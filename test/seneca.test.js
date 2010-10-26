@@ -45,4 +45,25 @@ module.exports = {
     });
   },
 
+  action: function(assert) {
+    var entity = Entity.$init('mem:');
+    var seneca = Seneca.init(entity);
+
+    var a1  = 0;
+
+    seneca.add({op:'foo'},function(args,cb){
+      assert.equal(100,args.a1);
+      a1 = args.a1;
+      cb('res');
+    });
+
+    seneca.act({zone:'action',op:'foo',a1:100}, function(res) {
+      assert.equal('res',res);
+      assert.equal(100,a1);
+
+      sys.puts('action');
+    });
+
+    assert.equal(100,a1);
+  }
 }
