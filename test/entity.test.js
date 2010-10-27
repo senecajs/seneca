@@ -16,7 +16,7 @@ module.exports = {
     Entity.$init('mem:',function(entity) {
       assert.equal('mem',entity.$.$store.name);
 
-      var ent1 = entity.$make({$base:'foo',$name:'bar',p1:'v1'});
+      var ent1 = entity.$make({$tenant:'test',$base:'foo',$name:'bar',p1:'v1'});
       ent1.p2 = 100;
     
       sys.puts( 'pre save: '+ent1);

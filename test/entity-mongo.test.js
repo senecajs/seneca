@@ -19,7 +19,7 @@ module.exports = {
 
       try {
 
-        var ent1 = entity.$make({$base:'foo',$name:'bar',p1:'v1'});
+        var ent1 = entity.$make({$tenant:'test',$base:'foo',$name:'bar',p1:'v1'});
         ent1.p2 = 100;
         
         sys.puts( 'pre save: '+ent1);
@@ -39,7 +39,7 @@ module.exports = {
               
               ent1.$find( ent1.id, function(err,ent1 ) {
                 sys.puts( 'found: '+ent1);
-              
+
                 ent1.$remove( ent1.id, function(err) {
                   sys.puts( 'removed: '+ent1);
                   

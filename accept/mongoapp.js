@@ -5,12 +5,12 @@ var connect = require('connect');
 
 var seneca = require('../lib/seneca');
 var entity = require('../lib/entity');
-
+require('../lib/entity-mongo');
 
 var Seneca = seneca.Seneca;
 var Entity = entity.Entity;
 
-Entity.$init('mem:',function(entity){
+Entity.$init('mongo://localhost/entity_mongo_test',function(entity){
   var seneca = Seneca.init(entity);
 
 
