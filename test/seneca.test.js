@@ -28,13 +28,13 @@ module.exports = {
   get: function(assert) {
     //explain('get');
 
-    Entity.$init('mem:',function(entity) {
+    Entity.init$('mem:',function(entity) {
       var seneca = Seneca.init(entity);
 
-      var ent1 = entity.$make({$base:'foo',$name:'bar',p1:'v1'});
+      var ent1 = entity.make$({base$:'foo',name$:'bar',p1:'v1'});
       ent1.p2 = 100;
 
-      ent1.$save( function(err,ent1) {
+      ent1.save$( function(err,ent1) {
         //eyes.inspect(ent1,'ent1');
 
         seneca.act({id:ent1.id,base:'foo',name:'bar',zone:'entity',method:'GET',result:function(res){
@@ -47,7 +47,7 @@ module.exports = {
   },
 
   action: function(assert) {
-    Entity.$init('mem:',function(entity) {
+    Entity.init$('mem:',function(entity) {
       var seneca = Seneca.init(entity);
 
       var a1  = 0;
@@ -64,6 +64,24 @@ module.exports = {
       });
 
       assert.equal(100,a1);
+    });
+  },
+
+  context: function(assert) {
+    Entity.init$('mem:',function(entity) {
+      var seneca = Seneca.init(entity);
+      var ctxt = seneca.context({foo:'bar'});
+      assert.equal('Context:{"foo":"bar"}',''+ctxt);
+      assert.equal('bar',ctxt.get$('foo'));
+
+      var s;
+      seneca.add({a:1},function(args){
+        s = args.context.get$('foo');
+      });
+      var act1 = seneca.actcontext(ctxt);
+
+      act1({a:1});
+      assert.equal('bar',s);
     });
   }
 }
