@@ -1,0 +1,22 @@
+{
+  "name": "seneca",
+  "description": "Multi-tenant user management",
+  "keywords": ["multi","tenant","user","entity"],
+  "version": "0.0.1",
+  "homepage": "https://github.com/rjrodger/seneca",
+  "author": "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
+    "contributors": [
+    "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)"
+  ],
+  "dependencies": {
+      "underscore": ">=1.1.4"
+  },
+  "main": "lib/seneca",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": { "type" : "git", "url" : "https://github.com/rjrodger/seneca.git" },
+  "engines": {
+    "node": "*"
+  }
+}
