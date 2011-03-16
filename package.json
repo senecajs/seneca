@@ -1,7 +1,7 @@
 {
   "name": "seneca",
-  "description": "Multi-tenant user management",
-  "keywords": ["multi","tenant","user","entity"],
+  "description": "A toolkit for building Minimum Viable Products",
+  "keywords": ["minimum","viable","product","toolkit","startup","lean"],
   "version": "0.0.1",
   "homepage": "https://github.com/rjrodger/seneca",
   "author": "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
