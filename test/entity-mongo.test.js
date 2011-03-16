@@ -6,15 +6,17 @@ require('entity-mongo');
 
 var E = common.E;
 
-var sys     = common.sys;
-var eyes    = common.eyes;
+var assert  = common.assert
+var eyes    = common.eyes
+var util    = common.util
 
 var Entity = entity.Entity;
 
 
 module.exports = {
-  mem: function(assert) {
-    Entity.init$('mongo://localhost/entity_mongo_test',function(entity) {
+  mem: function() {
+    Entity.init$('mongo://localhost/entity_mongo_test',function(err,entity) {
+      assert.isNull(err)
       assert.equal('mongo',entity.$.store$.name);
 
       try {
@@ -22,29 +24,29 @@ module.exports = {
         var ent1 = entity.make$({tenant$:'test',base$:'foo',name$:'bar',p1:'v1'});
         ent1.p2 = 100;
         
-        sys.puts( 'pre save: '+ent1);
+        util.debug( 'pre save: '+ent1);
         
         ent1.save$( function(err,ent1) {
           E(err);
-          sys.puts( 'post save: '+ent1);
+          util.debug( 'post save: '+ent1);
 
           ent1.find$( ent1.id, function(err,ent1 ) {
             E(err);
-            sys.puts( 'found: '+ent1);
+            util.debug( 'found: '+ent1);
             ent1.p1 = 'v1x';
             
             ent1.save$( function(err,ent1) {
               E(err);
-              sys.puts( 'post save: '+ent1);
+              util.debug( 'post save: '+ent1);
               
               ent1.find$( ent1.id, function(err,ent1 ) {
-                sys.puts( 'found: '+ent1);
+                util.debug( 'found: '+ent1);
 
                 ent1.remove$( ent1.id, function(err) {
-                  sys.puts( 'removed: '+ent1);
+                  util.debug( 'removed: '+ent1);
                   
                   ent1.find$( ent1.id, function(err,ent1 ) {
-                    sys.puts( 'found: '+ent1);
+                    util.debug( 'found: '+ent1);
 
                     entity.close$();
                   });
@@ -55,7 +57,7 @@ module.exports = {
         });
       }
       catch( e ) {
-        sys.puts(e);
+        util.debug(e);
         entity.close$();
       }
     });

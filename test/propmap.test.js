@@ -1,22 +1,23 @@
-/* Copyright (c) 2010 Ricebridge */
+/* Copyright (c) 2010-2011 Ricebridge */
 
-var common   = require('common');
-var propmap  = require('propmap');
 
-var E = common.E;
+var common   = require('common')
+var propmap  = require('propmap')
 
-var sys     = common.sys;
-var eyes    = common.eyes;
+var sys     = common.sys
+var eyes    = common.eyes
+var assert  = common.assert
 
-var PropMap = propmap.PropMap;
+var PropMap = propmap.PropMap
+
 
 module.exports = {
-  init: function(assert) {
+  init: function() {
     var pm = new PropMap();
     assert.equal('PropMap:root:\n',pm+'');
   },
 
-  find: function(assert) {
+  find: function() {
     var pm = new PropMap();
 
     pm.root = {root:true,prop:'root',star:{ref:'r2'}}; pm.trace = [];
@@ -45,7 +46,7 @@ module.exports = {
   },
 
 
-  toString: function(assert) {
+  toString: function() {
     var pm = new PropMap();
 
     pm.root = {root:true,prop:'root',star:{ref:'ref1'}}; //sys.puts(pm.toString());
@@ -65,7 +66,7 @@ module.exports = {
   },
 
 
-  add: function(assert) {
+  add: function() {
     var pm = new PropMap();
     
     pm.add( {p1:'v1'}, 'r1' ); //sys.puts(pm.toString());
