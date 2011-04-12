@@ -40,6 +40,7 @@ module.exports = function(expected) {
       //util.debug('### '+(a?(a+' '+a.$):null))
       argstrs.push(null==a?a:
                    'string'==typeof(a)?a:
+                   'number'==typeof(a)?a:
                    _.isDate(a)?(a.getTime()%1000000):
                    a.hasOwnProperty('toString')?''+a:own(a)
                    //a.$?own(a):

@@ -1,7 +1,7 @@
 /* Copyright (c) 2010 Ricebridge */
 
 var common   = require('common');
-var seneca   = require('seneca');
+var Seneca   = require('seneca');
 
 var E = common.E;
 
@@ -9,8 +9,8 @@ var eyes    = common.eyes
 var assert  = common.assert
 var gex     = common.gex
 
-var Seneca = seneca.Seneca;
-var Entity = seneca.Entity;
+var SenecaClass = Seneca.Seneca;
+var Entity = Seneca.Entity;
 
 var logger = require('./logassert')
 
@@ -20,83 +20,140 @@ module.exports = {
 
   logging: function() {
     var log = logger(['start','close',['entity','mem','close']])
-    var seneca = new Seneca({logger:log});
-    seneca.close()
-    assert.equal(3,log.index())
+
+    Seneca.init(
+      {logger:log},
+      function(err,seneca){
+        assert.isNull(err)
+        seneca.close()
+        assert.equal(3,log.index())
+      }
+    )
+                
+    try {
+      Seneca.init()
+    }
+    catch( e ) {
+      assert.equal( 'Seneca.init: no callback', ''+e )
+    }
 
     try {
-      seneca = new Seneca({logger:logger(['bad'])});
+      Seneca.init({logger:logger(['bad'])},function(){})
     }
     catch( e ) {
       assert.equal( 'bad != start', e.actual )
     }
 
     log = logger(['start',['custom','foo']])
-    seneca = new Seneca({logger:log});
-    seneca.log('foo')
-    assert.equal(2,log.index())
+    Seneca.init(
+      {logger:log},
+      function(err,seneca){
+        assert.isNull(err)
+        seneca.log('foo')
+        assert.equal(2,log.index())
+      }
+    )
   },
 
 
-  savefind: function() {
+  entity: function() {
 
-    // default memstore
     var log = logger([
       'start',
+      ['entity','mem','make'],
+
       ['entity','mem','make'],
       ['entity','mem','save','in'],
       ['entity','mem','save','out'],
       ['entity','mem','make'],
-      ['entity','mem','find'],
-    ])
-    var seneca = new Seneca({logger:log})
-    var entity = seneca.entity
+      ['entity','mem','load','in'],
+      ['entity','mem','load','out'],
 
-    var ent1 = entity.make$({tenant$:'ten',base$:'foo',name$:'bar',p1:'v1'})
-    ent1.p2 = 100;
-    
-    ent1.save$( function(err,ent1) {
-      assert.isNull(err)
-      assert.ok( gex('ten/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1) )
-
-      ent1.find$( {id:ent1.id}, function(err,ent1a) {
-        assert.isNull(err)
-        assert.ok( gex('ten/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1a) )
-      })
-    })
-
-
-    // entity store
-    var log = logger([
-      'start',
       ['entity','mem','make'],
       ['entity','mem','save','in'],
       ['entity','mem','save','out'],
       ['entity','mem','make'],
-      ['entity','mem','find'],
+      ['entity','mem','load','in'],
+      ['entity','mem','load','out'],
+
+      ['entity','mem','make'],
+      ['entity','mem','list','in'],
+      ['entity','mem','list','out'],
+
+      ['entity','mem','make'],
+      ['entity','mem','list','in'],
+      ['entity','mem','list','out'],
+
+      ['entity','mem','remove'],
+      ['entity','mem','make'],
+      ['entity','mem','list','in'],
+      ['entity','mem','list','out'],
     ])
 
-    Entity.init$('mem',function(err,entity) {
-      assert.isNull(err)
-      assert.ok(entity)
-      entity.tag = 'abc'
-
-      var seneca = new Seneca( {entity:entity,logger:log} )
-      assert.equal('abc',seneca.entity.tag)
-
-      var ent1 = entity.make$({tenant$:'ten',base$:'foo',name$:'bar',p1:'v1'})
-      ent1.p2 = 100;
-    
-      ent1.save$( function(err,ent1) {
+    Seneca.init(
+      {logger:log},
+      function(err,seneca){
         assert.isNull(err)
-        assert.ok( gex('ten/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1) )
 
-        ent1.find$( {id:ent1.id}, function(err,ent1a) {
+        var entity = seneca.make('ten','base')
+        var ent = entity.make$('ent',{p1:'v1'})
+        ent.p2 = 100;
+    
+        ;ent.save$( function(err,ent) {
           assert.isNull(err)
-          assert.ok( gex('ten/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1a) )
-        })
-      })
-    })
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+ent) )
+
+        ;ent.load$( {id:ent.id}, function(err,entR) {
+          assert.isNull(err)
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+entR) )
+          var ent1 = entR
+
+
+          ent = entity.make$('ent',{p1:'v1'})
+          ent.p3 = true
+        ;ent.save$( function(err,ent) {
+          assert.isNull(err)
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+ent) )
+
+        ;ent.load$( {id:ent.id}, function(err,entR) {
+          assert.isNull(err)
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+entR) )
+          var ent2 = entR
+
+
+        ;ent.list$( {p1:'v1'}, function(err,list) {
+          assert.isNull(err)
+          assert.equal(2,list.length)
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+list[0]) )
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+list[1]) )
+
+        ;ent.list$( {p2:100}, function(err,list) {
+          assert.isNull(err)
+          assert.equal(1,list.length)
+          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+list[0]) )
+
+          
+        ;ent.remove$( {p1:'v1'}, function(err) {
+          assert.isNull(err)
+
+        ;ent.list$( {p1:'v1'}, function(err,list) {
+          assert.isNull(err)
+          assert.equal(0,list.length)
+
+
+        }) // list
+        }) //remove
+
+        }) // list
+        }) // list
+
+        }) // load
+        }) // save
+
+        }) // load
+        }) // save
+      }
+    )
   },
 
 
@@ -110,26 +167,32 @@ module.exports = {
       ['act','out','action'],
     ])
 
-    var seneca = new Seneca({logger:log})
-    var a1  = 0;
-
-    seneca.add({op:'foo'},function(args,cb){
-      a1 = args.a1
-      cb(null,'+'+a1)
-    });
-
-    seneca.act({zone:'action',op:'foo',a1:100}, function(err,out) {
-      assert.isNull(err)
-      assert.equal('+100',out)
-      assert.equal(100,a1)
-      
-      seneca.act({zone:'action',op:'foo',a1:200}, function(err,out) {
+    Seneca.init(
+      {logger:log},
+      function(err,seneca){
         assert.isNull(err)
-        assert.equal('+200',out)
-        assert.equal(200,a1)
-      })
-    })
+        var a1  = 0;
+
+        seneca.add({op:'foo'},function(args,cb){
+          a1 = args.a1
+          cb(null,'+'+a1)
+        });
+
+        seneca.act({op:'foo',a1:100}, function(err,out) {
+          assert.isNull(err)
+          assert.equal('+100',out)
+          assert.equal(100,a1)
+      
+          seneca.act({op:'foo',a1:200}, function(err,out) {
+            assert.isNull(err)
+            assert.equal('+200',out)
+            assert.equal(200,a1)
+          })
+        })
+      }
+    )
   },
+
 
 
   register: function() {
@@ -146,8 +209,12 @@ module.exports = {
         cb(ent.err?{err:ent.err}:null,'save')
       }
 
-      self.find = function(qent,q,cb) {
-        cb(q.err?{err:q.err}:null,'find')
+      self.load = function(qent,q,cb) {
+        cb(q.err?{err:q.err}:null,'load')
+      }
+
+      self.list = function(qent,q,cb) {
+        cb(q.err?{err:q.err}:null,'list')
       }
 
       self.remove = function(qent,q,cb) {
@@ -164,25 +231,25 @@ module.exports = {
       'start',
     ])
 
-    Entity.init$('mock',function(err,entity) {
-      assert.isNull(err)
-      assert.ok(entity)
-
-      var seneca = new Seneca( {entity:entity,logger:log} )
-
-      var ent1 = entity.make$({tenant$:'ten',base$:'foo',name$:'bar'})    
-      ent1.save$( function(err,out) {
+    Seneca.init( 
+      {entity:'mock',logger:log},
+      function(err,seneca) {
         assert.isNull(err)
-        assert.equal('save',out)
-      })
 
-      ent1.err = 'boom'
-      ent1.save$( function(err,out) {
-        assert.equal('boom',err.err)
-      })
+        var ent1 = seneca.make('ten','foo','bar')    
+        ent1.save$( function(err,out) {
+          assert.isNull(err)
+          assert.equal('save',out)
+        })
 
-    })
+        ent1.err = 'boom'
+        ent1.save$( function(err,out) {
+          assert.equal('boom',err.err)
+        })
+      }
+    )
   }
+
 
   /*
   context: function() {
@@ -190,7 +257,7 @@ module.exports = {
       assert.isNull(err)
       assert.ok(entity)
 
-      var seneca = Seneca.init(entity);
+      var seneca = SenecaClass.init(entity);
       var ctxt = seneca.context({foo:'bar'});
       assert.equal('Context:{"foo":"bar"}',''+ctxt);
       assert.equal('bar',ctxt.get$('foo'));

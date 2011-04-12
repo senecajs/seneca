@@ -1,4 +1,4 @@
-/* Copyright (c) 2010 Ricebridge */
+/* Copyright (c) 2010-2011 Ricebridge */
 
 var common   = require('common');
 var entity   = require('entity');
@@ -17,7 +17,7 @@ module.exports = {
   mem: function() {
     Entity.init$('mem:',function(err,entity) {
       assert.isNull(err)
-      assert.equal('mem',entity.$.store$.name);
+      assert.equal('mem',entity.$.store$().name);
 
       var ent1 = entity.make$({tenant$:'test',base$:'foo',name$:'bar',p1:'v1'});
       ent1.p2 = 100;
@@ -28,7 +28,7 @@ module.exports = {
         util.debug( 'err: '+JSON.stringify(err)+' post save: '+ent1);
         assert.ok( gex('test/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1) )
 
-        ent1.find$( ent1.id, function(err,ent1 ) {
+        ent1.load$( ent1.id, function(err,ent1 ) {
           util.debug( 'err: '+err+' found: '+ent1);
           assert.ok( gex('test/foo/bar:{id=*,p1=v1,p2=100}').on(''+ent1) )
           ent1.p1 = 'v1x';
@@ -37,7 +37,7 @@ module.exports = {
             util.debug( 'post save: '+ent1);
             assert.ok( gex('test/foo/bar:{id=*,p1=v1x,p2=100}').on(''+ent1) )
 
-            ent1.find$( ent1.id, function(err,ent1 ) {
+            ent1.load$( ent1.id, function(err,ent1 ) {
               util.debug( 'found: '+ent1);
               assert.ok( gex('test/foo/bar:{id=*,p1=v1x,p2=100}').on(''+ent1) )
 
@@ -45,10 +45,10 @@ module.exports = {
                 util.debug( 'removed: '+ent1);
                 assert.isNull(err)
     
-                ent1.find$( ent1.id, function(err,ent1) {
+                ent1.load$( ent1.id, function(err,ent1) {
                   util.debug( 'found: '+ent1);
                   assert.isNull(err)
-                  assert.isUndefined(ent1)
+                  assert.isNull(ent1)
                 });
               });
             });
