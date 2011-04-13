@@ -173,7 +173,7 @@ module.exports = {
         assert.isNull(err)
         var a1  = 0;
 
-        seneca.add({op:'foo'},function(args,cb){
+        seneca.add({op:'foo'},function(args,seneca,cb) {
           a1 = args.a1
           cb(null,'+'+a1)
         });
@@ -248,6 +248,72 @@ module.exports = {
         })
       }
     )
+  },
+
+
+  plugins: function() {
+
+    function Mock1() {
+      var self = this
+      self.name = 'mock1'
+      self.init = function(seneca,cb){
+        seneca.add({on:self.name,cmd:'foo'},function(args,seneca,cb){
+          cb(null,'foo:'+args.foo)
+        })
+        cb()
+      }
+    }
+
+    Seneca.init(
+      {plugins:[new Mock1()], logger:logger()},
+      function(err,seneca){
+        assert.isNull(err)
+
+        seneca.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
+          assert.equal('foo:1',out)
+        })
+      }
+    )
+
+
+    var mock1a = new Mock1()
+    mock1a.name = 'mock1a'
+    Seneca.init(
+      {plugins:[mock1a], logger:logger()},
+      function(err,seneca){
+        assert.isNull(err)
+
+        seneca.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
+          assert.equal('foo:1',out)
+        })
+      }
+    )
+
+
+    function Mock2() {
+      var self = this
+      self.name = 'mock2'
+      self.init = function(seneca,cb){
+        seneca.add({on:'mock1',cmd:'foo'},function(args,seneca,cb){
+          args.parent$(args,seneca,function(err,out){
+            cb(null,'bar:'+out)
+          })
+        })
+        cb()
+      }
+    }
+
+    Seneca.init(
+      {plugins:[new Mock1(), new Mock2()], logger:logger()},
+      function(err,seneca){
+        assert.isNull(err)
+
+        seneca.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
+          assert.equal('bar:foo:2',out)
+        })
+      }
+    )
+
   }
 
 

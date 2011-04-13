@@ -8,7 +8,7 @@ function own(obj){
   if( obj ) {
     var sb = ['{']
     for( var p in obj ) {
-      if( obj.hasOwnProperty(p) ) {
+      if( obj.hasOwnProperty(p) && '$'!=p.charAt(p.length-1)) {
         sb.push(p)
         sb.push('=')
         sb.push(obj[p])
@@ -56,7 +56,7 @@ module.exports = function(expected) {
       }
     }
 
-    var expect = expected[index]
+    var expect = (expected && expected[index]) || null
     if( 'string'==typeof(expect) ) {
       check(expect,type)
     }

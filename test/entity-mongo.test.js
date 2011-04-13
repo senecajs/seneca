@@ -14,10 +14,10 @@ var Entity = entity.Entity;
 
 
 module.exports = {
-  mem: function() {
+  happy: function() {
     Entity.init$('mongo://localhost/entity_mongo_test',function(err,entity) {
       assert.isNull(err)
-      assert.equal('mongo',entity.$.store$.name);
+      assert.equal('mongo',entity.$.store$().name);
 
       try {
 
@@ -30,7 +30,7 @@ module.exports = {
           E(err);
           util.debug( 'post save: '+ent1);
 
-          ent1.find$( ent1.id, function(err,ent1 ) {
+          ent1.load$( ent1.id, function(err,ent1 ) {
             E(err);
             util.debug( 'found: '+ent1);
             ent1.p1 = 'v1x';
@@ -39,13 +39,13 @@ module.exports = {
               E(err);
               util.debug( 'post save: '+ent1);
               
-              ent1.find$( ent1.id, function(err,ent1 ) {
+              ent1.load$( ent1.id, function(err,ent1 ) {
                 util.debug( 'found: '+ent1);
 
                 ent1.remove$( ent1.id, function(err) {
                   util.debug( 'removed: '+ent1);
                   
-                  ent1.find$( ent1.id, function(err,ent1 ) {
+                  ent1.load$( ent1.id, function(err,ent1 ) {
                     util.debug( 'found: '+ent1);
 
                     entity.close$();
@@ -62,5 +62,30 @@ module.exports = {
       }
     });
   },
+
+
+  remote: function() {
+    Entity.init$('mongo://username:password@mongodb.example.com:27272/database',function(err,entity) {
+      assert.isNull(err)
+      assert.equal('mongo',entity.$.store$().name);
+
+      var ent1 = entity.make$({tenant$:'test',base$:'foo',name$:'bar',p1:'v1'});
+      ent1.p2 = 100;
+      
+      util.debug( 'pre save: '+ent1);
+      
+      ent1.save$( function(err,ent1) {
+        assert.isNull(err)
+        util.debug( 'post save: '+ent1);
+        
+        ent1.load$( ent1.id, function(err,ent1 ) {
+          assert.isNull(err)
+          util.debug( 'found: '+ent1);
+          
+          entity.close$();
+        })
+      })
+    })
+  }
 
 }
