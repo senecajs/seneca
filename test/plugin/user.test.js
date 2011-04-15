@@ -72,6 +72,8 @@ module.exports = {
       console.log(out)
       assert.ok(out.pass)
 
+      var token = out.login.token
+
     ;seneca.act({
       tenant:'test',
       on:'user',
@@ -83,9 +85,60 @@ module.exports = {
       console.log(out)
       assert.ok(!out.pass)
 
+
+
+    ;seneca.act({
+      tenant:'test',
+      on:'user',
+      cmd:'auth',
+      token:token,
+    }, function(err,out){
+      assert.isNull(err)
+      console.log(out)
+      assert.ok(out.auth)
+
+    ;seneca.act({
+      tenant:'test',
+      on:'user',
+      cmd:'auth',
+      token:token+'BAD',
+    }, function(err,out){
+      assert.isNull(err)
+      console.log(out)
+      assert.ok(!out.auth)
+
+
+
+    ;seneca.act({
+      tenant:'test',
+      on:'user',
+      cmd:'logout',
+      token:token,
+    }, function(err,out){
+      assert.isNull(err)
+      console.log(out)
+      assert.ok(out.logout)
+
+    ;seneca.act({
+      tenant:'test',
+      on:'user',
+      cmd:'auth',
+      token:token,
+    }, function(err,out){
+      assert.isNull(err)
+      console.log(out)
+      assert.ok(!out.auth)
+
+
+    }) // login fail
+    }) // logout
+
+    }) // login fail
+    }) // auth ok
     
     }) // login fail
     }) // login ok
+
     }) // register
 
     })
