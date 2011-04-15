@@ -1,8 +1,8 @@
-/* Copyright (c) 2010 Ricebridge */
+/* Copyright (c) 2010-2011 Ricebridge */
 
 var common   = require('common');
-var entity   = require('entity');
-require('entity-mongo');
+var seneca   = require('seneca');
+//require('entity-mongo');
 
 var E = common.E;
 
@@ -10,7 +10,7 @@ var assert  = common.assert
 var eyes    = common.eyes
 var util    = common.util
 
-var Entity = entity.Entity;
+var Entity = seneca.Entity;
 
 
 module.exports = {
@@ -27,25 +27,28 @@ module.exports = {
         util.debug( 'pre save: '+ent1);
         
         ent1.save$( function(err,ent1) {
-          E(err);
+          assert.isNull(err)
           util.debug( 'post save: '+ent1);
 
           ent1.load$( ent1.id, function(err,ent1 ) {
-            E(err);
+            assert.isNull(err)
             util.debug( 'found: '+ent1);
             ent1.p1 = 'v1x';
             
             ent1.save$( function(err,ent1) {
-              E(err);
+              assert.isNull(err)
               util.debug( 'post save: '+ent1);
               
               ent1.load$( ent1.id, function(err,ent1 ) {
+                assert.isNull(err)
                 util.debug( 'found: '+ent1);
 
                 ent1.remove$( ent1.id, function(err) {
+                  assert.isNull(err)
                   util.debug( 'removed: '+ent1);
                   
                   ent1.load$( ent1.id, function(err,ent1 ) {
+                    assert.isNull(err)
                     util.debug( 'found: '+ent1);
 
                     entity.close$();

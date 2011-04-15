@@ -202,7 +202,7 @@ module.exports = {
       self.name = 'mock';
 
       self.init = function(url,cb) {
-        cb('init')
+        cb(null,self)
       }
 
       self.save = function(ent,cb) {
@@ -314,29 +314,21 @@ module.exports = {
       }
     )
 
+
+    Seneca.init(
+      {plugins:['echo'], logger:logger()},
+      function(err,seneca){
+        assert.isNull(err)
+
+        seneca.act({on:'echo',cmd:'foo',bar:1},function(err,out){
+          assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
+        })
+      }
+    )
+
+
+
   }
 
 
-  /*
-  context: function() {
-    Entity.init$('mem:',function(err,entity) {
-      assert.isNull(err)
-      assert.ok(entity)
-
-      var seneca = SenecaClass.init(entity);
-      var ctxt = seneca.context({foo:'bar'});
-      assert.equal('Context:{"foo":"bar"}',''+ctxt);
-      assert.equal('bar',ctxt.get$('foo'));
-
-      var s;
-      seneca.add({a:1},function(args){
-        s = args.context$.get$('foo');
-      });
-      var act1 = seneca.actcontext(ctxt);
-
-      act1({a:1});
-      assert.equal('bar',s);
-    });
-  }
-  */
 }
