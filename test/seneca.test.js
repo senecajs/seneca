@@ -34,7 +34,7 @@ module.exports = {
       Seneca.init()
     }
     catch( e ) {
-      assert.equal( 'Seneca.init: no callback', ''+e )
+      assert.equal( 'no_callback', e.err )
     }
 
     try {
@@ -65,27 +65,27 @@ module.exports = {
       ['entity','mem','make'],
       ['entity','mem','save','in'],
       ['entity','mem','save','out'],
-      ['entity','mem','make'],
+      //['entity','mem','make'],
       ['entity','mem','load','in'],
       ['entity','mem','load','out'],
 
       ['entity','mem','make'],
       ['entity','mem','save','in'],
       ['entity','mem','save','out'],
-      ['entity','mem','make'],
+      //['entity','mem','make'],
       ['entity','mem','load','in'],
       ['entity','mem','load','out'],
 
-      ['entity','mem','make'],
+      //['entity','mem','make'],
       ['entity','mem','list','in'],
       ['entity','mem','list','out'],
 
-      ['entity','mem','make'],
+      //['entity','mem','make'],
       ['entity','mem','list','in'],
       ['entity','mem','list','out'],
 
       ['entity','mem','remove'],
-      ['entity','mem','make'],
+      //['entity','mem','make'],
       ['entity','mem','list','in'],
       ['entity','mem','list','out'],
     ])
@@ -95,17 +95,17 @@ module.exports = {
       function(err,seneca){
         assert.isNull(err)
 
-        var entity = seneca.make('ten','base')
+        var entity = seneca.make('ten','base',null)
         var ent = entity.make$('ent',{p1:'v1'})
         ent.p2 = 100;
     
         ;ent.save$( function(err,ent) {
           assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+ent) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
 
         ;ent.load$( {id:ent.id}, function(err,entR) {
           assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+entR) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+entR) )
           var ent1 = entR
 
 
@@ -113,24 +113,24 @@ module.exports = {
           ent.p3 = true
         ;ent.save$( function(err,ent) {
           assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+ent) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
 
         ;ent.load$( {id:ent.id}, function(err,entR) {
           assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+entR) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+entR) )
           var ent2 = entR
 
 
         ;ent.list$( {p1:'v1'}, function(err,list) {
           assert.isNull(err)
           assert.equal(2,list.length)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+list[0]) )
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p3=true}').on(''+list[1]) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+list[1]) )
 
         ;ent.list$( {p2:100}, function(err,list) {
           assert.isNull(err)
           assert.equal(1,list.length)
-          assert.ok( gex('ten/base/ent:{id=*,p1=v1,p2=100}').on(''+list[0]) )
+          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
 
           
         ;ent.remove$( {p1:'v1'}, function(err) {

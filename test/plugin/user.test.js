@@ -43,107 +43,197 @@ function seneca(cb) {
 }
 
 
+function cberr(win){
+  return function(err){
+    if(err) {
+      assert.fail(err, 'callback error')
+    }
+    else {
+      win.apply(this,Array.prototype.slice.call(arguments,1))
+    }
+  }
+}
+
+
 module.exports = {
   
   happy: function() {
 
     ;seneca(function(seneca){
-      seneca.act({
-        tenant:'test',
-        on:'user',
-        cmd:'register',
-        nick:'nick1',
-        email:'nick1@example.com',
-        password:'testtest',
-        active:true
-      }, function(err,out){
-        assert.isNull(err)
-        console.log(out)
+      var userpin = seneca.pin({tenant:'test',on:'user'})
+
+      var userent = seneca.make('test','sys','user')
+      userent.load$({nick:'nick1'},cberr(function(user){
+        if( user ) {
+          user.remove$({nick:'nick1'},cberr(happyseq))
+        }
+        else {
+          happyseq()
+        }
+      }))
 
 
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'login',
-      nick:'nick1',
-      password:'testtest'
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(out.pass)
+      function happyseq() {
 
-      var token = out.login.token
-
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'login',
-      nick:'nick1',
-      password:'testtestX'
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(!out.pass)
-
-
-
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'auth',
-      token:token,
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(out.auth)
-
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'auth',
-      token:token+'BAD',
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(!out.auth)
-
-
-
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'logout',
-      token:token,
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(out.logout)
-
-    ;seneca.act({
-      tenant:'test',
-      on:'user',
-      cmd:'auth',
-      token:token,
-    }, function(err,out){
-      assert.isNull(err)
-      console.log(out)
-      assert.ok(!out.auth)
-
-
-    }) // login fail
-    }) // logout
-
-    }) // login fail
-    }) // auth ok
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'register',
+          nick:'nick1',
+          email:'nick1@example.com',
+          password:'testtest',
+          active:true
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
     
-    }) // login fail
-    }) // login ok
+    
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'login',
+          nick:'nick1',
+          password:'testtest'
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(out.pass)
+      
+          var token = out.login.token
+      
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'login',
+          nick:'nick1',
+          password:'testtestX'
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(!out.pass)
+      
+      
+      
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'auth',
+          token:token,
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(out.auth)
+      
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'auth',
+          token:token+'BAD',
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(!out.auth)
+      
+      
+      
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'logout',
+          token:token,
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(out.logout)
+      
+        ;seneca.act({
+          tenant:'test',
+          on:'user',
+          cmd:'auth',
+          token:token,
+        }, function(err,out){
+          assert.isNull(err)
+          //console.log(out)
+          assert.ok(!out.auth)
+      
+      
+        ;userpin.cmd('change_password',{
+          nick:'nick1',
+          password:'passpass'
+        }, cberr(function(out){
+          //console.log(out)
+          assert.ok(out.ok)
+      
+        ;seneca.cmd('login',{
+          nick:'nick1',
+          password:'passpass'
+        }, cberr(function(out){
+          //console.log(out)
+          assert.ok(out.pass)
+      
+        ;seneca.cmd('login',{
+          nick:'nick1',
+          password:'testtest'
+        }, cberr(function(out){
+          //console.log(out)
+          assert.ok(!out.pass)
+      
+  
+        })) // login fail
+        })) // login ok
+        })) // change_password
+      
+        }) // login fail
+        }) // logout
+      
+        }) // login fail
+        }) // auth ok
+        
+        }) // login fail
+        }) // login ok
+      
+        }) // register
 
-    }) // register
-
+      }
     })
 
+  },
+
+  password: function() {
+    ;seneca(function(seneca){
+      var userpin = seneca.pin({tenant:'test',on:'user'})
+      
+    ;userpin.cmd('encrypt_password',{
+        password:'passpass'
+      }, cberr(function(outpass){
+        //console.log(out)
+        assert.isNotNull(outpass.salt)
+        assert.isNotNull(outpass.pass)
+
+    ;userpin.cmd('verify_password',{
+      proposed:'passpass',
+      salt:outpass.salt,
+      pass:outpass.pass
+    }, cberr(function(out){
+      //console.log(out)
+      assert.ok(out.ok)
+
+    ;userpin.cmd('verify_password',{
+      proposed:'failfail',
+      salt:outpass.salt,
+      pass:outpass.pass
+    }, cberr(function(out){
+      //console.log(out)
+      assert.ok(!out.ok)
+
+        
+    })) // verify_password
+    })) // verify_password
+    })) // encrypt_password
+
+    }) // seneca
   }
+
 }
 
 
