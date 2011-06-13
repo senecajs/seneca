@@ -57,6 +57,12 @@ function cberr(win){
 
 module.exports = {
   
+  version: function() {
+    seneca(function(seneca){
+      assert.equal('0.2.1',seneca.version)
+    })
+  },
+
   happy: function() {
 
     ;seneca(function(seneca){
@@ -202,7 +208,8 @@ module.exports = {
   password: function() {
     ;seneca(function(seneca){
       var userpin = seneca.pin({tenant:'test',on:'user'})
-      
+      console.dir(userpin.options.args)
+
     ;userpin.cmd('encrypt_password',{
         password:'passpass'
       }, cberr(function(outpass){
