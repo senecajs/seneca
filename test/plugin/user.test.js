@@ -10,10 +10,13 @@ var gex     = common.gex
 var logger = require('../logassert')
 
 
-var test = {}
+var test = {
+  senecacount: 0
+}
 
 function seneca(cb) {
   if( test.seneca ) {
+    test.senecacount++
     cb(test.seneca)
   }
   else {
@@ -35,6 +38,7 @@ function seneca(cb) {
         function(err,seneca){
           assert.isNull(err)
           test.seneca = seneca
+          test.senecacount++
           cb(seneca)
         }
       )
@@ -55,6 +59,14 @@ function cberr(win){
 }
 
 
+function done() {
+  test.senecacount--
+  if( 0 == test.senecacount ){
+    test.seneca.close()
+  }
+}
+
+
 module.exports = {
   
   version: function() {
@@ -66,7 +78,9 @@ module.exports = {
   happy: function() {
 
     ;seneca(function(seneca){
-      var userpin = seneca.pin({tenant:'test',on:'user'})
+      try {
+
+        var userpin = seneca.pin({tenant:'test',on:'user'})
 
       var userent = seneca.make('test','sys','user')
       userent.load$({nick:'nick1'},cberr(function(user){
@@ -170,14 +184,14 @@ module.exports = {
           //console.log(out)
           assert.ok(out.ok)
       
-        ;seneca.cmd('login',{
+        ;userpin.cmd('login',{
           nick:'nick1',
           password:'passpass'
         }, cberr(function(out){
           //console.log(out)
           assert.ok(out.pass)
       
-        ;seneca.cmd('login',{
+        ;userpin.cmd('login',{
           nick:'nick1',
           password:'testtest'
         }, cberr(function(out){
@@ -185,6 +199,8 @@ module.exports = {
           assert.ok(!out.pass)
       
   
+          done();
+
         })) // login fail
         })) // login ok
         })) // change_password
@@ -201,6 +217,11 @@ module.exports = {
         }) // register
 
       }
+      }
+      catch(e) {
+        done()
+        throw e
+      }
     })
 
   },
@@ -208,7 +229,6 @@ module.exports = {
   password: function() {
     ;seneca(function(seneca){
       var userpin = seneca.pin({tenant:'test',on:'user'})
-      console.dir(userpin.options.args)
 
     ;userpin.cmd('encrypt_password',{
         password:'passpass'
