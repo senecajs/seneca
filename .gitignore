@@ -3,3 +3,4 @@
 test/db
 *.old
 *.bak
+node_modules
