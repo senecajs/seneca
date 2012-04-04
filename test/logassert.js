@@ -28,7 +28,7 @@ module.exports = function(expected) {
   var index   = 0
   var history = []
 
-  var logger = function(type) {
+  var logger = function(date,type) {
     history.push(arguments)
 
     var args = Array.prototype.slice.call(arguments)

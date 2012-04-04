@@ -15,7 +15,6 @@ var Entity = Seneca.Entity;
 var logger = require('./logassert')
 
 
-
 module.exports = {
 
   logging: function() {
@@ -44,7 +43,7 @@ module.exports = {
       assert.equal( 'bad != start', e.actual )
     }
 
-    log = logger(['start',['custom','foo']])
+    log = logger(['start','foo'])
     Seneca.init(
       {logger:log},
       function(err,seneca){
@@ -253,16 +252,25 @@ module.exports = {
 
   plugins: function() {
 
+    require('mock3')
+
+
+
     function Mock1() {
       var self = this
       self.name = 'mock1'
-      self.init = function(seneca,cb){
+      self.plugin = function() {
+        return self
+      }
+      self.init = function(seneca,opts,cb){
         seneca.add({on:self.name,cmd:'foo'},function(args,seneca,cb){
           cb(null,'foo:'+args.foo)
         })
         cb()
       }
     }
+
+    Seneca.register(new Mock1())
 
     Seneca.init(
       {plugins:[new Mock1()], logger:logger()},
@@ -278,6 +286,8 @@ module.exports = {
 
     var mock1a = new Mock1()
     mock1a.name = 'mock1a'
+    Seneca.register(mock1a)
+
     Seneca.init(
       {plugins:[mock1a], logger:logger()},
       function(err,seneca){
@@ -293,7 +303,10 @@ module.exports = {
     function Mock2() {
       var self = this
       self.name = 'mock2'
-      self.init = function(seneca,cb){
+      self.plugin = function() {
+        return self
+      }
+      self.init = function(seneca,opts,cb){
         seneca.add({on:'mock1',cmd:'foo'},function(args,seneca,cb){
           args.parent$(args,seneca,function(err,out){
             cb(null,'bar:'+out)
@@ -302,6 +315,8 @@ module.exports = {
         cb()
       }
     }
+
+    Seneca.register(new Mock2())
 
     Seneca.init(
       {plugins:[new Mock1(), new Mock2()], logger:logger()},
@@ -326,6 +341,18 @@ module.exports = {
       }
     )
 
+
+
+    Seneca.init(
+      {plugins:['mock3'], logger:logger()},
+      function(err,seneca){
+        assert.isNull(err)
+
+        seneca.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
+          assert.equal('qaz:3',out)
+        })
+      }
+    )
 
 
   }
