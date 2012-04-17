@@ -252,7 +252,26 @@ module.exports = {
 
   plugins: function() {
 
-    require('mock3')
+
+    Seneca.init({logger:logger([]),plugins:['echo']},function(err,seneca){
+      assert.isNull(err)
+
+      seneca.act({on:'echo',baz:'bax'},function(err,out){
+        assert.isNull(err)
+        assert.equal(''+{baz:'bax'},''+out)
+      })
+    })
+
+
+    Seneca.init({logger:logger([]),plugins:['util']},function(err,seneca){
+      assert.isNull(err)
+
+      seneca.act({on:'util',cmd:'quickcode'},function(err,code){
+        assert.isNull(err)
+        assert.equal( 8, code.length )
+        assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
+      })
+    })
 
 
 
