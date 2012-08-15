@@ -9,7 +9,8 @@
     "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)"
   ],
   "dependencies": {
-      "underscore": ">=1.1.4"
+      "underscore": ">=1.1.4",
+      "eyes": ">=0.1.7"
   },
   "main": "lib/seneca",
   "directories": {
