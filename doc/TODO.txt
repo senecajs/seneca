@@ -1,1 +1,3 @@
+- load entity as plugin, using rolemap
+- load logger as plugin, using rolemap
 
