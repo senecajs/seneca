@@ -250,6 +250,7 @@ module.exports = {
   },
 
 
+/*
   plugins: function() {
 
 
@@ -375,6 +376,6 @@ module.exports = {
 
 
   }
-
+*/
 
 }

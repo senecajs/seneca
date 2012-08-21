@@ -1,4 +1,4 @@
-/* Copyright (c) 2010 Richard Rodger */
+/* Copyright (c) 2010-2012 Richard Rodger */
 
 var common   = require('../lib/common');
 var seneca   = require('../lib/seneca');
@@ -16,11 +16,12 @@ module.exports = {
 
   plugins: function() {
 
+    // built-in
 
-    seneca.init({logger:logger([]),plugins:['echo']},function(err,seneca){
+    seneca.init({logger:logger([]),plugins:['echo']},function(err,si){
       assert.isNull(err)
 
-      seneca.act({on:'echo',baz:'bax'},function(err,out){
+      si.act({on:'echo',baz:'bax'},function(err,out){
         assert.isNull(err)
         assert.equal(''+{baz:'bax'},''+out)
       })
@@ -28,10 +29,10 @@ module.exports = {
 
 
 
-    seneca.init({logger:logger([]),plugins:['util']},function(err,seneca){
+    seneca.init({logger:logger([]),plugins:['util']},function(err,si){
       assert.isNull(err)
 
-      seneca.act({on:'util',cmd:'quickcode'},function(err,code){
+      si.act({on:'util',cmd:'quickcode'},function(err,code){
         assert.isNull(err)
         assert.equal( 8, code.length )
         assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
@@ -40,28 +41,31 @@ module.exports = {
 
 
 
+    // register
+
     function Mock1() {
-      var self = this
+      var self = {}
       self.name = 'mock1'
       self.plugin = function() {
         return self
       }
-      self.init = function(seneca,opts,cb){
-        seneca.add({on:self.name,cmd:'foo'},function(args,seneca,cb){
+      self.init = function(si,opts,cb){
+        si.add({on:self.name,cmd:'foo'},function(args,si,cb){
           cb(null,'foo:'+args.foo)
         })
         cb()
       }
+      return self
     }
 
     seneca.register(new Mock1())
 
     seneca.init(
-      {plugins:[new Mock1()], logger:logger()},
-      function(err,seneca){
+      {plugins:['mock1'], logger:logger()},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
+        si.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
           assert.equal('foo:1',out)
         })
       }
@@ -74,15 +78,17 @@ module.exports = {
 
     seneca.init(
       {plugins:[mock1a], logger:logger()},
-      function(err,seneca){
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
+        si.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
           assert.equal('foo:1',out)
         })
       }
     )
 
+
+    // parent
 
     function Mock2() {
       var self = this
@@ -90,9 +96,9 @@ module.exports = {
       self.plugin = function() {
         return self
       }
-      self.init = function(seneca,opts,cb){
-        seneca.add({on:'mock1',cmd:'foo'},function(args,seneca,cb){
-          args.parent$(args,seneca,function(err,out){
+      self.init = function(si,opts,cb){
+        si.add({on:'mock1',cmd:'foo'},function(args,si,cb){
+          args.parent$(args,si,function(err,out){
             cb(null,'bar:'+out)
           })
         })
@@ -105,10 +111,10 @@ module.exports = {
 
     seneca.init(
       {plugins:[new Mock1(), new Mock2()], logger:logger()},
-      function(err,seneca){
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
+        si.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
           assert.equal('bar:foo:2',out)
         })
       }
@@ -117,23 +123,24 @@ module.exports = {
 
     seneca.init(
       {plugins:['echo'], logger:logger()},
-      function(err,seneca){
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'echo',cmd:'foo',bar:1},function(err,out){
+        si.act({on:'echo',cmd:'foo',bar:1},function(err,out){
           assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
         })
       }
     )
 
 
+    // require module
 
     seneca.init(
       {plugins:['mock3'], logger:logger()},
-      function(err,seneca){
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
+        si.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
           assert.equal('qaz:3',out)
         })
       }
