@@ -46,21 +46,19 @@ module.exports = {
       ['entity','mem','list','out'],
     ])
 
-    seneca.init(
-      {logger:common.log,plugins:['mem']},
-      function(err,seneca){
-        require('eyes').inspect(err)
-        console.log('RUN seneca: err='+err+' s='+seneca)
-
+    seneca(
+      {plugins:['mem']},
+      function(err,si){
         assert.isNull(err)
 
-        var entity = seneca.make('ten','base',null)
+        var entity = si.make('ten','base',null)
         var ent = entity.make$('ent',{p1:'v1'})
         ent.p2 = 100;
     
         ;ent.save$( function(err,ent) {
           assert.isNull(err)
           assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
+
 
         ;ent.load$( {id:ent.id}, function(err,entR) {
           assert.isNull(err)
@@ -73,6 +71,7 @@ module.exports = {
         ;ent.save$( function(err,ent) {
           assert.isNull(err)
           assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
+
 
         ;ent.load$( {id:ent.id}, function(err,entR) {
           assert.isNull(err)
