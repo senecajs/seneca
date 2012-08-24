@@ -138,6 +138,38 @@ module.exports = {
         assert.equal('fail', err.seneca.plugin.role)
       })
     })
+  },
+
+
+  register: function() {
+    seneca({},function(err,si){
+      var initfn = function(){}
+
+      try { si.register() } catch( e ) { 
+        assert.equal('register',e.seneca.code)
+      }
+
+      try { si.register({}) } catch( e ) { 
+        //console.log(e)
+        assert.equal('register',e.seneca.code)
+        assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
+      }
+
+      try { si.register({name:1,init:initfn}) } catch( e ) { 
+        assert.equal('register',e.seneca.code)
+      }
+
+      try { si.register({name:'a',role:1,init:initfn}) } catch( e ) { 
+        //console.log(e)
+        assert.equal('register',e.seneca.code)
+      }
+
+      try { si.register({name:'a',init:'b'}) } catch( e ) { 
+        //console.log(e)
+        assert.equal('register',e.seneca.code)
+      }
+
+    })
   }
 
 
