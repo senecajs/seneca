@@ -1,8 +1,9 @@
 - throw proper Error objects
+- mem test log check
 - get echo pluign working again, with separate test
 - get seneca basic test working
 - update other unit tests and plugins
-
+- convert tests to vows
 
 
 

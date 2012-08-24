@@ -1,22 +1,147 @@
-/* Copyright (c) 2010 Ricebridge */
+/* Copyright (c) 2010-2012 Richard Rodger */
 
-var common   = require('common');
-var Seneca   = require('seneca');
+var common   = require('../lib/common');
+var seneca   = require('../lib/seneca');
 
-var E = common.E;
+//var E = common.E;
 
 var eyes    = common.eyes
 var assert  = common.assert
 var gex     = common.gex
 
-var SenecaClass = Seneca.Seneca;
-var Entity = Seneca.Entity;
+//var SenecaClass = Seneca.Seneca;
+//var Entity = Seneca.Entity;
 
 var logger = require('./logassert')
 
 
 module.exports = {
 
+  failgen: function() {
+    seneca({},function(err,si){
+      assert.isNull(err)
+
+      
+      // nothing
+
+      err = si.fail()
+      assert.equal(err.seneca.code,'unknown')
+      assert.equal(err.message,'Seneca: unknown error.')
+
+
+      // just a message
+
+      err = si.fail('foo')
+      assert.equal(err.seneca.code,'unknown')
+      assert.equal(err.message,'Seneca: foo')
+
+      err = si.fail(11)
+      assert.equal(err.seneca.code,'unknown')
+      assert.equal(err.message,'Seneca: 11')
+
+      err = si.fail({m:1})
+      assert.equal(err.seneca.code,'unknown')
+      assert.equal(err.message,'Seneca: {"m":1}')
+
+
+      // msg and meta
+
+      err = si.fail('foo','code1')
+      assert.equal(err.seneca.code,'code1')
+      assert.equal(err.message,'Seneca: foo')
+
+      err = si.fail('foo',{code:'code2',bar:1})
+      assert.equal(err.seneca.code,'code2')
+      assert.equal(err.seneca.bar,1)
+      assert.equal(err.message,'Seneca: foo')
+
+      err = si.fail('foo',{bar:1})
+      assert.equal(err.seneca.code,'unknown')
+      assert.equal(err.seneca.bar,1)
+      assert.equal(err.message,'Seneca: foo')
+
+      err = si.fail(11,{code:'code2',bar:1})
+      assert.equal(err.seneca.code,'code2')
+      assert.equal(err.seneca.bar,1)
+      assert.equal(err.message,'Seneca: 11')
+
+      err = si.fail({m:1},{code:'code2',bar:1})
+      assert.equal(err.seneca.code,'code2')
+      assert.equal(err.seneca.bar,1)
+      assert.equal(err.message,'Seneca: {"m":1}')
+
+      
+      // callbacks
+      var cblog = ''
+
+      si.fail(function(err){
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.message,'Seneca: unknown error.')
+        cblog+='a'
+      })
+
+      si.fail('msg1',function(err){
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.message,'Seneca: msg1')
+        cblog+='b'
+      })
+
+      si.fail('msg1','code1',function(err){
+        assert.equal(err.seneca.code,'code1')
+        assert.equal(err.message,'Seneca: msg1')
+        cblog+='c'
+      })
+
+      si.fail('msg1',{code:'code2',bar:1},function(err){
+        assert.equal(err.seneca.code,'code2')
+        assert.equal(err.seneca.bar,1)
+        assert.equal(err.message,'Seneca: msg1')
+        cblog+='d'
+      })
+
+
+      si.fail(function(err,a1,a2){
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.message,'Seneca: unknown error.')
+        assert.equal('arg1',a1)
+        assert.equal('arg2',a2)
+        cblog+='e'
+      },'arg1','arg2')
+
+      si.fail('m1',function(err,a1,a2){
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.message,'Seneca: m1')
+        assert.equal('arg1',a1)
+        assert.equal('arg2',a2)
+        cblog+='f'
+      },'arg1','arg2')
+
+      si.fail('m1','c1',function(err,a1,a2){
+        assert.equal(err.seneca.code,'c1')
+        assert.equal(err.message,'Seneca: m1')
+        assert.equal('arg1',a1)
+        assert.equal('arg2',a2)
+        cblog+='g'
+      },'arg1','arg2')
+
+
+      assert.equal('abcdefg',cblog)
+    })
+
+    seneca({plugins:['error']},function(err,si){
+      assert.isNull(err)
+
+      si.act({on:'error'},function(err){
+        assert.equal('Seneca: m1', err.message)
+        assert.equal('plugin', err.seneca.code)
+        assert.equal('error', err.seneca.plugin.name)
+        assert.equal('fail', err.seneca.plugin.role)
+      })
+    })
+  }
+
+
+/*
   logging: function() {
     var log = logger(['start','close',['entity','mem','close']])
 
