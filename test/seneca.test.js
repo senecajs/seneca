@@ -29,46 +29,31 @@ module.exports = {
       assert.equal(err.message,'Seneca: unknown error.')
 
 
-      // just a message
+      // just meta
 
-      err = si.fail('foo')
-      assert.equal(err.seneca.code,'unknown')
-      assert.equal(err.message,'Seneca: foo')
-
-      err = si.fail(11)
-      assert.equal(err.seneca.code,'unknown')
-      assert.equal(err.message,'Seneca: 11')
-
-      err = si.fail({m:1})
-      assert.equal(err.seneca.code,'unknown')
-      assert.equal(err.message,'Seneca: {"m":1}')
-
-
-      // msg and meta
-
-      err = si.fail('foo','code1')
+      err = si.fail('code1')
       assert.equal(err.seneca.code,'code1')
-      assert.equal(err.message,'Seneca: foo')
+      assert.equal(err.message,'Seneca: unknown error.')
 
-      err = si.fail('foo',{code:'code2',bar:1})
+      err = si.fail({code:'code2',bar:1})
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: foo')
+      assert.equal(err.message,'Seneca: unknown error.')
 
-      err = si.fail('foo',{bar:1})
+      err = si.fail({bar:1})
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: foo')
+      assert.equal(err.message,'Seneca: unknown error.')
 
-      err = si.fail(11,{code:'code2',bar:1})
+      err = si.fail({code:'code2',bar:1})
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: 11')
+      assert.equal(err.message,'Seneca: unknown error.')
 
-      err = si.fail({m:1},{code:'code2',bar:1})
+      err = si.fail({code:'code2',bar:1})
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: {"m":1}')
+      assert.equal(err.message,'Seneca: unknown error.')
 
       
       // callbacks
@@ -81,21 +66,21 @@ module.exports = {
       })
 
       si.fail('msg1',function(err){
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.message,'Seneca: msg1')
+        assert.equal(err.seneca.code,'msg1')
+        assert.equal(err.message,'Seneca: unknown error.')
         cblog+='b'
       })
 
-      si.fail('msg1','code1',function(err){
+      si.fail('code1',function(err){
         assert.equal(err.seneca.code,'code1')
-        assert.equal(err.message,'Seneca: msg1')
+        assert.equal(err.message,'Seneca: unknown error.')
         cblog+='c'
       })
 
-      si.fail('msg1',{code:'code2',bar:1},function(err){
+      si.fail({code:'code2',bar:1},function(err){
         assert.equal(err.seneca.code,'code2')
         assert.equal(err.seneca.bar,1)
-        assert.equal(err.message,'Seneca: msg1')
+        assert.equal(err.message,'Seneca: unknown error.')
         cblog+='d'
       })
 
@@ -109,35 +94,60 @@ module.exports = {
       },'arg1','arg2')
 
       si.fail('m1',function(err,a1,a2){
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.message,'Seneca: m1')
+        assert.equal(err.seneca.code,'m1')
+        assert.equal(err.message,'Seneca: unknown error.')
         assert.equal('arg1',a1)
         assert.equal('arg2',a2)
         cblog+='f'
       },'arg1','arg2')
 
-      si.fail('m1','c1',function(err,a1,a2){
-        assert.equal(err.seneca.code,'c1')
-        assert.equal(err.message,'Seneca: m1')
-        assert.equal('arg1',a1)
-        assert.equal('arg2',a2)
-        cblog+='g'
-      },'arg1','arg2')
 
-
-      assert.equal('abcdefg',cblog)
+      assert.equal('abcdef',cblog)
     })
 
+
     seneca({plugins:['error']},function(err,si){
+      //eyes.inspect(err)
       assert.isNull(err)
 
       si.act({on:'error'},function(err){
+        eyes.inspect(err)
+
+        // FIX self.act
+        
         assert.equal('Seneca: m1', err.message)
         assert.equal('plugin', err.seneca.code)
         assert.equal('error', err.seneca.plugin.name)
         assert.equal('fail', err.seneca.plugin.role)
       })
     })
+
+
+    seneca({},function(err,si){
+      assert.isNull(err)
+
+      try { si.service('not-a-plugin') } catch( e ) { 
+        assert.equal('seneca/service_unknown_plugin',e.seneca.code)
+        assert.equal('not-a-plugin',e.seneca.pluginname)
+        assert.equal('Seneca: service(pluginname): unable to build service, unknown plugin name: not-a-plugin',e.message)
+      }
+
+      try { si.plugin('not-a-plugin') } catch( e ) { 
+        assert.equal('seneca/plugin_unknown_plugin',e.seneca.code)
+        assert.equal('not-a-plugin',e.seneca.pluginname)
+        assert.equal('Seneca: service(pluginname): unknown plugin name: not-a-plugin',e.message)
+      }
+
+      try { 
+        si.act({on:'not-a-plugin',cmd:'not-a-cmd'},function(err){
+          //eyes.inspect(err)
+          console.log(err)
+          assert.isNotNull(err)
+        }) 
+      } catch( e ) { console.log(e); assert.fail();}
+
+    })
+
   },
 
 

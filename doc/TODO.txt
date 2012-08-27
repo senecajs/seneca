@@ -4,6 +4,6 @@
 - get seneca basic test working
 - update other unit tests and plugins
 - convert tests to vows
-
+- allow custom msgmaps
 
 
