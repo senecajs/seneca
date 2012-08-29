@@ -18,42 +18,79 @@ var logger = require('./logassert')
 module.exports = {
 
   failgen: function() {
+
+    try { seneca(); assert.fail() }
+    catch(e) { assert.equal('Seneca: no options for init(opts,cb).',e.message) }
+
+    try { seneca({}); assert.fail() }
+    catch(e) { assert.equal('Seneca: no callback for init(opts,cb).',e.message) }
+
+
+    try {
+      var i = 0
+      seneca({},function(err,si){
+        assert.equal( 0, i )
+        throw new Error('after init '+(i++))
+      })
+      assert.fail()
+    }
+    catch(e) {
+      assert.equal('after init 0',e.seneca.error.message)
+      assert.equal('seneca/callback_exception',e.seneca.code)
+    }
+
+
+    try {
+      var i = 0
+      seneca({plugins:['error']},function(err,si){
+        assert.equal( 0, i )
+        throw new Error('plugins after init '+(i++))
+      })
+      assert.fail()
+    }
+    catch(e) {
+      //console.log(e)
+      assert.equal('seneca/callback_exception',e.seneca.code)
+      assert.equal('plugins after init 0',e.seneca.error.message)
+    }
+
+
+
     seneca({},function(err,si){
       assert.isNull(err)
 
       
       // nothing
 
-      err = si.fail()
+      var err = si.fail()
+      //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.message,'Seneca: unknown error.')
 
 
       // just meta
 
+      // unresolved code gets used as message
       err = si.fail('code1')
+      //eyes.inspect(err)
       assert.equal(err.seneca.code,'code1')
-      assert.equal(err.message,'Seneca: unknown error.')
+      assert.equal(err.message,'Seneca: code1')
 
-      err = si.fail({code:'code2',bar:1})
-      assert.equal(err.seneca.code,'code2')
-      assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: unknown error.')
-
+      // no code
       err = si.fail({bar:1})
+      //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.seneca.bar,1)
       assert.equal(err.message,'Seneca: unknown error.')
 
-      err = si.fail({code:'code2',bar:1})
+      // additional meta props dragged along
+      err = si.fail({code:'code2',bar:2})
+      //eyes.inspect(err)
       assert.equal(err.seneca.code,'code2')
-      assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: unknown error.')
+      assert.equal(err.seneca.bar,2)
+      assert.equal(err.message,'Seneca: code2')
 
-      err = si.fail({code:'code2',bar:1})
-      assert.equal(err.seneca.code,'code2')
-      assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: unknown error.')
+
 
       
       // callbacks
@@ -67,23 +104,22 @@ module.exports = {
 
       si.fail('msg1',function(err){
         assert.equal(err.seneca.code,'msg1')
-        assert.equal(err.message,'Seneca: unknown error.')
+        assert.equal(err.message,'Seneca: msg1')
         cblog+='b'
       })
 
       si.fail('code1',function(err){
         assert.equal(err.seneca.code,'code1')
-        assert.equal(err.message,'Seneca: unknown error.')
+        assert.equal(err.message,'Seneca: code1')
         cblog+='c'
       })
 
       si.fail({code:'code2',bar:1},function(err){
         assert.equal(err.seneca.code,'code2')
         assert.equal(err.seneca.bar,1)
-        assert.equal(err.message,'Seneca: unknown error.')
+        assert.equal(err.message,'Seneca: code2')
         cblog+='d'
       })
-
 
       si.fail(function(err,a1,a2){
         assert.equal(err.seneca.code,'unknown')
@@ -95,32 +131,15 @@ module.exports = {
 
       si.fail('m1',function(err,a1,a2){
         assert.equal(err.seneca.code,'m1')
-        assert.equal(err.message,'Seneca: unknown error.')
+        assert.equal(err.message,'Seneca: m1')
         assert.equal('arg1',a1)
         assert.equal('arg2',a2)
         cblog+='f'
       },'arg1','arg2')
 
-
       assert.equal('abcdef',cblog)
     })
 
-
-    seneca({plugins:['error']},function(err,si){
-      //eyes.inspect(err)
-      assert.isNull(err)
-
-      si.act({on:'error'},function(err){
-        eyes.inspect(err)
-
-        // FIX self.act
-        
-        assert.equal('Seneca: m1', err.message)
-        assert.equal('plugin', err.seneca.code)
-        assert.equal('error', err.seneca.plugin.name)
-        assert.equal('fail', err.seneca.plugin.role)
-      })
-    })
 
 
     seneca({},function(err,si){
@@ -141,14 +160,96 @@ module.exports = {
       try { 
         si.act({on:'not-a-plugin',cmd:'not-a-cmd'},function(err){
           //eyes.inspect(err)
-          console.log(err)
+          //console.log(err)
           assert.isNotNull(err)
         }) 
       } catch( e ) { console.log(e); assert.fail();}
 
     })
 
+
+
+    try {
+
+      var i = 0;
+      seneca({plugins:['echo','error']},function(err,si){
+        assert.isNull(err)
+        assert.equal(0,i)
+
+        si.act({on:'error'},function(err){
+          assert.isNull(err)
+        })
+
+        try {
+          si.act({on:'error'},function(err){
+            throw new Error('inside callback')
+          })
+          assert.fail()
+        }
+        catch(e) {
+          assert.equal(e.seneca.code,'seneca/act_error')
+        }
+
+
+        throw new Error('inside callback 3')
+      })
+    }
+    catch(e) {
+      //eyes.inspect(e)
+      assert.equal('seneca/callback_exception',e.seneca.code)
+      assert.equal('inside callback 3',e.seneca.error.message)
+    }
+
+
+    seneca({plugins:['echo','error']},function(err,si){
+      var cblog = ''
+
+      si.act({on:'error',how:'fail'},function(err){
+        //console.log('HOW-fail')
+        //eyes.inspect(err)
+        assert.equal('error_code1',err.seneca.code)
+        cblog += 'a'
+      })
+
+      si.act({on:'error',how:'msg'},function(err){
+        //console.log('HOW-msg')
+        //eyes.inspect(err)
+        assert.equal('an error message',err.seneca.code)
+        assert.equal('Seneca: an error message',err.message)
+        cblog += 'b'
+      })
+
+      si.act({on:'error',how:'errobj'},function(err){
+        //console.log('HOW-errobj')
+        //eyes.inspect(err)
+        assert.equal('unknown',err.seneca.code)
+        assert.equal('Seneca: an Error object',err.message)
+        cblog += 'c'
+      })
+
+
+      si.act({on:'error',how:'str'},function(err){
+        //console.log('HOW-str')
+        //eyes.inspect(err)
+        assert.equal('a string error',err.seneca.code)
+        assert.equal('Seneca: a string error',err.message)
+        cblog += 'd'
+      })
+
+
+      si.act({on:'error',how:'obj'},function(err){
+        //console.log('HOW-obj')
+        //eyes.inspect(err)
+        assert.equal('unknown',err.seneca.code)
+        assert.equal('an object',err.seneca.error)
+        assert.equal('Seneca: unknown error.',err.message)
+        cblog += 'e'
+      })
+
+      assert.equal('abcde',cblog)
+    })
   },
+
 
 
   register: function() {
@@ -181,6 +282,7 @@ module.exports = {
 
     })
   }
+
 
 
 /*
