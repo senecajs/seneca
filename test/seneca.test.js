@@ -3,14 +3,11 @@
 var common   = require('../lib/common');
 var seneca   = require('../lib/seneca');
 
-//var E = common.E;
 
 var eyes    = common.eyes
 var assert  = common.assert
 var gex     = common.gex
 
-//var SenecaClass = Seneca.Seneca;
-//var Entity = Seneca.Entity;
 
 var logger = require('./logassert')
 
@@ -35,6 +32,7 @@ module.exports = {
       assert.fail()
     }
     catch(e) {
+      eyes.inspect(e)
       assert.equal('after init 0',e.seneca.error.message)
       assert.equal('seneca/callback_exception',e.seneca.code)
     }

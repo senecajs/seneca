@@ -12,6 +12,7 @@ var logger = require('./logassert')
 
 module.exports = {
 
+
   entity: function() {
 
     var log = logger([
@@ -116,5 +117,57 @@ module.exports = {
   },
 
 
+  multi: function() {
+    seneca(
+      {plugins:[
 
+        {name:'mem',opts:{
+          tag:'foo',
+          map:{
+            '//foo':'*'
+          }
+        }},
+
+        {name:'mem',opts:{
+          tag:'bar',
+          map:{
+            '//bar':'*'
+          }
+        }}
+
+      ]},
+      function(err,si){
+        assert.isNull(err)
+
+
+        var foo = si.make('foo')
+        foo.a = 1
+
+        var bar = si.make('bar')
+        bar.b = 2
+    
+
+        ;foo.save$( function(err,foo) {
+          assert.isNull(err)
+          assert.ok( gex('//foo:{a=1;id=*}').on(''+foo), ''+foo )
+
+        ;foo.load$( {id:foo.id}, function(err,fooR) {
+          assert.isNull(err)
+          assert.ok( gex('//foo:{a=1;id=*}').on(''+fooR) )
+
+
+    
+        ;bar.save$( function(err,bar) {
+          assert.isNull(err)
+          assert.ok( gex('//bar:{b=2;id=*}').on(''+bar), ''+bar )
+
+        ;bar.load$( {id:bar.id}, function(err,barR) {
+          assert.isNull(err)
+          assert.ok( gex('//bar:{b=2;id=*}').on(''+barR) )
+
+
+        }) }) }) })
+        
+      }
+    )}
 }
