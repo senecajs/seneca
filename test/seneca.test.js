@@ -14,6 +14,7 @@ var logger = require('./logassert')
 
 module.exports = {
 
+
   failgen: function() {
 
     try { seneca(); assert.fail() }
@@ -253,193 +254,106 @@ module.exports = {
   register: function() {
     seneca({},function(err,si){
       var initfn = function(){}
+      var emptycb = function(){}
 
       try { si.register() } catch( e ) { 
-        assert.equal('register',e.seneca.code)
+        assert.equal('seneca/register_no_callback',e.seneca.code)
       }
 
       try { si.register({}) } catch( e ) { 
+        assert.equal('seneca/register_no_callback',e.seneca.code)
+      }
+
+      try { si.register({},emptycb) } catch( e ) { 
         //console.log(e)
-        assert.equal('register',e.seneca.code)
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
         assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
       }
 
-      try { si.register({name:1,init:initfn}) } catch( e ) { 
-        assert.equal('register',e.seneca.code)
+      try { si.register({name:1,init:initfn},emptycb) } catch( e ) { 
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 
-      try { si.register({name:'a',role:1,init:initfn}) } catch( e ) { 
+      try { si.register({name:'a',role:1,init:initfn},emptycb) } catch( e ) { 
         //console.log(e)
-        assert.equal('register',e.seneca.code)
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 
-      try { si.register({name:'a',init:'b'}) } catch( e ) { 
+      try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
         //console.log(e)
-        assert.equal('register',e.seneca.code)
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 
     })
-  }
+  },
 
 
 
-/*
   logging: function() {
-    var log = logger(['start','close',['entity','mem','close']])
+    var log = logger([
+      ['init','start'],
+      ['init','plugin'],
+      ['register'],
+      ['add'],
+      ['add'],
+      ['add'],
+      ['add'],
+      ['add'],
+      ['register'],
+      ['close'],
+      ['entity','close'],
+      ['act','in'],
+      ['plugin','mem'],
+      ['act','out'],
+    ])
 
-    Seneca.init(
+    seneca(
       {logger:log},
       function(err,seneca){
         assert.isNull(err)
         seneca.close()
-        assert.equal(3,log.index())
+        assert.equal(log.len,log.index())
       }
     )
                 
-    try {
-      Seneca.init()
-    }
-    catch( e ) {
-      assert.equal( 'no_callback', e.err )
-    }
+
 
     try {
-      Seneca.init({logger:logger(['bad'])},function(){})
+      seneca({logger:logger(['bad'])},function(){})
+      assert.fail()
     }
-    catch( e ) {
-      assert.equal( 'bad != start', e.actual )
-    }
+    catch( e ) {}
 
-    log = logger(['start','foo'])
-    Seneca.init(
+
+    log = logger([['init','start']])
+    seneca(
       {logger:log},
       function(err,seneca){
         assert.isNull(err)
         seneca.log('foo')
-        assert.equal(2,log.index())
+        assert.equal(10,log.index())
       }
     )
   },
 
-
-  entity: function() {
-
-    var log = logger([
-      'start',
-      ['entity','mem','make'],
-
-      ['entity','mem','make'],
-      ['entity','mem','save','in'],
-      ['entity','mem','save','out'],
-      //['entity','mem','make'],
-      ['entity','mem','load','in'],
-      ['entity','mem','load','out'],
-
-      ['entity','mem','make'],
-      ['entity','mem','save','in'],
-      ['entity','mem','save','out'],
-      //['entity','mem','make'],
-      ['entity','mem','load','in'],
-      ['entity','mem','load','out'],
-
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-
-      ['entity','mem','remove'],
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-    ])
-
-    Seneca.init(
-      {logger:log},
-      function(err,seneca){
-        assert.isNull(err)
-
-        var entity = seneca.make('ten','base',null)
-        var ent = entity.make$('ent',{p1:'v1'})
-        ent.p2 = 100;
-    
-        ;ent.save$( function(err,ent) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
-
-        ;ent.load$( {id:ent.id}, function(err,entR) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+entR) )
-          var ent1 = entR
-
-
-          ent = entity.make$('ent',{p1:'v1'})
-          ent.p3 = true
-        ;ent.save$( function(err,ent) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
-
-        ;ent.load$( {id:ent.id}, function(err,entR) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+entR) )
-          var ent2 = entR
-
-
-        ;ent.list$( {p1:'v1'}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(2,list.length)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+list[1]) )
-
-        ;ent.list$( {p2:100}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(1,list.length)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-
-          
-        ;ent.remove$( {p1:'v1'}, function(err) {
-          assert.isNull(err)
-
-        ;ent.list$( {p1:'v1'}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(0,list.length)
-
-
-        }) // list
-        }) //remove
-
-        }) // list
-        }) // list
-
-        }) // load
-        }) // save
-
-        }) // load
-        }) // save
-      }
-    )
-  },
 
 
   action: function() {
     var log = logger([
-      'start',
-      'add',
-      ['act','in','action'],
-      ['act','out','action'],
-      ['act','in','action'],
-      ['act','out','action'],
+      [],[],[],[], [],[],[],[], [],[],
+      ['act','in'],
+      ['act','out'],
+      ['act','in'],
+      ['act','out'],
     ])
 
-    Seneca.init(
+    seneca(
       {logger:log},
       function(err,seneca){
         assert.isNull(err)
         var a1  = 0;
 
-        seneca.add({op:'foo'},function(args,seneca,cb) {
+        seneca.add({op:'foo'},function(args,cb) {
           a1 = args.a1
           cb(null,'+'+a1)
         });
@@ -461,67 +375,10 @@ module.exports = {
 
 
 
-  register: function() {
-
-    function MockStore() {
-      var self = this;
-      self.name = 'mock';
-
-      self.init = function(url,cb) {
-        cb(null,self)
-      }
-
-      self.save = function(ent,cb) {
-        cb(ent.err?{err:ent.err}:null,'save')
-      }
-
-      self.load = function(qent,q,cb) {
-        cb(q.err?{err:q.err}:null,'load')
-      }
-
-      self.list = function(qent,q,cb) {
-        cb(q.err?{err:q.err}:null,'list')
-      }
-
-      self.remove = function(qent,q,cb) {
-        cb(q.err?{err:q.err}:null,'remove')
-      }
-
-      self.close = function(cb){
-        cb('close')
-      }
-    }
-    Entity.register$( new MockStore() );
-
-    var log = logger([
-      'start',
-    ])
-
-    Seneca.init( 
-      {entity:'mock',logger:log},
-      function(err,seneca) {
-        assert.isNull(err)
-
-        var ent1 = seneca.make('ten','foo','bar')    
-        ent1.save$( function(err,out) {
-          assert.isNull(err)
-          assert.equal('save',out)
-        })
-
-        ent1.err = 'boom'
-        ent1.save$( function(err,out) {
-          assert.equal('boom',err.err)
-        })
-      }
-    )
-  },
-
-
-/*
   plugins: function() {
 
 
-    Seneca.init({logger:logger([]),plugins:['echo']},function(err,seneca){
+    seneca({plugins:['echo']},function(err,seneca){
       assert.isNull(err)
 
       seneca.act({on:'echo',baz:'bax'},function(err,out){
@@ -531,7 +388,7 @@ module.exports = {
     })
 
 
-    Seneca.init({logger:logger([]),plugins:['util']},function(err,seneca){
+    seneca({plugins:['util']},function(err,seneca){
       assert.isNull(err)
 
       seneca.act({on:'util',cmd:'quickcode'},function(err,code){
@@ -550,41 +407,48 @@ module.exports = {
         return self
       }
       self.init = function(seneca,opts,cb){
-        seneca.add({on:self.name,cmd:'foo'},function(args,seneca,cb){
+        seneca.add({on:self.name,cmd:'foo'},function(args,cb){
           cb(null,'foo:'+args.foo)
         })
         cb()
       }
     }
 
-    Seneca.register(new Mock1())
 
-    Seneca.init(
-      {plugins:[new Mock1()], logger:logger()},
-      function(err,seneca){
+    seneca( 
+      {},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
-          assert.equal('foo:1',out)
+        si.register(new Mock1(), function(err){
+          assert.isNull(err)
+
+          si.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
+            assert.equal('foo:1',out)
+          })
         })
       }
     )
 
 
-    var mock1a = new Mock1()
-    mock1a.name = 'mock1a'
-    Seneca.register(mock1a)
 
-    Seneca.init(
-      {plugins:[mock1a], logger:logger()},
-      function(err,seneca){
+    seneca(
+      {},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
-          assert.equal('foo:1',out)
+        var mock1a = new Mock1()
+        mock1a.name = 'mock1a'
+        si.register(mock1a, function(err){
+          assert.isNull(err)
+
+          si.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
+            assert.equal('foo:1',out)
+          })
         })
       }
     )
+
 
 
     function Mock2() {
@@ -593,9 +457,9 @@ module.exports = {
       self.plugin = function() {
         return self
       }
-      self.init = function(seneca,opts,cb){
-        seneca.add({on:'mock1',cmd:'foo'},function(args,seneca,cb){
-          args.parent$(args,seneca,function(err,out){
+      self.init = function(si,opts,cb){
+        si.add({on:'mock1',cmd:'foo'},function(args,cb){
+          args.parent$(args,function(err,out){
             cb(null,'bar:'+out)
           })
         })
@@ -603,26 +467,33 @@ module.exports = {
       }
     }
 
-    Seneca.register(new Mock2())
 
-    Seneca.init(
-      {plugins:[new Mock1(), new Mock2()], logger:logger()},
-      function(err,seneca){
+    seneca(
+      {},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
-          assert.equal('bar:foo:2',out)
+        si.register( new Mock1(), function(err){
+          assert.isNull(err)
+
+          si.register( new Mock2(), function(err){
+            assert.isNull(err)
+
+            si.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
+              assert.equal('bar:foo:2',out)
+            })
+          })
         })
       }
     )
 
 
-    Seneca.init(
-      {plugins:['echo'], logger:logger()},
-      function(err,seneca){
+    seneca(
+      {plugins:['echo']},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'echo',cmd:'foo',bar:1},function(err,out){
+        si.act({on:'echo',cmd:'foo',bar:1},function(err,out){
           assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
         })
       }
@@ -630,19 +501,18 @@ module.exports = {
 
 
 
-    Seneca.init(
-      {plugins:['mock3'], logger:logger()},
-      function(err,seneca){
+    // loading a fake module: node_modules/mock3
+    seneca(
+      {plugins:['mock3']},
+      function(err,si){
         assert.isNull(err)
 
-        seneca.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
+        si.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
           assert.equal('qaz:3',out)
         })
       }
     )
-
-
   }
-*/
+
 
 }
