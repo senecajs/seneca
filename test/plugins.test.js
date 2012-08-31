@@ -14,6 +14,7 @@ var logger = require('./logassert')
 
 module.exports = {
 
+  /*
   plugins: function() {
 
     // built-in
@@ -148,6 +149,6 @@ module.exports = {
 
 
   }
-
+  */
 
 }

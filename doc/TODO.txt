@@ -1,9 +1,9 @@
 
 
 - entity
-  - rename name,base,tenant => name,base,zone
-  - no op store
+  - rename mem to mem-store
   - common driver test
+  - remove lib/entity folder
   - define common query lang - implement in mem
   - mongo - collection names convention
   - drivers (priority order)
@@ -22,10 +22,21 @@
     - hbase
     - odbc
     - ms sql server
+- fix vcache to use cmd $parent
 
 
 - update other unit tests and plugins
 - convert tests to vows
 - allow custom msgmaps
 
+
+
+
+
+- conventions:
+  - store plugins to have -store suffix
+
+
+- to document
+  - canonical order of ent designation parts: zone,base,name
 

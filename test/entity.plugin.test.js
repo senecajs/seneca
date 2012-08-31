@@ -13,40 +13,7 @@ var logger = require('./logassert')
 module.exports = {
 
 
-  entity: function() {
-
-    var log = logger([
-      'start',
-      ['entity','mem','make'],
-
-      ['entity','mem','make'],
-      ['entity','mem','save','in'],
-      ['entity','mem','save','out'],
-      //['entity','mem','make'],
-      ['entity','mem','load','in'],
-      ['entity','mem','load','out'],
-
-      ['entity','mem','make'],
-      ['entity','mem','save','in'],
-      ['entity','mem','save','out'],
-      //['entity','mem','make'],
-      ['entity','mem','load','in'],
-      ['entity','mem','load','out'],
-
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-
-      ['entity','mem','remove'],
-      //['entity','mem','make'],
-      ['entity','mem','list','in'],
-      ['entity','mem','list','out'],
-    ])
-
+  mem: function() {
     try {
       seneca(
         {plugins:['mem']},
@@ -59,9 +26,6 @@ module.exports = {
           
           ;ent.save$( function(err,ent) {
             assert.isNull(err)
-
-            eyes.inspect(ent)
-
             assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
 
 
@@ -212,5 +176,72 @@ module.exports = {
 
         }) })  }) })  }) })  }) })
       }
-    )}
+    )
+  },
+
+
+  noop: function() {
+    try {
+      seneca(
+        {plugins:['noop-store']},
+        function(err,si){
+          assert.isNull(err)
+
+          var entity = si.make('zone','base','name')
+          var ent = entity.make$('ent',{p1:'v1'})
+          ent.p2 = 100;
+          
+          ;ent.save$( function(err,ent) {
+            assert.isNull(err)
+
+
+            ;ent.load$( {id:ent.id}, function(err,entR) {
+              assert.isNull(err)
+
+              ent = entity.make$('ent',{p1:'v1'})
+              ent.p3 = true
+
+              ;ent.save$( function(err,ent) {
+                assert.isNull(err)
+
+                ;ent.load$( {id:ent.id}, function(err,entR) {
+                  assert.isNull(err)
+
+                  ;ent.list$( {p1:'v1'}, function(err,list) {
+                    assert.isNull(err)
+
+                    ;ent.list$( {p2:100}, function(err,list) {
+                      assert.isNull(err)
+                      
+                      ;ent.remove$( {p1:'v1'}, function(err) {
+                        assert.isNull(err)
+
+                        ;ent.list$( {p1:'v1'}, function(err,list) {
+                          assert.isNull(err)
+
+                          console.log('DONE')
+
+                        }) // list
+                      }) //remove
+
+                    }) // list
+                  }) // list
+
+                }) // load
+              }) // save
+
+            }) // load
+          }) // save
+        }
+      )
+    }
+    catch(e) {
+      eyes.inspect(e)
+      throw e
+    }
+  },
+
+
+  
+  
 }
