@@ -47,73 +47,79 @@ module.exports = {
       ['entity','mem','list','out'],
     ])
 
-    seneca(
-      {plugins:['mem']},
-      function(err,si){
-        assert.isNull(err)
-
-        var entity = si.make('ten','base',null)
-        var ent = entity.make$('ent',{p1:'v1'})
-        ent.p2 = 100;
-    
-        ;ent.save$( function(err,ent) {
+    try {
+      seneca(
+        {plugins:['mem']},
+        function(err,si){
           assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
 
-
-        ;ent.load$( {id:ent.id}, function(err,entR) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+entR) )
-          var ent1 = entR
-
-
-          ent = entity.make$('ent',{p1:'v1'})
-          ent.p3 = true
-        ;ent.save$( function(err,ent) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
-
-
-        ;ent.load$( {id:ent.id}, function(err,entR) {
-          assert.isNull(err)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+entR) )
-          var ent2 = entR
-
-
-        ;ent.list$( {p1:'v1'}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(2,list.length)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+list[1]) )
-
-        ;ent.list$( {p2:100}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(1,list.length)
-          assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-
+          var entity = si.make('ten','base',null)
+          var ent = entity.make$('ent',{p1:'v1'})
+          ent.p2 = 100;
           
-        ;ent.remove$( {p1:'v1'}, function(err) {
-          assert.isNull(err)
+          ;ent.save$( function(err,ent) {
+            assert.isNull(err)
+            assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
 
-        ;ent.list$( {p1:'v1'}, function(err,list) {
-          assert.isNull(err)
-          assert.equal(0,list.length)
 
-          console.log('DONE')
+            ;ent.load$( {id:ent.id}, function(err,entR) {
+              assert.isNull(err)
+              assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+entR) )
+              var ent1 = entR
 
-        }) // list
-        }) //remove
 
-        }) // list
-        }) // list
+              ent = entity.make$('ent',{p1:'v1'})
+              ent.p3 = true
+              ;ent.save$( function(err,ent) {
+                assert.isNull(err)
+                assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
 
-        }) // load
-        }) // save
 
-        }) // load
-        }) // save
-      }
-    )
+                ;ent.load$( {id:ent.id}, function(err,entR) {
+                  assert.isNull(err)
+                  assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+entR) )
+                  var ent2 = entR
+
+
+                  ;ent.list$( {p1:'v1'}, function(err,list) {
+                    assert.isNull(err)
+                    assert.equal(2,list.length)
+                    assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
+                    assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+list[1]) )
+
+                    ;ent.list$( {p2:100}, function(err,list) {
+                      assert.isNull(err)
+                      assert.equal(1,list.length)
+                      assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
+
+                      
+                      ;ent.remove$( {p1:'v1'}, function(err) {
+                        assert.isNull(err)
+
+                        ;ent.list$( {p1:'v1'}, function(err,list) {
+                          assert.isNull(err)
+                          assert.equal(0,list.length)
+
+                          console.log('DONE')
+
+                        }) // list
+                      }) //remove
+
+                    }) // list
+                  }) // list
+
+                }) // load
+              }) // save
+
+            }) // load
+          }) // save
+        }
+      )
+    }
+    catch(e) {
+      eyes.inspect(e)
+      throw e
+    }
   },
 
 

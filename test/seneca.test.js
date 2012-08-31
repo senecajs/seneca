@@ -34,7 +34,7 @@ module.exports = {
     }
     catch(e) {
       eyes.inspect(e)
-      assert.equal('after init 0',e.seneca.error.message)
+      assert.equal('Seneca: after init 0',e.seneca.error.message)
       assert.equal('seneca/callback_exception',e.seneca.code)
     }
 
@@ -50,7 +50,7 @@ module.exports = {
     catch(e) {
       //console.log(e)
       assert.equal('seneca/callback_exception',e.seneca.code)
-      assert.equal('plugins after init 0',e.seneca.error.message)
+      assert.equal('Seneca: plugins after init 0',e.seneca.error.message)
     }
 
 
@@ -196,7 +196,7 @@ module.exports = {
     catch(e) {
       //eyes.inspect(e)
       assert.equal('seneca/callback_exception',e.seneca.code)
-      assert.equal('inside callback 3',e.seneca.error.message)
+      assert.equal('Seneca: inside callback 3',e.seneca.error.message)
     }
 
 

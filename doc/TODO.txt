@@ -1,7 +1,6 @@
 
 
 - entity
-  - $ private
   - rename name,base,tenant => name,base,zone
   - no op store
   - common driver test
