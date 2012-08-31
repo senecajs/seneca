@@ -59,6 +59,9 @@ module.exports = {
           
           ;ent.save$( function(err,ent) {
             assert.isNull(err)
+
+            eyes.inspect(ent)
+
             assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
 
 
