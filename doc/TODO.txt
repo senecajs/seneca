@@ -1,7 +1,30 @@
-- throw proper Error objects
-- mem test log check
-- get echo pluign working again, with separate test
-- get seneca basic test working
+
+
+- entity
+  - $ private
+  - rename name,base,tenant => name,base,zone
+  - no op store
+  - common driver test
+  - define common query lang - implement in mem
+  - mongo - collection names convention
+  - drivers (priority order)
+    - mongodb
+    - mysql
+    - redis
+    - postgres
+    - riak
+    - memcache
+    - aws dynamo
+    - aws simpledb
+    - sqlite
+    - oracle
+    - hive
+    - couchdb
+    - hbase
+    - odbc
+    - ms sql server
+
+
 - update other unit tests and plugins
 - convert tests to vows
 - allow custom msgmaps
