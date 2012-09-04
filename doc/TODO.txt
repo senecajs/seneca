@@ -1,8 +1,8 @@
 
 
 - entity
-  - rename mem to mem-store
-  - common driver test
+  - common driver test - finish
+  - remove zone handling from mem-store
   - remove lib/entity folder
   - define common query lang - implement in mem
   - mongo - collection names convention
@@ -39,4 +39,6 @@
 
 - to document
   - canonical order of ent designation parts: zone,base,name
+  - stores handle base and name as base_name
+  - stores do not handle zones
 

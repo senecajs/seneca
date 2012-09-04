@@ -16,7 +16,7 @@ module.exports = {
   mem: function() {
     try {
       seneca(
-        {plugins:['mem']},
+        {plugins:['mem-store']},
         function(err,si){
           assert.isNull(err)
 
@@ -94,21 +94,21 @@ module.exports = {
     seneca(
       {plugins:[
 
-        {name:'mem',opts:{
+        {name:'mem-store',opts:{
           tag:'foo',
           map:{
             '//foo':'*'
           }
         }},
 
-        {name:'mem',opts:{
+        {name:'mem-store',opts:{
           tag:'bar',
           map:{
             '//bar':'*'
           }
         }},
 
-        {name:'mem',opts:{
+        {name:'mem-store',opts:{
           tag:'foo',
           map:{
             '//faa':'*'
@@ -118,6 +118,7 @@ module.exports = {
       ]},
       function(err,si){
         assert.isNull(err)
+
 
         // mem/foo
         var foo = si.make('foo')
