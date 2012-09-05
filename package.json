@@ -28,7 +28,8 @@
   },
 
   "devDependencies": {
-    "eyes": "*"
+    "eyes": "*",
+    "mongodb": "*"
   },
 
   "main": "lib/seneca",

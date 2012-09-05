@@ -1,8 +1,8 @@
-/* Copyright (c) 2010-2011 Ricebridge */
+/* Copyright (c) 2010-2012 Richard Rodger */
 
 
-var common   = require('common')
-var propmap  = require('propmap')
+var common   = require('../lib/common')
+var propmap  = require('../lib/propmap')
 
 var sys     = common.sys
 var eyes    = common.eyes

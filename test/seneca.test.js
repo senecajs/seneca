@@ -73,7 +73,7 @@ module.exports = {
       err = si.fail('code1')
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'code1')
-      assert.equal(err.message,'Seneca: code1')
+      assert.equal(err.message,'Seneca: code1 "code1"')
 
       // no code
       err = si.fail({bar:1})
@@ -87,7 +87,7 @@ module.exports = {
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,2)
-      assert.equal(err.message,'Seneca: code2')
+      assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
 
 
 
@@ -103,20 +103,20 @@ module.exports = {
 
       si.fail('msg1',function(err){
         assert.equal(err.seneca.code,'msg1')
-        assert.equal(err.message,'Seneca: msg1')
+        assert.equal(err.message,'Seneca: msg1 "msg1"')
         cblog+='b'
       })
 
       si.fail('code1',function(err){
         assert.equal(err.seneca.code,'code1')
-        assert.equal(err.message,'Seneca: code1')
+        assert.equal(err.message,'Seneca: code1 "code1"')
         cblog+='c'
       })
 
       si.fail({code:'code2',bar:1},function(err){
         assert.equal(err.seneca.code,'code2')
         assert.equal(err.seneca.bar,1)
-        assert.equal(err.message,'Seneca: code2')
+        assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":1}')
         cblog+='d'
       })
 
@@ -130,7 +130,7 @@ module.exports = {
 
       si.fail('m1',function(err,a1,a2){
         assert.equal(err.seneca.code,'m1')
-        assert.equal(err.message,'Seneca: m1')
+        assert.equal(err.message,'Seneca: m1 "m1"')
         assert.equal('arg1',a1)
         assert.equal('arg2',a2)
         cblog+='f'
@@ -214,7 +214,7 @@ module.exports = {
         //console.log('HOW-msg')
         //eyes.inspect(err)
         assert.equal('an error message',err.seneca.code)
-        assert.equal('Seneca: an error message',err.message)
+        assert.equal('Seneca: an error message "an error message"',err.message)
         cblog += 'b'
       })
 
@@ -231,7 +231,7 @@ module.exports = {
         //console.log('HOW-str')
         //eyes.inspect(err)
         assert.equal('a string error',err.seneca.code)
-        assert.equal('Seneca: a string error',err.message)
+        assert.equal('Seneca: a string error "a string error"',err.message)
         cblog += 'd'
       })
 
@@ -303,7 +303,7 @@ module.exports = {
       ['close'],
       ['entity','close'],
       ['act','in'],
-      ['plugin','mem'],
+      ['plugin','mem-store'],
       ['act','out'],
     ])
 

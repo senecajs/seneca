@@ -60,7 +60,7 @@ module.exports = {
                       assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
 
                       
-                      ;ent.remove$( {p1:'v1'}, function(err) {
+                      ;ent.remove$( {p1:'v1',all$:true}, function(err) {
                         assert.isNull(err)
 
                         ;ent.list$( {p1:'v1'}, function(err,list) {

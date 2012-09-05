@@ -1,11 +1,7 @@
 
 
 - entity
-  - common driver test - finish
-  - remove zone handling from mem-store
-  - remove lib/entity folder
   - define common query lang - implement in mem
-  - mongo - collection names convention
   - drivers (priority order)
     - mongodb
     - mysql
@@ -26,8 +22,12 @@
 
 
 - update other unit tests and plugins
+
 - convert tests to vows
 - allow custom msgmaps
+- remove eyes usage outside tests
+- drop support for load$:true in remove$ ?
+- string queries should be templates to avoid sql injection
 
 
 

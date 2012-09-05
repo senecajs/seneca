@@ -1,3 +1,5 @@
+UPDATE
+
 /* Copyright (c) 2010-2012 Richard Rodger */
 
 var common   = require('../lib/common');
