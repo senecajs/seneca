@@ -11,12 +11,11 @@ var async   = common.async
 
 
 
-var res
+var scratch = {}
 var verify = function(cb,tests){
   return function(err,out) {
-    res = out
     if( err ) return cb(err);
-    tests()
+    tests(out)
     cb()
   }
 }
@@ -35,100 +34,165 @@ module.exports = {
         function(err,si) {
           assert.isNull(err)
 
+
+          /* Set up a data set for testing the store.
+           * //foo contains [{p1:'v1',p2:'v2'},{p2:'v2'}]
+           * zen/moon/bar contains [{..bartemplate..}]
+           */
+
+
           async.series({
 
-
             save1: function(cb) {
-              var foo = si.make({name$:'foo'})
-              foo.p1 = 'v1'
+              var foo1 = si.make({name$:'foo'})
+              foo1.p1 = 'v1'
         
-              foo.save$( verify(cb, function(){
-                assert.isNotNull(res.id)
-                assert.equal('v1',res.p1)
+              foo1.save$( verify(cb, function(foo1){
+                assert.isNotNull(foo1.id)
+                assert.equal('v1',foo1.p1)
+                scratch.foo1 = foo1
               }))
             },
 
 
             load1: function(cb) {
-              res.load$( res.id, verify(cb,function(){
-                assert.isNotNull(res.id)
-                assert.equal('v1',res.p1)
+              scratch.foo1.load$( scratch.foo1.id, verify(cb,function(foo1){
+                assert.isNotNull(foo1.id)
+                assert.equal('v1',foo1.p1)
+                scratch.foo1 = foo1
               }))
             },
 
             save2: function(cb) {
-              res.p1 = 'v1x'
-              res.save$( verify(cb,function(){
-                assert.isNotNull(res.id)
-                assert.equal('v1x',res.p1)
+              scratch.foo1.p1 = 'v1x'
+              scratch.foo1.p2 = 'v2'
+              scratch.foo1.save$( verify(cb,function(foo1){
+                assert.isNotNull(foo1.id)
+                assert.equal('v1x',foo1.p1)
+                assert.equal('v2',foo1.p2)
+                scratch.foo1 = foo1
               })) 
             },
 
             
             load2: function(cb) {
-              res.load$( res.id, verify(cb, function(){
-                assert.isNotNull(res.id)
-                assert.equal('v1x',res.p1)
+              scratch.foo1.load$( scratch.foo1.id, verify(cb, function(foo1){
+                assert.isNotNull(foo1.id)
+                assert.equal('v1x',foo1.p1)
+                scratch.foo1 = foo1
               }))
             },
 
 
             save3: function(cb) {
-              var bar = si.make( shared.bartemplate )
-        
-              bar.save$( verify(cb, function(){
-                assert.isNotNull(res.id)
-                shared.barverify(res)
+              scratch.bar = si.make( shared.bartemplate )
+              scratch.bar.mark = Math.random()
+
+              scratch.bar.save$( verify(cb, function(bar){
+                assert.isNotNull(bar.id)
+                shared.barverify(bar)
+                scratch.bar = bar
               }))
             },
 
 
-            list1: function(cb) {
-              res.list$({}, verify(cb, function(){
+            save4: function(cb) {
+              scratch.foo2 = si.make({name$:'foo'})
+              scratch.foo2.p2 = 'v2'
+        
+              scratch.foo2.save$( verify(cb, function(foo2){
+                assert.isNotNull(foo2.id)
+                assert.equal('v2',foo2.p2)
+                scratch.foo2 = foo2
+              }))
+            },
+
+
+
+            query1: function(cb) {
+              scratch.bar.list$({}, verify(cb, function(res){
                 assert.ok( 1 <= res.length)
               }))
-            }
+            },
+
+            query2: function(cb) {
+              scratch.foo1.list$({}, verify(cb, function(res){
+                assert.ok( 2 <= res.length)
+              }))
+            },
+
+            query3: function(cb) {
+              scratch.bar.list$({id:scratch.bar.id}, verify(cb, function(res){
+                assert.equal( 1, res.length )
+                shared.barverify(res[0])
+              }))
+            },
+
+            query4: function(cb) {
+              scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(res){
+                assert.equal( 1, res.length )
+                shared.barverify(res[0])
+              }))
+            },
+
+            query5: function(cb) {
+              scratch.foo1.list$({p2:'v2'}, verify(cb, function(res){
+                assert.ok( 2 <= res.length )
+              }))
+            },
+
+
+            query6: function(cb) {
+              scratch.foo1.list$({p2:'v2',p1:'v1x'}, verify(cb, function(res){
+                assert.ok( 1 <= res.length )
+                res.forEach(function(foo){
+                  assert.equal('v2',foo.p2)
+                  assert.equal('v1x',foo.p1)
+                })
+              }))
+            },
+
+
+
+            // add store specific queries here
+            // - string queries
+            // - {native$:true, ...}
+            // - custom function
+ 
+
+
+            remove1: function(cb) {
+              var foo = si.make({name$:'foo'})
+        
+              foo.remove$( {all$:true}, function(err, res){
+                assert.isNull(err)
+                assert.ok( 2 <= res.length )
+                foo.list$({},verify(cb,function(res){
+                  assert.equal(0,res.length)
+                }))
+              })
+            },
+
+
+            remove2: function(cb) {
+              scratch.bar.remove$({mark:scratch.bar.mark,load$:false}, function(err,res){
+                assert.isNull(err)
+                assert.equal( 0, res.length )
+
+                scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(){
+                  assert.equal( 0, res.length )
+                }))
+              })
+            },
+
 
           }, function(err,out) {
             if(err) {
               eyes.inspect(err)
             }
             assert.isNull(err)
-            si.close();
+            si.close()
           })
-
-
-          /*
-
-          ent1.load$( ent1.id, function(err,ent1 ) {
-            assert.isNull(err)
-            util.debug( 'found: '+ent1);
-            ent1.p1 = 'v1x';
-            
-            ent1.save$( function(err,ent1) {
-              assert.isNull(err)
-              util.debug( 'post save: '+ent1);
-              
-              ent1.load$( ent1.id, function(err,ent1 ) {
-                assert.isNull(err)
-                util.debug( 'found: '+ent1);
-
-                ent1.remove$( ent1.id, function(err) {
-                  assert.isNull(err)
-                  util.debug( 'removed: '+ent1);
-                  
-                  ent1.load$( ent1.id, function(err,ent1 ) {
-                    assert.isNull(err)
-                    util.debug( 'found: '+ent1);
-
-                    entity.close$();
-                  });
-                });
-              });
-            });
-          });
-        });
-            */
         })
     }
     catch( e ) {
