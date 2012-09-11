@@ -60,7 +60,7 @@ module.exports = function(expected) {
     if( 'string'==typeof(expect) ) {
       check(expect,type)
     }
-    else if( null != expect ) {
+    else if( null != expect && 0 < expect.length ) {
       check(expect[0],type)
       for(var i = 1; i < expect.length; i++ ) {
         check(expect[i],arguments[i+1],i)
@@ -72,6 +72,7 @@ module.exports = function(expected) {
 
   logger.index   = function(){ return index }
   logger.history = history
+  logger.len     = expected.length
 
   return logger
 }

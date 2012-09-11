@@ -1,6 +1,6 @@
-/* Copyright (c) 2010-2011 Ricebridge */
+/* Copyright (c) 2010-2012 Richard Rodger */
 
-var common   = require('common')
+var common   = require('../lib/common')
 
 var eyes    = common.eyes
 var assert  = common.assert
