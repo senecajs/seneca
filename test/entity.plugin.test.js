@@ -12,7 +12,7 @@ var logger = require('./logassert')
 
 module.exports = {
 
-
+/*
   mem: function() {
     try {
       seneca(
@@ -88,7 +88,7 @@ module.exports = {
       throw e
     }
   },
-
+*/
 
   multi: function() {
     seneca(
@@ -180,7 +180,7 @@ module.exports = {
     )
   },
 
-
+/*
   noop: function() {
     try {
       seneca(
@@ -241,7 +241,7 @@ module.exports = {
       throw e
     }
   },
-
+*/
 
   
   

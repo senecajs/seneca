@@ -399,7 +399,6 @@ module.exports = {
     })
 
 
-
     function Mock1() {
       var self = this
       self.name = 'mock1'
@@ -512,6 +511,7 @@ module.exports = {
         })
       }
     )
+
   }
 
 

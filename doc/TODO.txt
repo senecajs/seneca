@@ -4,6 +4,7 @@
   - define common query lang - implement in mem
   - drivers (priority order)
     - mongodb
+    - couchdb
     - mysql
     - redis
     - postgres
@@ -14,7 +15,6 @@
     - sqlite
     - oracle
     - hive
-    - couchdb
     - hbase
     - odbc
     - ms sql server

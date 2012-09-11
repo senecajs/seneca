@@ -46,7 +46,7 @@ module.exports = {
           async.series({
 
             save1: function(cb) {
-              var foo1 = si.make({name$:'foo'})
+              var foo1 = si.make({name$:'foo'}) ///si.make('foo')
               foo1.p1 = 'v1'
         
               foo1.save$( verify(cb, function(foo1){
