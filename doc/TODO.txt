@@ -1,4 +1,5 @@
 
+- main api should be like express
 - on -> role
 
 
