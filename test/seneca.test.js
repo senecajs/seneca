@@ -512,6 +512,36 @@ module.exports = {
       }
     )
 
+  },
+
+
+  makeapi: function() {
+    seneca(
+      {},
+      function(err,si){
+        assert.isNull(err)
+
+        var log = []
+
+        si.add({p1:'v1',p2:'v2a'},function(args,cb){
+          console.log('a'+args.p3)
+          log.push('a'+args.p3)
+          cb()
+        })
+
+        si.add({p1:'v1',p2:'v2b'},function(args,cb){
+          console.log('b'+args.p3)
+          log.push('b'+args.p3)
+          cb()
+        })
+
+        var api = si.makeapi({p1:'v1',p2:'*'})
+        eyes.inspect(api)
+
+        api.v2a({p3:'A'})
+        api.v2b({p3:'B'})
+      }
+    )
   }
 
 

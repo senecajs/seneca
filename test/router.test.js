@@ -6,6 +6,8 @@ var router  = require('../lib/router')
 
 
 var assert = common.assert
+var eyes   = common.eyes
+
 var Router = router.Router
 
 
@@ -48,6 +50,25 @@ module.exports = {
 
     assert.equal('r1',rt1.find({p1:'v1',p2:'x'}))
     assert.equal('r3',rt1.find({p1:'v1',p2:'x',p3:'v3'}))
+  },
+
+
+  findall: function() {
+    var rt1 = new Router()
+    
+    rt1.add( {p1:'v1'}, 'r0' )
+    rt1.add( {p1:'v1',p2:'v2a'}, 'r1' )
+    rt1.add( {p1:'v1',p2:'v2b'}, 'r2' )
+
+    //eyes.inspect(JSON.parse(''+rt1))
+
+    var found = rt1.findall({p1:'v1'})
+    assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
+    //require('eyes').inspect(found)
+
+    found = rt1.findall({p1:'v1',p2:'*'})
+    assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
+    //require('eyes').inspect(found)
   }
   
 }
