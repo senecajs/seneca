@@ -1,5 +1,12 @@
 
 - main api should be like express
+  - nearly done - needs cleanup
+
+- multi action routing - si.add({foo:'a',bar:'*'}) attaches to all bar values
+
+- ordered params for pinning - use some sort of schema def on add? parambulator?
+
+
 - on -> role
 
 
