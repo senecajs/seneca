@@ -10,6 +10,8 @@
 - on -> role
 
 
+- plugin.init forgets to call cb - how to handle?
+
 - entity
   - define common query lang - implement in mem
   - drivers (priority order)
