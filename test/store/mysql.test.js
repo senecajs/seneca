@@ -2,7 +2,6 @@
 
 var seneca   = require('../../lib/seneca')
 var common   = require('../../lib/common')
-var Sequelize = require("sequelize")
 
 var shared   = require('./shared')
 
@@ -24,7 +23,7 @@ var verify = function(cb,tests){
 
 //These tests assumes a MySQL database/structure is already created.
 //create database 'seneca_test'
-//CREATE TABLE (id VARCHAR(255), p1 VARCHAR(255))
+//CREATE TABLE foo (id VARCHAR(255), p1 VARCHAR(255))
 
 module.exports = {
 
@@ -38,7 +37,7 @@ module.exports = {
             opts:{name:'seneca_test',
             host:'127.0.0.1',
             user:'root',
-            password:'malex',
+            password:'secret',
             port:3306} }
         ] },
 
