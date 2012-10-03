@@ -25,6 +25,7 @@
       "connect": "2.4.2",
       "oauth": "0.9.8",
       "cookies": "0.3.0"
+      "mysql":"2.0.0-alpha3"
   },
 
   "devDependencies": {
