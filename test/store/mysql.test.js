@@ -32,13 +32,16 @@ module.exports = {
 
     try {
       si = seneca(
-        { plugins:[
+        { log:'print',
+          plugins:[
           { name:'mysql-store', 
-            opts:{name:'seneca_test',
-            host:'127.0.0.1',
-            user:'root',
-            password:'malex',
-            port:3306} }
+            opts:{
+              name:'seneca_test',
+              host:'127.0.0.1',
+              user:'root',
+              password:'',
+              port:3306
+            } }
         ] },
 
         function(err,si) {

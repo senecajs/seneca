@@ -33,7 +33,7 @@
   },
 
   "devDependencies": {
-    "eyes": "*",
+    "eyes": "*"
   },
 
   "main": "lib/seneca",

@@ -29,9 +29,11 @@ module.exports = {
 
     try {
       si = seneca(
-        { plugins:[
-          { name:'mongo-store', opts:{name:'senecatest01',host:'127.0.0.1',port:27017} }
-        ] },
+        { log:'print'
+          plugins:[
+            { name:'mongo-store', opts:{name:'senecatest01',host:'127.0.0.1',port:27017} }
+          ] 
+        },
 
         function(err,si) {
           assert.isNull(err)
