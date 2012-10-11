@@ -57,18 +57,31 @@ module.exports = {
     var rt1 = new Router()
     
     rt1.add( {p1:'v1'}, 'r0' )
+
     rt1.add( {p1:'v1',p2:'v2a'}, 'r1' )
     rt1.add( {p1:'v1',p2:'v2b'}, 'r2' )
 
     //eyes.inspect(JSON.parse(''+rt1))
 
-    var found = rt1.findall({p1:'v1'})
-    assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
+    //var found = rt1.findall({p1:'v1'})
+    //assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
     //require('eyes').inspect(found)
 
-    found = rt1.findall({p1:'v1',p2:'*'})
-    assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
+    //found = rt1.findall({p1:'v1',p2:'*'})
+    //assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
     //require('eyes').inspect(found)
+
+
+    rt1.add( {p1:'v1',p2:'v2c',p3:'v3a'}, 'r3' )
+    rt1.add( {p1:'v1',p2:'v2d',p3:'v3b'}, 'r3' )
+
+    require('eyes').inspect(JSON.parse(''+rt1))
+
+    found = rt1.findall({p1:'v1',p2:'*',p3:'v3a'})
+    require('eyes').inspect(found)
+
+
+    test when there are superfluous keys
   }
   
 }
