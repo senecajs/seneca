@@ -85,8 +85,7 @@ seneca.act( {cmd:'salestax', net:100}, function(err,result){
 ```
 
 The _config_ command provides you with your configuration. This is
-cool because it doesn't matter _where_ it gets the configuration from
-- hard-coded, file system, database, network service, whatever. Did
+cool because it doesn't matter _where_ it gets the configuration from - hard-coded, file system, database, network service, whatever. Did
 you have to define an abstraction API to make this work? Nope.
 
 There's a little but too much verbosity here, don't you think? Let's fix that:
@@ -108,7 +107,7 @@ _Programmer Anarchy_
 
 The way to build Node.js systems, is to build lots of little
 processes. Here's a great talk explaining why you should do this:
-[Programmer Anarchy](http://vimeo.com/43690647) site.
+[Programmer Anarchy](http://vimeo.com/43690647).
 
 Seneca makes this really easy. Let's put configuration out on the network into it's own process:
 
