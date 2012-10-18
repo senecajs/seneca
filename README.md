@@ -2,7 +2,7 @@
 
 ## A Node.js toolkit for startups building Minimum Viable Products
 
-This is a community project of the http://nodejsdublin meetup.
+This is a community project of the http://nodejsdublin.com meetup.
 
 Seneca is a toolkit for organizing the business logic of your app. You
 can break down your app into "stuff that happens", rather than
