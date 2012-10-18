@@ -1,9 +1,14 @@
+
 var seneca = require('../..')()
 
-seneca.add({role:'math', cmd:'product'}, function(args,callback) {
-  var product = args.left * args.right
-  callback(null,{answer:product})
+seneca.add( {cmd:'config'}, function(args,callback){
+  var config = {
+    rate: 0.23
+  }
+  var value = config[args.prop]
+  callback(null,{value:value})
 })
+
 
 seneca.use('transport')
 
