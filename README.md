@@ -135,7 +135,7 @@ can then use the _connect_ module, for example, to run a little web
 server. The _seneca.service_ method returns a _connect_ middleware
 function to do this.
 
-Your implementation of the configuration code _stays the same_
+Your implementation of the configuration code _stays the same_.
 
 The client code looks like this:
 
@@ -170,7 +170,7 @@ how.
 You can do this with every command.
 
 
-_Keeping the Business Happy-
+_Keeping the Business Happy_
 
 The thing about business requirements is that have no respect for
 command sense, logic or orderly structure. The real world is
