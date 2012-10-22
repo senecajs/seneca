@@ -15,14 +15,19 @@ var logger = require('./logassert')
 module.exports = {
 
 
+  quick: function(){
+    var si = seneca()
+    si.use(function(si,opts,cb){
+      si.add({a:1},function(args,cb){cb(null,{b:2})})
+      cb()
+    })
+    si.act({a:1},function(err,out){
+      console.log(out)
+    })
+  },
+
+
   failgen: function() {
-
-    try { seneca(); assert.fail() }
-    catch(e) { assert.equal('Seneca: no options for init(opts,cb).',e.message) }
-
-    try { seneca({}); assert.fail() }
-    catch(e) { assert.equal('Seneca: no callback for init(opts,cb).',e.message) }
-
 
     try {
       var i = 0
@@ -512,6 +517,36 @@ module.exports = {
       }
     )
 
+  },
+
+
+  makeapi: function() {
+    seneca(
+      {},
+      function(err,si){
+        assert.isNull(err)
+
+        var log = []
+
+        si.add({p1:'v1',p2:'v2a'},function(args,cb){
+          console.log('a'+args.p3)
+          log.push('a'+args.p3)
+          cb()
+        })
+
+        si.add({p1:'v1',p2:'v2b'},function(args,cb){
+          console.log('b'+args.p3)
+          log.push('b'+args.p3)
+          cb()
+        })
+
+        var api = si.makeapi({p1:'v1',p2:'*'})
+        eyes.inspect(api)
+
+        api.v2a({p3:'A'})
+        api.v2b({p3:'B'})
+      }
+    )
   }
 
 

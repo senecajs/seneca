@@ -2,7 +2,6 @@
 
 var seneca   = require('../../lib/seneca')
 var common   = require('../../lib/common')
-
 var shared   = require('./shared')
 
 var assert  = common.assert
@@ -10,44 +9,32 @@ var eyes    = common.eyes
 var async   = common.async
 
 
-
 var scratch = {}
 var verify = function(cb,tests){
-  return function(err,out) {
-    if( err ) return cb(err);
+  return function(error,out) {
+    err = error
+    if( error ) return cb(err);
     tests(out)
     cb()
   }
 }
 
+var si
 
-
-module.exports = {
-
-  happy: function() {
-    var si
-
+exports.test = function(config, cb) {
     try {
       si = seneca(
-        { log:'print'
-          plugins:[
-            { name:'mongo-store', opts:{name:'senecatest01',host:'127.0.0.1',port:27017} }
-          ] 
-        },
+        config,
 
         function(err,si) {
           assert.isNull(err)
-
 
           /* Set up a data set for testing the store.
            * //foo contains [{p1:'v1',p2:'v2'},{p2:'v2'}]
            * zen/moon/bar contains [{..bartemplate..}]
            */
-
-
           async.series({
-
-            save1: function(cb) {
+            commonsave1: function(cb) {
               var foo1 = si.make({name$:'foo'}) ///si.make('foo')
               foo1.p1 = 'v1'
         
@@ -59,7 +46,7 @@ module.exports = {
             },
 
 
-            load1: function(cb) {
+            commonload1: function(cb) {
               scratch.foo1.load$( scratch.foo1.id, verify(cb,function(foo1){
                 assert.isNotNull(foo1.id)
                 assert.equal('v1',foo1.p1)
@@ -67,7 +54,7 @@ module.exports = {
               }))
             },
 
-            save2: function(cb) {
+            commonsave2: function(cb) {
               scratch.foo1.p1 = 'v1x'
               scratch.foo1.p2 = 'v2'
               scratch.foo1.save$( verify(cb,function(foo1){
@@ -79,7 +66,7 @@ module.exports = {
             },
 
             
-            load2: function(cb) {
+            commonload2: function(cb) {
               scratch.foo1.load$( scratch.foo1.id, verify(cb, function(foo1){
                 assert.isNotNull(foo1.id)
                 assert.equal('v1x',foo1.p1)
@@ -88,7 +75,7 @@ module.exports = {
             },
 
 
-            save3: function(cb) {
+            commonsave3: function(cb) {
               scratch.bar = si.make( shared.bartemplate )
               scratch.bar.mark = Math.random()
 
@@ -100,7 +87,7 @@ module.exports = {
             },
 
 
-            save4: function(cb) {
+            commonsave4: function(cb) {
               scratch.foo2 = si.make({name$:'foo'})
               scratch.foo2.p2 = 'v2'
         
@@ -113,40 +100,40 @@ module.exports = {
 
 
 
-            query1: function(cb) {
+            commonquery1: function(cb) {
               scratch.bar.list$({}, verify(cb, function(res){
                 assert.ok( 1 <= res.length)
               }))
             },
 
-            query2: function(cb) {
+            commonquery2: function(cb) {
               scratch.foo1.list$({}, verify(cb, function(res){
                 assert.ok( 2 <= res.length)
               }))
             },
 
-            query3: function(cb) {
+            commonquery3: function(cb) {
               scratch.bar.list$({id:scratch.bar.id}, verify(cb, function(res){
                 assert.equal( 1, res.length )
                 shared.barverify(res[0])
               }))
             },
 
-            query4: function(cb) {
+            commonquery4: function(cb) {
               scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(res){
                 assert.equal( 1, res.length )
                 shared.barverify(res[0])
               }))
             },
 
-            query5: function(cb) {
+            commonquery5: function(cb) {
               scratch.foo1.list$({p2:'v2'}, verify(cb, function(res){
                 assert.ok( 2 <= res.length )
               }))
             },
 
 
-            query6: function(cb) {
+            commonquery6: function(cb) {
               scratch.foo1.list$({p2:'v2',p1:'v1x'}, verify(cb, function(res){
                 assert.ok( 1 <= res.length )
                 res.forEach(function(foo){
@@ -156,16 +143,12 @@ module.exports = {
               }))
             },
 
-
-
             // add store specific queries here
             // - string queries
             // - {native$:true, ...}
             // - custom function
- 
 
-
-            remove1: function(cb) {
+            commonremove1: function(cb) {
               var foo = si.make({name$:'foo'})
         
               foo.remove$( {all$:true}, function(err, res){
@@ -178,31 +161,32 @@ module.exports = {
             },
 
 
-            remove2: function(cb) {
+            commonremove2: function(cb) {
               scratch.bar.remove$({mark:scratch.bar.mark}, function(err,res){
                 assert.isNull(err)
-                //assert.equal( 0, res.length )
-
                 scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(res){
                   assert.equal( 0, res.length )
                 }))
               })
             },
 
-
-          }, function(err,out) {
-            if(err) {
-              eyes.inspect(err)
+          }
+          , function(err,out) {
+            if( err ) {
+              eyes.inspect( err )
             }
             assert.isNull(err)
             si.close()
+            if (cb && cb.length > 0){
+              var cbarr = (cb.length == 1) ? [] : cb.slice(1, cb.length)
+              cb[0]( config, cbarr )
+            }
           })
-        })
+        }
+      )
     }
     catch( e ) {
-      //eyes.inspect(e)
       si && si.close()
       throw e
     }
   }
-}
