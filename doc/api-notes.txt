@@ -1,9 +1,0 @@
-
-
-- callbacks have err object as first argument
-  - err object always has structure: {err:'string_code',desc:{object}}
-    - where desc is err dependent, but is can always by JSON.stringified to print
-      - so no resource-bound values in desc! just static values
-
-- logging entries should emit before the described action
-  - means that the action is described in log before error message 

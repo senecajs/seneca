@@ -1,6 +1,3 @@
-*~
-.DS_Store
-test/db
-*.old
-*.bak
+test
 node_modules
+_site
