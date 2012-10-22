@@ -1,4 +1,18 @@
 
+- main api should be like express
+  - nearly done - needs cleanup
+
+- multi action routing - si.add({foo:'a',bar:'*'}) attaches to all bar values
+
+- ordered params for pinning - use some sort of schema def on add? parambulator?
+
+- transport: pin should handle '*'
+
+
+- on -> role
+
+
+- plugin.init forgets to call cb - how to handle?
 
 - entity
   - define common query lang - implement in mem

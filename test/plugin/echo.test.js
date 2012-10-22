@@ -1,13 +1,12 @@
-/* Copyright (c) 2010-2011 Ricebridge */
+/* Copyright (c) 2010-2012 Ricebridge */
 
-var common   = require('common')
-var Seneca   = require('seneca')
+var seneca   = require('../../lib/seneca.js')
+var common   = require('../../lib/common.js')
 
 var eyes    = common.eyes
 var assert  = common.assert
 var gex     = common.gex
 
-var logger = require('../logassert')
 
 
 
@@ -15,27 +14,23 @@ var logger = require('../logassert')
 module.exports = {
   
   echo: function() {
-    Seneca.init({logger:logger([]),plugins:['echo']},function(err,seneca){
-      assert.isNull(err)
+    var si = seneca({log:'print',plugins:['echo']})
 
-      seneca.act({on:'echo',baz:'bax'},function(err,out){
-        assert.isNull(err)
-        assert.equal(''+{baz:'bax'},''+out)
-      })
+    si.act({role:'echo',baz:'bax'},function(err,out){
+      assert.isNull(err)
+      assert.equal(''+{baz:'bax'},''+out)
+      //console.dir(out)
     })
   },
 
   echo_options: function() {
-    Seneca.init({logger:logger([]),plugins:[{
-      name:'echo',
-      options:{inject:{foo:'bar'}}
-    }]},function(err,seneca){
-      assert.isNull(err)
+    var si = seneca({log:'print'})
+    si.use('echo',{inject:{foo:'bar'}})
 
-      seneca.act({on:'echo',baz:'bax'},function(err,out){
-        assert.isNull(err)
-        assert.equal(''+{baz:'bax',foo:'bar'},''+out)
-      })
+    si.act({role:'echo',baz:'bax'},function(err,out){
+      assert.isNull(err)
+      assert.equal(''+{baz:'bax',foo:'bar'},''+out)
+      //console.dir(out)
     })
   }
   
