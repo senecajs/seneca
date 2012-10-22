@@ -1,87 +1,44 @@
 /* Copyright (c) 2010-2012 Richard Rodger */
 
-var common_tests = require('./common.test')
-var mysql_ext_tests = require('./mysql.ext.test')
+var seneca   = require('../../lib/seneca')
 var common   = require('../../lib/common')
-
-
 var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
 
-//These tests assumes a MySQL database/structure is already created.
-/*
-  CREATE DATABASE 'seneca_test';
-  USE seneca_test;
-  CREATE TABLE foo (id VARCHAR(255), p1 VARCHAR(255), p2 VARCHAR(255));
-  CREATE TABLE moon_bar (
-    id VARCHAR(255), 
-    str VARCHAR(255), 
-    `int` INT, 
-    bol BOOLEAN, 
-    wen TIMESTAMP, 
-    mark VARCHAR(255), 
-    `dec` REAL, 
-    arr TEXT, 
-    obj TEXT);
-*/
 
-var config = 
-{ plugins:[
-  { name:'mysql-store', 
-    opts:{name:'seneca_test',
-    host:'127.0.0.1',
-    user:'root',
-    password:'secret',
-    port:3306} }
-  ]
+var scratch = {}
+var verify = function(cb,tests){
+  return function(error,out) {
+    err = error
+    if( error ) return cb(err);
+    tests(out)
+    cb()
+  }
 }
 
-module.exports = {
-<<<<<<< HEAD
+var si
 
-  happy: function() {
-    var si
-
+exports.test = function( config, cb ) {
     try {
       si = seneca(
-        { log:'print',
-          plugins:[
-          { name:'mysql-store', 
-            opts:{
-              name:'seneca_test',
-              host:'127.0.0.1',
-              user:'root',
-              password:'',
-              port:3306
-            } }
-        ] },
+        config,
 
         function(err,si) {
           assert.isNull(err)
 
           async.series({
-            insert1: function(cb) {
-              var foo = si.make({name$:'foo'})
-              foo.p1 = 'v1'
-              
-              foo.save$(verify(cb, function(foo){
-                assert.isNotNull(foo.id)
-                assert.equal('v1',foo.p1)
-              }))
-            },
-
             // test remove$ with all$ - we have at least 2 rows in db
             removeAll: function(cb) {
               var foo = si.make({name$:'foo'})
-        
+
               foo.remove$( {all$:true}, verify(cb, function(res){
                 assert.isNull(err)
               }))
             },
 
             listEmpty: function(cb) {
-              var foo = si.make('foo')
+              var foo = si.make({name$:'foo'})
               foo.list$({}, verify(cb, function(res){
                 assert.equal( 0, res.length)
               }))
@@ -187,15 +144,21 @@ module.exports = {
               foo.list$({}, verify(cb, function(res){
                 assert.equal( 1, res.length)
               }))
-            },
-          }, function(err,out) {
+            }
+          }
+          , function(err,out) {
             if( err ) {
-              eyes.inspect(err)
+              eyes.inspect( err )
             }
             assert.isNull(err)
             si.close()
+            if (cb && cb.length > 0){
+              var cbarr = (cb.length == 1) ? [] : cb.slice(1, cb.length)
+              cb[0]( config, cbarr )
+            }
           })
-        })
+        }
+      )
     }
     catch( e ) {
       //eyes.inspect(e)
@@ -203,7 +166,3 @@ module.exports = {
       throw e
     }
   }
-=======
-  commontests: common_tests.test(config, [mysql_ext_tests.test])
->>>>>>> 87b9fe4ac12a569038bdf56174186ee8a1307e83
-}
