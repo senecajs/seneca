@@ -297,14 +297,17 @@ module.exports = {
   logging: function() {
     var log = logger([
       ['init','start'],
-      ['init','plugin'],
+      ['register'],
+      ['register'],
       ['register'],
       ['add'],
       ['add'],
       ['add'],
       ['add'],
       ['add'],
+      ['add'],
       ['register'],
+      ['init'],
       ['close'],
       ['entity','close'],
       ['act','in'],
@@ -314,6 +317,7 @@ module.exports = {
 
     seneca(
       {logger:log},
+      //{log:'print'},
       function(err,seneca){
         assert.isNull(err)
         seneca.close()
@@ -336,7 +340,7 @@ module.exports = {
       function(err,seneca){
         assert.isNull(err)
         seneca.log('foo')
-        assert.equal(10,log.index())
+        assert.equal(13,log.index())
       }
     )
   },
@@ -345,7 +349,7 @@ module.exports = {
 
   action: function() {
     var log = logger([
-      [],[],[],[], [],[],[],[], [],[],
+      [],[],[],[], [],[],[],[],[],[], [],[],[],
       ['act','in'],
       ['act','out'],
       ['act','in'],
@@ -354,6 +358,7 @@ module.exports = {
 
     seneca(
       {logger:log},
+      //{log:'print'},
       function(err,seneca){
         assert.isNull(err)
         var a1  = 0;
@@ -382,11 +387,10 @@ module.exports = {
 
   plugins: function() {
 
-
     seneca({plugins:['echo']},function(err,seneca){
       assert.isNull(err)
 
-      seneca.act({on:'echo',baz:'bax'},function(err,out){
+      seneca.act({role:'echo',baz:'bax'},function(err,out){
         assert.isNull(err)
         assert.equal(''+{baz:'bax'},''+out)
       })
@@ -396,7 +400,7 @@ module.exports = {
     seneca({plugins:['util']},function(err,seneca){
       assert.isNull(err)
 
-      seneca.act({on:'util',cmd:'quickcode'},function(err,code){
+      seneca.act({role:'util',cmd:'quickcode'},function(err,code){
         assert.isNull(err)
         assert.equal( 8, code.length )
         assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
@@ -411,7 +415,7 @@ module.exports = {
         return self
       }
       self.init = function(seneca,opts,cb){
-        seneca.add({on:self.name,cmd:'foo'},function(args,cb){
+        seneca.add({role:self.name,cmd:'foo'},function(args,cb){
           cb(null,'foo:'+args.foo)
         })
         cb()
@@ -427,7 +431,7 @@ module.exports = {
         si.register(new Mock1(), function(err){
           assert.isNull(err)
 
-          si.act({on:'mock1',cmd:'foo',foo:1},function(err,out){
+          si.act({role:'mock1',cmd:'foo',foo:1},function(err,out){
             assert.equal('foo:1',out)
           })
         })
@@ -446,7 +450,7 @@ module.exports = {
         si.register(mock1a, function(err){
           assert.isNull(err)
 
-          si.act({on:'mock1a',cmd:'foo',foo:1},function(err,out){
+          si.act({role:'mock1a',cmd:'foo',foo:1},function(err,out){
             assert.equal('foo:1',out)
           })
         })
@@ -462,7 +466,7 @@ module.exports = {
         return self
       }
       self.init = function(si,opts,cb){
-        si.add({on:'mock1',cmd:'foo'},function(args,cb){
+        si.add({role:'mock1',cmd:'foo'},function(args,cb){
           args.parent$(args,function(err,out){
             cb(null,'bar:'+out)
           })
@@ -483,7 +487,7 @@ module.exports = {
           si.register( new Mock2(), function(err){
             assert.isNull(err)
 
-            si.act({on:'mock1',cmd:'foo',foo:2},function(err,out){
+            si.act({role:'mock1',cmd:'foo',foo:2},function(err,out){
               assert.equal('bar:foo:2',out)
             })
           })
@@ -497,7 +501,7 @@ module.exports = {
       function(err,si){
         assert.isNull(err)
 
-        si.act({on:'echo',cmd:'foo',bar:1},function(err,out){
+        si.act({role:'echo',cmd:'foo',bar:1},function(err,out){
           assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
         })
       }
@@ -511,18 +515,17 @@ module.exports = {
       function(err,si){
         assert.isNull(err)
 
-        si.act({on:'mock3',cmd:'qaz',foo:3},function(err,out){
+        si.act({role:'mock3',cmd:'qaz',foo:3},function(err,out){
           assert.equal('qaz:3',out)
         })
       }
     )
-
   },
 
 
-  makeapi: function() {
+  pin: function() {
     seneca(
-      {},
+      {},//{log:'print'},
       function(err,si){
         assert.isNull(err)
 
@@ -531,20 +534,20 @@ module.exports = {
         si.add({p1:'v1',p2:'v2a'},function(args,cb){
           console.log('a'+args.p3)
           log.push('a'+args.p3)
-          cb()
+          cb(null,{p3:args.p3})
         })
 
         si.add({p1:'v1',p2:'v2b'},function(args,cb){
           console.log('b'+args.p3)
           log.push('b'+args.p3)
-          cb()
+          cb(null,{p3:args.p3})
         })
 
-        var api = si.makeapi({p1:'v1',p2:'*'})
-        eyes.inspect(api)
+        var api = si.pin({p1:'v1',p2:'*'})
+        //eyes.inspect(api)
 
-        api.v2a({p3:'A'})
-        api.v2b({p3:'B'})
+        api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
+        api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
       }
     )
   }
