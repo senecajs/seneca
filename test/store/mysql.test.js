@@ -36,7 +36,7 @@ var config =
     { name:'mysql-store', 
       opts:{name:'seneca_test',
             host:'127.0.0.1',
-            user:'root',
+            user:'test',
             //password:'secret',
             password:'',
             port:3306} }
