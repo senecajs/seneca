@@ -13,10 +13,12 @@ var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
 
-//These tests assumes a MySQL database/structure is already created.
+//These tests assume a MySQL database/structure is already created.
 /*
-  CREATE DATABASE 'seneca_test';
-  USE seneca_test;
+  CREATE DATABASE 'senecatest';
+  USE senecatest;
+  GRANT ALL PRIVILEGES ON senecatest.* TO senecatest@localhost;
+  FLUSH PRIVILEGES;
   CREATE TABLE foo (id VARCHAR(255), p1 VARCHAR(255), p2 VARCHAR(255));
   CREATE TABLE moon_bar (
     id VARCHAR(255), 
@@ -34,17 +36,32 @@ var config =
 { log:'print',
   plugins:[
     { name:'mysql-store', 
-      opts:{name:'seneca_test',
-            host:'127.0.0.1',
-            user:'root',
-            //password:'secret',
-            password:'',
-            port:3306} }
+      opts:{
+        name:'senecatest',
+        host:'127.0.0.1',
+        user:'senecatest',
+        password:'senecatest',
+        password:'',
+        port:3306
+      } 
+    }
   ]
 }
 
+
+var si = seneca(config)
+si.__testcount = 0
+var testcount = 0
+
 module.exports = {
+  basictest: (testcount++, shared.basictest(si)),
+  extratest: (testcount++, extratest(si)),
+  closetest: shared.closetest(si,testcount)
+}
 
 
-  commontests: common_tests.test(config)//, [mysql_ext_tests.test])
+
+function extratest(si) {
+  console.log('EXTRA')
+  si.__testcount++
 }
