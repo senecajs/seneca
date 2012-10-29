@@ -13,35 +13,29 @@ var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
 
-//These tests assume a MySQL database/structure is already created.
+//These tests assume a database structure is already created.
 /*
-  CREATE DATABASE 'senecatest';
+  CREATE DATABASE senecatest;
   USE senecatest;
-  GRANT ALL PRIVILEGES ON senecatest.* TO senecatest@localhost;
-  FLUSH PRIVILEGES;
-  CREATE TABLE foo (id VARCHAR(255), p1 VARCHAR(255), p2 VARCHAR(255));
-  CREATE TABLE moon_bar (
-    id VARCHAR(255), 
-    str VARCHAR(255), 
-    `int` INT, 
-    bol BOOLEAN, 
-    wen TIMESTAMP, 
-    mark VARCHAR(255), 
-    `dec` REAL, 
-    arr TEXT, 
-    obj TEXT);
+  CREATE ROLE senecatest
+
+  CREATE TABLE foo ( id character varying, p1 character varying, p2 character varying );
+  CREATE TABLE moon_bar ( str character varying, id character varying, "int" integer,  bol boolean, wen timestamp with time zone, mark character varying, "dec" real, arr text, obj text );
+
+  GRANT ALL ON foo TO senecatest;
+  GRANT ALL ON moon_bar TO senecatest;
 */
 
 var config = 
 { log:'print',
   plugins:[
-    { name:'mysql-store', 
+    { name:'postgres-store', 
       opts:{
         name:'senecatest',
         host:'127.0.0.1',
-        user:'senecatest',
-        password:'',
-        port:3306
+        port:5432,
+        username:'senecatest',
+        password:'senecatest',
       } 
     }
   ]
@@ -49,6 +43,8 @@ var config =
 
 
 var si = seneca(config)
+
+
 si.__testcount = 0
 var testcount = 0
 
