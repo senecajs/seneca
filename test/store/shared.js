@@ -21,7 +21,6 @@ var bartemplate = {
   obj:{a:1,b:[2],c:{d:3}}
 }
 
-
 var barverify = function(bar) {
   assert.equal('aaa', bar.str)
   assert.equal(11,    bar.int)
@@ -32,14 +31,9 @@ var barverify = function(bar) {
   assert.equal(JSON.stringify({a:1,b:[2],c:{d:3}}),JSON.stringify(bar.obj))
 }
 
-
-
-
-
 var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
-
 
 var scratch = {}
 
@@ -205,13 +199,17 @@ exports.basictest = function(si) {
 
 exports.closetest = function(si,testcount) {
   return function() {
+    var RETRY_LIMIT = 10
+    var retryCnt = 0
+
     function retry(){
-      console.log(si.__testcount)
-      if( testcount <= si.__testcount ) {
+      if( testcount <= si.__testcount || retryCnt > RETRY_LIMIT ) {
         console.log('CLOSE')
         si.close()
+      } else {
+        retryCnt++
+        setTimeout(retry, 500);
       }
-      else setTimeout(retry,500);
     }
     retry()
   }
