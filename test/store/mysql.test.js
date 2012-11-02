@@ -12,6 +12,9 @@ var shared   = require('./shared')
 var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
+var _       = common._
+var gex     = common.gex
+
 
 //These tests assume a MySQL database/structure is already created.
 /*
@@ -19,9 +22,9 @@ var async   = common.async
   USE senecatest;
   GRANT ALL PRIVILEGES ON senecatest.* TO senecatest@localhost;
   FLUSH PRIVILEGES;
-  CREATE TABLE foo (id VARCHAR(255), p1 VARCHAR(255), p2 VARCHAR(255));
+  CREATE TABLE foo (id VARCHAR(36), p1 VARCHAR(255), p2 VARCHAR(255));
   CREATE TABLE moon_bar (
-    id VARCHAR(255), 
+    id VARCHAR(36), 
     str VARCHAR(255), 
     `int` INT, 
     bol BOOLEAN, 
@@ -30,6 +33,7 @@ var async   = common.async
     `dec` REAL, 
     arr TEXT, 
     obj TEXT);
+    CREATE TABLE product (id VARCHAR(36), name VARCHAR(255), price INT);
 */
 
 var config = 
@@ -54,6 +58,7 @@ var testcount = 0
 
 module.exports = {
   basictest: (testcount++, shared.basictest(si)),
+  sqltest: (testcount++, shared.sqltest(si)),
   extratest: (testcount++, extratest(si)),
   closetest: shared.closetest(si,testcount)
 }
@@ -61,6 +66,13 @@ module.exports = {
 
 
 function extratest(si) {
-  console.log('EXTRA')
-  si.__testcount++
+  return function() {
+    si.ready(function(){
+      assert.isNotNull(si)
+      
+      // driver specific tests
+
+      si.__testcount++
+    })
+  }
 }

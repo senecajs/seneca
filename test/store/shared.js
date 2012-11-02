@@ -5,6 +5,8 @@ var common   = require('../../lib/common')
 var assert  = common.assert
 var eyes    = common.eyes
 var async   = common.async
+var _       = common._
+var gex     = common.gex
 
 
 var bartemplate = { 
@@ -27,6 +29,7 @@ var barverify = function(bar) {
   assert.equal(33.33, bar.dec)
   assert.equal(false, bar.bol)
   assert.equal(new Date(2020,1,1).toISOString(), bar.wen.toISOString())
+
   assert.equal(''+[2,3],''+bar.arr)
   assert.equal(JSON.stringify({a:1,b:[2],c:{d:3}}),JSON.stringify(bar.obj))
 }
@@ -52,6 +55,9 @@ exports.basictest = function(si) {
     si.ready(function(){
       console.log('BASIC')
       assert.isNotNull(si)
+
+// TODO: test load$(string), remove$(string)
+
 
       /* Set up a data set for testing the store.
        * //foo contains [{p1:'v1',p2:'v2'},{p2:'v2'}]
@@ -122,8 +128,10 @@ exports.basictest = function(si) {
           },
 
           query1: function(cb) {
-            scratch.bar.list$({}, verify(cb, function(res){
+            scratch.barq = si.make('zen', 'moon','bar')
+            scratch.barq.list$({}, verify(cb, function(res){
               assert.ok( 1 <= res.length)
+              barverify(res[0])
             }))
           },
 
@@ -134,7 +142,7 @@ exports.basictest = function(si) {
           },
 
           query3: function(cb) {
-            scratch.bar.list$({id:scratch.bar.id}, verify(cb, function(res){
+            scratch.barq.list$({id:scratch.bar.id}, verify(cb, function(res){
               assert.equal( 1, res.length )
               barverify(res[0])
             }))
@@ -196,6 +204,73 @@ exports.basictest = function(si) {
   }
 }
 
+
+exports.sqltest = function(si) {
+  return function() {
+    si.ready(function(){
+      assert.isNotNull(si)
+
+      var Product = si.make('product')
+      var products = []
+
+      async.series(
+        {
+          setup: function(cb) {
+
+            products.push( Product.make$({name:'apple',price:100}) )
+            products.push( Product.make$({name:'pear',price:200}) )
+
+            var i = 0
+            function saveproduct(){
+              return function(cb) {
+                products[i].save$(cb)
+                i++
+              }
+            }
+
+            async.series([
+              saveproduct(),
+              saveproduct(),
+            ],cb)
+          },
+
+
+          query_string: function( cb ) {
+            Product.list$("SELECT * FROM product ORDER BY price",function(err,list){
+              var s = _.map(list,function(p){return p.toString()}).toString()
+              assert.ok( 
+                gex("//product:{id=*;name=apple;price=100},//product:{id=*;name=pear;price=200}").on( s ) )
+              cb()
+            })
+          },
+
+          query_params: function( cb ) {
+            Product.list$(["SELECT * FROM product WHERE price >= ? AND price <= ?",0,1000],function(err,list){
+              var s = _.map(list,function(p){return p.toString()}).toString()
+              assert.ok( 
+                gex("//product:{id=*;name=apple;price=100},//product:{id=*;name=pear;price=200}").on( s ) )
+              cb()
+            })
+          },
+
+          teardown: function(cb) {
+            products.forEach(function(p){
+              p.remove$()
+            })
+            cb()
+          }
+        },
+        function(err,out){
+          if( err ) {
+            eyes.inspect( err )
+          }
+          si.__testcount++
+          assert.isNull(err)
+        }
+      )
+    })
+  }
+}
 
 exports.closetest = function(si,testcount) {
   return function() {
