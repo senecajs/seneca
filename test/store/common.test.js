@@ -160,7 +160,6 @@ exports.test = function(config, cb) {
               })
             },
 
-
             commonremove2: function(cb) {
               scratch.bar.remove$({mark:scratch.bar.mark}, function(err,res){
                 assert.isNull(err)
@@ -169,8 +168,8 @@ exports.test = function(config, cb) {
                 }))
               })
             },
-
           }
+
           , function(err,out) {
             if( err ) {
               eyes.inspect( err )
