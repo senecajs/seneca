@@ -57,6 +57,13 @@ module.exports = {
 
 
 function extratest(si) {
-  console.log('EXTRA')
-  si.__testcount++
+  return function() {
+    si.ready(function(){
+      assert.isNotNull(si)
+
+      // driver specific tests
+
+      si.__testcount++
+    })
+  }
 }
