@@ -31,9 +31,7 @@
       "http-proxy": ">=0.8.3",
       "request":    ">=2.11.4",
 
-      "mongodb":   ">=1.1.6",
-      "mysql":     ">=2.0.0-alpha3",
-      "pg":        ">=0.8.4"
+      "eyes": "*"
   },
 
   "devDependencies": {
