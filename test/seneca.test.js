@@ -17,7 +17,7 @@ module.exports = {
 
   quick: function(){
     var si = seneca()
-    si.use(function(si,opts,cb){
+    si.use(function quickplugin(si,opts,cb){
       si.add({a:1},function(args,cb){cb(null,{b:2})})
       cb()
     })
@@ -550,7 +550,35 @@ module.exports = {
         api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
       }
     )
+  },
+
+  compose: function() {
+    var si = seneca({log:'print'})   
+
+    si.add({A:1},function(args,cb){
+      cb(null,{x:2})
+    })
+    si.add({B:1},function(args,cb){
+      cb(null,{x:args.x+1})
+    })
+    si.add({C:1},function(args,cb){
+      cb(null,{y:args.y+1})
+    })
+
+    si.act({A:1},function(e,r){assert.equal(r.x,2)})
+    si.act({B:1,x:1},function(e,r){assert.equal(r.x,2)})
+
+    si.compose({D:1},[{A:1},{B:1}])
+    si.act({D:1},function(e,r){assert.equal(r.x,3)})
+
+    si.compose({E:1},[{A:1,modify$:function(res){res.y=res.x}},{C:1}])
+    si.act({E:1},function(e,r){assert.equal(r.y,3)})
+
+
+    si.add({F:1},function(args,cb){
+      cb(null,{y:args.y+args.z})
+    })
+    si.compose({G:1},[{A:1,modify$:function(res,args){res.y=res.x,res.z=args.z}},{F:1}])
+    si.act({G:1,z:3},function(e,r){assert.equal(r.y,5)})
   }
-
-
 }
