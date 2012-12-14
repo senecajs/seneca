@@ -1,0 +1,12 @@
+
+2012-12-14:
+- prepend 'seneca-' to plugins names if they cannot be found verbatim - reduces verbosity of references to standard plugins:
+  si.use( require('seneca-user') ) becomes si.use( require('user') ) 
+- search for plugin modules in calling code require paths, again to reduce verbosity. Uses module.parent filename and path properties
+  inside seneca module:
+  si.use( require('user') ) becomes si.use( 'user' )  works, even though seneca-user is npm installed into the calling code folder, not seneca's own folder
+
+  search algo is now: name, seneca-name, calling-file-folder/name, calling-file-folder/seneca-name, 
+                      calling-file-folder/node_modules/name, calling-file-folder/node_modules/seneca-name, ... etc up the parent folders
+
+
