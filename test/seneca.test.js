@@ -22,7 +22,7 @@ module.exports = {
       cb()
     })
     si.act({a:1},function(err,out){
-      console.log(out)
+      assert.equal(out.b,2)
     })
   },
 
@@ -38,7 +38,7 @@ module.exports = {
       assert.fail()
     }
     catch(e) {
-      eyes.inspect(e)
+      //eyes.inspect(e)
       assert.equal('Seneca: after init 0',e.seneca.error.message)
       assert.equal('seneca/callback_exception',e.seneca.code)
     }
@@ -265,6 +265,7 @@ module.exports = {
         assert.equal('seneca/register_no_callback',e.seneca.code)
       }
 
+
       try { si.register({}) } catch( e ) { 
         assert.equal('seneca/register_no_callback',e.seneca.code)
       }
@@ -280,7 +281,8 @@ module.exports = {
       }
 
       try { si.register({name:'a',role:1,init:initfn},emptycb) } catch( e ) { 
-        //console.log(e)
+        eyes.inspect(e)
+        console.log(e)
         assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 

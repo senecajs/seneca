@@ -10,3 +10,8 @@
                       calling-file-folder/node_modules/name, calling-file-folder/node_modules/seneca-name, ... etc up the parent folders
 
 
+2012-12-15:
+- seneca.util contains utility functions
+- seneca.util.deepextend - like _.extend, except overrides apply inside objects, see test/seneca.util.test.js for example
+- being migration to mocha, dropping expresso, for unit tests
+
