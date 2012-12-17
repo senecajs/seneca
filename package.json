@@ -2,8 +2,9 @@
   "name": "seneca",
   "description": "A toolkit for building Minimum Viable Products",
   "keywords": ["minimum","viable","product","toolkit","startup","lean"],
-  "version": "0.4.2",
-  "homepage": "https://github.com/nodejsdublin/seneca",
+  "version": "0.4.3",
+  "license": "MIT",
+  "homepage": "https://senecajs.org",
   "author": "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
   "contributors": [
     "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
@@ -13,7 +14,7 @@
   ],
 
   "engines": {
-    "node": ">=0.4"
+    "node": ">=0.8"
   },
 
   "dependencies": {
