@@ -2,7 +2,7 @@
   "name": "seneca",
   "description": "A toolkit for building Minimum Viable Products",
   "keywords": ["minimum","viable","product","toolkit","startup","lean"],
-  "version": "0.4.3",
+  "version": "0.4.4",
   "license": "MIT",
   "homepage": "https://senecajs.org",
   "author": "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
