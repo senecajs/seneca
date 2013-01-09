@@ -15,3 +15,10 @@
 - seneca.util.deepextend - like _.extend, except overrides apply inside objects, see test/seneca.util.test.js for example
 - being migration to mocha, dropping expresso, for unit tests
 
+
+
+2013-01-09:
+- logging stuff goes in lib/logging.js
+- makelogrouter creates log routing - enables filtering of logs
+- test/logging.test.js runs under mocha
+
