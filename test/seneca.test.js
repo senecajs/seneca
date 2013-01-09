@@ -1,21 +1,22 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
-var common   = require('../lib/common');
-var seneca   = require('../lib/seneca');
+"use strict";
+
+var common   = require('../lib/common')
+var seneca   = require('../lib/seneca')
 
 
 var eyes    = common.eyes
-var assert  = common.assert
+var assert  = require('chai').assert
 var gex     = common.gex
 
 
 var logger = require('./logassert')
 
 
-module.exports = {
+describe('seneca', function(){
 
-
-  quick: function(){
+  it('quick', function(){
     var si = seneca()
     si.use(function quickplugin(si,opts,cb){
       si.add({a:1},function(args,cb){cb(null,{b:2})})
@@ -24,10 +25,10 @@ module.exports = {
     si.act({a:1},function(err,out){
       assert.equal(out.b,2)
     })
-  },
+  })
 
 
-  failgen: function() {
+  it('failgen', function() {
 
     try {
       var i = 0
@@ -252,11 +253,11 @@ module.exports = {
 
       assert.equal('abcde',cblog)
     })
-  },
+  })
 
 
 
-  register: function() {
+  it('register', function() {
     seneca({},function(err,si){
       var initfn = function(){}
       var emptycb = function(){}
@@ -292,11 +293,11 @@ module.exports = {
       }
 
     })
-  },
+  })
 
 
 
-  logging: function() {
+  it('logging', function() {
     var log = logger([
       ['init','start'],
       ['register'],
@@ -345,11 +346,11 @@ module.exports = {
         assert.equal(13,log.index())
       }
     )
-  },
+  })
 
 
 
-  action: function() {
+  it('action', function() {
     var log = logger([
       [],[],[],[], [],[],[],[],[],[], [],[],[],
       ['act','in'],
@@ -383,11 +384,11 @@ module.exports = {
         })
       }
     )
-  },
+  })
 
 
 
-  plugins: function() {
+  it('plugins', function() {
 
     seneca({plugins:['echo']},function(err,seneca){
       assert.isNull(err)
@@ -510,7 +511,7 @@ module.exports = {
     )
 
 
-
+    /* breaks Mocha
     // loading a fake module: node_modules/mock3
     seneca(
       {plugins:['mock3']},
@@ -522,10 +523,11 @@ module.exports = {
         })
       }
     )
-  },
+    */
+  })
 
 
-  pin: function() {
+  it('pin', function() {
     seneca(
       {},//{log:'print'},
       function(err,si){
@@ -552,9 +554,10 @@ module.exports = {
         api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
       }
     )
-  },
+  })
 
-  compose: function() {
+
+  it('compose', function() {
     var si = seneca({log:'print'})   
 
     si.add({A:1},function(args,cb){
@@ -582,5 +585,6 @@ module.exports = {
     })
     si.compose({G:1},[{A:1,modify$:function(res,args){res.y=res.x,res.z=args.z}},{F:1}])
     si.act({G:1,z:3},function(e,r){assert.equal(r.y,5)})
-  }
-}
+  })
+
+})

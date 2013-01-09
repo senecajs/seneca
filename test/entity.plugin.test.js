@@ -1,97 +1,18 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
-var common   = require('../lib/common');
-var seneca   = require('../lib/seneca');
+"use strict";
 
-var eyes    = common.eyes
-var assert  = common.assert
+var common   = require('../lib/common')
+var seneca   = require('..')
+
+var assert  = require('chai').assert
 var gex     = common.gex
 
-var logger = require('./logassert')
 
+describe('entity.plugin', function() {
 
-module.exports = {
-
-/*
-  mem: function() {
-    try {
-      seneca(
-        {plugins:['mem-store']},
-        function(err,si){
-          assert.isNull(err)
-
-          var entity = si.make('ten','base',null)
-          var ent = entity.make$('ent',{p1:'v1'})
-          ent.p2 = 100;
-          
-          ;ent.save$( function(err,ent) {
-            assert.isNull(err)
-            assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+ent), ''+ent )
-
-
-            ;ent.load$( {id:ent.id}, function(err,entR) {
-              assert.isNull(err)
-              assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+entR) )
-              var ent1 = entR
-
-
-              ent = entity.make$('ent',{p1:'v1'})
-              ent.p3 = true
-              ;ent.save$( function(err,ent) {
-                assert.isNull(err)
-                assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+ent) )
-
-
-                ;ent.load$( {id:ent.id}, function(err,entR) {
-                  assert.isNull(err)
-                  assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+entR) )
-                  var ent2 = entR
-
-
-                  ;ent.list$( {p1:'v1'}, function(err,list) {
-                    assert.isNull(err)
-                    assert.equal(2,list.length)
-                    assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-                    assert.ok( gex('ten/base/ent:{id=*;p1=v1;p3=true}').on(''+list[1]) )
-
-                    ;ent.list$( {p2:100}, function(err,list) {
-                      assert.isNull(err)
-                      assert.equal(1,list.length)
-                      assert.ok( gex('ten/base/ent:{id=*;p1=v1;p2=100}').on(''+list[0]) )
-
-                      
-                      ;ent.remove$( {p1:'v1',all$:true}, function(err) {
-                        assert.isNull(err)
-
-                        ;ent.list$( {p1:'v1'}, function(err,list) {
-                          assert.isNull(err)
-                          assert.equal(0,list.length)
-
-                          console.log('DONE')
-
-                        }) // list
-                      }) //remove
-
-                    }) // list
-                  }) // list
-
-                }) // load
-              }) // save
-
-            }) // load
-          }) // save
-        }
-      )
-    }
-    catch(e) {
-      eyes.inspect(e)
-      throw e
-    }
-  },
-*/
-
-  multi: function() {
-    seneca(
+  it('multi', function() {
+    var si = seneca(
       {plugins:[
 
         {name:'mem-store',opts:{
@@ -178,71 +99,7 @@ module.exports = {
         }) })  }) })  }) })  }) })
       }
     )
-  },
 
-/*
-  noop: function() {
-    try {
-      seneca(
-        {plugins:['noop-store']},
-        function(err,si){
-          assert.isNull(err)
+  })
 
-          var entity = si.make('zone','base','name')
-          var ent = entity.make$('ent',{p1:'v1'})
-          ent.p2 = 100;
-          
-          ;ent.save$( function(err,ent) {
-            assert.isNull(err)
-
-
-            ;ent.load$( {id:ent.id}, function(err,entR) {
-              assert.isNull(err)
-
-              ent = entity.make$('ent',{p1:'v1'})
-              ent.p3 = true
-
-              ;ent.save$( function(err,ent) {
-                assert.isNull(err)
-
-                ;ent.load$( {id:ent.id}, function(err,entR) {
-                  assert.isNull(err)
-
-                  ;ent.list$( {p1:'v1'}, function(err,list) {
-                    assert.isNull(err)
-
-                    ;ent.list$( {p2:100}, function(err,list) {
-                      assert.isNull(err)
-                      
-                      ;ent.remove$( {p1:'v1'}, function(err) {
-                        assert.isNull(err)
-
-                        ;ent.list$( {p1:'v1'}, function(err,list) {
-                          assert.isNull(err)
-
-                          console.log('DONE')
-
-                        }) // list
-                      }) //remove
-
-                    }) // list
-                  }) // list
-
-                }) // load
-              }) // save
-
-            }) // load
-          }) // save
-        }
-      )
-    }
-    catch(e) {
-      eyes.inspect(e)
-      throw e
-    }
-  },
-*/
-
-  
-  
-}
+})

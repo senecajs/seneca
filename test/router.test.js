@@ -1,20 +1,21 @@
-/* Copyright (c) 2012 Richard Rodger */
+/* Copyright (c) 2012-2013 Richard Rodger */
+
+"use strict";
+
+var common = require('../lib/common')
+var router = require('../lib/router')
 
 
-var common   = require('../lib/common')
-var router  = require('../lib/router')
-
-
-var assert = common.assert
+var assert = require('chai').assert
 var eyes   = common.eyes
 
 var Router = router.Router
 
 
 
-module.exports = {
+describe('router', function() {
 
-  basic: function() {
+  it('basic', function() {
     var rt1 = new Router()
     
     rt1.add( {p1:'v1'}, 'r1' )
@@ -38,10 +39,10 @@ module.exports = {
     assert.equal('r4',rt1.find({p1:'v1',p3:'v4'}))
     assert.equal('r1x',rt1.find({p1:'v1',p3:'v5'}))
     assert.equal(null,rt1.find({p2:'v1'}))
-  },
+  })
 
 
-  culdesac: function() {
+  it('culdesac', function() {
     var rt1 = new Router()
     
     rt1.add( {p1:'v1'}, 'r1' )
@@ -50,10 +51,10 @@ module.exports = {
 
     assert.equal('r1',rt1.find({p1:'v1',p2:'x'}))
     assert.equal('r3',rt1.find({p1:'v1',p2:'x',p3:'v3'}))
-  },
+  }),
 
 
-  findall: function() {
+  it('findall', function() {
     var rt1 = new Router()
     
     rt1.add( {p1:'v1'}, 'r0' )
@@ -79,6 +80,6 @@ module.exports = {
     found = rt1.findall({p1:'v1',p2:'*',p3:'v3a'})
     //require('eyes').inspect(found)
     assert.equal('[{"match":{"p1":"v1","p2":"v2c","p3":"v3a"},"data":"r3a"}]',JSON.stringify(found))
-  }
+  })
   
-}
+})

@@ -1,8 +1,15 @@
+/* Copyright (c) 2010-2013 Richard Rodger */
+
 "use strict";
 
-var assert = require('assert')
-var util   = require('util')
+var common = require('../lib/common')
+
+var assert = common.assert
+var _      = common._
+var util   = common.util
+
 var seneca = require('..')
+
 
 describe('seneca.util', function() {
   var si = seneca()

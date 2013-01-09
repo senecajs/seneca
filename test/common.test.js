@@ -1,19 +1,20 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
-var common   = require('../lib/common')
+"use strict";
 
-var eyes    = common.eyes
-var assert  = common.assert
-var _       = common._
-var gex     = common.gex
+var common = require('../lib/common')
+
+var assert = common.assert
+var _      = common._
 
 
-module.exports = {
-  underscore: function() {
+describe('common', function(){
+  it('underscore.require', function(){
     var s = '';
     _.times(2,function(){
       s+='a'
     })
     assert.equal('aa',s)
-  }
-}
+  })
+})
+
