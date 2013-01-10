@@ -35,7 +35,7 @@ module.exports = function admin( si,opts,cb ) {
 
     client.on('data', function(data){
       var msg = JSON.parse(data)
-      console.dir(msg)
+      //console.dir(msg)
 
       if( msg.oldroute ) {
         si.logroute(msg.oldroute)
