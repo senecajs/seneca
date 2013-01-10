@@ -1,30 +1,35 @@
 /* Copyright (c) 2010-2012 Ricebridge */
 
-var seneca   = require('../../lib/seneca.js')
-var common   = require('../../lib/common.js')
-
-var eyes    = common.eyes
-var assert  = common.assert
-var gex     = common.gex
+"use strict"
 
 
+var events = require('events')
+
+var assert = require('chai').assert
+
+var seneca = require('../..')
 
 
-// echo is really a test of the plugin system
-module.exports = {
-  
-  echo: function() {
-    var si = seneca({log:'print',plugins:['echo']})
+
+describe('plugin.echo', function() {
+
+  it('happy', function() {
+    var si = seneca({log:{map:[{type:'init',handler:seneca.loghandler.stream(process.stdout)}]}})
+    si.use('echo')
 
     si.act({role:'echo',baz:'bax'},function(err,out){
       assert.isNull(err)
       assert.equal(''+{baz:'bax'},''+out)
       //console.dir(out)
     })
-  },
+  })
+  
+  
+  it('options', function() {
+    var printevents = new events.EventEmitter()
+    printevents.on('log',function(data){ console.log(data) })
 
-  echo_options: function() {
-    var si = seneca({log:'print'})
+    var si = seneca({log:{map:[{type:'init',handler:seneca.loghandler.emitter(printevents)}]}})
     si.use('echo',{inject:{foo:'bar'}})
 
     si.act({role:'echo',baz:'bax'},function(err,out){
@@ -32,6 +37,5 @@ module.exports = {
       assert.equal(''+{baz:'bax',foo:'bar'},''+out)
       //console.dir(out)
     })
-  }
-  
-}
+  })
+})

@@ -1,7 +1,9 @@
 /* Copyright (c) 2010-2012 Richard Rodger */
 
-var common  = require('../common');
-var _       = common._;
+"use strict"
+
+
+var _ = require('underscore')
 
 
 module.exports = function echo( si,opts,cb ) {
