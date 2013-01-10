@@ -21,4 +21,5 @@
 - logging stuff goes in lib/logging.js
 - makelogrouter creates log routing - enables filtering of logs
 - test/logging.test.js runs under mocha
+- moved test/*.text.js to all run under mocha
 

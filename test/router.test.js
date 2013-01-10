@@ -81,5 +81,29 @@ describe('router', function() {
     //require('eyes').inspect(found)
     assert.equal('[{"match":{"p1":"v1","p2":"v2c","p3":"v3a"},"data":"r3a"}]',JSON.stringify(found))
   })
+
+  
+  it('remove', function(){
+    var rt1 = new Router()
+
+    rt1.add( {p1:'v1'}, 'r0' )
+    //console.log(''+rt1)
+    assert.equal('r0',rt1.find({p1:'v1'}))
+
+    rt1.remove( {p1:'v1'} )
+    //console.log(''+rt1)
+    assert.equal(null,rt1.find({p1:'v1'}))
+
+    rt1.add( {p2:'v2',p3:'v3'}, 'r1' )
+    rt1.add( {p2:'v2',p4:'v4'}, 'r2' )
+    assert.equal('r1',rt1.find({p2:'v2',p3:'v3'}))
+    assert.equal('r2',rt1.find({p2:'v2',p4:'v4'}))
+
+    rt1.remove( {p2:'v2',p3:'v3'} )
+    //console.log(''+rt1)
+    assert.equal(null,rt1.find({p2:'v2',p3:'v3'}))
+    assert.equal('r2',rt1.find({p2:'v2',p4:'v4'}))
+
+  })
   
 })

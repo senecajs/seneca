@@ -1,8 +1,8 @@
+/* Copyright (c) 2012 Richard Rodger, BSD License */
 
-var common = require('../common')
+"use strict";
 
-var _ = common._
-
+var _ = require('underscore')
 
 
 function Store() {

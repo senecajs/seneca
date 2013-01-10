@@ -1,12 +1,12 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
-var common  = require('../common')
+"use strict"
+
 var store   = require('./store')
 
-var util    = common.util;
-var assert  = common.assert;
-var _       = common._;
-var uuid    = common.uuid;
+var _       = require('underscore')
+var idgen   = require('idgen')
+var uuid    = require('node-uuid')
 
 
 function MemStore() {
@@ -15,7 +15,7 @@ function MemStore() {
 
   self.name = 'mem-store'
 
-  var mark = common.idgen(4)
+  var mark = idgen(4)
 
 
   var si

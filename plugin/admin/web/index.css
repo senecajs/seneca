@@ -1,0 +1,8 @@
+
+.updating {
+  height: 300px;
+  font: 10px courier;
+  border: 1px solid #999;
+  overflow: hidden;
+}
+

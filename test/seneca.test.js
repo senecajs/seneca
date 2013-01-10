@@ -296,7 +296,7 @@ describe('seneca', function(){
   })
 
 
-
+/* DELETE - OBSOLETE
   it('logging', function() {
     var log = logger([
       ['init','start'],
@@ -327,8 +327,6 @@ describe('seneca', function(){
         assert.equal(log.len,log.index())
       }
     )
-                
-
 
     try {
       seneca({logger:logger(['bad'])},function(){})
@@ -347,6 +345,8 @@ describe('seneca', function(){
       }
     )
   })
+*/
+
 
 
 
