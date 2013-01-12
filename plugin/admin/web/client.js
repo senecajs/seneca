@@ -1,24 +1,63 @@
 
 var app = {
+  
+  itemcount: 0,
+
+  init: function() {
+    app.loglist = $('#loglist')
+
+    var confurl = (/^(.*?)(\/)?(index\.html)?$/.exec(''+location.href))[1]+'/conf'
+    console.log(confurl)
+
+    $.get( confurl, function(data) {
+      app.conf = data
+      console.log(app.conf)
+      app.initsock()
+    })
+
+
+
+
+    $('#update').click(sendlogroute)
+  },
+
+  initsock: function() {
+    app.sock = new SockJS(app.conf.prefix+'/socket');
+
+    app.sock.onopen = function() {
+      app.sock.send( JSON.stringify({hello:true,token:app.conf.login}) )
+    }
+
+    app.sock.onmessage = function(e) {
+      console.log(e)
+      var msg = JSON.parse(e.data)
+      if( msg.hello ) {
+        sendlogroute()
+      }
+      else {
+        //app.loglist.prepend(.text(e.data))
+        var itemdiv = $('<div>').addClass('item').addClass(++app.itemcount%2?'rowA':'rowB')
+
+        var logstr = []
+        _.each(msg,function(val){
+          var valstr = _.isObject(val)?JSON.stringify(val):val
+          //var field = $('<div>').text(valstr)
+          //itemdiv.append(field)
+          logstr.push(valstr)
+        })
+        itemdiv.text(logstr.join('\t'))
+
+        app.loglist.prepend(itemdiv)
+        var numitems = app.loglist.children().length
+        if( 3 < numitems ) {
+          app.loglist.remove(app.loglist.children()[numitems-1])
+        }
+      }
+    }
+  }
 
 }
 
-$(function(){
-  var loglist = $('#loglist')
-
-  app.sock = new SockJS('/admin/socket');
-
-  app.sock.onopen = function() {
-    sendlogroute()
-  }
-
-  app.sock.onmessage = function(e) {
-    loglist.prepend($('<li>').text(e.data))
-  }
-
-
-  $('#update').click(sendlogroute)
-})
 
 
 function sendlogroute() {
@@ -34,9 +73,12 @@ function sendlogroute() {
     if( ''==val ) newroute[key]=undefined;
   })
 
-    console.log(newroute)
+  console.log(newroute)
 
-  var msg = {oldroute:app.logroute,newroute:newroute}
+  var msg = {token:app.conf.login,oldroute:app.logroute,newroute:newroute}
   app.sock.send( JSON.stringify(msg) )
   app.logroute = newroute
 }
+
+
+$(app.init)

@@ -1,24 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" href="bootstrap.min.css" />
   <link rel="stylesheet" href="index.css" />
   
   <script src="jquery.min.js"></script> 
+  <script src="bootstrap.min.js"></script> 
   <script src="underscore.min.js"></script>
   <script src="sockjs.min.js"></script>
   <script src="client.js"></script>
 </head>
 <body>
 
-<h3>Log</h3>
-level: <input id="level_in" value="all">
-type: <input id="type_in" value="plugin">
-plugin: <input id="plugin_in" value="">
-tag: <input id="tag_in" value="">
-<input id="update" type="button" value="update">
-<ul id="loglist" class="updating">
-</ul>
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">Seneca Admin</a>
+    </div>
+  </div>
+</div>
 
+
+
+<div class="container">
+<h3>Log</h3>
+
+<div class="row well">
+<form id="logspec" >
+
+<label>level:</label> 
+<input id="level_in" value="all">
+
+<label>type:</label> 
+<input id="type_in" value="plugin">
+
+<label>plugin:</label> 
+<input id="plugin_in" value="">
+
+<label>tag:</label> 
+<input id="tag_in" value="">
+
+<input id="update" type="button" value="update">
+</form>
+
+<div id="loglist" class="well">
+</div>
+
+</div>
+</div>
+</div>
 
 </body>
 </html>

@@ -1,9 +1,10 @@
 /* Copyright (c) 2010-2012 Richard Rodger */
 
 
-var connect = require('connect')
-var sockjs  = require('sockjs')
-var _       = require('underscore')
+var connect  = require('connect')
+var sockjs   = require('sockjs')
+var _        = require('underscore')
+
 
 
 var seneca  = require('../..')
@@ -37,11 +38,17 @@ module.exports = function admin( si,opts,cb ) {
       var msg = JSON.parse(data)
       //console.dir(msg)
 
-      if( msg.oldroute ) {
-        si.logroute(msg.oldroute)
+      if( msg.hello ) {
+        client.token = msg.token
+        client.write(JSON.stringify({hello:true}))
       }
-      if( msg.newroute ) {
-        si.logroute(msg.newroute,loghandler(client))
+      else if(client.token==msg.token) {
+        if( msg.oldroute ) {
+          si.logroute(msg.oldroute)
+        }
+        if( msg.newroute ) {
+          si.logroute(msg.newroute,loghandler(client))
+        }
       }
     })
   })
@@ -50,18 +57,32 @@ module.exports = function admin( si,opts,cb ) {
 
   socket.installHandlers(
     opts.server, 
-    {prefix:'/admin/socket'}
+    {prefix:opts.prefix+'/socket'}
   )
 
 
 
   var app = connect()
+  app.use(connect.json())
+  app.use(si.httprouter(function(app){
+    app.get('/conf',function(req,res){
+      res.send({
+        prefix: opts.prefix,
+        login: req.seneca && req.seneca.login && req.seneca.login.token
+      })
+    })
+  }))
   app.use(connect.static(__dirname+'/web'))
 
   cb( null, function(req,res,next){
     if( 0 == req.url.indexOf(opts.prefix) ) {
-      req.url = req.url.substring(opts.prefix.length)
-      app(req,res)
-    } else next();
+      if( req.seneca && req.seneca.user && req.seneca.user.admin ) {
+        req.url = req.url.substring(opts.prefix.length)
+        app(req,res)
+        return
+      }
+    }
+    next()
   })
+
 }
