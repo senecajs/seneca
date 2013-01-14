@@ -2,11 +2,13 @@
 
 "use strict"
 
+
 var store   = require('./store')
 
 var _       = require('underscore')
 var idgen   = require('idgen')
 var uuid    = require('node-uuid')
+
 
 
 function MemStore() {
