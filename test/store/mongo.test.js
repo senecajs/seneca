@@ -1,42 +1,45 @@
 /* Copyright (c) 2010-2012 Richard Rodger */
 
-var common   = require('../../lib/common')
-var seneca   = require('../../lib/seneca')
-var shared   = require('./shared')
+"use strict";
 
 
-var assert  = common.assert
-var eyes    = common.eyes
-var async   = common.async
+var seneca   = require('../..')
+
+var shared = seneca.test.store.shared
 
 
-var config = 
-{ log:'print',
-  plugins:[
-    { name:'mongo-store', 
-      opts:{
-        name:'senecatest',
-        host:'127.0.0.1',
-        port:27017
-      } 
-    }
-  ]
-}
 
+var si = seneca()
+si.use('mongo-store',{
+  name:'senecatest',
+  host:'127.0.0.1',
+  port:27017
+})
 
-var si = seneca(config)
 si.__testcount = 0
 var testcount = 0
 
-module.exports = {
-  basictest: (testcount++, shared.basictest(si)),
-  extratest: (testcount++, extratest(si)),
-  closetest: shared.closetest(si,testcount)
-}
+
+describe('mongo', function(){
+  it('basic', function(done){
+    testcount++
+    shared.basictest(si,done)
+  })
+
+  it('extra', function(done){
+    testcount++
+    extratest(si,done)
+  })
+
+  it('close', function(done){
+    shared.closetest(si,testcount,done)
+  })
+})
 
 
 
-function extratest(si) {
+function extratest(si,done) {
   console.log('EXTRA')
   si.__testcount++
+  done && done()
 }

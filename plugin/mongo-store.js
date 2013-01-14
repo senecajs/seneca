@@ -1,14 +1,13 @@
 /* Copyright (c) 2010-2012 Richard Rodger */
 
+"use strict";
 
-var mongo  = require('mongodb')
 
-var common  = require('../common')
 var store   = require('./store')
 
+var mongo  = require('mongodb')
+var idgen  = require('idgen')
 
-var util    = common.util
-var assert  = common.assert
 
 
 var MIN_WAIT = 16
@@ -31,8 +30,10 @@ function MongoStore() {
   var self   = new store.Store()
   var parent = self.parent()
 
-  var mark = common.idgen(4)
+  var mark = idgen(4)
+  
 
+  var si, opts
 
   self.name = 'mongo'
 
@@ -45,8 +46,8 @@ function MongoStore() {
 
   function error(args,err,cb) {
     if( err ) {
-      seneca.log(args.tag$,'error: '+err)
-      seneca.fail({code:'entity/error',store:self.name},cb)
+      si.log.debug(args.tag$,'error: '+err)
+      si.fail({code:'entity/error',store:self.name},cb)
 
       if( 'ECONNREFUSED'==err.code || 'notConnected'==err.message ) {
         if( MIN_WAIT == self.waitmillis ) {
@@ -63,17 +64,17 @@ function MongoStore() {
 
 
   function reconnect(args) {
-    seneca.log(args.tag$,'attempting db reconnect')
+    si.log.debug(args.tag$,'attempting db reconnect')
 
     self.configure(self.spec, function(err,me){
       if( err ) {
-        seneca.log(args.tag$,'db reconnect (wait '+self.waitmillis+'ms) failed: '+err)
+        si.log.debug(args.tag$,'db reconnect (wait '+self.waitmillis+'ms) failed: '+err)
         self.waitmillis = Math.min(2*self.waitmillis,MAX_WAIT)
         setTimeout( function(){reconnect(args)}, self.waitmillis )
       }
       else {
         self.waitmillis = MIN_WAIT
-        seneca.log(args.tag$,'reconnect ok')
+        si.log.debug(args.tag$,'reconnect ok')
       }
     })
   }
@@ -84,18 +85,19 @@ function MongoStore() {
   }
 
 
-  self.init = function(si,opts,cb) {
-    parent.init(si,opts,function(err,canondesc){
+  self.init = function(seneca,options,cb) {
+    parent.init(seneca,options,function(err,canondesc){
       if( err ) return cb(err);
       mark = canondesc+'~'+mark
 
       // TODO: parambulator check on opts
 
-      seneca = si
+      opts = options
+      si = seneca
 
       self.configure(opts,function(err){
         if( err ) {
-          return seneca.fail({code:'entity',store:self.name,error:err},cb)
+          return si.fail({code:'entity',store:self.name,error:err},cb)
         } 
         else cb();
       })
@@ -151,29 +153,24 @@ function MongoStore() {
 
     // FIX: error reporting sucks on login fail
     self.dbinst.open(function(err){
-      console.log(err)
-
       if( !error({tag$:'init'},err,cb) ) {
         self.waitmillis = MIN_WAIT
 
         if( conf.username ) {
-          console.log('auth')
 
           self.dbinst.authenticate(conf.username,conf.password,function(err){
-            console.log(err)
-
             // do not attempt reconnect on auth error
             if( err) {
               cb(err)
             }
             else {
-              seneca.log({tag$:'init'},'db open and authed for '+conf.username)
+              si.log.debug({tag$:'init'},'db open and authed for '+conf.username)
               cb(null,self)
             }
           })
         }
         else {
-          seneca.log({tag$:'init'},'db open')
+          si.log.debug({tag$:'init'},'db open')
           cb(null,self)
         }
       }
@@ -205,7 +202,7 @@ function MongoStore() {
         if( update ) {
           coll.update({_id:makeid(ent.id)},entp,{upsert:true},function(err,update){
             if( !error(args,err,cb) ) {
-              seneca.log(args.tag$,'save/update',ent,mark)
+              si.log.debug(args.tag$,'save/update',ent,mark)
               cb(null,ent)
             }
           })
@@ -215,7 +212,7 @@ function MongoStore() {
             if( !error(args,err,cb) ) {
               ent.id = inserts[0]._id.toHexString()
 
-              seneca.log(args.tag$,'save/insert',ent,mark)
+              si.log.debug(args.tag$,'save/insert',ent,mark)
               cb(null,ent)
             }
           })
@@ -244,7 +241,7 @@ function MongoStore() {
               fent = qent.make$(entp);
             }
 
-            seneca.log(args.tag$,'load',fent,mark)
+            si.log.debug(args.tag$,'load',fent,mark)
             cb(null,fent);
           }
         });
@@ -279,7 +276,7 @@ function MongoStore() {
                   list.push(fent)
                 }
                 else {
-                  seneca.log(args.tag$,'list',list.length,list[0],mark)
+                  si.log.debug(args.tag$,'list',list.length,list[0],mark)
                   cb(null,list)
                 }
               }
