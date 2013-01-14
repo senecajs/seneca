@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012 Ricebridge */
+/* Copyright (c) 2010-2013 Ricebridge */
 
 "use strict"
 
@@ -20,7 +20,6 @@ describe('plugin.echo', function() {
     si.act({role:'echo',baz:'bax'},function(err,out){
       assert.isNull(err)
       assert.equal(''+{baz:'bax'},''+out)
-      //console.dir(out)
     })
   })
   
@@ -35,7 +34,6 @@ describe('plugin.echo', function() {
     si.act({role:'echo',baz:'bax'},function(err,out){
       assert.isNull(err)
       assert.equal(''+{baz:'bax',foo:'bar'},''+out)
-      //console.dir(out)
     })
   })
 })

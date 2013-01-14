@@ -23,3 +23,9 @@
 - test/logging.test.js runs under mocha
 - moved test/*.text.js to all run under mocha
 
+
+2013-01-11
+- fixed router bugs
+
+2013-01-14
+- updated store tests to use mocha

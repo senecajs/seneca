@@ -1,28 +1,27 @@
-/* Copyright (c) 2010-2012 Ricebridge */
-
-var seneca   = require('../../lib/seneca.js')
-var common   = require('../../lib/common.js')
+/* Copyright (c) 2010-2013 Ricebridge */
 
 
-var eyes    = common.eyes
-var assert  = common.assert
-var gex     = common.gex
+"use strict";
+
+var assert = require('chai').assert
+
+var seneca = require('../..')
 
 
+var si = seneca()
+si.use('util')
 
 
+var util = si.pin({role:'util',cmd:'*'})
 
 
-module.exports = {
-  
-  quickcode: function() {
-    var si = seneca({log:'print',plugins:['util']})
+describe('util', function() {
 
-    si.act({role:'util',cmd:'quickcode'},function(err,code){
+  it('quickcode', function() {
+    util.quickcode({},function(err,code){
       assert.isNull(err)
       assert.equal( 8, code.length )
       assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
     })
-  }
-  
-}
+  })
+})
