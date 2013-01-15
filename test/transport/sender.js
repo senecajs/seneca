@@ -1,17 +1,17 @@
 
-var seneca = require('../../lib/seneca');
+var seneca = require('../..')
 
-var si = seneca({})
+var si = seneca()
+
 
 si.use('transport',{
-  pins: [
-    { on:'echo' },
-  }] 
+  pins: [{ role:'echo' }] 
 })
 
 
 
-si.act({on:'echo',foo:111},function(err,res){
-  console.log('SENDER ECHO: '+err+JSON.stringify(res))
+si.act({role:'echo',foo:111},function(err,res){
+  if( err ) { console.log(err) }
+  console.log('SENDER ECHO: '+JSON.stringify(res))
 })
 

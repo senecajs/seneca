@@ -2,17 +2,12 @@
 
 "use strict";
 
-var common  = require('../common');
+var url     = require('url')
+var buffer  = require('buffer')
 
-var eyes    = common.eyes;
-var util    = common.util;
-var assert  = common.assert;
-var url     = common.url;
-var buffer  = common.buffer;
-
-var _         = common._;
-var httpproxy = common.httpproxy;
-var request   = common.request;
+var _         = require('underscore')
+var httpproxy = require('http-proxy')
+var request   = require('request')
 
 
 function TransportPlugin() {
@@ -24,23 +19,26 @@ function TransportPlugin() {
 
 
   self.send = function( args, cb ) {
+    si.log.debug(args.tag$,opts.endpoint,args)
 
-    // make http post to end point
-    request.post({url:opts.endpoint,json:args.args},function(err,response){
+    request.post({url:opts.remoteurl,json:args.args},function(err,response){
+      si.log.debug(args.tag$,err,response.body)
 
-      // call cb
+      if( err ) return cb(err)
+
       cb(null, response.body)
     })
   }
 
 
 
-  self.init = function(init_si,init_opts,cb){
-    si = init_si
+  self.init = function(seneca,options,cb){
+    si = seneca
 
     opts = _.extend({
-      endpoint:'http://127.0.0.1:10171/transport'
-    },init_opts)
+      remoteurl:'http://127.0.0.1:10171/transport',
+      localpath:'/transport'
+    },options)
 
 
     si.add({role:self.name,cmd:'send'},self.send)
@@ -53,11 +51,12 @@ function TransportPlugin() {
       })
     } 
 
-    var endpointurl = url.parse(opts.endpoint)
+    // forward requests you can't handle
+    var remoteurl = url.parse(opts.remoteurl)
     proxy = new httpproxy.HttpProxy({
       target: {
-        host: endpointurl.hostname, 
-        port: endpointurl.port
+        host: remoteurl.hostname, 
+        port: remoteurl.port
       }
     })
 
@@ -68,7 +67,7 @@ function TransportPlugin() {
 
   self.service = function() {
     return function(req,res,next){
-      if( 0 == req.url.indexOf('/transport') ) {
+      if( 0 == req.url.indexOf( opts.localpath ) ) {
 
         var args = _.extend(
           {},
@@ -77,6 +76,7 @@ function TransportPlugin() {
           req.params?req.params:{}
         )
 
+        si.log.debug(opts.localpath,args)
         si.act(args,function(err,result){
           if( err ) {
             res.writeHead(500)
@@ -99,11 +99,12 @@ function TransportPlugin() {
         })
       }
       else {
-        var found = !!_.filter( opts.prefixes || [], function(prefix){
+        var found = _.filter( opts.prefixes || [], function(prefix){
           return 0 == req.url.indexOf(prefix)
         })[0]
 
         if( found ) {
+          si.log.debug('proxy',found)
           proxy.proxyRequest(req, res)
         }
         else return next();
