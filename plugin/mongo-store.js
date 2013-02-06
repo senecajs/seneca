@@ -1,12 +1,15 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
 "use strict";
 
 
-var store   = require('./store')
+// MOVE TO OWN MODULE
 
-var mongo  = require('mongodb')
-var idgen  = require('idgen')
+
+var _     = require('underscore')
+var mongo = require('mongodb')
+var idgen = require('idgen')
+
 
 
 
@@ -24,34 +27,28 @@ function makeid(hexstr) {
 }
 
 
-// TODO: fails need to include tag - as per mysql
 
-function MongoStore() {
-  var self   = new store.Store()
-  var parent = self.parent()
-
-  var mark = idgen(4)
-  
-
-  var si, opts
-
-  self.name = 'mongo'
+module.exports = function(seneca,opts,cb) {
+  var desc
 
 
-  // TODO: make private?
-  self.waitmillis = MIN_WAIT
-  self.dbinst     = null
-  self.collmap    = {}
+  opts.minwait = opts.minwait || MIN_WAIT
+  opts.maxwait = opts.maxwait || MAX_WAIT
+
+  var minwait
+  var dbinst     = null
+  var collmap    = {}
+
 
 
   function error(args,err,cb) {
     if( err ) {
-      si.log.debug(args.tag$,'error: '+err)
-      si.fail({code:'entity/error',store:self.name},cb)
+      seneca.log.debug(args.tag$,'error: '+err)
+      seneca.fail({code:'entity/error',store:name},cb)
 
       if( 'ECONNREFUSED'==err.code || 'notConnected'==err.message ) {
-        if( MIN_WAIT == self.waitmillis ) {
-          self.collmap = {}
+        if( minwait = opts.minwait ) {
+          collmap = {}
           reconnect(args)
         }
       }
@@ -64,50 +61,24 @@ function MongoStore() {
 
 
   function reconnect(args) {
-    si.log.debug(args.tag$,'attempting db reconnect')
+    seneca.log.debug(args.tag$,'attempting db reconnect')
 
-    self.configure(self.spec, function(err,me){
+    configure(spec, function(err){
       if( err ) {
-        si.log.debug(args.tag$,'db reconnect (wait '+self.waitmillis+'ms) failed: '+err)
-        self.waitmillis = Math.min(2*self.waitmillis,MAX_WAIT)
-        setTimeout( function(){reconnect(args)}, self.waitmillis )
+        seneca.log.debug(args.tag$,'db reconnect (wait '+opts.minwait+'ms) failed: '+err)
+        minwait = Math.min(2*minwait,opts.maxwait)
+        setTimeout( function(){reconnect(args)}, minwait )
       }
       else {
-        self.waitmillis = MIN_WAIT
-        si.log.debug(args.tag$,'reconnect ok')
+        minwait = opts.minwait
+        seneca.log.debug(args.tag$,'reconnect ok')
       }
     })
   }
 
 
-  self.db = function() {
-    return self.dbinst;
-  }
-
-
-  self.init = function(seneca,options,cb) {
-    parent.init(seneca,options,function(err,canondesc){
-      if( err ) return cb(err);
-      mark = canondesc+'~'+mark
-
-      // TODO: parambulator check on opts
-
-      opts = options
-      si = seneca
-
-      self.configure(opts,function(err){
-        if( err ) {
-          return si.fail({code:'entity',store:self.name,error:err},cb)
-        } 
-        else cb();
-      })
-    })
-  }
-
-
-
-  self.configure = function(spec,cb) {
-    self.spec = spec
+  function configure(spec,cb) {
+    spec = spec
 
     var conf = 'string' == typeof(spec) ? null : spec
 
@@ -135,12 +106,12 @@ function MongoStore() {
 	rservs.push(new mongo.Server(servconf.host,servconf.port,{native_parser:false,auto_reconnect:true}))
       }
       var rset = new mongo.ReplSetServers(rservs)
-      self.dbinst = new mongo.Db(
+      dbinst = new mongo.Db(
 	conf.name, rset
       )
     }
     else {
-      self.dbinst = new mongo.Db(
+      dbinst = new mongo.Db(
         conf.name,
         new mongo.Server(
           conf.host || conf.server, 
@@ -152,232 +123,263 @@ function MongoStore() {
     }
 
     // FIX: error reporting sucks on login fail
-    self.dbinst.open(function(err){
+    dbinst.open(function(err){
       if( !error({tag$:'init'},err,cb) ) {
-        self.waitmillis = MIN_WAIT
+        minwait = MIN_WAIT
 
         if( conf.username ) {
 
-          self.dbinst.authenticate(conf.username,conf.password,function(err){
+          dbinst.authenticate(conf.username,conf.password,function(err){
             // do not attempt reconnect on auth error
             if( err) {
               cb(err)
             }
             else {
-              si.log.debug({tag$:'init'},'db open and authed for '+conf.username)
-              cb(null,self)
+              seneca.log.debug({tag$:'init'},'db open and authed for '+conf.username)
+              cb(null)
             }
           })
         }
         else {
-          si.log.debug({tag$:'init'},'db open')
-          cb(null,self)
+          seneca.log.debug({tag$:'init'},'db open')
+          cb(null)
         }
       }
     });
   }
 
 
-  self.close$ = function(cb) {
-    if(self.dbinst) {
-      self.dbinst.close(cb)
-    }
-  }
-
-  
-  self.save$ = function(args,cb) {
-    var ent = args.ent    
-
-    var update = !!ent.id;
-
-    getcoll(args,ent,function(err,coll){
-      if( !error(args,err,cb) ) {
-        var entp = {};
-
-        var fields = ent.fields$()
-        fields.forEach( function(field) {
-          entp[field] = ent[field]
-        })
-
-        if( update ) {
-          coll.update({_id:makeid(ent.id)},entp,{upsert:true},function(err,update){
-            if( !error(args,err,cb) ) {
-              si.log.debug(args.tag$,'save/update',ent,mark)
-              cb(null,ent)
-            }
-          })
-        }
-        else {
-          coll.insert(entp,function(err,inserts){
-            if( !error(args,err,cb) ) {
-              ent.id = inserts[0]._id.toHexString()
-
-              si.log.debug(args.tag$,'save/insert',ent,mark)
-              cb(null,ent)
-            }
-          })
-        }
-      }
-    })
-  }
-
-
-  self.load$ = function(args,cb) {
-    var qent = args.qent
-    var q    = args.q
-
-    getcoll(args,qent,function(err,coll){
-      if( !error(args,err,cb) ) {
-        var mq = metaquery(qent,q)
-        var qq = fixquery(qent,q)
-
-        coll.findOne(qq,mq,function(err,entp){
-          if( !error(args,err,cb) ) {
-            var fent = null;
-            if( entp ) {
-              entp.id = entp._id.toHexString();
-              delete entp._id;
-
-              fent = qent.make$(entp);
-            }
-
-            si.log.debug(args.tag$,'load',fent,mark)
-            cb(null,fent);
-          }
-        });
-      }
-    })
-  }
-
-
-  self.list$ = function(args,cb) {
-    var qent = args.qent
-    var q    = args.q
-
-    getcoll(args,qent,function(err,coll){
-      if( !error(args,err,cb) ) {
-        var mq = metaquery(qent,q)
-        var qq = fixquery(qent,q)
-
-        coll.find(qq,mq,function(err,cur){
-          if( !error(args,err,cb) ) {
-            var list = []
-
-            cur.each(function(err,entp){
-              if( !error(args,err,cb) ) {
-                if( entp ) {
-                  var fent = null;
-                  if( entp ) {
-                    entp.id = entp._id.toHexString();
-                    delete entp._id;
-
-                    fent = qent.make$(entp);
-                  }
-                  list.push(fent)
-                }
-                else {
-                  si.log.debug(args.tag$,'list',list.length,list[0],mark)
-                  cb(null,list)
-                }
-              }
-            })
-          }
-        })
-      }
-    })
-  }
-
-
-  self.remove$ = function(args,cb) {
-    var qent = args.qent
-    var q    = args.q
-
-    getcoll(args,qent,function(err,coll){
-      if( !error(args,err,cb) ) {
-        var qq = fixquery(qent,q)        
-
-        if( q.all$ ) {
-          coll.remove(qq,function(err){
-            cb(err)
-          })
-        }
-        else {
-          var mq = metaquery(qent,q)
-          coll.findOne(qq,mq,function(err,entp){
-            if( !error(args,err,cb) ) {
-              if( entp ) {
-                coll.remove({_id:entp._id},function(err){
-                  cb(err)
-                })
-              }
-              else cb(null)
-            }
-          })
-        }
-      }
-    })
-  }
-
-
-  var fixquery = function(qent,q) {
-    var qq = {};
-    for( var qp in q ) {
-      if( !qp.match(/\$$/) ) {
-        qq[qp] = q[qp]
-      }
-    }
-    if( qq.id ) {
-      qq._id = makeid(qq.id)
-      delete qq.id
-    }
-
-    return qq
-  }
-
-
-  var metaquery = function(qent,q) {
-    var mq = {}
-
-    if( q.sort$ ) {
-      for( var sf in q.sort$ ) break;
-      var sd = q.sort$[sf] < 0 ? 'descending' : 'ascending'
-      mq.sort = [[sf,sd]]
-    }
-
-    if( q.limit$ ) {
-      mq.limit = q.limit$
-    }
-
-    if( q.fields$ ) {
-      mq.fields = q.fields$
-    }
-
-    return mq
-  }
-
-
-  var getcoll = function(args,ent,cb) {
+  function getcoll(args,ent,cb) {
     var canon = ent.canon$({object:true})
 
     var collname = (canon.base?canon.base+'_':'')+canon.name
 
-    if( !self.collmap[collname] ) {
-      self.dbinst.collection(collname, function(err,coll){
+    if( !collmap[collname] ) {
+      dbinst.collection(collname, function(err,coll){
         if( !error(args,err,cb) ) {
-          self.collmap[collname] = coll
+          collmap[collname] = coll
           cb(null,coll);
         }
-      });
+      })
     }
     else {
-      cb(null,self.collmap[collname])
+      cb(null,collmap[collname])
     }
   }
 
-  return self
+
+
+  var store = {
+
+    name: 'mongo-store',
+
+    close: function(cb) {
+      if(dbinst) {
+        dbinst.close(cb)
+      }
+    },
+
+    
+    save: function(args,cb) {
+      var ent = args.ent    
+
+      var update = !!ent.id;
+
+      getcoll(args,ent,function(err,coll){
+        if( !error(args,err,cb) ) {
+          var entp = {};
+
+          var fields = ent.fields$()
+          fields.forEach( function(field) {
+            entp[field] = ent[field]
+          })
+
+          if( update ) {
+            coll.update({_id:makeid(ent.id)},entp,{upsert:true},function(err,update){
+              if( !error(args,err,cb) ) {
+                seneca.log.debug(args.tag$,'save/update',ent,desc)
+                cb(null,ent)
+              }
+            })
+          }
+          else {
+            coll.insert(entp,function(err,inserts){
+              if( !error(args,err,cb) ) {
+                ent.id = inserts[0]._id.toHexString()
+
+                seneca.log.debug(args.tag$,'save/insert',ent,desc)
+                cb(null,ent)
+              }
+            })
+          }
+        }
+      })
+    },
+
+
+    load: function(args,cb) {
+      var qent = args.qent
+      var q    = args.q
+
+      getcoll(args,qent,function(err,coll){
+        if( !error(args,err,cb) ) {
+          var mq = metaquery(qent,q)
+          var qq = fixquery(qent,q)
+
+          coll.findOne(qq,mq,function(err,entp){
+            if( !error(args,err,cb) ) {
+              var fent = null;
+              if( entp ) {
+                entp.id = entp._id.toHexString();
+                delete entp._id;
+
+                fent = qent.make$(entp);
+              }
+
+              seneca.log.debug(args.tag$,'load',q,fent,desc)
+              cb(null,fent);
+            }
+          });
+        }
+      })
+    },
+
+
+    list: function(args,cb) {
+      var qent = args.qent
+      var q    = args.q
+
+      getcoll(args,qent,function(err,coll){
+        if( !error(args,err,cb) ) {
+          var mq = metaquery(qent,q)
+          var qq = fixquery(qent,q)
+
+          coll.find(qq,mq,function(err,cur){
+            if( !error(args,err,cb) ) {
+              var list = []
+
+              cur.each(function(err,entp){
+                if( !error(args,err,cb) ) {
+                  if( entp ) {
+                    var fent = null;
+                    if( entp ) {
+                      entp.id = entp._id.toHexString();
+                      delete entp._id;
+
+                      fent = qent.make$(entp);
+                    }
+                    list.push(fent)
+                  }
+                  else {
+                    seneca.log.debug(args.tag$,'list',q,list.length,list[0],desc)
+                    cb(null,list)
+                  }
+                }
+              })
+                }
+          })
+        }
+      })
+    },
+
+
+    remove: function(args,cb) {
+      var qent = args.qent
+      var q    = args.q
+
+      var all  = q.all$ // default false
+      var load  = _.isUndefined(q.load$) ? true : q.load$ // default true 
+
+      getcoll(args,qent,function(err,coll){
+        if( !error(args,err,cb) ) {
+          var qq = fixquery(qent,q)        
+
+          if( all ) {
+            coll.remove(qq,function(err){
+              seneca.log.debug(args.tag$,'remove/all',q,desc)
+              cb(err)
+            })
+          }
+          else {
+            var mq = metaquery(qent,q)
+            coll.findOne(qq,mq,function(err,entp){
+              if( !error(args,err,cb) ) {
+                if( entp ) {
+                  coll.remove({_id:entp._id},function(err){
+                    seneca.log.debug(args.tag$,'remove/one',q,entp,desc)
+
+                    var ent = load ? entp : null
+                    cb(err,ent)
+                  })
+                }
+                else cb(null)
+              }
+            })
+          }
+        }
+      })
+    }
+  }
+
+
+  seneca.util.initstore(seneca,opts,store,function(err,tag,description){
+    if( err ) return cb(err);
+
+    desc = description
+
+    configure(opts,function(err){
+      if( err ) {
+        return seneca.fail({code:'entity/configure',store:store.name,error:err},cb)
+      } 
+      else cb(null,{role:store.name,tag:tag});
+    })
+  })
 }
 
-exports.plugin = function() {
-  return new MongoStore()
+
+
+
+
+
+
+var fixquery = function(qent,q) {
+  var qq = {};
+  for( var qp in q ) {
+    if( !qp.match(/\$$/) ) {
+      qq[qp] = q[qp]
+    }
+  }
+  if( qq.id ) {
+    qq._id = makeid(qq.id)
+    delete qq.id
+  }
+
+  return qq
 }
+
+
+var metaquery = function(qent,q) {
+  var mq = {}
+
+  if( q.sort$ ) {
+    for( var sf in q.sort$ ) break;
+    var sd = q.sort$[sf] < 0 ? 'descending' : 'ascending'
+    mq.sort = [[sf,sd]]
+  }
+
+  if( q.limit$ ) {
+    mq.limit = q.limit$
+  }
+
+  if( q.fields$ ) {
+    mq.fields = q.fields$
+  }
+
+  return mq
+}
+
+
+
+
+
 

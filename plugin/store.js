@@ -1,8 +1,9 @@
-/* Copyright (c) 2012 Richard Rodger, BSD License */
+/* Copyright (c) 2012-2013 Richard Rodger, BSD License */
 
 "use strict";
 
-var _ = require('underscore')
+var _     = require('underscore')
+var idgen = require('idgen')
 
 
 function Store() {
@@ -10,13 +11,15 @@ function Store() {
 
   var allcmds = ['save','load','list','remove','close']
 
+  var si
 
-  /* opts.map = { canon: [acts] }
-   * 
+  /* opts.map = { canon: [cmds] }
+   * opts.idlen = length of instance id, default 6
    */
-  self.init = function(si,opts,cb) {
+  self.init = function(seneca,opts,cb) {
     // TODO: parambulator validation
 
+    si = seneca
     var entspecs = []
 
     if( opts.map ) {
@@ -32,7 +35,7 @@ function Store() {
       entspecs.push({canon:'//',cmds:allcmds})
     }
     
-    var canondesc = []
+    var canondesc = [idgen(opts.idlen||6)]
 
     for( var esI = 0; esI < entspecs.length; esI++ ) {
       var entspec = entspecs[esI]
@@ -41,7 +44,7 @@ function Store() {
       var m = /^(\w*)\/(\w*)\/(\w*)$/.exec(entspec.canon)
       var name = m[3], base = m[2], tenant = m[1]
 
-      // TODO: support base/name and name
+      // TODO: support base/name and name, error handling
 
       var entargs = {}
       name   && (entargs.name   = name)
@@ -62,6 +65,16 @@ function Store() {
     }
 
     cb(null,canondesc.join('~'))
+  }
+
+
+  self.error = function(code,args,err,cb) {
+    if( err ) {
+      si.log.debug(args.tag$,'error',err,args)
+      si.fail({code:code||'entity/error',store:self.name,error:err,args:args},cb)
+      return true
+    }
+    else return false;
   }
 
 

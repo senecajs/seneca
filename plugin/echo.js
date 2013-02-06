@@ -19,7 +19,7 @@ module.exports = function echo( si,opts,cb ) {
   })
 
 
-  cb( null, function(req,res,next){
+  cb( null, {service:function(req,res,next){
     if( 0 == req.url.indexOf('/echo') ) {
       res.writeHead(200)
       var content = req.url
@@ -31,5 +31,5 @@ module.exports = function echo( si,opts,cb ) {
       res.end(content)
     }
     else next();
-  })
+  }})
 }

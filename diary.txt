@@ -29,3 +29,19 @@
 
 2013-01-14
 - updated store tests to use mocha
+- updated transport plugin
+
+2013-02-01
+- list of refactorings for stores:
+  - canon - unique desc of zone/base/name/instanceid for each store instance, gen'd by Store
+
+2013-04-06
+- plugins now defined only by init function(seneca,opts,cb) - objects no longer supported
+- updated some plugins to this new structure
+- updated top level tests
+
+
+NEXT:
+- text db store as example for external store plugin reference standard test
+- seneca-verify repo to test github masters of plugins against lastest version
+

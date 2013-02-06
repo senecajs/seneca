@@ -7,28 +7,15 @@
 var _ = require('underscore')
 
 
-function ConnectPlugin() {
-  var self = {}
-  self.name = 'connect'
 
-  var si
 
-  self.init = function(seneca,opts,cb){
-    si = seneca
-
-    cb()
-  }
-
-  self.service = function(opts,cb) {
-    return function(req,res,next){
-      req.seneca = _.extend({},si)
+module.exports = function(seneca,opts,cb){
+  cb(null,{
+    service:function(req,res,next){
+      // new obj allows for req specific props
+      req.seneca = _.extend({},seneca)
       next()
     }
-  }
-
-  return self
+  })
 }
-
-
-module.exports = new ConnectPlugin()
 

@@ -28,8 +28,7 @@ describe('seneca', function(){
   })
 
 
-  it('failgen', function() {
-
+  it('failgen.afterinit', function() {
     try {
       var i = 0
       seneca({},function(err,si){
@@ -43,11 +42,13 @@ describe('seneca', function(){
       assert.equal('Seneca: after init 0',e.seneca.error.message)
       assert.equal('seneca/callback_exception',e.seneca.code)
     }
+  })
 
 
+  it('failgen.afterinit.plugins', function() {
     try {
       var i = 0
-      seneca({plugins:['error']},function(err,si){
+      seneca({plugins:['error-test']},function(err,si){
         assert.equal( 0, i )
         throw new Error('plugins after init '+(i++))
       })
@@ -58,22 +59,20 @@ describe('seneca', function(){
       assert.equal('seneca/callback_exception',e.seneca.code)
       assert.equal('Seneca: plugins after init 0',e.seneca.error.message)
     }
+  })
 
 
 
+  it('failgen.meta', function() {
     seneca({},function(err,si){
       assert.isNull(err)
-
       
       // nothing
-
       var err = si.fail()
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.message,'Seneca: unknown error.')
 
-
-      // just meta
 
       // unresolved code gets used as message
       err = si.fail('code1')
@@ -94,11 +93,14 @@ describe('seneca', function(){
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,2)
       assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
+    })
+  })
 
 
-
+  it('failgen.callbacks', function() {
+    seneca({},function(err,si){
+      assert.isNull(err)
       
-      // callbacks
       var cblog = ''
 
       si.fail(function(err){
@@ -144,9 +146,10 @@ describe('seneca', function(){
 
       assert.equal('abcdef',cblog)
     })
+  })
 
 
-
+  it('failgen.badplugin', function() {
     seneca({},function(err,si){
       assert.isNull(err)
 
@@ -156,7 +159,7 @@ describe('seneca', function(){
         assert.equal('Seneca: service(pluginname): unable to build service, unknown plugin name: not-a-plugin',e.message)
       }
 
-      try { si.plugin('not-a-plugin') } catch( e ) { 
+      try { si.findplugin('not-a-plugin') } catch( e ) { 
         assert.equal('seneca/plugin_unknown_plugin',e.seneca.code)
         assert.equal('not-a-plugin',e.seneca.pluginname)
         assert.equal('Seneca: service(pluginname): unknown plugin name: not-a-plugin',e.message)
@@ -171,22 +174,23 @@ describe('seneca', function(){
       } catch( e ) { console.log(e); assert.fail();}
 
     })
+  })
 
 
-
+  it('failgen.cmd', function() {
     try {
 
       var i = 0;
-      seneca({plugins:['echo','error']},function(err,si){
+      seneca({plugins:['echo','error-test']},function(err,si){
         assert.isNull(err)
         assert.equal(0,i)
 
-        si.act({on:'error'},function(err){
+        si.act({role:'error-test'},function(err){
           assert.isNull(err)
         })
 
         try {
-          si.act({on:'error'},function(err){
+          si.act({role:'error-test'},function(err){
             throw new Error('inside callback')
           })
           assert.fail()
@@ -206,17 +210,17 @@ describe('seneca', function(){
     }
 
 
-    seneca({plugins:['echo','error']},function(err,si){
+    seneca({plugins:['echo','error-test']},function(err,si){
       var cblog = ''
 
-      si.act({on:'error',how:'fail'},function(err){
+      si.act({role:'error-test',how:'fail'},function(err){
         //console.log('HOW-fail')
         //eyes.inspect(err)
         assert.equal('error_code1',err.seneca.code)
         cblog += 'a'
       })
 
-      si.act({on:'error',how:'msg'},function(err){
+      si.act({role:'error-test',how:'msg'},function(err){
         //console.log('HOW-msg')
         //eyes.inspect(err)
         assert.equal('an error message',err.seneca.code)
@@ -224,7 +228,7 @@ describe('seneca', function(){
         cblog += 'b'
       })
 
-      si.act({on:'error',how:'errobj'},function(err){
+      si.act({role:'error-test',how:'errobj'},function(err){
         //console.log('HOW-errobj')
         //eyes.inspect(err)
         assert.equal('unknown',err.seneca.code)
@@ -233,7 +237,7 @@ describe('seneca', function(){
       })
 
 
-      si.act({on:'error',how:'str'},function(err){
+      si.act({role:'error-test',how:'str'},function(err){
         //console.log('HOW-str')
         //eyes.inspect(err)
         assert.equal('a string error',err.seneca.code)
@@ -242,7 +246,7 @@ describe('seneca', function(){
       })
 
 
-      si.act({on:'error',how:'obj'},function(err){
+      si.act({role:'error-test',how:'obj'},function(err){
         //console.log('HOW-obj')
         //eyes.inspect(err)
         assert.equal('unknown',err.seneca.code)
@@ -263,12 +267,15 @@ describe('seneca', function(){
       var emptycb = function(){}
 
       try { si.register() } catch( e ) { 
-        assert.equal('seneca/register_no_callback',e.seneca.code)
+        //console.log(e)
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 
 
       try { si.register({}) } catch( e ) { 
-        assert.equal('seneca/register_no_callback',e.seneca.code)
+        //console.log(e)
+        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+        assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
       }
 
       try { si.register({},emptycb) } catch( e ) { 
@@ -281,12 +288,6 @@ describe('seneca', function(){
         assert.equal('seneca/register_invalid_plugin',e.seneca.code)
       }
 
-      try { si.register({name:'a',role:1,init:initfn},emptycb) } catch( e ) { 
-        eyes.inspect(e)
-        console.log(e)
-        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-      }
-
       try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
         //console.log(e)
         assert.equal('seneca/register_invalid_plugin',e.seneca.code)
@@ -296,72 +297,10 @@ describe('seneca', function(){
   })
 
 
-/* DELETE - OBSOLETE
-  it('logging', function() {
-    var log = logger([
-      ['init','start'],
-      ['register'],
-      ['register'],
-      ['register'],
-      ['add'],
-      ['add'],
-      ['add'],
-      ['add'],
-      ['add'],
-      ['add'],
-      ['register'],
-      ['init'],
-      ['close'],
-      ['entity','close'],
-      ['act','in'],
-      ['plugin','mem-store'],
-      ['act','out'],
-    ])
-
-    seneca(
-      {logger:log},
-      //{log:'print'},
-      function(err,seneca){
-        assert.isNull(err)
-        seneca.close()
-        assert.equal(log.len,log.index())
-      }
-    )
-
-    try {
-      seneca({logger:logger(['bad'])},function(){})
-      assert.fail()
-    }
-    catch( e ) {}
-
-
-    log = logger([['init','start']])
-    seneca(
-      {logger:log},
-      function(err,seneca){
-        assert.isNull(err)
-        seneca.log('foo')
-        assert.equal(13,log.index())
-      }
-    )
-  })
-*/
-
-
-
 
   it('action', function() {
-    var log = logger([
-      [],[],[],[], [],[],[],[],[],[], [],[],[],
-      ['act','in'],
-      ['act','out'],
-      ['act','in'],
-      ['act','out'],
-    ])
-
     seneca(
-      {logger:log},
-      //{log:'print'},
+      {},
       function(err,seneca){
         assert.isNull(err)
         var a1  = 0;
@@ -536,13 +475,13 @@ describe('seneca', function(){
         var log = []
 
         si.add({p1:'v1',p2:'v2a'},function(args,cb){
-          console.log('a'+args.p3)
+          //console.log('a'+args.p3)
           log.push('a'+args.p3)
           cb(null,{p3:args.p3})
         })
 
         si.add({p1:'v1',p2:'v2b'},function(args,cb){
-          console.log('b'+args.p3)
+          //console.log('b'+args.p3)
           log.push('b'+args.p3)
           cb(null,{p3:args.p3})
         })

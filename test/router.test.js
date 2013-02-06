@@ -104,35 +104,6 @@ describe('router', function() {
     assert.equal('r3',rt1.find({p1:'v1',p2:'x',p3:'v3'}))
   }),
 
-
-  it('findall', function() {
-    var rt1 = new Router()
-    
-    rt1.add( {p1:'v1'}, 'r0' )
-
-    rt1.add( {p1:'v1',p2:'v2a'}, 'r1' )
-    rt1.add( {p1:'v1',p2:'v2b'}, 'r2' )
-
-    //eyes.inspect(JSON.parse(''+rt1))
-
-    var found = rt1.findall({p1:'v1'})
-    //require('eyes').inspect(found)
-    assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
-
-
-    found = rt1.findall({p1:'v1',p2:'*'})
-    //require('eyes').inspect(found)
-    assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
-
-
-    rt1.add( {p1:'v1',p2:'v2c',p3:'v3a'}, 'r3a' )
-    rt1.add( {p1:'v1',p2:'v2d',p3:'v3b'}, 'r3b' )
-    //require('eyes').inspect(JSON.parse(''+rt1))
-    found = rt1.findall({p1:'v1',p2:'*',p3:'v3a'})
-    //require('eyes').inspect(found)
-    assert.equal('[{"match":{"p1":"v1","p2":"v2c","p3":"v3a"},"data":"r3a"}]',JSON.stringify(found))
-  })
-
   
   it('remove', function(){
     var rt1 = new Router()
@@ -159,5 +130,42 @@ describe('router', function() {
     assert.equal('r2',rt1.find({p2:'v2',p4:'v4'}))
 
   })
+
+
+  function findalltest(mode) {
+    return function() {
+      var rt1 = new Router()
+      
+      'subvals==mode' && rt1.add( {a:'1'}, 'x' )
+
+      rt1.add( {p1:'v1'}, 'r0' )
+
+      rt1.add( {p1:'v1',p2:'v2a'}, 'r1' )
+      rt1.add( {p1:'v1',p2:'v2b'}, 'r2' )
+      //console.log(rt1.toString())
+
+      var found = rt1.findall({p1:'v1'})
+      //require('eyes').inspect(found)
+      assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
+
+      return 
+
+      found = rt1.findall({p1:'v1',p2:'*'})
+      //require('eyes').inspect(found)
+      assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
+
+
+      rt1.add( {p1:'v1',p2:'v2c',p3:'v3a'}, 'r3a' )
+      rt1.add( {p1:'v1',p2:'v2d',p3:'v3b'}, 'r3b' )
+      //require('eyes').inspect(JSON.parse(''+rt1))
+      found = rt1.findall({p1:'v1',p2:'*',p3:'v3a'})
+      //require('eyes').inspect(found)
+      assert.equal('[{"match":{"p1":"v1","p2":"v2c","p3":"v3a"},"data":"r3a"}]',JSON.stringify(found))
+    }
+  }
+
+  it('findall.topvals', findalltest('topvals'))
+  it('findall.subvals', findalltest('subvals'))
+
   
 })

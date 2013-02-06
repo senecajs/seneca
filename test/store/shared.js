@@ -173,7 +173,7 @@ exports.basictest = function(si,done) {
           
           foo.remove$( {all$:true}, function(err, res){
             assert.isNull(err)
-            //assert.ok( 2 <= res.length )
+
             foo.list$({},verify(cb,function(res){
               assert.equal(0,res.length)
             }))

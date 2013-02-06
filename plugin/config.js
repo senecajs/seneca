@@ -1,12 +1,15 @@
-/* Copyright (c) 2012 Richard Rodger */
+/* Copyright (c) 2012-2013 Richard Rodger */
+
+"use strict";
 
 
-var common  = require('../common');
-var _       = common._;
-var fs      = common.fs;
+var fs      = require('fs')
+
+var _       = require('underscore')
 
 
-module.exports = function echo( si,opts,cb ) {
+
+module.exports = function config( si,opts,cb ) {
 
   var config = {}
 

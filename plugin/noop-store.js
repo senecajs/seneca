@@ -1,152 +1,150 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger */
 
-var common  = require('../common');
-var store   = require('./store');
-
-var eyes    = common.eyes;
-var _       = common._;
-var uuid    = common.uuid;
+"use strict"
 
 
-function NoopStore() {
-  var self   = new store.Store()
-  var parent = self.parent()
-
-  var inid   = common.idgen(12)
-  var seneca
-
-  self.name = 'noop-store'
+var _       = require('underscore')
+var uuid    = require('node-uuid')
 
 
+// plugin init function
+module.exports = function(seneca,opts,cb) {
 
-  /** create or update an entity */
-  self.save$ = function(args,cb){
+  // added to logs to provide extra context info
+  var desc
 
-    // entity to save
-    var ent = args.ent
 
-    if( !ent.id ) {
-      // TODO: should be a default seneca action on util plugin - then it can be overwritten
-      ent.id = uuid()
-    }
+  // storage operations
+  var store = {
+
+    // the name of the data store
+    name: 'noop-store',
+
+
+    /** create or update an entity */
+    save: function(args,cb){
+
+      // entity to save
+      var ent = args.ent
+
+      // if there's no id, it's a new entity
+      var create = !ent.id
+
+      if( create ) {
+        // TODO: should be a default seneca action on util plugin - then it can be overwritten
+        ent.id = uuid()
+      }
     
-    // get entity type designation: zone/base/name
-    // zone and/or base could be undefined
-    var canon = ent.canon$({object:true})
-    var base = canon.base
-    var name = canon.name
-    var zone = canon.zone
-        
-    // do nothing - save operation would go here
+      // get entity type designation: zone/base/name
+      // ZONE SHOULD BE IGNORED
+      var canon = ent.canon$({object:true})
+      var base = canon.base
+      var name = canon.name
 
-    // conventional log format for data store operations
-    // args.tag$ is a seneca generate per-operation tag to track individual operations
-    seneca.log(args.tag$,'save',ent,inid)
+      // save operation would goes here
 
-    // follow normal callback convention for errors
-    var err = null
-    cb(null,ent)
-  }
+      // conventional log format for save operations
+      // args.tag$ is a per-operation tag to track individual operations
+      seneca.log(args.tag$,'save/'+(create?'insert':'update'),ent,desc)
 
-
-
-  /** Load the first matching entity.
-   *  The query must either be a set of properties, and all property values must match,
-   *  or a single string value, equal to the entity id
-   *  The sort$ operation is supported. There is an implicit limit$ = 1
-   */
-  self.load$ = function(args,cb){
-
-    // entity performing query - use qent.canon$() to get entity type
-    var qent = args.qent
-
-    // query string or object
-    var q = args.q
-
-    var foundent = null
-
-    // do nothing - load operation would go here
-
-    seneca.log(args.tag$,'load',foundent,inid)
-
-    var err = null
-    cb(err,foundent)
-  }
+      // follow normal callback convention for errors
+      var err = null
+      cb(null,ent)
+    },
 
 
 
-  /** Load all matching entities. 
-   *  The query depends on the args.q value:
-   *  object => AND query on property values
-   *  object with native$=true => pass object through to underlying driver, delete native$
-   *  array => call driver query with element 0 as query string, and remaining elements as values
-   *  array with native$=true property => pass through to underlying driver as arguments
-   *  string => use verbatim as query - user must escape values!
-   */
-  self.list$ = function(args,cb){
+    /** Load the first matching entity.
+     *  The query must either be a set of properties, and all property values must match,
+     *  or a single string value, equal to the entity id
+     *  The sort$ operation is supported. There is an implicit limit$ = 1
+     */
+    load: function(args,cb){
 
-    // as per load$
-    var qent = args.qent
-    var q    = args.q
+      // entity performing query - use qent.canon$() as above to get entity type
+      var qent = args.qent
 
-    var list = []
+      // query string or object
+      var q = args.q
 
-    // do nothing - list operation would go here
+      // load operation would go here
+      var foundent = null
 
-    seneca.log(args.tag$,'list',list.length,list[0])
+      // conventional log format for load operations
+      seneca.log(args.tag$,'load',q,foundent,desc)
 
-    var err = null
-    cb(err, list)
-  }
-
-
-
-  /** Remove one matching entity. 
-   *  If all$=true, remove all matching entities.
-   */
-  self.remove$ = function(args,cb){
-
-    // as per load$
-    var qent = args.qent
-    var q    = args.q
-
-    var list = []
-
-    // do nothing - remove operation would go here
-    seneca.log(args.tag$,'remove',list[0])
-
-    var err = null
-
-    // remove returns data of deleted entities
-    cb(err,list)
-  }
+      var err = null
+      cb(err,foundent)
+    },
 
 
 
-  /** close connection to data store - called during shutdown */
-  self.close$ = function(args,cb){
-    seneca.log(args.tag$,'close')
-    cb()
-  }
+    /** Load all matching entities. 
+     *  The query depends on the args.q value:
+     *  object => AND query on property values
+     *  object with native$=true => pass object through to underlying driver, delete native$
+     *  array => call driver query with element 0 as query string, and remaining elements as values
+     *  array with native$=true property => pass through to underlying driver as arguments
+     *  string => use verbatim as query - user must escape values!
+     */
+    list: function(args,cb){
+
+      // as per load
+      var qent = args.qent
+      var q    = args.q
+
+      // list operation would go here
+      var list = []
+
+      // log the first item in the list, if any
+      seneca.log(args.tag$,'list',q,list.length,list[0],desc)
+
+      var err = null
+      cb(err, list)
+    },
 
 
 
-  /** called by seneca to initialise plugin */
-  self.init = function(si,opts,cb) {
-    parent.init(si,opts,function(){
+    /** Remove one matching entity. 
+     *  If all$=true, remove all matching entities.
+     *  If load$=true, return entity data (ignored if all$=true)
+     */
+    remove: function(args,cb){
+      var qent = args.qent
+      var q    = args.q
 
-      // keep a reference to the seneca instance
-      seneca = si
+      // remove operation would go here
+      var ent = null
+
+      seneca.log(args.tag$,'remove/'+(all?'all':'one'),q,ent,desc)
+
+      var err = null
+
+      // remove returns data of deleted entity
+      cb(err,ent)
+    }
+
+
+
+    /** close connection to data store - called during shutdown */
+    close: function(args,cb){
+      seneca.log(args.tag$,'close',desc)
       cb()
-    })
+    }
   }
 
 
-  return self
+  // initstore is a utility function to setup data storage cmds
+  // in pattern: {role:store.name,cmd:save,load,list,remove,close}
+  seneca.util.initstore(seneca,opts,store,function(err,tag,description){
+    if( err ) return cb(err);
+    
+    desc = description
+
+    // ensures name and plugin instance tag are set if plugin is require'd directly
+    cb(null,{name:store.name,tag:tag})
+  })
+
 }
 
-
-exports.plugin = function() {
-  return new NoopStore()
-}
 
