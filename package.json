@@ -37,7 +37,8 @@
     "sockjs": "~0.3.5",
     "optimist": "~0.3.5",
     "eyes": "~0.1.8",
-    "chai": "~1.4.2"
+    "chai": "~1.4.2",
+    "nid": "~0.1.0"
   },
   "main": "lib/seneca",
   "files": [
