@@ -15,7 +15,12 @@ module.exports = function echo( si,opts,cb ) {
       _.filter(_.keys(args),function(n){return n.match(/\$$/)||exclude[n]})
     )
 
-    cb(null,out)
+    function finish() { cb(null,out) }
+
+    if( opts.delay && _.isNumber( opts.delay ) ) {
+      setTimeout(finish,opts.delay)
+    }
+    else finish();
   })
 
 

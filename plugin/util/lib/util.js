@@ -2,6 +2,7 @@
 "use strict";
 
 var nid = require('nid')
+var _   = require('underscore')
 
 
 module.exports = function(seneca,opts,cb) {
@@ -12,11 +13,7 @@ module.exports = function(seneca,opts,cb) {
     args.len = args.length || args.len
     var len      = args.len ? parseInt(args.len,10) : 8
     var alphabet = args.alphabet || '0123456789abcdefghijklmnopqrstuvwxyz'
-    var curses   = args.curses || ['\x66\x75\x63\x6B',
-                                   '\x73\x68\x69\x74',
-                                   '\x70\x69\x73\x73',
-                                   '\x63\x75\x6E\x74',
-                                   '\x6E\x69\x67\x67\x65\x72']
+    var curses   = args.curses
     
     var nidopts = {}
     if( len ) nidopts.length = len;
@@ -47,16 +44,14 @@ module.exports = function(seneca,opts,cb) {
 
   cb(null,{
     name:name,
-    service: function() {
-      return function(req,res,next) {
-        // FIX: needs proper cache headers etc
-        if( '/js/util/browser.js' == req.url ) {
-          res.sendfile(__dirname+'/browser.js',function(err){
-            if( err ) return si.fail('unable to deliver browser.js')
-          })
-        }
-        else next();
+    service: function(req,res,next) {
+      // FIX: needs proper cache headers etc
+      if( '/js/util/browser.js' == req.url ) {
+        res.sendfile(__dirname+'/browser.js',function(err){
+          if( err ) return seneca.fail('unable to deliver browser.js')
+        })
       }
+      else next();
     }
   })
 }

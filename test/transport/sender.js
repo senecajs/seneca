@@ -8,9 +8,10 @@ si.use('transport',{
   pins: [{ role:'echo' }] 
 })
 
+var args = {role:'echo',foo:111}
 
-
-si.act({role:'echo',foo:111},function(err,res){
+console.log('SENDING: '+JSON.stringify(args))
+si.act(args,function(err,res){
   if( err ) { console.log(err) }
   console.log('SENDER ECHO: '+JSON.stringify(res))
 })
