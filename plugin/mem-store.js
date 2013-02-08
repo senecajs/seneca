@@ -1,10 +1,8 @@
 /* Copyright (c) 2010-2013 Richard Rodger */
-
 "use strict"
 
 
 var _       = require('underscore')
-var idgen   = require('idgen')
 var uuid    = require('node-uuid')
 
 
@@ -52,19 +50,32 @@ module.exports = function(seneca,opts,cb) {
       var ent = args.ent
 
       var create = !ent.id
-      ent.id = create ? idgen(opts.idlen) : ent.id
-    
-      var canon = ent.canon$({object:true})
-      var base   = canon.base
-      var name   = canon.name
-    
-      entmap[base] = entmap[base] || {}
-      entmap[base][name] = entmap[base][name] || {}
-
-      entmap[base][name][ent.id] = ent
   
-      seneca.log.debug(args.tag$,'save/'+(create?'insert':'update'),ent,desc)
-      cb(null,ent)
+      if( create ) {
+        seneca.act({role:'util', cmd:'generate_id'}, function(err,id){
+          if( err ) return cb(err);
+          do_save(id)
+        })
+      }
+      else do_save();
+
+      function do_save(id) {
+        if( id ) {
+          ent.id = id
+        }
+
+        var canon = ent.canon$({object:true})
+        var base   = canon.base
+        var name   = canon.name
+    
+        entmap[base] = entmap[base] || {}
+        entmap[base][name] = entmap[base][name] || {}
+
+        entmap[base][name][ent.id] = ent
+  
+        seneca.log.debug(args.tag$,'save/'+(create?'insert':'update'),ent,desc)
+        cb(null,ent)
+      }
     },
 
 

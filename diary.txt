@@ -35,11 +35,13 @@
 - list of refactorings for stores:
   - canon - unique desc of zone/base/name/instanceid for each store instance, gen'd by Store
 
-2013-04-06
+2013-02-06
 - plugins now defined only by init function(seneca,opts,cb) - objects no longer supported
 - updated some plugins to this new structure
 - updated top level tests
 
+2013-02-08
+- really need to get rid of common.js, esp preloading of modules - silly
 
 NEXT:
 - text db store as example for external store plugin reference standard test

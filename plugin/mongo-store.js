@@ -8,7 +8,6 @@
 
 var _     = require('underscore')
 var mongo = require('mongodb')
-var idgen = require('idgen')
 
 
 

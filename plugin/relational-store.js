@@ -8,6 +8,9 @@ eyes      = common.eyes;
 _         = common._;
 uuid      = common.uuid;
 
+var nid = require('nid')
+
+
 var MIN_WAIT = 16
 var MAX_WAIT = 65336
 
@@ -21,7 +24,7 @@ function RelationalStore() {
   ARRAY_TYPE  = 'a'
   DATE_TYPE   = 'd'
 
-  mark = common.idgen(4)
+  mark = nid()
 
   self.waitmillis = MIN_WAIT
   self.dbinst     = null

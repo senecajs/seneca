@@ -1,6 +1,5 @@
 
-var seneca = require('../..')({xlog:'print'})
-
+var seneca = require('../..')()
 
 
 
@@ -27,7 +26,6 @@ saveload(seneca)
 
 
 
-seneca.use( 'mongo-store', {name:'mydata',host:'127.0.0.1',port:27017} )
 
 seneca.ready( function(err,seneca){
   if( err ) return console.error( 'ERROR:'+err )
@@ -39,7 +37,7 @@ seneca.ready( function(err,seneca){
   product.price = 100
 
   seneca.act( 
-    { role:'entity', cmd:'save',ent:product},
+    { role:'entity', cmd:'save', ent:product},
     function( err, product ) {
       if( err ) return console.error( err )
       console.log( 'saved: '+product )
@@ -53,6 +51,3 @@ seneca.ready( function(err,seneca){
     })
 })
 
-
-// should this work?
-//seneca.act( {role:'entity',cmd:'save',ent:{name$:'apple',price:100}},)
