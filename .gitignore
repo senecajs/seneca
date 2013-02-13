@@ -5,3 +5,5 @@ test/db
 *.bak
 node_modules
 README.html
+*.off
+*-off

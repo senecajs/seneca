@@ -13,7 +13,7 @@ For a gentle introduction to this module, see the [senecajs.org](http://senecajs
 
 If you're using this module, feel free to contact us on twitter if you have any questions! :) [@nodejsdublin](http://twitter.com/nodejsdublin)
 
-Current Version: 0.4.4
+Current Version: 0.5.0
 
 Tested on: node 0.8.16
 
