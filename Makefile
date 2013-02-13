@@ -6,4 +6,4 @@ dummy:
 test: test-seneca
 
 test-seneca:
-	expresso -I lib test/seneca.test.js
+	mocha test/seneca.test.js

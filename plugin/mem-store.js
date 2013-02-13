@@ -73,7 +73,7 @@ module.exports = function(seneca,opts,cb) {
 
         entmap[base][name][ent.id] = ent
   
-        seneca.log.debug(args.tag$,'save/'+(create?'insert':'update'),ent,desc)
+        seneca.log.debug(args.actid$,'save/'+(create?'insert':'update'),ent,desc)
         cb(null,ent)
       }
     },
@@ -85,7 +85,7 @@ module.exports = function(seneca,opts,cb) {
 
       list(entmap,qent,q,function(err,list){
         var ent = list[0] || null
-        seneca.log.debug(args.tag$,'load',q,ent,desc)
+        seneca.log.debug(args.actid$,'load',q,ent,desc)
         cb(err, ent)
       })
     },
@@ -96,7 +96,7 @@ module.exports = function(seneca,opts,cb) {
       var q    = args.q
 
       list(entmap,qent,q,function(err,list){
-        seneca.log.debug(args.tag$,'list',q,list.length,list[0],desc)
+        seneca.log.debug(args.actid$,'list',q,list.length,list[0],desc)
         cb(err, list)
       })
     },
@@ -118,7 +118,7 @@ module.exports = function(seneca,opts,cb) {
           var canon = qent.canon$({object:true})
           
           delete entmap[canon.base][canon.name][ent.id]
-          seneca.log.debug(args.tag$,'remove/'+(all?'all':'one'),q,ent,desc)
+          seneca.log.debug(args.actid$,'remove/'+(all?'all':'one'),q,ent,desc)
         })
 
         var ent = all ? null : load ? list[0] || null : null
@@ -129,13 +129,13 @@ module.exports = function(seneca,opts,cb) {
 
 
     close: function(args,cb){
-      seneca.log.debug(args.tag$,'close',desc)
+      seneca.log.debug(args.actid$,'close',desc)
       cb()
     }
   }
 
 
-  seneca.util.initstore(seneca,opts,store,function(err,tag,description){
+  seneca.store.init(seneca,opts,store,function(err,tag,description){
     if( err ) return cb(err);
 
     desc = description

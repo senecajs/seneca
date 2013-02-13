@@ -1,5 +1,8 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2013 Richard Rodger, MIT License */
+"use strict";
 
+
+var buffer  = require('buffer')
 
 var connect  = require('connect')
 var sockjs   = require('sockjs')
@@ -8,6 +11,17 @@ var _        = require('underscore')
 
 
 var seneca  = require('../..')
+
+
+function sendjson(res,obj) {
+  var jsonstr = JSON.stringify(obj)
+  res.writeHead(200,{
+    'Content-Type': 'application/json',
+    'Cache-Control': 'private, max-age=0, no-cache, no-store',
+    "Content-Length": buffer.Buffer.byteLength(jsonstr) 
+  })
+  res.end( jsonstr)
+}
 
 
 module.exports = function admin( si,opts,cb ) {
@@ -63,10 +77,10 @@ module.exports = function admin( si,opts,cb ) {
 
 
   var app = connect()
-  app.use(connect.json())
+  //app.use(connect.json())
   app.use(si.httprouter(function(app){
     app.get('/conf',function(req,res){
-      res.send({
+      sendjson(res,{
         prefix: opts.prefix,
         login: req.seneca && req.seneca.login && req.seneca.login.token
       })
@@ -74,15 +88,27 @@ module.exports = function admin( si,opts,cb ) {
   }))
   app.use(connect.static(__dirname+'/web'))
 
-  cb( null, function(req,res,next){
-    if( 0 == req.url.indexOf(opts.prefix) ) {
-      if( req.seneca && req.seneca.user && req.seneca.user.admin ) {
-        req.url = req.url.substring(opts.prefix.length)
-        app(req,res)
-        return
-      }
-    }
-    next()
-  })
+  cb( null, {
+    service:function(req,res,next){
+      if( 0 == req.url.indexOf(opts.prefix) ) {
 
+        var allow = req.seneca && req.seneca.user && req.seneca.user.admin
+        if( !allow ) {
+          allow = opts.local && (
+            '127.0.0.1' === req.connection.remoteAddress ||
+              '::1' === req.connection.remoteAddress
+          )
+        }
+
+      console.log(req.url+' '+allow)
+
+        if( allow ) {
+          req.url = req.url.substring(opts.prefix.length)
+          app(req,res)
+          return
+        }
+      }
+      next()
+    }
+  })
 }

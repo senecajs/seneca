@@ -43,7 +43,11 @@
 2013-02-08
 - really need to get rid of common.js, esp preloading of modules - silly
 
-NEXT:
+2013-02-12
 - text db store as example for external store plugin reference standard test
+- cleanup for 0.5.0 release
+
+
+NEXT
 - seneca-verify repo to test github masters of plugins against lastest version
 

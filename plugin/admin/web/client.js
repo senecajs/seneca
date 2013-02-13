@@ -1,6 +1,10 @@
 
 var app = {
   
+  conf: {
+    maxlines: 9999
+  },
+
   itemcount: 0,
 
   init: function() {
@@ -14,9 +18,6 @@ var app = {
       console.log(app.conf)
       app.initsock()
     })
-
-
-
 
     $('#update').click(sendlogroute)
   },
@@ -35,21 +36,18 @@ var app = {
         sendlogroute()
       }
       else {
-        //app.loglist.prepend(.text(e.data))
         var itemdiv = $('<div>').addClass('item').addClass(++app.itemcount%2?'rowA':'rowB')
 
         var logstr = []
         _.each(msg,function(val){
           var valstr = _.isObject(val)?JSON.stringify(val):val
-          //var field = $('<div>').text(valstr)
-          //itemdiv.append(field)
           logstr.push(valstr)
         })
         itemdiv.text(logstr.join('\t'))
 
         app.loglist.prepend(itemdiv)
         var numitems = app.loglist.children().length
-        if( 3 < numitems ) {
+        if( app.conf.maxlines < numitems ) {
           app.loglist.remove(app.loglist.children()[numitems-1])
         }
       }

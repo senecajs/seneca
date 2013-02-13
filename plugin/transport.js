@@ -16,6 +16,26 @@ var request   = require('request')
  *    prefixes: other http url path prefixes to proxy to remote host:port of rmeoteurl
  */
 
+
+// adapted from connect json.js, Sencha Inc and TJ Holowaychuk
+function parsejson(req,done) {
+  if (req._body) return done();
+  req.body = req.body || {}
+
+  // flag as parsed - play nice with connect
+  req._body = true
+
+  // parse
+  var buf = ''
+  req.setEncoding('utf8')
+  req.on('data', function(chunk){ buf += chunk })
+  req.on('end', function(){
+    req.body = JSON.parse(buf)
+    done()
+  })
+}
+
+
 module.exports = function(seneca,opts,cb){
   var name = 'transport'
 
@@ -27,7 +47,7 @@ module.exports = function(seneca,opts,cb){
 
 
   function send( args, cb ) {
-    seneca.log.debug(args.tag$,opts.endpoint,args)
+    seneca.log.debug(args.actid$,opts.endpoint,args)
 
     var reqopts = {
       url:opts.remoteurl,
@@ -40,7 +60,7 @@ module.exports = function(seneca,opts,cb){
     }
 
     request.post(reqopts,function(err,response){
-      seneca.log.debug(args.tag$,err,response&&response.body)
+      seneca.log.debug(args.actid$,err,response&&response.body)
 
       if( err ) return cb(err)
 
@@ -73,36 +93,39 @@ module.exports = function(seneca,opts,cb){
 
   function service(req,res,next){
     if( 0 == req.url.indexOf( opts.localpath ) ) {
+      parsejson(req,function(){
+        // TODO: handle parse errors
 
-      var args = _.extend(
-        {},
-        _.isObject(req.body)?req.body:{},
-        _.isObject(req.query)?req.query:{},
-        req.params?req.params:{}
-      )
+        var args = _.extend(
+          {},
+          _.isObject(req.body)?req.body:{},
+          _.isObject(req.query)?req.query:{},
+          req.params?req.params:{}
+        )
 
-      seneca.log.debug(opts.localpath,args)
+        seneca.log.debug(opts.localpath,args)
 
-      seneca.act(args,function(err,result){
-        if( err ) {
-          res.writeHead(500)
-          res.end(err.toString())
-        }
-        else {
-          if( res.send ) {
-            res.send(result)
+        seneca.act(args,function(err,result){
+          if( err ) {
+            res.writeHead(500)
+            res.end(err.toString())
           }
           else {
-            var jsonstr = JSON.stringify(result)
-            res.writeHead(200,{
-              'Content-Type': 'application/json',
-              'Cache-Control': 'private, max-age=0, no-cache, no-store',
-              "Content-Length": buffer.Buffer.byteLength(jsonstr) 
-            })
-            res.end( jsonstr)
+            if( res.send ) {
+              res.send(result)
+            }
+            else {
+              var jsonstr = JSON.stringify(result)
+              res.writeHead(200,{
+                'Content-Type': 'application/json',
+                'Cache-Control': 'private, max-age=0, no-cache, no-store',
+                "Content-Length": buffer.Buffer.byteLength(jsonstr) 
+              })
+              res.end( jsonstr)
+            }
           }
-        }
-      })
+        })
+     })
     }
     else {
       var found = _.filter( opts.prefixes || [], function(prefix){

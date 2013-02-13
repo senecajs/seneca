@@ -42,7 +42,7 @@ module.exports = function(seneca,opts,cb) {
 
   function error(args,err,cb) {
     if( err ) {
-      seneca.log.debug(args.tag$,'error: '+err)
+      seneca.log.debug(args.actid$,'error: '+err)
       seneca.fail({code:'entity/error',store:name},cb)
 
       if( 'ECONNREFUSED'==err.code || 'notConnected'==err.message ) {
@@ -60,17 +60,17 @@ module.exports = function(seneca,opts,cb) {
 
 
   function reconnect(args) {
-    seneca.log.debug(args.tag$,'attempting db reconnect')
+    seneca.log.debug(args.actid$,'attempting db reconnect')
 
     configure(spec, function(err){
       if( err ) {
-        seneca.log.debug(args.tag$,'db reconnect (wait '+opts.minwait+'ms) failed: '+err)
+        seneca.log.debug(args.actid$,'db reconnect (wait '+opts.minwait+'ms) failed: '+err)
         minwait = Math.min(2*minwait,opts.maxwait)
         setTimeout( function(){reconnect(args)}, minwait )
       }
       else {
         minwait = opts.minwait
-        seneca.log.debug(args.tag$,'reconnect ok')
+        seneca.log.debug(args.actid$,'reconnect ok')
       }
     })
   }
@@ -123,7 +123,7 @@ module.exports = function(seneca,opts,cb) {
 
     // FIX: error reporting sucks on login fail
     dbinst.open(function(err){
-      if( !error({tag$:'init'},err,cb) ) {
+      if( !error({actid$:'init'},err,cb) ) {
         minwait = MIN_WAIT
 
         if( conf.username ) {
@@ -134,13 +134,13 @@ module.exports = function(seneca,opts,cb) {
               cb(err)
             }
             else {
-              seneca.log.debug({tag$:'init'},'db open and authed for '+conf.username)
+              seneca.log.debug({actid$:'init'},'db open and authed for '+conf.username)
               cb(null)
             }
           })
         }
         else {
-          seneca.log.debug({tag$:'init'},'db open')
+          seneca.log.debug({actid$:'init'},'db open')
           cb(null)
         }
       }

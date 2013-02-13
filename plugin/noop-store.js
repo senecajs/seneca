@@ -44,8 +44,8 @@ module.exports = function(seneca,opts,cb) {
       // save operation would goes here
 
       // conventional log format for save operations
-      // args.tag$ is a per-operation tag to track individual operations
-      seneca.log(args.tag$,'save/'+(create?'insert':'update'),ent,desc)
+      // args.actid$ is a per-action tag to track individual actions
+      seneca.log(args.actid$,'save/'+(create?'insert':'update'),ent,desc)
 
       // follow normal callback convention for errors
       var err = null
@@ -71,7 +71,7 @@ module.exports = function(seneca,opts,cb) {
       var foundent = null
 
       // conventional log format for load operations
-      seneca.log(args.tag$,'load',q,foundent,desc)
+      seneca.log(args.actid$,'load',q,foundent,desc)
 
       var err = null
       cb(err,foundent)
@@ -97,7 +97,7 @@ module.exports = function(seneca,opts,cb) {
       var list = []
 
       // log the first item in the list, if any
-      seneca.log(args.tag$,'list',q,list.length,list[0],desc)
+      seneca.log(args.actid$,'list',q,list.length,list[0],desc)
 
       var err = null
       cb(err, list)
@@ -116,7 +116,7 @@ module.exports = function(seneca,opts,cb) {
       // remove operation would go here
       var ent = null
 
-      seneca.log(args.tag$,'remove/'+(all?'all':'one'),q,ent,desc)
+      seneca.log(args.actid$,'remove/'+(all?'all':'one'),q,ent,desc)
 
       var err = null
 
@@ -128,7 +128,7 @@ module.exports = function(seneca,opts,cb) {
 
     /** close connection to data store - called during shutdown */
     close: function(args,cb){
-      seneca.log(args.tag$,'close',desc)
+      seneca.log(args.actid$,'close',desc)
       cb()
     }
   }

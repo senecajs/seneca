@@ -11,11 +11,13 @@ seneca.use( function(seneca,options,callback) {
     callback(null,{answer:product})
   })
 
-  callback( null, seneca.http({
-    pin: {role:'math', cmd:'*'},
-    map: { sum: {}, product: {} },
-    args: { left: parseFloat, right: parseFloat }
-  }))
+  callback( null, {
+    service:seneca.http({
+      pin: {role:'math', cmd:'*'},
+      map: { sum: {}, product: {} },
+      args: { left: parseFloat, right: parseFloat }
+    })
+  })
 })
 
 seneca.use('transport')
