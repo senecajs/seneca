@@ -369,10 +369,257 @@ filters, as the type is <i>plugin</i> for one, and <i>act</i> for the
 other.
 </p>
 
+<p>
+The <i>tag</i> filter can be used to focus on a specific, tagged, plugin instance. Here's how you look at UK sales tax operations only:
+</p>
+
+{% highlight bash %}
+$ node sales-tax-log.js --seneca.log=plugin:sales-tax,tag:UK
+[-isodate-]	DEBUG	plugin	sales-tax	UK	i2r7wn	
+  net:	200	total:	240	tax:	{hits=1,rate=0.2,country=UK}
+[-isodate-]	DEBUG	plugin	sales-tax	UK	8ir490	
+  net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
+{% endhighlight %}
+
+
+
   <h4>Live Logs in Your Browser</h4>
 
 <p>
-Console logs are fun, but live logs in your web browser are awesome! Seneca can do this too.
+Console logs are fun, but live logs in your web browser are awesome! Seneca can do this too:
+<img src="/images/seneca-admin-log.png">
+</p>
+
+<p>
+You'll need to create an app that provides a sales-tax calculation HTTP JSON API. Using the 
+<i>transport</i> plugin this is easy. This plugin accepts JSON documents from remote clients
+over HTTP and submits them to the local Seneca instance.
+</p>
+
+<p>Here the code, in <i>sales-tax-app.js</i>, that sets up the app:</p>
+
+{% highlight js %}
+var http = require('http')
+
+var seneca = require('seneca')()
+seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
+seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
+
+seneca.use('transport')
+
+var server = http.createServer(seneca.service())
+server.listen(3000)
+
+seneca.use('admin',{server:server,local:true})
+{% endhighlight %}
+
+<p>
+The <i>transport</i> plugin works locally without any configuration,
+so all you have to do is load it in:
+</p>
+
+{% highlight js %}
+seneca.use('transport')
+{% endhighlight %}
+
+<p>
+The next step is to set up a simple HTTP server, using the standard
+Node.js <i>http</i> module. Any plugins that return a HTTP middleware
+function (by setting the <i>service</i> property when returning the
+plugin meta data), are wrapped up by Seneca into a single middleware
+function, returned by <i>seneca.service()</i>. You can use this as
+<a href="http://www.senchalabs.org/connect/">connect</a>
+or <a href="http://expressjs.com">express</a> middleware, or directly
+with the standard HTTP API:
+</p>
+
+{% highlight js %}
+var server = http.createServer(seneca.service())
+server.listen(3000)
+{% endhighlight %}
+
+<p>
+The <i>admin</i> plugin provides a web administration interface for
+Seneca. It uses web sockets, so you need to provide a reference to the
+http server object in the plugin options.  To expose the
+admininstration web interface locally without requiring a password,
+use the <i>local:true</i> option:
+</p>
+
+{% highlight js %}
+seneca.use('admin',{server:server,local:true})
+{% endhighlight %}
+
+<p>
+Run this app, and open <a href="localhost:3000/admin">localhost:3000/admin</a>. You can
+still use command line logging - you can have multiple separate logging channels.
+</p>
+
+{% highlight bash %}
+$ node sales-tax-app.js --seneca.log=plugin:sales-tax
+{% endhighlight %}
+
+
+<p>
+The administration interface let's you set filtering options. They work the same way as the command line options.
+There's nothing to log yet, so let's generate some sales tax calculations!
+</p>
+
+
+<p>
+The file <i>sales-tax-app-client.js</i> contains the client
+code. The <i>transport</i> plugin is used again on the client-side to
+direct sales tax operations to the app:
+</p>
+
+{% highlight js %}
+var seneca = require('server')()
+
+seneca.use('transport',{
+  remoteurl:'http://localhost:3000/transport',
+  pins:[ {cmd:'salestax'} ]
+})
+
+seneca.act( {cmd:'salestax', country:'IE', net:100})
+seneca.act( {cmd:'salestax', country:'UK', net:200})
+seneca.act( {cmd:'salestax', country:'UK', net:300})
+{% endhighlight %}
+
+
+<p>
+
+You need to provide the <i>transport</i> plugin with some settings to
+get the sales tax operations sent over to the remote app.  First,
+provide a <i>remoteurl</i>, which is the HTTP end point of the
+transport API provided by the app. Second the <i>pins</i> setting is
+an array of action patterns.  If any of these match a submitted
+action, the action is sent over the wire to the remote app. In this
+case, anything where the <i>cmd</i> property is equal to the string
+"salestax".
+</p>
+
+<p>
+The sales tax operations code is as before. This is the key idea
+behind Seneca - your business logic code stays the same, but you can
+move around and reconfigure where it happens without worrying about
+refactoring your code.
+</p>
+
+<p>
+With the app up and running, run the client:
+</p>
+
+{% highlight bash %}
+$ node sales-tax-log.js --seneca.log=plugin:sales-tax
+[-isodate-]	DEBUG	plugin	sales-tax	IE	dy6c6k	
+  net:	100	total:	123	tax:	{hits=1,rate=0.23,country=IE}
+[-isodate-]	DEBUG	plugin	sales-tax	UK	qbfzrw	
+  net:	200	total:	240	tax:	{hits=1,rate=0.2,country=UK}
+[-isodate-]	DEBUG	plugin	sales-tax	UK	wy5uah	
+ net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
+{% endhighlight %}
+
+<p>
+You'll see corresponding log entries in the web interface, along with
+entries for the transport plugin.
+</p>
+
+
+  <h4>Log Handlers</h4>
+
+<p>
+You can define your own log handlers programmatically when you setup Seneca. The file
+<i>sales-tax-log-handler.js</i> shows you how to do this:
+</p>
+
+{% highlight js %}
+var seneca = require('seneca')
+
+// need this to get a reference to seneca.loghandler
+seneca = seneca({
+  log:{
+    map:[
+      {plugin:'sales-tax',handler:'print'},
+      {level:'all',handler:seneca.loghandler.file('salestax.log')}
+    ]
+  }
+})
+
+seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
+seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
+
+seneca.act( {cmd:'salestax', country:'IE', net:100})
+seneca.act( {cmd:'salestax', country:'UK', net:200})
+seneca.act( {cmd:'salestax', country:'UK', net:300})
+{% endhighlight %}
+
+<p>
+Running this script will output log entries both to the console (only where plugin is "sales-tax" ), and
+to a log file <i>salestax.log</i>, which gets everything. In production you mostly just want to output to the console and use
+the operating system tools for file redirection. The file handler is mostly for creating special log files.
+</p>
+
+<p>
+The logging map allows you to send log entries to multiple locations based on the filters you specify. You can still use the 
+command line argument <i>--seneca.log=...</i> to add further filters.
+</p>
+
+<p>The built-in handlers are:
+<ul>
+<li><i>seneca.loghandler.print</i>: logs to the console</li>
+<li><i>seneca.loghandler.file(filepath)</i>: logs to a file</li>
+<li><i>seneca.loghandler.stream(WriteStream)</i>: logs to a stream</li>
+<li><i>seneca.loghandler.emitter(EventEmitter)</i>: logs using events</li>
+</ul>
+
+You can write your own handler. It's just a function that takes the
+log entry as first argument. The log entry is an array of values.
+</p>
+
+<p>
+Here's an example using the <a href="http://logentries.com">LogEntries.com</a> service. This is cloud logging service that
+stores your logs and makes them searchable. I wrote their Node.js API module :) - <code>$ install npm node-logentries</code>. 
+This example is in the file <i>sales-tax-logentries.js</i>: 
+</p>
+
+{% highlight js %}
+var logentries = require('node-logentries')
+
+var log = logentries.logger({
+  token:'YOUR_TOKEN',
+
+  // redefine log levels to match the ones seneca uses
+  levels:{debug:0,info:1,warn:2,error:3,fatal:4}
+})
+
+var seneca = require('../..')({
+  log:{
+    map:[
+      {level:'all',handler:function(){
+        log.log(arguments[1],Array.prototype.join.call(arguments,'\t'))
+      }}
+    ]
+  }
+})
+
+seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
+seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
+
+seneca.act( {cmd:'salestax', country:'IE', net:100})
+seneca.act( {cmd:'salestax', country:'UK', net:200})
+seneca.act( {cmd:'salestax', country:'UK', net:300})
+{% endhighlight %}
+
+<p>
+You'll need to register a LogEntries.com account and get a token for this to work.
+</p>
+
+<p>
+You can use custom handler functions to send logs anywhere you want, and process them anyway you need.
+</p>
+
+<p>
+That's all folks! Corrections and comments: please tweet <a href="https://twitter.com/nodeseneca">@nodeseneca</a>.
 </p>
 
         </section>
