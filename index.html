@@ -19,6 +19,10 @@ layout: main
     and one comes out, asynchronously.
   </p>
 
+  <p>
+    For practical details, visit the <a href="http://github.com/rjrodger/seneca">Seneca github project page</a>.
+  </p>
+
   <p>Here's a command that sums two numbers:</p>
 
 {% highlight js %}
@@ -28,7 +32,6 @@ seneca.add( {role:'math', cmd:'sum'}, function(args,callback) {
   var sum = args.left + args.right
   callback(null,{answer:sum})
 })
-
 
 seneca.act( {role:'math', cmd:'sum', left:1, right:2}, function(err,result) {
   if( err ) return console.error( err )
@@ -84,6 +87,7 @@ $ node example.js
 You can add new commands whenever you like, wherever you like. 
 </p>
 
+
 <p>This named argument style is fun, but if you want a real API, you can have that too:</p>
 
 {% highlight js %}
@@ -105,7 +109,7 @@ By <i>pinning</i> the pattern <code>{role:'math',cmd:'*'}</code> you created an 
 <p>
 <i>Seneca</i> provides plugins - sets of commands - that look after the foundations of your app for you:
 <ul>
-  <li>Organize your components
+  <li>Organize your business logic
   <li>Network API
   <li>Data layer
   <li>Caching
@@ -113,16 +117,18 @@ By <i>pinning</i> the pattern <code>{role:'math',cmd:'*'}</code> you created an 
   <li>User management
   <li>Distributed processing
 </ul>
+
 You write your own plugins and commands using the same system. 
 </p>
 
 <p>
-<i>Seneca</i> is not a web framework, it's a business logic organizer. You can use it with any framework.
+<i>Seneca</i> is not a web framework, it's a business logic organizer. You can use it with any web framework.
 </p>
 
 <p>
-Here's an example of how this helps you. Let's say the <i>product</i> command
-needs to live on a separate server. You can move it there with no changes to your calling code. First, set up the server:
+Here's an example of how this helps you. Let's say the <i>product</i>
+command needs to live on a separate server. You can move it there with
+<i>no changes to your calling code</i>. First, set up the server:
 </p>
 
 {% highlight js %}
@@ -151,7 +157,7 @@ returning a middleware function from the
 </p>
 
 
-<p>On the client side, just redirect the required patterns:</p>
+<p>On the client side, just <i>transport</i> the remote patterns:</p>
 
 {% highlight js %}
 seneca.use('transport',{
@@ -171,7 +177,7 @@ The <code>pins</code> option to the <i>transport</i> plugin accepts a
 set of patterns that will be sent over to the server (running on
 localhost by default).  The <i>transport</i> plugin just
 calls <code>seneca.add</code> for each pin, and proxies the input and
-ouput to the remote server.
+output to the remote server.
 </p>
 
 <p>
@@ -246,15 +252,24 @@ seneca.ready( function(err,seneca){
 {% endhighlight %}
 
 <p>
-The <code>seneca.use</code> method tell <i>Seneca</i> to load a
+The <code>seneca.use</code> method tells <i>Seneca</i> to load a
 plugin, including any commands the plugin exposes. In this case,
 you're loading the <i>mongo-store</i> plugin, which lets you talk to
 the MongoDB database.
 </p>
 
 <p>
+To use the <i>mongo-store</i> plugin, you'll need to install it:
+
+{% highlight bash %}
+npm install seneca-mongo-store
+{% endhighlight %}
+</p>
+
+<p>
 The <code>seneca.ready</code> method waits for the database connection
-to be established. Apart from that, your data logic code is <i>exactly the same</i>.
+to be established. Apart from plugin configuration, your data logic
+code is <i>exactly the same</i>. Swapping databases at any stage of your project is trivial.
 </p>
 
 <p>
@@ -267,7 +282,7 @@ product.name = 'apple'
 product.price = 100
 
 seneca.act( 
-  { role:'entity', cmd:'save',ent:product},
+  { role:'entity', cmd:'save', ent:product},
   function( err, product ) {
     if( err ) return console.error( err )
     console.log( 'saved: '+product )
@@ -288,19 +303,21 @@ You can add support for your favorite database by writing a plugin with commands
 each of the entity operations: <code>save</code>, <code>load</code>,
 etc. Here are some of the data stores <i>Seneca</i> supports:
 <ul> 
-  <li>Memory (transient)
-  <li>JSON files (on disk)
-  <li>JSON resources (REST API)
-  <li>MongoDB
-  <li>MySQL
-  <li>PostgreSQL
-  <li>Amazon SimpleDB
+  <li>Memory (transient) - built in
+  <li>JSON files (on disk) - <a href="http://github.com/rjrodger/seneca-jsonfile-store">seneca-jsonfile-store</a>
+  <li>JSON resources (REST API) - <a href="http://github.com/rjrodger/seneca-jsonrest-store">seneca-jsonrest-store</a>
+  <li>MongoDB - <a href="http://github.com/rjrodger/seneca-mongo-store">seneca-mongo-store</a>
+  <li>MySQL - <a href="https://github.com/mirceaalexandru/seneca-mysql-store">seneca-mysql-store</a>
+  <li>PostgreSQL - <a href="https://github.com/marianr/seneca-postgres-store">seneca-postgres-store</a>
+  <li>Redis - <a href="https://github.com/bamse16/seneca-redis-store">seneca-redis-store</a>
+  <li>CouchDB - <a href="https://github.com/bamse16/seneca-couch-store">seneca-couch-store</a>
+  <li>SQLite - <a href="https://github.com/bamse16/seneca-sqlite">seneca-sqlite-store</a>
 </ul> 
 </p>
 
 <p>
 You can even decide to save different entities into different
-databases - for example, put user profiles into Mongo, purchase
+databases - for example, put user profiles into MongoDB, purchase
 transactions into MySQL, and sessions into Redis.  You do need to stay
 database independent by avoiding table joins, <a href="http://en.wikipedia.org/wiki/Denormalization">but
 you don't need them anyway</a>!
