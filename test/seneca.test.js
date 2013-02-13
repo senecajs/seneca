@@ -449,20 +449,6 @@ describe('seneca', function(){
       }
     )
 
-
-    /* breaks Mocha
-    // loading a fake module: node_modules/mock3
-    seneca(
-      {plugins:['mock3']},
-      function(err,si){
-        assert.isNull(err)
-
-        si.act({role:'mock3',cmd:'qaz',foo:3},function(err,out){
-          assert.equal('qaz:3',out)
-        })
-      }
-    )
-    */
   })
 
 
