@@ -29,7 +29,10 @@ module.exports = function admin( si,opts,cb ) {
   var clients = {}
   
   opts.prefix = opts.prefix || '/admin' 
-
+  var m = /^(.*?)\/*$/.exec(opts.prefix)
+  if( m ) {
+    opts.prefix = m[1]
+  }
 
 
   function loghandler(client) {
@@ -71,7 +74,12 @@ module.exports = function admin( si,opts,cb ) {
 
   socket.installHandlers(
     opts.server, 
-    {prefix:opts.prefix+'/socket'}
+    {
+      prefix:opts.prefix+'/socket',
+      log:function(severity,line){
+        si.log.debug(severity,line)
+      }
+    }
   )
 
 
@@ -100,12 +108,18 @@ module.exports = function admin( si,opts,cb ) {
           )
         }
 
-      console.log(req.url+' '+allow)
-
         if( allow ) {
           req.url = req.url.substring(opts.prefix.length)
-          app(req,res)
-          return
+
+          if('/'===req.url||''===req.url) {
+            res.writeHead(301, {
+              'Location': opts.prefix+'/index.html'
+            })
+            return res.end()
+          }
+          else {
+            return app(req,res)
+          }
         }
       }
       next()

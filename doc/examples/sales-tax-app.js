@@ -12,6 +12,3 @@ server.listen(3000)
 
 seneca.use('admin',{server:server,local:true})
 
-
-
-

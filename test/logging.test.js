@@ -34,9 +34,18 @@ describe('logging', function() {
   })
 
     
-  it('makelogrouter.multival', function() {
+  it('makelogrouter.multival.comma', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info',type:'init,status',handler:'A'}
+      {level:'info',type:'init,  status',handler:'A'}
+    ]})
+    //console.log(fmt(r))
+    assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:'A'},status:{d:'A'}}}}}")
+  })
+
+
+  it('makelogrouter.multival.space', function() {
+    var r = logging.makelogrouter({map:[
+      {level:'info',type:'init status',handler:'A'}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:'A'},status:{d:'A'}}}}}")
