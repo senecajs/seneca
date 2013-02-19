@@ -50,9 +50,15 @@ module.exports = function(seneca,opts,cb) {
       var ent = args.ent
 
       var create = !ent.id
+
+      var canon = ent.canon$({object:true})
+      var zone   = canon.zone
+      var base   = canon.base
+      var name   = canon.name
+
   
       if( create ) {
-        seneca.act({role:'util', cmd:'generate_id'}, function(err,id){
+        seneca.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
           if( err ) return cb(err);
           do_save(id)
         })
@@ -64,10 +70,6 @@ module.exports = function(seneca,opts,cb) {
           ent.id = id
         }
 
-        var canon = ent.canon$({object:true})
-        var base   = canon.base
-        var name   = canon.name
-    
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 

@@ -29,6 +29,7 @@ module.exports = function(seneca,opts,cb) {
   // cache nid funcs up to length 64
   var nids = []
   
+  // TODO: allow specials based on ent canon: name,base,zone props
   seneca.add({role:name,cmd:'generate_id'},function(args,cb){
     var actnid, length = args.length || 6
     if( length < 65 ) {
