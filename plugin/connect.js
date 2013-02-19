@@ -13,7 +13,7 @@ module.exports = function(seneca,opts,cb){
   cb(null,{
     service:function(req,res,next){
       // new obj allows for req specific props
-      req.seneca = _.extend({},seneca)
+      res.seneca = req.seneca = _.extend({nodesc:true},seneca)
       next()
     }
   })

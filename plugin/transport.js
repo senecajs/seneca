@@ -17,6 +17,9 @@ var request   = require('request')
  */
 
 
+// TODO: entities at top level of action should be serialized with $ (zone,base,name) so they can be reconstructed on other side
+
+
 // adapted from connect json.js, Sencha Inc and TJ Holowaychuk
 function parsejson(req,done) {
   if (req._body) return done();
