@@ -9,7 +9,7 @@ var _       = require('underscore')
 
 
 
-module.exports = function config( si,opts,cb ) {
+module.exports = function config( seneca,opts,cb ) {
 
   var config = {}
 
@@ -26,14 +26,14 @@ module.exports = function config( si,opts,cb ) {
     
     cb()
   }
-  else si.fail(cb,'no-file')
+  else seneca.fail(cb,'no-file')
 
-  si.add({role:'config',cmd:'get'},function(args,cb){
+  seneca.add({role:'config',cmd:'get'},function(args,cb){
     var base = args.base || null
     var root  = base ? (config[base]||{}) : config 
     var val   = args.key ? root[args.key] : root
 
-    val = common.copydata(val)
+    val = seneca.util.copydata(val)
 
     cb(null,val)
   })
