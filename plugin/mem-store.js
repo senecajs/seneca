@@ -133,6 +133,11 @@ module.exports = function(seneca,opts,cb) {
     close: function(args,cb){
       seneca.log.debug(args.actid$,'close',desc)
       cb()
+    },
+
+
+    native: function(args,cb){
+      cb(null,entmap)
     }
   }
 
