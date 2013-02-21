@@ -1,5 +1,4 @@
 /* Copyright (c) 2010-2013 Richard Rodger */
-
 "use strict";
 
 var common   = require('../lib/common')
