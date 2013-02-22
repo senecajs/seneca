@@ -37,7 +37,7 @@ describe('delegation', function(){
 
 
   it('dynamic', function() {
-    var si  = seneca_module()
+    var si = seneca_module()
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
       cb(null,args)
@@ -53,22 +53,22 @@ describe('delegation', function(){
 
     si.act({c:'C'},function(err,out){
       //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,parent$=*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{c=C,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     si.act({d:'D'},function(err,out){
       //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,d=D,parent$=*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{c=C,d=D,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     sid.act({c:'C'},function(err,out){
       //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,a$=A,b=B,parent$=*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{c=C,a$=A,b=B,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     sid.act({d:'D'},function(err,out){
       //console.log( 'OUT='+common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,d=D,a$=A,b=B,parent$=*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{c=C,d=D,a$=A,b=B,actid$=*}").on( common.owndesc(out,1,true)))
     })
   })
 

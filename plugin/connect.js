@@ -9,11 +9,12 @@ var _ = require('underscore')
 
 
 
-module.exports = function(seneca,opts,cb){
+module.exports = function(opts,cb){
+  var instance = this
   cb(null,{
     service:function(req,res,next){
       // new obj allows for req specific props
-      res.seneca = req.seneca = _.extend({nodesc:true},seneca)
+      res.seneca = req.seneca = instance.delegate({req$:req,res$:res})
       next()
     }
   })

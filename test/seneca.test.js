@@ -408,7 +408,7 @@ describe('seneca', function(){
       }
       self.init = function(si,opts,cb){
         si.add({role:'mock1',cmd:'foo'},function(args,cb){
-          args.parent$(args,function(err,out){
+          this.parent(args,function(err,out){
             cb(null,'bar:'+out)
           })
         })

@@ -5,11 +5,11 @@ var nid = require('nid')
 var _   = require('underscore')
 
 
-module.exports = function(seneca,opts,cb) {
+module.exports = function(opts,cb) {
   var name = 'util'
 
   // legacy cmd
-  seneca.add({role:name,cmd:'quickcode'},function(args,cb){
+  this.add({role:name,cmd:'quickcode'},function(args,cb){
     args.len = args.length || args.len
     var len      = args.len ? parseInt(args.len,10) : 8
     var alphabet = args.alphabet || '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -30,7 +30,7 @@ module.exports = function(seneca,opts,cb) {
   var nids = []
   
   // TODO: allow specials based on ent canon: name,base,zone props
-  seneca.add({role:name,cmd:'generate_id'},function(args,cb){
+  this.add({role:name,cmd:'generate_id'},function(args,cb){
     var actnid, length = args.length || 6
     if( length < 65 ) {
       actnid = nids[length] || (nids[length]=nid({length:length}))
