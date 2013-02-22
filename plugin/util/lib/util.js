@@ -1,6 +1,9 @@
 /* Copyright (c) 2011-2013 Richard Rodger */
 "use strict";
 
+
+var fs = require('fs')
+
 var nid = require('nid')
 var _   = require('underscore')
 
@@ -43,14 +46,32 @@ module.exports = function(opts,cb) {
   })
 
 
+  var browser_js
+
   cb(null,{
     name:name,
     service: function(req,res,next) {
+
+      function send() {
+        res.writeHead(200)
+        res.end(browser_js)
+      }
+
       // FIX: needs proper cache headers etc
       if( '/js/util/browser.js' == req.url ) {
-        res.sendfile(__dirname+'/browser.js',function(err){
-          if( err ) return seneca.fail('unable to deliver browser.js')
-        })
+        if( browser_js ) {
+          send()
+        }
+        else {
+          fs.readFile(__dirname+'/browser.js',function(err,text){
+            if( err ) {
+              next(err)
+            }
+            browser_js = text
+            send()
+          })
+        }
+
       }
       else next();
     }

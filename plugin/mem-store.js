@@ -8,7 +8,7 @@ var uuid    = require('node-uuid')
 
 
 
-function list(entmap,qent,q,cb) {
+function list(si,entmap,qent,q,cb) {
   var list = []
 
   var canon = qent.canon$({object:true})
@@ -31,12 +31,12 @@ function list(entmap,qent,q,cb) {
     })
   }
   
-  cb(null,list)
+  cb.call(si,null,list)
 }
 
 
 
-module.exports = function(seneca,opts,cb) {
+module.exports = function(opts,cb) {
   var desc
 
   var entmap = {}
@@ -47,6 +47,7 @@ module.exports = function(seneca,opts,cb) {
 
 
     save: function(args,cb){
+      var si = this
       var ent = args.ent
 
       var create = !ent.id
@@ -58,7 +59,7 @@ module.exports = function(seneca,opts,cb) {
 
   
       if( create ) {
-        seneca.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
+        this.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
           if( err ) return cb(err);
           do_save(id)
         })
@@ -75,7 +76,7 @@ module.exports = function(seneca,opts,cb) {
 
         entmap[base][name][ent.id] = ent
   
-        seneca.log.debug(args.actid$,'save/'+(create?'insert':'update'),ent,desc)
+        si.log.debug(function(){return['save/'+(create?'insert':'update'),ent.canon$({string:1}),ent,desc]})
         cb(null,ent)
       }
     },
@@ -85,9 +86,9 @@ module.exports = function(seneca,opts,cb) {
       var qent = args.qent
       var q    = args.q
 
-      list(entmap,qent,q,function(err,list){
+      list(this,entmap,qent,q,function(err,list){
         var ent = list[0] || null
-        seneca.log.debug(args.actid$,'load',q,ent,desc)
+        this.log.debug(function(){return['load',q,qent.canon$({string:1}),,ent,desc]})
         cb(err, ent)
       })
     },
@@ -97,21 +98,23 @@ module.exports = function(seneca,opts,cb) {
       var qent = args.qent
       var q    = args.q
 
-      list(entmap,qent,q,function(err,list){
-        seneca.log.debug(args.actid$,'list',q,list.length,list[0],desc)
+      list(this,entmap,qent,q,function(err,list){
+        this.log.debug(function(){return['list',q,qent.canon$({string:1}),,list.length,list[0],desc]})
         cb(err, list)
       })
     },
 
 
     remove: function(args,cb){
+      var seneca = this
+
       var qent = args.qent
       var q    = args.q
 
       var all  = q.all$ // default false
       var load  = _.isUndefined(q.load$) ? true : q.load$ // default true 
   
-      list(entmap,qent,q,function(err,list){
+      list(seneca,entmap,qent,q,function(err,list){
         if( err ) return cb(err);
 
         list = all ? list : 0<list.length ? list.slice(0,1) : []
@@ -120,7 +123,7 @@ module.exports = function(seneca,opts,cb) {
           var canon = qent.canon$({object:true})
           
           delete entmap[canon.base][canon.name][ent.id]
-          seneca.log.debug(args.actid$,'remove/'+(all?'all':'one'),q,ent,desc)
+          seneca.log.debug(function(){return['remove/'+(all?'all':'one'),q,qent.canon$({string:1}),,ent,desc]})
         })
 
         var ent = all ? null : load ? list[0] || null : null
@@ -131,7 +134,7 @@ module.exports = function(seneca,opts,cb) {
 
 
     close: function(args,cb){
-      seneca.log.debug(args.actid$,'close',desc)
+      this.log.debug('close',desc)
       cb()
     },
 
@@ -142,14 +145,14 @@ module.exports = function(seneca,opts,cb) {
   }
 
 
-  seneca.store.init(seneca,opts,store,function(err,tag,description){
+  this.store.init(this,opts,store,function(err,tag,description){
     if( err ) return cb(err);
 
     desc = description
 
     opts.idlen = opts.idlen || 6
 
-    seneca.add({role:store.name,cmd:'dump'},function(args,cb){
+    this.add({role:store.name,cmd:'dump'},function(args,cb){
       cb(null,entmap)
     })
 
