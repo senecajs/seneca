@@ -7,3 +7,5 @@ node_modules
 README.html
 *.off
 *-off
+.DS_Store
+npm-debug.log
