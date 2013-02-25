@@ -30,6 +30,16 @@ function list(si,entmap,qent,q,cb) {
       list.push(ent)
     })
   }
+
+  if( q.limit$ ) {
+    list = list.slice(0,q.limit$)
+  }
+
+  if( q.sort$ ) {
+    list = list.sort(function(a,b){
+      return a[q.sort$] < b[q.sort$] ? -1 : a[q.sort$] === b[q.sort$] ? 0 : 1
+    })
+  }
   
   cb.call(si,null,list)
 }
