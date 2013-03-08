@@ -1,12 +1,8 @@
 {
-  "author": "",
   "name": "util",
   "description": "Seneca util",
   "version": "0.0.0",
   "main": "lib/util.js",
-  "engines": {
-    "node": "~0.4.12"
-  },
   "dependencies": {},
   "devDependencies": {}
 }

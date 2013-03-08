@@ -1,6 +1,9 @@
 /* Copyright (c) 2010-2013 Richard Rodger */
 "use strict";
 
+
+var util = require('util')
+
 var common   = require('../lib/common')
 var seneca   = require('../lib/seneca')
 
@@ -476,6 +479,9 @@ describe('seneca', function(){
 
         api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
         api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
+
+        var acts = si.pinact({p1:'v1',p2:'*'})
+        assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",util.inspect(acts))
       }
     )
   })
