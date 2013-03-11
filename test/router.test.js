@@ -148,7 +148,7 @@ describe('router', function() {
       //require('eyes').inspect(found)
       assert.equal('[{"match":{"p1":"v1"},"data":"r0"}]',JSON.stringify(found))
 
-      return 
+      //return 
 
       found = rt1.findall({p1:'v1',p2:'*'})
       //require('eyes').inspect(found)
@@ -159,8 +159,13 @@ describe('router', function() {
       rt1.add( {p1:'v1',p2:'v2d',p3:'v3b'}, 'r3b' )
       //require('eyes').inspect(JSON.parse(''+rt1))
       found = rt1.findall({p1:'v1',p2:'*',p3:'v3a'})
-      //require('eyes').inspect(found)
+      //console.log(JSON.stringify(found))
       assert.equal('[{"match":{"p1":"v1","p2":"v2c","p3":"v3a"},"data":"r3a"}]',JSON.stringify(found))
+
+      // gex can accept a list of globs
+      found = rt1.findall({p1:'v1',p2:['v2a','v2b','not-a-value']})
+      //console.log('found='+JSON.stringify(found))
+      assert.equal('[{"match":{"p1":"v1","p2":"v2a"},"data":"r1"},{"match":{"p1":"v1","p2":"v2b"},"data":"r2"}]',JSON.stringify(found))
     }
   }
 
