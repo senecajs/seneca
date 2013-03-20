@@ -27,7 +27,7 @@ var barverify = function(bar) {
   assert.equal(11,    bar.int)
   assert.equal(33.33, bar.dec)
   assert.equal(false, bar.bol)
-  assert.equal(new Date(2020,1,1).toISOString(), bar.wen.toISOString())
+  assert.equal(new Date(2020,1,1).toISOString(), _.isDate(bar.wen) ? bar.wen.toISOString() : bar.wen )
 
   assert.equal(''+[2,3],''+bar.arr)
   assert.equal(JSON.stringify({a:1,b:[2],c:{d:3}}),JSON.stringify(bar.obj))
@@ -273,6 +273,7 @@ exports.closetest = function(si,testcount,done) {
   var retryCnt = 0
 
   function retry(){
+    //console.log(testcount+' '+si.__testcount)
     if( testcount <= si.__testcount || retryCnt > RETRY_LIMIT ) {
       console.log('CLOSE')
       si.close()

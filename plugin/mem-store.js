@@ -31,15 +31,25 @@ function list(si,entmap,qent,q,cb) {
     })
   }
 
+  // sort first
+  if( q.sort$ ) {
+    for( var sf in q.sort$ ) break;
+    var sd = q.sort$[sf] < 0 ? -1 : 1
+
+    list = list.sort(function(a,b){
+      return sd * ( a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1 )
+    })
+  }
+
+
+  if( q.skip$ ) {
+    list = list.slice(q.skip$)
+  }
+
   if( q.limit$ ) {
     list = list.slice(0,q.limit$)
   }
 
-  if( q.sort$ ) {
-    list = list.sort(function(a,b){
-      return a[q.sort$] < b[q.sort$] ? -1 : a[q.sort$] === b[q.sort$] ? 0 : 1
-    })
-  }
   
   cb.call(si,null,list)
 }
