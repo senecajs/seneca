@@ -1,0 +1,5 @@
+1. update version: package.json, README.md, lib/seneca.js
+2. runs tests
+3. run seneca-verify
+4. run seneca-examples
+
