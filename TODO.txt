@@ -1,6 +1,7 @@
 
 - main api should be like express
   - nearly done - needs cleanup
+  - config race condition
 
 - multi action routing - si.add({foo:'a',bar:'*'}) attaches to all bar values
 
@@ -8,8 +9,12 @@
 
 - transport: pin should handle '*'
 
+- 'trigger' should be 'hook' - internal plugin commands exposing customisation points
 
-- on -> role
+- does seneca.add support string format for args?
+
+- update logging example
+- the log:{map:} thing sucks - make this easier
 
 
 - plugin.init forgets to call cb - how to handle?

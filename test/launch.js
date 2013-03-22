@@ -1,0 +1,2 @@
+
+var seneca = require('..')()
