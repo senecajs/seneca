@@ -17,6 +17,9 @@ describe('seneca.util', function() {
   it('seneca.util.deepextend', function() {
     assert.equal( util.inspect( si.util.deepextend({},{a:1},{b:{c:2}},{b:{c:3,d:4}}) ), "{ a: 1, b: { c: 3, d: 4 } }" )
     assert.equal( util.inspect( si.util.deepextend({},{a:1},{b:[11,22]},{b:[undefined,222,333]}) ), "{ a: 1, b: [ 11, 222, 333 ] }" )
+
+    var date = new Date(111)
+    assert.equal( si.util.deepextend({},{a:date},{b:[11,22]},{b:[undefined,222,333]}).a, date )
   })
 
 })
