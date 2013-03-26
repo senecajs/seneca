@@ -44,6 +44,7 @@
   "files": [
     "LICENSE.txt",
     "README.md",
+    "CHANGES.md",
     "lib",
     "plugin",
     "test/store/shared.js"
