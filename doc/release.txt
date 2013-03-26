@@ -1,5 +1,9 @@
-1. update version: package.json, README.md, lib/seneca.js
+1. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
 2. runs tests
 3. run seneca-verify
 4. run seneca-examples
+5. git, final commit+push
+6. git tag
+7. npm publish
+
 

@@ -21,6 +21,11 @@ var logger = require('./logassert')
 
 describe('seneca', function(){
 
+  it('version', function(){
+    var si = seneca()
+    assert.equal(si.version,'0.5.4')
+  })
+
   it('quick', function(){
     var si = seneca()
     si.use(function quickplugin(si,opts,cb){
