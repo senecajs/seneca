@@ -87,17 +87,18 @@ module.exports = function(opts,cb) {
       else do_save();
 
       function do_save(id) {
+        var mement = ent.clone$()
         if( id ) {
-          ent.id = id
+          mement.id = id
         }
 
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
-        entmap[base][name][ent.id] = ent
+        entmap[base][name][mement.id] = mement
   
-        si.log.debug(function(){return['save/'+(create?'insert':'update'),ent.canon$({string:1}),ent,desc]})
-        cb(null,ent)
+        si.log.debug(function(){return['save/'+(create?'insert':'update'),ent.canon$({string:1}),mement,desc]})
+        cb(null,mement)
       }
     },
 
@@ -109,7 +110,7 @@ module.exports = function(opts,cb) {
       list(this,entmap,qent,q,function(err,list){
         var ent = list[0] || null
         this.log.debug(function(){return['load',q,qent.canon$({string:1}),,ent,desc]})
-        cb(err, ent)
+        cb(err, ent.clone$())
       })
     },
 
