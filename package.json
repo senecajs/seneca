@@ -17,7 +17,8 @@
     "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
     "Tane Piper <piper.tane@gmail.com> (http://tanepiper.com)",
     "Marian Radulescu <marian.radulescu@gmail.com>",
-    "Alexandru Mircea <mircea.alexandru@gmail.com>"
+    "Alexandru Mircea <mircea.alexandru@gmail.com>",
+    "Cristian Ianto <cristian.ianto@nearform.com>"
   ],
   "engines": {
     "node": "*"
