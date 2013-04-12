@@ -7,7 +7,7 @@ layout: main
 
 <p>
 
-This tutorial shows you how to control Seneca's console logging
+This tutorial shows you how to control Seneca's logging
 output.  Clone the <a href="http://github.com/rjrodger/seneca">main
 Seneca repository</a> from github, and open the <i>doc/examples</i>
 folder.
@@ -147,7 +147,7 @@ node sales-tax.js --seneca.log=type:act
 
 The command line argument <i>--seneca.log</i> accepts a
 comma-separated list of filters. The filter <i>type:act</i> means only
-output the log entries of type <i>act<i>. The <i>type<i> is the third
+output the log entries of type <i>act</i>. The <i>type</i> is the third
 field. The <i>act</i> entries are very low level debugging logs
 showing the operation of individual actions. The logs show the input
 arguments, <i>in</i>, and the eventual output of the
@@ -578,7 +578,7 @@ log entry as first argument. The log entry is an array of values.
 
 <p>
 Here's an example using the <a href="http://logentries.com">LogEntries.com</a> service. This is cloud logging service that
-stores your logs and makes them searchable. I wrote their Node.js API module :) - <code>$ install npm node-logentries</code>. 
+stores your logs and makes them searchable. I wrote their Node.js API module :) - <code>$ npm install node-logentries</code>. 
 This example is in the file <i>sales-tax-logentries.js</i>: 
 </p>
 
@@ -617,6 +617,26 @@ You'll need to register a LogEntries.com account and get a token for this to wor
 <p>
 You can use custom handler functions to send logs anywhere you want, and process them anyway you need.
 </p>
+
+
+  <h4>One More Thing ...</h4>
+
+
+<p>
+Log filters are dynamic. You can add new ones at runtime using the <i>seneca.logroute</i> method:
+</p>
+
+{% highlight js %}
+seneca.logroute( {level:'all', handler:seneca.handler.print} )
+{% endhighlight %}
+
+<p>
+If you omit the handler, any previous filter is removed. If you add
+multiple handlers for the same filter, the logs will be sent to all
+the handlers.  This feature enables the administration web site to
+dynamically modify the filters at runtime.
+</p>
+
 
 <p>
 That's all folks! Corrections and comments: please tweet <a href="https://twitter.com/nodeseneca">@nodeseneca</a>.

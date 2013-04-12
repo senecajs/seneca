@@ -1,0 +1,78 @@
+---
+layout: main
+---
+<section id="main-content">
+
+  <h3>Seneca Data Entities</h3>
+
+<p>
+The Seneca framework provides a data entity API based loosely on the ActiveRecord style. Here's how it works.
+
+
+<h4>The Seneca Philosophy</h4>
+
+<p>
+The Seneca framework is defined by a philosophy that <a href="http://richardrodger.com">actions are better than objects</a>.
+</p>
+
+<p>
+The only first-class citizens in the Seneca framework are <i>actions</i>. You register actions in Seneca by defining a set of key-value pairs that the action matches.
+When a JSON document is submitted to Seneca, it triggers an action if a matching set of key-value pairs is found. The action returns another JSON document.
+</p>
+
+<p>
+Actions can call other actions, and wrap existing actions. Groups of actions can work together to provide specific functionality, such as user management. Such groups are called <i>plugins</i>.
+To keep things organized, a few conventions are used. A <i>role</i> property identifies a specific area of functionality. A <i>cmd</i> property identifies a specific action.
+</p>
+
+<p>
+For example:
+</p>
+
+<p>
+{% highlight js %}
+seneca.act( {role:'entity' cmd:'save', ent:{...}}, function(err,result){ ... })
+{% endhighlight %}
+</p>
+
+<p>
+This action will save data entities to persistent storage, as part of the group of actions that perform the <i>role</i> of data persistence.
+The <i>ent</i> property is an object containing the data of the data entity to save.
+
+<p>
+In Seneca, data persistence is provided by a set of actions. These are: 
+<code>save</code>, <code>load</code>, <code>list</code>, <code>remove</code>. This provides a consistent interface for all other actions that need to persist data.
+</p>
+
+<p>
+As convenience, these data entity actions are also available in the form of data entity objects, that expose the <i>cmd</i>s as methods - just like the ActiveRecord pattern. 
+However, you cannot add business logic to these objects. Business logic belongs inside actions.
+</p>
+
+<h4>The Data Entity API</h4>
+
+
+
+
+<!--
+
+- philosophy: objects v actions
+- persistent data model - entities
+- pragmatism: active record
+  - api intro
+  - simple example
+- namespacing
+- api coverage
+  - standard data interface
+- underlying actions
+- extending
+
+-->
+
+
+<p>
+That's all folks! Corrections and comments: please tweet <a href="https://twitter.com/nodeseneca">@nodeseneca</a>.
+</p>
+
+        </section>
+
