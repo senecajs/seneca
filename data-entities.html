@@ -6,7 +6,7 @@ layout: main
   <h3>Seneca Data Entities</h3>
 
 <p>
-The Seneca framework provides a data entity API based loosely on the ActiveRecord style. Here's how it works.
+The Seneca framework provides a data entity API based loosely on the <a href="http://www.martinfowler.com/eaaCatalog/activeRecord.html">ActiveRecord style</a>. Here's how it works.
 
 
 <h4>The Seneca Philosophy</h4>
@@ -29,11 +29,9 @@ To keep things organized, a few conventions are used. A <i>role</i> property ide
 For example:
 </p>
 
-<p>
 {% highlight js %}
-seneca.act( {role:'entity' cmd:'save', ent:{...}}, function(err,result){ ... })
+seneca.act( {role:'entity', cmd:'save', ent:{...}}, function(err,result){ ... })
 {% endhighlight %}
-</p>
 
 <p>
 This action will save data entities to persistent storage, as part of the group of actions that perform the <i>role</i> of data persistence.
@@ -46,10 +44,86 @@ In Seneca, data persistence is provided by a set of actions. These are:
 
 <p>
 As convenience, these data entity actions are also available in the form of data entity objects, that expose the <i>cmd</i>s as methods - just like the ActiveRecord pattern. 
-However, you cannot add business logic to these objects. Business logic belongs inside actions.
+However, you cannot add business logic to these objects. <i><b>Business logic belongs inside actions</b></i>.
 </p>
 
+
 <h4>The Data Entity API</h4>
+
+<p>
+First you need a Seneca instance:
+</p>
+
+{% highlight js %}
+var seneca = require('seneca')()
+{% endhighlight %}
+
+<p>
+Then you can create data entity objects:
+</p>
+
+{% highlight js %}
+var foo = seneca.make('foo')
+{% endhighlight %}
+
+<p>
+The entity name is <i>foo</i>. If your underlying data store is
+MongoDB, this data entity corresponds to the <i>foo</i>
+collection. Seneca provides a transient in-memory store out of the
+box (so you can just start coding!).
+</p>
+
+<p>
+Next, add some data fields:
+</p>
+
+{% highlight js %}
+foo.name = 'Apple'
+foo.price = 1.99
+{% endhighlight %}
+
+<p>
+The data fields are just ordinary JavaScript object properties.
+</p>
+
+<p>
+Now, you need to save the data:
+</p>
+
+{% highlight js %}
+foo.save$(function(err,foo){
+  console.log(foo)
+})
+{% endhighlight %}
+
+<p>
+The <code>save$</code> method invokes the <i>role:entity, cmd:save</i>
+action, passing in the foo object as the value of <i>ent</i> argument.
+</p>
+
+<p>
+The reason for the $ suffix is to namespace the <i>cmd</i>
+methods. You can always be 100% certain that vanilla property names
+"just work".
+</p>
+
+<p>
+The <code>save$</code> methods takes a callback, using the standard
+Node.js idiom: The first parameter is an error object (if there was an
+error), the second the result of the action. The save$ method provides
+a new copy of the foo entity. This copy has been saved to persistent
+storage, and includes a unique <i>id</i> property.
+</p>
+
+<!--
+
+loading
+removing
+listing and queries
+common query syntax
+-->
+
+
 
 
 
@@ -62,6 +136,7 @@ However, you cannot add business logic to these objects. Business logic belongs 
   - api intro
   - simple example
 - namespacing
+- stores
 - api coverage
   - standard data interface
 - underlying actions
