@@ -108,23 +108,73 @@ methods. You can always be 100% certain that vanilla property names
 </p>
 
 <p>
-The <code>save$</code> methods takes a callback, using the standard
+The <code>save$</code> method takes a callback, using the standard
 Node.js idiom: The first parameter is an error object (if there was an
-error), the second the result of the action. The save$ method provides
+error), the second the result of the action. The <code>save$</code> method provides
 a new copy of the foo entity. This copy has been saved to persistent
 storage, and includes a unique <i>id</i> property.
 </p>
 
-<!--
 
-loading
-removing
-listing and queries
-common query syntax
--->
+Once you've saved the data entity, you'll want to load it again at
+some point. Use the <code>load$</code> method to do this, passing in
+the <i>id</i> property.
+
+{% highlight js %}
+var id = '...'
+var foo_entity = seneca.make('foo')
+foo_entity.load$( id, function(err,foo){
+  console.log(foo)
+})
+{% endhighlight %}
+
+You can call the <code>load$</code> method on any data entity object
+to load a different entity of the same type. The original entity does
+not change - you get the loaded entity back via the callback.
+
+To delete entities, you also use the <i>id</i> property, with the 
+<code>remove$</code> method:
+
+{% highlight js %}
+var id = '...'
+var foo_entity = seneca.make('foo')
+foo_entity.remove$( id, function(err){ ... })
+{% endhighlight %}
+
+To get a list of entities that match a query, use
+the <code>list$</code> method:
+
+{% highlight js %}
+var foo_entity = seneca.make('foo')
+foo_entity.list$( {price:1.99}, function(err,list){
+  list.forEach(function( foo ){
+    console.log(foo)
+  })
+})
+{% endhighlight %}
+
+The matching entities are returned as an array. The query is a set of
+property values, all of which must match.  This is equivalent to a SQL
+query of the form: <code> col1 = 'val1' AND col2 = 'val2' AND ... </code>. 
+Seneca provides a common query format that works
+across all data stores. The trade-off is that these queries have
+limited expressiveness (more on this later, including the get-out-of-jail options).
+
+One thing you can do is sort the results:
+
+{% highlight js %}
+foo_entity.list$( {price:1.99, sort$:{price:-1}}, function(err,list){
+  ...
+})
+{% endhighlight %}
+
+The <code>sort$</code> meta argument takes a sub-object containing a single key, the field to sort. The value <code>+1</code> means sort ascending,
+and the value <code>-1</code> means sort descending. The common query format only accepts a sort by one field.
+
+You can also use queries with the <code>load$</code> and <code>remove$</code> methods. The first matching entity is selected.
 
 
-
+<h4>Zone, Base and Name: The Entity Namespace</h4>
 
 
 
@@ -137,9 +187,11 @@ common query syntax
   - simple example
 - namespacing
 - stores
+- logging
 - api coverage
   - standard data interface
 - underlying actions
+- native
 - extending
 
 -->
