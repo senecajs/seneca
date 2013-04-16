@@ -9,9 +9,9 @@
     "startup",
     "lean"
   ],
-  "version": "0.5.5",
+  "version": "0.5.6",
   "license": "MIT",
-  "homepage": "https://senecajs.org",
+  "homepage": "http://senecajs.org",
   "author": "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
   "contributors": [
     "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
