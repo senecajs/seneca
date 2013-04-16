@@ -30,7 +30,8 @@ For example:
 </p>
 
 {% highlight js %}
-seneca.act( {role:'entity', cmd:'save', ent:{...}}, function(err,result){ ... })
+seneca.act( {role:'entity', cmd:'save', ent:{...}}, 
+            function(err,result){ ... } )
 {% endhighlight %}
 
 <p>
@@ -69,7 +70,7 @@ var foo = seneca.make('foo')
 <p>
 The entity name is <i>foo</i>. If your underlying data store is
 MongoDB, this data entity corresponds to the <i>foo</i>
-collection. Seneca provides a transient in-memory store out of the
+collection. As a convenience, so you don't have to hook up a database, Seneca provides a transient in-memory store out of the
 box (so you can just start coding!).
 </p>
 
@@ -104,7 +105,7 @@ action, passing in the foo object as the value of <i>ent</i> argument.
 <p>
 The reason for the $ suffix is to namespace the <i>cmd</i>
 methods. You can always be 100% certain that vanilla property names
-"just work".
+"just work". Stick to alphanumeric characters and underscore and you'll be fine.
 </p>
 
 <p>
@@ -132,7 +133,7 @@ foo_entity.load$( id, function(err,foo){
 
 <p>
 You can call the <code>load$</code> method on any data entity object
-to load a different entity of the same type. The original entity does
+to load another entity of the same type. The original entity does
 not change - you get the loaded entity back via the callback.
 </p>
 <p>
@@ -190,18 +191,331 @@ You can also use queries with the <code>load$</code> and <code>remove$</code> me
 
 <h4>Zone, Base and Name: The Entity Namespace</h4>
 
+<p>
+Your data can live in many different places. It can be persistent or transient. It may have business rules that apply to it.
+It may be owned by different people.
+</p>
+
+<p>
+Seneca lets you work with your data, without worrying about where it
+lives, or what rules should apply to it. This makes it easy to handle
+different types of data in different ways. To make this easier, Seneca provides a three layer namespace for data entities:
+</p>
+
+<ul>
+<li>name: the primary name of the entity. For example: <i>product</i></li>
+<li>base: group name for entities that "belong together". For example: <i>shop</i></li>
+<li>zone: name for a data set belonging to a business entity, geography, or customer. For example: <i>tenant001</i></li>
+</ul>
+
+<p>
+The zone and base are optional. You can just use the name element in the same way you use ordinary database tables, and you'll be just fine.
+Here's an example of creating a <i>foo</i> entity (as seen above):
+</p>
+
+{% highlight js %}
+var foo_entity = seneca.make('foo')
+{% endhighlight %}
+
+<p>
+Often, a set of plugins that provide the related functions, will use
+the same <i>base</i>. This ensures that the entities used by these
+plugins won't interfere with your own entities.
+</p>
+
+<p>
+For example, the <a href="https://github.com/rjrodger/seneca-user">user</a> 
+and <a href="https://github.com/rjrodger/seneca-auth">auth</a> plugins,
+which handle user accounts, and login/logout, use the <i>sys</i> base,
+and work with the following entities:
+</p>
+
+{% highlight js %}
+var user_entity  = seneca.make('sys','user')
+var login_entity = seneca.make('sys','login')
+{% endhighlight %}
+
+<p>
+The underlying database needs to have a name for its table or
+collection. The convention is to join the base and name with an
+underscore, as this is accepted by most database systems as a valid
+name character.  This means that name, base and zone values should
+only be alphanumeric, and to be completely safe, should never start
+with a number.
+</p>
+
+<p>
+For the above plugins, the table or collection names would be:
+<code>sys_user</code> and <code>sys_login</code>.
+</p>
+
+<p>
+The zone element provides a higher level namespace that Seneca itself does not
+use. It is merely a placeholder for your own needs.  For example, you
+may need to isolate customer data into separate physical databases.
+</p>
+
+<p>
+The zone is never part of the database table name. You use it by
+registering multiple instances of the same database plugin, pointing
+at different physical databases. Seneca's pattern matching makes this
+automatic for you (see the entity type mapping examples below).
+</p>
+
+<p>
+You can also use the zone for custom business rules. The zone, base and name appear as action arguments - just pattern match the underlying actions! (and there are examples below).
+</p>
+
+<h5>Creating an Entity with a Specific Zone, Base and Name</h5>
+
+<p>
+The <i>make</i> method is available on both the main Seneca object, and on each entity object (where it always has a $ suffix):
+</p>
+
+{% highlight js %}
+// the alias make$ will also work
+var foo = seneca.make('foo') 
+
+// make() does not exist to avoid property clashes
+var bar = foo.make$('bar') 
+{% endhighlight %}
+
+<p>
+It optionally accepts up to three string arguments, specifying the zone, base and name, always in that order:
+</p>
+
+{% highlight js %}
+var foo = seneca.make('foo') 
+var bar_foo = seneca.make('bar','foo') 
+var zen_bar_foo = seneca.make('zen','bar','foo') 
+{% endhighlight %}
+
+<p>
+When no arguments are given, calling <code>make$</code> on an entity will create a new instance of the same kind (same zone, base and name):
+</p>
+
+{% highlight js %}
+var foo = seneca.make('foo') 
+var morefoo = foo.make$()
+{% endhighlight %}
+
+<p>
+If you call the <code>toString</code> method on an entity, it will indicate the zone, base and name using the syntax <i>zone/base/name</i> as a prefix to the entity data:
+</p>
+
+{% highlight text %}
+zone/base/name:{id=...;prop=val,...}
+{% endhighlight %}
+
+<p>
+If any of the namespace elements are not defined, a minus is used as placeholder:
+</p>
+
+{% highlight text %}
+-/-/name:{id=...;prop=val,...}
+{% endhighlight %}
+
+<p>
+The syntax <i>zone/base/name</i> is also used a shorthand for an
+entity type pattern. For example, <i>-/bar/-</i> means any entities
+that have base <i>bar</i>.
+</p>
+
+<h4>Using Databases to Store Entity Data</h4>
+
+<p>
+To store persistent data, you'll need to use an external
+database. Each database needs a plugin that understands how to talk to
+that database. The plugins normally use a specific driver module to do the actual talking.
+</p>
+
+<p>
+For example, the <a href="https://github.com/rjrodger/seneca-mongo-store">seneca-mongo-driver</a> plugin
+uses the <a href="http://mongodb.github.io/node-mongodb-native/">mongodb</a> module.
+</p>
+
+<p>
+Using a data store plugin is easy. Register with Seneca and supply the database connection details as options to the plugin:
+</p>
+
+{% highlight js %}
+var seneca = require('seneca')()
+seneca.use('mongo-store',{
+  name:'dbname',
+  host:'127.0.0.1',
+  port:27017
+})
+{% endhighlight %}
+
+<p>
+The database connection will need to be established before you can
+save data. Use the <code>seneca.ready</code> function to supply a
+callback that will be called once the database is good to go:
+</p>
+
+{% highlight js %}
+seneca.ready(function(err){
+  var apple = seneca.make$('fruit')
+  apple.name  = 'Pink Lady'
+  apple.price = 1.99
+  apple.save$(function(err,apple){
+    if( err ) return console.log(err);
+    console.log( "apple = "+apple  )
+  })
+})
+{% endhighlight %}
+
+<p>
+The <code>seneca.ready</code> function works for any plugin that has a callback dependency
+like this - it will only be triggered once all the plugins are ready.
+</p>
+
+<p>
+To close any open database connections, use the <code>seneca.close</code> method:
+</p>
+
+{% highlight js %}
+seneca.close(function(err){
+  console.log('database closed!')
+})
+{% endhighlight %}
+
+
+<h5>Data Store Plugins</h5>
+
+<p>
+To use a data store plugin, you'll normally need to install the module via npm:
+</p>
+
+{% highlight bash %}
+npm install seneca-mongo-store
+{% endhighlight %}
+
+<p>
+The data store plugins use a naming convention of the form seneca-<i>database</i>-store. The suffix <i>db</i> is dropped. Here are some of the existing data store plugins:
+</p>
+
+<ul> 
+  </li><li>JSON files (on disk) - <a href="http://github.com/rjrodger/seneca-jsonfile-store">seneca-jsonfile-store</a>
+  </li><li>MongoDB - <a href="http://github.com/rjrodger/seneca-mongo-store">seneca-mongo-store</a>
+  </li><li>MySQL - <a href="https://github.com/mirceaalexandru/seneca-mysql-store">seneca-mysql-store</a>
+  </li><li>PostgreSQL - <a href="https://github.com/marianr/seneca-postgres-store">seneca-postgres-store</a>
+  </li><li>levelDB - <a href="https://github.com/rjrodger/seneca-level-store">seneca-level-store</a>
+</li></ul>
+
+<p>
+Refer to their project pages for details on behaviour and configuration options. As a convenience, Seneca allows you to drop the <i>seneca-</i> prefix when registering the plugin:
+</p>
+
+{% highlight js %}
+seneca.use('mongo-store',{ ... })
+{% endhighlight %}
+
+<p>
+The default, built-in data store is mem-store, which provides a
+transient in-memory store. This is very useful for quick prototyping
+and allows you to get started quickly. By sticking to the common
+entity feature set, you can easily swap over to a real database at a
+later point.
+</p>
+
+<p>
+If you'd like to add support for a database to Seneca, 
+here's the <a href="/data-store-guide.html">guide to writing data store plugins</a> 
+</p>
+
+
+<h5>Mapping Entities to Data Stores</h5>
+
+<p>
+One of the most useful features of the Seneca data entity model is the
+ability to transparently use different databases. This is enabled by
+the use of Seneca actions for all the underlying operations. This
+makes it easy to pattern match against specific entity zones, bases
+and names and send them to different data stores.
+</p>
+
+<p>
+You can use the <i>map</i> option when registering a data store plugin
+to specify the data entity types that it should support. All others will be ignored.
+</p>
+
+<p>
+The map is a set of key-value pairs, where the key is an entity type
+pattern, and the value a list of entity <i>cmd</i>s 
+(such as <i>save</i>,<i>load</i>,<i>list</i>,<i>remove</i>,...), 
+or <code>'*'</code>, which means the mapping applies to all <i>cmd</i>s.
+</p>
+
+<p>
+The example mapping below means that all entities with the name <i>tmp</i>,
+regardless of zone or base, will use the transient mem-store:
+</p>
+
+{% highlight js %}
+seneca.use('mem-store',{ map:{ 
+  '-/-/tmp':'*'
+}})
+{% endhighlight %}
+
+<p>
+To use different databases for different groups of data, use the base element:
+</p>
+
+{% highlight js %}
+seneca.use('jsonfile-store',{ 
+  folder:'json-data', map:{'-/json/-':'*'}
+})
+
+seneca.use('level-store',{ 
+  folder:'level-data', map:{'-/level/-':'*'}
+})
+{% endhighlight %}
+
+<p>
+This mapping sends -/json/- entities to
+the <a href="https://github.com/rjrodger/seneca-jsonfile-store">jsonfile</a>
+data store, and -/level/- entities to
+the <a href="https://github.com/rjrodger/seneca-level-store">leveldb</a>
+data store.
+</p>
+
+<p>
+Here it is in action:
+
+{% highlight js %}
+seneca.ready(function(err,seneca){
+
+  ;seneca
+    .make$('json','foo',{propA:'val1',propB:'val2'})
+    .save$(function(err,json_foo){
+      console.log(''+json_foo)
+
+  ;seneca
+    .make$('level','bar',{propA:'val3',propB:'val4'})
+    .save$(function(err,level_bar){
+      console.log(''+level_bar)
+
+  }) })
+})
+{% endhighlight %}
+
+<p>
+(The ; prefix is just a marker to avoid excessive indentation)
+</p>
+
+<h4>Data Store Logging</h4>
+
+
+You can track and debug the activity of data entities by reviewing the action log, and the plugin log for the datastore.
+
 
 
 <!--
 
-- philosophy: objects v actions
-- persistent data model - entities
-- pragmatism: active record
-  - api intro
-  - simple example
-- namespacing
-- stores
+
 - logging
+- caching
 - api coverage
   - standard data interface
 - underlying actions
