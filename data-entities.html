@@ -203,9 +203,9 @@ different types of data in different ways. To make this easier, Seneca provides 
 </p>
 
 <ul>
-<li>name: the primary name of the entity. For example: <i>product</i></li>
-<li>base: group name for entities that "belong together". For example: <i>shop</i></li>
-<li>zone: name for a data set belonging to a business entity, geography, or customer. For example: <i>tenant001</i></li>
+<li><i>name</i>: the primary name of the entity. For example: <i>product</i></li>
+<li><i>base</i>: group name for entities that "belong together". For example: <i>shop</i></li>
+<li><i>zone</i>: name for a data set belonging to a business entity, geography, or customer. For example: <i>tenant001</i></li>
 </ul>
 
 <p>
@@ -231,17 +231,17 @@ and work with the following entities:
 </p>
 
 {% highlight js %}
-var user_entity  = seneca.make('sys','user')
-var login_entity = seneca.make('sys','login')
+var sys_user  = seneca.make('sys','user')
+var sys_login = seneca.make('sys','login')
 {% endhighlight %}
 
 <p>
-The underlying database needs to have a name for its table or
-collection. The convention is to join the base and name with an
-underscore, as this is accepted by most database systems as a valid
-name character.  This means that name, base and zone values should
-only be alphanumeric, and to be completely safe, should never start
-with a number.
+The underlying database needs to have a name for the table or
+collection associated with an entity. The convention is to join the
+base and name with an underscore, as <code>'_'</code> is accepted by most database
+systems as a valid name character.  This means that <i>name</i>, <i>base</i> and
+<i>zone</i> values should only be alphanumeric, and to be completely safe,
+should never start with a number.
 </p>
 
 <p>
@@ -250,7 +250,7 @@ For the above plugins, the table or collection names would be:
 </p>
 
 <p>
-The zone element provides a higher level namespace that Seneca itself does not
+The <i>zone</i> element provides a higher level namespace that Seneca itself does not
 use. It is merely a placeholder for your own needs.  For example, you
 may need to isolate customer data into separate physical databases.
 </p>
@@ -300,19 +300,30 @@ var morefoo = foo.make$()
 {% endhighlight %}
 
 <p>
+No data is copied, you get a completely new, empty, data entity (use <code>clone$</code> instead to copy the data).
+If you pass in an object as the last argument to <code>make$</code>, it will be used to initialize the entity data fields:
+</p>
+
+{% highlight js %}
+var foo = seneca.make('foo', {price:1.99,color:'red'}) 
+console.log('price is '+foo.price+' and color is '+foo.color)
+{% endhighlight %}
+
+
+<p>
 If you call the <code>toString</code> method on an entity, it will indicate the zone, base and name using the syntax <i>zone/base/name</i> as a prefix to the entity data:
 </p>
 
 {% highlight text %}
-zone/base/name:{id=...;prop=val,...}
+$zone/base/name:{id=...;prop=val,...}
 {% endhighlight %}
 
 <p>
-If any of the namespace elements are not defined, a minus is used as placeholder:
+If any of the namespace elements are not defined, a minus <code>'-'</code> is used as placeholder:
 </p>
 
 {% highlight text %}
--/-/name:{id=...;prop=val,...}
+$-/-/name:{id=...;prop=val,...}
 {% endhighlight %}
 
 <p>
@@ -412,10 +423,10 @@ seneca.use('mongo-store',{ ... })
 {% endhighlight %}
 
 <p>
-The default, built-in data store is mem-store, which provides a
+The default, built-in data store is <i>mem-store</i>, which provides a
 transient in-memory store. This is very useful for quick prototyping
 and allows you to get started quickly. By sticking to the common
-entity feature set, you can easily swap over to a real database at a
+entity feature set (see below), you can easily swap over to a real database at a
 later point.
 </p>
 
@@ -449,7 +460,7 @@ or <code>'*'</code>, which means the mapping applies to all <i>cmd</i>s.
 
 <p>
 The example mapping below means that all entities with the name <i>tmp</i>,
-regardless of zone or base, will use the transient mem-store:
+regardless of zone or base, will use the transient <i>mem-store</i>:
 </p>
 
 {% highlight js %}
@@ -459,7 +470,7 @@ seneca.use('mem-store',{ map:{
 {% endhighlight %}
 
 <p>
-To use different databases for different groups of data, use the base element:
+To use different databases for different groups of data, use the <i>base</i> element:
 </p>
 
 {% highlight js %}
@@ -501,6 +512,7 @@ seneca.ready(function(err,seneca){
 {% endhighlight %}
 
 <p>
+The full source code is available in the data-entities folder of the <a href="https://github.com/rjrodger/seneca-examples">seneca examples repository</a>.
 (The ; prefix is just a marker to avoid excessive indentation)
 </p>
 
@@ -517,7 +529,7 @@ You can track and debug the activity of data entities by reviewing the action lo
 - logging
 - caching
 - api coverage
-  - standard data interface
+  - standard data interface / common entity feature set
 - underlying actions
 - native
 - extending
