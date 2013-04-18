@@ -552,14 +552,12 @@ Once the action completes, the <code>OUT</code> log entries show the returned da
 </p>
 
 <p>
-The data stores themselves also generate logging output. Try <code>--seneca.log=plugin:jsonfile-store</code> or <code>--seneca.log=plugin:level-store</code> to see this:
+The data stores themselves also generate logging output. Try <code>--seneca.log=type:plugin</code> to see this:
 </p>
 
 {% highlight bash %}
-$ node main.js --seneca.log=type:plugin,plugin:jsonfile-store
+$ node main.js --seneca.log=type:plugin
 2013-04-18T10:39:54.961Z	DEBUG	plugin	jsonfile-store	QSG	cop6lx	save/insert	$-/json/foo:{id=nt7usm;propA=val1;propB=val2}	jsonfile-store~QSG~-/json/-
-
-$ node main.js --seneca.log=type:plugin,plugin:level-store
 2013-04-18T10:40:19.802Z	DEBUG	plugin	level-store	JNG	save/insert	$-/level/bar:{id=7166037e-112d-448c-9afa-84e69d84aa25;propA=val3;propB=val4}	level-store~JNG~-/level/-
 {% endhighlight %}
 
