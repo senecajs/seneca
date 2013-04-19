@@ -1,6 +1,6 @@
 /* Copyright (c) 2012-2013 Richard Rodger */
-
 "use strict";
+
 
 var common = require('../lib/common')
 var router = require('../lib/router')
