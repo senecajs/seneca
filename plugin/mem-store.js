@@ -110,7 +110,7 @@ module.exports = function(opts,cb) {
       list(this,entmap,qent,q,function(err,list){
         var ent = list[0] || null
         this.log.debug(function(){return['load',q,qent.canon$({string:1}),,ent,desc]})
-        cb(err, ent.clone$())
+        cb(err, ent ? ent.clone$() : null )
       })
     },
 
