@@ -16,7 +16,7 @@ describe('logging', function() {
       {level:'info',type:'plugin',plugin:'red',handler:'B'},
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{info:{k:'plugin',v:{'':{k:'type',v:{init:{d:'A'}}},red:{k:'type',v:{plugin:{d:'B'}}}}}}}")
+    assert.equal(fmt(r), "level:info->plugin:*->type:init-><A>red->type:plugin-><B>")
   })
 
 
@@ -30,7 +30,7 @@ describe('logging', function() {
     // fix printing for test
     r.add({level:'info',type:'init'},r.find({level:'info',type:'init'}).multiplex)
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:['A','B','C']}}}}}")
+    assert.equal(fmt(r), "level:info->type:init-><A,B,C>")
   })
 
     
@@ -39,7 +39,7 @@ describe('logging', function() {
       {level:'info',type:'init,  status',handler:'A'}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:'A'},status:{d:'A'}}}}}")
+    assert.equal(fmt(r), "level:info->type:init-><A>status-><A>")
   })
 
 
@@ -48,7 +48,7 @@ describe('logging', function() {
       {level:'info',type:'init status',handler:'A'}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:'A'},status:{d:'A'}}}}}")
+    assert.equal(fmt(r), "level:info->type:init-><A>status-><A>")
   })
 
 
@@ -57,7 +57,7 @@ describe('logging', function() {
       {level:'info,debug',type:'init,status',handler:'A'}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{info:{k:'type',v:{init:{d:'A'},status:{d:'A'}}},debug:{k:'type',v:{init:{d:'A'},status:{d:'A'}}}}}")
+    assert.equal(fmt(r), "level:info->type:init-><A>status-><A>debug->type:init-><A>status-><A>")
   })
 
 
@@ -66,7 +66,7 @@ describe('logging', function() {
       {level:'all',type:'init',handler:'A'}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{debug:{k:'type',v:{init:{d:'A'}}},info:{k:'type',v:{init:{d:'A'}}},warn:{k:'type',v:{init:{d:'A'}}},error:{k:'type',v:{init:{d:'A'}}},fatal:{k:'type',v:{init:{d:'A'}}}}}")
+    assert.equal(fmt(r), "level:debug->type:init-><A>info->type:init-><A>warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
   })
 
 
@@ -75,7 +75,7 @@ describe('logging', function() {
       {level:'warn+',type:'init',handler:'A'}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "{k:'level',v:{warn:{k:'type',v:{init:{d:'A'}}},error:{k:'type',v:{init:{d:'A'}}},fatal:{k:'type',v:{init:{d:'A'}}}}}")
+    assert.equal(fmt(r), "level:warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
   })
 
 

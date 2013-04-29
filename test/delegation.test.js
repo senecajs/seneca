@@ -68,7 +68,7 @@ describe('delegation', function(){
 
     sid.act({d:'D'},function(err,out){
       //console.log( 'OUT='+common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,d=D,a$=A,b=B,actid$=*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( common.owndesc(out,1,true)))
     })
   })
 

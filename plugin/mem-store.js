@@ -4,7 +4,7 @@
 
 var _       = require('underscore')
 var uuid    = require('node-uuid')
-
+var fs      = require('fs')
 
 
 
@@ -27,6 +27,10 @@ function list(si,entmap,qent,q,cb) {
         }
       }
       
+      if( !_.isFunction(ent.make$) ) {
+        ent = entset[id] = qent.make$(ent)
+      }
+
       list.push(ent)
     })
   }
@@ -175,6 +179,33 @@ module.exports = function(opts,cb) {
 
     this.add({role:store.name,cmd:'dump'},function(args,cb){
       cb(null,entmap)
+    })
+
+    this.add({role:store.name,cmd:'export'},function(args,done){
+      var entjson = JSON.stringify(entmap)
+      fs.writeFile(args.file,entjson,function(err){
+        done(err,{ok:!!err})
+      })
+    })
+
+
+    this.add({role:store.name,cmd:'import'},function(args,done){
+      try {
+        fs.readFile(args.file,function(err,entjson){
+          if( entjson ) {
+            try {
+              entmap = JSON.parse(entjson)
+              done(err,{ok:!!err})
+            }
+            catch(e){
+              done(e)
+            }
+          }
+        })
+      }
+      catch(e){
+        done(e)
+      }
     })
 
     cb(null,{name:store.name,tag:tag})
