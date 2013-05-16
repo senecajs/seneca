@@ -339,6 +339,37 @@ describe('seneca', function(){
   })
 
 
+  it('action-override', function() {
+    var si = seneca()
+
+    function foo(args,done) {
+      done(null,{a:args.a,s:this.toString()})
+    }
+
+    function bar(args,done) {
+      this.parent(args,function(e,o){
+        o.b=2
+        done(e,o)
+      })
+    }
+    
+    si.add({op:'foo'},foo)
+
+    si.act('op:foo,a:1',function(e,o){
+      assert.ok(gex('1~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.s))
+    })
+
+    return
+
+    si.add({op:'foo'},bar)
+
+    si.act('op:foo,a:1',function(e,o){
+      assert.ok(gex('1~2~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.b+'~'+o.s))
+    })
+
+  })
+
+
 
   it('plugins', function() {
 
