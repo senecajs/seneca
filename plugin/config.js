@@ -9,17 +9,18 @@ var _       = require('underscore')
 
 
 
-module.exports = function config( seneca,opts,cb ) {
+module.exports = function config( opts,cb ) {
+  var seneca = this
 
   var ref = {config:{}}
 
   if( opts.file ) {
 
     // TODO: need an async way to this
-    //fs.readFile( opts.file, function(err,text){
-    //if( err ) return cb(err);
+
     var text = fs.readFileSync( opts.file )
     ref.config = JSON.parse(text)
+
     cb()
   }
   else if( _.isObject(opts.object) ) {
