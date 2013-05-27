@@ -1,4 +1,6 @@
 
+- mem-store dump should not use role:mem-store, should be plugin:mem-store -> establish convention
+
 - main api should be like express
   - nearly done - needs cleanup
   - config race condition
