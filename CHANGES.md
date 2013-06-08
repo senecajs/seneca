@@ -1,5 +1,10 @@
 
-## 0.5.8:
+## 0.5.9: 
+
+   * seneca.depends - check plugin dependencies registered
+   * API CHANGE: seneca.fail throws if no callback
+
+## 0.5.8: 2013-05-29
 
    * Entities get an inspect() function for util.inspect
    * Entity.toString prints nicer object values
@@ -10,7 +15,7 @@
    * Config plugin supports environments
 
 
-## 2013-03-26, 0.5.3:
+## 0.5.3: 2013-03-26
 
    * seneca.util.deepextend supports boxed types, thanks Mircea!
 

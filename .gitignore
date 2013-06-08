@@ -9,4 +9,4 @@ README.html
 *-off
 .DS_Store
 npm-debug.log
-test/mem.json
+mem.json

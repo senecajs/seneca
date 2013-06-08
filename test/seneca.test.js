@@ -81,31 +81,64 @@ describe('seneca', function(){
       assert.isNull(err)
       
       // nothing
-      var err = si.fail()
+      var err = si.fail(false)
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.message,'Seneca: unknown error.')
 
 
       // unresolved code gets used as message
-      err = si.fail('code1')
+      err = si.fail('code1',false)
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'code1')
       assert.equal(err.message,'Seneca: code1 "code1"')
 
       // no code
-      err = si.fail({bar:1})
+      err = si.fail({bar:1},false)
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.seneca.bar,1)
       assert.equal(err.message,'Seneca: unknown error.')
 
       // additional meta props dragged along
-      err = si.fail({code:'code2',bar:2})
+      err = si.fail({code:'code2',bar:2},false)
       //eyes.inspect(err)
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,2)
       assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
+    })
+  })
+
+
+  it('failgen.meta.throw', function() {
+    seneca({},function(err,si){
+      assert.isNull(err)
+      
+      // nothing
+      try { si.fail(false) } catch(err) {
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.message,'Seneca: unknown error.')
+      }
+
+      // unresolved code gets used as message
+      try { err = si.fail('code1',false) } catch(err) {
+        assert.equal(err.seneca.code,'code1')
+        assert.equal(err.message,'Seneca: code1 "code1"')
+      }
+
+      // no code
+      try { err = si.fail({bar:1},false) } catch(err) {
+        assert.equal(err.seneca.code,'unknown')
+        assert.equal(err.seneca.bar,1)
+        assert.equal(err.message,'Seneca: unknown error.')
+      }
+
+      // additional meta props dragged along
+      try { err = si.fail({code:'code2',bar:2},false) } catch(err) {
+        assert.equal(err.seneca.code,'code2')
+        assert.equal(err.seneca.bar,2)
+        assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
+      }
     })
   })
 
