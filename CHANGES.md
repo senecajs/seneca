@@ -2,7 +2,8 @@
 ## 0.5.9: 
 
    * seneca.depends - check plugin dependencies registered
-   * API CHANGE: seneca.fail throws if no callback
+   * API CHANGE: seneca.fail throws if no callback      
+   * API CHANGE: seneca.http, mapping spec, data:true means place req.body into 'data' arg
 
 ## 0.5.8: 2013-05-29
 
@@ -20,3 +21,4 @@
    * seneca.util.deepextend supports boxed types, thanks Mircea!
 
 
+   
