@@ -60,8 +60,17 @@ function list(si,entmap,qent,q,cb) {
 
 
 
-module.exports = function(opts,cb) {
+module.exports = function(options) {
+  var seneca = this
+
+  options = seneca.util.deepextend({
+    prefix:'/mem-store',
+    web:{dump:false}
+  },options)
+
+
   var desc
+
 
   var entmap = {}
 
@@ -170,47 +179,58 @@ module.exports = function(opts,cb) {
   }
 
 
-  this.store.init(this,opts,store,function(err,tag,description){
-    if( err ) return cb(err);
+  var meta = this.store.init(this,options,store)
 
-    desc = description
+  desc = meta.desc
 
-    opts.idlen = opts.idlen || 6
+  options.idlen = options.idlen || 6
 
-    this.add({role:store.name,cmd:'dump'},function(args,cb){
-      cb(null,entmap)
-    })
-
-    this.add({role:store.name,cmd:'export'},function(args,done){
-      var entjson = JSON.stringify(entmap)
-      fs.writeFile(args.file,entjson,function(err){
-        done(err,{ok:!!err})
-      })
-    })
-
-
-    this.add({role:store.name,cmd:'import'},function(args,done){
-      try {
-        fs.readFile(args.file,function(err,entjson){
-          if( entjson ) {
-            try {
-              entmap = JSON.parse(entjson)
-              done(err,{ok:!!err})
-            }
-            catch(e){
-              done(e)
-            }
-          }
-        })
-      }
-      catch(e){
-        done(e)
-      }
-    })
-
-    cb(null,{name:store.name,tag:tag})
+  this.add({role:store.name,cmd:'dump'},function(args,cb){
+    cb(null,entmap)
   })
 
+  this.add({role:store.name,cmd:'export'},function(args,done){
+    var entjson = JSON.stringify(entmap)
+    fs.writeFile(args.file,entjson,function(err){
+      done(err,{ok:!!err})
+    })
+  })
+
+
+  this.add({role:store.name,cmd:'import'},function(args,done){
+    try {
+      fs.readFile(args.file,function(err,entjson){
+        if( entjson ) {
+          try {
+            entmap = JSON.parse(entjson)
+            done(err,{ok:!!err})
+          }
+          catch(e){
+            done(e)
+          }
+        }
+      })
+    }
+    catch(e){
+      done(e)
+    }
+  })
+
+  var service = null
+  if( options.web.dump ) {
+    service = seneca.httprouter(function(http){
+      http.get(options.prefix+'/dump',function(req,res){
+          res.send(entmap)
+      })
+    })
+  }
+
+  
+  return {
+    name:store.name,
+    tag:meta.tag,
+    service:service
+  }
 }
 
 

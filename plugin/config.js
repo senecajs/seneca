@@ -18,6 +18,7 @@ module.exports = function config( opts,cb ) {
   if( opts.file ) {
 
     // TODO: need an async way to this
+    // FIX: use init:config
 
     var text = fs.readFileSync( opts.file )
     ref.config = JSON.parse(text)
