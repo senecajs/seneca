@@ -4,6 +4,7 @@
    * seneca.depends - check plugin dependencies registered
    * API CHANGE: seneca.fail throws if no callback      
    * API CHANGE: seneca.http, mapping spec, data:true means place req.body into 'data' arg
+   * API CHANGE: plugins return, no async inside module def init:_plugin_ used instead for async init
 
 ## 0.5.8: 2013-05-29
 
