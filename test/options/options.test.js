@@ -1,8 +1,7 @@
 /* Copyright (c) 2013 Richard Rodger */
 "use strict";
 
-var http = require('http')
-
+var spawn = require('child_process').spawn
 
 var seneca_module = require('../..')
 
@@ -11,28 +10,13 @@ var assert = require('chai').assert
 var gex    = require('gex')
 
 
-var connect = require('connect')
-
-
-var app = connect()
-app.use(function(req,res,next){
-  res.writeHead(200)
-  res.end(JSON.stringify({"web":{"test":"web"}}))
-})
-var server = http.createServer(app).listen(62626)
-
-
-
-
 
 function check(init,val,lit) {
   var fn = function(options) {
+    assert.equal(''+val,''+options.test)
+    assert.equal(''+lit,''+options.lit)
+
     this.add({init:val},function(args,done){
-      options = args.options
-      assert.equal(''+val,''+args.options.test)
-      assert.equal(''+lit,''+args.options.lit)
-      assert.equal(''+val,''+options.test)
-      assert.equal(''+lit,''+options.lit)
       init.called=true
       done()
     })
@@ -41,7 +25,7 @@ function check(init,val,lit) {
     })
     return {name:val}
   }
-  return fn
+  return {name:val,init:fn}
 }
 
 describe('options', function(){
@@ -205,6 +189,10 @@ describe('options', function(){
 
 
   it('web', function(done) {
+    spawn('node',['options.server.js'])
+      .on('error',function(){console.log(arguments)})
+    setTimeout(function() {
+
     var si = seneca_module()
     var init = {}
     si.use('options','http://localhost:62626/')
@@ -229,12 +217,12 @@ describe('options', function(){
             if(err) return done(err);
             assert.equal('web~bar',out.foo)
 
-            server.close()
             done()
           })
         })
       })
     })
+    },500)
   })
 
 })
