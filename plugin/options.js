@@ -72,6 +72,7 @@ module.exports = function options( options ) {
 
   var env = process.env['NODE_ENV']
   if( _.isString(env) ) {
+    ref.options.env = env
     ref.options = seneca.util.deepextend(ref.options,ref.options[env])
   }
 
