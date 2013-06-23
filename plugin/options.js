@@ -6,10 +6,12 @@ var fs      = require('fs')
 var util    = require('util')
 var exec    = require('child_process').exec
 
-var _       = require('underscore')
-var request = require('request')
-var nid     = require('nid')
-var temp    = require('temp')
+var _        = require('underscore')
+var request  = require('request')
+var nid      = require('nid')
+var temp     = require('temp')
+var optimist = require('optimist')
+
 
 var name = 'options'
 
@@ -77,12 +79,21 @@ module.exports = function options( options ) {
   }
 
 
+  // these override previous sources
+  var argvoptions = {}
+  var argv = optimist.argv
+  if( argv.seneca && _.isObject(argv.seneca.options) ) {
+    argvoptions = argv.seneca.options 
+  }
+
+
+
   ref.options = seneca.util.deepextend({
     admin:{
       local:false,
       prefix:'/admin'
     }
-  },ref.options)
+  },ref.options,argvoptions)
 
 
   service = seneca.httprouter(function(http){
