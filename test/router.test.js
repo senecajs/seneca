@@ -172,5 +172,18 @@ describe('router', function() {
   it('findall.topvals', findalltest('topvals'))
   it('findall.subvals', findalltest('subvals'))
 
+
+  it('null-undef-nan', function(){
+    var rt1 = new Router()
+    
+    rt1.add( {p1:null}, 'r1' )
+    assert.equal( '{"d":"r1"}', rt1.toJSON() )
+
+    rt1.add( {p2:void 0}, 'r2' )
+    assert.equal( '{"d":"r2"}', rt1.toJSON() )
+
+    rt1.add( {p99:'v99'}, 'r99' )
+    assert.equal( '{"d":"r2","k":"p99","v":{"v99":{"d":"r99"}}}', rt1.toJSON() )
+  })
   
 })
