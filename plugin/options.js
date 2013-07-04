@@ -124,6 +124,6 @@ module.exports = function options( options ) {
   return {
     name:name,
     service:service,
-    return:seneca.util.copydata(ref.options)
+    export:seneca.util.copydata(ref.options)
   }
 }
