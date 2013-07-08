@@ -92,10 +92,17 @@ module.exports = function(options) {
 
   
       if( create ) {
-        this.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
-          if( err ) return cb(err);
+        if( ent.id$ ) {
+          var id = ent.id$
+          delete ent.id$
           do_save(id)
-        })
+        }
+        else {
+          this.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
+            if( err ) return cb(err);
+            do_save(id)
+          })
+        }
       }
       else do_save();
 
