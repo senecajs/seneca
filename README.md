@@ -2,8 +2,6 @@
 
 ## A Node.js toolkit for startups building Minimum Viable Products
 
-This is a community project of the http://nodejsdublin.com meetup.
-
 Seneca is a toolkit for organizing the business logic of your app. You
 can break down your app into "stuff that happens", rather than
 focusing on data models or managing dependencies.
@@ -11,16 +9,22 @@ focusing on data models or managing dependencies.
 For a gentle introduction to this module, see the [senecajs.org](http://senecajs.org) site.
 
 
-If you're using this module, feel free to contact us on twitter if you have any questions! :) [@nodejsdublin](http://twitter.com/nodejsdublin)
-
-Current Version: 0.5.8
-
-Tested on: node 0.10.6
+If you're using this module, feel free to contact me on twitter if you
+have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
 
-Use this module to define commands that work by taking in some JSON, and returning some JSON. The command to run is selected by pattern-matching on the the input JSON.
-There are built-in and optional sets of commands that help you build Minimum Viable Products: data storage, user management, distributed logic, caching, logging, etc.
-And you can define your own product by breaking it into a set of commands - "stuff that happens".
+Current Version: 0.5.9
+
+Tested on: node 0.10.6, 0.8.7
+
+
+Use this module to define commands that work by taking in some JSON,
+and, optionally, returning some JSON. The command to run is selected
+by pattern-matching on the the input JSON.  There are built-in and
+optional sets of commands that help you build Minimum Viable Products:
+data storage, user management, distributed logic, caching, logging,
+etc.  And you can define your own product by breaking it into a set of
+commands - "stuff that happens".
 
 That's pretty much it.
 
@@ -126,14 +130,14 @@ seneca.use('transport')
 var connect = require('connect')
 var app = connect()
   .use( connect.json() )
-  .use( seneca.service() )
+  .use( seneca.export('web') )
   .listen(10171)
 ```
 
 The _transport_ plugin exposes any commands over a HTTP end point. You
 can then use the _connect_ module, for example, to run a little web
-server. The _seneca.service_ method returns a _connect_ middleware
-function to do this.
+server. The _seneca.export('web')_ function call returns a _connect_
+middleware function to do this.
 
 Your implementation of the configuration code _stays the same_.
 
@@ -173,7 +177,7 @@ You can do this with every command.
 _Keeping the Business Happy_
 
 The thing about business requirements is that have no respect for
-command sense, logic or orderly structure. The real world is
+common sense, logic or orderly structure. The real world is
 messy. 
 
 In our example, let's say some countries have single sales tax rate,
@@ -249,7 +253,6 @@ This module depends on many, many Node.js modules - thank you!
 
 Development is sponsored by [nearForm](http://nearform.com)
 
-<img src="http://www.nearform.com/img/sponsored-by-nearform.png" width="300">
 
 
 

@@ -37,6 +37,7 @@ describe('util', function() {
     })
   })
 
+
   it('ensure_entity', function() {
     var foo_ent = si.make$('util_foo')
     var fooid = {}, foos = []

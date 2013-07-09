@@ -23,7 +23,7 @@ describe('seneca', function(){
 
   it('version', function(){
     var si = seneca()
-    assert.equal(si.version,'0.5.8')
+    assert.equal(si.version,'0.5.9')
   })
 
   it('quick', function(){
@@ -38,40 +38,6 @@ describe('seneca', function(){
     si.act('a:1',function(err,out){
       assert.equal(out.b,2)
     })
-  })
-
-
-  it('failgen.afterinit', function() {
-    try {
-      var i = 0
-      seneca({},function(err,si){
-        assert.equal( 0, i )
-        throw new Error('after init '+(i++))
-      })
-      assert.fail()
-    }
-    catch(e) {
-      //eyes.inspect(e)
-      assert.equal('Seneca: after init 0',e.seneca.error.message)
-      assert.equal('seneca/callback_exception',e.seneca.code)
-    }
-  })
-
-
-  it('failgen.afterinit.plugins', function() {
-    try {
-      var i = 0
-      seneca({plugins:['error-test']},function(err,si){
-        assert.equal( 0, i )
-        throw new Error('plugins after init '+(i++))
-      })
-      assert.fail()
-    }
-    catch(e) {
-      //console.log(e)
-      assert.equal('seneca/callback_exception',e.seneca.code)
-      assert.equal('Seneca: plugins after init 0',e.seneca.error.message)
-    }
   })
 
 

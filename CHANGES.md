@@ -1,10 +1,12 @@
 
 ## 0.5.9: 
 
+   * add export feature for plugins
    * seneca.depends - check plugin dependencies registered
    * API CHANGE: seneca.fail throws if no callback      
    * API CHANGE: seneca.http, mapping spec, data:true means place req.body into 'data' arg
-   * API CHANGE: plugins return, no async inside module def init:_plugin_ used instead for async init
+   * API CHANGE: no async inside module def init:_plugin_ used instead for async init
+   * API CHANGE: seneca.service replaced by seneca.export('web')
 
 ## 0.5.8: 2013-05-29
 

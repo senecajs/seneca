@@ -12,6 +12,6 @@ si.use('transport')
 
 var app = connect()
 app.use(connect.json())
-app.use( si.service() )
+app.use( si.export('web') )
 app.listen(10171)
 

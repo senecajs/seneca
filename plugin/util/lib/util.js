@@ -100,10 +100,14 @@ module.exports = function( options ) {
             })
           }
           
-          // ent JSON - contains $:{name,base,zone}
-          else if( _.isObject(args[entarg]) && args[entarg].$ ) {
-            args[entarg] = entmap[entarg].make$(args[entarg]) 
-            return next(null,args)
+          // ent JSON
+          else if( _.isObject(args[entarg]) ) {
+            
+            // contains entity$ or $:{name,base,zone} 
+            if( args[entarg].entity$ || args[entarg].$ ) {
+              args[entarg] = entmap[entarg].make$(args[entarg]) 
+              return next(null,args)
+            }
           }
           
           else return next(null,args);
