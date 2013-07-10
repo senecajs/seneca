@@ -1,0 +1,327 @@
+---
+layout: main
+---
+<section id="main-content">
+
+  <h3>Getting Started</h3>
+
+  <p>
+    This toolkit lets you focus on the real, "business" code of your app. Instead
+    of worrying about which database to use, how to structure your
+    components, or how to manage dependencies, you can just start
+    coding.
+  </p>
+
+  <p>
+    You write everything as a command. Your commands get called whenever
+    they match a set of properties. Your calling code doesn't know, or
+    care, which command gets the work done. A JavaScript object goes in,
+    and one comes out, asynchronously.
+  </p>
+
+  <p>
+    For practical details, visit the <a href="http://github.com/rjrodger/seneca">Seneca github project page</a>.
+  </p>
+
+  <p>Here's a command that sums two numbers:</p>
+
+{% highlight js %}
+var seneca = require('seneca')()
+
+seneca.add( {role:'math', cmd:'sum'}, function(args,callback) {
+  var sum = args.left + args.right
+  callback(null,{answer:sum})
+})
+
+seneca.act( {role:'math', cmd:'sum', left:1, right:2}, function(err,result) {
+  if( err ) return console.error( err )
+  console.log(result)
+})
+
+{% endhighlight %}
+
+
+<p>
+
+<code>seneca.add</code> adds a new command. <code>seneca.act</code>
+acts on the provided pattern, running a command if it matches. Try the code:
+
+</p>
+
+{% highlight bash %}
+$ node example.js
+{ answer: 3 }
+{% endhighlight %}
+  
+
+<p>
+You registered the pattern <code>{role:'math', cmd:'sum'}</code>. The
+input matched, and your code ran. The <code>left</code> and <code>right</code> arguments were
+then used by your plugin to do some real work.
+</p>
+
+<p>
+Let's add another command:
+</p>
+
+{% highlight js %}
+seneca.add( {role:'math', cmd:'product'}, function(args,callback) {
+  var product = args.left * args.right
+  callback(null,{answer:product})
+})
+
+seneca.act( {role:'math', cmd:'product', left:3, right:4}, 
+            function(err,result) {
+              if( err ) return console.error( err )
+              console.log(result)
+            })
+{% endhighlight %}
+
+{% highlight bash %}
+$ node example.js
+{ answer: 3 }
+{ answer: 12 }
+{% endhighlight %}
+
+<p>
+You can add new commands whenever you like, wherever you like. 
+</p>
+
+
+<p>This named argument style is fun, but if you want a real API, you can have that too:</p>
+
+{% highlight js %}
+function print(err,result) {console.log(result)}
+
+var math = seneca.pin({role:'math',cmd:'*'})
+math.sum( {left:1,right:2}, print )
+math.product( {left:1,right:2}, print )
+{% endhighlight %}
+
+
+<p>
+By <i>pinning</i> the pattern <code>{role:'math',cmd:'*'}</code> you created an object with methods that matched all the
+<code>cmd</code> properties.
+</p>
+
+  <h3>Why use Seneca?</h3>
+
+<p>
+<i>Seneca</i> provides plugins - sets of commands - that look after the foundations of your app for you:
+<ul>
+  <li>Organize your business logic
+  <li>Network API
+  <li>Data layer
+  <li>Caching
+  <li>Logging
+  <li>User management
+  <li>Distributed processing
+</ul>
+
+You write your own plugins and commands using the same system. 
+</p>
+
+<p>
+<i>Seneca</i> is not a web framework, it's a business logic organizer. You can use it with any web framework.
+</p>
+
+<p>
+Here's an example of how this helps you. Let's say the <i>product</i>
+command needs to live on a separate server. You can move it there with
+<i>no changes to your calling code</i>. First, set up the server:
+</p>
+
+{% highlight js %}
+seneca.add({role:'math', cmd:'product'}, function(args,callback) {
+  var product = args.left * args.right
+  callback(null,{answer:product})
+})
+
+seneca.use('transport')
+
+var connect = require('connect')
+var app = connect()
+  .use( connect.json() )
+  .use( seneca.service() )
+  .listen(10171)
+{% endhighlight %}
+
+<p>
+The <code>seneca.use</code> method loads in a plugin. In this case,
+the <i>transport</i> plugin, which can accept commands over a HTTP
+interface. <i>Seneca</i> exposes any plugin HTTP interface by
+returning a middleware function from the
+<code>seneca.service</code> method. You can use this directly with the 
+<a href="http://www.senchalabs.org/connect">connect</a> or 
+<a href="http://expressjs.com">express</a> modules.
+</p>
+
+
+<p>On the client side, just <i>transport</i> the remote patterns:</p>
+
+{% highlight js %}
+seneca.use('transport',{
+  pins:[ {role:'math',cmd:'product'} ]
+})
+
+seneca.act( {role:'math', cmd:'product', left:3, right:4}, 
+            function(err,result) {
+              if( err ) return console.error( err )
+              console.log(result)
+            })
+
+{% endhighlight %}
+
+<p>
+The <code>pins</code> option to the <i>transport</i> plugin accepts a
+set of patterns that will be sent over to the server (running on
+localhost by default).  The <i>transport</i> plugin just
+calls <code>seneca.add</code> for each pin, and proxies the input and
+output to the remote server.
+</p>
+
+<p>
+Your calling code, the <code>seneca.act</code> call, <i>does not
+change</i>. You now have a distributed system with no
+refactoring. Fire up a few <i>math.product</i> servers, put them
+behind a load balancer, and now you have a scalable system too.
+</p>
+
+
+
+  <h3>But what about data storage?</h3>
+
+<p>
+You really need a common database layer so that plugins and commands
+can all deal with data in the same way. Let's go with
+an <a href="http://en.wikipedia.org/wiki/Active_record_pattern">Active
+Record</a> style - it's nice and easy. 
+</p>
+
+{% highlight js %}
+var product = seneca.make('product')
+product.name = 'apple'
+product.price = 100
+
+product.save$(function( err, product ) {
+  if( err ) return console.error( err )
+  console.log( 'saved: '+product )
+
+  // product.id was generated for you
+  product.load$({id:product.id},function( err, product ) {
+    if( err ) return console.error( err )
+    console.log( 'loaded: '+product )
+  })
+})
+{% endhighlight %}
+
+<p>
+The <code>make</code> method creates an "Active Record"-ish object for
+you. The properties of this object store your data.  Call
+the <code>save$</code> and <code>load$</code> methods to save and load
+your data from the database.  You also get the <code>list$</code>
+method for queries, and <code>remove$</code> for deleting.
+</p>
+
+<p>
+You get an in-memory data store automatically, so the above code works
+out of the box without any database configuration. Here's how you would use MongoDB:
+</p>
+
+{% highlight js %}
+seneca.use( 'mongo-store', 
+            {name:'mydata',host:'127.0.0.1',port:27017} )
+
+seneca.ready( function(err,seneca){
+  if( err ) return console.error( 'ERROR:'+err )
+
+  var product = seneca.make('product')
+  product.name = 'apple'
+  product.price = 100
+
+  product.save$(function( err, product ) {
+    if( err ) return console.error( err )
+
+    // product.id is a MongoDB id this time
+    product.load$({id:product.id},function( err, product ) {
+      if( err ) return console.error( err )
+      console.log( 'loaded: '+product )
+    })
+  })
+})
+{% endhighlight %}
+
+<p>
+The <code>seneca.use</code> method tells <i>Seneca</i> to load a
+plugin, including any commands the plugin exposes. In this case,
+you're loading the <i>mongo-store</i> plugin, which lets you talk to
+the MongoDB database.
+</p>
+
+<p>
+To use the <i>mongo-store</i> plugin, you'll need to install it:
+
+{% highlight bash %}
+npm install seneca-mongo-store
+{% endhighlight %}
+</p>
+
+<p>
+The <code>seneca.ready</code> method waits for the database connection
+to be established. Apart from plugin configuration, your data logic
+code is <i>exactly the same</i>. Swapping databases at any stage of your project is trivial.
+</p>
+
+<p>
+How is the database layer implemented? It's just another set of commands. Here's the same code again:
+</p>
+
+{% highlight js %}
+var product = seneca.make('product')
+product.name = 'apple'
+product.price = 100
+
+seneca.act( 
+  { role:'entity', cmd:'save', ent:product},
+  function( err, product ) {
+    if( err ) return console.error( err )
+    console.log( 'saved: '+product )
+
+    seneca.act( 
+      // q is: the query - find matching property values
+      // qent is: entity type we want back
+      { role:'entity', cmd:'load', q:{id:product.id}, qent:product},
+      function( err, product ) {
+        if( err ) return console.error( err )
+        console.log( 'loaded: '+product )
+      })
+  })
+{% endhighlight %}
+
+<p>
+You can add support for your favorite database by writing a plugin with commands for
+each of the entity operations: <code>save</code>, <code>load</code>,
+etc. Here are some of the data stores <i>Seneca</i> supports:
+<ul> 
+  <li>Memory (transient) - built in
+  <li>JSON files (on disk) - <a href="http://github.com/rjrodger/seneca-jsonfile-store">seneca-jsonfile-store</a>
+  <li>JSON resources (REST API) - <a href="http://github.com/rjrodger/seneca-jsonrest-store">seneca-jsonrest-store</a>
+  <li>MongoDB - <a href="http://github.com/rjrodger/seneca-mongo-store">seneca-mongo-store</a>
+  <li>MySQL - <a href="https://github.com/mirceaalexandru/seneca-mysql-store">seneca-mysql-store</a>
+  <li>PostgreSQL - <a href="https://github.com/marianr/seneca-postgres-store">seneca-postgres-store</a>
+  <li>Redis - <a href="https://github.com/bamse16/seneca-redis-store">seneca-redis-store</a>
+  <li>CouchDB - <a href="https://github.com/bamse16/seneca-couch-store">seneca-couch-store</a>
+  <li>SQLite - <a href="https://github.com/bamse16/seneca-sqlite">seneca-sqlite-store</a>
+</ul> 
+</p>
+
+<p>
+You can even decide to save different entities into different
+databases - for example, put user profiles into MongoDB, purchase
+transactions into MySQL, and sessions into Redis.  You do need to stay
+database independent by avoiding table joins, <a href="http://en.wikipedia.org/wiki/Denormalization">but
+you don't need them anyway</a>!
+</p>
+
+        </section>
+
