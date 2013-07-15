@@ -3,7 +3,8 @@
 3. run seneca-verify
 4. run seneca-examples
 5. git, final commit+push
-6. git tag
-7. npm publish
+6. get merge
+7. git tag
+8. npm publish
 
 
