@@ -41,6 +41,45 @@ describe('seneca', function(){
   })
 
 
+  it('ready', function(fin){
+    var mark = {ec:0}
+
+    setTimeout(function(){
+      assert.ok(mark.r0)
+      assert.ok(mark.r1)
+      assert.ok(mark.p1)
+      assert.ok(mark.p2)
+      assert.ok(mark.ec==1)
+
+      fin()
+    },666)
+
+
+    var si = seneca()
+    si.ready(function(err){
+      assert.isNull(err)
+      mark.r0=true
+
+      si.use(function p1(opts){
+        si.add({init:'p1'},function(args,done){setTimeout(function(){mark.p1=true;done()},222)})
+      })
+
+      si.ready(function(err){
+        assert.isNull(err)
+        mark.r1=true
+
+        si.on('ready',function(err){
+          assert.isNull(err)
+          mark.ec++
+        })
+
+        si.use(function p2(opts){
+          si.add({init:'p2'},function(args,done){setTimeout(function(){mark.p2=true;done()},222)})
+        })
+      })
+    })
+  })
+
 
   it('failgen.meta', function() {
     seneca({},function(err,si){
