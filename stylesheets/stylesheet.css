@@ -213,11 +213,10 @@ aside a.button1:hover {
 
 /*Alignment for Github and Twitter text links on right-column*/
 .new_margin {
-	margin-left:47px;
-	xcolor:#555555;
-        color:#000f4b;
-	font-weight:700;
-	display:block;
+    margin-left:60px;
+    color:#000f4b;
+    font-weight:700;
+    display:block;
 }
 
 code, pre {
@@ -568,8 +567,29 @@ ul.docu {
     list-style-type: none;
 }
 
-ul.benefits {
+ul.benefits li {
     list-style-type: none;
+    margin: 10px 0px -5px 0px;
+    padding: 5px;
+    left: -5px;
+    position: relative;
+}
+ul.benefits li a:hover {
+    text-decoration: none;
+    background-color:#000f48;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+}
+
+ul.benefits a {
+    color: #666;
+}
+ul.benefits h5 {
+    font-weight: bold;
+    color: #2210EA !important;
+}
+ul.benefits p {
+    margin:0px;
 }
 
 ul.using {
@@ -594,4 +614,32 @@ ul.using li a {
 
 li a {
     text-decoration: none;
+}
+
+section.api h5 {
+    font-size: 1.2em !important;
+}
+
+section.api small {
+    font-size: smaller !important;
+    color: #000F4B;
+}
+
+section.api h4 {
+    font-size: 1.4em !important;
+    color: #2210EA !important;
+}
+
+section.api b {
+    font-weight: bold !important;
+}
+
+
+ul.contribs li {
+    list-style-type: none;
+}
+ul.contribs li img {
+    border: 2px solid #ccc;
+    margin: 4px;
+    vertical-align: middle;
 }
