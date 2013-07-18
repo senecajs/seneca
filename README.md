@@ -241,9 +241,13 @@ patterns. This lets you isolate complexity into well-defined
 places. It also means you can deal with special cases very easily.
 
 
-# Stay tuned...
+# Design Notes
 
-More to come...
+## Specific Minor Decisions
+
+   * Modules in package.json should have exact versions. Seneca is
+     infrastructure, so needs to be conservative and only use verified
+     versions.
 
 
 
