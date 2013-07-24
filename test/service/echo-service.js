@@ -4,5 +4,11 @@ require('../..')()
   .listen()
 
 
+// curl "http://localhost:10101/act?role=echo&foo=1"
+// OR
+// node echo-client.js
+
+
+
 
  
