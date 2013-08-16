@@ -44,4 +44,18 @@ describe('seneca.util', function() {
     assert.equal(to.f,t1.f)
     assert.equal(to.re,t1.re)
   })
+
+  it('seneca.util.deepextend.mixed', function() {
+    var str = util.inspect( si.util.deepextend(
+      {},{a:1,   b:{bb:1} ,       c:'s', d:'ss',   e:[2,3],  f:{fa:1,fb:2}},
+      {a:{aa:1}, b:{bb:{bbb:1}},  c:[1], d:{dd:1}, e:{ee:1}, f:[4,5,6]}
+    )).replace(/\s+/g,' ')
+
+    var expect = "{ a: { aa: 1 }, b: { bb: { bbb: 1 } }, c: [ 1 ], d: { dd: 1 }, e: { ee: 1 }, f: [ 4, 5, 6 ] }"
+    
+    assert.equal( str, expect )
+  })
+
+
+
 })
