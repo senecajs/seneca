@@ -1,32 +1,31 @@
 {
   "name": "seneca",
-  "description": "A toolkit for building Minimum Viable Products",
+  "description": "A Micro-Service Framework for Node.js",
   "keywords": [
+    "micro",
+    "service",
+    "framework",
     "minimum",
     "viable",
     "product",
     "toolkit",
-    "startup",
-    "lean"
+    "startup"
   ],
   "version": "0.5.9",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
-    "Richard Rodger <richard@ricebridge.com> (http://richardrodger.com/)",
-    "Tane Piper <piper.tane@gmail.com> (http://tanepiper.com)",
-    "Marian Radulescu <marian.radulescu@gmail.com>",
-    "Alexandru Mircea <mircea.alexandru@gmail.com>",
-    "Cristian Ianto <cristian.ianto@nearform.com>"
+    "Richard Rodger (http://richardrodger.com/)",
+    "Peter Elger",
+    "Marian Radulescu",
+    "Alexandru Mircea",
+    "Cristian Ianto"
   ],
-  "engines": {
-    "node": "*"
-  },
   "dependencies": {
     "underscore": "~1.4.2",
     "gex": "~0.1.1",
-    "parambulator": "~0.1.1",
+    "parambulator": "0.1.2",
     "async": "~0.2.9",
     "node-uuid": "~1.3.3",
     "connect": "2.8.4",

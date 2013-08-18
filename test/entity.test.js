@@ -69,6 +69,9 @@ describe('entity', function(){
     assert.equal('-/b/a',ap.entity$)
     ap = si.make$('c','b','a',{x:1})
     assert.equal('c/b/a',ap.entity$)
+
+    var esc1 = si.make$('esc',{x:1,y_$:2})
+    assert.equal( esc1.toString(), '$-/-/esc:{id=;x=1;y=2}' )
   })
 
   

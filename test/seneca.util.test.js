@@ -57,5 +57,16 @@ describe('seneca.util', function() {
   })
 
 
+  it('seneca.util.argprops',function(){
+    var out = si.util.argprops( {a:1, b:2, c:3}, {b:22, c:33, d:4}, {c:333}, ['d'] )
+    assert.equal( '{ a: 1, b: 22, c: 333 }', util.inspect(out) )
+
+    out = si.util.argprops( {}, {d:1}, {}, 'd' )
+    assert.equal( '{}', util.inspect(out) )
+
+    out = si.util.argprops( {}, {d:1,e:2}, {}, 'd, e' )
+    assert.equal( '{}', util.inspect(out) )
+
+  })
 
 })
