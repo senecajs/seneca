@@ -23,7 +23,7 @@ describe('seneca', function(){
 
   it('version', function(){
     var si = seneca()
-    assert.equal(si.version,'0.5.9')
+    assert.equal(si.version,'0.5.10')
   })
 
   it('quick', function(){

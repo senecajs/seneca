@@ -1,4 +1,9 @@
 
+## 0.5.10:
+
+   * added listen method for easy launching of services
+   * added client method for easy http access of services
+
 ## 0.5.9: 
 
    * add export feature for plugins

@@ -1,6 +1,6 @@
 {
   "name": "seneca",
-  "description": "A Micro-Service Framework for Node.js",
+  "description": "A Micro-Services Framework for Node.js",
   "keywords": [
     "micro",
     "service",
@@ -11,7 +11,7 @@
     "toolkit",
     "startup"
   ],
-  "version": "0.5.9",
+  "version": "0.5.10",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -23,7 +23,7 @@
     "Cristian Ianto"
   ],
   "dependencies": {
-    "underscore": "~1.4.2",
+    "underscore": "1.5.1",
     "gex": "~0.1.1",
     "parambulator": "0.1.2",
     "async": "~0.2.9",
