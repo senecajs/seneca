@@ -115,7 +115,7 @@ module.exports = function( options ) {
         function(err,args) {
           //console.log('done: '+util.inspect(args))
           if( err ) return done(err);
-          return seneca.parent(args,done)
+          return seneca.prior(args,done)
         }
       )
     })

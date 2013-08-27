@@ -141,6 +141,7 @@ module.exports = function(options) {
 
       list(this,entmap,qent,q,function(err,list){
         this.log.debug(function(){return['list',q,qent.canon$({string:1}),,list.length,list[0],desc]})
+        list = _.map(list,function(ent){ return ent.clone$() })
         cb(err, list)
       })
     },
