@@ -1,4 +1,8 @@
 
+## 0.5.11:
+
+   * parambulator arg validation logged
+
 ## 0.5.10:
 
    * added listen method for easy launching of services
