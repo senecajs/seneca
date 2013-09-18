@@ -45,6 +45,7 @@ describe('seneca.util', function() {
     assert.equal(to.re,t1.re)
   })
 
+
   it('seneca.util.deepextend.mixed', function() {
     var str = util.inspect( si.util.deepextend(
       {},{a:1,   b:{bb:1} ,       c:'s', d:'ss',   e:[2,3],  f:{fa:1,fb:2}},
@@ -57,6 +58,31 @@ describe('seneca.util', function() {
   })
 
 
+  it('seneca.util.deepextend.entity', function(fin) {
+
+    var str = util.inspect( si.util.deepextend(
+      {a:{x:1},b:{y:1,entity$:'a/b/c'}},
+      {c:{z:1},b:{y:2,entity$:'a/b/c'}}
+    )).replace(/\s+/g,' ')
+
+    var expect = "{ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } }"
+    
+    assert.equal( str, expect )
+    fin()
+  })
+
+
+
+  it('seneca.util.deepextend.cycle', function(fin) {
+    var a = {x:1}
+    a.a = a
+    var c = si.util.deepextend( {}, a )
+
+    assert.equal( "{ x: 1, a: { x: 1, a: { x: 1, a: [Circular] } } }", util.inspect(c) )
+    fin()
+  })
+
+
   it('seneca.util.argprops',function(){
     var out = si.util.argprops( {a:1, b:2, c:3}, {b:22, c:33, d:4}, {c:333}, ['d'] )
     assert.equal( '{ a: 1, b: 22, c: 333 }', util.inspect(out) )
@@ -66,7 +92,6 @@ describe('seneca.util', function() {
 
     out = si.util.argprops( {}, {d:1,e:2}, {}, 'd, e' )
     assert.equal( '{}', util.inspect(out) )
-
   })
 
 })

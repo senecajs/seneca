@@ -1,4 +1,11 @@
 
+
+## 0.5.12:
+
+   * added act_if convenience method
+   * deepextend avoid circular references
+   * argprops cleans $ args
+
 ## 0.5.11:
 
    * parambulator arg validation logged
