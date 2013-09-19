@@ -614,4 +614,19 @@ describe('seneca', function(){
     }
   })
 
+  it('string-add', function() {
+    var si = seneca()
+    si.add("i:0,a:1,b:2",function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
+    si.act("i:0,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+
+    si.add("i:1,a:1",{b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
+    si.act("i:1,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+
+    si.add("i:2,a:1",{b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
+    si.act("i:2,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+
+    si.add({i:3,a:1,b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
+    si.act("i:3,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+  })
 })
+

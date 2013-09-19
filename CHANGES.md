@@ -2,8 +2,9 @@
 
 ## 0.5.12:
 
+   * argsparser replaced with jsonic module
    * added act_if convenience method
-   * deepextend avoid circular references
+   * deepextend can handle circular references
    * argprops cleans $ args
 
 ## 0.5.11:
