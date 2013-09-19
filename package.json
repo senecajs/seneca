@@ -11,7 +11,7 @@
     "toolkit",
     "startup"
   ],
-  "version": "0.5.11",
+  "version": "0.5.12",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -56,6 +56,9 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "mocha test/seneca.test.js"
+    "test": "node_modules/.bin/mocha test/*.test.js"
+  },
+  "devDependencies": {
+    "mocha": "~1.13.0"
   }
 }

@@ -13,7 +13,7 @@ If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
 
-Current Version: 0.5.11
+Current Version: 0.5.12
 
 Tested on: node 0.10.6, 0.8.7
 
