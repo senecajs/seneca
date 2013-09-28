@@ -11,12 +11,12 @@ var common   = require('../lib/common')
 var seneca   = require('../lib/seneca')
 
 
-var eyes    = common.eyes
 var assert  = require('chai').assert
-var gex     = common.gex
+var gex     = require('gex')
 
 
 var logger = require('./logassert')
+
 
 
 describe('seneca', function(){
@@ -87,27 +87,23 @@ describe('seneca', function(){
       
       // nothing
       var err = si.fail(false)
-      //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.message,'Seneca: unknown error.')
 
 
       // unresolved code gets used as message
       err = si.fail('code1',false)
-      //eyes.inspect(err)
       assert.equal(err.seneca.code,'code1')
       assert.equal(err.message,'Seneca: code1 "code1"')
 
       // no code
       err = si.fail({bar:1},false)
-      //eyes.inspect(err)
       assert.equal(err.seneca.code,'unknown')
       assert.equal(err.seneca.bar,1)
       assert.equal(err.message,'Seneca: unknown error.')
 
       // additional meta props dragged along
       err = si.fail({code:'code2',bar:2},false)
-      //eyes.inspect(err)
       assert.equal(err.seneca.code,'code2')
       assert.equal(err.seneca.bar,2)
       assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
@@ -218,8 +214,6 @@ describe('seneca', function(){
 
       try { 
         si.act({on:'not-a-plugin',cmd:'not-a-cmd'},function(err){
-          //eyes.inspect(err)
-          //console.log(err)
           assert.isNotNull(err)
         }) 
       } catch( e ) { console.log(e); assert.fail();}
@@ -255,7 +249,6 @@ describe('seneca', function(){
       })
     }
     catch(e) {
-      //eyes.inspect(e)
       assert.equal('seneca/callback_exception',e.seneca.code)
       assert.equal('Seneca: inside callback 3',e.seneca.error.message)
     }
@@ -266,14 +259,12 @@ describe('seneca', function(){
 
       si.act({role:'error-test',how:'fail'},function(err){
         //console.log('HOW-fail')
-        //eyes.inspect(err)
         assert.equal('error_code1',err.seneca.code)
         cblog += 'a'
       })
 
       si.act({role:'error-test',how:'msg'},function(err){
         //console.log('HOW-msg')
-        //eyes.inspect(err)
         assert.equal('an error message',err.seneca.code)
         assert.equal('Seneca: an error message "an error message"',err.message)
         cblog += 'b'
@@ -281,7 +272,6 @@ describe('seneca', function(){
 
       si.act({role:'error-test',how:'errobj'},function(err){
         //console.log('HOW-errobj')
-        //eyes.inspect(err)
         assert.equal('unknown',err.seneca.code)
         assert.equal('Seneca: an Error object',err.message)
         cblog += 'c'
@@ -290,7 +280,6 @@ describe('seneca', function(){
 
       si.act({role:'error-test',how:'str'},function(err){
         //console.log('HOW-str')
-        //eyes.inspect(err)
         assert.equal('a string error',err.seneca.code)
         assert.equal('Seneca: a string error "a string error"',err.message)
         cblog += 'd'
@@ -299,7 +288,6 @@ describe('seneca', function(){
 
       si.act({role:'error-test',how:'obj'},function(err){
         //console.log('HOW-obj')
-        //eyes.inspect(err)
         assert.equal('unknown',err.seneca.code)
         assert.equal('an object',err.seneca.error)
         assert.equal('Seneca: unknown error.',err.message)
@@ -391,16 +379,16 @@ describe('seneca', function(){
       })
     }
     
-    si.add({op:'foo'},foo)
 
+    // NOTE: this test should fail once all actions are made properly async, so leaving it in place to verify this
+
+    si.add({op:'foo'},foo)
     si.act('op:foo,a:1',function(e,o){
       assert.ok(gex('1~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.s))
     })
 
-    return
 
     si.add({op:'foo'},bar)
-
     si.act('op:foo,a:1',function(e,o){
       assert.ok(gex('1~2~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.b+'~'+o.s))
     })
@@ -555,7 +543,6 @@ describe('seneca', function(){
         })
 
         var api = si.pin({p1:'v1',p2:'*'})
-        //eyes.inspect(api)
 
         api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
         api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
