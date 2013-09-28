@@ -23,7 +23,7 @@
     "Cristian Ianto"
   ],
   "dependencies": {
-    "underscore": "1.5.1",
+    "underscore": "1.5.2",
     "gex": "~0.1.1",
     "parambulator": "0.1.2",
     "async": "~0.2.9",
@@ -40,7 +40,8 @@
     "nid": "~0.3.0",
     "pegjs": "~0.7.0",
     "temp": "~0.5.0",
-    "jsonic": "~0.1.0"
+    "jsonic": "~0.1.0",
+    "patrun": "~0.1.1"
   },
   "main": "lib/seneca",
   "files": [

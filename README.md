@@ -17,6 +17,8 @@ Current Version: 0.5.12
 
 Tested on: node 0.10.6, 0.8.7
 
+[![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
+
 
 Use this module to define commands that work by taking in some JSON,
 and, optionally, returning some JSON. The command to run is selected

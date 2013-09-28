@@ -16,7 +16,7 @@ describe('logging', function() {
       {level:'info',type:'plugin',plugin:'red',handler:'B'},
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:info->plugin:*->type:init-><A>red->type:plugin-><B>")
+    assert.equal(fmt(r), "level:info->plugin:red->type:plugin-><B>*->type:init-><A>")
   })
 
 
