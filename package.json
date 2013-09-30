@@ -20,7 +20,8 @@
     "Peter Elger",
     "Marian Radulescu",
     "Alexandru Mircea",
-    "Cristian Ianto"
+    "Cristian Ianto",
+    "Dominic Tarr"
   ],
   "dependencies": {
     "underscore": "1.5.2",
@@ -57,9 +58,11 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha test/*.test.js"
+    "test": "./node_modules/.bin/mocha test/*.test.js",
+    "build": "./node_modules/.bin/jshint lib/*.js"
   },
   "devDependencies": {
-    "mocha": "~1.13.0"
+    "mocha": "~1.13.0",
+    "jshint": "~2.1.11"
   }
 }
