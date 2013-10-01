@@ -1,4 +1,8 @@
 
+## 0.5.13:
+   
+   * moved pattern matcher into own module: patrun
+   * added stats collection for actions
 
 ## 0.5.12:
 

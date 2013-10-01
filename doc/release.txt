@@ -1,10 +1,11 @@
+0. Update CHANGELOG
 1. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
 2. runs tests
 3. run seneca-verify
 4. run seneca-mvp
 5. run seneca-examples
 6. git, final commit+push
-7. get merge
+7. get checkout master; git merge
 8. git tag
 9. npm publish
 
