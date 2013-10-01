@@ -5,7 +5,7 @@ var util   = require('util')
 var logging = require('../lib/logging')
 
 
-function fmt(r){ return r.toString().replace(/\s+/g,'') }
+function fmt(r){ return r.toString(true).replace(/\s+/g,'') }
 
 describe('logging', function() {
 

@@ -62,6 +62,8 @@ exports.basictest = function(si,done) {
     async.series(
       {
         save1: function(cb) {
+          console.log('save1')
+
           var foo1 = si.make({name$:'foo'}) ///si.make('foo')
           foo1.p1 = 'v1'
           
@@ -73,6 +75,8 @@ exports.basictest = function(si,done) {
         },
 
         load1: function(cb) {
+          console.log('load1')
+
           scratch.foo1.load$( scratch.foo1.id, verify(cb,function(foo1){
             assert.isNotNull(foo1.id)
             assert.equal('v1',foo1.p1)
@@ -81,6 +85,8 @@ exports.basictest = function(si,done) {
         },
 
         save2: function(cb) {
+          console.log('save2')
+
           scratch.foo1.p1 = 'v1x'
           scratch.foo1.p2 = 'v2'
           scratch.foo1.save$( verify(cb,function(foo1){
@@ -92,6 +98,8 @@ exports.basictest = function(si,done) {
         },
         
         load2: function(cb) {
+          console.log('load2')
+
           scratch.foo1.load$( scratch.foo1.id, verify(cb, function(foo1){
             assert.isNotNull(foo1.id)
             assert.equal('v1x',foo1.p1)
@@ -101,6 +109,8 @@ exports.basictest = function(si,done) {
         },
 
         save3: function(cb) {
+          console.log('save3')
+
           scratch.bar = si.make( bartemplate )
           var mark = scratch.bar.mark = Math.random()
 
@@ -113,6 +123,8 @@ exports.basictest = function(si,done) {
         },
 
         save4: function(cb) {
+          console.log('save4')
+
           scratch.foo2 = si.make({name$:'foo'})
           scratch.foo2.p2 = 'v2'
           
@@ -124,6 +136,8 @@ exports.basictest = function(si,done) {
         },
 
         query1: function(cb) {
+          console.log('query1')
+
           scratch.barq = si.make('zen', 'moon','bar')
           scratch.barq.list$({}, verify(cb, function(res){
             assert.ok( 1 <= res.length)
@@ -132,12 +146,16 @@ exports.basictest = function(si,done) {
         },
 
         query2: function(cb) {
+          console.log('query2')
+
           scratch.foo1.list$({}, verify(cb, function(res){
             assert.ok( 2 <= res.length)
           }))
         },
 
         query3: function(cb) {
+          console.log('query3')
+
           scratch.barq.list$({id:scratch.bar.id}, verify(cb, function(res){
             assert.equal( 1, res.length )
             barverify(res[0])
@@ -145,6 +163,8 @@ exports.basictest = function(si,done) {
         },
 
         query4: function(cb) {
+          console.log('query4')
+
           scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(res){
             assert.equal( 1, res.length )
             barverify(res[0])
@@ -152,6 +172,8 @@ exports.basictest = function(si,done) {
         },
 
         query5: function(cb) {
+          console.log('query5')
+
           scratch.foo1.list$({p2:'v2'}, verify(cb, function(res){
             assert.ok( 2 <= res.length )
           }))
@@ -159,6 +181,8 @@ exports.basictest = function(si,done) {
 
 
         query6: function(cb) {
+          console.log('query6')
+
           scratch.foo1.list$({p2:'v2',p1:'v1x'}, verify(cb, function(res){
             assert.ok( 1 <= res.length )
             res.forEach(function(foo){
@@ -169,6 +193,8 @@ exports.basictest = function(si,done) {
         },
 
         remove1: function(cb) {
+          console.log('remove1')
+
           var foo = si.make({name$:'foo'})
           
           foo.remove$( {all$:true}, function(err, res){
@@ -181,8 +207,11 @@ exports.basictest = function(si,done) {
         },
 
         remove2: function(cb) {
+          console.log('remove2')
+
           scratch.bar.remove$({mark:scratch.bar.mark}, function(err,res){
             assert.isNull(err)
+
             scratch.bar.list$({mark:scratch.bar.mark}, verify(cb, function(res){
               assert.equal( 0, res.length )
             }))
