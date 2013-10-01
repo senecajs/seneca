@@ -13,9 +13,9 @@ If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
 
-Current Version: 0.5.12
+Current Version: 0.5.13
 
-Tested on: node 0.10.6, 0.8.7
+Tested on: Node 0.10.19, and 0.11, 0.8 on Travis
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
 

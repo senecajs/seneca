@@ -3,6 +3,7 @@
    
    * moved pattern matcher into own module: patrun
    * added stats collection for actions
+   * jshint applied to code, use npm run-script build
 
 ## 0.5.12:
 
