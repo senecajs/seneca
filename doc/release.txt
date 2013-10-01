@@ -6,7 +6,9 @@
 5. run seneca-examples
 6. git, final commit+push
 7. get checkout master; git merge
-8. git tag
+7.1 runs tests
+8. git push
+8.1 git tag; git push --tags
 9. npm publish
 
 
