@@ -1,0 +1,5 @@
+
+# 0.5.14:
+  - error msg for plugin not found
+  - error msg if store has not yet connected to db
+  - remove web stuff from main seneca lib
