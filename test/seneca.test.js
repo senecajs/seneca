@@ -249,6 +249,7 @@ describe('seneca', function(){
       })
     }
     catch(e) {
+      //console.log(e)
       assert.equal('seneca/callback_exception',e.seneca.code)
       assert.equal('Seneca: inside callback 3',e.seneca.error.message)
     }

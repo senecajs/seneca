@@ -2,8 +2,9 @@
 "use strict";
 
 
-var fs = require('fs')
+var fs   = require('fs')
 var util = require('util')
+var path = require('path')
 
 var nid   = require('nid')
 var _     = require('underscore')
@@ -128,12 +129,15 @@ module.exports = function( options ) {
   function cmd_define_sys_entity(args,done) {
     var seneca = this
     var list = args.list || [_.pick(args,['entity','zone','base','name','fields'])]
+    list = _.isArray(list) ? list : list.split(/\s*,\s*/)
 
     //console.dir(list)
     
     var sys_entity = seneca.make$('sys','entity')
 
     function define(entry,next) {
+      //console.log(entry)
+
       if( _.isString(entry) ) {
         entry = seneca.util.parsecanon(entry)
       }
@@ -159,10 +163,17 @@ module.exports = function( options ) {
       })
     }
 
-    async.mapLimit( args.list || [], options.limit.parallel, define, done )
+    async.mapLimit( list || [], options.limit.parallel, define, done )
   }
 
 
+
+  var utilfuncs = {
+    pathnorm: function( pathstr ) {
+      return path.normalize( (null==pathstr) ? '' : ''+pathstr ).replace(/\/+$/,'')
+    },
+    deepextend: pluginseneca.util.deepextend
+  }
 
 
   // TODO: needs own plugin, and more generic than just util
@@ -170,6 +181,10 @@ module.exports = function( options ) {
 
   return {
     name:name,
+    export:utilfuncs
+  }
+
+  /*
     service: function(req,res,next) {
 
       function send() {
@@ -196,6 +211,8 @@ module.exports = function( options ) {
       else next();
     }
   }
+   */
+
 }
 
 

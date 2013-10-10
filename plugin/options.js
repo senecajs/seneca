@@ -25,6 +25,8 @@ module.exports = function options( options ) {
 
   if( from ) {
 
+    // FIX, yeah fun, DELETE!!!
+
     // ... look away ... MUHAHA
     if( from.match( /^http/i ) ) {
       var tmp = temp.path({prefix:'seneca-options-'})
@@ -96,11 +98,14 @@ module.exports = function options( options ) {
   },ref.options,argvoptions)
 
 
+  // FIX: use role:web,use:service instead
+  /*
   service = seneca.httprouter(function(http){
     http.get(ref.options.admin.prefix+'/options',function(req,res){
       res.send(ref.options)
     })
   })
+   */
 
   seneca.log.debug('loaded',util.inspect(ref.options,false,null).replace(/[\r\n]/g,' '))
 
@@ -123,7 +128,7 @@ module.exports = function options( options ) {
 
   return {
     name:name,
-    service:service,
+    //service:service,
     export:seneca.util.copydata(ref.options)
   }
 }

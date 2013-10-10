@@ -226,18 +226,27 @@ module.exports = function(options) {
 
   var service = null
   if( options.web.dump ) {
+    seneca.act('role:web', {use:{
+      prefix:options.prefix,
+      pin:{role:'mem-store',cmd:'*'},
+      map:{
+        dump:true
+      }
+    }})
+/*
     service = seneca.httprouter(function(http){
       http.get(options.prefix+'/dump',function(req,res){
           res.send(entmap)
       })
     })
+*/
   }
 
   
   return {
     name:store.name,
-    tag:meta.tag,
-    service:service
+    tag:meta.tag
+    //service:service
   }
 }
 
