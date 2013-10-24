@@ -5,4 +5,4 @@
   - remove web stuff from main seneca lib
   - prevent use of _ in zone, base, name, also ensure matches [a-zA-Z][a-zA-Z0-9]*, option to turn off for backwards compat
   - delegate needs to have var self = this in all methods
-
+  - use('./localfile.js') broken
