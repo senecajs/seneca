@@ -12,7 +12,7 @@ For a gentle introduction to this module, see the [senecajs.org](http://senecajs
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.5.13
+Current Version: 0.5.14
 
 Tested on: Node 0.10.19, and 0.11, 0.8 on Travis
 
