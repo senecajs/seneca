@@ -385,13 +385,14 @@ describe('seneca', function(){
 
     si.add({op:'foo'},foo)
     si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.s))
+      assert.ok(gex('1~Seneca/0.5.*/*').on(''+o.a+'~'+o.s))
     })
+
 
 
     si.add({op:'foo'},bar)
     si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~2~Seneca/0.5.*/*/{actid$=*}').on(''+o.a+'~'+o.b+'~'+o.s))
+      assert.ok(gex('1~2~Seneca/0.5.*/*').on(''+o.a+'~'+o.b+'~'+o.s))
     })
 
   })

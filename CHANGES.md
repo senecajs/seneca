@@ -1,4 +1,10 @@
 
+## 0.5.14: 2013-10-30
+
+   * moved web to own module, seneca-web
+   * moved transport to own module, seneca-transport
+   * transport now uses patterns, no longer hard-coded into seneca.js
+
 ## 0.5.13:
    
    * moved pattern matcher into own module: patrun

@@ -22,7 +22,7 @@ describe('delegation', function(){
 
 
     assert.ok(gex("Seneca/0.5.*/*").on(si.toString()))
-    assert.ok(gex("Seneca/0.5.*/*/{a$=A,b=B}").on(sid.toString()))
+    assert.ok(gex("Seneca/0.5.*/*/{b=B}").on(sid.toString()))
 
 
     si.act({c:'C'},function(err,out){
@@ -138,7 +138,7 @@ describe('delegation', function(){
     var sid = si.delegate({b:'B'})
 
     si.act({c:'C'},function(err,out){
-      console.dir( common.owndesc(out,0,true) )
+      //console.dir( common.owndesc(out,0,true) )
       //assert.ok(gex("{c=C,parent$=*}").on( common.owndesc(out,1,true)))
     })
   })
