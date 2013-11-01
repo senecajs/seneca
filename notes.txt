@@ -1,2 +1,6 @@
+# to rebuild locally
 rvm use ruby-1.9.2-head
 jekyll --pygments --no-lsi --safe
+
+# to publish
+git push origin gh-pages
