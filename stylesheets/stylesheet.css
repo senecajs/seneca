@@ -586,7 +586,7 @@ ul.benefits a {
 }
 ul.benefits h5 {
     font-weight: bold;
-    color: #2210EA !important;
+    color: #2C006F !important;
 }
 ul.benefits p {
     margin:0px;
@@ -642,4 +642,41 @@ ul.contribs li img {
     border: 2px solid #ccc;
     margin: 4px;
     vertical-align: middle;
+}
+
+
+div.highlight {
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+}
+div.highlight pre {
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+}
+
+div.src-anno {
+  left:330px;
+  position:absolute;
+  font-family: serif;
+  font-style: italic;
+  line-height: 19px;
+  font-size: 16px;
+  padding: 20px;
+}
+
+span.anno-em {
+  font-weight: bold;
+  font-style:  normal;
+}
+
+span.anno-code {
+  font-family: monospace;
+  font-size:   12px;
+  font-weight: normal;
+  color: dark-green;
+}
+
+h4.filename {
+  margin-left:10px;
+  font-weight: normal;
 }
