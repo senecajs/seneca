@@ -70,7 +70,8 @@ module.exports = function options( options ) {
     ref.options = seneca.util.deepextend(seneca_options,ref.options)
   }
   catch(e) {
-    // IGNORE, seneca.options.js is optional
+    // seneca.options.js is optional
+    seneca.log.debug('not-loaded','optional','./seneca.options.js',e.message)
   }
 
 
