@@ -40,6 +40,12 @@ describe('seneca', function(){
     })
   })
 
+  
+  it('require-use-safetynet', function(){
+    require('..').use('echo')
+    require('..')().use('echo')
+  })
+
 
   it('ready', function(fin){
     var mark = {ec:0}
