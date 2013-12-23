@@ -8,34 +8,32 @@ var util   = require('util')
 
 var seneca   = require('..')
 
-var gex     = require('gex')
 var assert  = require('chai').assert
 
 
 describe('plugin', function(){
 
   it('depends', function(){
-    var si = seneca()
+    var si = seneca({test:{stayalive:function(code,valmap){stayalive(code,valmap)}}})
     
-    si.use( function(opts,reg){
-      reg(null,{name:'aaa'})
+    si.use( function(opts){
+      return {name:'aaa'}
     })
 
-    si.use( function(opts,reg){
+    si.use( function(opts){
       this.depends('bbb',['aaa'])
-      reg(null,{name:'bbb'})
+      return {name:'bbb'}
     })
 
-    try {
-      si.use( function(opts,reg){
-        this.depends('ccc',['zzz'])
-        reg(null,{name:'ccc'})
-      })
-      assert.fail()
+
+    var stayalive = function(code,valmap) {
+      assert.equal('plugin_required',code)
     }
-    catch( e ) {
-      assert.equal('seneca/plugin_required',e.seneca.code)
-    }
+
+    si.use( function(opts){
+      this.depends('ccc',['zzz'])
+      return {name:'ccc'}
+    })
   })
 
 })

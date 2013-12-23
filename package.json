@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "mocha": "~1.13.0",
-    "jshint": "~2.1.11"
+    "jshint": "~2.1.11",
+    "docco": "~0.6.2"
   }
 }
