@@ -46,7 +46,7 @@ Here's an example:
 ```javascript
 var seneca = require('seneca')()
 
-seneca.add( {cmd:'sales-tax'}, function(args,callback){
+seneca.add( {cmd:'salestax'}, function(args,callback){
   var rate  = 0.23
   var total = args.net * (1+rate)
   callback(null,{total:total})
