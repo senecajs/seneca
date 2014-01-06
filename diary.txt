@@ -1,6 +1,14 @@
 
+
+NEXT:
+- update error messages and codes in seneca.js
+- retest all data stores - should die on connection failure
+
+2014-01-06:
+- seneca.die kills process, seneca.fail just logs        
+
 2012-12-14:
-- prepend 'seneca-' to plugins names if they cannot be found verbatim - reduces verbosity of references to standard plugins:
+- prepend 'seneca-' to plugin names if they cannot be found verbatim - reduces verbosity of references to standard plugins:
   si.use( require('seneca-user') ) becomes si.use( require('user') ) 
 - search for plugin modules in calling code require paths, again to reduce verbosity. Uses module.parent filename and path properties
   inside seneca module:

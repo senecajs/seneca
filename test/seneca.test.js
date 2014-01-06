@@ -18,16 +18,17 @@ var gex     = require('gex')
 var logger = require('./logassert')
 
 
+var testopts = {test:{xsilent:true}}
 
 describe('seneca', function(){
 
   it('version', function(){
-    var si = seneca()
+    var si = seneca(testopts)
     assert.equal(si.version,'0.5.14')
   })
 
   it('quick', function(){
-    var si = seneca()
+    var si = seneca(testopts)
     si.use(function quickplugin(si,opts,cb){
       si.add({a:1},function(args,cb){cb(null,{b:2})})
       cb()
@@ -61,7 +62,7 @@ describe('seneca', function(){
     },666)
 
 
-    var si = seneca()
+    var si = seneca(testopts)
     si.ready(function(err){
       assert.isNull(err)
       mark.r0=true
@@ -373,7 +374,7 @@ describe('seneca', function(){
 
 
   it('action-override', function() {
-    var si = seneca()
+    var si = seneca(testopts)
 
     function foo(args,done) {
       done(null,{a:args.a,s:this.toString()})
@@ -563,7 +564,7 @@ describe('seneca', function(){
 
 
   it('compose', function() {
-    var si = seneca()
+    var si = seneca(testopts)
 
     si.add({A:1},function(args,cb){
       cb(null,{x:2})
@@ -594,7 +595,7 @@ describe('seneca', function(){
 
 
   it('strargs', function() {
-    var si = seneca()
+    var si = seneca(testopts)
     si.add({a:1,b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act({a:1,b:2,c:3},function(err,out){ assert.isNull(err); assert.equal(6,out) })
 
@@ -610,7 +611,7 @@ describe('seneca', function(){
   })
 
   it('string-add', function() {
-    var si = seneca()
+    var si = seneca(testopts)
     si.add("i:0,a:1,b:2",function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act("i:0,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
 
