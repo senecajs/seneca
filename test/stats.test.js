@@ -11,6 +11,7 @@ var stats   = require('../lib/stats')
 var assert  = require('chai').assert
 
 
+
 describe('stats', function(){
 
   it('wrap', function(){

@@ -4,6 +4,9 @@ NEXT:
 - update error messages and codes in seneca.js
 - retest all data stores - should die on connection failure
 
+2014-01-07:
+- handle errors thrown within callbacks - these need to be thrown by seneca.act, as they can't be passed *back* into the callback
+
 2014-01-06:
 - seneca.die kills process, seneca.fail just logs        
 
@@ -30,7 +33,6 @@ NEXT:
 - makelogrouter creates log routing - enables filtering of logs
 - test/logging.test.js runs under mocha
 - moved test/*.text.js to all run under mocha
-
 
 2013-01-11
 - fixed router bugs

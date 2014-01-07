@@ -7,12 +7,14 @@ var _      = require('underscore')
 var util   = require('util')
 
 
+var testopts = {test:{silent:true}}
+
 
 var seneca = require('..')
 
 
 describe('seneca.util', function() {
-  var si = seneca()
+  var si = seneca(testopts)
 
   it('seneca.util.deepextend.happy', function() {
     assert.equal( util.inspect( si.util.deepextend({},{a:1},{b:{c:2}},{b:{c:3,d:4}}) ), "{ a: 1, b: { c: 3, d: 4 } }" )

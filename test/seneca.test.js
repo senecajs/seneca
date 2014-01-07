@@ -15,10 +15,8 @@ var assert  = require('chai').assert
 var gex     = require('gex')
 
 
-var logger = require('./logassert')
+var testopts = {test:{silent:true}}
 
-
-var testopts = {test:{xsilent:true}}
 
 describe('seneca', function(){
 
@@ -44,7 +42,7 @@ describe('seneca', function(){
   
   it('require-use-safetynet', function(){
     require('..').use('echo')
-    require('..')().use('echo')
+    require('..')(testopts).use('echo')
   })
 
 
@@ -88,288 +86,177 @@ describe('seneca', function(){
   })
 
 
-  it('failgen.meta', function() {
-    seneca({},function(err,si){
-      assert.isNull(err)
-      
-      // nothing
-      var err = si.fail(false)
-      assert.equal(err.seneca.code,'unknown')
-      assert.equal(err.message,'Seneca: unknown error.')
-
-
-      // unresolved code gets used as message
-      err = si.fail('code1',false)
-      assert.equal(err.seneca.code,'code1')
-      assert.equal(err.message,'Seneca: code1 "code1"')
-
-      // no code
-      err = si.fail({bar:1},false)
-      assert.equal(err.seneca.code,'unknown')
-      assert.equal(err.seneca.bar,1)
-      assert.equal(err.message,'Seneca: unknown error.')
-
-      // additional meta props dragged along
-      err = si.fail({code:'code2',bar:2},false)
-      assert.equal(err.seneca.code,'code2')
-      assert.equal(err.seneca.bar,2)
-      assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
+  it('failgen.meta.happy', function() {
+    var si = seneca({
+      test:{silent:true},
+      message:{
+        seneca: {
+          msg1:'Message one'
+        }
+      }
     })
+    
+    // nothing
+    var err = si.fail()
+    assert.equal(err.seneca.code,'unknown')
+    assert.ok(gex("Seneca/*/*: unknown").on(err.message))
+
+    // unresolved code gets used as message
+    err = si.fail('code1')
+    assert.equal(err.seneca.code,'code1')
+    assert.ok(gex("Seneca/*/*: code1").on(err.message))
+
+    // additional values
+    err = si.fail('code1',{foo:'a'})
+    assert.equal(err.seneca.code,'code1')
+    assert.equal(err.seneca.valmap.foo,'a')
+    assert.ok(gex("Seneca/*/*: code1").on(err.message))
+
+    // no code
+    err = si.fail({bar:1})
+    assert.equal(err.seneca.code,'unknown')
+    assert.equal(err.seneca.valmap.bar,1)
+    assert.ok(gex("Seneca/*/*: unknown").on(err.message))
+
+    // additional meta props dragged along
+    err = si.fail({code:'code2',bar:2})
+    assert.equal(err.seneca.code,'code2')
+    assert.equal(err.seneca.valmap.bar,2)
+    assert.ok(gex("Seneca/*/*: code2").on(err.message))
+
+    // Error
+    err = si.fail(new Error('eek'))
+    assert.equal(err.seneca.code,'unknown')
+    assert.ok(gex("Seneca/*/*: eek").on(err.message))
+
+    // Error with unresolved code
+    var erg = new Error('erg')
+    erg.code = 'code3'
+    err = si.fail(erg)
+    assert.equal(err.seneca.code,'code3')
+    assert.ok(gex("Seneca/*/*: erg").on(err.message))
+
+    // Error with resolved code
+    var erg = new Error('erg')
+    erg.code = 'msg1'
+    err = si.fail(erg)
+    assert.equal(err.seneca.code,'msg1')
+    assert.ok(gex("Seneca/*/*: Message one").on(err.message))
   })
 
 
-  it('failgen.meta.throw', function() {
-    seneca({},function(err,si){
-      assert.isNull(err)
-      
-      // nothing
-      try { si.fail(false) } catch(err) {
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.message,'Seneca: unknown error.')
-      }
-
-      // unresolved code gets used as message
-      try { err = si.fail('code1',false) } catch(err) {
-        assert.equal(err.seneca.code,'code1')
-        assert.equal(err.message,'Seneca: code1 "code1"')
-      }
-
-      // no code
-      try { err = si.fail({bar:1},false) } catch(err) {
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.seneca.bar,1)
-        assert.equal(err.message,'Seneca: unknown error.')
-      }
-
-      // additional meta props dragged along
-      try { err = si.fail({code:'code2',bar:2},false) } catch(err) {
-        assert.equal(err.seneca.code,'code2')
-        assert.equal(err.seneca.bar,2)
-        assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":2}')
-      }
-    })
-  })
-
-
-  it('failgen.callbacks', function() {
-    seneca({},function(err,si){
-      assert.isNull(err)
-      
-      var cblog = ''
-
-      si.fail(function(err){
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.message,'Seneca: unknown error.')
-        cblog+='a'
-      })
-
-      si.fail('msg1',function(err){
-        assert.equal(err.seneca.code,'msg1')
-        assert.equal(err.message,'Seneca: msg1 "msg1"')
-        cblog+='b'
-      })
-
-      si.fail('code1',function(err){
-        assert.equal(err.seneca.code,'code1')
-        assert.equal(err.message,'Seneca: code1 "code1"')
-        cblog+='c'
-      })
-
-      si.fail({code:'code2',bar:1},function(err){
-        assert.equal(err.seneca.code,'code2')
-        assert.equal(err.seneca.bar,1)
-        assert.equal(err.message,'Seneca: code2 {"code":"code2","bar":1}')
-        cblog+='d'
-      })
-
-      si.fail(function(err,a1,a2){
-        assert.equal(err.seneca.code,'unknown')
-        assert.equal(err.message,'Seneca: unknown error.')
-        assert.equal('arg1',a1)
-        assert.equal('arg2',a2)
-        cblog+='e'
-      },'arg1','arg2')
-
-      si.fail('m1',function(err,a1,a2){
-        assert.equal(err.seneca.code,'m1')
-        assert.equal(err.message,'Seneca: m1 "m1"')
-        assert.equal('arg1',a1)
-        assert.equal('arg2',a2)
-        cblog+='f'
-      },'arg1','arg2')
-
-      assert.equal('abcdef',cblog)
-    })
-  })
-
-
-  it('failgen.badplugin', function() {
-    seneca({},function(err,si){
-      assert.isNull(err)
-
-      try { si.service('not-a-plugin') } catch( e ) { 
-        assert.equal('seneca/service_unknown_plugin',e.seneca.code)
-        assert.equal('not-a-plugin',e.seneca.pluginname)
-        assert.equal('Seneca: service(pluginname): unable to build service, unknown plugin name: not-a-plugin',e.message)
-      }
-
-      try { si.findplugin('not-a-plugin') } catch( e ) { 
-        assert.equal('seneca/plugin_unknown_plugin',e.seneca.code)
-        assert.equal('not-a-plugin',e.seneca.pluginname)
-        assert.equal('Seneca: service(pluginname): unknown plugin name: not-a-plugin',e.message)
-      }
-
-      try { 
-        si.act({on:'not-a-plugin',cmd:'not-a-cmd'},function(err){
-          assert.isNotNull(err)
-        }) 
-      } catch( e ) { console.log(e); assert.fail();}
-
-    })
-  })
 
 
   it('failgen.cmd', function() {
+    var si = seneca({test:{silent:true},plugins:['echo','error-test']})
+
+    si.act({role:'error-test'},function(err){
+      assert.isNull(err)
+    })
+
     try {
-
-      var i = 0;
-      seneca({plugins:['echo','error-test']},function(err,si){
-        assert.isNull(err)
-        assert.equal(0,i)
-
-        si.act({role:'error-test'},function(err){
-          assert.isNull(err)
-        })
-
-        try {
-          si.act({role:'error-test'},function(err){
-            throw new Error('inside callback')
-          })
-          assert.fail()
-        }
-        catch(e) {
-          assert.equal(e.seneca.code,'seneca/act_error')
-        }
-
-
-        throw new Error('inside callback 3')
+      si.act({role:'error-test'},function(err){
+        throw new Error('inside callback')
       })
+      assert.fail()
     }
     catch(e) {
-      //console.log(e)
-      assert.equal('seneca/callback_exception',e.seneca.code)
-      assert.equal('Seneca: inside callback 3',e.seneca.error.message)
+      assert.equal(e.seneca.code,'seneca/act_callback_error')
     }
 
+    var cblog = ''
 
-    seneca({plugins:['echo','error-test']},function(err,si){
-      var cblog = ''
-
-      si.act({role:'error-test',how:'fail'},function(err){
-        //console.log('HOW-fail')
-        assert.equal('error_code1',err.seneca.code)
-        cblog += 'a'
-      })
-
-      si.act({role:'error-test',how:'msg'},function(err){
-        //console.log('HOW-msg')
-        assert.equal('an error message',err.seneca.code)
-        assert.equal('Seneca: an error message "an error message"',err.message)
-        cblog += 'b'
-      })
-
-      si.act({role:'error-test',how:'errobj'},function(err){
-        //console.log('HOW-errobj')
-        assert.equal('unknown',err.seneca.code)
-        assert.equal('Seneca: an Error object',err.message)
-        cblog += 'c'
-      })
-
-
-      si.act({role:'error-test',how:'str'},function(err){
-        //console.log('HOW-str')
-        assert.equal('a string error',err.seneca.code)
-        assert.equal('Seneca: a string error "a string error"',err.message)
-        cblog += 'd'
-      })
-
-
-      si.act({role:'error-test',how:'obj'},function(err){
-        //console.log('HOW-obj')
-        assert.equal('unknown',err.seneca.code)
-        assert.equal('an object',err.seneca.error)
-        assert.equal('Seneca: unknown error.',err.message)
-        cblog += 'e'
-      })
-
-      assert.equal('abcde',cblog)
+    si.act({role:'error-test',how:'fail'},function(err){
+      assert.equal('error_code1',err.seneca.code)
+      cblog += 'a'
     })
+
+    si.act({role:'error-test',how:'msg'},function(err){
+      assert.equal('an error message',err.seneca.code)
+      assert.ok(gex('Seneca/*/*: an error message').on(err.message))
+      cblog += 'b'
+    })
+
+    si.act({role:'error-test',how:'errobj'},function(err){
+      assert.equal('seneca/act_error',err.seneca.code)
+      assert.ok(gex('Seneca/*/*: an Error object').on(err.message))
+      cblog += 'c'
+    })
+
+    si.act({role:'error-test',how:'str'},function(err){
+      assert.equal('seneca/act_error',err.seneca.code)
+      assert.ok(gex('Seneca/*/*: a string error').on(err.message))
+      cblog += 'd'
+    })
+
+    si.act({role:'error-test',how:'obj'},function(err){
+      assert.equal('seneca/act_error',err.seneca.code)
+      assert.ok(gex('Seneca/*/*: {error=an object}').on(err.message))
+      cblog += 'e'
+    })
+
+    assert.equal('abcde',cblog)
   })
 
 
 
   it('register', function() {
-    seneca({},function(err,si){
-      var initfn = function(){}
-      var emptycb = function(){}
+    var si = seneca(testopts)
 
-      try { si.register() } catch( e ) { 
-        //console.log(e)
+    var initfn = function(){}
+    var emptycb = function(){}
+
+    try { si.register() } catch( e ) { 
+      //console.log(e)
+      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+    }
+
+
+    try { si.register({}) } catch( e ) { 
+      //console.log(e)
+      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
+    }
+
+    try { si.register({},emptycb) } catch( e ) { 
+      //console.log(e)
+      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
+    }
+
+    try { si.register({name:1,init:initfn},emptycb) } catch( e ) { 
+      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+    }
+    
+    try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
+      //console.log(e)
         assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-      }
-
-
-      try { si.register({}) } catch( e ) { 
-        //console.log(e)
-        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-        assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
-      }
-
-      try { si.register({},emptycb) } catch( e ) { 
-        //console.log(e)
-        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-        assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
-      }
-
-      try { si.register({name:1,init:initfn},emptycb) } catch( e ) { 
-        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-      }
-
-      try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
-        //console.log(e)
-        assert.equal('seneca/register_invalid_plugin',e.seneca.code)
-      }
-
-    })
+    }
   })
 
 
 
   it('action', function() {
-    seneca(
-      {},
-      function(err,seneca){
-        assert.isNull(err)
-        var a1  = 0;
+    var si = seneca(testopts)
 
-        seneca.add({op:'foo'},function(args,cb) {
-          a1 = args.a1
-          cb(null,'+'+a1)
-        });
+    var a1  = 0;
 
-        seneca.act({op:'foo',a1:100}, function(err,out) {
-          assert.isNull(err)
-          assert.equal('+100',out)
-          assert.equal(100,a1)
+    si.add({op:'foo'},function(args,cb) {
+      a1 = args.a1
+      cb(null,'+'+a1)
+    });
+
+    si.act({op:'foo',a1:100}, function(err,out) {
+      assert.isNull(err)
+      assert.equal('+100',out)
+      assert.equal(100,a1)
       
-          seneca.act({op:'foo',a1:200}, function(err,out) {
-            assert.isNull(err)
-            assert.equal('+200',out)
-            assert.equal(200,a1)
-          })
-        })
-      }
-    )
+      si.act({op:'foo',a1:200}, function(err,out) {
+        assert.isNull(err)
+        assert.equal('+200',out)
+        assert.equal(200,a1)
+      })
+    })
   })
 
 
@@ -407,25 +294,20 @@ describe('seneca', function(){
 
 
   it('plugins', function() {
+    var si = seneca({plugins:['echo'],test:{silent:true}})
 
-    seneca({plugins:['echo']},function(err,seneca){
+    si.act({role:'echo',baz:'bax'},function(err,out){
       assert.isNull(err)
-
-      seneca.act({role:'echo',baz:'bax'},function(err,out){
-        assert.isNull(err)
-        assert.equal(''+{baz:'bax'},''+out)
-      })
+      assert.equal(''+{baz:'bax'},''+out)
     })
 
 
-    seneca({plugins:['util']},function(err,seneca){
-      assert.isNull(err)
+    var si = seneca({plugins:['util'],test:{silent:true}})
 
-      seneca.act({role:'util',cmd:'quickcode'},function(err,code){
-        assert.isNull(err)
-        assert.equal( 8, code.length )
-        assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
-      })
+    si.act({role:'util',cmd:'quickcode'},function(err,code){
+      assert.isNull(err)
+      assert.equal( 8, code.length )
+      assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
     })
 
 
@@ -435,49 +317,34 @@ describe('seneca', function(){
       self.plugin = function() {
         return self
       }
-      self.init = function(seneca,opts,cb){
-        seneca.add({role:self.name,cmd:'foo'},function(args,cb){
+      self.init = function(options){
+        this.add({role:self.name,cmd:'foo'},function(args,cb){
           cb(null,'foo:'+args.foo)
         })
-        cb()
       }
     }
 
 
-    seneca( 
-      {},
-      function(err,si){
-        assert.isNull(err)
+    var si = seneca(testopts)
+    si.register(new Mock1(), function(err){
+      assert.isNull(err)
 
-        si.register(new Mock1(), function(err){
-          assert.isNull(err)
-
-          si.act({role:'mock1',cmd:'foo',foo:1},function(err,out){
-            assert.equal('foo:1',out)
-          })
-        })
-      }
-    )
+      si.act({role:'mock1',cmd:'foo',foo:1},function(err,out){
+        assert.equal('foo:1',out)
+      })
+    })
 
 
+    var si = seneca(testopts)
+    var mock1a = new Mock1()
+    mock1a.name = 'mock1a'
+    si.register(mock1a, function(err){
+      assert.isNull(err)
 
-    seneca(
-      {},
-      function(err,si){
-        assert.isNull(err)
-
-        var mock1a = new Mock1()
-        mock1a.name = 'mock1a'
-        si.register(mock1a, function(err){
-          assert.isNull(err)
-
-          si.act({role:'mock1a',cmd:'foo',foo:1},function(err,out){
-            assert.equal('foo:1',out)
-          })
-        })
-      }
-    )
-
+      si.act({role:'mock1a',cmd:'foo',foo:1},function(err,out){
+        assert.equal('foo:1',out)
+      })
+    })
 
 
     function Mock2() {
@@ -486,80 +353,61 @@ describe('seneca', function(){
       self.plugin = function() {
         return self
       }
-      self.init = function(si,opts,cb){
-        si.add({role:'mock1',cmd:'foo'},function(args,cb){
-          this.parent(args,function(err,out){
+      self.init = function(options){
+        this.add({role:'mock1',cmd:'foo'},function(args,cb){
+          this.prior(args,function(err,out){
             cb(null,'bar:'+out)
           })
         })
-        cb()
       }
     }
 
+    var si = seneca(testopts)
+    si.register( new Mock1(), function(err){
+      assert.isNull(err)
 
-    seneca(
-      {},
-      function(err,si){
+      si.register( new Mock2(), function(err){
         assert.isNull(err)
-
-        si.register( new Mock1(), function(err){
-          assert.isNull(err)
-
-          si.register( new Mock2(), function(err){
-            assert.isNull(err)
-
-            si.act({role:'mock1',cmd:'foo',foo:2},function(err,out){
-              assert.equal('bar:foo:2',out)
-            })
-          })
+        
+        si.act({role:'mock1',cmd:'foo',foo:2},function(err,out){
+          assert.equal('bar:foo:2',out)
         })
-      }
-    )
+      })
+    })
 
 
-    seneca(
-      {plugins:['echo']},
-      function(err,si){
-        assert.isNull(err)
-
-        si.act({role:'echo',cmd:'foo',bar:1},function(err,out){
-          assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
-        })
-      }
-    )
-
+    var si = seneca(testopts)
+    si.use('echo')
+    si.act({role:'echo',cmd:'foo',bar:1},function(err,out){
+      assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
+    })
   })
 
 
   it('pin', function() {
-    seneca(
-      {},//{log:'print'},
-      function(err,si){
-        assert.isNull(err)
+    var si = seneca(testopts)
 
-        var log = []
+    var log = []
 
-        si.add({p1:'v1',p2:'v2a'},function(args,cb){
-          //console.log('a'+args.p3)
-          log.push('a'+args.p3)
-          cb(null,{p3:args.p3})
-        })
+    si.add({p1:'v1',p2:'v2a'},function(args,cb){
+      //console.log('a'+args.p3)
+      log.push('a'+args.p3)
+      cb(null,{p3:args.p3})
+    })
 
-        si.add({p1:'v1',p2:'v2b'},function(args,cb){
-          //console.log('b'+args.p3)
-          log.push('b'+args.p3)
-          cb(null,{p3:args.p3})
-        })
+    si.add({p1:'v1',p2:'v2b'},function(args,cb){
+      //console.log('b'+args.p3)
+      log.push('b'+args.p3)
+      cb(null,{p3:args.p3})
+    })
+    
+    var api = si.pin({p1:'v1',p2:'*'})
 
-        var api = si.pin({p1:'v1',p2:'*'})
-
-        api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
-        api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
-
-        var acts = si.pinact({p1:'v1',p2:'*'})
-        assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",util.inspect(acts))
-      }
-    )
+    api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
+    api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
+    
+    var acts = si.pinact({p1:'v1',p2:'*'})
+    assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",util.inspect(acts))
   })
 
 

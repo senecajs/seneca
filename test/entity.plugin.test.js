@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2013 Richard Rodger */
+/* Copyright (c) 2010-2014 Richard Rodger */
 "use strict";
 
 
@@ -13,30 +13,33 @@ describe('entity.plugin', function() {
 
   it('multi', function() {
     var si = seneca(
-      {plugins:[
+      {
+        plugins:[
 
-        {name:'mem-store',opts:{
-          tag:'foo',
-          map:{
-            '//foo':'*'
-          }
-        }},
+          {name:'mem-store',opts:{
+            tag:'foo',
+            map:{
+              '//foo':'*'
+            }
+          }},
 
-        {name:'mem-store',opts:{
-          tag:'bar',
-          map:{
-            '//bar':'*'
-          }
-        }},
+          {name:'mem-store',opts:{
+            tag:'bar',
+            map:{
+              '//bar':'*'
+            }
+          }},
 
-        {name:'mem-store',opts:{
-          tag:'foo',
-          map:{
-            '//faa':'*'
-          }
-        }},
+          {name:'mem-store',opts:{
+            tag:'foo',
+            map:{
+              '//faa':'*'
+            }
+          }},
 
-      ]},
+        ],
+        test:{silent:true}
+      },
       function(err,si){
         assert.isNull(err)
 
