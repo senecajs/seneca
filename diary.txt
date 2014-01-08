@@ -3,6 +3,11 @@
 NEXT:
 - update error messages and codes in seneca.js
 - retest all data stores - should die on connection failure
+- generate docco files for source code
+
+2014-01-08:
+- nicer string arg syntax errors
+- stayalive throws an error on die (allows all tests to run, also an escape hatch to prevent process dieing)
 
 2014-01-07:
 - handle errors thrown within callbacks - these need to be thrown by seneca.act, as they can't be passed *back* into the callback

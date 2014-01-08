@@ -13,12 +13,38 @@ var assert  = require('chai').assert
 
 describe('plugin', function(){
 
+  it('bad', function() {
+    var si = seneca({
+      // this lets you change stayalive per test
+      test:{
+        silent:    true,
+        stayalive: true
+      }
+    })
+    
+
+    try { si.use( {foo:1} ) } catch( e ) {
+      assert.equal('plugin_no_name',e.seneca.code)
+    }
+
+    /* TODO: may not be needed
+    try { si.use( {name:'foo',init:1} ) } catch( e ) {
+      assert.equal('plugin_bad_init',e.seneca.code)
+    }
+     */
+
+    try { si.use( 'not-a-plugin-at-all-at-all' ) } catch( e ) {
+      assert.equal('plugin_not_found',e.seneca.code)
+    }
+  })
+
+
   it('depends', function() {
     var si = seneca({
       // this lets you change stayalive per test
       test:{
         silent:    true,
-        stayalive: function(code,valmap){stayalive(code,valmap)}
+        stayalive: true
       }
     })
     
@@ -32,14 +58,15 @@ describe('plugin', function(){
     })
 
 
-    var stayalive = function(code,valmap) {
-      assert.equal('plugin_required',code)
+    try {
+      si.use( function(){
+        this.depends('ccc',['zzz'])
+        return {name:'ccc'}
+      })
     }
-
-    si.use( function(){
-      this.depends('ccc',['zzz'])
-      return {name:'ccc'}
-    })
+    catch(e) {
+      assert.equal('plugin_required',e.seneca.code)
+    }
   })
 
 })

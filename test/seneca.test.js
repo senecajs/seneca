@@ -25,6 +25,8 @@ describe('seneca', function(){
     assert.equal(si.version,'0.5.14')
   })
 
+
+
   it('quick', function(){
     var si = seneca(testopts)
     si.use(function quickplugin(si,opts,cb){
@@ -39,11 +41,13 @@ describe('seneca', function(){
     })
   })
 
+
   
   it('require-use-safetynet', function(){
     require('..').use('echo')
     require('..')(testopts).use('echo')
   })
+
 
 
   it('ready', function(fin){
@@ -260,6 +264,7 @@ describe('seneca', function(){
   })
 
 
+
   it('action-override', function() {
     var si = seneca(testopts)
 
@@ -384,6 +389,7 @@ describe('seneca', function(){
   })
 
 
+
   it('pin', function() {
     var si = seneca(testopts)
 
@@ -409,6 +415,7 @@ describe('seneca', function(){
     var acts = si.pinact({p1:'v1',p2:'*'})
     assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",util.inspect(acts))
   })
+
 
 
   it('compose', function() {
@@ -442,6 +449,7 @@ describe('seneca', function(){
   })
 
 
+
   it('strargs', function() {
     var si = seneca(testopts)
     si.add({a:1,b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
@@ -450,13 +458,23 @@ describe('seneca', function(){
     si.act('a:1,b:2',{c:3},function(err,out){ assert.isNull(err); assert.equal(6,out) })
     si.act('a:1,b:2',function(err,out){ assert.isNull(err); assert.equal(2,out) })
 
+
+    try {
+      si.add('a:,b:2',function(args,done){done()})
+    }
+    catch( e ) {
+      assert.equal(e.seneca.code,'add_string_args_syntax')
+    }
+
     try {
       si.act('a:,b:2',{c:3},function(err,out){assert.fail()})
     }
     catch( e ) {
-      assert.equal(e.seneca.code,'seneca/string-args-syntax-error')
+      assert.equal(e.seneca.code,'act_string_args_syntax')
     }
   })
+
+
 
   it('string-add', function() {
     var si = seneca(testopts)
