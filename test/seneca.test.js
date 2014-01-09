@@ -243,12 +243,12 @@ describe('seneca', function(){
   it('action', function() {
     var si = seneca(testopts)
 
-    var a1  = 0;
+    var a1 = 0
 
     si.add({op:'foo'},function(args,cb) {
       a1 = args.a1
       cb(null,'+'+a1)
-    });
+    })
 
     si.act({op:'foo',a1:100}, function(err,out) {
       assert.isNull(err)
@@ -261,6 +261,21 @@ describe('seneca', function(){
         assert.equal(200,a1)
       })
     })
+
+    try {
+      si.add({op:'bar'})
+    }
+    catch(e) {
+      assert.equal(e.seneca.code,'add_action_function_expected')
+    }
+
+    try {
+      si.add('a:1',function(args,done){},123)
+    }
+    catch(e) {
+      assert.equal(e.seneca.code,'add_action_metadata_not_an_object')
+    }
+
   })
 
 
@@ -463,7 +478,7 @@ describe('seneca', function(){
       si.add('a:,b:2',function(args,done){done()})
     }
     catch( e ) {
-      assert.equal(e.seneca.code,'add_string_args_syntax')
+      assert.equal(e.seneca.code,'add_string_pattern_syntax')
     }
 
     try {
@@ -471,6 +486,21 @@ describe('seneca', function(){
     }
     catch( e ) {
       assert.equal(e.seneca.code,'act_string_args_syntax')
+    }
+
+
+    try {
+      si.add('a:1,b:2',"bad-arg",function(args,done){done()})
+    }
+    catch( e ) {
+      assert.equal(e.seneca.code,'add_pattern_object_expected_after_string_pattern')
+    }
+
+    try {
+      si.add(123,function(args,done){done()})
+    }
+    catch( e ) {
+      assert.equal(e.seneca.code,'add_pattern_object_expected')
     }
   })
 
