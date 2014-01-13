@@ -276,6 +276,36 @@ describe('seneca', function(){
       assert.equal(e.seneca.code,'add_action_metadata_not_an_object')
     }
 
+
+    try {
+      si.act({op:'bad',a1:100}, function(err,out) {
+        assert.fail()
+      })
+    }
+    catch(e) {
+      assert.equal(e.seneca.code,'act_not_found')
+    }
+
+    si.act({op:'bad',a1:100,default$:"qaz"}, function(err,out) {
+      assert.equal(out,'qaz')
+    })
+
+    
+    try {
+      si.act()
+    }
+    catch(e) {
+      assert.equal(e.seneca.code,'act_no_args')
+    }
+
+    try {
+      si.act(function(err,out) {
+        assert.fail()
+      })
+    }
+    catch(e) {
+      assert.equal(e.seneca.code,'act_no_args')
+    }
   })
 
 
@@ -309,6 +339,37 @@ describe('seneca', function(){
       assert.ok(gex('1~2~Seneca/0.5.*/*').on(''+o.a+'~'+o.b+'~'+o.s))
     })
 
+  })
+
+
+
+  it('act_if', function() {
+    var si = seneca(testopts)
+
+    si.add({op:'foo'},function(args,done) {
+      done(null,'foo'+args.bar)
+    })
+
+    si.act_if(true,{op:'foo',bar:'1'},function(err,out){
+      assert.equal('foo1',out)
+    })
+
+    si.act_if(false,{op:'foo',bar:'2'},function(err,out){
+      assert.fail()
+    })
+
+    si.act_if(true,"op:foo,bar:3",function(err,out){
+      assert.equal('foo3',out)
+    })
+
+    try {
+      si.act_if({op:'foo',bar:'2'},function(err,out){
+        assert.fail()
+      })
+    }
+    catch(e){
+      assert.equal(e.seneca.code,'act_if_expects_boolean')
+    }
   })
 
 
@@ -519,6 +580,25 @@ describe('seneca', function(){
 
     si.add({i:3,a:1,b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act("i:3,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+  })
+
+
+  it('error-msgs', function() {
+    var si = seneca()
+    assert.ok( 
+      gex("Seneca/*/*: TESTING: exists: 111, notfound:[notfound?], str=s, obj={a=1}, arr=[1,2], bool=false, null=null, delete=D, undefined=U, void=V, NaN=N")
+        .on(si.fail('test_prop',{
+          exists:111,
+          str:'s',
+          obj:{a:1},
+          arr:[1,2],
+          bool:false,
+          null:null,
+          delete:'D',
+          undefined:'U',
+          void:'V',
+          NaN:'N',
+        }).message))
   })
 })
 

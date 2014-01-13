@@ -43,7 +43,8 @@
     "patrun": "~0.1.5",
     "jsonic": "0.1.1",
     "seneca-web": "~0.1.0",
-    "seneca-transport": "~0.1.0"
+    "seneca-transport": "~0.1.0",
+    "lodash": "~2.4.1"
   },
   "main": "lib/seneca",
   "files": [
