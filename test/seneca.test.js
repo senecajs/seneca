@@ -14,6 +14,9 @@ var seneca   = require('../lib/seneca')
 var assert  = require('chai').assert
 var gex     = require('gex')
 
+var _ = require('underscore')
+var parambulator = require('parambulator')
+
 
 var testopts = {test:{silent:true}}
 
@@ -599,6 +602,40 @@ describe('seneca', function(){
           void:'V',
           NaN:'N',
         }).message))
+  })
+
+
+  it('act-param', function(){
+    var si = seneca()
+
+    si.add({a:1},{integer$:'b'},function(args,done){
+      if( !_.isNumber(args.b) ) return assert.fail();
+      done(null,{a:1+args.b})
+    })
+
+    si.act({a:1,b:1},function(err,out){
+      assert.isNull(err)
+      assert.equal(2,out.a)
+    })
+
+    try {
+      si.act({a:1,b:"b"},function(err,out){
+        assert.fail()
+      })
+    }
+    catch(e){
+      assert.equal('invalid-act-args',e.seneca.code)
+    }
+
+    try {
+      si.add({a:1},{notatypeatallatall$:'b'},function(args,done){
+        assert.fail()
+      })
+    }
+    catch(e){
+      assert.equal('bad-param-spec',e.seneca.code)
+    }
+
   })
 })
 
