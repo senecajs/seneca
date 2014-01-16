@@ -23,7 +23,7 @@ function nil(){
 
 module.exports = function( options ) {
   var name = 'util'
-  var pluginseneca = this
+  var seneca = this
 
 
   options = this.util.deepextend({
@@ -39,7 +39,6 @@ module.exports = function( options ) {
   this.add(
     {role:name,cmd:'ensure_entity'},
     { required$:['pin','entmap'],
-      pin:{type$:'object'},
       entmap:{type$:'object'} }, ensure_entity)
 
   this.add({role:name,cmd:'define_sys_entity'},cmd_define_sys_entity)
@@ -85,7 +84,7 @@ module.exports = function( options ) {
   function ensure_entity(args,done){
     var entmap = args.entmap
 
-    pluginseneca.wrap(args.pin,function(args,done){
+    seneca.wrap(args.pin,function(args,done){
       var seneca = this
       seneca.util.recurse(
         _.keys(entmap),
@@ -172,7 +171,7 @@ module.exports = function( options ) {
     pathnorm: function( pathstr ) {
       return path.normalize( (null==pathstr) ? '' : ''+pathstr ).replace(/\/+$/,'')
     },
-    deepextend: pluginseneca.util.deepextend
+    deepextend: seneca.util.deepextend
   }
 
 
@@ -183,35 +182,6 @@ module.exports = function( options ) {
     name:name,
     export:utilfuncs
   }
-
-  /*
-    service: function(req,res,next) {
-
-      function send() {
-        res.writeHead(200)
-        res.end(browser_js)
-      }
-
-      // FIX: needs proper cache headers etc
-      if( '/js/util/browser.js' == req.url ) {
-        if( browser_js ) {
-          send()
-        }
-        else {
-          fs.readFile(__dirname+'/browser.js',function(err,text){
-            if( err ) {
-              next(err)
-            }
-            browser_js = text
-            send()
-          })
-        }
-
-      }
-      else next();
-    }
-  }
-   */
 
 }
 
