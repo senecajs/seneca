@@ -27,9 +27,7 @@ function list(si,entmap,qent,q,cb) {
         }
       }
       
-      if( !_.isFunction(ent.make$) ) {
-        ent = entset[id] = qent.make$(ent)
-      }
+      ent = qent.make$(ent)
 
       list.push(ent)
     })
@@ -107,10 +105,13 @@ module.exports = function(options) {
       else do_save();
 
       function do_save(id) {
-        var mement = ent.clone$()
+        var mement = ent.data$(true,'string')
+
         if( id ) {
           mement.id = id
         }
+        
+        mement.entity$ = ent.entity$
 
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
@@ -118,7 +119,7 @@ module.exports = function(options) {
         entmap[base][name][mement.id] = mement
   
         si.log.debug(function(){return['save/'+(create?'insert':'update'),ent.canon$({string:1}),mement,desc]})
-        cb(null,mement)
+        cb(null,ent.make$(mement))
       }
     },
 
@@ -130,7 +131,7 @@ module.exports = function(options) {
       list(this,entmap,qent,q,function(err,list){
         var ent = list[0] || null
         this.log.debug(function(){return['load',q,qent.canon$({string:1}),,ent,desc]})
-        cb(err, ent ? ent.clone$() : null )
+        cb(err, ent ? ent : null )
       })
     },
 
@@ -141,7 +142,7 @@ module.exports = function(options) {
 
       list(this,entmap,qent,q,function(err,list){
         this.log.debug(function(){return['list',q,qent.canon$({string:1}),,list.length,list[0],desc]})
-        list = _.map(list,function(ent){ return ent.clone$() })
+        //list = _.map(list,function(data){ return qent.make$(data) })
         cb(err, list)
       })
     },
@@ -233,20 +234,12 @@ module.exports = function(options) {
         dump:true
       }
     }})
-/*
-    service = seneca.httprouter(function(http){
-      http.get(options.prefix+'/dump',function(req,res){
-          res.send(entmap)
-      })
-    })
-*/
   }
 
   
   return {
     name:store.name,
     tag:meta.tag
-    //service:service
   }
 }
 

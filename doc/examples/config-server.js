@@ -10,11 +10,5 @@ seneca.add( {cmd:'config'}, function(args,callback){
 })
 
 
-seneca.use('transport')
-
-var connect = require('connect')
-var app = connect()
-  .use( connect.json() )
-  .use( seneca.service() )
-  .listen(10171)
+seneca.listen()
 

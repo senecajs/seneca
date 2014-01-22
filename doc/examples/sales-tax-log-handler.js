@@ -5,17 +5,18 @@ var seneca = require('../..')
 seneca = seneca({
   log:{
     map:[
-      {plugin:'sales-tax',handler:'print'},
-      {level:'all',handler:seneca.loghandler.file('salestax.log')}
+      {plugin:'shop',handler:'print'},
+      {level:'all',handler:seneca.loghandler.file('shop.log')}
     ]
   }
 })
 
-seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
-seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
+seneca.use( 'sales-tax-plugin', {rate:0.23} )
 
-seneca.act( {cmd:'salestax', country:'IE', net:100})
-seneca.act( {cmd:'salestax', country:'UK', net:200})
-seneca.act( {cmd:'salestax', country:'UK', net:300})
+seneca.ready(function(err){
+  if( err ) return process.exit(!console.error(err));
 
-
+  seneca.act( {role:'shop', cmd:'salestax', net:100})
+  seneca.act( {role:'shop', cmd:'salestax', net:200})
+  seneca.act( {role:'shop', cmd:'salestax', net:300})
+})

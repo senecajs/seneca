@@ -89,7 +89,6 @@ module.exports = function( options ) {
       seneca.util.recurse(
         _.keys(entmap),
         function(entarg,next){
-          //console.log('work entarg:'+entarg+' args:'+util.inspect(args))
 
           // ent id
           if( _.isString(args[entarg]) ) {
@@ -99,7 +98,7 @@ module.exports = function( options ) {
               return next(null,args)
             })
           }
-          
+
           // ent JSON
           else if( _.isObject(args[entarg]) ) {
             
@@ -109,11 +108,11 @@ module.exports = function( options ) {
               return next(null,args)
             }
           }
-          
+
           else return next(null,args);
+
         },
         function(err,args) {
-          //console.log('done: '+util.inspect(args))
           if( err ) return done(err);
           return seneca.prior(args,done)
         }
@@ -130,13 +129,9 @@ module.exports = function( options ) {
     var list = args.list || [_.pick(args,['entity','zone','base','name','fields'])]
     list = _.isArray(list) ? list : list.split(/\s*,\s*/)
 
-    //console.dir(list)
-    
     var sys_entity = seneca.make$('sys','entity')
 
     function define(entry,next) {
-      //console.log(entry)
-
       if( _.isString(entry) ) {
         entry = seneca.util.parsecanon(entry)
       }
@@ -146,19 +141,28 @@ module.exports = function( options ) {
         entry.fields = fields
       }
 
-      //console.dir(entry)
-
       var entq = {zone:entry.zone,base:entry.base,name:entry.name}
-      sys_entity.load$(entq,function(err,ent){
+      sys_entity.load$(entq,function(err,entity){
         if(err) return next(err);
 
-        if( void 0 == entry.fields ) {
-          entry.fields = []
+        var save = false
+
+        if( null == entity ) {
+          entity = sys_entity.make$(entry)
+          save = true
+        }
+        
+        if( null == entity.fields ) {
+          entity.fields = []
+          save = true
         }
 
-        (ent?nil:sys_entity.save$)(entry,function(err,ent){
-          return next(err,ent)
-        })
+        if( save ) {
+          entity.save$(function(err,ent){
+            return next(err,ent)
+          })
+        }
+        else return next(null,entity)
       })
     }
 

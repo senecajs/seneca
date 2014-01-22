@@ -1,10 +1,6 @@
 
 var seneca = require('../..')()
 
-seneca.use('transport',{
-  pins:[ {cmd:'config'} ]
-})
-
 seneca.add( {cmd:'salestax'}, function(args,callback){
   seneca.act( {cmd:'config', prop:'rate'}, function(err,result){
     var rate  = parseFloat(result.value)
@@ -13,11 +9,11 @@ seneca.add( {cmd:'salestax'}, function(args,callback){
   })
 })
 
+seneca.client()
+
 var shop = seneca.pin({cmd:'*'})
 
 shop.salestax({net:100}, function(err,result){
   console.log( result.total )
 })
-
-
 

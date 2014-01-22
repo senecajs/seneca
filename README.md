@@ -46,7 +46,7 @@ Here's an example:
 ```javascript
 var seneca = require('seneca')()
 
-seneca.add( {cmd:'sales-tax'}, function(args,callback){
+seneca.add( {cmd:'salestax'}, function(args,callback){
   var rate  = 0.23
   var total = args.net * (1+rate)
   callback(null,{total:total})
@@ -58,7 +58,7 @@ seneca.act( {cmd:'salestax', net:100}, function(err,result){
 ```
 
 In this code, whenever seneca sees the pattern
-<code>{cmd:'sales-tax'}</code>, it executes the function associated
+<code>{cmd:'salestax'}</code>, it executes the function associated
 with this pattern, which calculates sales tax. Yah!
 
 The _seneca.add_ method adds a new pattern, and the function to execute whenever that pattern occurs.
@@ -90,7 +90,8 @@ seneca.act( {cmd:'salestax', net:100}, function(err,result){
 ```
 
 The _config_ command provides you with your configuration. This is
-cool because it doesn't matter _where_ it gets the configuration from - hard-coded, file system, database, network service, whatever. Did
+cool because it doesn't matter _where_ it gets the configuration from
+- hard-coded, file system, database, network service, whatever. Did
 you have to define an abstraction API to make this work? Nope.
 
 There's a little but too much verbosity here, don't you think? Let's fix that:
@@ -114,7 +115,8 @@ The way to build Node.js systems, is to build lots of little
 processes. Here's a great talk explaining why you should do this:
 [Programmer Anarchy](http://vimeo.com/43690647).
 
-Seneca makes this really easy. Let's put configuration out on the network into it's own process:
+Seneca makes this really easy. Let's put configuration out on the
+network into its own process:
 
 ```javascript
 seneca.add( {cmd:'config'}, function(args,callback){
@@ -125,20 +127,14 @@ seneca.add( {cmd:'config'}, function(args,callback){
   callback(null,{value:value})
 })
 
-
-seneca.use('transport')
-
-var connect = require('connect')
-var app = connect()
-  .use( connect.json() )
-  .use( seneca.export('web') )
-  .listen(10171)
+seneca.listen()
 ```
 
-The _transport_ plugin exposes any commands over a HTTP end point. You
-can then use the _connect_ module, for example, to run a little web
-server. The _seneca.export('web')_ function call returns a _connect_
-middleware function to do this.
+The _listen_ method starts a web server that listens for JSON
+messages. When these arrive, they are submitted to the local Seneca
+instance, and executed as actions in the normal way.  The result is
+then returned to the client as the response to the HTTP
+request. Seneca can also listen for actions via a message bus.
 
 Your implementation of the configuration code _stays the same_.
 
@@ -146,10 +142,6 @@ The client code looks like this:
 
 
 ```javascript
-seneca.use('transport',{
-  pins:[ {cmd:'config'} ]
-})
-
 seneca.add( {cmd:'salestax'}, function(args,callback){
   seneca.act( {cmd:'config', prop:'rate'}, function(err,result){
     var rate  = parseFloat(result.value)
@@ -158,6 +150,8 @@ seneca.add( {cmd:'salestax'}, function(args,callback){
   })
 })
 
+seneca.client()
+
 var shop = seneca.pin({cmd:'*'})
 
 shop.salestax({net:100}, function(err,result){
@@ -165,8 +159,10 @@ shop.salestax({net:100}, function(err,result){
 })
 ```
 
-On the client-side, the _transport_ plugin takes a _pins_
-parameter. You can use this to specify which patterns are remote.
+On the client-side, calling _seneca.client()_ means that Seneca will
+send any actions it cannot match locally out over the network. In this
+case, the configuration server will match the _cmd:config_ pattern and
+return the configuratin data.
 
 Again, notice that your sales tax code _does not change_. It does not
 need to know where the configuration comes from, who provides it, or
