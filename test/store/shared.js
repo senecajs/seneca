@@ -2,7 +2,6 @@
 
 var assert  = require('chai').assert
 
-var eyes    = require('eyes')
 var async   = require('async')
 var _       = require('underscore')
 var gex     = require('gex')
@@ -221,7 +220,7 @@ exports.basictest = function(si,done) {
       },
       function(err,out) {
         if( err ) {
-          eyes.inspect( err )
+          console.dir( err )
         }
         si.__testcount++
         assert.isNull(err)
@@ -287,7 +286,7 @@ exports.sqltest = function(si,done) {
       },
       function(err,out){
         if( err ) {
-          eyes.inspect( err )
+          console.dir( err )
         }
         si.__testcount++
         assert.isNull(err)

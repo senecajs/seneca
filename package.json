@@ -40,7 +40,8 @@
     "patrun": "0.1.x",
     "jsonic": "0.1.x",
     "seneca-web": "0.1.x",
-    "seneca-transport": "0.1.x"
+    "seneca-transport": "0.1.x",
+    "chai": "1.8.x"
   },
   "main": "lib/seneca",
   "files": [
@@ -61,7 +62,6 @@
   },
   "devDependencies": {
     "mocha": "1.17.x",
-    "jshint": "2.4.x",
-    "chai": "1.8.x"
+    "jshint": "2.4.x"
   }
 }
