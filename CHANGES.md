@@ -1,4 +1,8 @@
 
+## 0.5.13:
+
+   * entity objects now use prototype style javascript objects - there's lots of them
+
 ## 0.5.14: 2013-10-30
 
    * moved web to own module, seneca-web

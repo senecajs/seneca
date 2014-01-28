@@ -1,11 +1,5 @@
 
-- convenience api: seneca.act( args, fail, win ), where fail takes err, if thrown, and win gets result
-
-- mem-store dump should not use role:mem-store, should be plugin:mem-store -> establish convention
-
-- main api should be like express
-  - nearly done - needs cleanup
-  - config race condition
+- alternate data entity type syntax: */foo/bar - '*' can be used like '-' - more consistent with traditional meaning
 
 - action register arg overrides - allow seneca.use to add/override additional argument matches
   e.g. seneca.use('vcache',{fixedargs$:{base:'bar'}, ...other options...})
@@ -15,17 +9,11 @@
 
 - ordered params for pinning - use some sort of schema def on add? parambulator?
 
-- transport: pin should handle '*'
-
 - 'trigger' should be 'hook' - internal plugin commands exposing customisation points
-
-- does seneca.add support string format for args?
 
 - update logging example
 - the log:{map:} thing sucks - make this easier
 
-
-- plugin.init forgets to call cb - how to handle?
 
 - entity
   - define common query lang - implement in mem
@@ -48,24 +36,9 @@
 - fix vcache to use cmd $parent
 
 
-- update other unit tests and plugins
-
-- convert tests to vows
-- allow custom msgmaps
-- remove eyes usage outside tests
 - drop support for load$:true in remove$ ?
 - string queries should be templates to avoid sql injection
 
 
 
-
-
-- conventions:
-  - store plugins to have -store suffix
-
-
-- to document
-  - canonical order of ent designation parts: zone,base,name
-  - stores handle base and name as base_name
-  - stores do not handle zones
 

@@ -25,32 +25,7 @@ module.exports = function options( options ) {
 
   if( from ) {
 
-    // FIX, yeah fun, DELETE!!!
-
-    // ... look away ... MUHAHA
-    if( from.match( /^http/i ) ) {
-      var tmp = temp.path({prefix:'seneca-options-'})
-      fs.writeFileSync(tmp,'',{mode:384}) // 0600
-
-      exec("node -e \"require('request')('"+from+"').pipe(require('fs').createWriteStream('"+tmp+"')).on('close',process.exit)\"",function(err){if(err){console.log(arguments)}})
-
-      var start = new Date().getTime()
-      while( true ) {
-        var text = fs.readFileSync(tmp)
-        try {
-          ref.options = JSON.parse(text)
-          fs.unlinkSync(tmp)
-          break
-        }
-        catch(e) {
-          if( (options.timeout || 3333) < new Date().getTime() - start ) {
-            fs.unlinkSync(tmp)
-            throw e
-          }
-        }
-      }
-    }
-    else if( from.match( /\.json$/i ) ) {
+    if( from.match( /\.json$/i ) ) {
       var text = fs.readFileSync( from )
       ref.options = JSON.parse(text)
     }

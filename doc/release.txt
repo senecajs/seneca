@@ -1,10 +1,12 @@
 0.  Update CHANGELOG
-1.  update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
-2.  run nmp test
+1.  run npm build
+2.  run npm test
 3.  run doc/examples/runtest.sh
 4.  run seneca-verify
 5.  run seneca-mvp
 6.  run seneca-examples
+7.  test data-stores: mongo
+1.  update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
 7.  git, final commit+push
 8.  get checkout master; git merge
 9   runs tests
