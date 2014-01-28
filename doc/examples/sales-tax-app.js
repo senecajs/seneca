@@ -1,14 +1,23 @@
 
-var http = require('http')
+var connect = require('connect')
 
 var seneca = require('../..')()
-seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
-seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
+seneca.use( 'sales-tax-plugin', {rate:0.23} )
 
-seneca.use('transport')
+seneca.ready(function(err){
+  if( err ) return process.exit(!console.error(err));
 
-var server = http.createServer(seneca.service())
-server.listen(3000)
+  seneca.act('role:shop,cmd:salestax,net:100',function(err,out){
+    if( err) return process.exit(!console.error(err));
+    this.log.debug('test',out.total)
+  })
 
-seneca.use('admin',{server:server,local:true})
+  var app = connect()
+
+  app.use( connect.query() )
+  app.use( connect.json() )
+  app.use( seneca.export('web') )
+
+  app.listen(3000)
+})
 

@@ -1,8 +1,0 @@
-
-
-- Date objects should not be used - behaviour on load is undef - might be an ISO string, might be a date
-- close should force sync of underlying data store
-
-
-
-

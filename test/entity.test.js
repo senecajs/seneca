@@ -7,6 +7,7 @@
 var util   = require('util')
 
 var seneca   = require('..')
+var entity   = require('../lib/entity')
 
 var async   = require('async')
 var gex     = require('gex')
@@ -38,6 +39,7 @@ describe('entity', function(){
   })
 
 
+
   it('make', function(){
     var si = seneca()
 
@@ -58,11 +60,24 @@ describe('entity', function(){
     assert.equal('z1/b1/n1',z1_b1_n1.entity$)
 
     var pe = si.make({entity$:'-/-/a'})
+    assert.equal('-/-/a',pe.canon$({string:true}))
     assert.equal('-/-/a',pe.entity$)
     pe = si.make({entity$:'-/b/a'})
     assert.equal('-/b/a',pe.entity$)
+    assert.equal('-/b/a',pe.canon$({string:true}))
     pe = si.make({entity$:'c/b/a'})
     assert.equal('c/b/a',pe.entity$)
+    assert.equal('c/b/a',pe.canon$({string:true}))
+
+    var pe = si.make({entity$:{name:'a'}})
+    assert.equal('-/-/a',pe.canon$({string:true}))
+    assert.equal('-/-/a',pe.entity$)
+    pe = si.make({entity$:{base:'b',name:'a'}})
+    assert.equal('-/b/a',pe.entity$)
+    assert.equal('-/b/a',pe.canon$({string:true}))
+    pe = si.make({entity$:{zone:'c',base:'b',name:'a'}})
+    assert.equal('c/b/a',pe.entity$)
+    assert.equal('c/b/a',pe.canon$({string:true}))
 
     var ap = si.make$('a',{x:1})
     assert.equal('-/-/a',ap.entity$)
@@ -74,6 +89,26 @@ describe('entity', function(){
     var esc1 = si.make$('esc',{x:1,y_$:2})
     assert.equal( esc1.toString(), '$-/-/esc:{id=;x=1;y=2}' )
   })
+
+
+
+  it('toString', function(){
+    var si = seneca()
+
+    var f1 = si.make$('foo')
+    f1.a = 1
+    assert.equal("$-/-/foo:{id=;a=1}",''+f1)
+
+    var f2 = si.make$('foo')
+    f2.a = 2
+    f2.b = 3
+    assert.equal("$-/-/foo:{id=;a=2;b=3}",''+f2)
+
+    var f3 = f1.make$({c:4})
+    f3.d = 5
+    assert.equal("$-/-/foo:{id=;c=4;d=5}",''+f3)
+  })
+
 
   
   it('mem-store-import-export', function(done){
@@ -91,8 +126,9 @@ describe('entity', function(){
 
       function(next){
         si.act('role:mem-store,cmd:dump',function(e,o){
-          //console.dir(o)
-          var t = gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o))
+          var t = gex(
+            '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+          ).on(JSON.stringify(o))
           assert.ok(t)
           next(e)
         })

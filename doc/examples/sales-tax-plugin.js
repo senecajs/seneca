@@ -1,24 +1,25 @@
 
-module.exports = function( seneca, options, callback ) {
+module.exports = function( options ) {
+  var seneca = this
+  var plugin = 'shop'
 
-  var salestax = {
-    hits:0,
-    rate:options.rate,
-    country:options.country
-  }
-  salestax.calc = function(net){
-    return net * (1+salestax.rate)
-  }
-
-  seneca.add( {cmd:'salestax',country:salestax.country}, function(args,callback){
-    var total = salestax.calc(args.net)
-    salestax.hits++
-    seneca.log.debug(args.actid$,
-                     'net:',args.net,
-                     'total:',total,
-                     'tax:',salestax)
+  seneca.add( { role:plugin, cmd:'salestax' }, function(args,callback){
+    var total = parseFloat(args.net,10) * (1+options.rate)
+    seneca.log.debug( args.net, total, options.rate )
     callback(null,{total:total})
   })
 
-  callback(null,{name:'sales-tax',tag:salestax.country})
+
+  seneca.act({role:'web', use:{
+    prefix:'shop/',
+    pin:{role:'shop',cmd:'*'},
+    map:{
+      salestax:{GET:true}
+    }
+  }})
+
+
+  return {
+    name:plugin
+  }
 }
