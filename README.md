@@ -248,12 +248,4 @@ places. It also means you can deal with special cases very easily.
 
 
 
-### Acknowledgements
-
-This module depends on many, many Node.js modules - thank you!
-
-Development is sponsored by [nearForm](http://nearform.com)
-
-
-
 
