@@ -617,5 +617,26 @@ describe('seneca', function(){
     si.add({i:3,a:1,b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act("i:3,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
   })
+
+
+  it('act_if', function(fin) {
+    var si = seneca()
+    .add('a:1',function(args,done){this.provide({b:args.a+1})})
+    .add('a:2',function(args,done){this.provide({b:args.a+2})})
+
+    si.act_if( true, 'a:1', function(err,out){
+      if( err ) return fin(err);
+
+      assert.equal(2,out.b)
+
+      si.act_if( false, 'a:2', function(err,out){
+        if( err ) return fin(err);
+        assert.fail()
+      })
+
+      process.nextTick(fin)
+    })
+  })
+  
 })
 
