@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012 Richard Rodger */
+/* Copyright (c) 2010-2014 Richard Rodger */
 
 "use strict"
 
@@ -6,9 +6,9 @@
 var _ = require('underscore')
 
 
-module.exports = function echo( si,opts,cb ) {
+module.exports = function echo( options ) {
 
-  si.add({role:'echo'},function(args,cb){
+  this.add({role:'echo'},function(args,cb){
     var exclude = _.extend({role:1},opts.exclude||{})
     var out = _.omit(
       _.extend(args,opts.inject||{}),
@@ -24,7 +24,7 @@ module.exports = function echo( si,opts,cb ) {
   })
 
 
-  cb( null, {service:function(req,res,next){
+  this.act({role:'web',use:function(req,res,next){
     if( 0 == req.url.indexOf('/echo') ) {
       res.writeHead(200)
       var content = req.url
@@ -37,4 +37,7 @@ module.exports = function echo( si,opts,cb ) {
     }
     else next();
   }})
+
+
+  return { name:'echo' }
 }
