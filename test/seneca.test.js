@@ -587,6 +587,22 @@ describe('seneca', function(){
   })
 
 
+  it('fire-and-forget', function() {
+    var si = seneca()
+    si.add({a:1},function(args,done){done(null,args.a+1)})
+    si.add({a:1,b:2},function(args,done){done(null,args.a+args.b)})
+
+    si.act({a:1})
+    si.act({a:1,b:2})
+    si.act('a:1')
+    si.act('a:1, b:2')
+    si.act('a:1',{b:2})
+    si.act('b:2',{a:1})
+    si.act('',{a:1})
+    si.act('',{a:1,b:2})
+  })
+
+
   it('strargs', function() {
     var si = seneca()
     si.add({a:1,b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
@@ -599,7 +615,7 @@ describe('seneca', function(){
       si.act('a:,b:2',{c:3},function(err,out){assert.fail()})
     }
     catch( e ) {
-      assert.equal(e.seneca.code,'seneca/string-args-syntax-error')
+      assert.equal(e.seneca.code,'seneca/string-pattern-syntax-error')
     }
   })
 
@@ -637,6 +653,23 @@ describe('seneca', function(){
       process.nextTick(fin)
     })
   })
-  
+
+
+  it('fix', function() {
+    var si = seneca()
+
+    function ab(args,done){done(null,{r:''+args.a+(args.b||'-')+(args.c||'-')+args.z})}
+
+    si
+      .fix('a:1')
+      .add('b:2',ab)
+      .add('c:3',ab)
+      .act('b:2,z:8',function(err,out){assert.isNull(err);assert.equal('12-8',out.r)})
+      .act('c:3,z:9',function(err,out){assert.isNull(err);assert.equal('1-39',out.r)})
+
+    si
+      .act('a:1,b:2,z:8',function(err,out){assert.isNull(err);assert.equal('12-8',out.r)})
+      .act('a:1,c:3,z:9',function(err,out){assert.isNull(err);assert.equal('1-39',out.r)})
+  })  
 })
 

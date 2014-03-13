@@ -42,7 +42,7 @@
     "seneca-web": "0.1.x",
     "seneca-transport": "0.1.x",
     "chai": "1.8.x",
-    "norma": "~0.1.1"
+    "norma": "~0.2.0"
   },
   "main": "lib/seneca",
   "files": [
