@@ -611,6 +611,9 @@ describe('seneca', function(){
     si.act('a:1,b:2',{c:3},function(err,out){ assert.isNull(err); assert.equal(6,out) })
     si.act('a:1,b:2',function(err,out){ assert.isNull(err); assert.equal(2,out) })
 
+    // strargs win!!
+    si.act('a:1,b:2',{a:2},function(err,out){ assert.isNull(err); assert.equal(2,out) })
+
     try {
       si.act('a:,b:2',{c:3},function(err,out){assert.fail()})
     }
