@@ -622,6 +622,7 @@ describe('seneca', function(){
     }
   })
 
+
   it('string-add', function() {
     var si = seneca()
     si.add("i:0,a:1,b:2",function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
@@ -630,11 +631,8 @@ describe('seneca', function(){
     si.add("i:1,a:1",{b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act("i:1,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
 
-    si.add("i:2,a:1",{b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
+    si.add("i:2,a:1",{b:2,c:{required$:true}},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
     si.act("i:2,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
-
-    si.add({i:3,a:1,b:2},{a:'required$'},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
-    si.act("i:3,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
   })
 
 
@@ -674,5 +672,16 @@ describe('seneca', function(){
       .act('a:1,b:2,z:8',function(err,out){assert.isNull(err);assert.equal('12-8',out.r)})
       .act('a:1,c:3,z:9',function(err,out){assert.isNull(err);assert.equal('1-39',out.r)})
   })  
+
+
+  it('parambulator', function() {
+    var si = seneca()
+
+    si.add({a:1,b:'q',c:{required$:true,string$:true}},function(args,done){done(null,{})})
+
+    si.act({a:1,b:'q',c:'c'})
+    try { si.act({a:1,b:'q',c:1}); assert.fail() } catch(e) {  }
+    try { si.act({a:1,b:'q'}); assert.fail() } catch(e) {  }
+  })
 })
 

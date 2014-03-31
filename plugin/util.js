@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013 Richard Rodger */
+/* Copyright (c) 2011-2014 Richard Rodger */
 "use strict";
 
 
@@ -26,22 +26,29 @@ module.exports = function( options ) {
   var seneca = this
 
 
-  options = this.util.deepextend({
+  options = seneca.util.deepextend({
     limit: { parallel: 11 }
   },options)
 
 
   // legacy cmd
-  this.add({role:name,cmd:'quickcode'},cmd_quickcode)
+  seneca.add({role:name,cmd:'quickcode'},cmd_quickcode)
   
-  this.add({role:name,cmd:'generate_id'},cmd_generate_id)
+  seneca.add({role:name,cmd:'generate_id'},cmd_generate_id)
 
-  this.add(
-    {role:name,cmd:'ensure_entity'},
-    { required$:['pin','entmap'],
-      entmap:{type$:'object'} }, ensure_entity)
+  seneca.add({
+    role:   name,
+    cmd:    'ensure_entity',
 
-  this.add({role:name,cmd:'define_sys_entity'},cmd_define_sys_entity)
+    pin:    {required$:true},
+    entmap: {object$:true,required$:true},
+  }, ensure_entity)
+
+  seneca.add({role:name,cmd:'define_sys_entity'},cmd_define_sys_entity)
+
+
+
+
 
 
 
@@ -178,9 +185,6 @@ module.exports = function( options ) {
     deepextend: seneca.util.deepextend
   }
 
-
-  // TODO: needs own plugin, and more generic than just util
-  var browser_js
 
   return {
     name:name,

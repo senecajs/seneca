@@ -9,16 +9,16 @@ var _ = require('underscore')
 module.exports = function echo( options ) {
 
   this.add({role:'echo'},function(args,cb){
-    var exclude = _.extend({role:1},opts.exclude||{})
+    var exclude = _.extend({role:1},options.exclude||{})
     var out = _.omit(
-      _.extend(args,opts.inject||{}),
+      _.extend(args,options.inject||{}),
       _.filter(_.keys(args),function(n){return n.match(/\$$/)||exclude[n]})
     )
 
     function finish() { cb(null,out) }
 
-    if( opts.delay && _.isNumber( opts.delay ) ) {
-      setTimeout(finish,opts.delay)
+    if( options.delay && _.isNumber( options.delay ) ) {
+      setTimeout(finish,options.delay)
     }
     else finish();
   })

@@ -1,8 +1,0 @@
-{
-  "name": "util",
-  "description": "Seneca util",
-  "version": "0.0.0",
-  "main": "lib/util.js",
-  "dependencies": {},
-  "devDependencies": {}
-}

@@ -1,5 +1,10 @@
 
-## 0.5.13:
+## 0.5.16:
+
+   * use norma for api function arguments
+   * parambulator arg checking moved into arg sepcification
+
+## 0.5.15: 2014-01-28
 
    * entity objects now use prototype style javascript objects - there's lots of them
 
@@ -9,29 +14,29 @@
    * moved transport to own module, seneca-transport
    * transport now uses patterns, no longer hard-coded into seneca.js
 
-## 0.5.13:
+## 0.5.13: 2013-10-01
    
    * moved pattern matcher into own module: patrun
    * added stats collection for actions
    * jshint applied to code, use npm run-script build
 
-## 0.5.12:
+## 0.5.12: 2013-09-13
 
    * argsparser replaced with jsonic module
    * added act_if convenience method
    * deepextend can handle circular references
    * argprops cleans $ args
 
-## 0.5.11:
+## 0.5.11: 2013-08-29
 
    * parambulator arg validation logged
 
-## 0.5.10:
+## 0.5.10: 2013-08-18
 
    * added listen method for easy launching of services
    * added client method for easy http access of services
 
-## 0.5.9: 
+## 0.5.9: 2013-07-09
 
    * add export feature for plugins
    * seneca.depends - check plugin dependencies registered

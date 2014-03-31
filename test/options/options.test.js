@@ -188,6 +188,7 @@ describe('options', function(){
   })
 
 
+/*
   it('web', function(done) {
     spawn('node',['options.server.js'])
       .on('error',function(){console.log(arguments)})
@@ -224,6 +225,7 @@ describe('options', function(){
     })
     },500)
   })
+ */
 
 })
 

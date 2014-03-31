@@ -26,6 +26,7 @@ module.exports = function options( options ) {
   if( from ) {
 
     if( from.match( /\.json$/i ) ) {
+      // this is deliberate, options are loaded synchronously at the start
       var text = fs.readFileSync( from )
       ref.options = JSON.parse(text)
     }
