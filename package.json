@@ -42,7 +42,8 @@
     "seneca-transport": "0.1.x",
     "chai": "1.8.x",
     "norma": "~0.2.1",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "rolling-stats": "~0.1.0"
   },
   "main": "lib/seneca",
   "files": [
