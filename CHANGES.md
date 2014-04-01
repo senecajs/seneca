@@ -3,6 +3,7 @@
 
    * use norma for api function arguments
    * parambulator arg checking moved into arg sepcification
+   * stats moved outside to rolling-stats module
 
 ## 0.5.15: 2014-01-28
 
