@@ -1,10 +1,12 @@
-/* Copyright (c) 2013 Richard Rodger */
+/* Copyright (c) 2013-2014 Richard Rodger */
 "use strict";
 
 
 // mocha plugin.test.js
 
 var util   = require('util')
+
+var _   = require('underscore')
 
 var seneca   = require('..')
 
@@ -66,6 +68,74 @@ describe('plugin', function(){
     catch( e ) {
       assert.equal('seneca/plugin_required',e.seneca.code)
     }
+
+  })
+
+
+  it('fix', function(fin){
+    var si = seneca()
+
+    function echo(args,done){done(null,_.extend({t:Date.now()},args))}
+    
+    var plugin_aaa = function(opts){
+      this.add({a:1},function(args,done){
+        this.act('z:1',function(err,out){
+          done(null,_.extend({a:1},out))
+        })
+      })
+      return 'aaa'
+    }
+
+    si.add({z:1},echo)
+    si.use(plugin_aaa)
+
+    assert.ok(si.hasact({z:1}))
+
+    si.act({a:1},function(err,out){
+      //console.log({a:1},out)
+      assert.isNull(err)
+      assert.equal(1,out.a)
+      assert.equal(1,out.z)
+      assert.ok(out.t)
+      assert.ok(si.hasact({a:1}))
+
+
+      si
+        .fix({q:1})
+        .use(function(opts){
+          this.add({a:1},function(args,done){
+            this.act('z:1',function(err,out){
+              done(null,_.extend({a:1,w:1},out))
+            })
+          })
+          return 'bbb'
+        })
+
+      assert.ok(si.hasact({a:1}))
+      assert.ok(si.hasact({a:1,q:1}))
+
+      //console.log(si.actroutes())
+
+      si.act({a:1},function(err,out){
+        //console.log({a:1},out)
+        assert.isNull(err)
+        assert.equal(1,out.a)
+        assert.equal(1,out.z)
+        assert.ok(out.t)
+
+        si.act({a:1,q:1},function(err,out){
+          //console.log({a:1,q:1},out)
+          assert.isNull(err)
+          assert.equal(1,out.a)
+          assert.equal(1,out.z)
+          assert.equal(1,out.w)
+          assert.ok(out.t)
+
+          fin()
+        })
+      })
+    })
+
 
   })
 
