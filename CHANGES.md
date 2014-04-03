@@ -2,7 +2,7 @@
 ## 0.5.16:
 
    * use norma for api function arguments
-   * parambulator arg checking moved into arg sepcification
+   * parambulator arg checking moved into arg specification
    * stats moved outside to rolling-stats module
    * seneca.fix sets fixed args
 

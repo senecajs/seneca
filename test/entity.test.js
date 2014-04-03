@@ -110,6 +110,43 @@ describe('entity', function(){
   })
 
 
+  it('isa', function(){
+    var si = seneca()
+
+    var f1 = si.make$('foo')
+
+    assert.ok( f1.canon$({isa:'foo'}) )
+    assert.ok( f1.canon$({isa:[null,null,'foo']}) )
+    assert.ok( f1.canon$({isa:{name:'foo'}}) )
+
+    assert.ok( !f1.canon$({isa:'bar'}) )
+    assert.ok( !f1.canon$({isa:[null,null,'bar']}) )
+    assert.ok( !f1.canon$({isa:{name:'bar'}}) )
+
+
+    var f2 = si.make$('boo/foo')
+
+    assert.ok( f2.canon$({isa:'boo/foo'}) )
+    assert.ok( f2.canon$({isa:[null,'boo','foo']}) )
+    assert.ok( f2.canon$({isa:{base:'boo',name:'foo'}}) )
+
+    assert.ok( !f2.canon$({isa:'far/bar'}) )
+    assert.ok( !f2.canon$({isa:[null,'far','bar']}) )
+    assert.ok( !f2.canon$({isa:{base:'far',name:'bar'}}) )
+
+
+    var f3 = si.make$('zoo/boo/foo')
+
+    assert.ok( f3.canon$({isa:'zoo/boo/foo'}) )
+    assert.ok( f3.canon$({isa:['zoo','boo','foo']}) )
+    assert.ok( f3.canon$({isa:{zone:'zoo',base:'boo',name:'foo'}}) )
+
+    assert.ok( !f3.canon$({isa:'zar/far/bar'}) )
+    assert.ok( !f3.canon$({isa:['zar','far','bar']}) )
+    assert.ok( !f3.canon$({isa:{zone:'zar',base:'far',name:'bar'}}) )
+
+  })
+
   
   it('mem-store-import-export', function(done){
     var si = seneca()
