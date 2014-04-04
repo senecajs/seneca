@@ -134,6 +134,19 @@ exports.basictest = function(si,done) {
           }))
         },
 
+        save5: function(cb) {
+          console.log('save5')
+
+          scratch.foo2 = si.make({name$:'foo'})
+          scratch.foo2.id$ = '12345'
+          
+          scratch.foo2.save$( verify(cb, function(foo2){
+            assert.isNotNull(foo2.id)
+            assert.equal('12345', foo2.id)
+            scratch.foo2 = foo2
+          }))
+        },
+
         query1: function(cb) {
           console.log('query1')
 
