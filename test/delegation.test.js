@@ -1,4 +1,4 @@
-/* Copyright (c) 2013 Richard Rodger */
+/* Copyright (c) 2013-2014 Richard Rodger */
 "use strict";
 
 var seneca_module = require('..')
@@ -11,10 +11,14 @@ var gex    = require('gex')
 var common = require('../lib/common')
 
 
+var testopts = {test:{silent:true}}
+
+
+
 describe('delegation', function(){
 
   it('happy', function() {
-    var si  = seneca_module()
+    var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       cb(null,args)
     })
@@ -37,7 +41,7 @@ describe('delegation', function(){
 
 
   it('dynamic', function() {
-    var si = seneca_module()
+    var si = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
       cb(null,args)

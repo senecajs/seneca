@@ -10,23 +10,54 @@ var _   = require('underscore')
 
 var seneca   = require('..')
 
-var gex     = require('gex')
 var assert  = require('chai').assert
 
 
 describe('plugin', function(){
 
-  it('depends', function(){
-    var si = seneca()
+  it('bad', function() {
+    var si = seneca({
+      // this lets you change stayalive per test
+      test:{
+        silent:    true,
+        stayalive: true
+      }
+    })
     
-    si.use( function(opts){
+    try { si.use( {foo:1} ) } catch( e ) {
+      assert.equal('plugin_no_name',e.seneca.code)
+    }
+
+    /* TODO: may not be needed
+    try { si.use( {name:'foo',init:1} ) } catch( e ) {
+      assert.equal('plugin_bad_init',e.seneca.code)
+    }
+     */
+
+    try { si.use( 'not-a-plugin-at-all-at-all' ) } catch( e ) {
+      assert.equal('plugin_not_found',e.seneca.code)
+    }
+  })
+
+
+  it('depends', function() {
+    var si = seneca({
+      // this lets you change stayalive per test
+      test:{
+        silent:    true,
+        stayalive: true
+      }
+    })
+    
+    si.use( function(){
       return {name:'aaa'}
     })
 
-    si.use( function(opts){
+    si.use( function(){
       this.depends('bbb',['aaa'])
       return {name:'bbb'}
     })
+
 
     try {
       si.use( function(opts){
@@ -36,7 +67,7 @@ describe('plugin', function(){
       assert.fail()
     }
     catch( e ) {
-      assert.equal('seneca/plugin_required',e.seneca.code)
+      assert.equal('plugin_required',e.seneca.code)
     }
 
     si.use( function(opts){
@@ -63,10 +94,9 @@ describe('plugin', function(){
         this.depends('hhh','aaa','zzz')
         return {name:'hhh'}
       })
-      assert.fail()
     }
-    catch( e ) {
-      assert.equal('seneca/plugin_required',e.seneca.code)
+    catch(e) {
+      assert.equal('plugin_required',e.seneca.code)
     }
 
   })

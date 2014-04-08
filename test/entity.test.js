@@ -14,10 +14,13 @@ var gex     = require('gex')
 var assert  = require('chai').assert
 
 
+var testopts = {test:{silent:true}}
+
+
 describe('entity', function(){
 
   it('parsecanon', function(){
-    var si = seneca()
+    var si = seneca(testopts)
     function def(v,d){return void 0 == v ? d : v}
     function fmt(cn){ return def(cn.zone,'-')+'/'+def(cn.base,'-')+'/'+def(cn.name,'-') }
 
@@ -41,7 +44,7 @@ describe('entity', function(){
 
 
   it('make', function(){
-    var si = seneca()
+    var si = seneca(testopts)
 
     var foo = si.make$('foo')
     assert.equal('-/-/foo',foo.entity$)
@@ -149,7 +152,7 @@ describe('entity', function(){
 
   
   it('mem-store-import-export', function(done){
-    var si = seneca()
+    var si = seneca(testopts)
 
 
     // NOTE: zone is NOT saved! by design!
