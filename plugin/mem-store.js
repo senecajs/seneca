@@ -3,7 +3,6 @@
 
 
 var _       = require('underscore')
-var uuid    = require('node-uuid')
 var fs      = require('fs')
 
 

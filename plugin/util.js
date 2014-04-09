@@ -147,6 +147,9 @@ module.exports = function( options ) {
         entry = seneca.util.parsecanon(entry.entity)
         entry.fields = fields
       }
+      else if( _.isObject(entry) && entry.entity$ ) {
+        entry = entry.canon$({object:true})
+      }
 
       var entq = {zone:entry.zone,base:entry.base,name:entry.name}
       sys_entity.load$(entq,function(err,entity){

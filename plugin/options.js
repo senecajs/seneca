@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2013 Richard Rodger */
+/* Copyright (c) 2012-2014 Richard Rodger */
 "use strict";
 
 
@@ -7,9 +7,7 @@ var util    = require('util')
 var exec    = require('child_process').exec
 
 var _        = require('underscore')
-var request  = require('request')
 var nid      = require('nid')
-var temp     = require('temp')
 var optimist = require('optimist')
 
 

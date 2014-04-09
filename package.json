@@ -27,23 +27,15 @@
     "gex": "~0.1.3",
     "parambulator": "~0.1.6",
     "async": "~0.7.0",
-    "node-uuid": "1.4.x",
-    "connect": "2.12.x",
-    "cookies": "0.3.x",
-    "http-proxy": "1.0.x",
-    "request": "2.x",
-    "sockjs": "~0.3.x",
-    "optimist": "0.6.x",
-    "nid": "0.3.x",
-    "temp": "0.6.x",
-    "patrun": "0.1.x",
-    "jsonic": "0.1.x",
-    "seneca-web": "0.1.x",
-    "seneca-transport": "0.1.x",
-    "chai": "1.8.x",
-    "norma": "~0.2.1",
+    "patrun": "~0.1.5",
+    "jsonic": "~0.1.1",
+    "seneca-web": "~0.1.1",
+    "seneca-transport": "~0.1.1",
+    "norma": "~0.2.3",
     "underscore": "~1.5.2",
-    "rolling-stats": "~0.1.0"
+    "rolling-stats": "~0.1.0",
+    "optimist": "~0.6.1",
+    "nid": "~0.3.2"
   },
   "main": "lib/seneca",
   "files": [
@@ -60,11 +52,12 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.test.js test/plugin/*.test.js",
-    "build": "./node_modules/.bin/jshint lib/*.js"
+    "build": "./node_modules/.bin/jshint lib/*.js; ./node_modules/.bin/docco lib/seneca.js -o doc"
   },
   "devDependencies": {
     "mocha": "~1.13.0",
     "jshint": "~2.1.11",
+    "chai": "~1.9.1",
     "docco": "~0.6.2"
   }
 }
