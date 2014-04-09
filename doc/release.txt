@@ -1,7 +1,7 @@
 0.  Update CHANGELOG
 1.  run npm build
 2.  run npm test
-3.  run doc/examples/runtest.sh
+3.  run doc/examples/testrun.sh (cd into doc/examples)
 4.  run seneca-verify
 5.  run seneca-mvp
 6.  run seneca-examples
@@ -15,5 +15,4 @@
 14. npm publish
 15. update gh-pages
 16. update tumblr
-
 

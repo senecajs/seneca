@@ -242,5 +242,3 @@ places. It also means you can deal with special cases very easily.
 
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rjrodger/seneca/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-

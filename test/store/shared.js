@@ -232,6 +232,7 @@ exports.basictest = function(si,done) {
 
       },
       function(err,out) {
+        err = err || null
         if( err ) {
           console.dir( err )
         }

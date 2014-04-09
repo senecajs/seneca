@@ -5,6 +5,7 @@
    * parambulator arg checking moved into arg specification
    * stats moved outside to rolling-stats module
    * seneca.fix sets fixed args
+   * started annotating source code
 
 ## 0.5.15: 2014-01-28
 
