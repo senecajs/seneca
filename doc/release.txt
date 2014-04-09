@@ -8,8 +8,8 @@
 7.  test data-stores: mongo
 8.  update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
 9.  git, final commit+push
-10.  get checkout master; git merge
-11.   runs tests
+10. get checkout master; git merge
+11. runs tests
 12. git push
 13  git tag; git push --tags
 14. npm publish

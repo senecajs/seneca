@@ -12,9 +12,9 @@ For a gentle introduction to this module, see the [senecajs.org](http://senecajs
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.5.15
+Current Version: 0.5.16
 
-Tested on: Node 0.10.24, and 0.11, 0.8 on Travis
+Tested on: Node 0.10.24, and 0.11 on Travis
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
 

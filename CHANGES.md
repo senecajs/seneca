@@ -6,6 +6,7 @@
    * stats moved outside to rolling-stats module
    * seneca.fix sets fixed args
    * started annotating source code
+   * small improvement to error handling and logging
 
 ## 0.5.15: 2014-01-28
 
