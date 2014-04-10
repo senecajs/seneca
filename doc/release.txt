@@ -12,8 +12,8 @@
 11. git, final commit+push
 12. rm -rf node_modules
 13. npm install
-14 get checkout master; git merge
-154. runs tests
+14  git checkout master; git merge
+15. runs tests
 16. git push
 17  npm publish
 18. git tag; git push --tags
