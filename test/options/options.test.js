@@ -1,4 +1,4 @@
-/* Copyright (c) 2013 Richard Rodger */
+/* Copyright (c) 2013-2014 Richard Rodger */
 "use strict";
 
 var spawn = require('child_process').spawn
@@ -33,7 +33,7 @@ describe('options', function(){
   // options from js object (loaded elsewhere)
 
   it('object', function(done) {
-    var si = seneca_module()
+    var si = seneca_module({test:{silent:true}})
 
     // insure cmd:init called
     var init = {}
@@ -58,7 +58,7 @@ describe('options', function(){
   })
 
   it('object-lit', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options',{object:{test:'object'}})
 
@@ -80,7 +80,7 @@ describe('options', function(){
   // options from file
 
   it('file', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options','options.file.json')
     si.use( check(init,'file') )
@@ -97,7 +97,7 @@ describe('options', function(){
   })
 
   it('file-lit', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options','options.file.json')
     si.use( check(init,'file','bar'), {lit:'bar'} )
@@ -117,7 +117,7 @@ describe('options', function(){
   // options from require
 
   it('require', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options','options.require.js')
     si.use( check(init,'require') )
@@ -134,7 +134,7 @@ describe('options', function(){
   })
 
   it('require-lit', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options','options.require.js')
     si.use( check(init,'require','bar'), {lit:'bar'} )
@@ -154,7 +154,7 @@ describe('options', function(){
   // options from default ./seneca.options.js
 
   it('default', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options')
     si.use( check(init,'default') )
@@ -171,7 +171,7 @@ describe('options', function(){
   })
 
   it('default-lit', function(done) {
-    var si = seneca_module()
+    var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
     si.use('options')
     si.use( check(init,'default','bar'), {lit:'bar'} )
@@ -186,46 +186,6 @@ describe('options', function(){
       })
     })
   })
-
-
-/*
-  it('web', function(done) {
-    spawn('node',['options.server.js'])
-      .on('error',function(){console.log(arguments)})
-    setTimeout(function() {
-
-    var si = seneca_module()
-    var init = {}
-    si.use('options','http://localhost:62626/')
-    si.use( check(init,'web') )
-    si.ready(function(err){
-      if(err) return done(err);
-      assert.ok(init.called)
-
-      si.act('cmd:foo',function(err,out){
-        if(err) return done(err);
-        assert.equal('web~undefined',out.foo)
-
-        var si = seneca_module()
-        var init = {}
-        si.use('options','http://localhost:62626/')
-        si.use( check(init,'web','bar'), {lit:'bar'} )
-        si.ready(function(err){
-          if(err) return done(err);
-          assert.ok(init.called)
-
-          si.act('cmd:foo',function(err,out){
-            if(err) return done(err);
-            assert.equal('web~bar',out.foo)
-
-            done()
-          })
-        })
-      })
-    })
-    },500)
-  })
- */
 
 })
 

@@ -103,7 +103,7 @@ describe('plugin', function(){
 
 
   it('fix', function(fin){
-    var si = seneca()
+    var si = seneca({test:{silent:true}})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}
     

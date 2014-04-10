@@ -12,7 +12,7 @@ For a gentle introduction to this module, see the [senecajs.org](http://senecajs
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.5.16
+Current Version: 0.5.17
 
 Tested on: Node 0.10.24, and 0.11 on Travis
 
@@ -239,6 +239,7 @@ places. It also means you can deal with special cases very easily.
 
 
 
+_Source_
 
-
+The [Seneca source code](http://senecajs.org/doc/seneca.html) is annotated.
 

@@ -96,7 +96,7 @@ describe('entity', function(){
 
 
   it('toString', function(){
-    var si = seneca()
+    var si = seneca(testopts)
 
     var f1 = si.make$('foo')
     f1.a = 1
@@ -114,7 +114,7 @@ describe('entity', function(){
 
 
   it('isa', function(){
-    var si = seneca()
+    var si = seneca(testopts)
 
     var f1 = si.make$('foo')
 
@@ -178,7 +178,7 @@ describe('entity', function(){
         si.act('role:mem-store,cmd:export',{file:'mem.json'}, function(e){
           assert.isNull(e)
 
-          var si2 = seneca()
+          var si2 = seneca(testopts)
 
           si2.act('role:mem-store,cmd:import',{file:'mem.json'}, function(e){
             assert.isNull(e)

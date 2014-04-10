@@ -11,7 +11,7 @@
     "toolkit",
     "startup"
   ],
-  "version": "0.5.16",
+  "version": "0.5.17",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -43,8 +43,7 @@
     "README.md",
     "CHANGES.md",
     "lib",
-    "plugin",
-    "test/store/shared.js"
+    "plugin"
   ],
   "repository": {
     "type": "git",
@@ -52,12 +51,13 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.test.js test/plugin/*.test.js",
-    "build": "./node_modules/.bin/jshint lib/*.js; ./node_modules/.bin/docco lib/seneca.js -o doc"
+    "build": "./build.sh"
   },
   "devDependencies": {
     "mocha": "~1.13.0",
     "jshint": "~2.1.11",
     "chai": "~1.9.1",
-    "docco": "~0.6.2"
+    "docco": "~0.6.2",
+    "fixture-stdout": "~0.2.1"
   }
 }

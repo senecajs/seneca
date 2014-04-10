@@ -1,4 +1,8 @@
 
+## 0.5.17:
+
+   * Moved standard store test to separate seneca-store-test module
+
 ## 0.5.16:
 
    * use norma for api function arguments

@@ -80,6 +80,7 @@ describe('delegation', function(){
   it('logging.actid',function(){
     var fail
     var si = seneca_module({
+      test:{silent:true},
       log:{map:[{handler:function(){
         if( 'aaa'==arguments[6] ) {
           if('debug'!=arguments[1]) fail='aaa,debug'; 
@@ -126,7 +127,7 @@ describe('delegation', function(){
 
 
   it('parent', function() {
-    var si  = seneca_module()
+    var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
       args.a=1
@@ -150,7 +151,7 @@ describe('delegation', function(){
 
 
   it('parent.plugin',function(){
-    var si = seneca_module()
+    var si = seneca_module(testopts)
 
     si.use(function(x,opts,cb){
       this.add({a:'A'},function(args,cb){

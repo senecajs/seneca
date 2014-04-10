@@ -1,11 +1,14 @@
-/* Copyright (c) 2010-2013 Richard Rodger */
+/* Copyright (c) 2010-2014 Richard Rodger, MIT License */
 "use strict";
 
 
 // mocha seneca.test.js
 
+var VERSION = '0.5.17'
 
-var util = require('util')
+var util   = require('util')
+var stream = require('stream')
+
 
 var common   = require('../lib/common')
 var seneca   = require('../lib/seneca')
@@ -17,6 +20,8 @@ var gex     = require('gex')
 var _ = require('underscore')
 var parambulator = require('parambulator')
 
+var fixturestdout = new require('fixture-stdout');
+
 
 var testopts = {test:{silent:true}}
 
@@ -24,8 +29,8 @@ var testopts = {test:{silent:true}}
 describe('seneca', function(){
 
   it('version', function(){
-    var si = seneca()
-    assert.equal(si.version,'0.5.16')
+    var si = seneca(testopts)
+    assert.equal(si.version,VERSION)
   })
 
 
@@ -47,7 +52,20 @@ describe('seneca', function(){
 
   
   it('require-use-safetynet', function(){
-    require('..').use('echo')
+
+    var fso = new fixturestdout()
+    try {
+      fso.capture( function onWrite (string, encoding, fd) {
+        return false;
+      })
+      require('..').use('echo')
+      fso.release()
+    }
+    catch(e){
+      fso.release()
+      aasert.faiL()
+    }
+
     require('..')(testopts).use('echo')
   })
 
@@ -106,49 +124,49 @@ describe('seneca', function(){
     // nothing
     var err = si.fail()
     assert.equal(err.seneca.code,'unknown')
-    assert.ok(gex("Seneca/*/*: unknown").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: unknown").on(err.message))
 
     // unresolved code gets used as message
     err = si.fail('code1')
     assert.equal(err.seneca.code,'code1')
-    assert.ok(gex("Seneca/*/*: code1").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code1").on(err.message))
 
     // additional values
     err = si.fail('code1',{foo:'a'})
     assert.equal(err.seneca.code,'code1')
     assert.equal(err.seneca.valmap.foo,'a')
-    assert.ok(gex("Seneca/*/*: code1").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code1").on(err.message))
 
     // no code
     err = si.fail({bar:1})
     assert.equal(err.seneca.code,'unknown')
     assert.equal(err.seneca.valmap.bar,1)
-    assert.ok(gex("Seneca/*/*: unknown").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: unknown").on(err.message))
 
     // additional meta props dragged along
     err = si.fail({code:'code2',bar:2})
     assert.equal(err.seneca.code,'code2')
     assert.equal(err.seneca.valmap.bar,2)
-    assert.ok(gex("Seneca/*/*: code2").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code2").on(err.message))
 
     // Error
     err = si.fail(new Error('eek'))
     assert.equal(err.seneca.code,'unknown')
-    assert.ok(gex("Seneca/*/*: eek").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: eek").on(err.message))
 
     // Error with unresolved code
     var erg = new Error('erg')
     erg.code = 'code3'
     err = si.fail(erg)
     assert.equal(err.seneca.code,'code3')
-    assert.ok(gex("Seneca/*/*: erg").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: erg").on(err.message))
 
     // Error with resolved code
     var erg = new Error('erg')
     erg.code = 'msg1'
     err = si.fail(erg)
     assert.equal(err.seneca.code,'msg1')
-    assert.ok(gex("Seneca/*/*: Message one").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: Message one").on(err.message))
   })
 
 
@@ -180,25 +198,25 @@ describe('seneca', function(){
 
     si.act({role:'error-test',how:'msg'},function(err){
       assert.equal('an error message',err.seneca.code)
-      assert.ok(gex('Seneca/*/*: an error message').on(err.message))
+      assert.ok(gex('Seneca/*'+'/*: an error message').on(err.message))
       cblog += 'b'
     })
 
     si.act({role:'error-test',how:'errobj'},function(err){
       //assert.equal('seneca/act_error',err.seneca.code)
-      assert.ok(gex('Seneca/*/*: an Error object').on(err.message))
+      assert.ok(gex('Seneca/*'+'/*: an Error object').on(err.message))
       cblog += 'c'
     })
 
     si.act({role:'error-test',how:'str'},function(err){
       //assert.equal('seneca/act_error',err.seneca.code)
-      assert.ok(gex('Seneca/*/*: a string error').on(err.message))
+      assert.ok(gex('Seneca/*'+'/*: a string error').on(err.message))
       cblog += 'd'
     })
 
     si.act({role:'error-test',how:'obj'},function(err){
       //assert.equal('seneca/act_error',err.seneca.code)
-      assert.ok(gex('Seneca/*/*: {error=an object}').on(err.message))
+      assert.ok(gex('Seneca/*'+'/*: {error=an object}').on(err.message))
       cblog += 'e'
     })
 
@@ -328,14 +346,14 @@ describe('seneca', function(){
 
     si.add({op:'foo'},foo)
     si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~Seneca/0.5.*/*').on(''+o.a+'~'+o.s))
+      assert.ok(gex('1~Seneca/0.5.*'+'/*').on(''+o.a+'~'+o.s))
     })
 
 
 
     si.add({op:'foo'},bar)
     si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~2~Seneca/0.5.*/*').on(''+o.a+'~'+o.b+'~'+o.s))
+      assert.ok(gex('1~2~Seneca/0.5.*'+'/*').on(''+o.a+'~'+o.b+'~'+o.s))
     })
 
   })
@@ -370,7 +388,7 @@ describe('seneca', function(){
       assert.ok(e.message.match(/norma:/))
     }
 
-    si = seneca()
+    si = seneca(testopts)
       .add('a:1',function(args){this.good({b:args.a+1})})
       .add('a:2',function(args){this.good({b:args.a+2})})
 
@@ -540,7 +558,7 @@ describe('seneca', function(){
 
 
   it('fire-and-forget', function() {
-    var si = seneca()
+    var si = seneca(testopts)
     si.add({a:1},function(args,done){done(null,args.a+1)})
     si.add({a:1,b:2},function(args,done){done(null,args.a+args.b)})
 
@@ -611,7 +629,7 @@ describe('seneca', function(){
 
 
   it('fix', function() {
-    var si = seneca()
+    var si = seneca(testopts)
 
     function ab(args,done){done(null,{r:''+args.a+(args.b||'-')+(args.c||'-')+args.z})}
 
@@ -629,7 +647,7 @@ describe('seneca', function(){
 
 
   it('parambulator', function() {
-    var si = seneca()
+    var si = seneca(testopts)
 
     si.add({a:1,b:'q',c:{required$:true,string$:true}},function(args,done){done(null,{})})
 
@@ -640,7 +658,7 @@ describe('seneca', function(){
 
 
   it('error-msgs', function() {
-    var si = seneca()
+    var si = seneca(testopts)
     assert.ok( 
       gex("Seneca/*/*: TESTING: exists: 111, notfound:[notfound?], str=s, obj={a=1}, arr=[1,2], bool=false, null=null, delete=D, undefined=U, void=V, NaN=N")
         .on(si.fail('test_prop',{
@@ -659,7 +677,7 @@ describe('seneca', function(){
 
 
   it('act-param', function(){
-    var si = seneca()
+    var si = seneca(testopts)
 
     si.add({a:1,b:{integer$:true}},function(args,done){
       if( !_.isNumber(args.b) ) return assert.fail();
