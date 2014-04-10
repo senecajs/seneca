@@ -1,0 +1,22 @@
+START
+sales-tax
+123
+sales-tax-config
+123
+sales-tax-config-pin
+123
+sales-tax-client/server
+123
+sales-tax-complex
+DE: 123
+US,NY: 104
+IE: 113.5
+sales-tax-plugin/app
+{"total":123}
+{role=shop,cmd=salestax,net=100}
+0.23
+{total=123}
+123
+{net=100,cmd=salestax,role=shop}
+0.23
+{total=123}

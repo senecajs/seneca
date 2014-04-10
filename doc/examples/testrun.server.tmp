@@ -1,0 +1,7 @@
+2014-04-09T12:10:24.182Z	DEBUG	act	shop	-	byaivq	IN	{role=shop,cmd=salestax,net=100}	wx38iu
+2014-04-09T12:10:24.184Z	DEBUG	plugin	shop	-	100	123	0.23
+2014-04-09T12:10:24.184Z	DEBUG	act	shop	-	byaivq	OUT	{total=123}	wx38iu
+2014-04-09T12:10:24.184Z	DEBUG	plugin	shop	-	byaivq	test	123
+2014-04-09T12:10:24.946Z	DEBUG	act	shop	-	bc7rjc	IN	{net=100,cmd=salestax,role=shop}	wx38iu
+2014-04-09T12:10:24.947Z	DEBUG	plugin	shop	-	100	123	0.23
+2014-04-09T12:10:24.947Z	DEBUG	act	shop	-	bc7rjc	OUT	{total=123}	wx38iu
