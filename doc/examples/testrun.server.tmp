@@ -1,7 +1,7 @@
-2014-04-09T12:10:24.182Z	DEBUG	act	shop	-	byaivq	IN	{role=shop,cmd=salestax,net=100}	wx38iu
-2014-04-09T12:10:24.184Z	DEBUG	plugin	shop	-	100	123	0.23
-2014-04-09T12:10:24.184Z	DEBUG	act	shop	-	byaivq	OUT	{total=123}	wx38iu
-2014-04-09T12:10:24.184Z	DEBUG	plugin	shop	-	byaivq	test	123
-2014-04-09T12:10:24.946Z	DEBUG	act	shop	-	bc7rjc	IN	{net=100,cmd=salestax,role=shop}	wx38iu
-2014-04-09T12:10:24.947Z	DEBUG	plugin	shop	-	100	123	0.23
-2014-04-09T12:10:24.947Z	DEBUG	act	shop	-	bc7rjc	OUT	{total=123}	wx38iu
+2014-04-10T13:34:25.989Z	DEBUG	act	shop	-	qk8e2k	IN	{role=shop,cmd=salestax,net=100}	5cfb0o
+2014-04-10T13:34:25.991Z	DEBUG	plugin	shop	-	100	123	0.23
+2014-04-10T13:34:25.991Z	DEBUG	act	shop	-	qk8e2k	OUT	{total=123}	5cfb0o
+2014-04-10T13:34:25.991Z	DEBUG	plugin	shop	-	qk8e2k	test	123
+2014-04-10T13:34:26.790Z	DEBUG	act	shop	-	mhwlm4	IN	{net=100,cmd=salestax,role=shop}	5cfb0o
+2014-04-10T13:34:26.790Z	DEBUG	plugin	shop	-	100	123	0.23
+2014-04-10T13:34:26.790Z	DEBUG	act	shop	-	mhwlm4	OUT	{total=123}	5cfb0o
