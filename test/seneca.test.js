@@ -189,36 +189,67 @@ describe('seneca', function(){
       assert.ok( e.message.match(/inside callback/) )
     }
 
+
     var cblog = ''
 
-    si.act({role:'error-test',how:'fail'},function(err){
+    try {
+      si.act({role:'error-test',how:'fail'},function(err){
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(err) {
       assert.equal('error_code1',err.seneca.code)
       cblog += 'a'
-    })
+    }
 
-    si.act({role:'error-test',how:'msg'},function(err){
+
+    try {
+      si.act({role:'error-test',how:'msg'},function(err){
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(err) {
       assert.equal('an error message',err.seneca.code)
       assert.ok(gex('Seneca/*'+'/*: an error message').on(err.message))
       cblog += 'b'
-    })
+    }
 
-    si.act({role:'error-test',how:'errobj'},function(err){
-      //assert.equal('seneca/act_error',err.seneca.code)
+
+    try {
+      si.act({role:'error-test',how:'errobj'},function(err){
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(err) {
       assert.ok(gex('Seneca/*'+'/*: an Error object').on(err.message))
       cblog += 'c'
-    })
+    }
 
-    si.act({role:'error-test',how:'str'},function(err){
-      //assert.equal('seneca/act_error',err.seneca.code)
+
+    try {
+      si.act({role:'error-test',how:'str'},function(err){
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(err) {
       assert.ok(gex('Seneca/*'+'/*: a string error').on(err.message))
       cblog += 'd'
-    })
+    }
 
-    si.act({role:'error-test',how:'obj'},function(err){
-      //assert.equal('seneca/act_error',err.seneca.code)
+    try {
+      si.act({role:'error-test',how:'obj'},function(err){
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(err) {
       assert.ok(gex('Seneca/*'+'/*: {error=an object}').on(err.message))
       cblog += 'e'
-    })
+    }
 
     assert.equal('abcde',cblog)
   })
