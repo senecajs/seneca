@@ -1,4 +1,8 @@
 
+## 0.5.18:
+
+   * Added role:util,note:true actions for note storage, for inter-plugin data sharing
+
 ## 0.5.17:
 
    * Moved standard store test to separate seneca-store-test module

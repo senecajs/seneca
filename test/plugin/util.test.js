@@ -78,4 +78,66 @@ describe('util', function() {
 
   })
 
+  
+  it('note', function(){
+    si.act('role:util,note:true,cmd:set,key:foo,value:red', function(e,o){
+      assert.isNull(e)
+      assert.equal('red',o)
+
+      si.act('role:util,note:true,cmd:get,key:foo', function(e,o){
+        assert.isNull(e)
+        assert.equal('red',o)
+
+        si.act('role:util,note:true,cmd:list,key:foo', function(e,o){
+          assert.isNull(e)
+          assert.equal(0,o.length)
+
+          si.act('role:util,note:true,cmd:push,key:foo,value:aaa', function(e,o){
+            assert.isNull(e)
+            assert.equal('aaa',o)
+
+            si.act('role:util,note:true,cmd:list,key:foo', function(e,o){
+              assert.isNull(e)
+              assert.equal(1,o.length)
+              assert.equal('aaa',o[0])
+
+              si.act('role:util,note:true,cmd:push,key:foo,value:bbb', function(e,o){
+                assert.isNull(e)
+                assert.equal('bbb',o)
+
+                si.act('role:util,note:true,cmd:list,key:foo', function(e,o){
+                  assert.isNull(e)
+                  assert.equal(2,o.length)
+                  assert.equal('aaa',o[0])
+                  assert.equal('bbb',o[1])
+
+                  si.act('role:util,note:true,cmd:pop,key:foo', function(e,o){
+                    assert.isNull(e)
+                    assert.equal('bbb',o)
+
+                    si.act('role:util,note:true,cmd:list,key:foo', function(e,o){
+                      assert.isNull(e)
+                      assert.equal(1,o.length)
+                      assert.equal('aaa',o[0])
+
+                      si.act('role:util,note:true,cmd:pop,key:foo', function(e,o){
+                        assert.isNull(e)
+                        assert.equal('aaa',o)
+
+                        si.act('role:util,note:true,cmd:list,key:foo', function(e,o){
+                          assert.isNull(e)
+                          assert.equal(0,o.length)
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
 })

@@ -48,6 +48,39 @@ module.exports = function( options ) {
 
 
 
+  seneca.add({role:name,note:true,cmd:'set'},  note_set)
+  seneca.add({role:name,note:true,cmd:'get'},  note_get)
+  seneca.add({role:name,note:true,cmd:'list'}, note_list)
+  seneca.add({role:name,note:true,cmd:'push'}, note_push)
+  seneca.add({role:name,note:true,cmd:'pop'},  note_pop)
+
+
+  var note = {}
+
+  function note_set(args,done)  { this.good(note[args.key] = args.value) }
+  function note_get(args,done)  { this.good(note[args.key]) }
+  function note_list(args,done) { 
+    if( _.isArray(note[args.key]) ) {
+      this.good(note[args.key]) 
+    }
+    else this.good([])
+  }
+
+  function note_push(args,done) {
+    if( !_.isArray(note[args.key]) ) {
+      note[args.key] = []
+    }
+    note[args.key].push(args.value)
+    this.good( args.value )
+  }
+
+  function note_pop(args,done) {
+    if( _.isArray(note[args.key]) ) {
+      this.good( note[args.key].pop() )
+    }
+    else this.good()
+  }
+
 
 
 

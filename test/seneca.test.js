@@ -739,5 +739,36 @@ describe('seneca', function(){
     }
 
   })
+
+
+  it('declare', function(){
+    var si = seneca(testopts)
+
+    var init = false
+
+    var foo = function(){
+      this.add({a:1},function(args,done){done.good({b:args.b})})
+      this.add({init:'foo'},function(args,done){init=true;this.good()})
+      return 'foo'
+    }
+
+    si.use(foo)
+    si.ready(function(){
+      assert.ok(init)
+
+      si.hasact({a:1})
+
+      si = seneca(testopts)
+      init = false
+
+      si.declare(foo)
+      si.ready(function(){
+        assert.ok(!init)
+
+        si.hasact({a:1})
+      })
+    })
+  })
+
 })
 
