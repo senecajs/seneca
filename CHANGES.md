@@ -2,6 +2,7 @@
 ## 0.5.18:
 
    * Added role:util,note:true actions for note storage, for inter-plugin data sharing
+   * Moved plugin loading to new module, use-plugin
 
 ## 0.5.17:
 
