@@ -31,7 +31,7 @@
     "jsonic": "~0.1.1",
     "seneca-web": "~0.1.3",
     "seneca-transport": "~0.1.2",
-    "norma": "~0.2.3",
+    "norma": "~0.2.4",
     "underscore": "~1.6.0",
     "rolling-stats": "~0.1.0",
     "optimist": "~0.6.1",
