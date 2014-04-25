@@ -3,6 +3,8 @@
 
    * Added role:util,note:true actions for note storage, for inter-plugin data sharing
    * Moved plugin loading to new module, use-plugin
+   * Moved utility functions to common
+   * Removed deprecated functions
 
 ## 0.5.17:
 
