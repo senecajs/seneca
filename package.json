@@ -36,7 +36,7 @@
     "rolling-stats": "~0.1.0",
     "optimist": "~0.6.1",
     "nid": "~0.3.2",
-    "use-plugin": "~0.1.2",
+    "use-plugin": "~0.1.3",
     "eraro": "~0.1.3"
   },
   "main": "lib/seneca",
