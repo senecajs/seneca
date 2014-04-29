@@ -36,7 +36,8 @@
     "rolling-stats": "~0.1.0",
     "optimist": "~0.6.1",
     "nid": "~0.3.2",
-    "use-plugin": "~0.1.2"
+    "use-plugin": "~0.1.2",
+    "eraro": "~0.1.3"
   },
   "main": "lib/seneca",
   "files": [
@@ -59,6 +60,7 @@
     "jshint": "~2.1.11",
     "chai": "~1.9.1",
     "docco": "~0.6.2",
-    "fixture-stdout": "~0.2.1"
+    "fixture-stdout": "~0.2.1",
+    "timerstub": "~1.0.2"
   }
 }

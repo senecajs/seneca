@@ -6,11 +6,10 @@
 module.exports = function(seneca,options,done) {
 
   seneca.add({role:'error-test'},function(args,cb){
+    var seneca = this
+
     if( 'fail' == args.how ) {
       throw seneca.fail('error_code1')
-    }
-    else if( 'msg' == args.how ) {
-      throw seneca.fail('an error message')
     }
     else if( 'errobj' == args.how ) {
       throw new Error('an Error object')
@@ -19,7 +18,19 @@ module.exports = function(seneca,options,done) {
       throw('a string error')
     }
     else if( 'obj' == args.how ) {
-      throw({error:'an object'})
+      throw({bad:1})
+    }
+    else if( 'cb-err' == args.how ) {
+      return cb(new Error('cb-err'))
+    }
+    else if( 'cb-fail' == args.how ) {
+      return cb(seneca.fail('cb-fail'))
+    }
+    else if( 'cb-obj' == args.how ) {
+      return cb({bad:2})
+    }
+    else if( 'cb-cb-err' == args.how ) {
+      return cb(new Error('cb-cb-err'))
     }
     else cb()
   })

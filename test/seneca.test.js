@@ -172,86 +172,152 @@ describe('seneca', function(){
 
 
 
-  it('failgen.cmd', function() {
-    var si = seneca({test:{silent:true},plugins:['echo','error-test']})
+  it('failgen.cmd', function(fin) {
+    var errhandler
+
+    var si = seneca({
+      test:{silent:true},
+      plugins:['echo','error-test'],
+      log:{map:[{level:'error+',handler:function(){
+        errhandler.apply(null,common.arrayify(arguments))
+      }}]}
+    })
+    var cblog = ''
 
     si.act({role:'error-test'},function(err){
       assert.isNull(err)
     })
 
-    try {
+
+    next_a()
+
+
+    function next_a() {
+      errhandler = function(){
+        assert.equal('task-callback',arguments[7])
+        cblog += 'a'
+
+        next_b()
+      }
       si.act({role:'error-test'},function(err){
         throw new Error('inside callback')
       })
-      assert.fail()
-    }
-    catch(e) {
-      assert.ok( e.message.match(/inside callback/) )
     }
 
 
-    var cblog = ''
-
-    try {
+    function next_b() {
+      errhandler = function(err){
+        assert.equal('task-execute',arguments[7])
+        cblog += 'B'
+      }
       si.act({role:'error-test',how:'fail'},function(err){
-        assert.fail()
+        assert.equal('error_code1',err.seneca.code)
+        cblog += 'b'
+        next_c()
       })
-      assert.fail()
-    }
-    catch(err) {
-      assert.equal('error_code1',err.seneca.code)
-      cblog += 'a'
     }
 
 
-    try {
-      si.act({role:'error-test',how:'msg'},function(err){
-        assert.fail()
-      })
-      assert.fail()
-    }
-    catch(err) {
-      assert.equal('an error message',err.seneca.code)
-      assert.ok(gex('Seneca/*'+'/*: an error message').on(err.message))
-      cblog += 'b'
-    }
-
-
-    try {
+    function next_c() {
+      errhandler = function(err){
+        assert.equal('task-execute',arguments[7])
+        cblog += 'C'
+      }
       si.act({role:'error-test',how:'errobj'},function(err){
-        assert.fail()
+        assert.equal('an Error object',err.message)
+        cblog += 'c'
+        next_d()
       })
-      assert.fail()
-    }
-    catch(err) {
-      assert.ok(gex('Seneca/*'+'/*: an Error object').on(err.message))
-      cblog += 'c'
     }
 
 
-    try {
+    function next_d() {
+      errhandler = function(err){
+        assert.equal('a string error',arguments[7])
+        cblog += 'D'
+      }
       si.act({role:'error-test',how:'str'},function(err){
-        assert.fail()
+        assert.equal('a string error',err.code)
+        cblog += 'd'
+        next_e()
       })
-      assert.fail()
-    }
-    catch(err) {
-      assert.ok(gex('Seneca/*'+'/*: a string error').on(err.message))
-      cblog += 'd'
     }
 
-    try {
+
+    function next_e() {
+      errhandler = function(err){
+        assert.equal('unknown',arguments[7])
+        cblog += 'E'
+      }
       si.act({role:'error-test',how:'obj'},function(err){
-        assert.fail()
+        assert.equal('unknown',err.code)
+        cblog += 'e'
+        next_f()
       })
-      assert.fail()
-    }
-    catch(err) {
-      assert.ok(gex('Seneca/*'+'/*: {error=an object}').on(err.message))
-      cblog += 'e'
     }
 
-    assert.equal('abcde',cblog)
+
+    function next_f() {
+      errhandler = function(err){
+        assert.equal('task-error',arguments[7])
+        cblog += 'F'
+      }
+      si.act({role:'error-test',how:'cb-err'},function(err){
+        assert.equal('task-error',err.code)
+        cblog += 'f'
+        next_g()
+      })
+    }
+
+
+    function next_g() {
+      errhandler = function(err){
+        assert.equal('task-error',arguments[7])
+        cblog += 'G'
+      }
+      si.act({role:'error-test',how:'cb-fail'},function(err){
+        assert.equal('task-error',err.code)
+        assert.equal('cb-fail',err.seneca.code)
+        cblog += 'g'
+        next_h()
+      })
+    }
+
+
+    function next_h() {
+      errhandler = function(err){
+        assert.equal('unknown',arguments[7])
+        cblog += 'H'
+      }
+      si.act({role:'error-test',how:'cb-obj'},function(err){
+        assert.equal('unknown',err.code)
+        cblog += 'h'
+        next_i()
+      })
+    }
+
+
+    function next_i() {
+      var count = 0
+      errhandler = function(err){
+        0===count && assert.equal('task-error',arguments[7]);
+        1===count && assert.equal('task-callback',arguments[7])
+        count++
+        cblog += 'I'
+        if( 1 < count ) return finish();
+      }
+      si.act({role:'error-test',how:'cb-cb-err'},function(err){
+        assert.equal('task-error',err.code)
+        cblog += 'i'
+        throw new Error('inside-cb-cb')
+      })
+    }
+
+
+    function finish() {
+      assert.equal('aBbCcDdEeFfGgHhIiI',cblog)
+      fin()
+    }
   })
 
 
