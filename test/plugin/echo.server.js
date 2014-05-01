@@ -1,5 +1,4 @@
-/* Copyright (c) 2010-2013 Ricebridge */
-
+/* Copyright (c) 2010-2014 Richard Rodger, MIT License */
 "use strict";
 
 

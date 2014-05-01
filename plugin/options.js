@@ -32,7 +32,23 @@ module.exports = function options( options ) {
       if( !from.match(/^\//) ) {
         from = './'+from
       }
-      ref.options = seneca.context.module.require( from )
+      
+      try {
+        ref.options = seneca.context.module.require( from )
+      }
+      catch(e) {
+        try {
+          ref.options = seneca.context.module.require( __dirname+'/'+from )
+        }
+        catch(e) {
+          try {
+            ref.options = require( from )
+          }
+          catch(e) {
+            ref.options = require( __dirname+'/'+from )
+          }
+        }
+      }
     }
   }
   else if( 0 < _.keys(options).length ) {

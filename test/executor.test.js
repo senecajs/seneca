@@ -70,4 +70,21 @@ describe('executor', function(){
 
     timerstub.wait(900,fin)
   })
+
+
+  it('no-callback',function(fin){
+    var e1 = executor({
+      trace:true,
+      timeout:300,
+      stubs:timerstub
+    })
+
+    var t1 = false
+    var start = timerstub.Date.now()
+    e1.execute({id:'a',fn:function(done){t1=true;done()}})
+    timerstub.wait(900,function(){
+      assert.ok(t1)
+      fin()
+    })
+  })
 })
