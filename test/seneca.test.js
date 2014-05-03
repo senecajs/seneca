@@ -837,5 +837,54 @@ describe('seneca', function(){
     })
   })
 
+
+
+  it('sub', function(fin){
+    var si = seneca(testopts)
+
+    var tmp = {a:0,as1:0,as2:0}
+
+    si.add({a:1},function(args,done){
+      tmp.a = tmp.a+1
+      done(null,{b:1})
+    })
+
+    si.act({a:1},function(err,out) {
+      if(err) return fin(err);
+      assert.equal(1,out.b)
+      assert.equal(1,tmp.a)
+      assert.equal(0,tmp.as1)
+      assert.equal(0,tmp.as2)
+
+      si.sub({a:1},function(args){
+        tmp.as1 = tmp.as1+1
+      })
+
+      si.act({a:1},function(err,out) {
+        if(err) return fin(err);
+
+        assert.equal(1,out.b)
+        assert.equal(2,tmp.a)
+        assert.equal(1,tmp.as1)
+        assert.equal(0,tmp.as2)
+
+        si.sub({a:1},function(args){
+          tmp.as2 = tmp.as2+1
+        })
+
+        si.act({a:1},function(err,out) {
+          if(err) return fin(err);
+
+          assert.equal(1,out.b)
+          assert.equal(3,tmp.a)
+          assert.equal(2,tmp.as1)
+          assert.equal(1,tmp.as2)
+
+          fin()
+        })
+      })
+    })
+  })
+
 })
 
