@@ -22,6 +22,7 @@ var parambulator = require('parambulator')
 
 var fixturestdout = new require('fixture-stdout');
 
+var timerstub = require('timerstub')
 
 var testopts = {test:{silent:true}}
 
@@ -74,40 +75,40 @@ describe('seneca', function(){
   it('ready', function(fin){
     var mark = {ec:0}
 
-    setTimeout(function(){
+    timerstub.setTimeout(function(){
       assert.ok(mark.r0)
       assert.ok(mark.r1)
       assert.ok(mark.p1)
       assert.ok(mark.p2)
-      assert.ok(mark.ec==1)
+      assert.ok(1===mark.ec)
 
       fin()
-    },666)
+    },300)
 
 
     var si = seneca(testopts)
-    si.ready(function(err){
-      assert.isNull(err)
+    si.ready(function(){
       mark.r0=true
 
       si.use(function p1(opts){
-        si.add({init:'p1'},function(args,done){setTimeout(function(){mark.p1=true;done()},222)})
+        si.add({init:'p1'},function(args,done){timerstub.setTimeout(function(){mark.p1=true;done()},100)})
       })
 
-      si.ready(function(err){
-        assert.isNull(err)
+      si.on('ready',function(){
+        mark.ec++
+      })
+
+      si.ready(function(){
         mark.r1=true
 
-        si.on('ready',function(err){
-          assert.isNull(err)
-          mark.ec++
-        })
 
         si.use(function p2(opts){
-          si.add({init:'p2'},function(args,done){setTimeout(function(){mark.p2=true;done()},222)})
+          si.add({init:'p2'},function(args,done){timerstub.setTimeout(function(){mark.p2=true;done()},100)})
         })
       })
     })
+
+    timerstub.wait(400)
   })
 
 
