@@ -87,4 +87,42 @@ describe('executor', function(){
       fin()
     })
   })
+
+
+  it('ignore-gate',function(fin){
+    var e1 = executor({
+      trace:true,
+      timeout:100,
+      stubs:timerstub
+    })
+
+    var seq = ''
+
+
+    e1.execute({id:'a',fn:function(done){seq+='a';done()}})
+    e1.execute({id:'b',gate:true,fn:function(done){
+      seq+='b'
+
+      e1.execute({id:'c',ignoregate:true,fn:function(done2){
+        seq+='c'
+
+        done2()
+        done()
+      }})
+
+      e1.execute({id:'d',gate:true,fn:function(done3){
+        seq+='d'
+        timerstub.setTimeout(done3,100)
+      }})
+
+      
+    }})
+    e1.execute({id:'e',fn:function(done){seq+='e';done()}})
+
+    timerstub.wait(200,function(){
+      assert.equal('abcde',seq)
+      fin()
+    })
+  })
+
 })
