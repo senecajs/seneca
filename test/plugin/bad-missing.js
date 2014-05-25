@@ -1,0 +1,2 @@
+require('../..')()
+  .use('missing-plugin')

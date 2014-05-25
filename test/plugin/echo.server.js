@@ -11,7 +11,7 @@ si.use('echo')
 var app = connect()
   .use(connect.logger())
   .use(connect.json())
-  .use( si.service() )
+  .use( si.export('web') )
   .listen(3000)
 
 

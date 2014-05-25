@@ -1,0 +1,2 @@
+
+require('./not-a-module')

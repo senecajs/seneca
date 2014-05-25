@@ -392,14 +392,10 @@ describe('seneca', function(){
     }
 
 
-    try {
-      si.act({op:'bad',a1:100}, function(err,out) {
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal(e.seneca.code,'act_not_found')
-    }
+    si.act({op:'bad',a1:100}, function(err,out) {
+      assert.equal(err.seneca.code,'act_not_found')
+    })
+
 
     si.act({op:'bad',a1:100,default$:"qaz"}, function(err,out) {
       assert.equal(out,'qaz')
@@ -413,14 +409,9 @@ describe('seneca', function(){
       assert.equal(e.seneca.code,'act_not_found')
     }
 
-    try {
-      si.act(function(err,out) {
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal(e.seneca.code,'act_not_found')
-    }
+    si.act(function(err,out) {
+      assert.equal(err.seneca.code,'act_not_found')
+    })
   })
 
 
@@ -433,21 +424,17 @@ describe('seneca', function(){
     }
 
     function bar(args,done) {
-      this.parent(args,function(e,o){
+      this.prior(args,function(e,o){
         o.b=2
         done(e,o)
       })
     }
     
 
-    // NOTE: this test should fail once all actions are made properly async, so leaving it in place to verify this
-
     si.add({op:'foo'},foo)
     si.act('op:foo,a:1',function(e,o){
       assert.ok(gex('1~Seneca/0.5.*'+'/*').on(''+o.a+'~'+o.s))
     })
-
-
 
     si.add({op:'foo'},bar)
     si.act('op:foo,a:1',function(e,o){
