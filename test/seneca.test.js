@@ -330,6 +330,7 @@ describe('seneca', function(){
     var emptycb = function(){}
 
     try { si.register() } catch( e ) { 
+	console.log(e.stack)
       assert.equal('seneca/register_invalid_plugin',e.seneca.code)
     }
 
