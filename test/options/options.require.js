@@ -1,3 +1,4 @@
 module.exports = {
-  require: { test: 'require' }
+  b:2,
+  foo:{bb:2}
 }

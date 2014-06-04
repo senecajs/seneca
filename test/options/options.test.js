@@ -1,9 +1,7 @@
 /* Copyright (c) 2013-2014 Richard Rodger */
 "use strict";
 
-var spawn = require('child_process').spawn
-
-var seneca_module = require('../..')
+var seneca = require('../..')
 
 
 var assert = require('chai').assert
@@ -11,41 +9,125 @@ var gex    = require('gex')
 
 
 
-function check(init,name,val,lit) {
-  var fn = function(options) {
-    //console.log('check',options)
-
-    assert.equal(''+val,''+options.val)
-    assert.equal(''+lit,''+options.lit)
-
-    this.add({init:name},function(args,done){
-      init.called=true
-      done()
-    })
-
-    this.add({cmd:'zed'},function(args,done){
-      done(null,{res:options.val+'~'+options.lit})
-    })
-
-    //console.log('PE')
-  }
-  return {name:name,init:fn}
-}
-
-
 describe('options', function(){
 
 
   it('options-happy', function(){
-    var si = seneca_module({a:1, test:{silent:true}})
-    assert.equal(1,si.export('options').a)
+    // loads ./seneca.options.js as well
+    var si = seneca({d:4, foo:{dd:4}, test:{silent:true}})
 
-    si.use('options',{b:2})
-    assert.equal(1,si.export('options').a)
-    assert.equal(2,si.export('options').b)
+    var opts = si.options()
+    //console.dir(si.options())
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+
+    var opts = si.export('options')
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
   })
 
 
+  it('options-getset', function(){
+    var si = seneca({d:4, foo:{dd:4}, test:{silent:true}})
+
+    si.options({e:5,foo:{ee:5}})
+
+    var opts = si.options()
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(5,opts.e)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(5,opts.foo.ee)
+
+    var opts = si.export('options')
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(5,opts.e)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(5,opts.foo.ee)
+  })
+
+
+  it('options-legacy', function(){
+    var si = seneca({d:4, foo:{dd:4}, test:{silent:true}})
+
+    si.use('options',{e:5,foo:{ee:5}})
+
+    var opts = si.options()
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(5,opts.e)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(5,opts.foo.ee)
+
+    var opts = si.export('options')
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(5,opts.e)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(5,opts.foo.ee)
+  })
+
+
+  it('options-file-js', function(){
+    var si0 = seneca({d:4, foo:{dd:4}, test:{silent:true}})
+
+    si0.options('./options.require.js')
+
+    var opts = si0.options()
+    //console.dir(opts)
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(2,opts.b)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(2,opts.foo.bb)
+
+    var opts = si0.export('options')
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(2,opts.b)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(2,opts.foo.bb)
+  })
+
+
+  it('options-file-json', function(){
+    var si0 = seneca({d:4, foo:{dd:4}, test:{silent:true}})
+
+    si0.options(__dirname+'/options.file.json')
+
+    var opts = si0.options()
+    //console.dir(opts)
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(3,opts.c)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(3,opts.foo.cc)
+
+    var opts = si0.export('options')
+    assert.equal(1,opts.a)
+    assert.equal(4,opts.d)
+    assert.equal(3,opts.c)
+    assert.equal(1,opts.foo.aa)
+    assert.equal(4,opts.foo.dd)
+    assert.equal(3,opts.foo.cc)
+  })
+
+
+  // TODO: failure modes
+
+/*
   // options from js object (loaded elsewhere)
 
   it('plugin-options-from-global', function(done) {

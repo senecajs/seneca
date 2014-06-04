@@ -1,1 +1,5 @@
-{"file":{"test":"file"}}
+c:3,
+foo:{
+  cc:3
+}
+

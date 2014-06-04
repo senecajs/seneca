@@ -1,3 +1,4 @@
 module.exports = {
-  default: { test: 'default' }
+  a:1,
+  foo: { aa: 1 }
 }
