@@ -52,7 +52,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha test/*.test.js test/plugin/*.test.js",
+    "test": "./node_modules/.bin/mocha test/*.test.js test/plugin/*.test.js test/options/*.test.js",
     "build": "./build.sh"
   },
   "devDependencies": {

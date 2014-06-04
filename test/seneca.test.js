@@ -114,12 +114,7 @@ describe('seneca', function(){
 
   it('failgen.meta.happy', function() {
     var si = seneca({
-      test:{silent:true},
-      message:{
-        seneca: {
-          msg1:'Message one'
-        }
-      }
+      test:{silent:true}
     })
     
     // nothing
@@ -163,11 +158,11 @@ describe('seneca', function(){
     assert.ok(gex("Seneca/*"+"/*: erg").on(err.message))
 
     // Error with resolved code
-    var erg = new Error('erg')
-    erg.code = 'msg1'
+    var erg = new Error('test message')
+    erg.code = 'test_msg'
     err = si.fail(erg)
-    assert.equal(err.seneca.code,'msg1')
-    assert.ok(gex("Seneca/*"+"/*: Message one").on(err.message))
+    assert.equal(err.seneca.code,'test_msg')
+    assert.ok(gex("Seneca/*"+"/*: Test message.").on(err.message))
   })
 
 

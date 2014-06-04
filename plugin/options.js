@@ -17,15 +17,21 @@ var name = 'options'
 module.exports = function options( options ) {
   var seneca  = this
   var from    = options.value$ || options.from
+
   var ref     = {options:{}}
+
   var service
 
 
   if( from ) {
 
+    // TODO: support jsonic
+
     if( from.match( /\.json$/i ) ) {
       // this is deliberate, options are loaded synchronously at the start
       var text = fs.readFileSync( from )
+
+      // TOOD: what happen's here on parse error?
       ref.options = JSON.parse(text)
     }
     else if( from.match( /\.js$/i ) ) {
@@ -65,7 +71,9 @@ module.exports = function options( options ) {
   }
 
 
-  var env = process.env['NODE_ENV']
+  // FIX: should be in main seneca, as they can override
+
+  var env = process.env['NODE_ENV'] 
   if( _.isString(env) ) {
     ref.options.env = env
     ref.options = seneca.util.deepextend(ref.options,ref.options[env])
@@ -81,22 +89,18 @@ module.exports = function options( options ) {
 
 
 
-  ref.options = seneca.util.deepextend({
-    admin:{
-      local:false,
-      prefix:'/admin'
-    }
-  },ref.options,argvoptions)
+  ref.options = seneca.util.deepextend(
+    {
+      admin:{
+        local:false,
+        prefix:'/admin'
+      }
+    },
+    ref.options,
+    argvoptions,
+    seneca.export('options')
+  )
 
-
-  // FIX: use role:web,use:service instead
-  /*
-  service = seneca.httprouter(function(http){
-    http.get(ref.options.admin.prefix+'/options',function(req,res){
-      res.send(ref.options)
-    })
-  })
-   */
 
   seneca.log.debug('loaded',util.inspect(ref.options,false,null).replace(/[\r\n]/g,' '))
 

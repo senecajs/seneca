@@ -11,52 +11,79 @@ var gex    = require('gex')
 
 
 
-function check(init,val,lit) {
+function check(init,name,val,lit) {
   var fn = function(options) {
-    assert.equal(''+val,''+options.test)
+    //console.log('check',options)
+
+    assert.equal(''+val,''+options.val)
     assert.equal(''+lit,''+options.lit)
 
-    this.add({init:val},function(args,done){
+    this.add({init:name},function(args,done){
       init.called=true
       done()
     })
-    this.add({cmd:'foo'},function(args,done){
-      done(null,{foo:options.test+'~'+options.lit})
+
+    this.add({cmd:'zed'},function(args,done){
+      done(null,{res:options.val+'~'+options.lit})
     })
-    return {name:val}
+
+    //console.log('PE')
   }
-  return {name:val,init:fn}
+  return {name:name,init:fn}
 }
+
 
 describe('options', function(){
 
+
+  it('options-happy', function(){
+    var si = seneca_module({a:1, test:{silent:true}})
+    assert.equal(1,si.export('options').a)
+
+    si.use('options',{b:2})
+    assert.equal(1,si.export('options').a)
+    assert.equal(2,si.export('options').b)
+  })
+
+
   // options from js object (loaded elsewhere)
 
-  it('object', function(done) {
+  it('plugin-options-from-global', function(done) {
     var si = seneca_module({test:{silent:true}})
 
     // insure cmd:init called
     var init = {}
 
     // global options
-    si.use('options',{object:{test:'object'}})
+    si.use('options',{foo:{val:'bar'}})
+    assert.equal('bar',si.export('options').foo.val)
+
+    //console.log('export',si.export('options'))
+    //return done()
 
     // dynamically create plugin, no literal options
-    si.use( check(init,'object') )
+    si.use( check(init,'foo','bar') )
+
 
     si.ready(function(err){
       if(err) return done(err);
+      //console.log('AAA',init)
       assert.ok(init.called)
 
+
+
       // ensure actions can see all options after ready
-      si.act('cmd:foo',function(err,out){
+      si.act('cmd:zed',function(err,out){
         if(err) return done(err);
-        assert.equal('object~undefined',out.foo)
+        //console.log(err,out)
+
+        assert.equal('bar~undefined',out.res)
         done()
       })
     })
   })
 
+/*
   it('object-lit', function(done) {
     var si = seneca_module(seneca_module({test:{silent:true}}))
     var init = {}
@@ -186,6 +213,6 @@ describe('options', function(){
       })
     })
   })
-
+*/
 })
 
