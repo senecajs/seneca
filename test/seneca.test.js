@@ -24,7 +24,8 @@ var fixturestdout = new require('fixture-stdout');
 
 var timerstub = require('timerstub')
 
-var testopts = {test:{silent:true}}
+var testopts = {log:'silent'}
+
 
 
 describe('seneca', function(){
@@ -172,13 +173,13 @@ describe('seneca', function(){
     var errhandler
 
     var si = seneca({
-      test:{silent:true},
       plugins:['echo','error-test'],
       log:{map:[{level:'error+',handler:function(){
         errhandler.apply(null,common.arrayify(arguments))
       }}]}
     })
     var cblog = ''
+
 
     si.act({role:'error-test'},function(err){
       assert.isNull(err)
@@ -190,7 +191,7 @@ describe('seneca', function(){
 
     function next_a() {
       errhandler = function(){
-        assert.equal('task-callback',arguments[7])
+        assert.equal('callback',arguments[5])
         cblog += 'a'
 
         next_b()
@@ -297,7 +298,7 @@ describe('seneca', function(){
       var count = 0
       errhandler = function(err){
         0===count && assert.equal('task-error',arguments[7]);
-        1===count && assert.equal('task-callback',arguments[7])
+        1===count && assert.equal('callback',arguments[5]);
         count++
         cblog += 'I'
         if( 1 < count ) return finish();

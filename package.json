@@ -24,20 +24,21 @@
     "Dominic Tarr"
   ],
   "dependencies": {
-    "gex": "~0.1.3",
-    "parambulator": "~0.1.9",
     "async": "~0.7.0",
-    "patrun": "~0.1.5",
+    "eraro": "~0.1.5",
+    "gex": "~0.1.3",
     "jsonic": "~0.1.1",
-    "seneca-web": "~0.1.3",
-    "seneca-transport": "~0.1.2",
-    "norma": "~0.2.6",
-    "underscore": "~1.6.0",
-    "rolling-stats": "~0.1.0",
-    "optimist": "~0.6.1",
+    "minimist": "^0.1.0",
     "nid": "~0.3.2",
-    "use-plugin": "~0.1.4",
-    "eraro": "~0.1.5"
+    "norma": "~0.2.6",
+    "optimist": "~0.6.1",
+    "parambulator": "~0.1.9",
+    "patrun": "~0.1.5",
+    "rolling-stats": "~0.1.0",
+    "seneca-transport": "~0.1.2",
+    "seneca-web": "~0.1.3",
+    "underscore": "~1.6.0",
+    "use-plugin": "~0.1.4"
   },
   "main": "lib/seneca",
   "files": [
