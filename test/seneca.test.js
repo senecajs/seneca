@@ -77,6 +77,8 @@ describe('seneca', function(){
     var mark = {ec:0}
 
     timerstub.setTimeout(function(){
+      //console.log(mark)
+
       assert.ok(mark.r0)
       assert.ok(mark.r1)
       assert.ok(mark.p1)

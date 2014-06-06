@@ -213,4 +213,58 @@ describe('entity', function(){
       }
     )
   })
+
+
+  it('close', function(done){
+    var si = seneca({log:'silent'})
+
+    var tmp = {s0:0,s1:0,s2:0}
+
+    function noopcb( args, cb ) { cb() }
+
+    si.use(function store0(){
+      this.store.init(this,{},{
+        save:noopcb,load:noopcb,list:noopcb,remove:noopcb,native:noopcb,
+        close: function( args, cb ) {
+          tmp.s0++
+          cb()
+        }
+      })
+    })
+
+    si.use(function store1(){
+      this.store.init(this,{},{
+        save:noopcb,load:noopcb,list:noopcb,remove:noopcb,native:noopcb, nick:'11',
+        close: function( args, cb ) {
+          tmp.s1++
+          cb()
+        }
+      })
+    })
+
+    si.use(function store2(){
+      this.store.init(this,{map:{'foo':'*'}},{
+        save:noopcb,load:noopcb,list:noopcb,remove:noopcb,native:noopcb, nick:'22',
+        close: function( args, cb ) {
+          tmp.s2++
+          cb()
+        }
+      })
+    })
+
+    si.close(function( err ){
+      assert.isNull(err)
+
+      //console.log(tmp)
+
+      // close gets called on all of them
+      // any store may have open db connections
+      assert.equal(1,tmp.s0)
+      assert.equal(1,tmp.s1)
+      assert.equal(1,tmp.s2)
+
+      done()
+    })
+  })
+
 })
