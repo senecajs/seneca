@@ -328,26 +328,26 @@ describe('seneca', function(){
     var emptycb = function(){}
 
     try { si.register() } catch( e ) { 
-      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      assert.equal('register_invalid_plugin',e.seneca.code)
     }
 
 
     try { si.register({}) } catch( e ) { 
-      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      assert.equal('register_invalid_plugin',e.seneca.code)
       //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
     }
 
     try { si.register({},emptycb) } catch( e ) { 
-      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      assert.equal('register_invalid_plugin',e.seneca.code)
       //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
     }
 
     try { si.register({name:1,init:initfn},emptycb) } catch( e ) { 
-      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      assert.equal('register_invalid_plugin',e.seneca.code)
     }
     
     try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
-      assert.equal('seneca/register_invalid_plugin',e.seneca.code)
+      assert.equal('register_invalid_plugin',e.seneca.code)
     }
   })
 
@@ -778,7 +778,8 @@ describe('seneca', function(){
       })
     }
     catch(e){
-      assert.equal('invalid-act-args',e.seneca.code)
+      assert.equal('act_invalid_args',e.seneca.code)
+      assert.equal(': Invalid action arguments; The property \'b\', with current value: \'b\', must be a integer (parent: top level).; arguments were: "{a=1,b=b}".',e.message.substring(e.message.indexOf(':')))
     }
 
     try {
