@@ -22,7 +22,18 @@ var parambulator = require('parambulator')
 
 var fixturestdout = new require('fixture-stdout');
 
-var timerstub = require('timerstub')
+// timerstub broken on node 0.11
+//var timerstub = require('timerstub')
+var timerstub = {
+  setTimeout:setTimeout,
+  setInterval:setInterval,
+  Date:Date,
+  wait:function(dur,fn){
+    setTimeout(fn,dur)
+  }
+}
+
+
 
 var testopts = {log:'silent'}
 
@@ -86,7 +97,7 @@ describe('seneca', function(){
       assert.ok(1===mark.ec)
 
       fin()
-    },300)
+    },60)
 
 
     var si = seneca(testopts)
@@ -94,7 +105,7 @@ describe('seneca', function(){
       mark.r0=true
 
       si.use(function p1(opts){
-        si.add({init:'p1'},function(args,done){timerstub.setTimeout(function(){mark.p1=true;done()},100)})
+        si.add({init:'p1'},function(args,done){timerstub.setTimeout(function(){mark.p1=true;done()},20)})
       })
 
       si.on('ready',function(){
@@ -106,12 +117,12 @@ describe('seneca', function(){
 
 
         si.use(function p2(opts){
-          si.add({init:'p2'},function(args,done){timerstub.setTimeout(function(){mark.p2=true;done()},100)})
+          si.add({init:'p2'},function(args,done){timerstub.setTimeout(function(){mark.p2=true;done()},20)})
         })
       })
     })
 
-    timerstub.wait(400)
+    timerstub.wait(80)
   })
 
 
