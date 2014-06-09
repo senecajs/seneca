@@ -193,6 +193,15 @@ describe('seneca', function(){
     })
     var cblog = ''
 
+    // done after initial creation, overrides command line
+    si.options({
+      log:{map:[{level:'error+',handler:function(){
+        errhandler.apply(null,common.arrayify(arguments))
+      }}]}
+    })
+
+    //console.log(si.options().log)
+
 
     si.act({role:'error-test'},function(err){
       assert.isNull(err)

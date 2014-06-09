@@ -33,9 +33,12 @@ describe('options', function(){
   it('options-getset', function(){
     var si = seneca({d:4, foo:{dd:4}, log:'silent', module:module})
 
-    si.options({e:5,foo:{ee:5}})
+    var a = si.options({e:5,foo:{ee:5}})
+    //console.log('a',a)
 
     var opts = si.options()
+    //console.log('b',opts)
+
     assert.equal(1,opts.a)
     assert.equal(4,opts.d)
     assert.equal(5,opts.e)
