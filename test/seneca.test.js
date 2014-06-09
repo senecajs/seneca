@@ -90,14 +90,14 @@ describe('seneca', function(){
     timerstub.setTimeout(function(){
       //console.log(mark)
 
-      assert.ok(mark.r0)
-      assert.ok(mark.r1)
-      assert.ok(mark.p1)
-      assert.ok(mark.p2)
-      assert.ok(1===mark.ec)
+      assert.ok(mark.r0,'r0')
+      assert.ok(mark.r1,'r1')
+      assert.ok(mark.p1,'p1')
+      assert.ok(mark.p2,'p2')
+      assert.ok(1===mark.ec,'ec')
 
       fin()
-    },60)
+    },80)
 
 
     var si = seneca(testopts)
@@ -122,7 +122,7 @@ describe('seneca', function(){
       })
     })
 
-    timerstub.wait(80)
+    timerstub.wait(100)
   })
 
 
