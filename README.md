@@ -2,6 +2,8 @@
 
 ## A Node.js toolkit for startups building Minimum Viable Products
 
+[![NPM](https://nodei.co/npm/seneca.png)](https://nodei.co/npm/seneca/)
+
 Seneca is a toolkit for organizing the business logic of your app. You
 can break down your app into "stuff that happens", rather than
 focusing on data models or managing dependencies.
