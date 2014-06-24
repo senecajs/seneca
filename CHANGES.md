@@ -5,6 +5,7 @@
    * Moved plugin loading to new module, use-plugin
    * Moved utility functions to common
    * Removed deprecated functions
+   * Added action execution cache
 
 ## 0.5.17:
 

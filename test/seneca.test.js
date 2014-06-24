@@ -892,5 +892,33 @@ describe('seneca', function(){
     })
   })
 
+
+  it('act-cache', function(fin){
+    var si = seneca(testopts)
+
+    var x = 0
+    si.add({a:1},function(args,done){x++;this.good({x:x})})
+    si.act({a:1},function(err,out){ assert.equal(1,out.x) })
+
+    si.act({actid$:'a',a:1},function(err,out){ 
+      assert.equal(2,out.x)
+
+      si.act({a:1},function(err,out){ 
+        assert.equal(3,out.x)
+
+        si.act({actid$:'a',a:1},function(err,out){ 
+          assert.equal(2,out.x) 
+
+          si.act('role:seneca,stats:true',function(err,stats){
+            assert.equal( '{ calls: 5, done: 5, fails: 0, cache: 1 }',
+                          util.inspect(stats.act))
+            fin()
+          })
+        })
+      })
+    })
+  })
+
+
 })
 
