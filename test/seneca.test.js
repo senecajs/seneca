@@ -410,6 +410,7 @@ describe('seneca', function(){
     }
 
 
+    // log error expected
     si.act({op:'bad',a1:100}, function(err,out) {
       assert.equal(err.seneca.code,'act_not_found')
     })
@@ -420,6 +421,7 @@ describe('seneca', function(){
     })
 
     
+    // log error expected
     try {
       si.act()
     }
@@ -427,6 +429,7 @@ describe('seneca', function(){
       assert.equal(e.seneca.code,'act_not_found')
     }
 
+    // log error expected
     si.act(function(err,out) {
       assert.equal(err.seneca.code,'act_not_found')
     })
