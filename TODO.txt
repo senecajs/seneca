@@ -1,45 +1,4 @@
 
-- alternate data entity type syntax: */foo/bar - '*' can be used like '-' - more consistent with traditional meaning
-
-- action register arg overrides - allow seneca.use to add/override additional argument matches
-  e.g. seneca.use('vcache',{fixedargs$:{base:'bar'}, ...other options...})
-       => vcache only applies to -/bar/- entities
-
-- multi action routing - si.add({foo:'a',bar:'*'}) attaches to all bar values
-
-- ordered params for pinning - use some sort of schema def on add? parambulator?
-
-- 'trigger' should be 'hook' - internal plugin commands exposing customisation points
-
-- update logging example
-- the log:{map:} thing sucks - make this easier
-
-
-- entity
-  - define common query lang - implement in mem
-  - drivers (priority order)
-    - mongodb
-    - couchdb
-    - mysql
-    - redis
-    - postgres
-    - riak
-    - memcache
-    - aws dynamo
-    - aws simpledb
-    - sqlite
-    - oracle
-    - hive
-    - hbase
-    - odbc
-    - ms sql server
-- fix vcache to use cmd $parent
-
-
-- drop support for load$:true in remove$ ?
-- string queries should be templates to avoid sql injection
-
-
-
+- tranport test needs fault tolerance tests for failure of service side
 
 
