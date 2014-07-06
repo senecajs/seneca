@@ -136,7 +136,7 @@ describe('executor', function(){
     e1.execute({id:'b',gate:true,fn:function(done){
       seq+='b'
 
-      e1.execute({id:'c',ignoregate:true,fn:function(done2){
+      e1.execute({id:'c',ungate:true,fn:function(done2){
         seq+='c'
 
         done2()
