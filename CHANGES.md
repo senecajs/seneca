@@ -1,11 +1,14 @@
 
 ## 0.5.18:
 
+   * Major update to message transport mechanism
+   * Added plugin init queue so seneca.ready is no longer required
    * Added role:util,note:true actions for note storage, for inter-plugin data sharing
    * Moved plugin loading to new module, use-plugin
    * Moved utility functions to common
    * Removed deprecated functions
    * Added action execution cache
+   * Improved error reporting
 
 ## 0.5.17:
 
