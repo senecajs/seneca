@@ -25,7 +25,7 @@ APP_SERVER_PID=$!
 sleep 1
 curl -s "http://localhost:3000/shop/salestax?net=100" >> testrun.log
 echo "" >> testrun.log
-cat testrun.server.tmp | awk '{ print $8; }' >> testrun.log
+cat testrun.server.tmp | awk '{ print $9; }' >> testrun.log
 kill $APP_SERVER_PID
 
 

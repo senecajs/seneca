@@ -58,11 +58,14 @@
     "build": "./build.sh"
   },
   "devDependencies": {
-    "mocha": "~1.13.0",
-    "jshint": "~2.1.11",
+    "body-parser": "^1.4.3",
     "chai": "~1.9.1",
+    "connect": "^3.0.1",
+    "connect-query": "^0.1.0",
     "docco": "~0.6.2",
     "fixture-stdout": "~0.2.1",
+    "jshint": "~2.1.11",
+    "mocha": "~1.13.0",
     "timerstub": "~1.0.2"
   }
 }

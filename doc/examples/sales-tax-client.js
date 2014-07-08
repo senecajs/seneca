@@ -15,5 +15,7 @@ var shop = seneca.pin({cmd:'*'})
 
 shop.salestax({net:100}, function(err,result){
   console.log( result.total )
+
+  seneca.close()
 })
 
