@@ -21,4 +21,4 @@
 20. update gh-pages
 21. update and publish plugins
 22. update tumblr
-23.
+
