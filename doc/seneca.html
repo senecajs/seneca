@@ -47,7 +47,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.5.17'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.5.18'</span></pre></div></div>
             
         </li>
         
@@ -1420,8 +1420,8 @@ sets public seneca.closed property</p>
 
     self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'start'</span>)
     self.act(<span class="hljs-string">'role:seneca,cmd:close'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> {</span>
-      self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'end'</span>,err)
-      done(err);
+      <span class="hljs-keyword">this</span>.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'end'</span>,err)
+      <span class="hljs-keyword">if</span>( _.isFunction(done) ) <span class="hljs-keyword">return</span> done.call(<span class="hljs-keyword">this</span>,err);
     })
   }</pre></div></div>
             
@@ -1444,6 +1444,7 @@ sets public seneca.closed property</p>
     <span class="hljs-keyword">if</span>( _.isFunction(ready) ) {
       self.act(<span class="hljs-string">'role:seneca,ready:true,gate$:true'</span>,ready)
     }
+
     <span class="hljs-keyword">return</span> self;
   }</pre></div></div>
             
