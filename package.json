@@ -16,12 +16,15 @@
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
-    "Richard Rodger (http://richardrodger.com/)",
+    "Richard Rodger (http://richardrodger.com)",
     "Peter Elger",
-    "Marian Radulescu",
-    "Alexandru Mircea",
     "Cristian Ianto",
-    "Dominic Tarr"
+    "Dominic Tarr",
+    "David Mark Clements",
+    "Nicolas Herment",
+    "Maciej Małecki (http://mmalecki.com)",
+    "Marian Radulescu",
+    "Alexandru Mircea"
   ],
   "dependencies": {
     "async": "~0.9.0",
@@ -58,10 +61,10 @@
     "build": "./build.sh"
   },
   "devDependencies": {
-    "body-parser": "^1.4.3",
+    "body-parser": "~1.4.3",
     "chai": "~1.9.1",
-    "connect": "^3.0.1",
-    "connect-query": "^0.1.0",
+    "connect": "~3.0.1",
+    "connect-query": "~0.1.0",
     "docco": "~0.6.2",
     "fixture-stdout": "~0.2.1",
     "jshint": "~2.1.11",

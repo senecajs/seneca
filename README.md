@@ -1,6 +1,6 @@
 # seneca - Node.js module
 
-## A Node.js toolkit for startups building Minimum Viable Products
+## A Node.js toolkit for Micro-Service Architctures
 
 [![NPM](https://nodei.co/npm/seneca.png)](https://nodei.co/npm/seneca/)
 
@@ -8,7 +8,8 @@ Seneca is a toolkit for organizing the business logic of your app. You
 can break down your app into "stuff that happens", rather than
 focusing on data models or managing dependencies.
 
-For a gentle introduction to this module, see the [senecajs.org](http://senecajs.org) site.
+For a gentle introduction to this module, see the
+[senecajs.org](http://senecajs.org) site.
 
 
 If you're using this module, feel free to contact me on twitter if you
