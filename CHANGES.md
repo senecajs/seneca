@@ -1,4 +1,8 @@
 
+## 0.5.19:
+
+   * Removed builtin plugins - all now in separate modules.
+
 ## 0.5.18:
 
    * Major update to message transport mechanism

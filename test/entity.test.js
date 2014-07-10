@@ -19,6 +19,21 @@ var testopts = {test:{silent:true}}
 
 describe('entity', function(){
 
+  it('happy-mem', function(fin){
+    var si = seneca(testopts)
+    
+    var fooent = si.make$('foo')
+    fooent.data$({a:1,b:2}).save$(function(err,out){
+      assert.isNull(err)
+      assert.ok(out.id)
+      assert.equal(1,out.a)
+      assert.equal(2,out.b)
+
+      fin()
+    })
+  })
+
+
   it('parsecanon', function(){
     var si = seneca(testopts)
     function def(v,d){return void 0 == v ? d : v}

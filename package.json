@@ -39,7 +39,10 @@
     "parambulator": "~0.1.9",
     "patrun": "~0.2.0",
     "rolling-stats": "~0.1.0",
-    "seneca-transport": "~0.2.0",
+    "seneca-basic": "~0.1.0",
+    "seneca-echo": "~0.1.0",
+    "seneca-mem-store": "~0.1.0",
+    "seneca-transport": "~0.2.3",
     "seneca-web": "~0.1.3",
     "underscore": "~1.6.0",
     "use-plugin": "~0.1.4"
@@ -69,6 +72,7 @@
     "fixture-stdout": "~0.2.1",
     "jshint": "~2.1.11",
     "mocha": "~1.13.0",
+    "seneca-error-test": "~0.1.0",
     "timerstub": "~1.0.2"
   }
 }

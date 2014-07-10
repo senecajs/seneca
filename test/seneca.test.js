@@ -134,30 +134,30 @@ describe('seneca', function(){
     // nothing
     var err = si.fail()
     assert.equal(err.seneca.code,'unknown')
-    assert.ok(gex("Seneca/*"+"/*: unknown").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: unknown*").on(err.message))
 
     // unresolved code gets used as message
     err = si.fail('code1')
     assert.equal(err.seneca.code,'code1')
-    assert.ok(gex("Seneca/*"+"/*: code1").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code1*").on(err.message))
 
     // additional values
     err = si.fail('code1',{foo:'a'})
     assert.equal(err.seneca.code,'code1')
     assert.equal(err.seneca.valmap.foo,'a')
-    assert.ok(gex("Seneca/*"+"/*: code1").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code1*").on(err.message))
 
     // no code
     err = si.fail({bar:1})
     assert.equal(err.seneca.code,'unknown')
     assert.equal(err.seneca.valmap.bar,1)
-    assert.ok(gex("Seneca/*"+"/*: unknown").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: unknown*").on(err.message))
 
     // additional meta props dragged along
     err = si.fail({code:'code2',bar:2})
     assert.equal(err.seneca.code,'code2')
     assert.equal(err.seneca.valmap.bar,2)
-    assert.ok(gex("Seneca/*"+"/*: code2").on(err.message))
+    assert.ok(gex("Seneca/*"+"/*: code2*").on(err.message))
 
     // Error
     err = si.fail(new Error('eek'))
@@ -513,7 +513,6 @@ describe('seneca', function(){
   })
 
 
-
   it('plugins', function() {
     var si = seneca({plugins:['echo'],test:{silent:true}})
 
@@ -523,7 +522,7 @@ describe('seneca', function(){
     })
 
 
-    var si = seneca({plugins:['util'],test:{silent:true}})
+    var si = seneca({plugins:['basic'],test:{silent:true}})
 
     si.act({role:'util',cmd:'quickcode'},function(err,code){
       assert.isNull(err)
