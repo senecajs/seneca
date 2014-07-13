@@ -1,9 +1,11 @@
 
-## 0.5.19:
+## 0.5.19: 2014-07-13
 
    * Removed builtin plugins - all now in separate modules.
+   * Updated to seneca-web 0.2 - now with admin module
+   * Fixed broken .client and .listen chaining
 
-## 0.5.18:
+## 0.5.18: 2014-07-09
 
    * Major update to message transport mechanism
    * Added plugin init queue so seneca.ready is no longer required
@@ -14,11 +16,11 @@
    * Added action execution cache
    * Improved error reporting
 
-## 0.5.17:
+## 0.5.17: 2014-04-10
 
    * Moved standard store test to separate seneca-store-test module
 
-## 0.5.16:
+## 0.5.16: 2014-04-09
 
    * use norma for api function arguments
    * parambulator arg checking moved into arg specification
