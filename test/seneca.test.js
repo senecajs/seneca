@@ -4,7 +4,7 @@
 
 // mocha seneca.test.js
 
-var VERSION = '0.5.18'
+var VERSION = '0.5.19'
 
 var util   = require('util')
 var stream = require('stream')
@@ -912,7 +912,7 @@ describe('seneca', function(){
           assert.equal(2,out.x) 
 
           si.act('role:seneca,stats:true',function(err,stats){
-            assert.equal( '{ calls: 5, done: 5, fails: 0, cache: 1 }',
+            assert.equal( '{ calls: 7, done: 7, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
             fin()
           })
