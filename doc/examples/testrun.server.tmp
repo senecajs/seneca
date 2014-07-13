@@ -1,7 +1,7 @@
-2014-07-08T06:55:17.043Z	eh6gqimrirj6/1404802516881/-	DEBUG	act	shop	-	ncsg9fz6bzzb	IN	{role=shop,cmd=salestax,net=100}	x6pd4gmcgp26	
-2014-07-08T06:55:17.069Z	eh6gqimrirj6/1404802516881/-	DEBUG	plugin	shop	-	100	123	0.23
-2014-07-08T06:55:17.069Z	eh6gqimrirj6/1404802516881/-	DEBUG	act	shop	-	ncsg9fz6bzzb	OUT	{total=123}	x6pd4gmcgp26
-2014-07-08T06:55:17.069Z	eh6gqimrirj6/1404802516881/-	DEBUG	plugin	shop	-	ncsg9fz6bzzb	test	123
-2014-07-08T06:55:17.795Z	eh6gqimrirj6/1404802516881/-	DEBUG	act	shop	-	fjeqmjy139xw	IN	{net=100,cmd=salestax,role=shop}	x6pd4gmcgp26	UNGATE
-2014-07-08T06:55:17.796Z	eh6gqimrirj6/1404802516881/-	DEBUG	plugin	shop	-	100	123	0.23
-2014-07-08T06:55:17.796Z	eh6gqimrirj6/1404802516881/-	DEBUG	act	shop	-	fjeqmjy139xw	OUT	{total=123}	x6pd4gmcgp26
+2014-07-13T07:08:22.608Z	y35jvwon69xv/1405235302412/-	DEBUG	act	shop	-	t7xpsxni6ee4	IN	{role=shop,cmd=salestax,net=100}	ubb2091bii5a	
+2014-07-13T07:08:22.632Z	y35jvwon69xv/1405235302412/-	DEBUG	plugin	shop	-	100	123	0.23
+2014-07-13T07:08:22.632Z	y35jvwon69xv/1405235302412/-	DEBUG	act	shop	-	t7xpsxni6ee4	OUT	{total=123}	ubb2091bii5a
+2014-07-13T07:08:22.633Z	y35jvwon69xv/1405235302412/-	DEBUG	plugin	shop	-	t7xpsxni6ee4	test	123
+2014-07-13T07:08:23.310Z	y35jvwon69xv/1405235302412/-	DEBUG	act	shop	-	7hkf3hez1h41	IN	{cmd=salestax,role=shop,net=100}	ubb2091bii5a	UNGATE
+2014-07-13T07:08:23.311Z	y35jvwon69xv/1405235302412/-	DEBUG	plugin	shop	-	100	123	0.23
+2014-07-13T07:08:23.311Z	y35jvwon69xv/1405235302412/-	DEBUG	act	shop	-	7hkf3hez1h41	OUT	{total=123}	ubb2091bii5a

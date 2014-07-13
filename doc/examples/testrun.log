@@ -17,6 +17,6 @@ sales-tax-plugin/app
 0.23
 {total=123}
 123
-{net=100,cmd=salestax,role=shop}
+{cmd=salestax,role=shop,net=100}
 0.23
 {total=123}

@@ -1,24 +1,25 @@
 0.  Update CHANGELOG
 1.  Review github issues
-2.  run npm run build
-3.  run npm test
-4.  run doc/examples/testrun.sh (cd into doc/examples)
-5.  run seneca-verify
-6.  run seneca-mvp
-7.  run seneca-examples
-8.  run well app
-9.  test data-stores: mongo, jsonfile-store
-10. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
-11. run npm run build
-12. git, final commit+push
-13. rm -rf node_modules
-14. npm install
-15. git checkout master; git merge
-16. runs tests
-17. git push
-18. npm publish
-19. git tag; git push --tags
-20. update gh-pages
-21. update and publish plugins
-22. update tumblr
+2.  run test/test-included-plugins.sh
+3.  run npm run build
+4.  run npm test
+5.  run doc/examples/testrun.sh (cd into doc/examples)
+6.  run seneca-verify
+7.  run seneca-mvp
+8.  run seneca-examples
+9.  run well app
+10. test data-stores: mongo, jsonfile-store
+11. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
+12. run npm run build
+13. git, final commit+push
+14. rm -rf node_modules
+15. npm install
+16. git checkout master; git merge
+17. runs tests
+18. git push
+19. npm publish
+20. git tag; git push --tags
+21. update gh-pages
+22. update and publish plugins
+23. update tumblr
 
