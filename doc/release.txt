@@ -20,7 +20,7 @@
 19. git push
 20. npm publish
 21. git tag; git push --tags
-22. update gh-pages
+22. update gh-pages install.html; git push origin gh-pages
 23. update and publish plugins
 24. update tumblr
 

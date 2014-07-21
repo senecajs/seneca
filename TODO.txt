@@ -1,4 +1,7 @@
 
+- add contact link to get project listed if using seneca
+
+ 
 
 
 
