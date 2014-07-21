@@ -86,7 +86,7 @@ call <code>require('seneca')</code> when defining a plugin. The Seneca
 instance provides the standard API, but has special logging methods
 that include infomation about the plugin. So when you
 call <code>this.log.debug('stuff about my plugin')</code>, the log
-output will containextra fields identifying the plugin. In this
+output will contain extra fields identifying the plugin. In this
 example, you haven't given the plugin a name (you'll see how to do
 that in a moment), so Seneca will generate a short random name for
 you.
@@ -95,10 +95,10 @@ you.
 <p>
 You can use the plugin by calling
 the <a href="http://senecajs.org/api.html#long-m-use">use</a> method
-of the Seneca object. This loads the plugin into Seneca, after which,
+of the Seneca object. This loads the plugin into Seneca, after which
 the action patterns defined by the plugin are available. You can then
 call the <a href="http://senecajs.org/api.html#long-m-act">act</a>
-mthod to trigger them, like so:
+method to trigger them, like so:
 </p>
 
 {% highlight js %}
@@ -106,6 +106,14 @@ var seneca = require('seneca')()
 
 seneca.use( plugin, {color:"pink"} )
 seneca.act( {foo:'bar'}, console.log )
+{% endhighlight %}
+
+This code is available in
+the <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a> in the <i>simple.js</i> script. Running the script produces:
+
+{% highlight bash %}
+$ node simple.js
+null { color: 'pink' }
 {% endhighlight %}
 
 <!--
