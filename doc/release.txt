@@ -11,15 +11,16 @@
 10. test data-stores: mongo, jsonfile-store
 11. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
 12. run npm run build
-13. git, final commit+push
-14. rm -rf node_modules
-15. npm install
-16. git checkout master; git merge
-17. runs tests
-18. git push
-19. npm publish
-20. git tag; git push --tags
-21. update gh-pages
-22. update and publish plugins
-23. update tumblr
+13. run npm test
+14. git, final commit+push
+15. rm -rf node_modules
+16. npm install
+17. git checkout master; git merge
+18. runs tests
+19. git push
+20. npm publish
+21. git tag; git push --tags
+22. update gh-pages install.html; git push origin gh-pages
+23. update and publish plugins
+24. update tumblr
 
