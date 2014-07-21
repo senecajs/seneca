@@ -41,12 +41,75 @@ approach to software architecture, so that will be discussed too.
 </p>
 
 
-<h4>Simple Plugins</h4>
-
-<!--
-<h4>The Seneca Philosophy</h4>
+<h4>A Simple Plugin</h4>
 
 <p>
+Let's write a plugin that defines one action. The action uses the plugin options 
+to produce a result.
+</p>
+
+{% highlight js %}
+var plugin = function( options ) {
+
+  this.add( {foo:'bar'}, function( args, done ){
+    done( null, {color: options.color} )
+  })
+
+}
+{% endhighlight %}
+
+<p>
+A plugin is just a function. You can see that there is no callback
+passed into the function defining a plugin. How does Seneca know that
+the plugin has fully initialized? The plugin might depend on
+establishing a database connection. As with most things in Seneca, you
+define an action pattern to handle that. We'll talk about plugin
+initialization a little later. Many plugins don't even need to initialize because all they do is define a set of action patterns.
+</p>
+
+<p>
+The example above defines a single action
+pattern, <i>foo:bar</i>. This action provides a result based on the
+options provided to the plugin. Plugin options are not required, but
+if they are provided, they are passed in as the first argument to the
+plugin definition function. The <i>options</i> argument is just a
+JavaScript object with some properties. Seneca makes sure it always
+exists. Even in the case where you have no options, you'll still get
+an empty object.
+</p>
+
+<p>
+The context object of the plugin function (that is, the value
+of <i>this</i>), is a Seneca instance that you can use to define
+actions. That means you don't even need to
+call <code>require('seneca')</code> when defining a plugin. The Seneca
+instance provides the standard API, but has special logging methods
+that include infomation about the plugin. So when you
+call <code>this.log.debug('stuff about my plugin')</code>, the log
+output will containextra fields identifying the plugin. In this
+example, you haven't given the plugin a name (you'll see how to do
+that in a moment), so Seneca will generate a short random name for
+you.
+</p>
+
+<p>
+You can use the plugin by calling
+the <a href="http://senecajs.org/api.html#long-m-use">use</a> method
+of the Seneca object. This loads the plugin into Seneca, after which,
+the action patterns defined by the plugin are available. You can then
+call the <a href="http://senecajs.org/api.html#long-m-act">act</a>
+mthod to trigger them, like so:
+</p>
+
+{% highlight js %}
+var seneca = require('seneca')()
+
+seneca.use( plugin, {color:"pink"} )
+seneca.act( {foo:'bar'}, console.log )
+{% endhighlight %}
+
+<!--
+
 The Seneca framework is defined by a philosophy that <a href="http://richardrodger.com">actions are better than objects</a>.
 </p>
 
