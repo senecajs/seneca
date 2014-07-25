@@ -275,8 +275,8 @@ And then run it like so:
 
 {% highlight bash %}
 $ node name0.js --seneca.log=plugin:name0
-... DEBUG	act	name0	-	yvgt5y48wqjb	IN	{foo=bar}	bsot1xa3cr91	
-... DEBUG	act	name0	-	yvgt5y48wqjb	OUT	{color=pink}	bsot1xa3cr91
+... DEBUG  act  name0  -  yvgt5y48wqjb  IN   {foo=bar}  ...
+... DEBUG  act  name0  -  yvgt5y48wqjb  OUT  {color=pink}  ...
 null { color: 'pink' }
 {% endhighlight %}
 
@@ -293,9 +293,9 @@ when registering their names. Try this:
 
 {% highlight bash %}
 $ node echo.js --seneca.log=plugin:echo
-... DEBUG	plugin	echo	-	add	echo	-	{role=echo}	jbnax2ssrr74
-... DEBUG	act	echo	-	lkmlk29r6uwt	IN	{role=echo,foo=bar}	jbnax2ssrr74	
-... DEBUG	act	echo	-	lkmlk29r6uwt	OUT	{foo=bar}	jbnax2ssrr74
+... DEBUG  plugin  echo  -  add  echo  -  {role=echo}  ...
+... DEBUG  act     echo  -  lkmlk29r6uwt  IN  {role=echo,foo=bar}  ...
+... DEBUG  act     echo  -  lkmlk29r6uwt  OUT  {foo=bar}  ...
 null { foo: 'bar' }
 {% endhighlight %}
 
@@ -332,9 +332,9 @@ Running this gives:
 
 {% highlight bash %}
 $ node name1.js --seneca.log=plugin:name1
-... DEBUG	plugin	name1	-	add	name1	-	{foo=bar}	ikxdmc4xu9iz
-... DEBUG	act	name1	-	b3uamicogfnm	IN	{foo=bar}	ikxdmc4xu9iz	
-... DEBUG	act	name1	-	b3uamicogfnm	OUT	{color=pink}	ikxdmc4xu9iz
+... DEBUG  plugin  name1  -  add  name1  -  {foo=bar}  ...
+... DEBUG  act     name1  -  b3uamicogfnm  IN   {foo=bar}  ...
+... DEBUG  act     name1  -  b3uamicogfnm  OUT  {color=pink}  ...
 null { color: 'pink' }
 {% endhighlight %}
 
@@ -349,9 +349,9 @@ Here's the <i>foo.js</i> plugin again:
 
 {% highlight bash %}
 $ node module.js --seneca.log=plugin:./foo.js
-... DEBUG	plugin	./foo.js	-	add	./foo.js	-	{foo=bar}	hqv4y1w3p04j
-... DEBUG	act	./foo.js	-	47ssblskuj59	IN	{foo=bar}	hqv4y1w3p04j	
-... DEBUG	act	./foo.js	-	47ssblskuj59	OUT	{color=pink}	hqv4y1w3p04j
+... DEBUG  plugin  ./foo.js  -  add  ./foo.js  -  {foo=bar}  ...
+... DEBUG  act     ./foo.js  -  47ssblskuj59  IN   {foo=bar}  ...
+... DEBUG  act     ./foo.js  -  47ssblskuj59  OUT  {color=pink}  ...
 null { color: 'pink' }
 {% endhighlight %}
 
@@ -481,13 +481,13 @@ Using the debug log shows the different instances of the plugin in action:
 
 {% highlight bash %}
 $ node tags.js --seneca.log=plugin:./bar.js
-... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  6vyoa1dlb1t9
-... DEBUG  plugin  ./bar.js  BBB  add  ./bar.js  BBB  {foo=bar,zed=2}  gcigpuizai47
-... DEBUG  act  ./bar.js  AAA  pamds7vlteyv  IN  {foo=bar,zed=1}  6vyoa1dlb1t9  
-... DEBUG  act  ./bar.js  BBB  4uxz90gcczn5  IN  {foo=bar,zed=2}  gcigpuizai47  
-... DEBUG  act  ./bar.js  AAA  pamds7vlteyv  OUT  {color=red,tag=AAA}  6vyoa1dlb1t9
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  ...
+... DEBUG  plugin  ./bar.js  BBB  add  ./bar.js  BBB  {foo=bar,zed=2}  ...
+... DEBUG  act     ./bar.js  AAA  pamds7vlteyv  IN   {foo=bar,zed=1}  ...
+... DEBUG  act     ./bar.js  BBB  4uxz90gcczn5  IN   {foo=bar,zed=2}  ...
+... DEBUG  act     ./bar.js  AAA  pamds7vlteyv  OUT  {color=red,tag=AAA}  ...
 null { color: 'red', tag: 'AAA' }
-... DEBUG  act  ./bar.js  BBB  4uxz90gcczn5  OUT  {color=green,tag=BBB}  gcigpuizai47
+... DEBUG  act     ./bar.js  BBB  4uxz90gcczn5  OUT  {color=green,tag=BBB}  ...
 null { color: 'green', tag: 'BBB' }
 {% endhighlight %}
 
@@ -497,9 +497,9 @@ To isolate a tag, use these log settings:
 
 {% highlight bash %}
 $ node tags.js --seneca.log=plugin:./bar.js,tag:AAA
-... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  mp2cq990lzmy
-... DEBUG  act  ./bar.js  AAA  9rp8luozaf92  IN  {foo=bar,zed=1}  mp2cq990lzmy  
-... DEBUG  act  ./bar.js  AAA  9rp8luozaf92  OUT  {color=red,tag=AAA}  mp2cq990lzmy
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  ...
+... DEBUG  act     ./bar.js  AAA  9rp8luozaf92  IN   {foo=bar,zed=1}  ...
+... DEBUG  act     ./bar.js  AAA  9rp8luozaf92  OUT  {color=red,tag=AAA}  ...
 null { color: 'red', tag: 'AAA' }
 null { color: 'green', tag: 'BBB' }
 {% endhighlight %}
