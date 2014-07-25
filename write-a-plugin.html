@@ -44,14 +44,14 @@ approach to software architecture, so that will be discussed too.
 <h4>A Simple Plugin</h4>
 
 <p>
-Let's write a plugin that defines one action. The action uses the plugin options 
-to produce a result.
+Let's write a plugin that defines one action. The action uses the
+plugin <i>options</i> argument to build a result.
 </p>
 
 {% highlight js %}
 var plugin = function( options ) {
 
-  this.add( {foo:'bar'}, function( args, done ){
+  this.add( {foo:'bar'}, function( args, done ) {
     done( null, {color: options.color} )
   })
 
@@ -60,11 +60,18 @@ var plugin = function( options ) {
 
 <p>
 A plugin is just a function. You can see that there is no callback
-passed into the function defining a plugin. How does Seneca know that
-the plugin has fully initialized? The plugin might depend on
-establishing a database connection. As with most things in Seneca, you
-define an action pattern to handle that. We'll talk about plugin
-initialization a little later. Many plugins don't even need to initialize because all they do is define a set of action patterns.
+passed into this function that defines the plugin. So, how does Seneca
+know that the plugin has fully initialized? It's an important
+questions, because the plugin might depend on establishing a database
+connection before it can operate properly.
+</p>
+
+<p>
+As with most things in Seneca, you define an action pattern to handle
+initialization, and make sure it happens in the proper order. We'll
+talk about plugin initialization a little later. Many plugins don't
+even need to initialize because all they do is define a set of action
+patterns.
 </p>
 
 <p>
@@ -81,15 +88,15 @@ an empty object.
 <p>
 The context object of the plugin function (that is, the value
 of <i>this</i>), is a Seneca instance that you can use to define
-actions. That means you don't even need to
-call <code>require('seneca')</code> when defining a plugin. The Seneca
-instance provides the standard API, but has special logging methods
-that include infomation about the plugin. So when you
+actions. That means you don't need to
+call <code>require('seneca')</code> when defining a plugin. This
+Seneca instance provides the standard API, but the logging methods are
+special - they append infomation about the plugin. So when you
 call <code>this.log.debug('stuff about my plugin')</code>, the log
-output will contain extra fields identifying the plugin. In this
-example, you haven't given the plugin a name (you'll see how to do
-that in a moment), so Seneca will generate a short random name for
-you.
+output will contain extra fields identifying the plugin, such as its
+name. In this example, you haven't given the plugin a name (you'll see
+how to do that in a moment), so Seneca will generate a short random
+name for you.
 </p>
 
 <p>
@@ -104,12 +111,15 @@ method to trigger them, like so:
 {% highlight js %}
 var seneca = require('seneca')()
 
+var plugin = function( options ) { ... } // as above
+
 seneca.use( plugin, {color:"pink"} )
 seneca.act( {foo:'bar'}, console.log )
 {% endhighlight %}
 
 This code is available in
-the <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a> in the <i>simple.js</i> script. Running the script produces:
+the <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>
+example, in the <i>simple.js</i> script. Running the script produces:
 
 {% highlight bash %}
 $ node simple.js
