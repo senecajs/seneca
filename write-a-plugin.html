@@ -228,26 +228,279 @@ the output.
 The Seneca framework comes
 with <a href="http://senecajs.org/plugins.html">many plugins</a>
 written by the community. Feel free to write one yourself (after
-reading this article!). In general public and generically useful
+reading this article!). By convention, public and generically useful
 plugins are prefixed with <i>seneca-</i> as part of their name. This
 lets you know the module is a Seneca plugin if you see it on
 NPM. However, its a bit tedious to type in "seneca-" all the time, so
 you are allowed to abbreviate plugin names by dropping the "seneca-"
-prefix. So this will also work:
+prefix. That means you can use the the <i>seneca-echo</i> by just
+providing the "echo" part of the name:
 </p>
 
 {% highlight js %}
 seneca.use( 'echo' )
 {% endhighlight %}
 
-<!--
+
+
 <h4>Give Your Plugin a Name</h4>
 
-- how to name, role, action names
-- tags, multiple instances
-- debug usage
+<p>
+Your plugin needs a name. You can return a string from the plugin
+definition function to give it one. When you look at the Seneca logs,
+you can see what your plugin is doing. Let's try it!
+</p>
+
+{% highlight js %}
+var plugin = function( options ) {
+
+  this.add( {foo:'bar'}, function( args, done ){
+    done( null, {color: options.color} )
+  })
+
+  return 'name0'
+}
+
+var seneca = require('seneca')()
+
+seneca.use( plugin, {color:'pink'} )
+seneca.act( {foo:'bar'}, console.log )
+{% endhighlight %}
+
+<p>
+And then run it like so:
+</p>
+
+{% highlight bash %}
+$ node name0.js --seneca.log=plugin:name0
+... DEBUG	act	name0	-	yvgt5y48wqjb	IN	{foo=bar}	bsot1xa3cr91	
+... DEBUG	act	name0	-	yvgt5y48wqjb	OUT	{color=pink}	bsot1xa3cr91
+null { color: 'pink' }
+{% endhighlight %}
+
+</p>
+This uses Seneca's log filtering feature to focus on the log lines
+that you care about. For more details on log filtering, read
+the <a href="http://senecajs.org/logging-example.html">logging example
+article</a>.
+</p>
+
+<p>
+To avoid repetition, the public plugins drop their "seneca-" prefix
+when registering their names. Try this:
+</p>
+
+{% highlight bash %}
+$ node echo.js --seneca.log=plugin:echo
+... DEBUG	plugin	echo	-	add	echo	-	{role=echo}	jbnax2ssrr74
+... DEBUG	act	echo	-	lkmlk29r6uwt	IN	{role=echo,foo=bar}	jbnax2ssrr74	
+... DEBUG	act	echo	-	lkmlk29r6uwt	OUT	{foo=bar}	jbnax2ssrr74
+null { foo: 'bar' 
+{% endhighlight %}
+
+<p>
+You may have noticed something interesting. There were three lines of
+logging output that time. Why didn't you see an "add" line for your
+"name0" plugin? During the execution of its definition function, it
+didn't have a name. You only gave it one when you returned a
+name. Sometimes this is useful, because you can set a name
+dynamically. Still, is it possible to set the name intially? Yes! Just
+give the defining function a name:
+</p>
 
 
+{% highlight js %}
+var plugin = function name1( options ) {
+
+  this.add( {foo:'bar'}, function( args, done ){
+    done( null, {color: options.color} )
+  })
+}
+
+var seneca = require('seneca')()
+
+seneca.use( plugin, {color:'pink'} )
+seneca.act( {foo:'bar'}, console.log )
+{% endhighlight %}
+
+<p>
+Running this gives:
+</p>
+
+{% highlight bash %}
+$ node name1.js --seneca.log=plugin:name1
+... DEBUG	plugin	name1	-	add	name1	-	{foo=bar}	ikxdmc4xu9iz
+... DEBUG	act	name1	-	b3uamicogfnm	IN	{foo=bar}	ikxdmc4xu9iz	
+... DEBUG	act	name1	-	b3uamicogfnm	OUT	{color=pink}	ikxdmc4xu9iz
+null { color: 'pink' }
+{% endhighlight %}
+
+
+<p>
+When you load a plugin as a module then the module reference, as
+supplied to the <i>use<i> method, becomes the initial name of the
+module (Of course, you can override this by returning your own name)
+Here's the <i>foo.js</i> plugin again:
+</p>
+
+
+{% highlight bash %}
+$ node module.js --seneca.log=plugin:./foo.js
+... DEBUG	plugin	./foo.js	-	add	./foo.js	-	{foo=bar}	hqv4y1w3p04j
+... DEBUG	act	./foo.js	-	47ssblskuj59	IN	{foo=bar}	hqv4y1w3p04j	
+... DEBUG	act	./foo.js	-	47ssblskuj59	OUT	{color=pink}	hqv4y1w3p04j
+null { color: 'pink' }
+{% endhighlight %}
+
+
+<p>
+There's an obvious risk that you might have a naming conflict. Seneca
+allows this because you it's more useful to have the ability to
+override plugins. If you're defining your own set of plugin names,
+it's best to choose a short prefix for your project. This is a good
+idea in general for many frameworks!
+</p>
+
+<p>
+For example, if you're working on the Manhattan project, choose the
+prefix <i>mh</i>. Then call your "Trinity" plugin <i>mh-trinity</i>.
+</p>
+
+<p>
+There are no hard and fast rules for naming your action
+patterns. However, there are some conventions, which help to organize
+the patterns. Your plugin is providing functionality to the
+system. This functionality fulfills a role in the system. So it makes
+sense to use a <i>role:plugin-name</i> as part of your action
+pattern. This creates a namespace to avoid clashes with other
+plugins. The use of the word "role" also indicates that other plugins
+may override some aspects of this role by providing extensions to some
+of the action patterns.
+</p>
+
+<p>
+For example, the <a href="">seneca-vcache plugin</a> overrides the
+standard entity patterns, of the form <i>role:entity, cmd:*</i>. It
+does this to transparently add caching to the database store
+operations.
+</p>
+
+<p>
+Another common convention is to use the property "cmd" for the main
+public commands exposed by the plugin. So, you might have, for
+example:
+</p>
+
+{% highlight js %}
+var plugin = function trinity( options ) {
+
+  this.add( {role:'trinity', cmd:'detonate'}, function( args, done ){
+    // ... compress plutonium, etc
+  })
+}
+{% endhighlight %}
+
+<p>
+Many of the public Seneca plugins on NPM follow this pattern. You may
+find other patterns more useful in your own projects, so don't feel
+obligated to follow this one.
+</p>
+
+<p>
+If you load a plugin multiple times, only the last one loaded will be
+used. You can however load multiple separate instances of the same
+plugin, by using tags. NOTE: the action patterns will still be
+overridden, unless the plugin handles this for you. The data store
+plugins, in particular, use this mechanism to support multiple
+databases in the same system. For more details, read
+the <a href="http://senecajs.org/data-entities.html">data store
+tutorial.</a>
+</p>
+
+<p>
+Here's a simple example that uses tags. In this case,
+the <i>bar.js</i> plugin defines an action pattern using one of its
+option properties. This means that different action patterns are
+defined depending on the options provided.
+</p>
+
+{% highlight js %}
+// bar.js
+module.exports = function( options ) {
+  var tag = this.context.tag
+
+  this.add( {foo:'bar', zed:options.zed}, function( args, done ){
+    done( null, {color: options.color, tag:tag} )
+  })
+
+}
+{% endhighlight %}
+
+<p>
+You can access the tag value from the context property of the plugin
+Seneca instance: <code>this.context.tag</code>
+</p>
+
+<p>
+You still want to debug and track each instance of this plugin, so you
+provide a tag each time you <i>use<i> it. Tags can be supplied in two
+ways, either by description object for the plugin, or by suffixing
+a <i>$</i> character, and then the tag, to the plugin module
+reference. Here's the example code:
+</p>
+
+{% highlight js %}
+// tags.js
+var seneca = require('seneca')()
+
+seneca.use( {name:'./bar.js',tag:'AAA'}, {zed:1,color:'red'} )
+seneca.use( './bar.js$BBB',              {zed:2,color:'green'} )
+
+seneca.act( {foo:'bar',zed:1}, console.log )
+seneca.act( {foo:'bar',zed:2}, console.log )
+{% endhighlight %}
+
+<p>
+Running this code produces the output:
+</p>
+
+{% highlight bash %}
+$ node tags.js
+null { color: 'red', tag: 'AAA' }
+null { color: 'green', tag: 'BBB' }
+{% endhighlight %}
+
+<p>
+Using the debug log shows the different instances of the plugin in action:
+</p>
+
+{% highlight bash %}
+$ node tags.js --seneca.log=plugin:./bar.js
+... DEBUG	plugin	./bar.js	AAA	add	./bar.js	AAA	{foo=bar,zed=1}	6vyoa1dlb1t9
+... DEBUG	plugin	./bar.js	BBB	add	./bar.js	BBB	{foo=bar,zed=2}	gcigpuizai47
+... DEBUG	act	./bar.js	AAA	pamds7vlteyv	IN	{foo=bar,zed=1}	6vyoa1dlb1t9	
+... DEBUG	act	./bar.js	BBB	4uxz90gcczn5	IN	{foo=bar,zed=2}	gcigpuizai47	
+... DEBUG	act	./bar.js	AAA	pamds7vlteyv	OUT	{color=red,tag=AAA}	6vyoa1dlb1t9
+null { color: 'red', tag: 'AAA' }
+... DEBUG	act	./bar.js	BBB	4uxz90gcczn5	OUT	{color=green,tag=BBB}	gcigpuizai47
+null { color: 'green', tag: 'BBB' }
+{% endhighlight %}
+
+<p>
+To isolate a tag, use:
+</p>
+
+{% highlight bash %}
+$ node tags.js --seneca.log=plugin:./bar.js,tag:AAA
+... DEBUG	plugin	./bar.js	AAA	add	./bar.js	AAA	{foo=bar,zed=1}	mp2cq990lzmy
+... DEBUG	act	./bar.js	AAA	9rp8luozaf92	IN	{foo=bar,zed=1}	mp2cq990lzmy	
+... DEBUG	act	./bar.js	AAA	9rp8luozaf92	OUT	{color=red,tag=AAA}	mp2cq990lzmy
+null { color: 'red', tag: 'AAA' }
+null { color: 'green', tag: 'BBB' }
+{% endhighlight %}
+
+
+<!--
 <h4>Dealing with Options</h4>
 
 - deepextend
@@ -262,24 +515,39 @@ seneca.use( 'echo' )
 - exceptions
 
 
+
 <h4>Using the Correct Context</h4>
 
 - use this inside add funcs
 - meta arguments - $ suffix; plugin metas
-
+- state inside plugin
 
 <h4>Initializing Your Plugin</h4>
 
 - init action
-- init order and logging
+- init order and logging, register etc
 - gating, ready
 
+<h4>Exporting Utility Objects</h4>
+- export
+
+
+<h4>Finding Your Plugin</h4>
+- loading, use-plugin
+- not found and other load errors
 
 <h4>Finding Out About Plugins</h4>
 
 - plugin api
 - stats
 
+
+<h4>Tips and Tricks for Writing Plugins</h4>
+
+- var seneca = this
+- dump patterns
+- debug log
+- failure to load
 
 
 
