@@ -162,7 +162,7 @@ module.exports = function( options ) {
 {% endhighlight %}
 
 <p>
-The <i>foo.js<i> file is a normal JavaScript file you can load into Node.js with <i>require</i>. It exposes a single function that takes the plugin <i>options</i>. To use the plugin, this code is almost the same as before, except you pass in the <i>foo.js</i> relative file path in the same way you would for <i>require</i>.
+The <i>foo.js</i> file is a normal JavaScript file you can load into Node.js with <i>require</i>. It exposes a single function that takes the plugin <i>options</i>. To use the plugin, the code is almost the same as before, except that you pass in the <i>foo.js</i> relative file path in the same way you would for <i>require</i>.
 </p>
 
 {% highlight js %}
@@ -171,9 +171,7 @@ The <i>foo.js<i> file is a normal JavaScript file you can load into Node.js with
 var seneca = require('seneca')()
 
 seneca.use( './foo.js', {color:'pink'} )
-
 seneca.act( {foo:'bar'}, console.log )
-
 {% endhighlight %}
 
 <p>
@@ -187,7 +185,7 @@ null { color: 'pink' }
 
 <p>
 As well as local files and modules, you can use plugin modules
-from <a href="http://npmjs.org">npmjs.org</a>. Let's use
+from <a href="https://www.npmjs.org/search?q=seneca">npmjs.org</a>. Let's use
 the <a href="https://www.npmjs.org/package/seneca-echo">seneca-echo
 plugin</a> as an example. This plugin echoes back arguments you send
 to the <i>role:echo<i> pattern. First, <i>npm install</i> it:
@@ -207,7 +205,6 @@ Then use it:
 var seneca = require('seneca')()
 
 seneca.use( 'seneca-echo' )
-
 seneca.act( {role:'echo', foo:'bar'}, console.log )
 {% endhighlight %}
 
@@ -221,9 +218,9 @@ null { foo: 'bar' }
 {% endhighlight %}
 
 <p>
-You aren't using an options in this example. The <i>seneca-echo</i>
-just produces the arguments passed. In this
-case <i>foo:bar</i>. The <i>role:echo<i> pattern is not included in
+You aren't using any options in this example. The <i>seneca-echo</i>
+plugin just reproduces the arguments passed in. In this
+case <i>foo:bar</i>. The <i>role:echo</i> pattern is not included in
 the output.
 </p>
 
