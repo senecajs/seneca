@@ -11,6 +11,6 @@ var plugin = function( options ) {
 
 var seneca = require('../../..')()
 
-seneca.use( plugin, {color:"pink"} )
+seneca.use( plugin, {color:'pink'} )
 
 seneca.act( {foo:'bar'}, console.log )
