@@ -109,6 +109,8 @@ method to trigger them, like so:
 </p>
 
 {% highlight js %}
+// simple.js
+
 var seneca = require('seneca')()
 
 var plugin = function( options ) { ... } // as above
@@ -129,10 +131,10 @@ null { color: 'pink' }
 {% endhighlight %}
 
 <p>
-The <i>null</i> is the first argument to <i>console.log</i>, an
-indicates that there was no error.  The output is a JavaScript object
-with single property <i>color</i> set from the original options given
-to the plugin.
+In the output, the <i>null</i> is the first argument
+to <i>console.log</i>, and indicates that there was no error.  The
+output is a JavaScript object with single property <i>color</i>, the
+value of which is set from the original options given to the plugin.
 </p>
 
 
@@ -140,9 +142,9 @@ to the plugin.
 
 <p>
 The Seneca <i>use</i> method can also accept module references. That
-is, if you can <i>require</i>, you can <i>use</i> it! Let's update the
-simple example to show this. First, create a file called <i>foo.js<i>
-containing the plugin (all the files in this article are available on
+is, if you can <i>require</i> it, you can <i>use</i> it! Let's update the
+simple example to show this. First, create a file called <i>foo.js</i>
+containing the plugin code (all the files in this article are available on
 the Seneca github
 at <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>).
 </p>
