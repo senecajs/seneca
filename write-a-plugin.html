@@ -294,7 +294,7 @@ when registering their names. Try this:
 {% highlight bash %}
 $ node echo.js --seneca.log=plugin:echo
 ... DEBUG  plugin  echo  -  add  echo  -  {role=echo}  ...
-... DEBUG  act     echo  -  lkmlk29r6uwt  IN  {role=echo,foo=bar}  ...
+... DEBUG  act     echo  -  lkmlk29r6uwt  IN   {role=echo,foo=bar}  ...
 ... DEBUG  act     echo  -  lkmlk29r6uwt  OUT  {foo=bar}  ...
 null { foo: 'bar' }
 {% endhighlight %}
@@ -448,7 +448,7 @@ Seneca instance: <code>this.context.tag</code>
 
 <p>
 You still want to debug and track each instance of this plugin, so you
-provide a tag each time you register it with the <i>use<i>
+provide a tag each time you register it with the <i>use</i>
 method. Tags can be supplied in two ways, either by description object
 for the plugin, or by suffixing a <i>$</i> character, and then the
 tag, to the plugin module reference. Here's the example code:
