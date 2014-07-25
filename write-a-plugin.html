@@ -154,7 +154,7 @@ at <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-
 
 module.exports = function( options ) {
 
-  this.add( {foo:'bar'}, function( args, done ){
+  this.add( {foo:'bar'}, function( args, done ) {
     done( null, {color: options.color} )
   })
 
@@ -252,9 +252,11 @@ you can see what your plugin is doing. Let's try it!
 </p>
 
 {% highlight js %}
+// name0.js
+
 var plugin = function( options ) {
 
-  this.add( {foo:'bar'}, function( args, done ){
+  this.add( {foo:'bar'}, function( args, done ) {
     done( null, {color: options.color} )
   })
 
@@ -281,8 +283,7 @@ null { color: 'pink' }
 </p>
 This uses Seneca's log filtering feature to focus on the log lines
 that you care about. For more details on log filtering, read
-the <a href="http://senecajs.org/logging-example.html">logging example
-article</a>.
+the <a href="http://senecajs.org/logging-example.html">logging tutorial</a>.
 </p>
 
 <p>
@@ -295,7 +296,7 @@ $ node echo.js --seneca.log=plugin:echo
 ... DEBUG	plugin	echo	-	add	echo	-	{role=echo}	jbnax2ssrr74
 ... DEBUG	act	echo	-	lkmlk29r6uwt	IN	{role=echo,foo=bar}	jbnax2ssrr74	
 ... DEBUG	act	echo	-	lkmlk29r6uwt	OUT	{foo=bar}	jbnax2ssrr74
-null { foo: 'bar' 
+null { foo: 'bar' }
 {% endhighlight %}
 
 <p>
@@ -310,9 +311,11 @@ give the defining function a name:
 
 
 {% highlight js %}
+// name1.js
+
 var plugin = function name1( options ) {
 
-  this.add( {foo:'bar'}, function( args, done ){
+  this.add( {foo:'bar'}, function( args, done ) {
     done( null, {color: options.color} )
   })
 }
@@ -338,7 +341,7 @@ null { color: 'pink' }
 
 <p>
 When you load a plugin as a module then the module reference, as
-supplied to the <i>use<i> method, becomes the initial name of the
+supplied to the <i>use</i> method, becomes the initial name of the
 module (Of course, you can override this by returning your own name)
 Here's the <i>foo.js</i> plugin again:
 </p>
@@ -355,7 +358,7 @@ null { color: 'pink' }
 
 <p>
 There's an obvious risk that you might have a naming conflict. Seneca
-allows this because you it's more useful to have the ability to
+allows this because it's more useful to have the ability to
 override plugins. If you're defining your own set of plugin names,
 it's best to choose a short prefix for your project. This is a good
 idea in general for many frameworks!
@@ -368,21 +371,23 @@ prefix <i>mh</i>. Then call your "Trinity" plugin <i>mh-trinity</i>.
 
 <p>
 There are no hard and fast rules for naming your action
-patterns. However, there are some conventions, which help to organize
+patterns. However, there are some conventions that help to organize
 the patterns. Your plugin is providing functionality to the
 system. This functionality fulfills a role in the system. So it makes
-sense to use a <i>role:plugin-name</i> as part of your action
-pattern. This creates a namespace to avoid clashes with other
-plugins. The use of the word "role" also indicates that other plugins
-may override some aspects of this role by providing extensions to some
-of the action patterns.
+sense to use the form <i>role:plugin-name</i> as part of your action
+pattern. This creates a pattern namespace to avoid clashes with other
+plugin patterns. The use of the word "role" also indicates that other
+plugins may override some aspects of this role (that is, aspects of
+this functionality) by providing extensions to some of the action
+patterns.
 </p>
 
 <p>
-For example, the <a href="">seneca-vcache plugin</a> overrides the
-standard entity patterns, of the form <i>role:entity, cmd:*</i>. It
-does this to transparently add caching to the database store
-operations.
+For example,
+the <a href="https://github.com/rjrodger/seneca-vcache">seneca-vcache
+plugin</a> overrides the standard entity patterns, of the
+form <i>role:entity, cmd:*</i>. It does this to transparently add
+caching to the database store operations.
 </p>
 
 <p>
@@ -394,7 +399,7 @@ example:
 {% highlight js %}
 var plugin = function trinity( options ) {
 
-  this.add( {role:'trinity', cmd:'detonate'}, function( args, done ){
+  this.add( {role:'trinity', cmd:'detonate'}, function( args, done ) {
     // ... compress plutonium, etc
   })
 }
@@ -409,11 +414,11 @@ obligated to follow this one.
 <p>
 If you load a plugin multiple times, only the last one loaded will be
 used. You can however load multiple separate instances of the same
-plugin, by using tags. NOTE: the action patterns will still be
-overridden, unless the plugin handles this for you. The data store
-plugins, in particular, use this mechanism to support multiple
-databases in the same system. For more details, read
-the <a href="http://senecajs.org/data-entities.html">data store
+plugin, by using tag strings. NOTE: the action patterns will still be
+overridden, unless the plugin handles this for you (like the example
+below). The data store plugins, in particular, use this mechanism to
+support multiple databases in the same system. For more details, read
+the <a href="http://senecajs.org/data-entities.html">data entities
 tutorial.</a>
 </p>
 
@@ -429,7 +434,7 @@ defined depending on the options provided.
 module.exports = function( options ) {
   var tag = this.context.tag
 
-  this.add( {foo:'bar', zed:options.zed}, function( args, done ){
+  this.add( {foo:'bar', zed:options.zed}, function( args, done ) {
     done( null, {color: options.color, tag:tag} )
   })
 
@@ -443,10 +448,10 @@ Seneca instance: <code>this.context.tag</code>
 
 <p>
 You still want to debug and track each instance of this plugin, so you
-provide a tag each time you <i>use<i> it. Tags can be supplied in two
-ways, either by description object for the plugin, or by suffixing
-a <i>$</i> character, and then the tag, to the plugin module
-reference. Here's the example code:
+provide a tag each time you register it with the <i>use<i>
+method. Tags can be supplied in two ways, either by description object
+for the plugin, or by suffixing a <i>$</i> character, and then the
+tag, to the plugin module reference. Here's the example code:
 </p>
 
 {% highlight js %}
@@ -476,25 +481,25 @@ Using the debug log shows the different instances of the plugin in action:
 
 {% highlight bash %}
 $ node tags.js --seneca.log=plugin:./bar.js
-... DEBUG	plugin	./bar.js	AAA	add	./bar.js	AAA	{foo=bar,zed=1}	6vyoa1dlb1t9
-... DEBUG	plugin	./bar.js	BBB	add	./bar.js	BBB	{foo=bar,zed=2}	gcigpuizai47
-... DEBUG	act	./bar.js	AAA	pamds7vlteyv	IN	{foo=bar,zed=1}	6vyoa1dlb1t9	
-... DEBUG	act	./bar.js	BBB	4uxz90gcczn5	IN	{foo=bar,zed=2}	gcigpuizai47	
-... DEBUG	act	./bar.js	AAA	pamds7vlteyv	OUT	{color=red,tag=AAA}	6vyoa1dlb1t9
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  6vyoa1dlb1t9
+... DEBUG  plugin  ./bar.js  BBB  add  ./bar.js  BBB  {foo=bar,zed=2}  gcigpuizai47
+... DEBUG  act  ./bar.js  AAA  pamds7vlteyv  IN  {foo=bar,zed=1}  6vyoa1dlb1t9  
+... DEBUG  act  ./bar.js  BBB  4uxz90gcczn5  IN  {foo=bar,zed=2}  gcigpuizai47  
+... DEBUG  act  ./bar.js  AAA  pamds7vlteyv  OUT  {color=red,tag=AAA}  6vyoa1dlb1t9
 null { color: 'red', tag: 'AAA' }
-... DEBUG	act	./bar.js	BBB	4uxz90gcczn5	OUT	{color=green,tag=BBB}	gcigpuizai47
+... DEBUG  act  ./bar.js  BBB  4uxz90gcczn5  OUT  {color=green,tag=BBB}  gcigpuizai47
 null { color: 'green', tag: 'BBB' }
 {% endhighlight %}
 
 <p>
-To isolate a tag, use:
+To isolate a tag, use these log settings:
 </p>
 
 {% highlight bash %}
 $ node tags.js --seneca.log=plugin:./bar.js,tag:AAA
-... DEBUG	plugin	./bar.js	AAA	add	./bar.js	AAA	{foo=bar,zed=1}	mp2cq990lzmy
-... DEBUG	act	./bar.js	AAA	9rp8luozaf92	IN	{foo=bar,zed=1}	mp2cq990lzmy	
-... DEBUG	act	./bar.js	AAA	9rp8luozaf92	OUT	{color=red,tag=AAA}	mp2cq990lzmy
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=1}  mp2cq990lzmy
+... DEBUG  act  ./bar.js  AAA  9rp8luozaf92  IN  {foo=bar,zed=1}  mp2cq990lzmy  
+... DEBUG  act  ./bar.js  AAA  9rp8luozaf92  OUT  {color=red,tag=AAA}  mp2cq990lzmy
 null { color: 'red', tag: 'AAA' }
 null { color: 'green', tag: 'BBB' }
 {% endhighlight %}
@@ -574,7 +579,7 @@ For example:
 
 {% highlight js %}
 seneca.act( {role:'entity', cmd:'save', ent:{...}}, 
-            function(err,result){ ... } )
+            function(err,result) { ... } )
 {% endhighlight %}
 
 <p>
@@ -635,7 +640,7 @@ Now, you need to save the data:
 </p>
 
 {% highlight js %}
-foo.save$(function(err,foo){
+foo.save$(function(err,foo) {
   console.log(foo)
 })
 {% endhighlight %}
@@ -669,7 +674,7 @@ the <i>id</i> property.
 {% highlight js %}
 var id = '...'
 var foo_entity = seneca.make('foo')
-foo_entity.load$( id, function(err,foo){
+foo_entity.load$( id, function(err,foo) {
   console.log(foo)
 })
 {% endhighlight %}
@@ -687,7 +692,7 @@ To delete entities, you also use the <i>id</i> property, with the
 {% highlight js %}
 var id = '...'
 var foo_entity = seneca.make('foo')
-foo_entity.remove$( id, function(err){ ... })
+foo_entity.remove$( id, function(err) { ... })
 {% endhighlight %}
 
 <p>
@@ -697,8 +702,8 @@ the <code>list$</code> method:
 
 {% highlight js %}
 var foo_entity = seneca.make('foo')
-foo_entity.list$( {price:1.99}, function(err,list){
-  list.forEach(function( foo ){
+foo_entity.list$( {price:1.99}, function(err,list) {
+  list.forEach(function( foo ) {
     console.log(foo)
   })
 })
@@ -718,7 +723,7 @@ One thing you can do is sort the results:
 </p>
 
 {% highlight js %}
-foo_entity.list$( {price:1.99, sort$:{price:-1}}, function(err,list){
+foo_entity.list$( {price:1.99, sort$:{price:-1}}, function(err,list) {
   ...
 })
 {% endhighlight %}
@@ -908,11 +913,11 @@ callback that will be called once the database is good to go:
 </p>
 
 {% highlight js %}
-seneca.ready(function(err){
+seneca.ready(function(err) {
   var apple = seneca.make$('fruit')
   apple.name  = 'Pink Lady'
   apple.price = 1.99
-  apple.save$(function(err,apple){
+  apple.save$(function(err,apple) {
     if( err ) return console.log(err);
     console.log( "apple = "+apple  )
   })
@@ -929,7 +934,7 @@ To close any open database connections, use the <code>seneca.close</code> method
 </p>
 
 {% highlight js %}
-seneca.close(function(err){
+seneca.close(function(err) {
   console.log('database closed!')
 })
 {% endhighlight %}
@@ -1038,16 +1043,16 @@ data store.
 Here it is in action:
 
 {% highlight js %}
-seneca.ready(function(err,seneca){
+seneca.ready(function(err,seneca) {
 
   ;seneca
     .make$('json','foo',{propA:'val1',propB:'val2'})
-    .save$(function(err,json_foo){
+    .save$(function(err,json_foo) {
       console.log(''+json_foo)
 
   ;seneca
     .make$('level','bar',{propA:'val3',propB:'val4'})
-    .save$(function(err,level_bar){
+    .save$(function(err,level_bar) {
       console.log(''+level_bar)
 
   }) })
@@ -1073,11 +1078,11 @@ For example, run the example above, that uses both the jsonfile store and the le
 {% highlight bash %}
 $ node main.js --seneca.log=type:act
 ...
-2013-04-18T10:05:45.818Z	DEBUG	act	jsonfile-store	BCL	wa8xc5	In	{cmd=save,role=entity,ent=$-/json/foo:{id=;propA=val1;propB=val2},name=foo,base=json}	gx38qi
-2013-04-18T10:05:45.821Z	DEBUG	act	jsonfile-store	BCL	wa8xc5	OUT	[$-/json/foo:{id=ulw8ew;propA=val1;propB=val2}]	gx38qi
+2013-04-18T10:05:45.818Z  DEBUG  act  jsonfile-store  BCL  wa8xc5  In  {cmd=save,role=entity,ent=$-/json/foo:{id=;propA=val1;propB=val2},name=foo,base=json}  gx38qi
+2013-04-18T10:05:45.821Z  DEBUG  act  jsonfile-store  BCL  wa8xc5  OUT  [$-/json/foo:{id=ulw8ew;propA=val1;propB=val2}]  gx38qi
 ...
-2013-04-18T10:05:45.822Z	DEBUG	act	level-store	GPN	8dnjyt	IN	{cmd=save,role=entity,ent=$-/level/bar:{id=;propA=val3;propB=val4},name=bar,base=level}	8ml1p7
-2013-04-18T10:05:45.826Z	DEBUG	act	level-store	GPN	8dnjyt	OUT	[$-/level/bar:{id=7de92fc0-f402-411d-80ea-59e435a8c398;propA=val3;propB=val4}]	8ml1p7
+2013-04-18T10:05:45.822Z  DEBUG  act  level-store  GPN  8dnjyt  IN  {cmd=save,role=entity,ent=$-/level/bar:{id=;propA=val3;propB=val4},name=bar,base=level}  8ml1p7
+2013-04-18T10:05:45.826Z  DEBUG  act  level-store  GPN  8dnjyt  OUT  [$-/level/bar:{id=7de92fc0-f402-411d-80ea-59e435a8c398;propA=val3;propB=val4}]  8ml1p7
 ...
 {% endhighlight %}
 
@@ -1100,8 +1105,8 @@ The data stores themselves also generate logging output. Try <code>--seneca.log=
 
 {% highlight bash %}
 $ node main.js --seneca.log=type:plugin
-2013-04-18T10:39:54.961Z	DEBUG	plugin	jsonfile-store	QSG	cop6lx	save/insert	$-/json/foo:{id=nt7usm;propA=val1;propB=val2}	jsonfile-store~QSG~-/json/-
-2013-04-18T10:40:19.802Z	DEBUG	plugin	level-store	JNG	save/insert	$-/level/bar:{id=7166037e-112d-448c-9afa-84e69d84aa25;propA=val3;propB=val4}	level-store~JNG~-/level/-
+2013-04-18T10:39:54.961Z  DEBUG  plugin  jsonfile-store  QSG  cop6lx  save/insert  $-/json/foo:{id=nt7usm;propA=val1;propB=val2}  jsonfile-store~QSG~-/json/-
+2013-04-18T10:40:19.802Z  DEBUG  plugin  level-store  JNG  save/insert  $-/level/bar:{id=7166037e-112d-448c-9afa-84e69d84aa25;propA=val3;propB=val4}  level-store~JNG~-/level/-
 {% endhighlight %}
 
 <p>
