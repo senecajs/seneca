@@ -1,12 +1,10 @@
 
 
 module.exports = function( options ) {
-  
+  var tag = this.context.tag
 
   this.add( {foo:'bar', zed:options.zed}, function( args, done ){
-    console.log(this)
-
-    done( null, {color: options.color} )
+    done( null, {color: options.color, tag:tag} )
   })
 
 }
