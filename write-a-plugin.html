@@ -184,11 +184,11 @@ null { color: 'pink' }
 {% endhighlight %}
 
 <p>
-As well as local files and modules, you can use plugin modules
+As well as local files and local modules, you can use public plugin modules
 from <a href="https://www.npmjs.org/search?q=seneca">npmjs.org</a>. Let's use
 the <a href="https://www.npmjs.org/package/seneca-echo">seneca-echo
 plugin</a> as an example. This plugin echoes back arguments you send
-to the <i>role:echo<i> pattern. First, <i>npm install</i> it:
+to the <i>role:echo</i> pattern. First, <i>npm install</i> it:
 </p>
 
 {% highlight bash %}
@@ -220,7 +220,7 @@ null { foo: 'bar' }
 <p>
 You aren't using any options in this example. The <i>seneca-echo</i>
 plugin just reproduces the arguments passed in. In this
-case <i>foo:bar</i>. The <i>role:echo</i> pattern is not included in
+case <i>foo:bar</i>. The <i>role</i> property is not included in
 the output.
 </p>
 
@@ -231,7 +231,7 @@ written by the community. Feel free to write one yourself (after
 reading this article!). In general public and generically useful
 plugins are prefixed with <i>seneca-</i> as part of their name. This
 lets you know the module is a Seneca plugin if you see it on
-NPM. However, its a bt tedious to type in "seneca-" all the time, so
+NPM. However, its a bit tedious to type in "seneca-" all the time, so
 you are allowed to abbreviate plugin names by dropping the "seneca-"
 prefix. So this will also work:
 </p>
@@ -243,7 +243,7 @@ seneca.use( 'echo' )
 <!--
 <h4>Give Your Plugin a Name</h4>
 
-- how to name
+- how to name, role, action names
 - tags, multiple instances
 - debug usage
 
