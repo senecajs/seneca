@@ -6,11 +6,10 @@ var plugin = function( options ) {
     done( null, {color: options.color} )
   })
 
+  return 'name0'
 }
-
 
 var seneca = require('../../..')()
 
 seneca.use( plugin, {color:'pink'} )
-
 seneca.act( {foo:'bar'}, console.log )
