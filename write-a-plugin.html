@@ -41,7 +41,7 @@ approach to software architecture, so that will be discussed too.
 </p>
 
 
-<h4>A Simple Plugin</h4>
+<a name="wp-simple"><h4>A Simple Plugin</h4></a>
 
 <p>
 Let's write a plugin that defines one action. The action uses the
@@ -113,18 +113,178 @@ var seneca = require('seneca')()
 
 var plugin = function( options ) { ... } // as above
 
-seneca.use( plugin, {color:"pink"} )
+seneca.use( plugin, {color:'pink'} )
 seneca.act( {foo:'bar'}, console.log )
 {% endhighlight %}
 
+<p>
 This code is available in
 the <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>
 example, in the <i>simple.js</i> script. Running the script produces:
+</p>
 
 {% highlight bash %}
 $ node simple.js
 null { color: 'pink' }
 {% endhighlight %}
+
+<p>
+The <i>null</i> is the first argument to <i>console.log</i>, an
+indicates that there was no error.  The output is a JavaScript object
+with single property <i>color</i> set from the original options given
+to the plugin.
+</p>
+
+
+<h4>A Plugin is a Module</h4>
+
+<p>
+The Seneca <i>use</i> method can also accept module references. That
+is, if you can <i>require<i>, you can <i>use</i> it! Let's update the
+simple example to show this. First, create a file called <i>foo.js<i>
+containing the plugin (all the files in this article are available on
+the Seneca github
+at <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>).
+</p>
+
+{% highlight js %}
+// foo.js
+
+module.exports = function( options ) {
+
+  this.add( {foo:'bar'}, function( args, done ){
+    done( null, {color: options.color} )
+  })
+
+}
+{% endhighlight %}
+
+<p>
+The <i>foo.js<i> file is a normal JavaScript file you can load into Node.js with <i>require</i>. It exposes a single function that takes the plugin <i>options</i>. To use the plugin, this code is almost the same as before, except you pass in the <i>foo.js</i> relative file path in the same way you would for <i>require</i>.
+</p>
+
+{% highlight js %}
+// module.js
+
+var seneca = require('seneca')()
+
+seneca.use( './foo.js', {color:'pink'} )
+
+seneca.act( {foo:'bar'}, console.log )
+
+{% endhighlight %}
+
+<p>
+The code produces the same output as before:
+</p>
+
+{% highlight bash %}
+$ node module.js
+null { color: 'pink' }
+{% endhighlight %}
+
+<p>
+As well as local files and modules, you can use plugin modules
+from <a href="http://npmjs.org">npmjs.org</a>. Let's use
+the <a href="https://www.npmjs.org/package/seneca-echo">seneca-echo
+plugin</a> as an example. This plugin echoes back arguments you send
+to the <i>role:echo<i> pattern. First, <i>npm install</i> it:
+</p>
+
+{% highlight bash %}
+$ npm install seneca-echo
+{% endhighlight %}
+
+<p>
+Then use it:
+</p>
+
+{% highlight js %}
+// echo.js
+
+var seneca = require('seneca')()
+
+seneca.use( 'seneca-echo' )
+
+seneca.act( {role:'echo', foo:'bar'}, console.log )
+{% endhighlight %}
+
+<p>
+Running <i>echo.js</i> produces:
+</p>
+
+{% highlight js %}
+$ node echo.js
+null { foo: 'bar' }
+{% endhighlight %}
+
+<p>
+You aren't using an options in this example. The <i>seneca-echo</i>
+just produces the arguments passed. In this
+case <i>foo:bar</i>. The <i>role:echo<i> pattern is not included in
+the output.
+</p>
+
+<p>
+The Seneca framework comes
+with <a href="http://senecajs.org/plugins.html">many plugins</a>
+written by the community. Feel free to write one yourself (after
+reading this article!). In general public and generically useful
+plugins are prefixed with <i>seneca-</i> as part of their name. This
+lets you know the module is a Seneca plugin if you see it on
+NPM. However, its a bt tedious to type in "seneca-" all the time, so
+you are allowed to abbreviate plugin names by dropping the "seneca-"
+prefix. So this will also work:
+</p>
+
+{% highlight js %}
+seneca.use( 'echo' )
+{% endhighlight %}
+
+<!--
+<h4>Give Your Plugin a Name</h4>
+
+- how to name
+- tags, multiple instances
+- debug usage
+
+
+<h4>Dealing with Options</h4>
+
+- deepextend
+- config files (basic)
+- seneca.options
+
+
+<h4>Dealing with Errors</h4>
+
+- callback err
+- seneca.fail/die
+- exceptions
+
+
+<h4>Using the Correct Context</h4>
+
+- use this inside add funcs
+- meta arguments - $ suffix; plugin metas
+
+
+<h4>Initializing Your Plugin</h4>
+
+- init action
+- init order and logging
+- gating, ready
+
+
+<h4>Finding Out About Plugins</h4>
+
+- plugin api
+- stats
+
+
+
+
+-->
 
 <!--
 
