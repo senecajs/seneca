@@ -3,6 +3,7 @@
 ## A Node.js toolkit for Micro-Service Architctures
 
 [![NPM](https://nodei.co/npm/seneca.png)](https://nodei.co/npm/seneca/)
+[![NPM](https://nodei.co/npm-dl/seneca.png)](https://nodei.co/npm-dl/seneca/)
 
 Seneca is a toolkit for organizing the business logic of your app. You
 can break down your app into "stuff that happens", rather than
@@ -15,7 +16,7 @@ For a gentle introduction to this module, see the
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.5.20
+Current Version: 0.5.19
 
 Tested on: Node 0.10.29, and 0.11.13
 
