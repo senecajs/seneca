@@ -542,13 +542,13 @@ console.log(bar)
 {% endhighlight %}
 
 <p>
-The property <code>colors.red</code> is overridden, but the other colors remain
-their default vlaues.
+The property <code>colors.red</code> is overridden, but the other colors retain
+their default values.
 </p>
 
 <p>
 You can use this in your own plugins. Let's add default options to
-the <code>foo.js</code> module (as above).
+the <i>foo.js</i> module (as above).
 </p>
 
 {% highlight js %}
@@ -580,7 +580,10 @@ module.exports = function( options ) {
 
 <p>
 The default option structure is used as the base for the user supplied
-options. Let's supply some:
+options. (As an aside, note that you can specify the name of the
+plugin by returning an object of the form <code>{name:...}</code>. You
+see some more properties you can add this return object
+below...). Let's supply some user options that will override the defaults:
 </p>
 
 {% highlight js %}
@@ -599,7 +602,7 @@ seneca.act( {foo:'bar'}, console.log )
 
 
 <p>
-This code runs the <code>foo:bar</code> action, which produces:
+This code runs the <i>foo:bar</i> action, which produces:
 </p>
 
 {% highlight bash %}
