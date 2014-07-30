@@ -510,10 +510,11 @@ null { color: 'green', tag: 'BBB' }
 
 <p>
 It's useful to provide default option values for users of your
-plugin. Seneca provides a utility function to support this:
-`seneca.util.deepextend`. The `deepextend` function works much the
-same as [`_.extend`](http://underscorejs.org/#extend), except that it
-can handle properties at any level. For example:
+plugin. Seneca provides a utility function to support
+this: <code>seneca.util.deepextend</code>. The <code>deepextend</code>
+function works much the same
+as <a href="http://underscorejs.org/#extend"><code>_.extend</code></a>,
+except that it can handle properties at any level. For example:
 </p>
 
 {% highlight js %}
@@ -541,12 +542,13 @@ console.log(bar)
 {% endhighlight %}
 
 <p>
-The property `colors.red` is overridden, but the other colors remain
+The property <code>colors.red</code> is overridden, but the other colors remain
 their default vlaues.
 </p>
 
 <p>
-You can use this in your own plugins. Let's add default options to the `foo.js` module (as above).
+You can use this in your own plugins. Let's add default options to
+the <code>foo.js</code> module (as above).
 </p>
 
 {% highlight js %}
@@ -597,7 +599,7 @@ seneca.act( {foo:'bar'}, console.log )
 
 
 <p>
-This code runs the `foo:bar` action, which produces:
+This code runs the <code>foo:bar</code> action, which produces:
 </p>
 
 {% highlight bash %}
@@ -661,7 +663,6 @@ null { color: 'pink', box_width: 50, box_height: 200 }
 That's all folks! Corrections and comments: please tweet <a href="https://twitter.com/nodeseneca">@nodeseneca</a>.
 </p>
 
--->
 
         </section>
 
