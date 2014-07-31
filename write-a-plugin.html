@@ -617,14 +617,186 @@ This code runs the <i>foo:bar</i> action, which produces:
 </p>
 
 {% highlight bash %}
+$ node module-defopts.js
 null { color: 'pink', box_width: 50, box_height: 200 }
 {% endhighlight %}
 
+<p>
+You can load plugin options from configuration files. Seneca looks for a file named <i>seneca.options.js</i> in the current folder, and <i>requires</i> the file if it exists. This file should be a Node.js module that exports a JSON object. For example:
+</p>
+
+{% highlight js %}
+// seneca.options.js
+module.exports = {
+  zed: {
+    red:   50,
+    green: 100,
+    blue:  150,
+  },
+  'zed$tag0': {
+    red:   55,
+  }
+}
+{% endhighlight %}
+
+<p>
+You can specify global Seneca options in this file, and you can
+specify options for individual plugins. Top level properties that
+match the name of a plugin are used to provide options to plugins when
+they are loaded.
+</p>
+
+<p>
+Let's see this in action. The <i>zed.js</i> script defines a plugin
+that prints out the plugin name and tag
+using <code>this.context</code> (see above), and also prints out the
+options provided to the plugin by Seneca.
+</p>
+
+{% highlight js %}
+// zed.js
+function zed( options ) {
+  console.log( this.context.name, this.context.tag, options )
+}
+
+var seneca = require('seneca')()
+
+seneca.use( zed )
+{% endhighlight %}
+
+<p>
+As the example <i>seneca.options.js</i> file defines a <i>zed</i> property, this is used to provide options to the <i>zed</i> plugin. Running the <i>zed.js</i> script prints out the options loaded from <i>seneca.options.js</i>:
+</p>
+
+{% highlight bash %}
+$ node zed.js
+zed undefined { red: 50, green: 100, blue: 150 }
+{% endhighlight %}
+
+<p>
+If you are using tags to create multiple instances of the same plugin, you can use the <i>$suffix</i> convention to specify options particular to a given tagged plugin instance. The <i>zed-tag.js</i> script is the same as the <i>zed.js</i> script, except that it also creates an additional tagged instance of the <i>zed</i> plugin:
+</p>
+
+{% highlight js %}
+// zed-tag.js
+function zed( options ) {
+  console.log( this.context.name, this.context.tag, options )
+}
+
+var seneca = require('seneca')()
+
+seneca.use( zed )
+seneca.use( {init:zed, name:'zed', tag:'tag0'} )
+{% endhighlight %}
+
+<p>
+The <i>seneca.options.js</i> also defines a <i>zed$tag0</i> property, and the options for the <i>tag0</i> instance of the <i>zed</i> plugin are taken from this. However! If you run the code, you'll notice that it also picks op the options defined for the main <i>zed</i> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.
+</p>
+
+{% highlight js %}
+$ node zed-tag.js
+zed undefined { red: 50, green: 100, blue: 150 }
+zed tag0      { red: 55, green: 100, blue: 150 }
+{% endhighlight %}
+
+<p>
+Sometimes you need to access to full options provided to Seneca. For
+example, there is a global <i>timeout</i> value that you might want to
+use for timeouts. The <i>transport</i> family of plugins do this. See,
+for example,
+the <a href="https://github.com/rjrodger/seneca-redis-transport/blob/master/redis-transport.js">redis-transport</a>.
+</p>
+
+<p>
+Inside your plugin function, you can call <code>this.options()</code>
+to get back a object containing the entire Seneca options tree:
+</p>
+
+{% highlight js %}
+// zed-access.js
+function zed( options ) {
+  console.log( this.options() )
+}
+
+var seneca = require('../../../lib/seneca.js')()
+
+seneca.use( zed )
+{% endhighlight %}
+
+<p>
+Running this script produces:
+</p>
+
+{% highlight bash %}
+$ node zed-access.js 
+{ ...
+  timeout: 33333,
+  ...
+  zed: { red: 50, green: 100, blue: 150 },
+  'zed$tag0': { red: 55 },
+  ...
+}
+{% endhighlight %}
+
+<p>
+You are not required to use the <i>seneca.options.js</i> file. If it exists, it will be loaded and used as the base default for options. You can specify your own configuration file (or an object containing option values), by providing an argument to <code>seneca.options()</code>. This is useful for different deployment scenarios. For example, the file <i>dev.options.js</i> defines a custom configuration for the <i>zed</i> plugin:
+</p>
+
+{% highlight js %}
+// dev.options.js
+module.exports = {
+  zed: {
+    green: 110,
+  }
+}
+{% endhighlight %}
+
+<p>
+The <i>zed-dev.js</i> script uses this options file, but also gets the default options from <i>seneca.options.js</i>:
+</p>
+
+{% highlight js %}
+function zed( options ) {
+  console.log( this.context.name, this.context.tag, options )
+}
+
+var seneca = require('../../../lib/seneca.js')()
+seneca.options('./dev.options.js')
+
+seneca.use( zed )
+{% endhighlight %}
+
+<p>
+And the output has the overridden value for the <code>green</code> option.
+</p>
+
+{% highlight bash %}
+$ node zed-dev.js
+zed undefined { red: 50, green: 110, blue: 150 }
+{% endhighlight %}
+
+
+<p>
+Finally, you can specify options on the command line, either via an argument, or an evironment variable. Here are some examples using the <i>zed-dev.js</i> script. Use the <code>--seneca.options</code> command line argument to provide option values. You can use "dot notation" to specify nested options, and you can specify multiple options:
+</p>
+
+{% highlight bash %}
+$ node zed-dev.js --seneca.options.zed.red=10 --seneca.options.zed.blue=200
+zed undefined { red: 10, green: 110, blue: 200 }
+{% endhighlight %}
+
+<p>
+Alternatively, you can use the environment variable <code>SENECA_OPTIONS</code> to specify options that will be merged into the base defaults (using <code>seneca.util.deepextend</code>). The format is <a href="https://github.com/rjrodger/jsonic">jsonic</a>, a lenient, abbreviated, fully compatible version of JSON for lazy developers.
+</p>
+
+{% highlight bash %}
+$ SENECA_OPTIONS="{zed:{red:10,blue:200}}" node zed-dev.js
+zed undefined { red: 10, green: 110, blue: 200 }
+{% endhighlight %}
+
+
 
 <!--
-- config files (basic)
-- seneca.options
-
 
 <h4>Dealing with Errors</h4>
 
