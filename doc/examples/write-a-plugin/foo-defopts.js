@@ -1,9 +1,9 @@
 
 
 module.exports = function( options ) {
-  var seneca = this
 
-  options = seneca.util.deepextend({
+  // Default options
+  options = this.util.deepextend({
     color: 'red',
     box: {
       width:  100,
