@@ -565,10 +565,9 @@ the <i>foo.js</i> module (as above).
 {% highlight js %}
 // foo-defopts.js
 module.exports = function( options ) {
-  var seneca = this
 
   // Default options
-  options = seneca.util.deepextend({
+  options = this.util.deepextend({
     color: 'red',
     box: {
       width:  100,
@@ -579,9 +578,9 @@ module.exports = function( options ) {
 
   this.add( {foo:'bar'}, function( args, done ){
     done( null, { color:      options.color, 
-                  box_width:  options.box.width,
-                  box_height: options.box.height
-                } )
+                   box_width:  options.box.width,
+                   box_height: options.box.height
+                })
   })
 
   return {name:'foo'}
@@ -592,9 +591,9 @@ module.exports = function( options ) {
 <p>
 The default option structure is used as the base for the user supplied
 options. (As an aside, note that you can specify the name of the
-plugin by returning an object of the form <code>{name:...}</code>. You
+plugin by returning an object of the form <code>{name:...}</code>. You'll
 see some more properties you can add this return object
-below...). Let's supply some user options that will override the defaults:
+below). Let's supply some user options that will override the defaults:
 </p>
 
 {% highlight js %}
@@ -620,6 +619,10 @@ This code runs the <i>foo:bar</i> action, which produces:
 $ node module-defopts.js
 null { color: 'pink', box_width: 50, box_height: 200 }
 {% endhighlight %}
+
+<p>
+The default values for <code>color</code>, and <code>box.width</code>, have been overridden by the options provided as the second argument to <code>seneca.use</code> when the plugin is loaded.
+</p>
 
 <p>
 You can load plugin options from configuration files. Seneca looks for a file named <i>seneca.options.js</i> in the current folder, and <i>requires</i> the file if it exists. This file should be a Node.js module that exports a JSON object. For example:
@@ -674,7 +677,7 @@ zed undefined { red: 50, green: 100, blue: 150 }
 {% endhighlight %}
 
 <p>
-If you are using tags to create multiple instances of the same plugin, you can use the <i>$suffix</i> convention to specify options particular to a given tagged plugin instance. The <i>zed-tag.js</i> script is the same as the <i>zed.js</i> script, except that it also creates an additional tagged instance of the <i>zed</i> plugin:
+If you are using tags to create multiple instances of the same plugin, you can use the <i>$suffix</i> convention to specify options particular to a given tagged plugin instance. The <i>zed-tag.js</i> script is the same as the <i>zed.js</i> script, except that it also creates an additional tagged instance of the <i>zed</i> plugin. Note that the definition of the plugin uses a properties object, with the <code>init</code> property specifying the plugin definition function.
 </p>
 
 {% highlight js %}
@@ -690,7 +693,7 @@ seneca.use( {init:zed, name:'zed', tag:'tag0'} )
 {% endhighlight %}
 
 <p>
-The <i>seneca.options.js</i> also defines a <i>zed$tag0</i> property, and the options for the <i>tag0</i> instance of the <i>zed</i> plugin are taken from this. However! If you run the code, you'll notice that it also picks op the options defined for the main <i>zed</i> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.
+The <i>seneca.options.js</i> file also defines a <i>zed$tag0</i> property, and the options for the <i>tag0</i> instance of the <i>zed</i> plugin are taken from this. However! If you run the code, you'll notice that it also picks op the options defined for the main <i>zed</i> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.
 </p>
 
 {% highlight js %}
