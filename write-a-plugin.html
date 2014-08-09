@@ -1,5 +1,6 @@
 ---
 layout: main
+title: How to Write a Seneca Plugin
 ---
 <section id="main-content">
 
@@ -52,7 +53,8 @@ approach to software architecture, so that will be discussed too.
 
 
 
-<a name="wp-simple"><h4>A Simple Plugin</h4>&nbsp;&nbsp;<small><a href="#wp-contents">[top]</a></small></a>
+<small style="float:right"><a href="#wp-contents">[top]</a></small></a>
+<a name="wp-simple"><h4>A Simple Plugin</h4>
 
 <p>
 Let's write a plugin that defines one action. The action uses the
@@ -588,12 +590,16 @@ module.exports = function( options ) {
 {% endhighlight %}
 
 
-<p>
-The default option structure is used as the base for the user supplied
-options. (As an aside, note that you can specify the name of the
+<p><small>
+(As an aside, note that you can also specify the name of the
 plugin by returning an object of the form <code>{name:...}</code>. You'll
 see some more properties you can add this return object
-below). Let's supply some user options that will override the defaults:
+below).
+</small></p>
+
+<p>
+The default option structure is used as the base for the user supplied
+options. Let's supply some user options that will override the defaults:
 </p>
 
 {% highlight js %}
@@ -621,7 +627,7 @@ null { color: 'pink', box_width: 50, box_height: 200 }
 {% endhighlight %}
 
 <p>
-The default values for <code>color</code>, and <code>box.width</code>, have been overridden by the options provided as the second argument to <code>seneca.use</code> when the plugin is loaded.
+The default values for <code>color</code> and <code>box.width</code> (<i>red</i> and <i>100</i>, respectively), have been overridden by the options provided as the second argument to <code>seneca.use</code> when the plugin is loaded (<i>pink</i> and <i>50</i>).
 </p>
 
 <p>
@@ -693,13 +699,13 @@ seneca.use( {init:zed, name:'zed', tag:'tag0'} )
 {% endhighlight %}
 
 <p>
-The <i>seneca.options.js</i> file also defines a <i>zed$tag0</i> property, and the options for the <i>tag0</i> instance of the <i>zed</i> plugin are taken from this. However! If you run the code, you'll notice that it also picks op the options defined for the main <i>zed</i> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.
+The <i>seneca.options.js</i> file also defines a <i>zed$tag0</i> property, and the options for the <i>tag0</i> instance of the <i>zed</i> plugin are taken from this. However, if you run the code, you'll notice that it also picks up the options defined for the main <i>zed</i> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.
 </p>
 
 {% highlight js %}
 $ node zed-tag.js
 zed undefined { red: 50, green: 100, blue: 150 }
-zed tag0      { red: 55, green: 100, blue: 150 }
+zed tag0       { red: 55, green: 100, blue: 150 }
 {% endhighlight %}
 
 <p>
