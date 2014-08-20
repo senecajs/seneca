@@ -11,7 +11,7 @@ var gex    = require('gex')
 var common = require('../lib/common')
 
 
-var testopts = {test:{silent:true}}
+var testopts = {log:'silent'}
 
 
 
@@ -80,8 +80,8 @@ describe('delegation', function(){
   it('logging.actid',function(){
     var fail
     var si = seneca_module({
-      test:{silent:true},
-      log:{map:[{handler:function(){
+      log:{
+        map:[{handler:function(){
         if( 'aaa'==arguments[6] ) {
           if('debug'!=arguments[1]) fail='aaa,debug'; 
           if('single'!=arguments[2]) fail='aaa,single'; 

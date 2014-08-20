@@ -38,7 +38,7 @@ describe('entity.plugin', function() {
           }},
 
         ],
-        test:{silent:true}
+        log:'silent'
       })
 
 

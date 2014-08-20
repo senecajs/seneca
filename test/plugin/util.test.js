@@ -7,7 +7,7 @@ var assert = require('chai').assert
 var seneca = require('../..')
 
 
-var si = seneca({test:{silent:true}})
+var si = seneca({log:'silent'})
 
 
 var util = si.pin({role:'util',cmd:'*'})

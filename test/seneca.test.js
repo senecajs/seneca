@@ -132,9 +132,7 @@ describe('seneca', function(){
 
 
   it('failgen.meta.happy', function() {
-    var si = seneca({
-      test:{silent:true}
-    })
+    var si = seneca(testopts)
     
     // nothing
     var err = si.fail()
@@ -519,7 +517,7 @@ describe('seneca', function(){
 
 
   it('plugins', function() {
-    var si = seneca({plugins:['echo'],test:{silent:true}})
+    var si = seneca({plugins:['echo'],log:'silent'})
 
     si.act({role:'echo',baz:'bax'},function(err,out){
       assert.isNull(err)
@@ -527,7 +525,7 @@ describe('seneca', function(){
     })
 
 
-    var si = seneca({plugins:['basic'],test:{silent:true}})
+    var si = seneca({plugins:['basic'],log:'silent'})
 
     si.act({role:'util',cmd:'quickcode'},function(err,code){
       assert.isNull(err)

@@ -19,9 +19,9 @@ describe('plugin', function(){
     var si = seneca({
       // this lets you change stayalive per test
       test:{
-        silent:    true,
         stayalive: true
-      }
+      },
+      log:'silent'
     })
     
     try { si.use( {foo:1} ) } catch( e ) {
@@ -44,9 +44,9 @@ describe('plugin', function(){
     var si = seneca({
       // this lets you change stayalive per test
       test:{
-        silent:    true,
         stayalive: true
-      }
+      },
+      log:'silent'
     })
     
     si.use( function(){
@@ -103,7 +103,7 @@ describe('plugin', function(){
 
 
   it('fix', function(fin){
-    var si = seneca({test:{silent:true}})
+    var si = seneca({log:'silent'})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}
     

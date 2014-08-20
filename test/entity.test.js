@@ -106,8 +106,25 @@ describe('entity', function(){
       if(err) return fin(err);
       assert.equal(0,list.length)
 
+    ;fooent.make$({b:1}).save$(function(){
+      if(err) return fin(err);
+
+    ;fooent.make$({b:2}).save$(function(){
+      if(err) return fin(err);
+      
+    ;fooent.list$(function(err,list){
+      if(err) return fin(err);
+
+      assert.equal(2,list.length)
+
+    ;fooent.list$({b:1},function(err,list){
+      if(err) return fin(err);
+
+      assert.equal(1,list.length)
+      
+
       fin()
-    }) }) }) }) }) }) }) }) }) }) }) }) })
+    }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) })
 
 
   })
@@ -310,7 +327,7 @@ describe('entity', function(){
 
 
   it('close', function(done){
-    var si = seneca({log:'silent'})
+    var si = seneca(testopts)
 
     var tmp = {s0:0,s1:0,s2:0}
 

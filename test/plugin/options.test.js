@@ -13,7 +13,7 @@ var seneca = require('../..')
 describe('plugin.options', function() {
 
   it('happy', function() {
-    var si = seneca({test:{silent:true}})
+    var si = seneca({log:'silent'})
 
     si.use('options',{a:1})
     assert.equal(1,si.export('options').a)

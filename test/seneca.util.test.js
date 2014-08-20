@@ -7,7 +7,7 @@ var _      = require('underscore')
 var util   = require('util')
 
 
-var testopts = {test:{silent:true}}
+var testopts = {log:'silent'}
 
 
 var seneca = require('..')
