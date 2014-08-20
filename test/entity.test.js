@@ -55,14 +55,60 @@ describe('entity', function(){
       assert.ok(foo1.id)
       assert.equal(1,foo1.a)
 
+    ;fooent.list$(function(err,list){
+      if(err) return fin(err);
+      assert.equal(1,list.length)
+      assert.equal(foo1.id,list[0].id)
+      assert.equal(foo1.a,list[0].a)
+      assert.equal(''+foo1,''+list[0])
+
+    ;fooent.list$({a:1},function(err,list){
+      if(err) return fin(err);
+      assert.equal(1,list.length)
+      assert.equal(foo1.id,list[0].id)
+      assert.equal(foo1.a,list[0].a)
+      assert.equal(''+foo1,''+list[0])
+
     ;fooent.load$(foo1.id,function(err,foo11){
-      assert.isNull(err)
+      if(err) return fin(err);
       assert.equal(foo1.id,foo11.id)
       assert.equal(foo1.a,foo11.a)
       assert.equal(''+foo1,''+foo11)
-        
+
+      foo11.a = 2
+    ;foo11.save$( function(err,foo111){
+      if(err) return fin(err);
+      assert.equal(foo11.id,foo111.id)
+      assert.equal(2,foo111.a)
+
+    ;fooent.list$(function(err,list){
+      if(err) return fin(err);
+      assert.equal(1,list.length)
+      assert.equal(foo1.id,list[0].id)
+      assert.equal(2,list[0].a)
+      assert.equal(''+foo111,''+list[0])
+
+    ;fooent.list$({a:2},function(err,list){
+      if(err) return fin(err);
+      assert.equal(1,list.length)
+      assert.equal(foo1.id,list[0].id)
+      assert.equal(2,list[0].a)
+      assert.equal(''+foo111,''+list[0])
+
+    ;list[0].remove$(function(err){
+      if(err) return fin(err);
+
+    ;fooent.list$(function(err,list){
+      if(err) return fin(err);
+      assert.equal(0,list.length)
+
+    ;fooent.list$({a:2},function(err,list){
+      if(err) return fin(err);
+      assert.equal(0,list.length)
+
       fin()
-    }) }) }) }) })
+    }) }) }) }) }) }) }) }) }) }) }) }) })
+
 
   })
 
