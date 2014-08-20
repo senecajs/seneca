@@ -28,6 +28,7 @@ var timerstub = {
 describe('executor', function(){
 
   it('happy', function(fin) {
+    if( ~process.version.indexOf('0.11.') ) return fin();
 
     var e0 = executor({
       trace:true,
