@@ -14,14 +14,14 @@ var gex     = require('gex')
 var assert  = require('chai').assert
 
 
-var testopts = {test:{silent:true}}
+var testopts = {log:'silent'}
 
 
 describe('entity', function(){
 
   it('happy-mem', function(fin){
     var si = seneca(testopts)
-    
+
     var fooent = si.make$('foo')
     fooent.data$({a:1,b:2}).save$(function(err,out){
       assert.isNull(err)
@@ -31,6 +31,39 @@ describe('entity', function(){
 
       fin()
     })
+  })
+
+
+  it('mem-ops', function(fin){
+    var si = seneca(testopts)
+    
+    var fooent = si.make$('foo')
+    fooent.load$('',function(err,out){
+      if(err) return fin(err);
+      assert.isNull(out)
+
+    ;fooent.list$(function(err,list){
+      if(err) return fin(err);
+      assert.equal(0,list.length)
+
+    ;fooent.list$({a:1},function(err,list){
+      if(err) return fin(err);
+      assert.equal(0,list.length)
+
+    ;fooent.make$({a:1}).save$(function(err,foo1){
+      if(err) return fin(err);
+      assert.ok(foo1.id)
+      assert.equal(1,foo1.a)
+
+    ;fooent.load$(foo1.id,function(err,foo11){
+      assert.isNull(err)
+      assert.equal(foo1.id,foo11.id)
+      assert.equal(foo1.a,foo11.a)
+      assert.equal(''+foo1,''+foo11)
+        
+      fin()
+    }) }) }) }) })
+
   })
 
 
