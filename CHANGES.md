@@ -1,4 +1,8 @@
 
+## 0.5.20: 
+
+   * More standardized log messages that keep fields consistent
+
 ## 0.5.19: 2014-07-13
 
    * Removed builtin plugins - all now in separate modules.

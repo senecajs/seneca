@@ -1,4 +1,4 @@
-0.  Update CHANGELOG
+0.  Update CHANGELOG, date release
 1.  Review github issues
 2.  run test/test-included-plugins.sh
 3.  run npm run build
