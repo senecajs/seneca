@@ -148,6 +148,12 @@ describe('options', function(){
     assert.equal(99,opts.a)
   })
 
+  
+  it('options-internal',function(){
+    var si = seneca({log:'silent'})
+    var ar = si.options().internal.actrouter
+    assert.isNotNull(ar)
+  })
 
   // TODO: failure modes
 })
