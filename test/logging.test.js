@@ -20,6 +20,17 @@ describe('logging', function() {
   })
 
 
+  it('makelogrouter.short', function() {
+    var r = logging.makelogrouter('level:info,type:plugin')
+    //console.log(fmt(r))
+    assert.equal(fmt(r), "level:info->type:plugin-><print>")
+
+    r = logging.makelogrouter(['level:info,type:plugin','level:debug,type:act'])
+    //console.log(fmt(r))
+    assert.equal(fmt(r), "level:info->type:plugin-><print>debug->type:act-><print>")
+  })
+
+
   it('makelogrouter.multiplex', function() {
     var r = logging.makelogrouter({map:[
       {level:'info',type:'init',handler:'A'},
@@ -83,4 +94,9 @@ describe('logging', function() {
     try { logging.makelogrouter({map:[ {level:'bad',type:'init',handler:'A'} ]}); assert.fail() }
     catch( e ) { assert.ok( -1 != e.message.indexOf('unknown log level') )}
   })
+
+
+  
+
+
 })

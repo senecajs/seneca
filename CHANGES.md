@@ -2,6 +2,7 @@
 ## 0.5.20: 
 
    * More standardized log messages that keep fields consistent
+   * Regexp can be used to filter logs
 
 ## 0.5.19: 2014-07-13
 

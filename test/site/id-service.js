@@ -1,6 +1,7 @@
 require('../..')()
   .add( { generate:'id'},
         function( args, done ) {
-          done( null, ''+Math.random() )
+          done( null, 
+                {id:''+Math.random()} )
         })
-  .listen()
+  .listen({type:'web'})
