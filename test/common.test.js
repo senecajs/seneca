@@ -28,4 +28,11 @@ describe('common', function(){
     assert.equal( 2,out.a.bb )
   })
 
+
+  it('argpattern', function(){
+    assert.equal( 'a:1', common.argpattern({a:1}) )
+    assert.equal( 'a:1,b:2', common.argpattern({a:1,b:2}) )
+  })
+
+
 })
