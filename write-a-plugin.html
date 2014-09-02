@@ -709,16 +709,14 @@ zed tag0       { red: 55, green: 100, blue: 150 }
 {% endhighlight %}
 
 <p>
-Sometimes you need to access to full options provided to Seneca. For
+Sometimes you need to access to all the options provided to Seneca. For
 example, there is a global <i>timeout</i> value that you might want to
-use for timeouts. The <i>transport</i> family of plugins do this. See,
-for example,
-the <a href="https://github.com/rjrodger/seneca-redis-transport/blob/master/redis-transport.js">redis-transport</a>.
+use for timeouts. The <i>transport</i> family of plugins do this, see <a href="https://github.com/rjrodger/seneca-redis-transport/blob/master/redis-transport.js">redis-transport</a> for an example.
 </p>
 
 <p>
 Inside your plugin function, you can call <code>this.options()</code>
-to get back a object containing the entire Seneca options tree:
+to get back an object containing the entire Seneca options tree:
 </p>
 
 {% highlight js %}
@@ -769,7 +767,7 @@ function zed( options ) {
   console.log( this.context.name, this.context.tag, options )
 }
 
-var seneca = require('../../../lib/seneca.js')()
+var seneca = require('seneca')()
 seneca.options('./dev.options.js')
 
 seneca.use( zed )
@@ -803,12 +801,26 @@ $ SENECA_OPTIONS="{zed:{red:10,blue:200}}" node zed-dev.js
 zed undefined { red: 10, green: 110, blue: 200 }
 {% endhighlight %}
 
+<p>
+Command line options always override options from other sources. Here is the order of priority, from highest to lowest:
+</p>
+
+<ul>
+  <i>Command line</i>
+  <i>Environment variable</i>
+  <i>Source code</i>
+  <i>Custom options file</i>
+  <i>Default options file</i>
+  <i>Internal defaults</i>
+</ul>
+
 
 
 <!--
 
 <h4>Dealing with Errors</h4>
 
+- logging
 - callback err
 - seneca.fail/die
 - exceptions
