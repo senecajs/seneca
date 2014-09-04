@@ -3,6 +3,8 @@
 
    * More standardized log messages that keep fields consistent
    * Regexp can be used to filter logs
+   * Refactored plugin code into lib/plugin-utils
+   * Fixed most github issues
 
 ## 0.5.19: 2014-07-13
 
