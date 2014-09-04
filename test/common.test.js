@@ -15,15 +15,85 @@ var common = require('../lib/common')
 
 describe('common', function(){
 
-  it('deepextend', function() {
+
+  it('deepextend-empty', function() {
+
+    assert.equal(null, common.deepextend({}).a )
+
+    assert.equal(1, common.deepextend({a:1}).a )
+
+    assert.equal(1, common.deepextend({},{a:1}).a )
+    assert.equal(1, common.deepextend({a:1},{}).a )
+
+
+
+
+    assert.equal(1, common.deepextend({},{a:1},{b:2}).a )
+    assert.equal(2, common.deepextend({},{a:1},{b:2}).b )
+
+    assert.equal(1, common.deepextend({a:1},{b:2},{}).a )
+    assert.equal(2, common.deepextend({a:1},{b:2},{}).b )
+
+    assert.equal(1, common.deepextend({},{a:1},{b:2},{}).a )
+    assert.equal(2, common.deepextend({},{a:1},{b:2},{}).b )
+
+    assert.equal(1, common.deepextend({},{a:1},{},{b:2},{}).a )
+    assert.equal(2, common.deepextend({},{a:1},{},{b:2},{}).b )
+
+
+    assert.equal(1, common.deepextend({a:{b:1}},{}).a.b )
+    assert.equal(1, common.deepextend({},{a:{b:1}}).a.b )
+
+
+    assert.equal(1, common.deepextend({a:{b:1}},{c:{d:2}},{}).a.b )
+    assert.equal(2, common.deepextend({a:{b:1}},{c:{d:2}},{}).c.d )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{c:{d:2}}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{c:{d:2}}).c.d )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{c:{d:2}},{}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{c:{d:2}},{}).c.d )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{},{c:{d:2}},{}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{},{c:{d:2}},{}).c.d )
+
+
+    assert.equal(1, common.deepextend({a:{b:1}},{a:{c:2}},{}).a.b )
+    assert.equal(2, common.deepextend({a:{b:1}},{a:{c:2}},{}).a.c )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{a:{c:2}}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{a:{c:2}}).a.c )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{a:{c:2}},{}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{a:{c:2}},{}).a.c )
+
+    assert.equal(1, common.deepextend({},{a:{b:1}},{},{a:{c:2}},{}).a.b )
+    assert.equal(2, common.deepextend({},{a:{b:1}},{},{a:{c:2}},{}).a.c )
+
+
+    assert.equal(1, common.deepextend({a:{b:1}},{a:{b:1}},{}).a.b )
+
+    assert.equal(2, common.deepextend({},{a:{b:1}},{a:{b:2}}).a.b )
+
+    assert.equal(2, common.deepextend({},{a:{b:1}},{a:{b:2}},{}).a.b )
+
+    assert.equal(2, common.deepextend({},{a:{b:1}},{},{a:{b:2}},{}).a.b )
+
+  })
+
+
+  it('deepextend-dups', function() {
     var aa = {a:{aa:1}}
     var bb = {a:{bb:2}}
 
+    var out = common.deepextend(aa,bb,aa)
+
+    assert.equal( 1,out.a.aa )
+    assert.equal( 2,out.a.bb )
+
+
     // FIX: make this work too
-    //var out = common.deepextend( {},aa,bb,aa)
-
-    var out = common.deepextend( aa,bb,aa)
-
+    out = common.deepextend( {},aa,bb,aa)
     assert.equal( 1,out.a.aa )
     assert.equal( 2,out.a.bb )
   })
