@@ -73,6 +73,6 @@
     "jshint": "~2.1.11",
     "mocha": "~1.13.0",
     "seneca-error-test": "~0.1.0",
-    "timerstub": "~1.0.2"
+    "timerstub": "~1.0.3"
   }
 }
