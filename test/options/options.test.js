@@ -155,6 +155,17 @@ describe('options', function(){
     assert.isNotNull(ar)
   })
 
+
+  it('options-invalid',function(){
+    try {
+      seneca({idlen:'foo'})
+      assert.fail()
+    }
+    catch(e){
+      assert.equal('integer$',e.parambulator.code)
+    }
+  })
+
   // TODO: failure modes
 })
 

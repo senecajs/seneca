@@ -392,26 +392,23 @@ describe('seneca', function(){
     var emptycb = function(){}
 
     try { si.register() } catch( e ) { 
-      assert.equal('register_invalid_plugin',e.seneca.code)
+      assert.equal('no_input$',e.parambulator.code)
     }
 
 
     try { si.register({}) } catch( e ) { 
-      assert.equal('register_invalid_plugin',e.seneca.code)
-      //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
+      assert.equal('name',e.parambulator.property)
+      assert.equal('required$',e.parambulator.code)
     }
 
-    try { si.register({},emptycb) } catch( e ) { 
-      assert.equal('register_invalid_plugin',e.seneca.code)
-      //assert.equal("Seneca: register(plugin): The property 'name' is missing and is always required (parent: plugin).",e.message)
-    }
-
-    try { si.register({name:1,init:initfn},emptycb) } catch( e ) { 
-      assert.equal('register_invalid_plugin',e.seneca.code)
+    try { si.register({name:1,init:initfn},emptycb) } catch( e ) {
+      assert.equal('name',e.parambulator.property)
+      assert.equal('string$',e.parambulator.code)
     }
     
-    try { si.register({name:'a',init:'b'},emptycb) } catch( e ) { 
-      assert.equal('register_invalid_plugin',e.seneca.code)
+    try { si.register({name:'a',init:'b'},emptycb) } catch( e ) {
+      assert.equal('init',e.parambulator.property)
+      assert.equal('function$',e.parambulator.code)
     }
   })
 
