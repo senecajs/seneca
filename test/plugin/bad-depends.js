@@ -1,0 +1,2 @@
+require('../..')()
+  .depends('foo',['bar'])
