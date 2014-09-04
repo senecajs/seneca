@@ -343,6 +343,47 @@ describe('seneca', function(){
   })
 
 
+  it('errhandler',function(fin){
+    var tmp = {}
+
+    function grab_all(err) {
+      tmp.grab = err
+      return true
+    }
+
+    function pass_on(err) {
+      tmp.pass = err
+    }
+
+    var si = seneca(testopts)
+    si.add('cmd:grab',function(args,done){
+      done(this.fail('grab'))
+    })
+    si.add('cmd:pass',function(args,done){
+      done(this.fail('pass'))
+    })
+
+    si.options({errhandler:grab_all})
+
+    si.act('cmd:grab',function(err){
+      assert.fail()
+    })
+
+    setTimeout(function(){
+      assert.isNotNull(tmp.grab)
+
+      si.options({errhandler:pass_on})
+      
+      si.act('cmd:pass',function(err){
+        assert.isNotNull(err)
+        assert.isNotNull(tmp.pass)
+        fin()
+      })
+      
+    },10)
+
+  })
+
 
   it('register', function() {
     var si = seneca(testopts)

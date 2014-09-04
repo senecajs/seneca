@@ -32,6 +32,7 @@ describe('common', function(){
   it('argpattern', function(){
     assert.equal( 'a:1', common.argpattern({a:1}) )
     assert.equal( 'a:1,b:2', common.argpattern({a:1,b:2}) )
+    assert.equal( 'a:1,b:2', common.argpattern({a:1,b:2,c$:3}) )
   })
 
 

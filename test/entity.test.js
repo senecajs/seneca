@@ -36,7 +36,9 @@ describe('entity', function(){
 
   it('mem-ops', function(fin){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({
+      errhandler: function(err){ err && fin(err); return true; }
+    })
 
     var fooent = si.make$('foo')
     fooent.load$('',function(err,out){
