@@ -42,6 +42,16 @@ describe('entity', function(){
 
     var fooent = si.make$('foo')
 
+
+    try {
+      fooent.load$(function(err,out){
+        assert.fail()
+      })
+    }
+    catch(e) {
+      assert.equal('load-without-query',e.seneca.code)
+    }
+
     try {
       fooent.load$('',function(err,out){
         assert.fail()
@@ -50,6 +60,27 @@ describe('entity', function(){
     catch(e) {
       assert.equal('load-without-query',e.seneca.code)
     }
+
+
+    try {
+      fooent.remove$(function(err,out){
+        assert.fail()
+      })
+    }
+    catch(e) {
+      assert.equal('remove-without-query',e.seneca.code)
+    }
+
+    try {
+      fooent.remove$('',function(err,out){
+        assert.fail()
+      })
+    }
+    catch(e) {
+      assert.equal('remove-without-query',e.seneca.code)
+    }
+
+
 
     ;fooent.list$(function(err,list){
       assert.equal(0,list.length)
