@@ -4,7 +4,7 @@
 
 // mocha seneca.test.js
 
-var VERSION = '0.5.20'
+var VERSION = '0.5.21'
 
 var util   = require('util')
 var stream = require('stream')
@@ -342,6 +342,16 @@ describe('seneca', function(){
     }
   })
 
+
+  it('happy-error',function(fin){
+    var si = seneca(testopts)
+    si.add('happy_error:1',function(args,done){done(new Error('happy-error'))})
+    si.act('happy_error:1',function(err){
+      assert.isNotNull(err)
+      assert.equal('happy-error',err.message)
+      fin()
+    })
+  })
 
   it('errhandler',function(fin){
     var tmp = {}
@@ -944,15 +954,23 @@ describe('seneca', function(){
     si.act({a:1},function(err,out){ assert.equal(1,out.x) })
 
     si.act({actid$:'a',a:1},function(err,out){ 
+      if(err) return fin(err);
+
       assert.equal(2,out.x)
 
       si.act({a:1},function(err,out){ 
+        if(err) return fin(err);
+
         assert.equal(3,out.x)
 
         si.act({actid$:'a',a:1},function(err,out){ 
+          if(err) return fin(err);
+
           assert.equal(2,out.x) 
 
           si.act('role:seneca,stats:true',function(err,stats){
+            if(err) return fin(err);
+
             assert.equal( '{ calls: 7, done: 7, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
             fin()
