@@ -49,6 +49,8 @@ describe('seneca', function(){
 
     // ensure startup time does not degenerate
     assert.ok( end-start < 333 )
+
+    assert.equal( si, si.seneca() )
   })
 
 
@@ -950,8 +952,15 @@ describe('seneca', function(){
     var si = seneca(testopts)
 
     var x = 0
-    si.add({a:1},function(args,done){x++;this.good({x:x})})
-    si.act({a:1},function(err,out){ assert.equal(1,out.x) })
+
+    si.add({a:1},function(args,done){
+      x++;this.good({x:x})
+    })
+
+    si.act({a:1},function(err,out){ 
+      if(err) return fin(err);
+      assert.equal(1,out.x) 
+    })
 
     si.act({actid$:'a',a:1},function(err,out){ 
       if(err) return fin(err);

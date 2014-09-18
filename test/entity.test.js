@@ -346,7 +346,7 @@ describe('entity', function(){
   })
 
 
-  it('close', function(done){
+  it('close', function(fin){
     var si = seneca(testopts)
 
     var tmp = {s0:0,s1:0,s2:0}
@@ -384,7 +384,7 @@ describe('entity', function(){
     })
 
     si.close(function( err ){
-      assert.isNull(err)
+      if(err) return fin(err);
 
       //console.log(tmp)
 
@@ -394,7 +394,7 @@ describe('entity', function(){
       assert.equal(1,tmp.s1)
       assert.equal(1,tmp.s2)
 
-      done()
+      fin()
     })
   })
 

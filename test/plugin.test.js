@@ -169,4 +169,44 @@ describe('plugin', function(){
 
   })
 
+
+  it('export',function(){
+    var si = seneca({
+      // this lets you change stayalive per test
+      test:{
+        stayalive: true
+      },
+      log:'silent'
+    })
+
+    si.use(function badexport(){})
+
+    try {
+      si.export('not-an-export')
+      assert.fail()
+    }
+    catch(e) {
+      assert.equal('export_not_found',e.seneca.code)
+    }
+  })
+
+
+  it('hasplugin',function(){
+    var si = seneca({log:'silent'})
+
+    si.use(function foo(){})
+    si.use({init:function(){},name:'bar',tag:'aaa'})
+    
+    assert.ok( si.hasplugin('foo') )
+    assert.ok( si.hasplugin('foo','') )
+    assert.ok( si.hasplugin('foo','-') )
+
+    assert.ok( !si.hasplugin('bar') )
+    assert.ok( !si.hasplugin('bar','') )
+    assert.ok( !si.hasplugin('bar','-') )
+    assert.ok( !si.hasplugin('bar','bbb') )
+    assert.ok( si.hasplugin('bar','aaa') )
+
+  })
+
 })
