@@ -91,7 +91,7 @@ describe('seneca', function(){
 
 
 
-  it('ready', function(fin){
+  it('ready-complex', function(fin){
     var mark = {ec:0}
 
     timerstub.setTimeout(function(){
@@ -104,7 +104,7 @@ describe('seneca', function(){
       assert.ok(1===mark.ec,'ec')
 
       fin()
-    },160)
+    },300)
 
 
     var si = seneca(testopts)
@@ -112,7 +112,9 @@ describe('seneca', function(){
       mark.r0=true
 
       si.use(function p1(opts){
-        si.add({init:'p1'},function(args,done){timerstub.setTimeout(function(){mark.p1=true;done()},40)})
+        si.add({init:'p1'},function(args,done){
+          timerstub.setTimeout(function(){mark.p1=true;done()},40)
+        })
       })
 
       si.on('ready',function(){
@@ -124,12 +126,57 @@ describe('seneca', function(){
 
 
         si.use(function p2(opts){
-          si.add({init:'p2'},function(args,done){timerstub.setTimeout(function(){mark.p2=true;done()},40)})
+          si.add({init:'p2'},function(args,done){
+            timerstub.setTimeout(function(){mark.p2=true;done()},40)
+          })
         })
       })
     })
 
-    timerstub.wait(200)
+    timerstub.wait(400)
+  })
+
+
+  it('ready-func', function(fin){
+    var si = seneca(testopts)
+
+    si.ready(function(){
+      //console.log('READY FUNC')
+      fin()
+    })
+  })
+
+
+  it('ready-event', function(fin){
+    var si = seneca(testopts)
+
+    si.on('ready',function(){
+      //console.log('READY EVENT')
+      fin()
+    })
+  })
+
+
+  it('ready-both', function(fin){
+    var si = seneca(testopts)
+    var tmp = {}
+
+    si.on('ready',function(){
+      //console.log('READY EVENT')
+      tmp.a = 1
+      complete()
+    })
+    si.ready(function(){
+      //console.log('READY FUNC')
+      tmp.b = 1
+      complete()
+    })
+
+    function complete(){
+      if( tmp.a && tmp.b ) {
+        fin()
+      }
+    }
   })
 
 
