@@ -29,6 +29,7 @@
   "dependencies": {
     "async": "~0.9.0",
     "eraro": "~0.1.6",
+    "gate-executor": "jrpruit1/gate-executor",
     "gex": "~0.1.3",
     "jsonic": "~0.1.1",
     "lru-cache": "~2.5.0",
