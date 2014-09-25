@@ -75,16 +75,6 @@ describe('seneca.util', function() {
 
 
 
-  it('seneca.util.deepextend.cycle', function(fin) {
-    var a = {x:1}
-    a.a = a
-    var c = si.util.deepextend( {}, a )
-
-    assert.equal( "{ x: 1, a: { x: 1, a: { x: 1, a: [Circular] } } }", util.inspect(c) )
-    fin()
-  })
-
-
   it('seneca.util.argprops',function(){
     var out = si.util.argprops( {a:1, b:2, c:3}, {b:22, c:33, d:4}, {c:333}, ['d'] )
     assert.equal( '{ a: 1, b: 22, c: 333 }', util.inspect(out) )

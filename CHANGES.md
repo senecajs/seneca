@@ -1,8 +1,10 @@
 
-## 0.5.20: 
+## 0.5.20: 2014-09-07
 
    * More standardized log messages that keep fields consistent
    * Regexp can be used to filter logs
+   * Refactored plugin code into lib/plugin-utils
+   * Fixed most github issues
 
 ## 0.5.19: 2014-07-13
 

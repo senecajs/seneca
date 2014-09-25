@@ -16,7 +16,7 @@ For a gentle introduction to this module, see the
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.5.19
+Current Version: 0.5.20
 
 Tested on: Node 0.10.29, and 0.11.13
 
