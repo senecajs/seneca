@@ -45,7 +45,7 @@
     "seneca-transport": "~0.2.5",
     "seneca-web": "~0.2.1",
     "underscore": "~1.6.0",
-    "use-plugin": "~0.1.4"
+    "use-plugin": "~0.2.0"
   },
   "main": "lib/seneca",
   "files": [
