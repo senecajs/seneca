@@ -1,4 +1,5 @@
 # seneca - Node.js module
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/rjrodger/seneca?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## A Node.js toolkit for Micro-Service Architctures
 
