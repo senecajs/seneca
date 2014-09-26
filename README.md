@@ -2,7 +2,8 @@
 
 ## A Node.js toolkit for Micro-Service Architctures
 
-+[![Gitter chat](https://badges.gitter.im/rjrodger/seneca.png)](https://gitter.im/rjrodger/seneca)
+[![Gitter chat](https://badges.gitter.im/rjrodger/seneca.png)](https://gitter.im/rjrodger/seneca)
+
 [![NPM](https://nodei.co/npm/seneca.png)](https://nodei.co/npm/seneca/)
 [![NPM](https://nodei.co/npm-dl/seneca.png)](https://nodei.co/npm-dl/seneca/)
 
