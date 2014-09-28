@@ -278,7 +278,7 @@ describe('seneca', function(){
 
     function next_b() {
       errhandler = function(err){
-        assert.equal('action-execute',arguments[10])
+        assert.equal('action-execute',arguments[14])
         cblog += 'B'
       }
       si.act({role:'error-test',how:'fail'},function(err){
@@ -291,7 +291,7 @@ describe('seneca', function(){
 
     function next_c() {
       errhandler = function(err){
-        assert.equal('action-execute',arguments[10])
+        assert.equal('action-execute',arguments[14])
         cblog += 'C'
       }
       si.act({role:'error-test',how:'errobj'},function(err){
@@ -304,7 +304,7 @@ describe('seneca', function(){
 
     function next_d() {
       errhandler = function(err){
-        assert.equal('a string error',arguments[10])
+        assert.equal('a string error',arguments[14])
         cblog += 'D'
       }
       si.act({role:'error-test',how:'str'},function(err){
@@ -317,7 +317,7 @@ describe('seneca', function(){
 
     function next_e() {
       errhandler = function(err){
-        assert.equal('unknown',arguments[10])
+        assert.equal('unknown',arguments[14])
         cblog += 'E'
       }
       si.act({role:'error-test',how:'obj'},function(err){
@@ -330,7 +330,7 @@ describe('seneca', function(){
 
     function next_f() {
       errhandler = function(err){
-        assert.equal('action-error',arguments[10])
+        assert.equal('action-error',arguments[14])
         cblog += 'F'
       }
       si.act({role:'error-test',how:'cb-err'},function(err){
@@ -343,7 +343,7 @@ describe('seneca', function(){
 
     function next_g() {
       errhandler = function(err){
-        assert.equal('action-error',arguments[10])
+        assert.equal('action-error',arguments[14])
         cblog += 'G'
       }
       si.act({role:'error-test',how:'cb-fail'},function(err){
@@ -357,7 +357,7 @@ describe('seneca', function(){
 
     function next_h() {
       errhandler = function(err){
-        assert.equal('unknown',arguments[10])
+        assert.equal('unknown',arguments[14])
         cblog += 'H'
       }
       si.act({role:'error-test',how:'cb-obj'},function(err){
@@ -371,7 +371,7 @@ describe('seneca', function(){
     function next_i() {
       var count = 0
       errhandler = function(err){
-        0===count && assert.equal('action-error',arguments[10]);
+        0===count && assert.equal('action-error',arguments[14]);
         1===count && assert.equal('callback',arguments[6]);
         count++
         cblog += 'I'
@@ -564,6 +564,99 @@ describe('seneca', function(){
 
   })
 
+
+
+  it('prior-nocache', function(fin){
+    var si = seneca({log:'silent',errhandler:fin,trace:{act:false}})
+    var count = 0, called = ''
+
+    si.add('foo:a',function(args,done){
+      count++
+      count += args.x
+      done(null,{count:count})
+    })
+
+    si.add('foo:a',function(args,done){
+      count += args.y
+      this.prior(args,done)
+    })
+
+
+    si
+      .gate()
+      .act('foo:a,x:10,y:0.1',function(err,out){
+        assert.equal(11.1,count)
+        called+='A'
+      })
+      .act('foo:a,x:100,y:0.01',function(err,out){
+        assert.equal(112.11,count)
+        called+='B'
+      })
+      .act('foo:a,x:10,y:0.1',function(err,out){
+        assert.equal(123.21,count)
+        called+='C'
+      })
+      .act('foo:a,x:100,y:0.01',function(err,out){
+        assert.equal(224.22,count)
+        called+='D'
+      })
+      .ready(function(){
+        assert.equal('ABCD',called)
+        assert.equal(224.22,count)
+
+        this
+          .add('foo:a',function(args,done){
+            count += args.z
+            this.prior(args,done)
+          })
+          .gate()
+          .act('foo:a,x:10,y:0.1,z:1000000',function(err,out){
+            assert.equal(1000235.32,count)
+            called+='E'
+          })
+          .ready(function(){
+            assert.equal('ABCDE',called)
+            fin()
+          })
+      })
+  })
+
+
+
+
+  it('gating', function(fin){
+    var si = seneca({log:'silent',errhandler:fin})
+    var count = 0, called = ''
+
+    si.add('foo:a',function(args,done){
+      count++
+      count+=args.x
+      done(null,{count:count})
+    })
+    
+    si
+      .gate()
+      .act('foo:a,x:10',function(err,out){
+        assert.equal(11,count)
+        called+='A'
+      })
+      .act('foo:a,x:100',function(err,out){
+        assert.equal(112,count)
+        called+='B'
+      })
+      .act('foo:a,x:1000',function(err,out){
+        assert.equal(1113,count)
+        called+='C'
+      })
+      .ready(function(){
+        assert.equal('ABC',called)
+        assert.equal(1113,count)
+        fin()
+      })
+  })
+
+
+  
 
 
   it('act_if', function(fin) {
