@@ -912,6 +912,52 @@ describe('seneca', function(){
   })
 
 
+  it('moreobjargs', function(fin) {
+    seneca({log:'silent',errhandler:fin})
+
+      .add({a:1},{b:2},
+           function(args,done){done(null,{c:args.c})})
+
+      .add({A:1},{B:{integer$:true}},
+           function(args,done){done(null,{C:args.C})})
+
+      .add('x:1',{x:2,y:3},{x:4,y:5,z:6},
+           function(args,done){done(null,{k:args.k})})
+    
+      .gate()
+
+      .act('a:1,b:2,c:3',function(err,out){
+        assert.equal(3,out.c)
+      })
+      .act({a:1,b:2},{c:4},function(err,out){
+        assert.equal(4,out.c)
+      })
+      .act('a:1',{b:2},{c:5},function(err,out){
+        assert.equal(5,out.c)
+      })
+
+      .act('A:1,B:2,C:33',function(err,out){
+        assert.equal(33,out.C)
+      })
+
+      .act('x:1,y:3,z:6,k:7',function(err,out){
+        assert.equal(7,out.k)
+      })
+
+      .ready(function(){
+
+        try {
+          this.act('A:1,B:true,C:44')
+          assert.fail()
+        }
+        catch(e) {
+          assert.equal('act_invalid_args',e.seneca.code)
+          fin()
+        }
+      })
+  })
+
+
   it('string-add', function() {
     var si = seneca(testopts)
     si.add("i:0,a:1,b:2",function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
