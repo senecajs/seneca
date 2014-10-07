@@ -43,44 +43,21 @@ describe('entity', function(){
     var fooent = si.make$('foo')
 
 
-    try {
-      fooent.load$(function(err,out){
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal('load-without-query',e.seneca.code)
-    }
+    ;fooent.load$(function(err,out){
+      assert.isUndefined(err)
+      assert.isUndefined(out)
 
-    try {
-      fooent.load$('',function(err,out){
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal('load-without-query',e.seneca.code)
-    }
+    ;fooent.load$('',function(err,out){
+      assert.isUndefined(err)
+      assert.isUndefined(out)
 
+    ;fooent.remove$(function(err,out){
+      assert.isUndefined(err)
+      assert.isUndefined(out)
 
-    try {
-      fooent.remove$(function(err,out){
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal('remove-without-query',e.seneca.code)
-    }
-
-    try {
-      fooent.remove$('',function(err,out){
-        assert.fail()
-      })
-    }
-    catch(e) {
-      assert.equal('remove-without-query',e.seneca.code)
-    }
-
-
+    ;fooent.remove$('',function(err,out){
+      assert.isUndefined(err)
+      assert.isUndefined(out)
 
     ;fooent.list$(function(err,list){
       assert.equal(0,list.length)
@@ -145,7 +122,7 @@ describe('entity', function(){
       assert.equal(1,list.length)
 
       fin()
-    }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) })
+    }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) })
 
   })
 

@@ -1,4 +1,8 @@
 
+## 0.5.21: 2014-10-07
+
+   * Bug fixes for github issues: 70, 65, 48, 45
+
 ## 0.5.20: 2014-09-07
 
    * More standardized log messages that keep fields consistent
