@@ -450,10 +450,10 @@ describe('seneca', function(){
     var initfn = function(){}
     var emptycb = function(){}
 
+
     try { si.register() } catch( e ) { 
       assert.equal('no_input$',e.parambulator.code)
     }
-
 
     try { si.register({}) } catch( e ) { 
       assert.equal('name',e.parambulator.property)
