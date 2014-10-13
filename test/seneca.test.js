@@ -1177,5 +1177,119 @@ describe('seneca', function(){
   })
 
 
+  it('zig', function(fin){
+    var si = seneca(testopts)
+    si.options({errhandler:fin})
+
+    si
+      .add('a:1',function(a,d){d(0,{aa:a.aa})})
+      .act('a:1,aa:1',function(e,o){
+        assert.equal(1,o.aa)
+        do_zig0()
+      })
+
+    function do_zig0() {
+      si
+        .start()
+        .wait('a:1,aa:1')
+        .end(function(e,o){
+          if(e) return fin(e);
+          assert.equal(1,o.aa)
+          do_zig1()
+        })
+    }
+
+    function do_zig1() {
+      si.options({xzig:{trace:true}})
+      si
+        .start()
+        .run('a:1,aa:1')
+        .run('a:1,aa:2')
+        .wait(function(r,d){
+          assert.deepEqual([{aa:1},{aa:2}],r)
+          d()
+        })
+        .end(function(e,o){
+          if(e) return fin(e);
+          do_zig2()
+        })
+    }
+
+    function do_zig2() {
+      si.options({xzig:{trace:true}})
+      var tmp = {}
+
+      si
+        .start()
+        .wait('a:1,aa:1')
+        .step(function A(r,d){
+          return tmp.aaa=r
+        })
+
+        .if( function(d){return !!tmp.aaa} )
+        .step(function B(r,d){
+          return tmp.aaaa=2
+        })
+        .endif()
+
+        .if( function(d){return !!tmp.aaa} )
+        .if( false )
+        .step(function C(r,d){
+          return tmp.aaaa=3
+        })
+        .endif()
+        .endif()
+
+        .end(function(e,o){
+          if(e) return fin(e);
+          assert.equal(2,tmp.aaaa)
+          do_zig3()
+        })
+    }
+
+    function do_zig3() {
+      si.options({xzig:{trace:true}})
+
+      var tmp = {bb:[]}
+
+      si
+        .add('b:1',function(a,d){tmp.bb.push(a.bb);d()})
+
+      si
+        .start()
+        .fire('b:1,bb:1')
+        .fire('b:1,bb:2')
+        .end(function(e,o){
+          setTimeout(function(){
+            assert.deepEqual({ bb: [ 1, 2 ] },tmp)
+            do_zig4()
+          },10)
+        })
+    }
+
+    function do_zig4() {
+      si.options({xzig:{trace:true}})
+
+      var tmp = {bb:[]}
+
+      si
+        .add('b:1',function(a,d){d(0,{c:a.c})})
+
+      si
+        .start()
+        .wait('b:1,c:2')
+        .step(function(d){
+          d.d=d.c
+          return d
+        })
+        .wait('b:1,c:$.d')
+        .end(function(e,o){
+          assert.equal(2,o.c)
+          fin(e)
+        })
+    }
+
+  })
+
 })
 
