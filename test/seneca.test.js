@@ -182,6 +182,7 @@ describe('seneca', function(){
 
   it('failgen.meta.happy', function() {
     var si = seneca(testopts)
+
     
     // nothing
     var err = si.fail()
