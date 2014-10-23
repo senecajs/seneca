@@ -23,6 +23,9 @@ describe('entity', function(){
     var si = seneca(testopts)
 
     var fooent = si.make$('foo')
+    assert.ok( fooent.is$('foo') )
+    assert.ok( !fooent.is$('bar') )
+
     fooent.data$({a:1,b:2}).save$(function(err,out){
       assert.isNull(err)
       assert.ok(out.id)
