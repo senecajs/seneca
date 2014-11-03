@@ -98,12 +98,12 @@ describe('delegation', function(){
       cb(null,args)
     })
 
-    si.use(function(x,opts,cb){
+    si.use(function(opts){
       this.add({p:'P'},function(args,cb){
         this.log.debug('ppp')
         cb(null,args)
       })
-      cb(null,{name:'p1'})
+      return {name:'p1'}
     })
 
 
@@ -153,13 +153,13 @@ describe('delegation', function(){
   it('parent.plugin',function(){
     var si = seneca_module(testopts)
 
-    si.use(function(x,opts,cb){
+    si.use(function(opts){
       this.add({a:'A'},function(args,cb){
         this.log.debug('P','1')
         args.p1=1
         cb(null,args)
       })
-      cb(null,{name:'p1'})
+      return {name:'p1'}
     })
 
     si.act({a:'A'},function(err,out){
@@ -168,7 +168,7 @@ describe('delegation', function(){
     })
 
 
-    si.use(function(x,opts,cb){
+    si.use(function(opts){
       this.add({a:'A'},function(args,cb){
         this.log.debug('P','2a')
 
@@ -178,7 +178,7 @@ describe('delegation', function(){
           cb(err,out)
         })
       })
-      cb(null,{name:'p2'})
+      return {name:'p2'}
     })
 
     si.act({a:'A'},function(err,out){
@@ -187,7 +187,7 @@ describe('delegation', function(){
     })
 
 
-    si.use(function(x,opts,cb){
+    si.use(function(opts){
       this.add({a:'A'},function(args,cb){
         this.log.debug('P','3a')
 
@@ -197,7 +197,7 @@ describe('delegation', function(){
           cb(err,out)
         })
       })
-      cb(null,{name:'p3'})
+      return {name:'p3'}
     })
 
     si.act({a:'A'},function(err,out){

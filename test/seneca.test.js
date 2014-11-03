@@ -57,9 +57,8 @@ describe('seneca', function(){
 
   it('quick', function(){
     var si = seneca(testopts)
-    si.use(function quickplugin(si,opts,cb){
+    si.use(function quickplugin(opts){
       si.add({a:1},function(args,cb){cb(null,{b:2})})
-      cb()
     })
     si.act({a:1},function(err,out){
       assert.equal(out.b,2)
