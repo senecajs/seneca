@@ -1291,5 +1291,85 @@ describe('seneca', function(){
 
   })
 
+
+  it('wrap',function(fin){
+    var si = seneca(testopts)
+    si.options({errhandler:fin})
+
+    si.add('a:1',function(args,done){done(null,{aa:args.aa})})
+    si.add('b:2',function(args,done){done(null,{bb:args.bb})})
+    si.add('a:1,c:3',function(args,done){done(null,{cc:args.cc})})
+    si.add('a:1,d:4',function(args,done){done(null,{dd:args.dd})})
+
+    si.wrap('a:1',function(args,done){
+      this.prior(args,function(err,out){
+        out.X=1
+        done(err,out)
+      })
+    })
+
+    // existence predicate!! d must exist
+    si.wrap('a:1,d:*',function(args,done){
+      this.prior(args,function(err,out){
+        out.DD=44
+        done(err,out)
+      })
+    })
+
+    si
+      .start(fin)
+
+      .wait('a:1,aa:1')
+      .step(function(out){
+        assert.deepEqual({ aa: 1, X: 1 }, out)
+      })
+
+      .wait('a:1,c:3,cc:3')
+      .step(function(out){
+        assert.deepEqual({ cc: 1, X: 1 }, out)
+      })
+
+      .wait('a:1,d:4,dd:4')
+      .step(function(out){
+        assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
+      })
+
+      .wait('b:2,bb:2')
+      .step(function(out){
+        assert.deepEqual({ bb: 2 }, out)
+      })
+
+      .step(function(){
+        si.wrap('',function(args,done){
+          this.prior(args,function(err,out){
+            out.ALL=2
+            done(err,out)
+          })
+        })
+      })
+
+      .wait('a:1,aa:1')
+      .step(function(out){
+        assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+      })
+
+      .wait('a:1,c:3,cc:3')
+      .step(function(out){
+        assert.deepEqual({ cc: 1, X: 1, ALL: 2 }, out)
+      })
+
+      .wait('a:1,d:4,dd:4')
+      .step(function(out){
+        assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
+      })
+
+      .wait('b:2,bb:2')
+      .step(function(out){
+        assert.deepEqual({ bb: 2, ALL: 2 }, out)
+      })
+    
+      .end()
+  })
+
 })
 
