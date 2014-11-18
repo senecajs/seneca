@@ -1055,6 +1055,7 @@ describe('seneca', function(){
   })
 
 
+/*
   it('declare', function(){
     var si = seneca(testopts)
 
@@ -1083,7 +1084,7 @@ describe('seneca', function(){
       })
     })
   })
-
+*/
 
 
   it('sub', function(fin){
