@@ -278,7 +278,7 @@ describe('seneca', function(){
 
     function next_b() {
       errhandler = function(err){
-        assert.equal('action-execute',arguments[14])
+        assert.equal('action-execute',arguments[15])
         cblog += 'B'
       }
       si.act({role:'error-test',how:'fail'},function(err){
@@ -291,7 +291,7 @@ describe('seneca', function(){
 
     function next_c() {
       errhandler = function(err){
-        assert.equal('action-execute',arguments[14])
+        assert.equal('action-execute',arguments[15])
         cblog += 'C'
       }
       si.act({role:'error-test',how:'errobj'},function(err){
@@ -304,7 +304,7 @@ describe('seneca', function(){
 
     function next_d() {
       errhandler = function(err){
-        assert.equal('a string error',arguments[14])
+        assert.equal('a string error',arguments[15])
         cblog += 'D'
       }
       si.act({role:'error-test',how:'str'},function(err){
@@ -317,7 +317,7 @@ describe('seneca', function(){
 
     function next_e() {
       errhandler = function(err){
-        assert.equal('unknown',arguments[14])
+        assert.equal('unknown',arguments[15])
         cblog += 'E'
       }
       si.act({role:'error-test',how:'obj'},function(err){
@@ -330,7 +330,7 @@ describe('seneca', function(){
 
     function next_f() {
       errhandler = function(err){
-        assert.equal('action-error',arguments[14])
+        assert.equal('action-error',arguments[15])
         cblog += 'F'
       }
       si.act({role:'error-test',how:'cb-err'},function(err){
@@ -343,7 +343,7 @@ describe('seneca', function(){
 
     function next_g() {
       errhandler = function(err){
-        assert.equal('action-error',arguments[14])
+        assert.equal('action-error',arguments[15])
         cblog += 'G'
       }
       si.act({role:'error-test',how:'cb-fail'},function(err){
@@ -357,7 +357,7 @@ describe('seneca', function(){
 
     function next_h() {
       errhandler = function(err){
-        assert.equal('unknown',arguments[14])
+        assert.equal('unknown',arguments[15])
         cblog += 'H'
       }
       si.act({role:'error-test',how:'cb-obj'},function(err){
@@ -371,7 +371,7 @@ describe('seneca', function(){
     function next_i() {
       var count = 0
       errhandler = function(err){
-        0===count && assert.equal('action-error',arguments[14]);
+        0===count && assert.equal('action-error',arguments[15]);
         1===count && assert.equal('callback',arguments[6]);
         count++
         cblog += 'I'
