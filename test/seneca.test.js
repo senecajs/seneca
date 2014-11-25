@@ -1055,46 +1055,19 @@ describe('seneca', function(){
   })
 
 
-/*
-  it('declare', function(){
-    var si = seneca(testopts)
-
-    var init = false
-
-    var foo = function(){
-      this.add({a:1},function(args,done){done.good({b:args.b})})
-      this.add({init:'foo'},function(args,done){init=true;this.good()})
-      return 'foo'
-    }
-
-    si.use(foo)
-    si.ready(function(){
-      assert.ok(init)
-
-      si.hasact({a:1})
-
-      si = seneca(testopts)
-      init = false
-
-      si.declare(foo)
-      si.ready(function(){
-        assert.ok(!init)
-
-        si.hasact({a:1})
-      })
-    })
-  })
-*/
-
-
   it('sub', function(fin){
-    var si = seneca(testopts)
+    var si = seneca(testopts,{errhandler:fin})
 
-    var tmp = {a:0,as1:0,as2:0}
+    var tmp = {a:0,as1:0,as2:0,as1_in:0,as1_out:0,all:0}
+
+    si.sub({},function(args){
+      // console.log(args.meta$)
+      tmp.all++
+    })
 
     si.add({a:1},function(args,done){
       tmp.a = tmp.a+1
-      done(null,{b:1})
+      done(null,{b:1,y:1})
     })
 
     si.act({a:1},function(err,out) {
@@ -1105,7 +1078,23 @@ describe('seneca', function(){
       assert.equal(0,tmp.as2)
 
       si.sub({a:1},function(args){
+        assert.equal(1,args.a)
+        assert.equal(true,args.in$)
         tmp.as1 = tmp.as1+1
+      })
+
+      si.sub({a:1,in$:true},function(args){
+        assert.equal(1,args.a)
+        assert.equal(true,args.in$)
+        tmp.as1_in = tmp.as1_in+1
+      })
+
+      si.sub({a:1,out$:true},function(args,result){
+        //console.log(arguments)
+        assert.equal(1,args.a)
+        assert.equal(1,result.y)
+        assert.equal(true,args.out$)
+        tmp.as1_out = tmp.as1_out+1
       })
 
       si.act({a:1},function(err,out) {
@@ -1114,19 +1103,23 @@ describe('seneca', function(){
         assert.equal(1,out.b)
         assert.equal(2,tmp.a)
         assert.equal(1,tmp.as1)
+        assert.equal(1,tmp.as1_in)
+        assert.equal(1,tmp.as1_out)
         assert.equal(0,tmp.as2)
 
         si.sub({a:1},function(args){
           tmp.as2 = tmp.as2+1
         })
 
-        si.act({a:1},function(err,out) {
+        si.act({a:1,x:1},function(err,out) {
           if(err) return fin(err);
 
           assert.equal(1,out.b)
           assert.equal(3,tmp.a)
           assert.equal(2,tmp.as1)
           assert.equal(1,tmp.as2)
+
+          assert.ok( 0 < tmp.all )
 
           fin()
         })
@@ -1371,5 +1364,35 @@ describe('seneca', function(){
       .end()
   })
 
+
+  it('meta',function(fin){
+    var si = seneca(testopts)
+    si.options({errhandler:fin})
+
+    var meta = {}
+
+    si.add('a:1',function(args,done){
+      //console.log(args)
+      meta.a = args.meta$
+      done(null,{aa:args.aa})
+    })
+
+    si.add('b:2',function(args,done){
+      //console.log(args)
+      meta.b = args.meta$
+      done(null,{bb:args.bb})
+    })
+
+    si.start(fin)
+      .wait('a:1')
+      .wait('b:2')
+      .end(function(err){
+        if(err) return fin(err);
+
+        assert.equal( 'a:1', meta.a.pattern )
+        assert.equal( 'b:2', meta.b.pattern )
+        fin()
+      })
+  })
 })
 
