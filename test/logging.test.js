@@ -92,7 +92,9 @@ describe('logging', function() {
 
   it('makelogrouter.level.bad', function() {    
     try { logging.makelogrouter({map:[ {level:'bad',type:'init',handler:'A'} ]}); assert.fail() }
-    catch( e ) { assert.ok( -1 != e.message.indexOf('unknown log level') )}
+    catch( e ) { 
+      assert.equal('invalid_log_level',e.code)
+    }
   })
 
 
