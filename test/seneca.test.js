@@ -11,7 +11,7 @@ var stream = require('stream')
 
 
 var common   = require('../lib/common')
-var seneca   = require('../lib/seneca')
+var seneca   = require('..')
 
 
 var assert  = require('chai').assert

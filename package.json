@@ -50,7 +50,7 @@
     "zig": "~0.0.2",
     "gate-executor": "~0.2.0"
   },
-  "main": "lib/seneca",
+  "main": "seneca.js",
   "files": [
     "LICENSE.txt",
     "README.md",

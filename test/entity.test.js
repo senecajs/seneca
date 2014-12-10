@@ -6,8 +6,8 @@
 
 var util   = require('util')
 
-var seneca   = require('..')
-var entity   = require('../lib/entity')
+var seneca      = require('..')
+var make_entity = require('../lib/entity')
 
 var async   = require('async')
 var gex     = require('gex')
@@ -147,9 +147,12 @@ describe('entity', function(){
     assert.equal('0/0/0',fmt(si.util.parsecanon('0/0/0')))
 
     var fail
-    try { si.util.parsecanon(''); fail = '' } catch(e) {}
-    try { si.util.parsecanon('?'); fail = '?' } catch(e) {}
+    try { si.util.parsecanon(''); fail = '' } catch(e) { assert.equal('invalid_canon',e.code) }
+    try { si.util.parsecanon('?'); fail = '?' } catch(e) { assert.equal('invalid_canon',e.code); }
     assert.ok( void 0 == fail, fail )
+
+    var foo = si.make$('foo')
+    assert.equal('a/b/c',fmt(foo.canon$({parse:'a/b/c'})))
   })
 
 

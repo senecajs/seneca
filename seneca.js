@@ -34,15 +34,15 @@ var executor     = require('gate-executor')
 
 
 // Internal modules
-var Entity       = require('./entity').Entity
-var store        = require('./store')
-var logging      = require('./logging')
-var plugin_util  = require('./plugin-util')
-var makeoptioner = require('./optioner')
+var make_entity  = require('./lib/entity')
+var store        = require('./lib/store')
+var logging      = require('./lib/logging')
+var plugin_util  = require('./lib/plugin-util')
+var makeoptioner = require('./lib/optioner')
 
 
 // Utility functions
-var common   = require('./common')
+var common   = require('./lib/common')
 
 
 // Abbreviations
@@ -342,7 +342,7 @@ function make_seneca( initial_options ) {
     print:      common.print,
 
     router:     function() { return patrun() },
-    parsecanon: Entity.parsecanon,
+    parsecanon: make_entity.parsecanon,
   }
 
 
@@ -1727,7 +1727,7 @@ function make_seneca( initial_options ) {
   
 
   // Template entity that makes all others.
-  private$.entity = new Entity({},sd)
+  private$.entity = make_entity({},sd)
 
 
   // DEPRECATED 
