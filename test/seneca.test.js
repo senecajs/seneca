@@ -537,29 +537,59 @@ describe('seneca', function(){
 
 
 
-  it('action-override', function() {
+  it('action-override', function(fin) {
     var si = seneca(testopts)
+    si.options({errhandler:fin})
 
     function foo(args,done) {
-      done(null,{a:args.a,s:this.toString()})
+      done(null,{ a:args.a, s:this.toString(), foo:args.meta$ })
     }
 
     function bar(args,done) {
+      var pargs = { a:args.a, s:args.s }
+      this.prior(pargs,function(e,o){
+        o.b = 2
+        o.bar = args.meta$
+        done(e,o)
+      })
+    }
+
+
+    function zed(args,done) {
+      var m = args.meta$
+      args.z = 3
       this.prior(args,function(e,o){
-        o.b=2
+        o.z = 3
+        o.zed = args.meta$
         done(e,o)
       })
     }
     
 
-    si.add({op:'foo'},foo)
-    si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~Seneca/0.5.*'+'/*').on(''+o.a+'~'+o.s))
-    })
+    si.ready( function(){
+      si.add({op:'foo'},foo)
+      si.act('op:foo,a:1',function(e,o){
+        assert.ok(gex('1~Seneca/0.6.*'+'/*').on(''+o.a+'~'+o.s))
+        assert.ok( o.foo.entry )
 
-    si.add({op:'foo'},bar)
-    si.act('op:foo,a:1',function(e,o){
-      assert.ok(gex('1~2~Seneca/0.5.*'+'/*').on(''+o.a+'~'+o.b+'~'+o.s))
+        si.add({op:'foo'},bar)
+        si.act('op:foo,a:1',function(e,o){
+          assert.ok(gex('1~2~Seneca/0.6.*'+'/*').on(''+o.a+'~'+o.b+'~'+o.s))
+          assert.ok( o.bar.entry )
+          assert.ok( !o.foo.entry )
+
+          si.add({op:'foo'},zed)
+          si.act('op:foo,a:1',function(e,o){
+            assert.ok(gex('1~2~3~Seneca/0.6.*'+'/*').on(
+              ''+o.a+'~'+o.b+'~'+o.z+'~'+o.s))
+            assert.ok( o.zed.entry )
+            assert.ok( !o.bar.entry )
+            assert.ok( !o.foo.entry )
+
+            fin()
+          })
+        })
+      })
     })
 
   })
@@ -570,58 +600,60 @@ describe('seneca', function(){
     var si = seneca({log:'silent',errhandler:fin,trace:{act:false}})
     var count = 0, called = ''
 
-    si.add('foo:a',function(args,done){
-      count++
-      count += args.x
-      done(null,{count:count})
+    si.ready( function(){
+
+      si.add('foo:a',function(args,done){
+        count++
+        count += args.x
+        done(null,{count:count})
+      })
+
+      si.add('foo:a',function(args,done){
+        count += args.y
+        this.prior(args,done)
+      })
+
+
+      si
+        .gate()
+        .act('foo:a,x:10,y:0.1',function(err,out){
+          assert.equal(11.1,count)
+          called+='A'
+        })
+        .act('foo:a,x:100,y:0.01',function(err,out){
+          assert.equal(112.11,count)
+          called+='B'
+        })
+        .act('foo:a,x:10,y:0.1',function(err,out){
+          assert.equal(123.21,count)
+          called+='C'
+        })
+        .act('foo:a,x:100,y:0.01',function(err,out){
+          assert.equal(224.22,count)
+          called+='D'
+        })
+        .ready(function(){
+          assert.equal('ABCD',called)
+          assert.equal(224.22,count)
+
+          this
+            .add('foo:a',function(args,done){
+              count += args.z
+              this.prior(args,done)
+            })
+            .gate()
+            .act('foo:a,x:10,y:0.1,z:1000000',function(err,out){
+              assert.equal(1000235.32,count)
+              called+='E'
+            })
+            .ready(function(){
+              assert.equal('ABCDE',called)
+              fin()
+            })
+
+        })
     })
-
-    si.add('foo:a',function(args,done){
-      count += args.y
-      this.prior(args,done)
-    })
-
-
-    si
-      .gate()
-      .act('foo:a,x:10,y:0.1',function(err,out){
-        assert.equal(11.1,count)
-        called+='A'
-      })
-      .act('foo:a,x:100,y:0.01',function(err,out){
-        assert.equal(112.11,count)
-        called+='B'
-      })
-      .act('foo:a,x:10,y:0.1',function(err,out){
-        assert.equal(123.21,count)
-        called+='C'
-      })
-      .act('foo:a,x:100,y:0.01',function(err,out){
-        assert.equal(224.22,count)
-        called+='D'
-      })
-      .ready(function(){
-        assert.equal('ABCD',called)
-        assert.equal(224.22,count)
-
-        this
-          .add('foo:a',function(args,done){
-            count += args.z
-            this.prior(args,done)
-          })
-          .gate()
-          .act('foo:a,x:10,y:0.1,z:1000000',function(err,out){
-            assert.equal(1000235.32,count)
-            called+='E'
-          })
-          .ready(function(){
-            assert.equal('ABCDE',called)
-            fin()
-          })
-      })
   })
-
-
 
 
   it('gating', function(fin){

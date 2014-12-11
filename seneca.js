@@ -873,19 +873,6 @@ function make_seneca( initial_options ) {
     return self;
   }
 
-/*
-  function api_sub() {
-    var self = this
-
-    var subargs = parse_pattern(self,arguments,'action:f actmeta:o?')
-    subargs.pattern.sub$ = true
-
-    return api_add.call(self,subargs.pattern,function(args,done) {
-      subargs.action.call(this,args)
-      this.prior(args,done)
-    },subargs.actmeta)
-  }
-*/
 
 
   // params: argstr,argobj,actfunc,actmeta
@@ -1277,8 +1264,9 @@ function make_seneca( initial_options ) {
 
 
 
-  function do_act(instance,actmeta,isprior,origargs,cb) {
+  function do_act( instance, actmeta, prior_ctxt, origargs, cb ) {
     var args = _.clone(origargs)
+    prior_ctxt = prior_ctxt || {chain:[],entry:true,depth:1}
 
     if( null != args.actid$ && so.actcache ) {
       var actdetails = private$.actcache.get(args.actid$)      
@@ -1287,7 +1275,8 @@ function make_seneca( initial_options ) {
         actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
 
-        logging.log_act_cache( instance, {actid:args.actid$}, actmeta, args)
+        logging.log_act_cache( instance, {actid:args.actid$}, 
+                               actmeta, args, prior_ctxt )
         
         return cb.apply( instance, actdetails.result )
       }
@@ -1316,10 +1305,6 @@ function make_seneca( initial_options ) {
       var actstats = (private$.stats.actmap[actmeta.argpattern] = 
                       private$.stats.actmap[actmeta.argpattern] || {})
 
-      var do_log = !actmeta.sub
-
-      logging.log_act_in( root, {actid:actid}, actmeta, args )
-
       // TODO: review the way this works
       var delegate_args = {}
       if( null != args.gate$ ) {
@@ -1329,6 +1314,7 @@ function make_seneca( initial_options ) {
 
 
       // automate actid log insertion
+      /*
       delegate.log = function() {
         var args = arr(arguments)
 
@@ -1345,7 +1331,7 @@ function make_seneca( initial_options ) {
       }
       delegate.log.log = actmeta.log
       logging.makelogfuncs(delegate)
-
+       */
 
       // build callargs
       var callargs = args
@@ -1356,19 +1342,21 @@ function make_seneca( initial_options ) {
         callargs = _.extend({},args,delegate.fixedargs)
       }
 
-
       if( actmeta.priormeta ) {
         // TODO: deprecate parent
         delegate.prior = delegate.parent = function(prior_args,prior_cb) {
           prior_args = _.clone(prior_args)
 
-          // This is a new action.
-          prior_args.entry$ = prior_args.entry$ ?
-            prior_args.entry$+';'+prior_args.actid$ : 'PRIOR;'+prior_args.actid$
-          prior_args.prior$ = true
-          delete prior_args.actid$
+          var sub_prior_ctxt = _.clone(prior_ctxt)
+          sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
+          sub_prior_ctxt.chain.push(callargs.actid$)
+          sub_prior_ctxt.entry = false
+          sub_prior_ctxt.depth++
 
-          do_act(delegate,actmeta.priormeta,true,prior_args,prior_cb)
+          delete prior_args.actid$
+          delete prior_args.meta$
+
+          do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
         }
       }
       else delegate.prior = common.nil
@@ -1380,11 +1368,23 @@ function make_seneca( initial_options ) {
       var actstart = Date.now()
 
 
+      callargs.meta$ = {
+        id:      actid,
+        start:   actstart,
+        pattern: actmeta.argpattern,
+        action:  actmeta.id,
+        entry:   prior_ctxt.entry,
+        chain:   prior_ctxt.chain
+      }
+
 
       var act_done = function(err) {
         var actend = Date.now()
         private$.timestats.point( actend-actstart, actmeta.argpattern )
 
+        prior_ctxt.depth--
+        prior_ctxt.entry = prior_ctxt.depth <= 0
+ 
         var result  = arr(arguments)
         var call_cb = true
 
@@ -1403,8 +1403,8 @@ function make_seneca( initial_options ) {
           err.details = err.details || {}
           err.details.plugin = err.details.plugin || {}
 
-          logging.log_act_err( 
-            root, {actid:actid,duration:actend-actstart}, actmeta, args, err )
+          logging.log_act_err( root, {actid:actid,duration:actend-actstart}, 
+                               actmeta, callargs, prior_ctxt, err )
 
           instance.emit('error',err)
           if( so.errhandler ) {
@@ -1416,7 +1416,8 @@ function make_seneca( initial_options ) {
           result[0] = null
 
           logging.log_act_out( 
-            instance, {actid:actid,duration:actend-actstart}, actmeta, args, result )
+            instance, {actid:actid,duration:actend-actstart}, 
+            actmeta, callargs, result, prior_ctxt )
 
           private$.stats.act.done++
           actstats.done++
@@ -1458,16 +1459,9 @@ function make_seneca( initial_options ) {
         }
       }
 
-
-      callargs.meta$ = {
-        id:      actid,
-        start:   actstart,
-        pattern: actmeta.argpattern
-      }
-
       var execspec = {
         id:      actid,
-        gate:    !callargs.prior$ && !!callargs.gate$,
+        gate:    prior_ctxt.entry && !!callargs.gate$,
         ungate:  !!callargs.ungate$,
         desc:    actmeta.argpattern,
         cb:      act_done,
@@ -1485,6 +1479,8 @@ function make_seneca( initial_options ) {
           delegate.bad = function(err) {
             cb(err)
           }
+
+          logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
 
           delegate.emit('act-in', callargs)
 
