@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "async": "~0.9.0",
-    "eraro": "~0.1.6",
+    "eraro": "~0.2.0",
     "gex": "^0.1.4",
     "jsonic": "~0.1.1",
     "lru-cache": "~2.5.0",
@@ -75,7 +75,7 @@
     "fixture-stdout": "~0.2.1",
     "jshint": "~2.1.11",
     "mocha": "~1.20.1",
-    "seneca-error-test": "~0.1.0",
+    "seneca-error-test": "~0.2.2",
     "timerstub": "~1.0.3"
   }
 }

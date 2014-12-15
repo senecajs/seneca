@@ -46,7 +46,7 @@ describe('transport', function(){
           .wait(function(data,done){
             si.act('bar:1',function(err,out){
               assert.ok(!!err)
-              assert.equal('act_not_found',err.seneca.code)
+              assert.equal('act_not_found',err.code)
               assert.ok(!out)
               done()
             })

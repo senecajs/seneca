@@ -31,7 +31,7 @@ var lrucache     = require('lru-cache')
 var zig          = require('zig')
 var gex          = require('gex')
 var executor     = require('gate-executor')
-
+var error        = require('eraro')({package:'seneca',msgmap:ERRMSGMAP()})
 
 // Internal modules
 var make_entity  = require('./lib/entity')
@@ -324,13 +324,16 @@ function make_seneca( initial_options ) {
 
   root.toString = api_toString
 
+
+  /*
   root.fail = makefail( root, {
     type:   'sys',
     plugin: 'seneca',
     tag:    root.version,
     id:     root.id
   })
-
+   */
+   
 
   root.util = {
     deepextend: common.deepextend,
@@ -395,7 +398,8 @@ function make_seneca( initial_options ) {
     var sd = plugin_util.make_delegate( 
       self, 
       plugin, 
-      {makefail:makefail, makedie:makedie}
+      //{makefail:makefail, makedie:makedie}
+      {makedie:makedie}
     )
 
     self.log.debug('register','init',fullname)
@@ -837,9 +841,10 @@ function make_seneca( initial_options ) {
             try {
               subfunc.call(self,args,result)
             }
-            catch(error) {
+            catch(ex) {
               // TODO: not really satisfactory
-              var err = self.fail( error, {args:args,result:result} )
+              //var err = self.fail( error, {args:args,result:result} )
+              var err = error(ex,'sub_function_catch',{args:args,result:result})
               self.log.error(
                 'sub','err',args.actid$, err.message, args, error.stack )
             }
@@ -889,7 +894,8 @@ function make_seneca( initial_options ) {
     pattern = self.util.clean(args.pattern)
 
     if( 0 === _.keys( pattern ) ) {
-      throw self.fail('add_empty_pattern',{args:args})
+      //throw self.fail('add_empty_pattern',{args:args})
+      throw error('add_empty_pattern',{args:args})
     }
 
 
@@ -1099,7 +1105,8 @@ function make_seneca( initial_options ) {
 
     if( !actmeta ) {
       if( _.isUndefined(args.default$) ) {
-        var err = self.fail('act_not_found',{args:args})
+        var err = error('act_not_found',{args:args})
+        //var err = self.fail('act_not_found',{args:args})
 
         logging.log_act_not_found( self, err )
 
@@ -1291,8 +1298,9 @@ function make_seneca( initial_options ) {
       actmeta.parambulator.validate(args,function(err) {
 
         if( err ) {
-          throw instance.fail('act_invalid_args',
-                              {message:err.message,args:origargs})
+          //throw instance.fail('act_invalid_args',
+          throw error('act_invalid_args',
+                      {message:err.message,args:origargs})
         }
 
         return perform(actmeta)
@@ -1429,25 +1437,26 @@ function make_seneca( initial_options ) {
           }
         }
         // for errors thrown inside the callback
-        catch( er ) {
-          var error = er
-          if( error.seneca ) {
-            error.seneca.callback = true
-            throw error;
+        catch( ex ) {
+          var err = ex
+          if( err.seneca ) {
+            //err.seneca_callback = true
+            throw err;
           }
 
           // handle throws of non-Error values
-          if( !util.isError(error) ) {
-            if( _.isObject(error) ) {
-              error = new Error(common.owndesc(error,1))
+          if( !util.isError(err) ) {
+            if( _.isObject(err) ) {
+              err = new Error(common.owndesc(err,1))
             }
             else {
-              error = new Error(''+error)
+              err = new Error(''+err)
             }
           }
 
           // TODO: not really satisfactory
-          var err = instance.fail( error, {result:result} )
+          //var err = instance.fail( error, {result:result} )
+          err = error( error, {result:result} )
           instance.log.error(
             'act','err',actid,'callback', 
             err.message, 'A;'+actmeta.id, origargs, error.stack )
@@ -1513,7 +1522,8 @@ function make_seneca( initial_options ) {
     }
     catch( e ) {
       var col = 1==e.line?e.column-1:e.column
-      throw instance.fail('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
+      //throw instance.fail('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
+      throw error('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
     }
   }
 
@@ -1859,7 +1869,8 @@ function handle_error_args( args, ctxt ) {
 
   var valmap = _.isObject(args[valstart]) ? args[valstart] : {}
 
-  var message = (MSGMAP[ctxt.plugin] && MSGMAP[ctxt.plugin][code])
+  var msgmap = ERRMSGMAP()
+  var message = (msgmap[ctxt.plugin] && msgmap[ctxt.plugin][code])
   message = _.isString(message) ? 
     message : (_.isString(valmap.message) && valmap.message)
   message = _.isString(message) ? 
@@ -1931,25 +1942,25 @@ function makedie( instance, ctxt ) {
     var args = handle_error_args(arguments,ctxt)
 
     var code    = args.code
-    var error   = args.error
+    var err     = args.error
     var message = args.message
 
     var so = instance.options()
 
     // stayalive is only for testing, do not use in production
-    var stayalive = so.test.stayalive || (error && error.stayalive)
+    var stayalive = so.test.stayalive || (err && err.stayalive)
 
     var logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, code]
           .concat( message && message != code ? message : void 0 )
           .concat( args.remaining )
 
-    if( !error ) {
-      error = new Error( code )
+    if( !err ) {
+      err = new Error( code )
     }
 
     instance.log.fatal.apply( instance, logargs )
 
-    var stack = error.stack
+    var stack = err.stack
     stack = stack.replace(/^.*?\n/,'\n')
 
     var procdesc = process.pid // + more
@@ -1969,14 +1980,9 @@ function makedie( instance, ctxt ) {
           ", path="+process.execPath+
           ", args="+util.inspect(process.argv)+"\n\n"
 
+
     if( stayalive ) {
-      error = new Error(stderrmsg)
-      error.seneca = {
-        code:code,
-        when:new Date().toISOString(),
-        valmap:args.valmap
-      }
-      throw error
+      throw error(err,code,args.valmap)
     }
 
 
@@ -2016,7 +2022,7 @@ function makedie( instance, ctxt ) {
 }
 
 
-
+/*
 function makefail( instance, ctxt ) {
   ctxt = _.extend(ctxt,instance.fail?instance.fail.context:{})
 
@@ -2056,7 +2062,7 @@ function makefail( instance, ctxt ) {
 
   return fail
 }
-
+*/
 
 
 function make_trace_act( opts ) {
@@ -2160,8 +2166,8 @@ function thrower(err) {
 
 
 // Error code messages.
-var MSGMAP = {
-  seneca:{
+function ERRMSGMAP() {
+  return {
     test_msg: 'Test message.',
     test_prop: 'TESTING: exists: <%=exists%>, notfound:<%=notfound%>, str=<%=str%>, obj=<%=obj%>, arr=<%=arr%>, bool=<%=bool%>, null=<%=null$%>, delete=<%=delete$%>, undefined=<%=undefined$%>, void=<%=void$%>, NaN=<%=NaN$%>',
 
@@ -2180,7 +2186,7 @@ var MSGMAP = {
 
     act_not_found: 'No matching action pattern found for "<%=args%>", and no default result provided (using a default$ property).',
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument should be a string or object pattern.',
-    act_invalid_args: 'Invalid action arguments; <%=message%>; arguments were: "<%=args%>".',
+    act_invalid_args: 'Invalid action arguments; <%=message%>; arguments were: <%=args%>.',
     no_client: 'Transport client was not created; arguments were: "<%=args%>".',
 
     invalid_options: 'Invalid options; <%=message%>',
@@ -2192,5 +2198,7 @@ var MSGMAP = {
     export_not_found: 'The export <%=key%> has not been defined by a plugin.',
 
     store_cmd_missing: 'Entity data store implementation is missing a command; "<%=cmd%>": "<%=store%>".',
+
+    sub_function_catch: 'Pattern subscription function threw: <%=message%> on args: <%=args%>, result: <%=result%>.'
   }
 }

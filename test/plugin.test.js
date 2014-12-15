@@ -25,17 +25,13 @@ describe('plugin', function(){
     })
     
     try { si.use( {foo:1} ) } catch( e ) {
-      assert.equal('plugin_no_name',e.seneca.code)
+      assert.ok(e.seneca)
+      assert.equal('plugin_no_name',e.code)
     }
-
-    /* TODO: may not be needed
-    try { si.use( {name:'foo',init:1} ) } catch( e ) {
-      assert.equal('plugin_bad_init',e.seneca.code)
-    }
-     */
 
     try { si.use( 'not-a-plugin-at-all-at-all' ) } catch( e ) {
-      assert.equal('plugin_not_found',e.seneca.code)
+      assert.ok(e.seneca)
+      assert.equal('plugin_not_found',e.code)
     }
   })
 
@@ -67,7 +63,7 @@ describe('plugin', function(){
       assert.fail()
     }
     catch( e ) {
-      assert.equal('plugin_required',e.seneca.code)
+      assert.equal('plugin_required',e.code)
     }
 
     si.use( function(opts){
@@ -96,7 +92,7 @@ describe('plugin', function(){
       })
     }
     catch(e) {
-      assert.equal('plugin_required',e.seneca.code)
+      assert.equal('plugin_required',e.code)
     }
 
   })
@@ -186,7 +182,7 @@ describe('plugin', function(){
       assert.fail()
     }
     catch(e) {
-      assert.equal('export_not_found',e.seneca.code)
+      assert.equal('export_not_found',e.code)
     }
   })
 
