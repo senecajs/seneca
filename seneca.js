@@ -203,23 +203,31 @@ function make_seneca( initial_options ) {
               duration: 60000,
               running:  false
             },
+
             debug:{
-              allargs:  false
+              allargs: false,
+              fragile: false,
             },
+
             deathdelay: 33333,
+
             test:{
               stayalive: false
             },
+
             admin:{
               local:  false,
               prefix: '/admin'
             },
+
             plugin:{},
+
             internal: {
               actrouter:    patrun(),
               clientrouter: patrun(pin_patrun_customizer),
               subrouter:    patrun(pin_patrun_customizer)
             },
+
             default_plugins: {
               basic:       true, 
               'mem-store': true, 
@@ -1065,14 +1073,14 @@ function make_seneca( initial_options ) {
   }
 
 
-
+/*
   function handle_act_args(self,orig) {
     var args = parse_pattern( self, orig, 'done:f?' )
     var done = args.done ? args.done : common.noop
 
     return [args.pattern,done]
   }
-
+*/
 
 
   function api_act_if() {
@@ -1092,12 +1100,37 @@ function make_seneca( initial_options ) {
   function api_act() {
     var self = this
 
-    var argscb = handle_act_args(self,arr(arguments))
-    var args = argscb[0]
-    var cb   = argscb[1]
-
+    var spec    = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
+    var args    = spec.pattern
+    var cb      = spec.done ? spec.done : common.noop
     var actmeta = self.findact(args)
 
+    // action pattern found
+    if( actmeta ) {
+      do_act(self,actmeta,false,args,cb)
+      return self;
+    }
+
+    if( _.isObject( args.default$ ) ) {
+      self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
+      cb.call( self, null, _.clone(args.default$) )
+      return self;
+    }
+
+    
+    var err = error('act_not_found',{args:args})
+    logging.log_act_not_found( self, err )
+
+    if( so.debug.fragile ) {
+      throw err;
+    }
+    else {
+      cb.call( self, err )
+      return self;
+    }
+
+
+/*
     function provide_default() {
       self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
       cb.call( self, null, _.clone(args.default$) )
@@ -1117,6 +1150,7 @@ function make_seneca( initial_options ) {
     else do_act(self,actmeta,false,args,cb)
 
     return self
+ */
   }
 
 
@@ -1556,12 +1590,16 @@ function make_seneca( initial_options ) {
     delegate.did = nid()
 
     delegate.act = function() {
-      var argscb = handle_act_args(this,arr(arguments))
+      var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
+      var args = spec.pattern
+      var cb   = spec.done
+
+      //var argscb = handle_act_args(this,arr(arguments))
 
       // can't override fixedargs
-      var args = _.extend({},argscb[0],fixedargs)
+      var args = _.extend({},args,fixedargs)
 
-      var cb = argscb[1]
+      //var cb = argscb[1]
 
       act.call(this,args,cb)
 

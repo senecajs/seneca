@@ -466,6 +466,7 @@ describe('seneca', function(){
 
   it('action', function() {
     var si = seneca(testopts)
+    si.options({debug:{fragile:true}})
 
     var a1 = 0
 
@@ -488,42 +489,67 @@ describe('seneca', function(){
 
     try {
       si.add({op:'bar'})
+      assert.fail()
     }
     catch(e) {
       assert.ok(e.message.match(/norma:/))
     }
+
 
     try {
       si.add('a:1',function(args,done){},123)
+      assert.fail()
     }
     catch(e) {
       assert.ok(e.message.match(/norma:/))
     }
 
 
-    // log error expected
-    si.act({op:'bad',a1:100}, function(err,out) {
-      assert.equal(err.code,'act_not_found')
-    })
-
-
-    si.act({op:'bad',a1:100,default$:"qaz"}, function(err,out) {
-      assert.equal(out,'qaz')
-    })
-
-    
-    // log error expected
     try {
-      si.act()
+      si.act({op:'bad',a1:100}, function(err,out) {
+        assert.fail()
+      })
+      assert.fail()
     }
     catch(e) {
       assert.equal(e.code,'act_not_found')
     }
 
-    // log error expected
-    si.act(function(err,out) {
-      assert.equal(err.code,'act_not_found')
+
+    try {
+      // default is not an object
+      si.act({op:'bad',a1:100,default$:"qaz"}, function(err,out) {
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(e) {
+      assert.equal(e.code,'act_not_found')
+    }
+
+
+    si.act({op:'bad',a1:100,default$:{a:1}}, function(err,out) {
+      assert.deepEqual({a:1},out)
     })
+
+    
+    try {
+      si.act()
+      assert.fail()
+    }
+    catch(e) {
+      assert.equal(e.code,'act_not_found')
+    }
+
+    try {
+      si.act(function(err,out) {
+        assert.fail()
+      })
+      assert.fail()
+    }
+    catch(e) {
+      assert.equal(e.code,'act_not_found')
+    }
   })
 
 

@@ -45,9 +45,7 @@ describe('transport', function(){
 
           .wait(function(data,done){
             si.act('bar:1',function(err,out){
-              assert.ok(!!err)
-              assert.equal('act_not_found',err.code)
-              assert.ok(!out)
+              assert.equal('act_not_found',err.code)            
               done()
             })
           })
@@ -64,7 +62,7 @@ describe('transport', function(){
           .client( {type:'test', pin:'foo:1'} )
 
     si.act('foo:2',function(err){
-      assert.ok(!!err)
+      assert.ok(err.code,'act_not_found')
 
       this
         .start(fin)
