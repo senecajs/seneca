@@ -33,6 +33,7 @@ var gex          = require('gex')
 var executor     = require('gate-executor')
 var error        = require('eraro')({package:'seneca',msgmap:ERRMSGMAP()})
 
+
 // Internal modules
 var make_entity  = require('./lib/entity')
 var store        = require('./lib/store')
@@ -331,16 +332,6 @@ function make_seneca( initial_options ) {
 
 
   root.toString = api_toString
-
-
-  /*
-  root.fail = makefail( root, {
-    type:   'sys',
-    plugin: 'seneca',
-    tag:    root.version,
-    id:     root.id
-  })
-   */
    
 
   root.util = {
@@ -392,6 +383,7 @@ function make_seneca( initial_options ) {
     topname:       'plugin',
     msgprefix:     'register(plugin): ',
   })
+
 
 
   function api_register( plugin ) {
@@ -489,7 +481,6 @@ function make_seneca( initial_options ) {
     self.log.debug('register','install',pluginref,
                    {exports:exports},fullname!=pluginref?fullname:undefined)
   }
-
 
 
   
@@ -980,29 +971,6 @@ function make_seneca( initial_options ) {
 
     return self
   }
-  
-
-
-  // DEPRECATED
-  root.compose = function(args,acts) {
-    var self = this
-    self.add(args,function(call_args,cb) {
-      function call_act(i,cur_args) {
-        if( i < acts.length ) {
-          cur_args = _.omit(cur_args,_.keys(acts[i-1]||args))
-          cur_args = _.extend(cur_args,acts[i])
-
-          self.act(cur_args,function(err,next_args) {
-            if( err ) return cb(err);
-            next_args = acts[i].modify$ ? (acts[i].modify$(next_args,call_args)||next_args) : next_args
-            call_act(i+1,next_args)
-          })
-        }
-        else cb(null,cur_args)
-      }
-      call_act(0,call_args)
-    })
-  }
 
 
   
@@ -1073,15 +1041,6 @@ function make_seneca( initial_options ) {
   }
 
 
-/*
-  function handle_act_args(self,orig) {
-    var args = parse_pattern( self, orig, 'done:f?' )
-    var done = args.done ? args.done : common.noop
-
-    return [args.pattern,done]
-  }
-*/
-
 
   function api_act_if() {
     var self = this
@@ -1125,29 +1084,6 @@ function make_seneca( initial_options ) {
 
     cb.call( self, err )
     return self;
-
-
-/*
-    function provide_default() {
-      self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
-      cb.call( self, null, _.clone(args.default$) )
-    }
-
-    if( !actmeta ) {
-      if( _.isUndefined(args.default$) ) {
-        var err = error('act_not_found',{args:args})
-        //var err = self.fail('act_not_found',{args:args})
-
-        logging.log_act_not_found( self, err )
-
-        return cb.call( self, err )
-      }
-      else provide_default()
-    }
-    else do_act(self,actmeta,false,args,cb)
-
-    return self
- */
   }
 
 
@@ -1164,6 +1100,7 @@ function make_seneca( initial_options ) {
       })
     })
   }
+
 
 
   // close seneca instance
@@ -2056,48 +1993,6 @@ function makedie( instance, ctxt ) {
   return die
 }
 
-
-/*
-function makefail( instance, ctxt ) {
-  ctxt = _.extend(ctxt,instance.fail?instance.fail.context:{})
-
-  var fail = function() {
-    var args = handle_error_args(arguments,ctxt)
-
-    var code    = args.code
-    var error   = args.error
-    var message = args.message
-
-
-    message = instance.toString()+': '+message
-    message = message.replace(/[\r\n]/g,' ')
-
-    if( error ) {
-      error.message = message
-    }
-    else {
-      error = new Error(message)
-    }
-
-    error.seneca = {
-      code:code,
-      when:new Date().toISOString(),
-      valmap:args.valmap
-    }
-
-    // DEPRECATED
-    if( _.isFunction( args.callback ) ) {
-      args.callback.call( instance, error )
-    }
-
-    return error;
-  }
-
-  fail.context = ctxt
-
-  return fail
-}
-*/
 
 
 function make_trace_act( opts ) {
