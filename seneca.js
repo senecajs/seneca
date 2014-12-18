@@ -1121,13 +1121,10 @@ function make_seneca( initial_options ) {
     var err = error('act_not_found',{args:args})
     logging.log_act_not_found( self, err )
 
-    if( so.debug.fragile ) {
-      throw err;
-    }
-    else {
-      cb.call( self, err )
-      return self;
-    }
+    if( so.debug.fragile ) throw err;
+
+    cb.call( self, err )
+    return self;
 
 
 /*
