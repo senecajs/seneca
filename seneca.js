@@ -14,6 +14,7 @@ var net      = require('net')
 var repl     = require('repl')
 var path     = require('path')
 var buffer   = require('buffer')
+var assert   = require('assert')
 
 
 // External modules
@@ -1075,7 +1076,6 @@ function make_seneca( initial_options ) {
       cb.call( self, null, _.clone(args.default$) )
       return self;
     }
-
     
     var err = error('act_not_found',{args:args})
     logging.log_act_not_found( self, err )
@@ -1243,20 +1243,7 @@ function make_seneca( initial_options ) {
     var args = _.clone(origargs)
     prior_ctxt = prior_ctxt || {chain:[],entry:true,depth:1}
 
-    if( null != args.actid$ && so.actcache ) {
-      var actdetails = private$.actcache.get(args.actid$)      
-
-      if( actdetails ) {
-        actmeta = actdetails.actmeta || {}
-        private$.stats.act.cache++
-
-        logging.log_act_cache( instance, {actid:args.actid$}, 
-                               actmeta, args, prior_ctxt )
-        
-        return cb.apply( instance, actdetails.result )
-      }
-    }
-
+    if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
 
     var actid = ( args.actid$ || instance.idgen() )
 
@@ -1266,9 +1253,7 @@ function make_seneca( initial_options ) {
       actmeta.parambulator.validate(args,function(err) {
 
         if( err ) {
-          //throw instance.fail('act_invalid_args',
-          throw error('act_invalid_args',
-                      {message:err.message,args:origargs})
+          throw error('act_invalid_args', {message:err.message,args:origargs})
         }
 
         return perform(actmeta)
@@ -1327,7 +1312,7 @@ function make_seneca( initial_options ) {
           sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
           sub_prior_ctxt.chain.push(callargs.actid$)
           sub_prior_ctxt.entry = false
-          sub_prior_ctxt.depth++
+          sub_prior_ctxt.depth++;
 
           delete prior_args.actid$
           delete prior_args.meta$
@@ -1471,6 +1456,38 @@ function make_seneca( initial_options ) {
 
 
 
+  // Check if actid has already been seen, and if action cache is active,
+  // then provide cached result, if any. Return true in this case.
+  //
+  //    * _instance_    (object)    &rarr;  seneca instance
+  //    * _args_        (object)    &rarr;  action arguments
+  //    * _prior_ctxt_  (object?)   &rarr;  prior action context, if any
+  //    * _actcb_       (function)  &rarr;  action arguments
+  function act_cache_check( instance, args, prior_ctxt, actcb ) {
+    assert.ok( _.isObject(args),    'act_cache_check; args;  isObject')
+    assert.ok( _.isFunction(actcb), 'act_cache_check; actcb; isFunction')
+
+    var actid = args.actid$
+
+    if( null != actid && so.actcache ) {
+      var actdetails = private$.actcache.get(actid)      
+
+      if( actdetails ) {
+        var actmeta = actdetails.actmeta || {}
+        private$.stats.act.cache++
+        
+        logging.log_act_cache( instance, {actid:actid}, actmeta, args, prior_ctxt )
+        
+        actcb.apply( instance, actdetails.result )
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+
+
   // string args override object args
   function parse_pattern(instance,args,normaspec,fixed) {
     args = norma('{strargs:s? objargs:o? moreobjargs:o? '+(normaspec||'')+'}', args)
@@ -1531,7 +1548,7 @@ function make_seneca( initial_options ) {
       //var argscb = handle_act_args(this,arr(arguments))
 
       // can't override fixedargs
-      var args = _.extend({},args,fixedargs)
+      args = _.extend({},args,fixedargs)
 
       //var cb = argscb[1]
 
