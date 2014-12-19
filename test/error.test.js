@@ -93,17 +93,19 @@ describe('seneca', function(){
       errlog = common.arrayify(arguments)
     }}]}})
 
-    si.add('a:1,b:{required$:true}',function(args,done){this.good({x:1})})
+    si.ready(function(){
+      si.add('a:1,b:{required$:true}',function(args,done){this.good({x:1})})
 
-    si.act('a:1',function(err){
-      assert.equal('act_invalid_args',err.code)
-      assert.equal(null,errlog)
-      return fin();
+      si.act('a:1',function(err){
+        assert.equal('act_invalid_args',err.code)
+        assert.equal('act_invalid_args',errlog[15])
 
-      si.act('a:1,b:1',function(err,out){
-        assert.ok(null==err)
-        assert.equal(1,out.x)
-        fin();
+
+        si.act('a:1,b:1',function(err,out){
+          assert.ok(null==err)
+          assert.equal(1,out.x)
+          fin();
+        })
       })
     })
   }

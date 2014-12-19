@@ -1250,183 +1250,124 @@ function make_seneca( initial_options ) {
     var actid    = ( args.actid$ || instance.idgen() )
     var actstart = Date.now()
 
+    cb = cb || common.noop
 
-    cb = cb || function(err) {
+    if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
+
+    var actstats = act_stats_call( actmeta.pattern )
+
+
+    // build callargs
+    var callargs = args
+    callargs.actid$ = actid
+
+    callargs.meta$ = {
+      id:      actid,
+      start:   actstart,
+      pattern: actmeta.argpattern,
+      action:  actmeta.id,
+      entry:   prior_ctxt.entry,
+      chain:   prior_ctxt.chain
+    }
+    
+
+    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
+    
+    instance.emit('act-in', callargs)
+
+    var delegate = act_make_delegate( instance, callargs, actmeta, prior_ctxt )
+
+    if( delegate.fixedargs ) {
+      callargs = _.extend({},callargs,delegate.fixedargs)
+    }
+
+
+    var act_done = function(err) {
+      var actend = Date.now()
+      private$.timestats.point( actend-actstart, actmeta.argpattern )
+
+      prior_ctxt.depth--
+      prior_ctxt.entry = prior_ctxt.depth <= 0
+      
+      var result  = arr(arguments)
+      var call_cb = true
+
+      if( so.actcache ) {
+        private$.actcache.set(actid,{
+          result:result,
+          actmeta:actmeta,
+          when:Date.now()
+        })
+      }
+
       if( err ) {
-        logging.log_act_err( 
-          instance, {actid:actid,duration:Date.now()-actstart}, 
-          actmeta, args, prior_ctxt, err )
+        private$.stats.act.fails++
+        actstats.fails++
 
+        err.details = err.details || {}
+        err.details.plugin = err.details.plugin || {}
+
+        logging.log_act_err( root, {actid:actid,duration:actend-actstart}, 
+                             actmeta, callargs, prior_ctxt, err )
+
+        instance.emit('error',err)
+        if( so.errhandler ) {
+          call_cb = !so.errhandler(err)
+        }
+      }
+      else {
+        instance.emit('act-out',callargs,result[1])
+        result[0] = null
+
+        logging.log_act_out( 
+          instance, {actid:actid,duration:actend-actstart}, 
+          actmeta, callargs, result, prior_ctxt )
+
+        private$.stats.act.done++
+        actstats.done++
+      }
+      
+      try {
+        if( call_cb ) {
+          cb.apply(delegate,result) // note: err == result[0]
+        }
+      }
+      // for errors thrown inside the callback
+      catch( ex ) {
+        var err = ex
+        if( err.seneca ) {
+          //err.seneca_callback = true
+          throw err;
+        }
+
+        // handle throws of non-Error values
+        if( !util.isError(err) ) {
+          if( _.isObject(err) ) {
+            err = new Error(common.owndesc(err,1))
+          }
+          else {
+            err = new Error(''+err)
+          }
+        }
+
+        // TODO: not really satisfactory
+        //var err = instance.fail( error, {result:result} )
+        err = error( error, {result:result} )
+        instance.log.error(
+          'act','err',actid,'callback', 
+          err.message, 'A;'+actmeta.id, origargs, error.stack )
+
+        instance.emit('error',err)
         if( so.errhandler ) {
           so.errhandler(err)
         }
       }
     }
 
-    if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
 
 
-    // FIX: need to setup IN log and OUT log, and act_done, first, otherwise this won't get logged
-
-    act_param_check( args, actmeta, function( err ) {
-      if( err ) return cb(err);
-
-      var actstats = (private$.stats.actmap[actmeta.argpattern] = 
-                      private$.stats.actmap[actmeta.argpattern] || {})
-
-      // TODO: review the way this works
-      var delegate_args = {}
-      if( null != args.gate$ ) {
-        delegate_args.ungate$ = !!args.gate$
-      }
-      var delegate = instance.delegate( delegate_args )
-
-
-      // automate actid log insertion
-      /*
-      delegate.log = function() {
-        var args = arr(arguments)
-
-        if( _.isFunction(actmeta.log) ) {
-          var entries = [args[0],'ACT',actid].concat(args.slice(1))
-          actmeta.log.apply(instance,entries)
-        }
-        else {
-          instance.log.apply(
-            instance,
-            [args[0],'-','-','-','ACT',actid]
-              .concat(args.slice(1)))
-        }
-      }
-      delegate.log.log = actmeta.log
-      logging.makelogfuncs(delegate)
-       */
-
-      // build callargs
-      var callargs = args
-      callargs.actid$ = actid
-
-      // fixed args are not used for finding actions!!!
-      if( delegate.fixedargs ) {
-        callargs = _.extend({},args,delegate.fixedargs)
-      }
-
-      if( actmeta.priormeta ) {
-        // TODO: deprecate parent
-        delegate.prior = delegate.parent = function(prior_args,prior_cb) {
-          prior_args = _.clone(prior_args)
-
-          var sub_prior_ctxt = _.clone(prior_ctxt)
-          sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
-          sub_prior_ctxt.chain.push(callargs.actid$)
-          sub_prior_ctxt.entry = false
-          sub_prior_ctxt.depth++;
-
-          delete prior_args.actid$
-          delete prior_args.meta$
-
-          do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
-        }
-      }
-      else delegate.prior = common.nil
-
-
-      
-      private$.stats.act.calls++
-      actstats.calls++
-
-
-      callargs.meta$ = {
-        id:      actid,
-        start:   actstart,
-        pattern: actmeta.argpattern,
-        action:  actmeta.id,
-        entry:   prior_ctxt.entry,
-        chain:   prior_ctxt.chain
-      }
-
-
-      var act_done = function(err) {
-        var actend = Date.now()
-        private$.timestats.point( actend-actstart, actmeta.argpattern )
-
-        prior_ctxt.depth--
-        prior_ctxt.entry = prior_ctxt.depth <= 0
- 
-        var result  = arr(arguments)
-        var call_cb = true
-
-        if( so.actcache ) {
-          private$.actcache.set(actid,{
-            result:result,
-            actmeta:actmeta,
-            when:Date.now()
-          })
-        }
-
-        if( err ) {
-          private$.stats.act.fails++
-          actstats.fails++
-
-          err.details = err.details || {}
-          err.details.plugin = err.details.plugin || {}
-
-          logging.log_act_err( root, {actid:actid,duration:actend-actstart}, 
-                               actmeta, callargs, prior_ctxt, err )
-
-          instance.emit('error',err)
-          if( so.errhandler ) {
-            call_cb = !so.errhandler(err)
-          }
-        }
-        else {
-          delegate.emit('act-out',callargs,result[1])
-          result[0] = null
-
-          logging.log_act_out( 
-            instance, {actid:actid,duration:actend-actstart}, 
-            actmeta, callargs, result, prior_ctxt )
-
-          private$.stats.act.done++
-          actstats.done++
-        }
-        
-        try {
-          if( call_cb ) {
-            cb.apply(delegate,result) // note: err == result[0]
-          }
-        }
-        // for errors thrown inside the callback
-        catch( ex ) {
-          var err = ex
-          if( err.seneca ) {
-            //err.seneca_callback = true
-            throw err;
-          }
-
-          // handle throws of non-Error values
-          if( !util.isError(err) ) {
-            if( _.isObject(err) ) {
-              err = new Error(common.owndesc(err,1))
-            }
-            else {
-              err = new Error(''+err)
-            }
-          }
-
-          // TODO: not really satisfactory
-          //var err = instance.fail( error, {result:result} )
-          err = error( error, {result:result} )
-          instance.log.error(
-            'act','err',actid,'callback', 
-            err.message, 'A;'+actmeta.id, origargs, error.stack )
-
-          instance.emit('error',err)
-          if( so.errhandler ) {
-            so.errhandler(err)
-          }
-        }
-      }
+    act_param_check( origargs, actmeta, function( err ) {
+      if( err ) return act_done(err);
 
       var execspec = {
         id:      actid,
@@ -1448,10 +1389,6 @@ function make_seneca( initial_options ) {
           delegate.bad = function(err) {
             cb(err)
           }
-
-          logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
-
-          delegate.emit('act-in', callargs)
 
           actmeta.func.call(delegate,callargs,cb)
         },
@@ -1498,6 +1435,71 @@ function make_seneca( initial_options ) {
   }
 
 
+  // Resolve action stats object, creating if ncessary, and count a call.
+  //
+  //    * _pattern_     (string)    &rarr;  action pattern
+  function act_stats_call( pattern ) {
+    var actstats = (private$.stats.actmap[pattern] = 
+                    private$.stats.actmap[pattern] || {})
+
+    private$.stats.act.calls++
+    actstats.calls++
+
+    return actstats
+  }
+  
+
+
+  function act_make_delegate( instance, callargs, actmeta, prior_ctxt ) {
+    var delegate_args = {}
+    if( null != callargs.gate$ ) {
+      delegate_args.ungate$ = !!callargs.gate$
+    }
+    var delegate = instance.delegate( delegate_args )
+    
+
+    // automate actid log insertion
+    /*
+    delegate.log = function() {
+      var args = arr(arguments)
+
+      if( _.isFunction(actmeta.log) ) {
+        var entries = [args[0],'ACT',actid].concat(args.slice(1))
+        actmeta.log.apply(instance,entries)
+      }
+      else {
+        instance.log.apply(
+          instance,
+          [args[0],'-','-','-','ACT',actid]
+            .concat(args.slice(1)))
+      }
+    }
+    delegate.log.log = actmeta.log
+    logging.makelogfuncs(delegate)
+     */
+
+    if( actmeta.priormeta ) {
+      // TODO: deprecate parent
+      delegate.prior = delegate.parent = function(prior_args,prior_cb) {
+        prior_args = _.clone(prior_args)
+        
+        var sub_prior_ctxt = _.clone(prior_ctxt)
+        sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
+        sub_prior_ctxt.chain.push(callargs.actid$)
+        sub_prior_ctxt.entry = false
+        sub_prior_ctxt.depth++;
+        
+        delete prior_args.actid$
+        delete prior_args.meta$
+
+        do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
+      }
+    }
+    else delegate.prior = common.nil
+
+    return delegate;
+  }
+  
 
   // Check if action parameters pass parambulator spec, if any.
   //
