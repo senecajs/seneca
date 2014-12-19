@@ -952,7 +952,7 @@ describe('seneca', function(){
           si.act('role:seneca,stats:true',function(err,stats){
             if(err) return fin(err);
 
-            assert.equal( '{ calls: 6, done: 6, fails: 0, cache: 1 }',
+            assert.equal( '{ calls: 7, done: 7, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
             fin()
           })

@@ -1266,6 +1266,8 @@ function make_seneca( initial_options ) {
     if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
 
 
+    // FIX: need to setup IN log and OUT log, and act_done, first, otherwise this won't get logged
+
     act_param_check( args, actmeta, function( err ) {
       if( err ) return cb(err);
 
@@ -1511,6 +1513,7 @@ function make_seneca( initial_options ) {
       actmeta.parambulator.validate(args,function(err) {
         if(err) return done( 
           error('act_invalid_args', {message:err.message,args:args} ));
+        return done();
       })
     } 
     else return done();
