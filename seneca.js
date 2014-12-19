@@ -915,7 +915,11 @@ function make_seneca( initial_options ) {
     var priormeta = self.findact( pattern )
 
     actmeta.args = _.clone( pattern )
-    actmeta.argpattern = common.argpattern( pattern )
+    actmeta.pattern = common.argpattern( pattern )
+
+    // deprecated
+    actmeta.argpattern = actmeta.pattern
+
     actmeta.id = self.idgen()
 
 
@@ -1062,18 +1066,18 @@ function make_seneca( initial_options ) {
 
     var spec    = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
     var args    = spec.pattern
-    var cb      = spec.done ? spec.done : common.noop
+    var actcb   = spec.done
     var actmeta = self.findact(args)
 
     // action pattern found
     if( actmeta ) {
-      do_act(self,actmeta,false,args,cb)
+      do_act(self,actmeta,false,args,actcb)
       return self;
     }
 
     if( _.isObject( args.default$ ) ) {
       self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
-      cb.call( self, null, _.clone(args.default$) )
+      if( actcb ) actcb.call( self, null, _.clone(args.default$) );
       return self;
     }
     
@@ -1082,7 +1086,7 @@ function make_seneca( initial_options ) {
 
     if( so.debug.fragile ) throw err;
 
-    cb.call( self, err )
+    if( actcb ) actcb.call( self, err );
     return self;
   }
 
@@ -1243,26 +1247,28 @@ function make_seneca( initial_options ) {
     var args = _.clone(origargs)
     prior_ctxt = prior_ctxt || {chain:[],entry:true,depth:1}
 
+    var actid    = ( args.actid$ || instance.idgen() )
+    var actstart = Date.now()
+
+
+    cb = cb || function(err) {
+      if( err ) {
+        logging.log_act_err( 
+          instance, {actid:actid,duration:Date.now()-actstart}, 
+          actmeta, args, prior_ctxt, err )
+
+        if( so.errhandler ) {
+          so.errhandler(err)
+        }
+      }
+    }
+
     if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
 
-    var actid = ( args.actid$ || instance.idgen() )
 
-    
-    // FIX: make this error nice to handle for calling code - get rid of circular ref
-    if( actmeta.parambulator ) {
-      actmeta.parambulator.validate(args,function(err) {
+    act_param_check( args, actmeta, function( err ) {
+      if( err ) return cb(err);
 
-        if( err ) {
-          throw error('act_invalid_args', {message:err.message,args:origargs})
-        }
-
-        return perform(actmeta)
-      })
-    } 
-    else return perform(actmeta);
-
-
-    function perform(actmeta) {
       var actstats = (private$.stats.actmap[actmeta.argpattern] = 
                       private$.stats.actmap[actmeta.argpattern] || {})
 
@@ -1326,7 +1332,6 @@ function make_seneca( initial_options ) {
       
       private$.stats.act.calls++
       actstats.calls++
-      var actstart = Date.now()
 
 
       callargs.meta$ = {
@@ -1451,7 +1456,7 @@ function make_seneca( initial_options ) {
       }
 
       private$.executor.execute(execspec)
-    }
+    })
   }
 
 
@@ -1464,8 +1469,12 @@ function make_seneca( initial_options ) {
   //    * _prior_ctxt_  (object?)   &rarr;  prior action context, if any
   //    * _actcb_       (function)  &rarr;  action arguments
   function act_cache_check( instance, args, prior_ctxt, actcb ) {
-    assert.ok( _.isObject(args),    'act_cache_check; args;  isObject')
-    assert.ok( _.isFunction(actcb), 'act_cache_check; actcb; isFunction')
+    assert.ok( _.isObject(instance), 'act_cache_check; instance; isObject')
+    assert.ok( _.isObject(args),     'act_cache_check; args; isObject')
+    assert.ok( !prior_ctxt || _.isObject(prior_ctxt),     
+               'act_cache_check; prior_ctxt; isObject')
+    assert.ok( !actcb || _.isFunction(actcb),  
+               'act_cache_check; actcb; isFunction')
 
     var actid = args.actid$
 
@@ -1478,12 +1487,33 @@ function make_seneca( initial_options ) {
         
         logging.log_act_cache( instance, {actid:actid}, actmeta, args, prior_ctxt )
         
-        actcb.apply( instance, actdetails.result )
+        if( actcb ) actcb.apply( instance, actdetails.result );
         return true;
       }
     }
     
     return false;
+  }
+
+
+
+  // Check if action parameters pass parambulator spec, if any.
+  //
+  //    * _args_     (object)    &rarr;  action arguments
+  //    * _actmeta_  (object)    &rarr;  action meta data
+  //    * _done_     (function)  &rarr;  callback function
+  function act_param_check( args, actmeta, done ) {
+    assert.ok( _.isObject(args),    'act_param_check; args; isObject')
+    assert.ok( _.isObject(actmeta), 'act_param_check; actmeta; isObject')
+    assert.ok( _.isFunction(done),  'act_param_check; done; isFunction')
+
+    if( actmeta.parambulator ) {
+      actmeta.parambulator.validate(args,function(err) {
+        if(err) return done( 
+          error('act_invalid_args', {message:err.message,args:args} ));
+      })
+    } 
+    else return done();
   }
 
 

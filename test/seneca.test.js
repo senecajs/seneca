@@ -763,14 +763,12 @@ describe('seneca', function(){
 
       .ready(function(){
 
-        try {
-          this.act('A:1,B:true,C:44')
-          assert.fail()
-        }
-        catch(e) {
-          assert.equal('act_invalid_args',e.code)
+        this.options({errhandler:function(err){
+          if( 'act_invalid_args' != err.code ) return fin(err);
           fin()
-        }
+        }})
+        this.act('A:1,B:true,C:44')
+
       })
   })
 
@@ -819,7 +817,7 @@ describe('seneca', function(){
 
 
 
-  it('act-param', function(){
+  it('act-param', function(fin){
     var si = seneca(testopts)
 
     si.add({a:1,b:{integer$:true}},function(args,done){
@@ -832,25 +830,20 @@ describe('seneca', function(){
       assert.equal(2,out.a)
     })
 
-    try {
-      si.act({a:1,b:"b"},function(err,out){
-        assert.fail()
-      })
-    }
-    catch(e){
-      assert.equal('act_invalid_args',e.code)
-      assert.equal(": Invalid action arguments; The property \'b\', with current value: \'b\', must be a integer (parent: top level).; arguments were: { a: 1, b: 'b' }.",e.message.substring(e.message.indexOf(':')))
-    }
-
-    try {
-      si.add({a:1,b:{notatypeatallatall$:true}},function(args,done){
-        assert.fail()
-      })
-    }
-    catch(e){
-      assert.ok(e.message.match(/Parambulator: Unknown rule/))
-    }
-
+    si.act({a:1,b:"b"},function(err,out){
+      assert.equal('act_invalid_args',err.code)
+      assert.equal(": Invalid action arguments; The property \'b\', with current value: \'b\', must be a integer (parent: top level).; arguments were: { a: 1, b: 'b' }.",err.message.substring(err.message.indexOf(':')))
+      
+      try {
+        si.add({a:1,b:{notatypeatallatall$:true}},function(args,done){
+          assert.fail()
+        })
+      }
+      catch(e){
+        assert.ok(e.message.match(/Parambulator: Unknown rule/))
+        fin()
+      }
+    })
   })
 
 
@@ -959,7 +952,7 @@ describe('seneca', function(){
           si.act('role:seneca,stats:true',function(err,stats){
             if(err) return fin(err);
 
-            assert.equal( '{ calls: 7, done: 7, fails: 0, cache: 1 }',
+            assert.equal( '{ calls: 6, done: 6, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
             fin()
           })
