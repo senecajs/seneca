@@ -57,7 +57,7 @@ module.exports = init
 
 // Create a new Seneca instance.
 //
-//    * opts  &rarr;  options
+//    * initial_options  &rarr;  options
 function make_seneca( initial_options ) {
   /* jshint validthis:true */
 
@@ -1283,6 +1283,8 @@ function make_seneca( initial_options ) {
 
 
     var act_done = function(err) {
+      //console.log('DONE',err)
+
       var actend = Date.now()
       private$.timestats.point( actend-actstart, actmeta.argpattern )
 
@@ -1304,16 +1306,8 @@ function make_seneca( initial_options ) {
         private$.stats.act.fails++
         actstats.fails++
 
-        err.details = err.details || {}
-        err.details.plugin = err.details.plugin || {}
-
-        logging.log_act_err( root, {actid:actid,duration:actend-actstart}, 
-                             actmeta, callargs, prior_ctxt, err )
-
-        instance.emit('error',err)
-        if( so.errhandler ) {
-          call_cb = !so.errhandler(err)
-        }
+        call_cb = act_error(instance,err,result,actmeta,cb,actend-actstart,
+                            callargs,prior_ctxt)
       }
       else {
         instance.emit('act-out',callargs,result[1])
@@ -1398,6 +1392,40 @@ function make_seneca( initial_options ) {
     })
   }
 
+
+  function act_error( instance, err, result, actmeta, cb, duration, callargs, prior_ctxt ) {
+    var call_cb = true
+
+    if( 'action-execute' === err.code ) {
+      var origerr = err
+      err = error('act_execute',_.extend(
+        {},
+        origerr.details,
+        {
+          message:err.message,
+          pattern:err.details.desc,
+          fn:actmeta.func,
+          cb:cb
+        }))
+      err.stack = origerr.stack
+      err.callpoint = origerr.callpoint
+      result[0] = err
+    }
+
+    err.details = err.details || {}
+    err.details.plugin = err.details.plugin || {}
+
+    logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
+                         actmeta, callargs, prior_ctxt, err )
+
+    instance.emit('act-err',callargs,err)
+
+    if( so.errhandler ) {
+      call_cb = !so.errhandler(err)
+    }
+
+    return call_cb
+  }
 
 
   // Check if actid has already been seen, and if action cache is active,
@@ -2169,6 +2197,9 @@ function ERRMSGMAP() {
     act_not_found: 'No matching action pattern found for "<%=args%>", and no default result provided (using a default$ property).',
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument should be a string or object pattern.',
     act_invalid_args: 'Invalid action arguments; <%=message%>; arguments were: <%=args%>.',
+    act_execute: 'Action <%=pattern%> failed: <%=message%>.',
+
+
     no_client: 'Transport client was not created; arguments were: "<%=args%>".',
 
     invalid_options: 'Invalid options; <%=message%>',
@@ -2182,5 +2213,6 @@ function ERRMSGMAP() {
     store_cmd_missing: 'Entity data store implementation is missing a command; "<%=cmd%>": "<%=store%>".',
 
     sub_function_catch: 'Pattern subscription function threw: <%=message%> on args: <%=args%>, result: <%=result%>.'
+
   }
 }
