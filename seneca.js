@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2014 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 /* jshint node:true, asi:true, eqnull:true */
 "use strict"; 
 
@@ -1411,6 +1411,7 @@ function make_seneca( initial_options ) {
         }))
       err.stack = origerr.stack
       err.callpoint = origerr.callpoint
+      err.log = origerr.log
       result[0] = err
     }
       
