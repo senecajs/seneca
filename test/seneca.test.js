@@ -179,16 +179,17 @@ describe('seneca', function(){
   })
 
 
-
   it('happy-error',function(fin){
     var si = seneca(testopts)
+
     si.add('happy_error:1',function(args,done){done(new Error('happy-error'))})
     si.act('happy_error:1',function(err){
       assert.isNotNull(err)
-      assert.equal('happy-error',err.message)
+      assert.equal('seneca: Action happy_error:1 failed: happy-error.',err.message)
       fin()
     })
   })
+
 
   it('errhandler',function(fin){
     var tmp = {}
@@ -832,7 +833,7 @@ describe('seneca', function(){
 
     si.act({a:1,b:"b"},function(err,out){
       assert.equal('act_invalid_args',err.code)
-      assert.equal(": Invalid action arguments; The property \'b\', with current value: \'b\', must be a integer (parent: top level).; arguments were: { a: 1, b: 'b' }.",err.message.substring(err.message.indexOf(':')))
+      assert.equal("seneca: Action a:1 has invalid arguments; The property 'b', with current value: 'b', must be a integer (parent: top level).; arguments were: { a: 1, b: 'b' }.",err.message)
       
       try {
         si.add({a:1,b:{notatypeatallatall$:true}},function(args,done){

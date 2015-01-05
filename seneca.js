@@ -209,6 +209,7 @@ function make_seneca( initial_options ) {
             debug:{
               allargs: false,
               fragile: false,
+              undead:  false,
             },
 
             deathdelay: 33333,
@@ -254,6 +255,21 @@ function make_seneca( initial_options ) {
   root.id = root.idgen()+'/'+Date.now()+'/'+so.tag
 
   root.name = 'Seneca/'+root.version+'/'+root.id
+
+
+  root.die = makedie( root, {
+    type:   'sys',
+    plugin: 'seneca',
+    tag:    root.version,
+    id:     root.id
+  })
+
+  // Error events are fatal, unless you're undead.  These are not the
+  // same as action errors, these are unexpected internal issues.
+  if( !so.debug.undead ) {
+    root.on('error',root.die) 
+  }
+
 
   private$.logrouter = logging.makelogrouter(so.log)
 
@@ -317,9 +333,6 @@ function make_seneca( initial_options ) {
   private$.clientrouter = so.internal.clientrouter
   private$.subrouter    = so.internal.subrouter
 
-
-  // prevent process exit
-  root.on('error',common.noop) 
 
 
   root.on('newListener', function(eventname) {
@@ -429,6 +442,7 @@ function make_seneca( initial_options ) {
 
     private$.plugin_order.byref.push(pluginref)
 
+
     // LEGACY
     var service = plugin.service
     if( service ) {
@@ -515,13 +529,6 @@ function make_seneca( initial_options ) {
     return exportval;
   }
 
-
-  root.die = makedie( root, {
-    type:   'sys',
-    plugin: 'seneca',
-    tag:    root.version,
-    id:     root.id
-  })
 
 
 
@@ -1283,78 +1290,70 @@ function make_seneca( initial_options ) {
 
 
     var act_done = function(err) {
-      //console.log('DONE',err)
-
-      var actend = Date.now()
-      private$.timestats.point( actend-actstart, actmeta.argpattern )
-
-      prior_ctxt.depth--
-      prior_ctxt.entry = prior_ctxt.depth <= 0
-      
-      var result  = arr(arguments)
-      var call_cb = true
-
-      if( so.actcache ) {
-        private$.actcache.set(actid,{
-          result:result,
-          actmeta:actmeta,
-          when:Date.now()
-        })
-      }
-
-      if( err ) {
-        private$.stats.act.fails++
-        actstats.fails++
-
-        call_cb = act_error(instance,err,result,actmeta,cb,actend-actstart,
-                            callargs,prior_ctxt)
-      }
-      else {
-        instance.emit('act-out',callargs,result[1])
-        result[0] = null
-
-        logging.log_act_out( 
-          instance, {actid:actid,duration:actend-actstart}, 
-          actmeta, callargs, result, prior_ctxt )
-
-        private$.stats.act.done++
-        actstats.done++
-      }
-      
       try {
-        if( call_cb ) {
-          cb.apply(delegate,result) // note: err == result[0]
+        var actend = Date.now()
+        private$.timestats.point( actend-actstart, actmeta.argpattern )
+
+        prior_ctxt.depth--
+        prior_ctxt.entry = prior_ctxt.depth <= 0
+        
+        var result  = arr(arguments)
+        var call_cb = true
+
+        if( so.actcache ) {
+          private$.actcache.set(actid,{
+            result:result,
+            actmeta:actmeta,
+            when:Date.now()
+          })
+        }
+
+        if( err ) {
+          private$.stats.act.fails++
+          actstats.fails++
+
+          call_cb = act_error(instance,err,result,actmeta,cb,actend-actstart,
+                              callargs,prior_ctxt)
+        }
+        else {
+          instance.emit('act-out',callargs,result[1])
+          result[0] = null
+
+          logging.log_act_out( 
+            instance, {actid:actid,duration:actend-actstart}, 
+            actmeta, callargs, result, prior_ctxt )
+
+          private$.stats.act.done++
+          actstats.done++
+        }
+
+        
+        try {
+          if( call_cb ) {
+            cb.apply(delegate,result) // note: err == result[0]
+          }
+        }
+
+        // for exceptions thrown inside the callback
+        catch( ex ) {
+          var err = ex
+
+          // handle throws of non-Error values
+          if( !util.isError(ex) ) {
+            if( _.isObject(ex) ) {
+              err = new Error(common.owndesc(ex,1))
+            }
+            else {
+              err = new Error(''+ex)
+            }
+          }
+
+          act_error(instance,err,result,actmeta,cb,actend-actstart,
+                    callargs,prior_ctxt)
         }
       }
-      // for errors thrown inside the callback
-      catch( ex ) {
-        var err = ex
-        if( err.seneca ) {
-          //err.seneca_callback = true
-          throw err;
-        }
-
-        // handle throws of non-Error values
-        if( !util.isError(err) ) {
-          if( _.isObject(err) ) {
-            err = new Error(common.owndesc(err,1))
-          }
-          else {
-            err = new Error(''+err)
-          }
-        }
-
-        // TODO: not really satisfactory
-        //var err = instance.fail( error, {result:result} )
-        err = error( error, {result:result} )
-        instance.log.error(
-          'act','err',actid,'callback', 
-          err.message, 'A;'+actmeta.id, origargs, error.stack )
-
-        instance.emit('error',err)
-        if( so.errhandler ) {
-          so.errhandler(err)
-        }
+      catch(ex) {
+        instance.emit('error',ex)
       }
     }
 
@@ -1393,32 +1392,35 @@ function make_seneca( initial_options ) {
   }
 
 
-  function act_error( instance, err, result, actmeta, cb, duration, callargs, prior_ctxt ) {
+  function act_error( instance, err, result, actmeta, cb, 
+                      duration, callargs, prior_ctxt ) 
+  {
     var call_cb = true
 
-    if( 'action-execute' === err.code ) {
+    if( !err.seneca ) {
       var origerr = err
       err = error('act_execute',_.extend(
         {},
         origerr.details,
         {
-          message:err.message,
-          pattern:err.details.desc,
-          fn:actmeta.func,
-          cb:cb
+          message:  err.message,
+          pattern:  err.details ? err.details.desc : '',
+          fn:       actmeta.func,
+          cb:       cb,
+          instance: instance.toString()
         }))
       err.stack = origerr.stack
       err.callpoint = origerr.callpoint
       result[0] = err
     }
-
+      
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
     logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
                          actmeta, callargs, prior_ctxt, err )
 
-    instance.emit('act-err',callargs,err)
+    instance.emit('act-err',callargs,err,result[1])
 
     if( so.errhandler ) {
       call_cb = !so.errhandler(err)
@@ -1542,7 +1544,8 @@ function make_seneca( initial_options ) {
     if( actmeta.parambulator ) {
       actmeta.parambulator.validate(args,function(err) {
         if(err) return done( 
-          error('act_invalid_args', {message:err.message,args:args} ));
+          error('act_invalid_args', 
+                {pattern:actmeta.pattern,message:err.message,args:args} ));
         return done();
       })
     } 
@@ -2196,8 +2199,9 @@ function ERRMSGMAP() {
 
     act_not_found: 'No matching action pattern found for "<%=args%>", and no default result provided (using a default$ property).',
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument should be a string or object pattern.',
-    act_invalid_args: 'Invalid action arguments; <%=message%>; arguments were: <%=args%>.',
+    act_invalid_args: 'Action <%=pattern%> has invalid arguments; <%=message%>; arguments were: <%=args%>.',
     act_execute: 'Action <%=pattern%> failed: <%=message%>.',
+    act_callback: 'Action <%=pattern%> callback threw: <%=message%>.',
 
 
     no_client: 'Transport client was not created; arguments were: "<%=args%>".',
