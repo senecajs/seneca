@@ -20,34 +20,21 @@ var testopts = {log:'silent'}
 
 describe('seneca', function(){
 
-  // error generators
-  // ex:  param, exec, action, callback, ready
-  // res: err
-
-  // error receivers
-  // caller, callback, errhandler
-
 
   it('act_not_found', act_not_found)
 
   it('param_caller', param_caller)
 
-  it('exec_action_throw',        exec_action_throw)
-  it('exec_action_throw_nolog',  exec_action_throw_nolog)
-  it('exec_action_errhandler_throw',    exec_action_errhandler_throw)
+  it('exec_action_throw',             exec_action_throw)
+  it('exec_action_throw_nolog',       exec_action_throw_nolog)
+  it('exec_action_errhandler_throw',  exec_action_errhandler_throw)
 
-  it('exec_action_result',       exec_action_result)
-  it('exec_action_result_nolog', exec_action_result_nolog)
-  it('exec_action_errhandler_result',   exec_action_errhandler_result)
+  it('exec_action_result',            exec_action_result)
+  it('exec_action_result_nolog',      exec_action_result_nolog)
+  it('exec_action_errhandler_result', exec_action_errhandler_result)
 
-  //it('exec_action',       exec_action)
-  //it('exec_callback',     exec_callback)
-  //it('exec_errhandler',   exec_errhandler)
+  it('action_callback',   action_callback)
 
-  //it('action_callback',   action_callback)
-  //it('action_errhandler', action_errhandler)
-
-  //it('callback_errhandler', callback_errhandler)
 
   //it('ready', ready)
 
@@ -336,6 +323,9 @@ describe('seneca', function(){
         if( ctxt.log ) {
           assert.equal('act_execute', ctxt.errlog[15], ctxt.name+'-C' )
         }
+        else {
+          assert.ok( null == ctxt.errlog )
+        }
 
         ctxt.errlog = null
 
@@ -360,6 +350,55 @@ describe('seneca', function(){
       catch(e) { ctxt.fin(e) }
     })
   }
+
+
+
+  function action_callback(fin){
+    var ctxt = {errlog:null}
+    var si   = make_seneca(ctxt)
+
+    var log_it = true
+
+    si.options({errhandler:function(err){
+      assert.equal('act_callback', err.code, 'callback-G' )
+      assert.equal('seneca: Action a:1 callback threw: DDD.',err.message)
+
+      if( log_it ) {
+        assert.equal('act_callback', ctxt.errlog[15], 'callback-H' )
+      }
+      else {
+        assert.ok( null == ctxt.errlog )
+        fin();
+      }
+    }})
+
+    si.ready(function(){
+      si.add('a:1',function(args,done){this.good({x:1})})
+      
+
+      setTimeout( function(){
+        // ~~ CASE: action; callback; callback-throws; log
+        si.act('a:1',function(err,out){
+          assert.ok(out.x)
+          throw new Error('DDD');
+        })
+      },20)
+
+      setTimeout( function(){
+        // ~~ CASE: action; callback; callback-throws; no-log
+        si.act('a:1',function(err,out){
+          assert.ok(out.x)
+          var e = new Error('DDD')
+          e.log = false
+          log_it = false
+          ctxt.errlog = null
+          throw e;
+        })
+      },40)
+
+    })
+  }
+
 
 })
 

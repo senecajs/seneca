@@ -17,9 +17,9 @@ describe('plugin', function(){
 
   it('bad', function() {
     var si = seneca({
-      // this lets you change stayalive per test
-      test:{
-        stayalive: true
+      // this lets you change undead per test
+      debug:{
+        undead:true
       },
       log:'silent'
     })
@@ -38,9 +38,9 @@ describe('plugin', function(){
 
   it('depends', function() {
     var si = seneca({
-      // this lets you change stayalive per test
-      test:{
-        stayalive: true
+      // this lets you change undead per test
+      debug:{
+        undead: true
       },
       log:'silent'
     })
@@ -168,9 +168,9 @@ describe('plugin', function(){
 
   it('export',function(){
     var si = seneca({
-      // this lets you change stayalive per test
-      test:{
-        stayalive: true
+      // this lets you change undead per test
+      debug:{
+        undead: true
       },
       log:'silent'
     })

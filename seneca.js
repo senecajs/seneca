@@ -214,10 +214,6 @@ function make_seneca( initial_options ) {
 
             deathdelay: 33333,
 
-            test:{
-              stayalive: false
-            },
-
             admin:{
               local:  false,
               prefix: '/admin'
@@ -264,17 +260,15 @@ function make_seneca( initial_options ) {
     id:     root.id
   })
 
-  // Error events are fatal, unless you're undead.  These are not the
-  // same as action errors, these are unexpected internal issues.
-  if( !so.debug.undead ) {
-    root.on('error',root.die) 
-  }
-
 
   private$.logrouter = logging.makelogrouter(so.log)
 
   root.log = logging.makelog(private$.logrouter,root.id)
 
+
+  // Error events are fatal, unless you're undead.  These are not the
+  // same as action errors, these are unexpected internal issues.
+  root.on('error',root.die) 
   
   // TODO: support options
   private$.executor = executor({
@@ -1312,8 +1306,8 @@ function make_seneca( initial_options ) {
           private$.stats.act.fails++
           actstats.fails++
 
-          call_cb = act_error(instance,err,result,actmeta,cb,actend-actstart,
-                              callargs,prior_ctxt)
+          call_cb = act_error(instance,err,actmeta,result,cb,
+                              actend-actstart,callargs,prior_ctxt)
         }
         else {
           instance.emit('act-out',callargs,result[1])
@@ -1348,8 +1342,8 @@ function make_seneca( initial_options ) {
             }
           }
 
-          act_error(instance,err,result,actmeta,cb,actend-actstart,
-                    callargs,prior_ctxt)
+          callback_error(
+            instance,err,actmeta,result,cb,actend-actstart,callargs,prior_ctxt)
         }
       }
       catch(ex) {
@@ -1392,7 +1386,7 @@ function make_seneca( initial_options ) {
   }
 
 
-  function act_error( instance, err, result, actmeta, cb, 
+  function act_error( instance, err, actmeta, result, cb, 
                       duration, callargs, prior_ctxt ) 
   {
     var call_cb = true
@@ -1404,14 +1398,55 @@ function make_seneca( initial_options ) {
         origerr.details,
         {
           message:  err.message,
-          pattern:  err.details ? err.details.desc : '',
+          pattern:  actmeta.pattern,
           fn:       actmeta.func,
           cb:       cb,
           instance: instance.toString()
         }))
-      err.stack = origerr.stack
-      err.callpoint = origerr.callpoint
-      err.log = origerr.log
+
+      err.stack     = origerr.stack
+      err.callpoint = error.callpoint(origerr)
+      err.log       = origerr.log
+
+      result[0] = err
+    }
+      
+    err.details = err.details || {}
+    err.details.plugin = err.details.plugin || {}
+
+    logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
+                         actmeta, callargs, prior_ctxt, err )
+
+    instance.emit('act-err',callargs,err)
+
+    if( so.errhandler ) {
+      call_cb = !so.errhandler(err)
+    }
+
+    return call_cb
+  }
+
+
+  function callback_error( instance, err, actmeta, result, cb,
+                           duration, callargs, prior_ctxt ) 
+  {
+    if( !err.seneca ) {
+      var origerr = err
+      err = error('act_callback',_.extend(
+        {},
+        origerr.details,
+        {
+          message:  err.message,
+          pattern:  actmeta.pattern,
+          fn:       actmeta.func,
+          cb:       cb,
+          instance: instance.toString()
+        }))
+
+      err.stack     = origerr.stack
+      err.callpoint = error.callpoint(origerr)
+      err.log       = origerr.log
+
       result[0] = err
     }
       
@@ -1424,10 +1459,8 @@ function make_seneca( initial_options ) {
     instance.emit('act-err',callargs,err,result[1])
 
     if( so.errhandler ) {
-      call_cb = !so.errhandler(err)
+      so.errhandler(err)
     }
-
-    return call_cb
   }
 
 
@@ -2003,8 +2036,8 @@ function makedie( instance, ctxt ) {
 
     var so = instance.options()
 
-    // stayalive is only for testing, do not use in production
-    var stayalive = so.test.stayalive || (err && err.stayalive)
+    // undead is only for testing, do not use in production
+    var undead = so.debug.undead || (err && err.undead)
 
     var logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, code]
           .concat( message && message != code ? message : void 0 )
@@ -2037,7 +2070,7 @@ function makedie( instance, ctxt ) {
           ", args="+util.inspect(process.argv)+"\n\n"
 
 
-    if( stayalive ) {
+    if( undead ) {
       throw error(err,code,args.valmap)
     }
 
@@ -2049,7 +2082,7 @@ function makedie( instance, ctxt ) {
     
     // terminate process, err (if defined) is from seneca.close
     function die( err ) {
-      if( !stayalive ) {
+      if( !undead ) {
         process.nextTick(function() {
           if( err ) console.error( err );
           console.error("Terminated at "+(new Date().toISOString())+
@@ -2062,7 +2095,7 @@ function makedie( instance, ctxt ) {
     instance.close( die )
 
     // make sure we close down within options.deathdelay seconds
-    if( !stayalive ) {
+    if( !undead ) {
       var killtimer = setTimeout(function() {
         console.error("Terminated (on timeout) at "+(new Date().toISOString())+
                       ".\n\n")
