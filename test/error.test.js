@@ -5,17 +5,16 @@
 // mocha error.test.js
 
 var util   = require('util')
+var assert = require('assert')
 
 var seneca   = require('..')
 var common   = require('../lib/common')
 
-var assert  = require('chai').assert
-var gex     = require('gex')
-var _ = require('underscore')
+var gex = require('gex')
+var _   = require('underscore')
 
 
 var testopts = {log:'silent'}
-
 
 
 describe('seneca', function(){
@@ -36,7 +35,8 @@ describe('seneca', function(){
   it('action_callback',   action_callback)
 
 
-  //it('ready', ready)
+  it('ready_die', ready_die)
+
 
 
   function act_not_found(fin){
@@ -399,6 +399,27 @@ describe('seneca', function(){
     })
   }
 
+
+  function ready_die(fin) {
+    var si = seneca({
+      log:'silent',
+      debug:{undead:true},
+      errhandler:function(err){
+        try {
+          assert.ok(err.foo)
+          assert.equal('seneca: Ready function failed: EEE',err.message)
+          fin()
+        }
+        catch(e){fin(e)}
+      }
+    })
+
+    si.ready(function(){
+      var e = new Error('EEE')
+      e.foo = true
+      throw e;
+    })
+  }
 
 })
 

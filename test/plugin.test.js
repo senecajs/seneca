@@ -55,16 +55,15 @@ describe('plugin', function(){
     })
 
 
-    try {
-      si.use( function(opts){
-        this.depends('ccc',['zzz'])
-        return {name:'ccc'}
-      })
-      assert.fail()
-    }
-    catch( e ) {
-      assert.equal('plugin_required',e.code)
-    }
+    si.options({errhandler:function(err){
+      assert.equal('plugin_required',err.code)
+    }})
+
+    si.use( function(opts){
+      this.depends('ccc',['zzz'])
+      return {name:'ccc'}
+    })
+
 
     si.use( function(opts){
       return {name:'ddd'}
@@ -85,16 +84,11 @@ describe('plugin', function(){
       return {name:'ggg'}
     })
 
-    try {
-      si.use( function(opts){
-        this.depends('hhh','aaa','zzz')
-        return {name:'hhh'}
-      })
-    }
-    catch(e) {
-      assert.equal('plugin_required',e.code)
-    }
 
+    si.use( function(opts){
+      this.depends('hhh','aaa','zzz')
+      return {name:'hhh'}
+    })
   })
 
 
@@ -177,13 +171,11 @@ describe('plugin', function(){
 
     si.use(function badexport(){})
 
-    try {
-      si.export('not-an-export')
-      assert.fail()
-    }
-    catch(e) {
-      assert.equal('export_not_found',e.code)
-    }
+    si.options({errhandler:function(err){
+      assert.equal('export_not_found',err.code)
+    }})
+
+    si.export('not-an-export')
   })
 
 

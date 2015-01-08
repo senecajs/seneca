@@ -463,7 +463,7 @@ function make_seneca( initial_options ) {
             plugin.timeout = so.timeout
           }
 
-          return self.die(plugin_err_code,err,plugin)
+          return self.die(error(err,plugin_err_code,plugin))
         }
         return self.log.debug('register','ready',pluginref,out)
       }
@@ -503,7 +503,7 @@ function make_seneca( initial_options ) {
     _.every(deps, function(depname) {
       if( !_.contains(private$.plugin_order.byname,depname) &&
           !_.contains(private$.plugin_order.byname,'seneca-'+depname) ) {
-        self.die('plugin_required',{name:args.pluginname,dependency:depname})
+        self.die(error('plugin_required',{name:args.pluginname,dependency:depname}))
         return false
       }
       else return true;
@@ -517,7 +517,7 @@ function make_seneca( initial_options ) {
 
     var exportval = private$.exports[key];
     if( !exportval ) {
-      return self.die( 'export_not_found', {key:key} )
+      return self.die(error('export_not_found', {key:key}))
     }
     
     return exportval;
@@ -545,7 +545,7 @@ function make_seneca( initial_options ) {
     var config = parseConfig( arr(arguments), opts )
 
     self.act('role:transport,cmd:listen',{config:config,gate$:true},function(err) {
-      if( err ) return self.die('transport_listen',err,config)
+      if( err ) return self.die(error(err,'transport_listen',config))
     })
 
     return self
@@ -607,10 +607,12 @@ function make_seneca( initial_options ) {
       'role:transport,cmd:client',
       {config:config,gate$:true},
       function(err,liveclient) {
-        if( err ) return self.die('transport_client',err,config)
-        if( null == liveclient ) return self.die('transport_client_null',config)
+        if( err ) return self.die(error(err,'transport_client',config));
+        if( null == liveclient ) 
+          return self.die(error('transport_client_null',config));
 
-        // Process any messages waiting for this client, before bringing client online.
+        // Process any messages waiting for this client, 
+        // before bringing client online.
         function sendnext() {
           if( 0 === sendqueue.length ) {
             sendclient = liveclient
@@ -618,7 +620,8 @@ function make_seneca( initial_options ) {
           }
           else {
             var tosend = sendqueue.shift()
-            self.log.debug('client','sendqueue-processing',sendqueue.length+1,config,tosend)
+            self.log.debug('client','sendqueue-processing',
+                           sendqueue.length+1,config,tosend)
             sendclient.send.call(tosend.instance,tosend.args,tosend.done)
             setImmediate(sendnext)
           }
@@ -831,12 +834,10 @@ function make_seneca( initial_options ) {
       pattern.in$ = true
     }
 
-    //console.log(pattern)
-
     if( !private$.handle_sub ) {
       private$.handle_sub = function(args,result) {
         var subfuncs = private$.subrouter.find(args)
-        //console.log('F',args,''+subfuncs)
+
         if( subfuncs ) {
           _.each(subfuncs,function(subfunc){
             try {
@@ -873,8 +874,6 @@ function make_seneca( initial_options ) {
       private$.subrouter.add(pattern,subs=[])
     }
     subs.push(subargs.action)
-
-    //console.log(private$.subrouter)
 
     return self;
   }
@@ -1135,8 +1134,14 @@ function make_seneca( initial_options ) {
         try {
           ready.call(self)
         }
-        catch(e) {
-          self.die('ready_failed',e,ready)
+        catch(ex) {
+          var re = ex
+
+          if( !re.seneca ) { 
+            re = error(re,'ready_failed', {message:ex.message,ready:ready})
+          }
+
+          self.die( re )
         }
       })
 
@@ -1167,7 +1172,7 @@ function make_seneca( initial_options ) {
       plugindesc = private$.use( arg0, arg1, arg2 )
     }
     catch(e) {
-      return self.die( 'plugin_'+e.code, e );
+      return self.die( error(e,'plugin_'+e.code) );
     }
 
     self.register( plugindesc, plugindesc.callback )
@@ -1320,7 +1325,6 @@ function make_seneca( initial_options ) {
           private$.stats.act.done++
           actstats.done++
         }
-
         
         try {
           if( call_cb ) {
@@ -1392,10 +1396,9 @@ function make_seneca( initial_options ) {
     var call_cb = true
 
     if( !err.seneca ) {
-      var origerr = err
-      err = error('act_execute',_.extend(
+      err = error(err,'act_execute',_.extend(
         {},
-        origerr.details,
+        err.details,
         {
           message:  err.message,
           pattern:  actmeta.pattern,
@@ -1403,10 +1406,6 @@ function make_seneca( initial_options ) {
           cb:       cb,
           instance: instance.toString()
         }))
-
-      err.stack     = origerr.stack
-      err.callpoint = error.callpoint(origerr)
-      err.log       = origerr.log
 
       result[0] = err
     }
@@ -1431,10 +1430,9 @@ function make_seneca( initial_options ) {
                            duration, callargs, prior_ctxt ) 
   {
     if( !err.seneca ) {
-      var origerr = err
-      err = error('act_callback',_.extend(
+      err = error(err,'act_callback',_.extend(
         {},
-        origerr.details,
+        err.details,
         {
           message:  err.message,
           pattern:  actmeta.pattern,
@@ -1442,10 +1440,6 @@ function make_seneca( initial_options ) {
           cb:       cb,
           instance: instance.toString()
         }))
-
-      err.stack     = origerr.stack
-      err.callpoint = error.callpoint(origerr)
-      err.log       = origerr.log
 
       result[0] = err
     }
@@ -2027,81 +2021,93 @@ function handle_error_args( args, ctxt ) {
 function makedie( instance, ctxt ) {
   ctxt = _.extend(ctxt,instance.die?instance.die.context:{})
 
-  var die = function() {
-    var args = handle_error_args(arguments,ctxt)
+  var die = function( err ) {
+    try {
+      if( !err ) {
+        err = new Error( 'unknown' )
+      }
 
-    var code    = args.code
-    var err     = args.error
-    var message = args.message
+      //var args = handle_error_args(arguments,ctxt)
 
-    var so = instance.options()
+      //var code    = args.code
+      //var err     = args.error
+      //var message = args.message
 
-    // undead is only for testing, do not use in production
-    var undead = so.debug.undead || (err && err.undead)
+      var so = instance.options()
 
-    var logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, code]
-          .concat( message && message != code ? message : void 0 )
-          .concat( args.remaining )
+      // undead is only for testing, do not use in production
+      var undead = so.debug.undead || (err && err.undead)
 
-    if( !err ) {
-      err = new Error( code )
-    }
+      var logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, err.code, err.message, err.details]
 
-    instance.log.fatal.apply( instance, logargs )
+      instance.log.fatal.apply( instance, logargs )
 
-    var stack = err.stack
-    stack = stack.replace(/^.*?\n/,'\n')
+      var stack = err.stack || ''
+      stack = stack.replace(/^.*?\n/,'\n')
 
-    var procdesc = process.pid // + more
+      var procdesc = process.pid // + more
 
-    var stderrmsg =
-          "\n\n"+
-          "Seneca Fatal Error\n"+
-          "==================\n\n"+
-          "Message: "+message+"\n\n"+
-          "Code: "+code+"\n\n"+
-          "Stack: "+stack+"\n\n"+
-          "Instance: "+instance.toString()+"\n\n"+
-          "When: "+new Date().toISOString()+"\n\n"+
-          "Log: "+common.owndesc(logargs,3)+"\n\n"+
-          "Node: "+util.inspect(process.versions).replace(/\s+/g,' ')+"\n\n"+
-          "Process: pid="+procdesc+
-          ", path="+process.execPath+
-          ", args="+util.inspect(process.argv)+"\n\n"
-
-
-    if( undead ) {
-      throw error(err,code,args.valmap)
-    }
+      var stderrmsg =
+            "\n\n"+
+            "Seneca Fatal Error\n"+
+            "==================\n\n"+
+            "Message: "+err.message+"\n\n"+
+            "Code: "+err.code+"\n\n"+
+            "Stack: "+stack+"\n\n"+
+            "Instance: "+instance.toString()+"\n\n"+
+            "When: "+new Date().toISOString()+"\n\n"+
+            "Log: "+common.owndesc(logargs,3)+"\n\n"+
+            "Node: "+util.inspect(process.versions).replace(/\s+/g,' ')+"\n\n"+
+            "Process: pid="+procdesc+
+            ", path="+process.execPath+
+            ", args="+util.inspect(process.argv)+"\n\n"
 
 
-    // this blocks, but that's ok, we want to be sure the error description 
-    // is printed to STDERR
-    console.error( stderrmsg )
+      if( so.errhandler ) {
+        so.errhandler(err)
+      }
 
-    
-    // terminate process, err (if defined) is from seneca.close
-    function die( err ) {
+      // this blocks, but that's ok, we want to be sure the error description 
+      // is printed to STDERR
       if( !undead ) {
-        process.nextTick(function() {
-          if( err ) console.error( err );
-          console.error("Terminated at "+(new Date().toISOString())+
-                        ". See above for error report.\n\n")
-          process.exit(1)
-        })
+        console.error( stderrmsg )
+      }
+      
+      if( !undead ) {
+        instance.close(     
+          // terminate process, err (if defined) is from seneca.close
+          function ( err ) {
+            if( !undead ) {
+              process.nextTick(function() {
+                if( err ) console.error( err );
+                console.error("Terminated at "+(new Date().toISOString())+
+                              ". See above for error report.\n\n")
+                process.exit(1)
+              })
+            }
+          }
+        )
+      }
+
+      // make sure we close down within options.deathdelay seconds
+      if( !undead ) {
+        var killtimer = setTimeout(function() {
+          console.error("Terminated (on timeout) at "+(new Date().toISOString())+
+                        ".\n\n")
+          process.exit(2);
+        }, so.deathdelay);
+        killtimer.unref();
       }
     }
-
-    instance.close( die )
-
-    // make sure we close down within options.deathdelay seconds
-    if( !undead ) {
-      var killtimer = setTimeout(function() {
-        console.error("Terminated (on timeout) at "+(new Date().toISOString())+
-                      ".\n\n")
-        process.exit(2);
-      }, so.deathdelay);
-      killtimer.unref();
+    catch(panic) {
+      var msg =
+            "\n\n"+
+            "Seneca Panic\n"+
+            "============\n\n"+
+            panic.stack+
+            "\n\nOrginal Error:\n"+
+            (arguments[0] && arguments[0].stack ? arguments[0].stack : arguments[0])
+      console.error(msg)
     }
   }
 
@@ -2250,7 +2256,8 @@ function ERRMSGMAP() {
 
     store_cmd_missing: 'Entity data store implementation is missing a command; "<%=cmd%>": "<%=store%>".',
 
-    sub_function_catch: 'Pattern subscription function threw: <%=message%> on args: <%=args%>, result: <%=result%>.'
+    sub_function_catch: 'Pattern subscription function threw: <%=message%> on args: <%=args%>, result: <%=result%>.',
 
+    ready_failed: 'Ready function failed: <%=message%>'
   }
 }

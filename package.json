@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "async": "~0.9.0",
-    "eraro": "~0.3.0",
+    "eraro": "~0.4.0",
     "gex": "^0.1.4",
     "jsonic": "~0.1.1",
     "lru-cache": "~2.5.0",
