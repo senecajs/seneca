@@ -1,7 +1,7 @@
-2014-09-07T10:54:39.975Z	3z4oon483ras/1410087279784/-	DEBUG	act	shop	-	IN	d39qceeh78rz	role:shop,cmd:salestax	{role=shop,cmd=salestax,net=100}	m53rtjkt7p9r	
-2014-09-07T10:54:40.074Z	3z4oon483ras/1410087279784/-	DEBUG	plugin	shop	-	ACT	d39qceeh78rz	100	123	0.23
-2014-09-07T10:54:40.075Z	3z4oon483ras/1410087279784/-	DEBUG	act	shop	-	OUT	d39qceeh78rz	role:shop,cmd:salestax	{total=123}	m53rtjkt7p9r
-2014-09-07T10:54:40.086Z	3z4oon483ras/1410087279784/-	DEBUG	plugin	shop	-	ACT	d39qceeh78rz	test	123
-2014-09-07T10:54:40.697Z	3z4oon483ras/1410087279784/-	DEBUG	act	shop	-	IN	7mshqxvf78zc	role:shop,cmd:salestax	{cmd=salestax,role=shop,net=100}	m53rtjkt7p9r	UNGATE
-2014-09-07T10:54:40.698Z	3z4oon483ras/1410087279784/-	DEBUG	plugin	shop	-	ACT	7mshqxvf78zc	100	123	0.23
-2014-09-07T10:54:40.698Z	3z4oon483ras/1410087279784/-	DEBUG	act	shop	-	OUT	7mshqxvf78zc	role:shop,cmd:salestax	{total=123}	m53rtjkt7p9r
+2014-10-07T15:10:04.582Z	yw6quq7baday/1412694604380/-	DEBUG	act	shop	-	IN	d7z803fpow30	role:shop,cmd:salestax	{role=shop,cmd=salestax,net=100}	ENTRY	A;b19hrfwetqcd	-
+2014-10-07T15:10:04.609Z	yw6quq7baday/1412694604380/-	DEBUG	plugin	shop	-	ACT	d7z803fpow30	100	123	0.23
+2014-10-07T15:10:04.609Z	yw6quq7baday/1412694604380/-	DEBUG	act	shop	-	OUT	d7z803fpow30	role:shop,cmd:salestax	{total=123}	EXIT	A;b19hrfwetqcd	-
+2014-10-07T15:10:04.609Z	yw6quq7baday/1412694604380/-	DEBUG	plugin	shop	-	ACT	d7z803fpow30	test	123
+2014-10-07T15:10:05.278Z	yw6quq7baday/1412694604380/-	DEBUG	act	shop	-	IN	uafaa22a9asf	role:shop,cmd:salestax	{cmd=salestax,role=shop,net=100}	ENTRY	A;b19hrfwetqcd	-
+2014-10-07T15:10:05.279Z	yw6quq7baday/1412694604380/-	DEBUG	plugin	shop	-	ACT	uafaa22a9asf	100	123	0.23
+2014-10-07T15:10:05.279Z	yw6quq7baday/1412694604380/-	DEBUG	act	shop	-	OUT	uafaa22a9asf	role:shop,cmd:salestax	{total=123}	EXIT	A;b19hrfwetqcd	-
