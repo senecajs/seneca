@@ -666,9 +666,34 @@ describe('seneca', function(){
     api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
     
     var acts = si.pinact({p1:'v1',p2:'*'})
-    assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",util.inspect(acts))
+    assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",
+                 util.inspect(acts))
   })
 
+
+  it('pin-star', function() {
+    var si = seneca(testopts)
+    si.add('a:1,b:x',function(){})
+    si.add('a:1,c:y',function(){})
+
+    var pin_b = si.pin('a:1,b:*')
+    assert.ok( _.isFunction(pin_b.x) )
+    assert.ok( null == pin_b.y )
+
+    var pin_c = si.pin('a:1,c:*')
+    assert.ok( _.isFunction(pin_c.y) )
+    assert.ok( null == pin_c.x )
+
+    assert.deepEqual( [ { a: '1', b: 'x' }, { a: '1', c: 'y' } ], 
+                      si.findpins('a:1') )
+
+    assert.deepEqual( [ { a: '1', b: 'x' } ], 
+                      si.findpins('a:1,b:*') )
+
+    assert.deepEqual( [ { a: '1', c: 'y' } ], 
+                      si.findpins('a:1,c:*') )
+
+  })
 
 
   it('fire-and-forget', function() {

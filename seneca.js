@@ -744,6 +744,8 @@ function make_seneca( initial_options ) {
   function api_pin( pattern, pinopts ) {
     var thispin = this
 
+    pattern = _.isString( pattern ) ? jsonic(pattern) : pattern
+
     var methodkeys = []
     for( var key in pattern ) {
       if( /[\*\?]/.exec(pattern[key]) ) {
@@ -997,10 +999,13 @@ function make_seneca( initial_options ) {
   root.findpins = root.pinact = function() {
     var pins = []
     var patterns = _.flatten(arr(arguments))
+
     _.each( patterns, function(pattern) {
       pattern = _.isString(pattern) ? jsonic(pattern) : pattern
-      pins = pins.concat( _.map( private$.actrouter.list(pattern), function(desc) {return desc.match} ) )
+      pins = pins.concat( _.map( private$.actrouter.list(pattern), 
+                                 function(desc) {return desc.match} ) )
     })
+
     return pins
   }
 
@@ -1094,7 +1099,7 @@ function make_seneca( initial_options ) {
 
     pin = _.isArray(pin) ? pin : [pin]
     _.each(pin, function(p) {
-      _.each( pinthis.pinact(pin), function(actpattern) {
+      _.each( pinthis.findpins(p), function(actpattern) {
         pinthis.add(actpattern,function(args,done) {
           wrapper.call(this,args,done)
         })
