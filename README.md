@@ -1,6 +1,6 @@
 # seneca - Node.js module
 
-## A Node.js toolkit for Micro-Service Architctures
+## A Node.js toolkit for Micro-Service Architectures
 
 [![Gitter chat](https://badges.gitter.im/rjrodger/seneca.png)](https://gitter.im/rjrodger/seneca)
 
