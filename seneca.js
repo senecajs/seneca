@@ -12,14 +12,11 @@ var util     = require('util')
 var events   = require('events')
 var net      = require('net')
 var repl     = require('repl')
-var path     = require('path')
-var buffer   = require('buffer')
 var assert   = require('assert')
 
 
 // External modules
 var _            = require('underscore')
-var async        = require('async')
 var minimist     = require('minimist')
 var nid          = require('nid')
 var jsonic       = require('jsonic')
