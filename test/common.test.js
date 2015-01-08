@@ -5,10 +5,9 @@
 // mocha common.test.js
 
 var util = require('util')
+var assert = require('assert')
 
-var _ = require('underscore')
-var assert  = require('chai').assert
-
+var _      = require('underscore')
 
 var common = require('../lib/common')
 
@@ -91,13 +90,26 @@ describe('common', function(){
     assert.equal( 1,out.a.aa )
     assert.equal( 2,out.a.bb )
 
-
-    // FIX: make this work too
     out = common.deepextend( {},aa,bb,aa)
     assert.equal( 1,out.a.aa )
     assert.equal( 2,out.a.bb )
   })
 
+
+  it('deepextend-objs', function() {
+    var d = {
+      s:'s',
+      n:100,
+      d:new Date(),
+      f:function(){},
+      a:arguments,
+      r:/a/,
+      b:Buffer('b')
+    }
+    var o = common.deepextend({},d)
+    assert.equal(''+o,''+d)
+  })
+  
 
   it('argpattern', function(){
     assert.equal( 'a:1', common.argpattern({a:1}) )

@@ -1922,99 +1922,6 @@ function make_seneca( initial_options ) {
 
 // Utilities
 
-// Error arguments:
-// code
-// code, values
-// code, Error, values
-// Error (optional code,message properties), values
-// values (optional code,message properties)
-function handle_error_args( args, ctxt ) {
-  args = arr(args)
-
-  var first = args[0]
-  var valstart = 1
-
-  var code = 'unknown'
-  code = _.isString(first) ? first : code 
-  code = util.isError(first) && _.isString(first.code) ? first.code : code
-  code = _.isObject(first) && _.isString(first.code) ? first.code : code 
-
-
-  if( _.isObject(first) && !util.isError(first) ) {
-    valstart = 0
-  }
-
-  var error = util.isError(first) ? 
-        first : util.isError(args[1]) ? (valstart=2,args[1]) : null
-
-  var valmap = _.isObject(args[valstart]) ? args[valstart] : {}
-
-  var msgmap = ERRMSGMAP()
-  var message = (msgmap[ctxt.plugin] && msgmap[ctxt.plugin][code])
-  message = _.isString(message) ? 
-    message : (_.isString(valmap.message) && valmap.message)
-  message = _.isString(message) ? 
-    message : (error && _.isString(error.message) && error.message)
-
-
-  if( !_.isString(message) ) {
-    try {
-      message = code+': '+util.inspect(args)
-    }
-    catch(e) {
-      message = code
-    }
-  }
-
-
-  // workaround to prevent underscore blowing up if properties are not found
-  // reserved words and undefined need to be suffixed with $ 
-  // in the template interpolates
-
-  // TODO: use eraro
-
-  var valstrmap = {}
-  _.each(valmap,function(val,key) {
-    /* jshint evil:true */
-    try { eval('var '+key+';') } catch(e) { key = key+'$' }
-    if( {'undefined':1,'NaN':1}[key] ) { key = key+'$' }
-    valstrmap[key] = (_.isObject(val) ? common.owndesc(val,1) : ''+val)
-  })
-
-  var done = false
-  while( !done ) {
-    try {
-      var tm = _.template( message )
-      message = tm( valstrmap )
-      done = true
-    }
-    catch(e) {
-      if(e instanceof ReferenceError) {
-        var m = /ReferenceError:\s+(.*?)\s+/.exec(e.toString())
-        if( m && m[1] ) {
-          valstrmap[m[1]]="["+m[1]+"?]"
-        }
-        else done = true
-      }
-      else {
-        done = true
-        message = message+' VALUES:'+common.owndesc(valmap,2)
-      }
-    }
-  }
-
-  return {
-    code:      code,
-    error:     error,
-    message:   message,
-    remaining: args.slice(valstart),
-    valmap:    valmap,
-    callback:  _.isFunction(args[valstart]) ? args[valstart] : null
-  }
-}
-
-
-
 function makedie( instance, ctxt ) {
   ctxt = _.extend(ctxt,instance.die?instance.die.context:{})
 
@@ -2023,12 +1930,6 @@ function makedie( instance, ctxt ) {
       if( !err ) {
         err = new Error( 'unknown' )
       }
-
-      //var args = handle_error_args(arguments,ctxt)
-
-      //var code    = args.code
-      //var err     = args.error
-      //var message = args.message
 
       var so = instance.options()
 
