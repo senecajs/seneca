@@ -1592,6 +1592,7 @@ function make_seneca( initial_options ) {
       return _.extend(
         args,
         { pattern: _.extend(
+          {},
 
           // Precedence of arguments in add,act is left-to-right
           args.moreobjargs ? args.moreobjargs : {},
