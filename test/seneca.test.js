@@ -715,14 +715,21 @@ describe('seneca', function(){
 
   it('strargs', function() {
     var si = seneca(testopts)
-    si.add({a:1,b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
-    si.act({a:1,b:2,c:3},function(err,out){ assert.isNull(err); assert.equal(6,out) })
+    si.add({a:1,b:2},function(args,done){
+      done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
 
-    si.act('a:1,b:2',{c:3},function(err,out){ assert.isNull(err); assert.equal(6,out) })
-    si.act('a:1,b:2',function(err,out){ assert.isNull(err); assert.equal(2,out) })
+    si.act({a:1,b:2,c:3},function(err,out){ 
+      assert.isNull(err); assert.equal(6,out) })
+
+    si.act('a:1,b:2',{c:3},function(err,out){ 
+      assert.isNull(err); assert.equal(6,out) })
+
+    si.act('a:1,b:2',function(err,out){ 
+      assert.isNull(err); assert.equal(2,out) })
 
     // strargs win!!
-    si.act('a:1,b:2',{a:2},function(err,out){ assert.isNull(err); assert.equal(2,out) })
+    si.act('a:1,b:2',{a:2},function(err,out){ 
+      assert.isNull(err); assert.equal(2,out) })
 
     try {
       si.add('a:,b:2',function(args,done){done()})
@@ -756,6 +763,8 @@ describe('seneca', function(){
 
 
   it('moreobjargs', function(fin) {
+    var p0 = {c:6}
+
     seneca({log:'silent',errhandler:fin})
 
       .add({a:1},{b:2},
@@ -772,11 +781,18 @@ describe('seneca', function(){
       .act('a:1,b:2,c:3',function(err,out){
         assert.equal(3,out.c)
       })
+
       .act({a:1,b:2},{c:4},function(err,out){
         assert.equal(4,out.c)
       })
+
       .act('a:1',{b:2},{c:5},function(err,out){
         assert.equal(5,out.c)
+      })
+
+      .act({a:1,b:2},p0,function(err,out){
+        assert.equal(6,out.c)
+        assert.equal('{ c: 6 }',util.inspect(p0))
       })
 
       .act('A:1,B:2,C:33',function(err,out){
@@ -793,6 +809,7 @@ describe('seneca', function(){
           if( 'act_invalid_args' != err.code ) return fin(err);
           fin()
         }})
+
         this.act('A:1,B:true,C:44')
 
       })
