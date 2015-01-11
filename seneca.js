@@ -1936,6 +1936,9 @@ function makedie( instance, ctxt ) {
       if( !err ) {
         err = new Error( 'unknown' )
       }
+      else if( !util.isError(err) ) {
+        err = new Error( _.isString(err) ? err : util.inspect(err) )
+      }
 
       var so = instance.options()
 
@@ -1949,7 +1952,12 @@ function makedie( instance, ctxt ) {
       var stack = err.stack || ''
       stack = stack.replace(/^.*?\n/,'\n')
 
-      var procdesc = process.pid // + more
+      var procdesc = '\n  pid='+process.pid+
+            ', arch='+process.arch+
+            ', platform='+process.platform+
+            ',\n  path='+process.execPath+
+            ',\n  argv='+util.inspect(process.argv).replace(/\n/g,'')+
+            ',\n  env='+util.inspect(process.env).replace(/\n/g,'')
 
       var stderrmsg =
             "\n\n"+
@@ -1961,10 +1969,10 @@ function makedie( instance, ctxt ) {
             "Instance: "+instance.toString()+"\n\n"+
             "When: "+new Date().toISOString()+"\n\n"+
             "Log: "+common.owndesc(logargs,3)+"\n\n"+
-            "Node: "+util.inspect(process.versions).replace(/\s+/g,' ')+"\n\n"+
-            "Process: pid="+procdesc+
-            ", path="+process.execPath+
-            ", args="+util.inspect(process.argv)+"\n\n"
+            "Node:\n  "+util.inspect(process.versions).replace(/\s+/g,' ')+
+            ",\n  "+util.inspect(process.features).replace(/\s+/g,' ')+
+            ",\n  "+util.inspect(process.moduleLoadList).replace(/\s+/g,' ')+"\n\n"+
+            "Process: "+procdesc+"\n\n"
 
 
       if( so.errhandler ) {
