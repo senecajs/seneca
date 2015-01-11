@@ -5,12 +5,11 @@
 // mocha plugin.test.js
 
 var util   = require('util')
+var assert = require('assert')
 
-var _   = require('underscore')
+var seneca = require('..')
 
-var seneca   = require('..')
-
-var assert  = require('chai').assert
+var _ = require('underscore')
 
 
 describe('plugin', function(){
@@ -112,8 +111,7 @@ describe('plugin', function(){
     assert.ok(si.hasact({z:1}))
 
     si.act({a:1},function(err,out){
-      //console.log({a:1},out)
-      assert.isNull(err)
+      assert.ok( null == err )
       assert.equal(1,out.a)
       assert.equal(1,out.z)
       assert.ok(out.t)
@@ -134,18 +132,14 @@ describe('plugin', function(){
       assert.ok(si.hasact({a:1}))
       assert.ok(si.hasact({a:1,q:1}))
 
-      //console.log(si.actroutes())
-
       si.act({a:1},function(err,out){
-        //console.log({a:1},out)
-        assert.isNull(err)
+        assert.ok( null == err )
         assert.equal(1,out.a)
         assert.equal(1,out.z)
         assert.ok(out.t)
 
         si.act({a:1,q:1},function(err,out){
-          //console.log({a:1,q:1},out)
-          assert.isNull(err)
+          assert.ok( null == err )
           assert.equal(1,out.a)
           assert.equal(1,out.z)
           assert.equal(1,out.w)

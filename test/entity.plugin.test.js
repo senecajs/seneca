@@ -1,17 +1,18 @@
-/* Copyright (c) 2010-2014 Richard Rodger */
+/* Copyright (c) 2010-2015 Richard Rodger */
 "use strict";
 
 
-var common   = require('../lib/common')
-var seneca   = require('..')
+var assert  = require('assert')
 
-var assert  = require('chai').assert
-var gex     = require('gex')
+var common = require('../lib/common')
+var seneca = require('..')
+
+var gex = require('gex')
 
 
 describe('entity.plugin', function() {
 
-  it('multi', function() {
+  it('multi', function(fin) {
     var si = seneca(
       {
         plugins:[
@@ -38,7 +39,8 @@ describe('entity.plugin', function() {
           }},
 
         ],
-        log:'silent'
+        log:'silent',
+        errhandler:fin
       })
 
 
@@ -60,42 +62,44 @@ describe('entity.plugin', function() {
     
 
     ;foo.save$( function(err,foo) {
-      assert.isNull(err)
+      assert.ok( null == err)
       assert.ok( gex('$-/-/foo:{id=*;a=1}').on(''+foo), ''+foo )
 
       ;foo.load$( {id:foo.id}, function(err,fooR) {
-        assert.isNull(err)
+        assert.ok( null == err)
         assert.ok( gex('$-/-/foo:{id=*;a=1}').on(''+fooR) )
 
 
         
         ;bar.save$( function(err,bar) {
-          assert.isNull(err)
+          assert.ok( null == err)
           assert.ok( gex('$-/-/bar:{id=*;b=2}').on(''+bar), ''+bar )
 
           ;bar.load$( {id:bar.id}, function(err,barR) {
-            assert.isNull(err)
+            assert.ok( null == err)
             assert.ok( gex('$-/-/bar:{id=*;b=2}').on(''+barR) )
 
 
 
             ;faa.save$( function(err,faa) {
-              assert.isNull(err)
+              assert.ok( null == err)
               assert.ok( gex('$-/-/faa:{id=*;c=3}').on(''+faa), ''+faa )
 
               ;faa.load$( {id:faa.id}, function(err,faaR) {
-                assert.isNull(err)
+                assert.ok( null == err)
                 assert.ok( gex('$-/-/faa:{id=*;c=3}').on(''+faaR) )
 
 
                 ;zen.save$( function(err,zen) {
-                  assert.isNull(err)
+                  assert.ok( null == err)
                   assert.ok( gex('$-/-/zen:{id=*;d=4}').on(''+zen), ''+zen )
 
                   ;zen.load$( {id:zen.id}, function(err,zenR) {
-                    assert.isNull(err)
+                    assert.ok( null == err)
                     assert.ok( gex('$-/-/zen:{id=*;d=4}').on(''+zenR) )
 
+
+                    fin()
 
                   }) })  }) })  }) })  }) })
   })

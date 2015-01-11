@@ -1,13 +1,12 @@
-/* Copyright (c) 2014 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 "use strict"
 
 
+var assert = require('assert')
 var events = require('events')
 
-var assert = require('chai').assert
 
 var seneca = require('../..')
-
 
 
 describe('plugin.options', function() {

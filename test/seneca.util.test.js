@@ -1,8 +1,8 @@
-/* Copyright (c) 2010-2013 Richard Rodger */
+/* Copyright (c) 2010-2015 Richard Rodger */
 
 "use strict";
 
-var assert = require('chai').assert
+var assert = require('assert')
 var _      = require('underscore')
 var util   = require('util')
 

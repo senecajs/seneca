@@ -1,21 +1,19 @@
-/* Copyright (c) 2014 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 "use strict";
 
 
 // mocha transport.test.js
 
 var util   = require('util')
+var assert  = require('assert')
 
 var common   = require('../lib/common')
 var seneca   = require('..')
 
+var gex = require('gex')
+var _   = require('underscore')
 
-var assert  = require('chai').assert
-var gex     = require('gex')
 
-var _ = require('underscore')
-
-console.log(new Date().toISOString())
 
 describe('transport', function(){
 

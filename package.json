@@ -75,7 +75,6 @@
   },
   "devDependencies": {
     "body-parser": "~1.4.3",
-    "chai": "~1.9.1",
     "connect": "~3.0.1",
     "connect-query": "~0.1.0",
     "docco": "~0.6.2",

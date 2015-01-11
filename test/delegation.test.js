@@ -1,18 +1,19 @@
-/* Copyright (c) 2013-2014 Richard Rodger */
+/* Copyright (c) 2013-2015 Richard Rodger */
 "use strict";
 
+
+var assert = require('assert')
+
+
 var seneca_module = require('..')
-
-
-var assert = require('chai').assert
-var gex    = require('gex')
-
-
 var common = require('../lib/common')
 
 
-var testopts = {log:'silent'}
+var gex    = require('gex')
 
+
+
+var testopts = {log:'silent'}
 
 
 describe('delegation', function(){

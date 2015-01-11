@@ -1,10 +1,11 @@
-/* Copyright (c) 2013-2014 Richard Rodger */
+/* Copyright (c) 2013-2015 Richard Rodger */
 "use strict";
+
+
+var assert = require('assert')
 
 var seneca = require('../..')
 
-
-var assert = require('chai').assert
 var gex    = require('gex')
 
 
@@ -152,7 +153,7 @@ describe('options', function(){
   it('options-internal',function(){
     var si = seneca({log:'silent'})
     var ar = si.options().internal.actrouter
-    assert.isNotNull(ar)
+    assert.ok( null != ar )
   })
 
 

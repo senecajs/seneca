@@ -8,13 +8,11 @@ var VERSION = '0.6.0'
 
 var util   = require('util')
 var stream = require('stream')
-
+var assert  = require('assert')
 
 var common   = require('../lib/common')
 var seneca   = require('..')
 
-
-var assert  = require('chai').assert
 var gex     = require('gex')
 
 var _ = require('underscore')
@@ -184,7 +182,7 @@ describe('seneca', function(){
 
     si.add('happy_error:1',function(args,done){done(new Error('happy-error'))})
     si.act('happy_error:1',function(err){
-      assert.isNotNull(err)
+      assert.ok( null != err )
       assert.equal('seneca: Action happy_error:1 failed: happy-error.',err.message)
       fin()
     })
@@ -218,13 +216,13 @@ describe('seneca', function(){
     })
 
     setTimeout(function(){
-      assert.isNotNull(tmp.grab)
+      assert.ok( null != tmp.grab )
 
       si.options({errhandler:pass_on})
       
       si.act('cmd:pass',function(err){
-        assert.isNotNull(err)
-        assert.isNotNull(tmp.pass)
+        assert.ok( null != err )
+        assert.ok( null != tmp.pass)
         fin()
       })
       
@@ -274,12 +272,12 @@ describe('seneca', function(){
     })
 
     si.act({op:'foo',a1:100}, function(err,out) {
-      assert.isNull(err)
+      assert.ok( null == err)
       assert.equal('+100',out)
       assert.equal(100,a1)
       
       si.act({op:'foo',a1:200}, function(err,out) {
-        assert.isNull(err)
+        assert.ok( null == err)
         assert.equal('+200',out)
         assert.equal(200,a1)
       })
@@ -557,7 +555,7 @@ describe('seneca', function(){
     var si = seneca({plugins:['echo'],log:'silent'})
 
     si.act({role:'echo',baz:'bax'},function(err,out){
-      assert.isNull(err)
+      assert.ok( null == err)
       assert.equal(''+{baz:'bax'},''+out)
     })
 
@@ -565,9 +563,9 @@ describe('seneca', function(){
     var si = seneca({plugins:['basic'],log:'silent'})
 
     si.act({role:'util',cmd:'quickcode'},function(err,code){
-      assert.isNull(err)
+      assert.ok( null == err)
       assert.equal( 8, code.length )
-      assert.isNull( /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
+      assert.ok( null ==  /[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code) )
     })
 
 
@@ -587,7 +585,7 @@ describe('seneca', function(){
 
     var si = seneca(testopts)
     si.register(new Mock1(), function(err){
-      assert.isNull(err)
+      assert.ok( null == err)
 
       si.act({role:'mock1',cmd:'foo',foo:1},function(err,out){
         assert.equal('foo:1',out)
@@ -599,7 +597,7 @@ describe('seneca', function(){
     var mock1a = new Mock1()
     mock1a.name = 'mock1a'
     si.register(mock1a, function(err){
-      assert.isNull(err)
+      assert.ok( null == err)
 
       si.act({role:'mock1a',cmd:'foo',foo:1},function(err,out){
         assert.equal('foo:1',out)
@@ -624,10 +622,10 @@ describe('seneca', function(){
 
     var si = seneca(testopts)
     si.register( new Mock1(), function(err){
-      assert.isNull(err)
+      assert.ok( null == err)
 
       si.register( new Mock2(), function(err){
-        assert.isNull(err)
+        assert.ok( null == err)
         
         si.act({role:'mock1',cmd:'foo',foo:2},function(err,out){
           assert.equal('bar:foo:2',out)
@@ -719,17 +717,17 @@ describe('seneca', function(){
       done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
 
     si.act({a:1,b:2,c:3},function(err,out){ 
-      assert.isNull(err); assert.equal(6,out) })
+      assert.ok( null == err); assert.equal(6,out) })
 
     si.act('a:1,b:2',{c:3},function(err,out){ 
-      assert.isNull(err); assert.equal(6,out) })
+      assert.ok( null == err); assert.equal(6,out) })
 
     si.act('a:1,b:2',function(err,out){ 
-      assert.isNull(err); assert.equal(2,out) })
+      assert.ok( null == err); assert.equal(2,out) })
 
     // strargs win!!
     si.act('a:1,b:2',{a:2},function(err,out){ 
-      assert.isNull(err); assert.equal(2,out) })
+      assert.ok( null == err); assert.equal(2,out) })
 
     try {
       si.add('a:,b:2',function(args,done){done()})
@@ -819,13 +817,13 @@ describe('seneca', function(){
   it('string-add', function() {
     var si = seneca(testopts)
     si.add("i:0,a:1,b:2",function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
-    si.act("i:0,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+    si.act("i:0,a:1,b:2,c:3",function(err,out){ assert.ok( null == err); assert.equal(6,out) })
 
     si.add("i:1,a:1",{b:2},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
-    si.act("i:1,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+    si.act("i:1,a:1,b:2,c:3",function(err,out){ assert.ok( null == err); assert.equal(6,out) })
 
     si.add("i:2,a:1",{b:2,c:{required$:true}},function(args,done){done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
-    si.act("i:2,a:1,b:2,c:3",function(err,out){ assert.isNull(err); assert.equal(6,out) })
+    si.act("i:2,a:1,b:2,c:3",function(err,out){ assert.ok( null == err); assert.equal(6,out) })
   })
 
 
@@ -839,12 +837,12 @@ describe('seneca', function(){
       .fix('a:1')
       .add('b:2',ab)
       .add('c:3',ab)
-      .act('b:2,z:8',function(err,out){assert.isNull(err);assert.equal('12-8',out.r)})
-      .act('c:3,z:9',function(err,out){assert.isNull(err);assert.equal('1-39',out.r)})
+      .act('b:2,z:8',function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
+      .act('c:3,z:9',function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
 
     si
-      .act('a:1,b:2,z:8',function(err,out){assert.isNull(err);assert.equal('12-8',out.r)})
-      .act('a:1,c:3,z:9',function(err,out){assert.isNull(err);assert.equal('1-39',out.r)})
+      .act('a:1,b:2,z:8',function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
+      .act('a:1,c:3,z:9',function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
   })  
 
 
@@ -869,7 +867,7 @@ describe('seneca', function(){
     })
 
     si.act({a:1,b:1},function(err,out){
-      assert.isNull(err)
+      assert.ok( null == err)
       assert.equal(2,out.a)
     })
 

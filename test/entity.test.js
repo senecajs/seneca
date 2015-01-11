@@ -5,13 +5,13 @@
 // mocha entity.test.js
 
 var util   = require('util')
+var assert  = require('assert')
 
 var seneca      = require('..')
 var make_entity = require('../lib/entity')
 
 var async   = require('async')
 var gex     = require('gex')
-var assert  = require('chai').assert
 
 
 var testopts = {log:'silent'}
@@ -21,13 +21,14 @@ describe('entity', function(){
 
   it('happy-mem', function(fin){
     var si = seneca(testopts)
+    si.options({errhandler:fin})
 
     var fooent = si.make$('foo')
     assert.ok( fooent.is$('foo') )
     assert.ok( !fooent.is$('bar') )
 
     fooent.data$({a:1,b:2}).save$(function(err,out){
-      assert.isNull(err)
+      assert.ok( null == err )
       assert.ok(out.id)
       assert.equal(1,out.a)
       assert.equal(2,out.b)
@@ -47,20 +48,20 @@ describe('entity', function(){
 
 
     ;fooent.load$(function(err,out){
-      assert.isUndefined(err)
-      assert.isUndefined(out)
+      assert.ok( null == err)
+      assert.ok( null == out)
 
     ;fooent.load$('',function(err,out){
-      assert.isUndefined(err)
-      assert.isUndefined(out)
+      assert.ok( null == err)
+      assert.ok( null == out)
 
     ;fooent.remove$(function(err,out){
-      assert.isUndefined(err)
-      assert.isUndefined(out)
+      assert.ok( null == err)
+      assert.ok( null == out)
 
     ;fooent.remove$('',function(err,out){
-      assert.isUndefined(err)
-      assert.isUndefined(out)
+      assert.ok( null == err)
+      assert.ok( null == out)
 
     ;fooent.list$(function(err,list){
       assert.equal(0,list.length)
@@ -290,12 +291,12 @@ describe('entity', function(){
 
       function(next){
         si.act('role:mem-store,cmd:export',{file:'mem.json'}, function(e){
-          assert.isNull(e)
+          assert.ok( null == e)
 
           var si2 = seneca(testopts)
 
           si2.act('role:mem-store,cmd:import',{file:'mem.json'}, function(e){
-            assert.isNull(e)
+            assert.ok( null == e)
 
             si2.act('role:mem-store,cmd:dump',function(e,o){
               assert.ok( gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
