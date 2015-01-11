@@ -193,8 +193,9 @@ function make_seneca( initial_options ) {
             zig:{},
 
             trace:{
-              act:   false,
-              stack: false
+              act:     false,
+              stack:   false,
+              unknown: 'warn'
             },
 
             stats: {
@@ -1084,7 +1085,7 @@ function make_seneca( initial_options ) {
     }
     
     var err = error('act_not_found',{args:args})
-    logging.log_act_not_found( self, err )
+    logging.log_act_not_found( self, err, so.trace.unknown )
 
     if( so.debug.fragile ) throw err;
 

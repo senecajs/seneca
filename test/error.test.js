@@ -300,9 +300,12 @@ describe('seneca', function(){
 
   function make_seneca( ctxt ) {
     var si = seneca(testopts)
-    si.options({log:{map:[{level:'error+',handler:function(){
-      ctxt.errlog = common.arrayify(arguments)
-    }}]}})
+    si.options({
+      log:{map:[{level:'error+',handler:function(){
+        ctxt.errlog = common.arrayify(arguments)
+      }}]},
+      trace: { unknown: 'error' }
+    })
     return si;
   }
 
