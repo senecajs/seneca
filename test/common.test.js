@@ -7,8 +7,6 @@
 var util = require('util')
 var assert = require('assert')
 
-var _      = require('underscore')
-
 var common = require('../lib/common')
 
 

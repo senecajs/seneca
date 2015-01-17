@@ -11,7 +11,7 @@ var common   = require('../lib/common')
 var seneca   = require('..')
 
 var gex = require('gex')
-var _   = require('underscore')
+var _   = require('lodash')
 
 
 

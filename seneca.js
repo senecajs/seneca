@@ -16,7 +16,7 @@ var assert   = require('assert')
 
 
 // External modules
-var _            = require('underscore')
+var _            = require('lodash')
 var minimist     = require('minimist')
 var nid          = require('nid')
 var jsonic       = require('jsonic')

@@ -30,7 +30,7 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* Copyright (c) 2010-2014 Richard Rodger, MIT License */</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* Copyright (c) 2010-2015 Richard Rodger, MIT License */</span>
 <span class="hljs-comment">/* jshint node:true, asi:true, eqnull:true */</span>
 <span class="hljs-pi">"use strict"</span>;</pre></div></div>
             
@@ -66,8 +66,6 @@
 <span class="hljs-keyword">var</span> events   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
 <span class="hljs-keyword">var</span> net      = <span class="hljs-built_in">require</span>(<span class="hljs-string">'net'</span>)
 <span class="hljs-keyword">var</span> repl     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'repl'</span>)
-<span class="hljs-keyword">var</span> path     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>)
-<span class="hljs-keyword">var</span> buffer   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'buffer'</span>)
 <span class="hljs-keyword">var</span> assert   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>)</pre></div></div>
             
         </li>
@@ -84,7 +82,6 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> _            = <span class="hljs-built_in">require</span>(<span class="hljs-string">'underscore'</span>)
-<span class="hljs-keyword">var</span> async        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'async'</span>)
 <span class="hljs-keyword">var</span> minimist     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'minimist'</span>)
 <span class="hljs-keyword">var</span> nid          = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nid'</span>)
 <span class="hljs-keyword">var</span> jsonic       = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jsonic'</span>)
@@ -383,8 +380,9 @@ is not considered part of the pattern, but rather an argument to validate when <
             zig:{},
 
             trace:{
-              act:   <span class="hljs-literal">false</span>,
-              stack: <span class="hljs-literal">false</span>
+              act:     <span class="hljs-literal">false</span>,
+              stack:   <span class="hljs-literal">false</span>,
+              unknown: <span class="hljs-string">'warn'</span>
             },
 
             stats: {
@@ -400,10 +398,6 @@ is not considered part of the pattern, but rather an argument to validate when <
             },
 
             deathdelay: <span class="hljs-number">33333</span>,
-
-            test:{
-              stayalive: <span class="hljs-literal">false</span>
-            },
 
             admin:{
               local:  <span class="hljs-literal">false</span>,
@@ -484,7 +478,12 @@ is not considered part of the pattern, but rather an argument to validate when <
     plugin: <span class="hljs-string">'seneca'</span>,
     tag:    root.version,
     id:     root.id
-  })</pre></div></div>
+  })
+
+
+  private$.logrouter = logging.makelogrouter(so.log)
+
+  root.log = logging.makelog(private$.logrouter,root.id)</pre></div></div>
             
         </li>
         
@@ -500,14 +499,7 @@ same as action errors, these are unexpected internal issues.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( !so.debug.undead ) {
-    root.on(<span class="hljs-string">'error'</span>,root.die) 
-  }
-
-
-  private$.logrouter = logging.makelogrouter(so.log)
-
-  root.log = logging.makelog(private$.logrouter,root.id)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  root.on(<span class="hljs-string">'error'</span>,root.die)</pre></div></div>
             
         </li>
         
@@ -783,7 +775,7 @@ setup status log</p>
             plugin.timeout = so.timeout
           }
 
-          <span class="hljs-keyword">return</span> self.die(plugin_err_code,err,plugin)
+          <span class="hljs-keyword">return</span> self.die(error(err,plugin_err_code,plugin))
         }
         <span class="hljs-keyword">return</span> self.log.debug(<span class="hljs-string">'register'</span>,<span class="hljs-string">'ready'</span>,pluginref,out)
       }
@@ -823,7 +815,7 @@ setup status log</p>
     _.every(deps, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(depname)</span> </span>{
       <span class="hljs-keyword">if</span>( !_.contains(private$.plugin_order.byname,depname) &amp;&amp;
           !_.contains(private$.plugin_order.byname,<span class="hljs-string">'seneca-'</span>+depname) ) {
-        self.die(<span class="hljs-string">'plugin_required'</span>,{name:args.pluginname,dependency:depname})
+        self.die(error(<span class="hljs-string">'plugin_required'</span>,{name:args.pluginname,dependency:depname}))
         <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
       }
       <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
@@ -837,7 +829,7 @@ setup status log</p>
 
     <span class="hljs-keyword">var</span> exportval = private$.exports[key];
     <span class="hljs-keyword">if</span>( !exportval ) {
-      <span class="hljs-keyword">return</span> self.die( <span class="hljs-string">'export_not_found'</span>, {key:key} )
+      <span class="hljs-keyword">return</span> self.die(error(<span class="hljs-string">'export_not_found'</span>, {key:key}))
     }
     
     <span class="hljs-keyword">return</span> exportval;
@@ -874,7 +866,7 @@ setup status log</p>
     <span class="hljs-keyword">var</span> config = parseConfig( arr(<span class="hljs-built_in">arguments</span>), opts )
 
     self.act(<span class="hljs-string">'role:transport,cmd:listen'</span>,{config:config,gate$:<span class="hljs-literal">true</span>},<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
-      <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> self.die(<span class="hljs-string">'transport_listen'</span>,err,config)
+      <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> self.die(error(err,<span class="hljs-string">'transport_listen'</span>,config))
     })
 
     <span class="hljs-keyword">return</span> self
@@ -996,8 +988,9 @@ Don’t want to wrap all patterns, esp. system ones!</p>
       <span class="hljs-string">'role:transport,cmd:client'</span>,
       {config:config,gate$:<span class="hljs-literal">true</span>},
       <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,liveclient)</span> </span>{
-        <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> self.die(<span class="hljs-string">'transport_client'</span>,err,config)
-        <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> == liveclient ) <span class="hljs-keyword">return</span> self.die(<span class="hljs-string">'transport_client_null'</span>,config)</pre></div></div>
+        <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> self.die(error(err,<span class="hljs-string">'transport_client'</span>,config));
+        <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> == liveclient ) 
+          <span class="hljs-keyword">return</span> self.die(error(<span class="hljs-string">'transport_client_null'</span>,config));</pre></div></div>
             
         </li>
         
@@ -1008,7 +1001,8 @@ Don’t want to wrap all patterns, esp. system ones!</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
-              <p>Process any messages waiting for this client, before bringing client online.</p>
+              <p>Process any messages waiting for this client, 
+before bringing client online.</p>
 
             </div>
             
@@ -1019,7 +1013,8 @@ Don’t want to wrap all patterns, esp. system ones!</p>
           }
           <span class="hljs-keyword">else</span> {
             <span class="hljs-keyword">var</span> tosend = sendqueue.shift()
-            self.log.debug(<span class="hljs-string">'client'</span>,<span class="hljs-string">'sendqueue-processing'</span>,sendqueue.length+<span class="hljs-number">1</span>,config,tosend)
+            self.log.debug(<span class="hljs-string">'client'</span>,<span class="hljs-string">'sendqueue-processing'</span>,
+                           sendqueue.length+<span class="hljs-number">1</span>,config,tosend)
             sendclient.send.call(tosend.instance,tosend.args,tosend.done)
             setImmediate(sendnext)
           }
@@ -1190,6 +1185,8 @@ Don’t want to wrap all patterns, esp. system ones!</p>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_pin</span><span class="hljs-params">( pattern, pinopts )</span> </span>{
     <span class="hljs-keyword">var</span> thispin = <span class="hljs-keyword">this</span>
 
+    pattern = _.isString( pattern ) ? jsonic(pattern) : pattern
+
     <span class="hljs-keyword">var</span> methodkeys = []
     <span class="hljs-keyword">for</span>( <span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> pattern ) {
       <span class="hljs-keyword">if</span>( <span class="hljs-regexp">/[\*\?]/</span>.exec(pattern[key]) ) {
@@ -1275,40 +1272,13 @@ Don’t want to wrap all patterns, esp. system ones!</p>
         <span class="hljs-literal">null</span> == pattern.client$ ) 
     {
       pattern.in$ = <span class="hljs-literal">true</span>
-    }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-38">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
-              </div>
-              <p>console.log(pattern)</p>
+    }
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
     <span class="hljs-keyword">if</span>( !private$.handle_sub ) {
       private$.handle_sub = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,result)</span> </span>{
-        <span class="hljs-keyword">var</span> subfuncs = private$.subrouter.find(args)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-39">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
-              </div>
-              <p>console.log(‘F’,args,’’+subfuncs)</p>
+        <span class="hljs-keyword">var</span> subfuncs = private$.subrouter.find(args)
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span>( subfuncs ) {
+        <span class="hljs-keyword">if</span>( subfuncs ) {
           _.each(subfuncs,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(subfunc)</span></span>{
             <span class="hljs-keyword">try</span> {
               subfunc.call(self,args,result)
@@ -1318,11 +1288,11 @@ Don’t want to wrap all patterns, esp. system ones!</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>TODO: not really satisfactory
 var err = self.fail( error, {args:args,result:result} )</p>
@@ -1340,11 +1310,11 @@ var err = self.fail( error, {args:args,result:result} )</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>TODO: other cases</p>
 
@@ -1368,33 +1338,19 @@ var err = self.fail( error, {args:args,result:result} )</p>
     <span class="hljs-keyword">if</span>( !subs ) {
       private$.subrouter.add(pattern,subs=[])
     }
-    subs.push(subargs.action)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-42">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
-              </div>
-              <p>console.log(private$.subrouter)</p>
+    subs.push(subargs.action)
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
     <span class="hljs-keyword">return</span> self;
   }</pre></div></div>
             
         </li>
         
         
-        <li id="section-43">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>params: argstr,argobj,actfunc,actmeta</p>
 
@@ -1417,11 +1373,11 @@ var err = self.fail( error, {args:args,result:result} )</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>throw self.fail(‘add_empty_pattern’,{args:args})</p>
 
@@ -1452,11 +1408,11 @@ var err = self.fail( error, {args:args,result:result} )</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>deprecated</p>
 
@@ -1487,11 +1443,11 @@ var err = self.fail( error, {args:args,result:result} )</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>FIX: need a much better way to support layered actions
 this “.handle” hack is just to make seneca.close work</p>
@@ -1555,10 +1511,13 @@ this “.handle” hack is just to make seneca.close work</p>
   root.findpins = root.pinact = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">var</span> pins = []
     <span class="hljs-keyword">var</span> patterns = _.flatten(arr(<span class="hljs-built_in">arguments</span>))
+
     _.each( patterns, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(pattern)</span> </span>{
       pattern = _.isString(pattern) ? jsonic(pattern) : pattern
-      pins = pins.concat( _.map( private$.actrouter.list(pattern), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(desc)</span> </span>{<span class="hljs-keyword">return</span> desc.match} ) )
+      pins = pins.concat( _.map( private$.actrouter.list(pattern), 
+                                 <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(desc)</span> </span>{<span class="hljs-keyword">return</span> desc.match} ) )
     })
+
     <span class="hljs-keyword">return</span> pins
   }
 
@@ -1615,11 +1574,11 @@ this “.handle” hack is just to make seneca.close work</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Perform an action. The propeties of the first argument are matched against 
 known patterns, and the most specific one wins.</p>
@@ -1637,11 +1596,11 @@ known patterns, and the most specific one wins.</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>action pattern found</p>
 
@@ -1659,7 +1618,7 @@ known patterns, and the most specific one wins.</p>
     }
     
     <span class="hljs-keyword">var</span> err = error(<span class="hljs-string">'act_not_found'</span>,{args:args})
-    logging.log_act_not_found( self, err )
+    logging.log_act_not_found( self, err, so.trace.unknown )
 
     <span class="hljs-keyword">if</span>( so.debug.fragile ) <span class="hljs-keyword">throw</span> err;
 
@@ -1674,7 +1633,7 @@ known patterns, and the most specific one wins.</p>
 
     pin = _.isArray(pin) ? pin : [pin]
     _.each(pin, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(p)</span> </span>{
-      _.each( pinthis.pinact(pin), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(actpattern)</span> </span>{
+      _.each( pinthis.findpins(p), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(actpattern)</span> </span>{
         pinthis.add(actpattern,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,done)</span> </span>{
           wrapper.call(<span class="hljs-keyword">this</span>,args,done)
         })
@@ -1685,11 +1644,11 @@ known patterns, and the most specific one wins.</p>
         </li>
         
         
-        <li id="section-49">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>close seneca instance
 sets public seneca.closed property</p>
@@ -1711,11 +1670,11 @@ sets public seneca.closed property</p>
         </li>
         
         
-        <li id="section-50">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>useful when defining services!
 note: has EventEmitter.once semantics
@@ -1731,8 +1690,14 @@ if using .on(‘ready’,fn) it will be be called for each ready event</p>
         <span class="hljs-keyword">try</span> {
           ready.call(self)
         }
-        <span class="hljs-keyword">catch</span>(e) {
-          self.die(<span class="hljs-string">'ready_failed'</span>,e,ready)
+        <span class="hljs-keyword">catch</span>(ex) {
+          <span class="hljs-keyword">var</span> re = ex
+
+          <span class="hljs-keyword">if</span>( !re.seneca ) { 
+            re = error(re,<span class="hljs-string">'ready_failed'</span>, {message:ex.message,ready:ready})
+          }
+
+          self.die( re )
         }
       })
 
@@ -1748,11 +1713,11 @@ if using .on(‘ready’,fn) it will be be called for each ready event</p>
         </li>
         
         
-        <li id="section-51">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>use(‘pluginname’) - built-in, or provide calling code ‘require’ as seneca opt
 use( require(‘pluginname’) ) - plugin object, init will be called
@@ -1766,11 +1731,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Legacy options</p>
 
@@ -1785,7 +1750,7 @@ if first arg has property senecaplugin </p>
       plugindesc = private$.use( arg0, arg1, arg2 )
     }
     <span class="hljs-keyword">catch</span>(e) {
-      <span class="hljs-keyword">return</span> self.die( <span class="hljs-string">'plugin_'</span>+e.code, e );
+      <span class="hljs-keyword">return</span> self.die( error(e,<span class="hljs-string">'plugin_'</span>+e.code) );
     }
 
     self.register( plugindesc, plugindesc.callback )
@@ -1796,11 +1761,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p>TODO: move repl functionality to seneca-reply</p>
 
@@ -1860,11 +1825,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>/ Return self. Mostly useful as a check that this is a Seneca instance.</p>
 
@@ -1877,11 +1842,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>Describe this instance using the form: Seneca/VERSION/ID</p>
 
@@ -1909,11 +1874,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>build callargs</p>
 
@@ -1966,8 +1931,8 @@ if first arg has property senecaplugin </p>
           private$.stats.act.fails++
           actstats.fails++
 
-          call_cb = act_error(instance,err,result,actmeta,cb,actend-actstart,
-                              callargs,prior_ctxt)
+          call_cb = act_error(instance,err,actmeta,result,cb,
+                              actend-actstart,callargs,prior_ctxt)
         }
         <span class="hljs-keyword">else</span> {
           instance.emit(<span class="hljs-string">'act-out'</span>,callargs,result[<span class="hljs-number">1</span>])
@@ -1980,7 +1945,6 @@ if first arg has property senecaplugin </p>
           private$.stats.act.done++
           actstats.done++
         }
-
         
         <span class="hljs-keyword">try</span> {
           <span class="hljs-keyword">if</span>( call_cb ) {
@@ -1991,11 +1955,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>for exceptions thrown inside the callback</p>
 
@@ -2007,11 +1971,11 @@ if first arg has property senecaplugin </p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>handle throws of non-Error values</p>
 
@@ -2026,8 +1990,8 @@ if first arg has property senecaplugin </p>
             }
           }
 
-          act_error(instance,err,result,actmeta,cb,actend-actstart,
-                    callargs,prior_ctxt)
+          callback_error(
+            instance,err,actmeta,result,cb,actend-actstart,callargs,prior_ctxt)
         }
       }
       <span class="hljs-keyword">catch</span>(ex) {
@@ -2070,25 +2034,57 @@ if first arg has property senecaplugin </p>
   }
 
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">act_error</span><span class="hljs-params">( instance, err, result, actmeta, cb, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">act_error</span><span class="hljs-params">( instance, err, actmeta, result, cb, 
                       duration, callargs, prior_ctxt )</span> 
   </span>{
     <span class="hljs-keyword">var</span> call_cb = <span class="hljs-literal">true</span>
 
     <span class="hljs-keyword">if</span>( !err.seneca ) {
-      <span class="hljs-keyword">var</span> origerr = err
-      err = error(<span class="hljs-string">'act_execute'</span>,_.extend(
+      err = error(err,<span class="hljs-string">'act_execute'</span>,_.extend(
         {},
-        origerr.details,
+        err.details,
         {
           message:  err.message,
-          pattern:  err.details ? err.details.desc : <span class="hljs-string">''</span>,
+          pattern:  actmeta.pattern,
           fn:       actmeta.func,
           cb:       cb,
           instance: instance.toString()
         }))
-      err.stack = origerr.stack
-      err.callpoint = origerr.callpoint
+
+      result[<span class="hljs-number">0</span>] = err
+    }
+      
+    err.details = err.details || {}
+    err.details.plugin = err.details.plugin || {}
+
+    logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
+                         actmeta, callargs, prior_ctxt, err )
+
+    instance.emit(<span class="hljs-string">'act-err'</span>,callargs,err)
+
+    <span class="hljs-keyword">if</span>( so.errhandler ) {
+      call_cb = !so.errhandler(err)
+    }
+
+    <span class="hljs-keyword">return</span> call_cb
+  }
+
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">callback_error</span><span class="hljs-params">( instance, err, actmeta, result, cb,
+                           duration, callargs, prior_ctxt )</span> 
+  </span>{
+    <span class="hljs-keyword">if</span>( !err.seneca ) {
+      err = error(err,<span class="hljs-string">'act_callback'</span>,_.extend(
+        {},
+        err.details,
+        {
+          message:  err.message,
+          pattern:  actmeta.pattern,
+          fn:       actmeta.func,
+          cb:       cb,
+          instance: instance.toString()
+        }))
+
       result[<span class="hljs-number">0</span>] = err
     }
       
@@ -2101,20 +2097,18 @@ if first arg has property senecaplugin </p>
     instance.emit(<span class="hljs-string">'act-err'</span>,callargs,err,result[<span class="hljs-number">1</span>])
 
     <span class="hljs-keyword">if</span>( so.errhandler ) {
-      call_cb = !so.errhandler(err)
+      so.errhandler(err)
     }
-
-    <span class="hljs-keyword">return</span> call_cb
   }</pre></div></div>
             
         </li>
         
         
-        <li id="section-59">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>Check if actid has already been seen, and if action cache is active,
 then provide cached result, if any. Return true in this case.</p>
@@ -2157,11 +2151,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-60">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>Resolve action stats object, creating if ncessary, and count a call.</p>
 <ul>
@@ -2192,11 +2186,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-61">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>automate actid log insertion</p>
 
@@ -2226,11 +2220,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>TODO: deprecate parent</p>
 
@@ -2259,11 +2253,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-63">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Check if action parameters pass parambulator spec, if any.</p>
 <ul>
@@ -2293,11 +2287,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>string args override object args</p>
 
@@ -2309,16 +2303,17 @@ then provide cached result, if any. Return true in this case.</p>
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">return</span> _.extend(
         args,
-        { pattern: _.extend(</pre></div></div>
+        { pattern: _.extend(
+          {},</pre></div></div>
             
         </li>
         
         
-        <li id="section-65">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>Precedence of arguments in add,act is left-to-right</p>
 
@@ -2337,11 +2332,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>throw instance.fail(‘add_string_pattern_syntax’,{argstr:args,syntax:e.message,line:e.line,col:col})</p>
 
@@ -2387,11 +2382,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>var argscb = handle_act_args(this,arr(arguments))</p>
 
@@ -2400,11 +2395,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-68">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>can’t override fixedargs</p>
 
@@ -2415,11 +2410,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-69">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>var cb = argscb[1]</p>
 
@@ -2455,11 +2450,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-70">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>Somewhere to put contextual data for this delegate.
 For example, data for individual web requests.</p>
@@ -2599,11 +2594,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-71">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>Create entity delegate.</p>
 
@@ -2619,11 +2614,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-72">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
               <p>Template entity that makes all others.</p>
 
@@ -2634,11 +2629,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-73">
+        <li id="section-70">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>DEPRECATED 
 for use with async</p>
@@ -2671,11 +2666,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-74">
+        <li id="section-71">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
               <p>Add builtin actions.</p>
 
@@ -2689,11 +2684,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-75">
+        <li id="section-72">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
               <p>Define builtin actions.</p>
 
@@ -2763,15 +2758,126 @@ for use with async</p>
         </li>
         
         
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>Utilities</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makedie</span><span class="hljs-params">( instance, ctxt )</span> </span>{
+  ctxt = _.extend(ctxt,instance.die?instance.die.context:{})
+
+  <span class="hljs-keyword">var</span> die = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err )</span> </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">if</span>( !err ) {
+        err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>( <span class="hljs-string">'unknown'</span> )
+      }
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( !util.isError(err) ) {
+        err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>( _.isString(err) ? err : util.inspect(err) )
+      }
+
+      <span class="hljs-keyword">var</span> so = instance.options()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>undead is only for testing, do not use in production</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> undead = so.debug.undead || (err &amp;&amp; err.undead)
+
+      <span class="hljs-keyword">var</span> logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, err.code, err.message, err.details]
+
+      instance.log.fatal.apply( instance, logargs )
+
+      <span class="hljs-keyword">var</span> stack = err.stack || <span class="hljs-string">''</span>
+      stack = stack.replace(<span class="hljs-regexp">/^.*?\n/</span>,<span class="hljs-string">'\n'</span>)
+
+      <span class="hljs-keyword">var</span> procdesc = <span class="hljs-string">'\n  pid='</span>+process.pid+
+            <span class="hljs-string">', arch='</span>+process.arch+
+            <span class="hljs-string">', platform='</span>+process.platform+
+            <span class="hljs-string">',\n  path='</span>+process.execPath+
+            <span class="hljs-string">',\n  argv='</span>+util.inspect(process.argv).replace(<span class="hljs-regexp">/\n/g</span>,<span class="hljs-string">''</span>)+
+            <span class="hljs-string">',\n  env='</span>+util.inspect(process.env).replace(<span class="hljs-regexp">/\n/g</span>,<span class="hljs-string">''</span>)
+
+      <span class="hljs-keyword">var</span> stderrmsg =
+            <span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Seneca Fatal Error\n"</span>+
+            <span class="hljs-string">"==================\n\n"</span>+
+            <span class="hljs-string">"Message: "</span>+err.message+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Code: "</span>+err.code+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Stack: "</span>+stack+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Instance: "</span>+instance.toString()+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"When: "</span>+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString()+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Log: "</span>+common.owndesc(logargs,<span class="hljs-number">3</span>)+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Node:\n  "</span>+util.inspect(process.versions).replace(<span class="hljs-regexp">/\s+/g</span>,<span class="hljs-string">' '</span>)+
+            <span class="hljs-string">",\n  "</span>+util.inspect(process.features).replace(<span class="hljs-regexp">/\s+/g</span>,<span class="hljs-string">' '</span>)+
+            <span class="hljs-string">",\n  "</span>+util.inspect(process.moduleLoadList).replace(<span class="hljs-regexp">/\s+/g</span>,<span class="hljs-string">' '</span>)+<span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Process: "</span>+procdesc+<span class="hljs-string">"\n\n"</span>
+
+
+      <span class="hljs-keyword">if</span>( so.errhandler ) {
+        so.errhandler(err)
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>this blocks, but that’s ok, we want to be sure the error description 
+is printed to STDERR</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span>( !undead ) {
+        <span class="hljs-built_in">console</span>.error( stderrmsg )
+      }
+      
+      <span class="hljs-keyword">if</span>( !undead ) {
+        instance.close(</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
-              <p>Utilities</p>
+              <p>terminate process, err (if defined) is from seneca.close</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">( err )</span> </span>{
+            <span class="hljs-keyword">if</span>( !undead ) {
+              process.nextTick(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">if</span>( err ) <span class="hljs-built_in">console</span>.error( err );
+                <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Terminated at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
+                              <span class="hljs-string">". See above for error report.\n\n"</span>)
+                process.exit(<span class="hljs-number">1</span>)
+              })
+            }
+          }
+        )
+      }</pre></div></div>
             
         </li>
         
@@ -2782,248 +2888,28 @@ for use with async</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
-              <p>Error arguments:
-code
-code, values
-code, Error, values
-Error (optional code,message properties), values
-values (optional code,message properties)</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle_error_args</span><span class="hljs-params">( args, ctxt )</span> </span>{
-  args = arr(args)
-
-  <span class="hljs-keyword">var</span> first = args[<span class="hljs-number">0</span>]
-  <span class="hljs-keyword">var</span> valstart = <span class="hljs-number">1</span>
-
-  <span class="hljs-keyword">var</span> code = <span class="hljs-string">'unknown'</span>
-  code = _.isString(first) ? first : code 
-  code = util.isError(first) &amp;&amp; _.isString(first.code) ? first.code : code
-  code = _.isObject(first) &amp;&amp; _.isString(first.code) ? first.code : code 
-
-
-  <span class="hljs-keyword">if</span>( _.isObject(first) &amp;&amp; !util.isError(first) ) {
-    valstart = <span class="hljs-number">0</span>
-  }
-
-  <span class="hljs-keyword">var</span> error = util.isError(first) ? 
-        first : util.isError(args[<span class="hljs-number">1</span>]) ? (valstart=<span class="hljs-number">2</span>,args[<span class="hljs-number">1</span>]) : <span class="hljs-literal">null</span>
-
-  <span class="hljs-keyword">var</span> valmap = _.isObject(args[valstart]) ? args[valstart] : {}
-
-  <span class="hljs-keyword">var</span> msgmap = ERRMSGMAP()
-  <span class="hljs-keyword">var</span> message = (msgmap[ctxt.plugin] &amp;&amp; msgmap[ctxt.plugin][code])
-  message = _.isString(message) ? 
-    message : (_.isString(valmap.message) &amp;&amp; valmap.message)
-  message = _.isString(message) ? 
-    message : (error &amp;&amp; _.isString(error.message) &amp;&amp; error.message)
-
-
-  <span class="hljs-keyword">if</span>( !_.isString(message) ) {
-    <span class="hljs-keyword">try</span> {
-      message = code+<span class="hljs-string">': '</span>+util.inspect(args)
-    }
-    <span class="hljs-keyword">catch</span>(e) {
-      message = code
-    }
-  }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-78">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
-              </div>
-              <p>workaround to prevent underscore blowing up if properties are not found
-reserved words and undefined need to be suffixed with $ 
-in the template interpolates</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-79">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
-              </div>
-              <p>TODO: use eraro</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-  <span class="hljs-keyword">var</span> valstrmap = {}
-  _.each(valmap,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(val,key)</span> </span>{
-    <span class="hljs-comment">/* jshint evil:true */</span>
-    <span class="hljs-keyword">try</span> { <span class="hljs-built_in">eval</span>(<span class="hljs-string">'var '</span>+key+<span class="hljs-string">';'</span>) } <span class="hljs-keyword">catch</span>(e) { key = key+<span class="hljs-string">'$'</span> }
-    <span class="hljs-keyword">if</span>( {<span class="hljs-string">'undefined'</span>:<span class="hljs-number">1</span>,<span class="hljs-string">'NaN'</span>:<span class="hljs-number">1</span>}[key] ) { key = key+<span class="hljs-string">'$'</span> }
-    valstrmap[key] = (_.isObject(val) ? common.owndesc(val,<span class="hljs-number">1</span>) : <span class="hljs-string">''</span>+val)
-  })
-
-  <span class="hljs-keyword">var</span> done = <span class="hljs-literal">false</span>
-  <span class="hljs-keyword">while</span>( !done ) {
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">var</span> tm = _.template( message )
-      message = tm( valstrmap )
-      done = <span class="hljs-literal">true</span>
-    }
-    <span class="hljs-keyword">catch</span>(e) {
-      <span class="hljs-keyword">if</span>(e <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">ReferenceError</span>) {
-        <span class="hljs-keyword">var</span> m = <span class="hljs-regexp">/ReferenceError:\s+(.*?)\s+/</span>.exec(e.toString())
-        <span class="hljs-keyword">if</span>( m &amp;&amp; m[<span class="hljs-number">1</span>] ) {
-          valstrmap[m[<span class="hljs-number">1</span>]]=<span class="hljs-string">"["</span>+m[<span class="hljs-number">1</span>]+<span class="hljs-string">"?]"</span>
-        }
-        <span class="hljs-keyword">else</span> done = <span class="hljs-literal">true</span>
-      }
-      <span class="hljs-keyword">else</span> {
-        done = <span class="hljs-literal">true</span>
-        message = message+<span class="hljs-string">' VALUES:'</span>+common.owndesc(valmap,<span class="hljs-number">2</span>)
-      }
-    }
-  }
-
-  <span class="hljs-keyword">return</span> {
-    code:      code,
-    error:     error,
-    message:   message,
-    remaining: args.slice(valstart),
-    valmap:    valmap,
-    callback:  _.isFunction(args[valstart]) ? args[valstart] : <span class="hljs-literal">null</span>
-  }
-}
-
-
-
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makedie</span><span class="hljs-params">( instance, ctxt )</span> </span>{
-  ctxt = _.extend(ctxt,instance.die?instance.die.context:{})
-
-  <span class="hljs-keyword">var</span> die = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-keyword">var</span> args = handle_error_args(<span class="hljs-built_in">arguments</span>,ctxt)
-
-    <span class="hljs-keyword">var</span> code    = args.code
-    <span class="hljs-keyword">var</span> err     = args.error
-    <span class="hljs-keyword">var</span> message = args.message
-
-    <span class="hljs-keyword">var</span> so = instance.options()</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-80">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
-              </div>
-              <p>stayalive is only for testing, do not use in production</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> stayalive = so.test.stayalive || (err &amp;&amp; err.stayalive)
-
-    <span class="hljs-keyword">var</span> logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, code]
-          .concat( message &amp;&amp; message != code ? message : <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> )
-          .concat( args.remaining )
-
-    <span class="hljs-keyword">if</span>( !err ) {
-      err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>( code )
-    }
-
-    instance.log.fatal.apply( instance, logargs )
-
-    <span class="hljs-keyword">var</span> stack = err.stack
-    stack = stack.replace(<span class="hljs-regexp">/^.*?\n/</span>,<span class="hljs-string">'\n'</span>)
-
-    <span class="hljs-keyword">var</span> procdesc = process.pid <span class="hljs-comment">// + more</span>
-
-    <span class="hljs-keyword">var</span> stderrmsg =
-          <span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Seneca Fatal Error\n"</span>+
-          <span class="hljs-string">"==================\n\n"</span>+
-          <span class="hljs-string">"Message: "</span>+message+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Code: "</span>+code+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Stack: "</span>+stack+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Instance: "</span>+instance.toString()+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"When: "</span>+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString()+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Log: "</span>+common.owndesc(logargs,<span class="hljs-number">3</span>)+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Node: "</span>+util.inspect(process.versions).replace(<span class="hljs-regexp">/\s+/g</span>,<span class="hljs-string">' '</span>)+<span class="hljs-string">"\n\n"</span>+
-          <span class="hljs-string">"Process: pid="</span>+procdesc+
-          <span class="hljs-string">", path="</span>+process.execPath+
-          <span class="hljs-string">", args="</span>+util.inspect(process.argv)+<span class="hljs-string">"\n\n"</span>
-
-
-    <span class="hljs-keyword">if</span>( stayalive ) {
-      <span class="hljs-keyword">throw</span> error(err,code,args.valmap)
-    }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-81">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
-              </div>
-              <p>this blocks, but that’s ok, we want to be sure the error description 
-is printed to STDERR</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-built_in">console</span>.error( stderrmsg )</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-82">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
-              </div>
-              <p>terminate process, err (if defined) is from seneca.close</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">die</span><span class="hljs-params">( err )</span> </span>{
-      <span class="hljs-keyword">if</span>( !stayalive ) {
-        process.nextTick(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-          <span class="hljs-keyword">if</span>( err ) <span class="hljs-built_in">console</span>.error( err );
-          <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Terminated at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
-                        <span class="hljs-string">". See above for error report.\n\n"</span>)
-          process.exit(<span class="hljs-number">1</span>)
-        })
-      }
-    }
-
-    instance.close( die )</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-83">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
-              </div>
               <p>make sure we close down within options.deathdelay seconds</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span>( !stayalive ) {
-      <span class="hljs-keyword">var</span> killtimer = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Terminated (on timeout) at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
-                      <span class="hljs-string">".\n\n"</span>)
-        process.exit(<span class="hljs-number">2</span>);
-      }, so.deathdelay);
-      killtimer.unref();
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span>( !undead ) {
+        <span class="hljs-keyword">var</span> killtimer = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+          <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Terminated (on timeout) at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
+                        <span class="hljs-string">".\n\n"</span>)
+          process.exit(<span class="hljs-number">2</span>);
+        }, so.deathdelay);
+        killtimer.unref();
+      }
+    }
+    <span class="hljs-keyword">catch</span>(panic) {
+      <span class="hljs-keyword">var</span> msg =
+            <span class="hljs-string">"\n\n"</span>+
+            <span class="hljs-string">"Seneca Panic\n"</span>+
+            <span class="hljs-string">"============\n\n"</span>+
+            panic.stack+
+            <span class="hljs-string">"\n\nOrginal Error:\n"</span>+
+            (<span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>] &amp;&amp; <span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>].stack ? <span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>].stack : <span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>])
+      <span class="hljs-built_in">console</span>.error(msg)
     }
   }
 
@@ -3064,11 +2950,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-84">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
               <p>handle previous patterns that match this pattern</p>
 
@@ -3097,11 +2983,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-85">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
               <p>Primary export function, creates a new Seneca instance.</p>
 
@@ -3112,11 +2998,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-86">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
               <p>Create instance.</p>
 
@@ -3128,11 +3014,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-87">
+        <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
               <p>TODO: make these optional
 register default plugins</p>
@@ -3147,11 +3033,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-88">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-88">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
               <p>Register plugins specified in options.</p>
 
@@ -3168,11 +3054,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-89">
+        <li id="section-83">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-89">&#182;</a>
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>To reference builtin loggers when defining logging options.</p>
 
@@ -3183,11 +3069,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-90">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-90">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>Makes require(‘seneca’).use( … ) work by creating an on-the-fly instance.</p>
 
@@ -3201,11 +3087,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-91">
+        <li id="section-85">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-91">&#182;</a>
+                <a class="pilcrow" href="#section-85">&#182;</a>
               </div>
               <p>Mostly for testing.</p>
 
@@ -3218,11 +3104,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-92">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-92">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <p>Minor utils</p>
 
@@ -3235,11 +3121,11 @@ register default plugins</p>
         </li>
         
         
-        <li id="section-93">
+        <li id="section-87">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-93">&#182;</a>
+                <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
               <p>Error code messages.</p>
 
@@ -3282,8 +3168,9 @@ register default plugins</p>
 
     store_cmd_missing: <span class="hljs-string">'Entity data store implementation is missing a command; "&lt;%=cmd%&gt;": "&lt;%=store%&gt;".'</span>,
 
-    sub_function_catch: <span class="hljs-string">'Pattern subscription function threw: &lt;%=message%&gt; on args: &lt;%=args%&gt;, result: &lt;%=result%&gt;.'</span>
+    sub_function_catch: <span class="hljs-string">'Pattern subscription function threw: &lt;%=message%&gt; on args: &lt;%=args%&gt;, result: &lt;%=result%&gt;.'</span>,
 
+    ready_failed: <span class="hljs-string">'Ready function failed: &lt;%=message%&gt;'</span>
   }
 }</pre></div></div>
             

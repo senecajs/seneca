@@ -1,9 +1,8 @@
-/* Copyright (c) 2010-2015 Richard Rodger */
+/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 
 "use strict";
 
 var assert = require('assert')
-var _      = require('underscore')
 var util   = require('util')
 
 

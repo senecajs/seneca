@@ -11,7 +11,6 @@ var seneca   = require('..')
 var common   = require('../lib/common')
 
 var gex = require('gex')
-var _   = require('underscore')
 
 
 var testopts = {log:'silent'}

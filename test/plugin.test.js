@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2014 Richard Rodger */
+/* Copyright (c) 2013-2015 Richard Rodger, MIT License */
 "use strict";
 
 
@@ -7,9 +7,9 @@
 var util   = require('util')
 var assert = require('assert')
 
-var seneca = require('..')
+var _   = require('lodash')
 
-var _ = require('underscore')
+var seneca = require('..')
 
 
 describe('plugin', function(){
@@ -92,7 +92,7 @@ describe('plugin', function(){
 
 
   it('fix', function(fin){
-    var si = seneca({log:'silent'})
+    var si = seneca({log:'silent',errhandler:fin})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}
     

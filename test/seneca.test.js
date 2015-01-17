@@ -13,12 +13,11 @@ var assert  = require('assert')
 var common   = require('../lib/common')
 var seneca   = require('..')
 
-var gex     = require('gex')
-
-var _ = require('underscore')
-var parambulator = require('parambulator')
-
+var gex           = require('gex')
+var parambulator  = require('parambulator')
 var fixturestdout = new require('fixture-stdout');
+var _             = require('lodash')
+
 
 // timerstub broken on node 0.11
 //var timerstub = require('timerstub')
