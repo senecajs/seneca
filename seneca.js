@@ -401,10 +401,10 @@ function make_seneca( initial_options ) {
     var tag      = plugin.tag||'-'
 
     plugin.fullname = fullname
+
     var sd = plugin_util.make_delegate( 
       self, 
       plugin, 
-      //{makefail:makefail, makedie:makedie}
       {makedie:makedie}
     )
 
@@ -414,7 +414,12 @@ function make_seneca( initial_options ) {
 
     sd.log.debug('DEFINE',plugin_options)
 
-    var meta = plugin_util.define_plugin( sd, plugin, plugin_options )
+    try {
+      var meta = plugin_util.define_plugin( sd, plugin, plugin_options )
+    }
+    catch(e) {
+      return sd.die(e)
+    }
 
     // legacy api for service function
     if( _.isFunction(meta) ) {
@@ -1314,8 +1319,14 @@ function make_seneca( initial_options ) {
           private$.stats.act.fails++
           actstats.fails++
 
-          call_cb = act_error(instance,err,actmeta,result,cb,
+          var out = act_error(instance,err,actmeta,result,cb,
                               actend-actstart,callargs,prior_ctxt)
+          
+          call_cb = out.call_cb
+
+          if( args.fatal$ ) {
+            return instance.die(out.err)
+          }
         }
         else {
           instance.emit('act-out',callargs,result[1])
@@ -1425,7 +1436,7 @@ function make_seneca( initial_options ) {
       call_cb = !so.errhandler(err)
     }
 
-    return call_cb
+    return {call_cb:call_cb,err:err}
   }
 
 

@@ -35,6 +35,66 @@ describe('plugin', function(){
   })
 
 
+  it('plugin-error-def', function(fin) {
+    var si = seneca({
+      debug:{
+        undead:true
+      },
+      log:'silent',
+      errhandler: function(err) {
+        assert.equal('plugin-def',err.message)
+        fin()
+      }
+    })
+
+    si.use(function(){
+      throw new Error('plugin-def')
+    })
+  })
+
+
+  it('plugin-error-add', function(fin) {
+    var si = seneca({
+      debug:{
+        undead:true
+      },
+      log:'silent',
+      errhandler: function(err) {
+        assert.equal('invalid_arguments',err.code)
+        fin()
+      }
+    })
+
+    si.use(function(){
+      this.add()
+    })
+  })
+
+
+  it('plugin-error-act', function(fin) {
+    var cc = 0
+
+    var si = seneca({
+      debug:{
+        undead:true
+      },
+      log:'silent',
+      errhandler: function(err) {
+        assert.equal('seneca: Action foo:1 failed: act-cb.',err.message)
+        cc++ && fin()
+      }
+    })
+
+    si.add('foo:1',function(args,done){
+      done(new Error('act-cb'))
+    })
+
+    si.use(function(){
+      this.act('foo:1')
+    })
+  })
+
+
   it('depends', function() {
     var si = seneca({
       // this lets you change undead per test
