@@ -899,12 +899,10 @@ function make_seneca( initial_options ) {
     pattern = self.util.clean(args.pattern)
 
     if( 0 === _.keys( pattern ) ) {
-      //throw self.fail('add_empty_pattern',{args:args})
       throw error('add_empty_pattern',{args:args})
     }
 
-
-    var pattern_rules = {}
+    var pattern_rules = _.clone(action.validate || {})
     _.each( pattern, function(v,k) { 
       if( _.isObject(v) ) {
         pattern_rules[k] = v

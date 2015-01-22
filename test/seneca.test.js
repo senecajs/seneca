@@ -845,14 +845,36 @@ describe('seneca', function(){
   })  
 
 
-  it('parambulator', function() {
+  it('parambulator', function(fin) {
     var si = seneca(testopts)
 
-    si.add({a:1,b:'q',c:{required$:true,string$:true}},function(args,done){done(null,{})})
+    si.add({a:1,b:'q',c:{required$:true,string$:true}},
+           function(args,done){done(null,{})})
 
-    si.act({a:1,b:'q',c:'c'})
-    try { si.act({a:1,b:'q',c:1}); assert.fail() } catch(e) {  }
-    try { si.act({a:1,b:'q'}); assert.fail() } catch(e) {  }
+
+    function foo(args,done){done(null,{})}
+    foo.validate = {
+      b: { required$:true }
+    }
+    si.add('a:2',foo)
+
+    si.act( {a:1,b:'q',c:'c'}, function(err){err&&fin(err)})
+    si.act( {a:2,b:'q'}, function(err){err&&fin(err)})
+
+    si.act( {a:1,b:'q',c:1}, function(err){ 
+      assert.equal('act_invalid_args',err.code) 
+
+      si.act( {a:1,b:'q'}, function(err){ 
+        assert.equal('act_invalid_args',err.code) 
+
+        si.act( {a:2}, function(err){ 
+          assert.equal('act_invalid_args',err.code) 
+
+          fin()
+        })
+      })
+    })
+
   })
 
 
