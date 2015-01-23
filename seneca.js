@@ -414,8 +414,9 @@ function make_seneca( initial_options ) {
 
     sd.log.debug('DEFINE',plugin_options)
 
+    var meta
     try {
-      var meta = plugin_util.define_plugin( sd, plugin, plugin_options )
+      meta = plugin_util.define_plugin( sd, plugin, plugin_options )
     }
     catch(e) {
       return sd.die(e)
