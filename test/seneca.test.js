@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2014 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 "use strict";
 
 
@@ -78,8 +78,9 @@ describe('seneca', function(){
       fso.release()
     }
     catch(e){
+      console.log(e)
       fso.release()
-      aasert.faiL()
+      assert.fail()
     }
 
     require('..')(testopts).use('echo')
