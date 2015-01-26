@@ -1190,7 +1190,8 @@ function make_seneca( initial_options ) {
   function api_use( arg0, arg1, arg2 ) {
     var self = this, plugindesc;
 
-    // Legacy options
+    // Allow chaining with seneca.use('options', {...}) 
+    // see https://github.com/rjrodger/seneca/issues/80
     if( 'options' == arg0 ) {
       self.options( arg1 )
       return self
