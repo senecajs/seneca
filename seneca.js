@@ -84,6 +84,8 @@ function make_seneca( initial_options ) {
   util.inherits(Seneca, events.EventEmitter)
 
   var root = new Seneca()
+  root.root      = root
+  root.fixedargs = {}
 
   root.context = {}
 
@@ -454,7 +456,8 @@ function make_seneca( initial_options ) {
         init:plugin.name,
         tag:plugin.tag,
         default$:{},
-        gate$:true
+        gate$:true,
+        fatal$:true
       },
       function(err,out) {
         if( err ) {
@@ -1529,6 +1532,7 @@ function make_seneca( initial_options ) {
     var delegate = instance.delegate( delegate_args )
     
 
+    // TODO: make a call on this!!!
     // automate actid log insertion
     /*
     delegate.log = function() {
@@ -1653,12 +1657,7 @@ function make_seneca( initial_options ) {
       var args = spec.pattern
       var cb   = spec.done
 
-      //var argscb = handle_act_args(this,arr(arguments))
-
-      // can't override fixedargs
       args = _.extend({},args,fixedargs)
-
-      //var cb = argscb[1]
 
       act.call(this,args,cb)
 
@@ -1943,6 +1942,9 @@ function makedie( instance, ctxt ) {
   ctxt = _.extend(ctxt,instance.die?instance.die.context:{})
 
   var die = function( err ) {
+    var die_trace = '\n'+(new Error('die trace').stack)
+          .match(/^.*?\n.*\n(.*)/)[1]
+
     try {
       if( !err ) {
         err = new Error( 'unknown' )
@@ -1956,7 +1958,9 @@ function makedie( instance, ctxt ) {
       // undead is only for testing, do not use in production
       var undead = so.debug.undead || (err && err.undead)
 
-      var logargs  = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, err.code, err.message, err.details]
+      var logargs = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, 
+                     err.code, err.message, err.details, 
+                     instance.fixedargs.fatal$?'all-errors-fatal':'-']
 
       instance.log.fatal.apply( instance, logargs )
 
@@ -1970,6 +1974,10 @@ function makedie( instance, ctxt ) {
             ',\n  argv='+util.inspect(process.argv).replace(/\n/g,'')+
             ',\n  env='+util.inspect(process.env).replace(/\n/g,'')
 
+      var fatalmodemsg = instance.fixedargs.fatal$ ? 
+            '\n  ALL ERRORS FATAL: action called with argument fatal$:true '+
+            '(probably a plugin init error, or using a plugin seneca instance, see senecajs.org/fatal.html)' : ''
+      
       var stderrmsg =
             "\n\n"+
             "Seneca Fatal Error\n"+
@@ -1977,7 +1985,7 @@ function makedie( instance, ctxt ) {
             "Message: "+err.message+"\n\n"+
             "Code: "+err.code+"\n\n"+
             "Stack: "+stack+"\n\n"+
-            "Instance: "+instance.toString()+"\n\n"+
+            "Instance: "+instance.toString()+fatalmodemsg+die_trace+"\n\n"+
             "When: "+new Date().toISOString()+"\n\n"+
             "Log: "+common.owndesc(logargs,3)+"\n\n"+
             "Node:\n  "+util.inspect(process.versions).replace(/\s+/g,' ')+
@@ -2097,19 +2105,16 @@ function init( seneca_options, more_options ) {
   var seneca = make_seneca( _.extend( {}, seneca_options, more_options ))
   var so     = seneca.options()
 
-  // TODO: make these optional
-  // register default plugins
+  // Register default plugins, unless turned off by options.
   if( so.default_plugins.basic )        { seneca.use('basic') }
   if( so.default_plugins['mem-store'] ) { seneca.use('mem-store') }
   if( so.default_plugins.transport )    { seneca.use('transport') }
   if( so.default_plugins.web )          { seneca.use('web') }
 
-
   // Register plugins specified in options.
   _.each(so.plugins, function(plugindesc) {
     seneca.use(plugindesc)
   })
-
 
   return seneca
 }

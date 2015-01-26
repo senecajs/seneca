@@ -225,7 +225,7 @@ describe('seneca', function(){
         fin()
       })
       
-    },10)
+    },100)
 
   })
 
