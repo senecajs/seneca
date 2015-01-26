@@ -210,6 +210,7 @@ function make_seneca( initial_options ) {
               allargs: false,
               fragile: false,
               undead:  false,
+              print:   {}
             },
 
             deathdelay: 33333,
@@ -371,6 +372,13 @@ function make_seneca( initial_options ) {
     return util.inspect(so,false,null).replace(/[\r\n]/g,' ')
   })
 
+  if( so.debug.print.options ) {
+    console.log('\nSeneca Options: before plugins\n'+
+                '==============================\n')
+    console.log(util.inspect(so,{depth:null}))
+    console.log('')
+  }
+
 
   function api_logroute(entry,handler) {
     if( 0 === arguments.length ) return private$.logrouter.toString()
@@ -472,6 +480,16 @@ function make_seneca( initial_options ) {
 
           return self.die(error(err,plugin_err_code,plugin))
         }
+
+        if( so.debug.print.options ) {
+          console.log('\nSeneca Options: plugin: '+plugin.name+
+                      (plugin.tag?'$'+plugin.tag:'')+'\n'+
+                      '==================================================\n')
+          console.log(util.inspect(plugin_options,{depth:null}))
+          console.log('')
+        }
+
+
         return self.log.debug('register','ready',pluginref,out)
       }
     )
