@@ -29,7 +29,12 @@ var lrucache     = require('lru-cache')
 var zig          = require('zig')
 var gex          = require('gex')
 var executor     = require('gate-executor')
-var error        = require('eraro')({package:'seneca',msgmap:ERRMSGMAP()})
+
+var error        = require('eraro')({
+  package:  'seneca',
+  msgmap:   ERRMSGMAP(),
+  override: true
+})
 
 
 // Internal modules
@@ -1435,7 +1440,7 @@ function make_seneca( initial_options ) {
         {},
         err.details,
         {
-          message:  err.message,
+          message:  (err.eraro && err.orig) ? err.orig.message : err.message,
           pattern:  actmeta.pattern,
           fn:       actmeta.func,
           cb:       cb,
