@@ -70,18 +70,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha test/*.test.js test/plugin/*.test.js test/options/*.test.js",
+    "test": "./test.sh",
     "build": "./build.sh"
-  },
-  "devDependencies": {
-    "body-parser": "~1.4.3",
-    "connect": "~3.0.2",
-    "connect-query": "~0.2.0",
-    "docco": "~0.6.2",
-    "fixture-stdout": "~0.2.1",
-    "jshint": "~2.6.0",
-    "mocha": "~1.20.1",
-    "seneca-error-test": "~0.2.2",
-    "timerstub": "~1.0.3"
   }
 }
