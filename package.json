@@ -63,7 +63,7 @@
     "README.md",
     "CHANGES.md",
     "lib",
-    "plugin"
+    "seneca.js"
   ],
   "repository": {
     "type": "git",
