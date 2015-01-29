@@ -49,7 +49,7 @@
     "parambulator": "~1.5.0",
     "patrun": "~0.4.3",
     "rolling-stats": "~0.1.1",
-    "seneca-basic": "~0.1.0",
+    "seneca-basic": "~0.2.0",
     "seneca-mem-store": "~0.2.0",
     "seneca-transport": "~0.6.1",
     "seneca-web": "~0.3.0",
