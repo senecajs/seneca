@@ -42,9 +42,9 @@
     "jsonic": "~0.1.2",
     "lodash": "~2.4.1",
     "lru-cache": "~2.5.0",
-    "minimist": "~0.1.0",
+    "minimist": "~1.1.0",
     "nid": "~0.3.2",
-    "norma": "~0.2.6",
+    "norma": "~0.3.0",
     "optimist": "~0.6.1",
     "parambulator": "~1.4.0",
     "patrun": "~0.4.3",
@@ -54,7 +54,7 @@
     "seneca-mem-store": "~0.1.1",
     "seneca-transport": "~0.6.1",
     "seneca-web": "~0.3.0",
-    "use-plugin": "~0.3.0",
+    "use-plugin": "~0.3.1",
     "zig": "~0.1.0"
   },
   "main": "seneca.js",
@@ -72,5 +72,14 @@
   "scripts": {
     "test": "./test.sh",
     "build": "./build.sh"
+  },
+  "devDependencies": {
+    "connect": "^3.3.4",
+    "connect-query": "^0.2.0",
+    "docco": "^0.6.3",
+    "fixture-stdout": "^0.2.1",
+    "jshint": "^2.6.0",
+    "mocha": "^2.1.0",
+    "seneca-error-test": "^0.2.2"
   }
 }
