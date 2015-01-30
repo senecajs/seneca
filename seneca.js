@@ -163,6 +163,35 @@ function make_seneca( initial_options ) {
   root.start = api_start
 
 
+  // Legacy API; Deprecated.
+
+  root.fail = function(){
+    var args = common.arrayify(arguments)
+
+    var cb = _.isFunction(arguments[arguments.length-1]) ?
+          arguments[arguments.length-1] : null
+
+    if( cb ) {
+      args.pop()
+    }
+
+    var err = error.apply(null,args)
+    err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
+
+    this.log.error(err)
+    if( so.errhandler ) {
+      so.errhandler.call(this,err)
+    }
+
+    if( cb ) {
+      cb.call(this,err)
+    }
+
+    return err;
+  }
+
+
+
   var paramcheck = {}
 
   paramcheck.options = parambulator({
@@ -378,10 +407,10 @@ function make_seneca( initial_options ) {
   })
 
   if( so.debug.print.options ) {
-    console.log('\nSeneca Options: before plugins\n'+
+    console_log('\nSeneca Options: before plugins\n'+
                 '==============================\n')
-    console.log(util.inspect(so,{depth:null}))
-    console.log('')
+    console_log(util.inspect(so,{depth:null}))
+    console_log('')
   }
 
 
@@ -487,11 +516,11 @@ function make_seneca( initial_options ) {
         }
 
         if( so.debug.print.options ) {
-          console.log('\nSeneca Options: plugin: '+plugin.name+
+          console_log('\nSeneca Options: plugin: '+plugin.name+
                       (plugin.tag?'$'+plugin.tag:'')+'\n'+
                       '==================================================\n')
-          console.log(util.inspect(plugin_options,{depth:null}))
-          console.log('')
+          console_log(util.inspect(plugin_options,{depth:null}))
+          console_log('')
         }
 
 
@@ -877,7 +906,6 @@ function make_seneca( initial_options ) {
             }
             catch(ex) {
               // TODO: not really satisfactory
-              //var err = self.fail( error, {args:args,result:result} )
               var err = error(ex,'sub_function_catch',{args:args,result:result})
               self.log.error(
                 'sub','err',args.actid$, err.message, args, error.stack )
@@ -1148,7 +1176,7 @@ function make_seneca( initial_options ) {
     self.closed = true
 
     self.log.debug('close','start')
-    self.act('role:seneca,cmd:close',function(err) {
+    self.act('role:seneca,cmd:close,closing$:true',function(err) {
       this.log.debug('close','end',err)
       if( _.isFunction(done) ) return done.call(this,err);
     })
@@ -1209,7 +1237,7 @@ function make_seneca( initial_options ) {
       return self.die( error(e,'plugin_'+e.code) );
     }
 
-    self.register( plugindesc, plugindesc.callback )
+    self.register( plugindesc )
 
     return self
   }
@@ -1413,6 +1441,10 @@ function make_seneca( initial_options ) {
         },
 
         fn:function(cb) {
+          if( root.closed && !callargs.closing$ ) {
+            return cb(error('instance-closed',{args:callargs}))
+          }
+
           delegate.good = function(out) {
             cb(null,out)
           }
@@ -1459,7 +1491,7 @@ function make_seneca( initial_options ) {
     instance.emit('act-err',callargs,err)
 
     if( so.errhandler ) {
-      call_cb = !so.errhandler(err)
+      call_cb = !so.errhandler.call(instance,err)
     }
 
     return {call_cb:call_cb,err:err}
@@ -1493,7 +1525,7 @@ function make_seneca( initial_options ) {
     instance.emit('act-err',callargs,err,result[1])
 
     if( so.errhandler ) {
-      so.errhandler(err)
+      so.errhandler.call(instance,err)
     }
   }
 
@@ -1643,7 +1675,6 @@ function make_seneca( initial_options ) {
     }
     catch( e ) {
       var col = 1==e.line?e.column-1:e.column
-      //throw instance.fail('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
       throw error('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
     }
   }
@@ -2008,6 +2039,7 @@ function makedie( instance, ctxt ) {
             "==================\n\n"+
             "Message: "+err.message+"\n\n"+
             "Code: "+err.code+"\n\n"+
+            "Details: "+util.inspect(err.details,{depth:null})+"\n\n"+
             "Stack: "+stack+"\n\n"+
             "Instance: "+instance.toString()+fatalmodemsg+die_trace+"\n\n"+
             "When: "+new Date().toISOString()+"\n\n"+
@@ -2019,23 +2051,19 @@ function makedie( instance, ctxt ) {
 
 
       if( so.errhandler ) {
-        so.errhandler(err)
+        so.errhandler.call(instance,err)
       }
 
-      // this blocks, but that's ok, we want to be sure the error description 
-      // is printed to STDERR
-      if( !undead ) {
-        console.error( stderrmsg )
-      }
-      
+      if( instance.closed ) return;
+
       if( !undead ) {
         instance.close(     
           // terminate process, err (if defined) is from seneca.close
           function ( err ) {
             if( !undead ) {
               process.nextTick(function() {
-                if( err ) console.error( err );
-                console.error("Terminated at "+(new Date().toISOString())+
+                if( err ) console_error( err );
+                console_error("\n\nSENECA TERMINATED at "+(new Date().toISOString())+
                               ". See above for error report.\n\n")
                 process.exit(1)
               })
@@ -2044,10 +2072,16 @@ function makedie( instance, ctxt ) {
         )
       }
 
+      // this blocks, but that's ok, we want to be sure the error description 
+      // is printed to STDERR
+      if( !undead ) {
+        console_error( stderrmsg )
+      }
+      
       // make sure we close down within options.deathdelay seconds
       if( !undead ) {
         var killtimer = setTimeout(function() {
-          console.error("Terminated (on timeout) at "+(new Date().toISOString())+
+          console_error("\n\nSENECA TERMINATED (on timeout) at "+(new Date().toISOString())+
                         ".\n\n")
           process.exit(2);
         }, so.deathdelay);
@@ -2062,7 +2096,7 @@ function makedie( instance, ctxt ) {
             panic.stack+
             "\n\nOrginal Error:\n"+
             (arguments[0] && arguments[0].stack ? arguments[0].stack : arguments[0])
-      console.error(msg)
+      console_error(msg)
     }
   }
 
@@ -2082,7 +2116,7 @@ function make_trace_act( opts ) {
       args.push(new Error('trace...').stack)
     }
 
-    console.log(args.join('\t'))
+    console_log(args.join('\t'))
   }
 }
 
@@ -2212,4 +2246,15 @@ function ERRMSGMAP() {
 
     ready_failed: 'Ready function failed: <%=message%>'
   }
+}
+
+
+// Intentional console output uses this function. Helps to find spurious debugging.
+function console_log() {
+  console.log.apply(null,arguments)
+}
+
+// Intentional console errors use this function. Helps to find spurious debugging.
+function console_error() {
+  console.error.apply(null,arguments)
 }

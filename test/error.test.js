@@ -36,6 +36,8 @@ describe('seneca', function(){
 
   it('ready_die', ready_die)
 
+  it('legacy_fail', legacy_fail)
+
 
 
   function act_not_found(fin){
@@ -421,6 +423,43 @@ describe('seneca', function(){
       e.foo = true
       throw e;
     })
+  }
+
+
+  function legacy_fail(fin) {
+    var si = seneca({
+      log:'silent',
+    })
+
+    si.options({errhandler:function(err){
+      try {
+        assert.equal('foo',err.code)
+        assert.deepEqual({bar:1},err.details)
+      }
+      catch(e){fin(e)}
+    }})
+
+    var err = si.fail('foo',{bar:1})
+    assert.equal('foo',err.code)
+    assert.deepEqual({bar:1},err.details)
+
+
+    si.options({errhandler:function(err){
+      try {
+        assert.equal('FOO',err.code)
+        assert.deepEqual({BAR:1},err.details)
+      }
+      catch(e){fin(e)}
+    }})
+
+    var err = si.fail('FOO',{BAR:1},function(err){
+      assert.equal('FOO',err.code)
+      assert.deepEqual({BAR:1},err.details)
+      setImmediate(fin)
+    })
+
+    assert.equal('FOO',err.code)
+    assert.deepEqual({BAR:1},err.details)
   }
 
 })
