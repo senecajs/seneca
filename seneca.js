@@ -241,10 +241,11 @@ function make_seneca( initial_options ) {
             },
 
             debug:{
-              allargs: false,
-              fragile: false,
-              undead:  false,
-              print:   {}
+              allargs:    false,
+              fragile:    false,
+              undead:     false,
+              print:      {},
+              act_caller: false,
             },
 
             deathdelay: 33333,
@@ -1129,6 +1130,13 @@ function make_seneca( initial_options ) {
     var args    = spec.pattern
     var actcb   = spec.done
     var actmeta = self.findact(args)
+
+    if( so.debug.act_caller ) {
+      args.caller$ = '\n    Action call arguments and location: '+
+        (new Error(util.inspect(args).replace(/\n/g,'')).stack)
+        .replace(/.*\/seneca\.js:.*\n/g,'')
+        .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g,'')
+    }
 
     // action pattern found
     if( actmeta ) {
