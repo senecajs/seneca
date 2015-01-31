@@ -1151,7 +1151,7 @@ function make_seneca( initial_options ) {
     }
     
     var err = error('act_not_found',{args:args})
-    logging.log_act_not_found( self, err, so.trace.unknown )
+    logging.log_act_not_found( root, err, so.trace.unknown )
 
     if( so.debug.fragile ) throw err;
 
@@ -1395,7 +1395,7 @@ function make_seneca( initial_options ) {
           result[0] = null
 
           logging.log_act_out( 
-            instance, {actid:actid,duration:actend-actstart}, 
+            root, {actid:actid,duration:actend-actstart}, 
             actmeta, callargs, result, prior_ctxt )
 
           private$.stats.act.done++
@@ -1562,7 +1562,7 @@ function make_seneca( initial_options ) {
         var actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
         
-        logging.log_act_cache( instance, {actid:actid}, actmeta, args, prior_ctxt )
+        logging.log_act_cache( root, {actid:actid}, actmeta, args, prior_ctxt )
         
         if( actcb ) actcb.apply( instance, actdetails.result );
         return true;
@@ -1596,26 +1596,10 @@ function make_seneca( initial_options ) {
     var delegate = instance.delegate( delegate_args )
     
 
-    // TODO: make a call on this!!!
     // automate actid log insertion
-    /*
-    delegate.log = function() {
-      var args = arr(arguments)
-
-      if( _.isFunction(actmeta.log) ) {
-        var entries = [args[0],'ACT',actid].concat(args.slice(1))
-        actmeta.log.apply(instance,entries)
-      }
-      else {
-        instance.log.apply(
-          instance,
-          [args[0],'-','-','-','ACT',actid]
-            .concat(args.slice(1)))
-      }
-    }
-    delegate.log.log = actmeta.log
+    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta)
     logging.makelogfuncs(delegate)
-     */
+
 
     if( actmeta.priormeta ) {
       // TODO: deprecate parent
