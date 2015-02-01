@@ -986,6 +986,7 @@ describe('seneca', function(){
 
   it('act-cache', function(fin){
     var si = seneca(testopts)
+    si.options({errhandler:fin})
 
     var x = 0
 
@@ -1016,7 +1017,10 @@ describe('seneca', function(){
           si.act('role:seneca,stats:true',function(err,stats){
             if(err) return fin(err);
 
-            assert.equal( '{ calls: 7, done: 7, fails: 0, cache: 1 }',
+            // --seneca.log.all and count INs
+            // ... | grep act | grep IN | wc -l
+            // sensitive to changes in plugin init and internal action calls
+            assert.equal( '{ calls: 8, done: 8, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
             fin()
           })

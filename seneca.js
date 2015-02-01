@@ -3,6 +3,9 @@
 "use strict"; 
 
 
+// TODO: handle multiple response callbacks!!!
+
+
 // Current version, access using _seneca.version_ property
 var VERSION = '0.6.0'
 
@@ -672,7 +675,7 @@ function make_seneca( initial_options ) {
       function(err,liveclient) {
         if( err ) return self.die(error(err,'transport_client',config));
         if( null == liveclient ) 
-          return self.die(error('transport_client_null',config));
+          return self.die(error('transport_client_null',common.clean(config)));
 
         // Process any messages waiting for this client, 
         // before bringing client online.
@@ -958,7 +961,7 @@ function make_seneca( initial_options ) {
     pattern = self.util.clean(args.pattern)
 
     if( 0 === _.keys( pattern ) ) {
-      throw error('add_empty_pattern',{args:args})
+      throw error('add_empty_pattern',{args:common.clean(args)})
     }
 
     var pattern_rules = _.clone(action.validate || {})
@@ -1147,13 +1150,17 @@ function make_seneca( initial_options ) {
       return self;
     }
 
+    // action pattern not found
+
     if( _.isObject( args.default$ ) ) {
       self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
       if( actcb ) actcb.call( self, null, _.clone(args.default$) );
       return self;
     }
     
-    var err = error('act_not_found',{args:args})
+    var err = error('act_not_found',
+                    {args:util.inspect(common.clean(args)).replace(/\n/g,'')})
+
     if( args.fatal$ ) {
       return self.die(err)
     }
@@ -1331,7 +1338,11 @@ function make_seneca( initial_options ) {
     var args = _.clone(origargs)
     prior_ctxt = prior_ctxt || {chain:[],entry:true,depth:1}
 
-    var actid    = ( args.actid$ || instance.idgen() )
+    var tx = origargs.tx$ || 
+          instance.fixedargs.tx$ || 
+          instance.idgen()
+
+    var actid    = ( args.actid$ || (instance.idgen()+'/'+tx) )
     var actstart = Date.now()
 
     cb = cb || common.noop
@@ -1359,11 +1370,9 @@ function make_seneca( initial_options ) {
     
     instance.emit('act-in', callargs)
 
-    var delegate = act_make_delegate( instance, callargs, actmeta, prior_ctxt )
+    var delegate = act_make_delegate( instance, tx, callargs, actmeta, prior_ctxt )
 
-    if( delegate.fixedargs ) {
-      callargs = _.extend({},callargs,delegate.fixedargs)
-    }
+    callargs = _.extend({},callargs,delegate.fixedargs)
 
 
     var act_done = function(err) {
@@ -1458,7 +1467,7 @@ function make_seneca( initial_options ) {
 
         fn:function(cb) {
           if( root.closed && !callargs.closing$ ) {
-            return cb(error('instance-closed',{args:callargs}))
+            return cb(error('instance-closed',{args:common.clean(callargs)}))
           }
 
           delegate.good = function(out) {
@@ -1596,8 +1605,8 @@ function make_seneca( initial_options ) {
   
 
 
-  function act_make_delegate( instance, callargs, actmeta, prior_ctxt ) {
-    var delegate_args = {}
+  function act_make_delegate( instance, tx, callargs, actmeta, prior_ctxt ) {
+    var delegate_args = { tx$: tx }
     if( null != callargs.gate$ ) {
       delegate_args.ungate$ = !!callargs.gate$
     }
@@ -1610,8 +1619,7 @@ function make_seneca( initial_options ) {
 
 
     if( actmeta.priormeta ) {
-      // TODO: deprecate parent
-      delegate.prior = delegate.parent = function(prior_args,prior_cb) {
+      delegate.prior = function(prior_args,prior_cb) {
         prior_args = _.clone(prior_args)
         
         var sub_prior_ctxt = _.clone(prior_ctxt)
@@ -1624,6 +1632,12 @@ function make_seneca( initial_options ) {
         delete prior_args.meta$
 
         do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
+      }
+
+      delegate.parent = function(prior_args,prior_cb) {
+        delegate.log.warn('The method name seneca.parent is deprecated.'+
+                          ' Please use seneca.prior instead.')
+        delegate.prior(prior_args,prior_cb)
       }
     }
     else delegate.prior = common.nil
@@ -1645,8 +1659,11 @@ function make_seneca( initial_options ) {
     if( actmeta.parambulator ) {
       actmeta.parambulator.validate(args,function(err) {
         if(err) return done( 
-          error('act_invalid_args', 
-                {pattern:actmeta.pattern,message:err.message,args:args} ));
+          error('act_invalid_args', {
+            pattern: actmeta.pattern,
+            message: err.message,
+            args:    common.clean(args)
+          }));
         return done();
       })
     } 
@@ -1675,7 +1692,12 @@ function make_seneca( initial_options ) {
     }
     catch( e ) {
       var col = 1==e.line?e.column-1:e.column
-      throw error('add_string_pattern_syntax',{argstr:args,syntax:e.message,line:e.line,col:col})
+      throw error('add_string_pattern_syntax',{
+        argstr: args,
+        syntax: e.message,
+        line:   e.line,
+        col:    col
+      })
     }
   }
 
@@ -1732,13 +1754,13 @@ function make_seneca( initial_options ) {
 
       return strdesc
     }
+
+    delegate.fixedargs = _.extend({},fixedargs,self.fixedargs)
     
     delegate.delegate = function(further_fixedargs) {
-      var args = _.extend({},fixedargs,further_fixedargs||{})
+      var args = _.extend({},delegate.fixedargs,further_fixedargs||{})
       return self.delegate.call(this,args)
     }
-
-    delegate.fixedargs = fixedargs
 
     // Somewhere to put contextual data for this delegate.
     // For example, data for individual web requests.
@@ -2223,7 +2245,7 @@ function ERRMSGMAP() {
 
     act_if_expects_boolean: 'The method act_if expects a boolean value as its first argument, was: "<%=first%>".',
 
-    act_not_found: 'No matching action pattern found for "<%=args%>", and no default result provided (using a default$ property).',
+    act_not_found: 'No matching action pattern found for <%=args%>, and no default result provided (using a default$ property).',
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument should be a string or object pattern.',
     act_invalid_args: 'Action <%=pattern%> has invalid arguments; <%=message%>; arguments were: <%=args%>.',
     act_execute: 'Action <%=pattern%> failed: <%=message%>.',
