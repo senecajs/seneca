@@ -575,6 +575,9 @@ function make_seneca( initial_options ) {
   function api_export( key ) {
     var self = this
 
+    // Legacy aliases
+    if( 'util' == key ) key = 'basic';
+
     var exportval = private$.exports[key];
     if( !exportval ) {
       return self.die(error('export_not_found', {key:key}))
@@ -1151,6 +1154,10 @@ function make_seneca( initial_options ) {
     }
     
     var err = error('act_not_found',{args:args})
+    if( args.fatal$ ) {
+      return self.die(err)
+    }
+
     logging.log_act_not_found( root, err, so.trace.unknown )
 
     if( so.debug.fragile ) throw err;
@@ -1201,7 +1208,8 @@ function make_seneca( initial_options ) {
     if( _.isFunction(ready) ) {
       self.once('ready',function(){
         try {
-          ready.call(self)
+          var ready_delegate = self.delegate({fatal$:true})
+          ready.call(ready_delegate)
         }
         catch(ex) {
           var re = ex
@@ -2157,9 +2165,9 @@ function init( seneca_options, more_options ) {
 
   // Register default plugins, unless turned off by options.
   if( so.default_plugins.basic )        { seneca.use('basic') }
-  if( so.default_plugins['mem-store'] ) { seneca.use('mem-store') }
   if( so.default_plugins.transport )    { seneca.use('transport') }
   if( so.default_plugins.web )          { seneca.use('web') }
+  if( so.default_plugins['mem-store'] ) { seneca.use('mem-store') }
 
   // Register plugins specified in options.
   _.each(so.plugins, function(plugindesc) {

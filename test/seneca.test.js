@@ -803,12 +803,13 @@ describe('seneca', function(){
 
       .ready(function(){
 
-        this.options({errhandler:function(err){
+        // using root as ready seneca is fatal$
+        this.root.options({errhandler:function(err){
           if( 'act_invalid_args' != err.code ) return fin(err);
           fin()
         }})
 
-        this.act('A:1,B:true,C:44')
+        this.root.act('A:1,B:true,C:44')
 
       })
   })
