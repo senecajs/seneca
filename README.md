@@ -2,6 +2,14 @@
 
 ## A Node.js toolkit for Micro-Service Architectures
 
+Seneca provides a toolkit for writing micro-services in Node.js. Seneca provides:
+
+   * pattern matching: a wonderfully flexible way to handle business requirements
+   * transport independence: how messages get to the right server is not something you should have to worry about
+   * maturity: 5 years in production (before we called it _micro-services_), but was once taken out by [lightning](http://aws.amazon.com/message/67457/)
+   * deep and wide ecosystem of [plugins](https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults)
+
+
 [![Gitter chat](https://badges.gitter.im/rjrodger/seneca.png)](https://gitter.im/rjrodger/seneca)
 
 Seneca is a toolkit for organizing the business logic of your app. You
@@ -19,6 +27,8 @@ Current Version: 0.6.1-rc1
 Tested on: Node 0.10.36
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
+
+[Annotated Source Code](http://senecajs.org/doc/seneca.html).
 
 
 Use this module to define commands that work by taking in some JSON,
@@ -240,8 +250,12 @@ patterns. This lets you isolate complexity into well-defined
 places. It also means you can deal with special cases very easily.
 
 
+_Examples_
 
-_Source_
+For more examples of Seneca in action, take a look at:
 
-The [Seneca source code](http://senecajs.org/doc/seneca.html) is annotated.
+   * (seneca-examples)[github.com/rjrodger/seneca-examples]
+   * (nodezoo.com)[github.com/rjrodger/seneca-examples]
+   * (Well!)[github.com/nearform/well]
+
 
