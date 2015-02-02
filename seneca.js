@@ -178,9 +178,17 @@ function make_seneca( initial_options ) {
       args.pop()
     }
 
+    if( _.isObject( args[0] ) ) {
+      var code = args[0].code
+      if( _.isString(code) ) {
+        args.unshift(code)
+      }
+    }
+
     var err = error.apply(null,args)
     err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
-
+    err.seneca = { code: err.code, valmap:err.details }
+    
     this.log.error(err)
     if( so.errhandler ) {
       so.errhandler.call(this,err)
@@ -487,7 +495,6 @@ function make_seneca( initial_options ) {
     private$.plugin_order.byname = _.uniq(private$.plugin_order.byname)
 
     private$.plugin_order.byref.push(pluginref)
-
 
     // LEGACY
     var service = plugin.service
@@ -1504,6 +1511,12 @@ function make_seneca( initial_options ) {
           instance: instance.toString()
         }))
 
+      result[0] = err
+    }
+
+    // Special legacy case for seneca-perm
+    else if( err.orig && 0 === err.orig.code.indexOf('perm/') ) {
+      err = err.orig
       result[0] = err
     }
       
