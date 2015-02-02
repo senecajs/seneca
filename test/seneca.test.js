@@ -34,6 +34,7 @@ var timerstub = {
 
 var testopts = {log:'silent'}
 
+process.setMaxListeners(0)
 
 
 describe('seneca', function(){

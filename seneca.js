@@ -271,7 +271,13 @@ function make_seneca( initial_options ) {
             internal: {
               actrouter:    patrun(),
               clientrouter: patrun(pin_patrun_customizer),
-              subrouter:    patrun(pin_patrun_customizer)
+              subrouter:    patrun(pin_patrun_customizer),
+              close_signals: {
+                SIGHUP:   true, 
+                SIGTERM:  true,
+                SIGINT:   true, 
+                SIGBREAK: true, 
+              }
             },
 
             default_plugins: {
@@ -295,7 +301,7 @@ function make_seneca( initial_options ) {
 
 
   // Create a unique identifer for this instance.
-  root.id = root.idgen()+'/'+Date.now()+'/'+so.tag
+  root.id = root.idgen()+'/'+Date.now()+'/'+process.pid+'/'+so.tag
 
   root.name = 'Seneca/'+root.version+'/'+root.id
 
@@ -1206,8 +1212,8 @@ function make_seneca( initial_options ) {
 
     self.log.debug('close','start')
     self.act('role:seneca,cmd:close,closing$:true',function(err) {
-      this.log.debug('close','end',err)
-      if( _.isFunction(done) ) return done.call(this,err);
+      self.log.debug('close','end',err)
+      if( _.isFunction(done) ) return done.call(self,err);
     })
   }
 
@@ -1365,6 +1371,7 @@ function make_seneca( initial_options ) {
 
     callargs.meta$ = {
       id:      actid,
+      tx:      tx,
       start:   actstart,
       pattern: actmeta.argpattern,
       action:  actmeta.id,
@@ -1627,7 +1634,7 @@ function make_seneca( initial_options ) {
     
 
     // automate actid log insertion
-    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta)
+    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta,instance)
     logging.makelogfuncs(delegate)
 
 
@@ -2018,6 +2025,18 @@ function make_seneca( initial_options ) {
 
     done(null,common.copydata(val))
   }
+
+
+  _.each( so.internal.close_signals, function(active,signal){
+    if(active) {
+      process.on(signal,function(){
+        root.close(function(err){
+          if( err ) console.error(err);
+          //process.exit( err ? (null == err.exit ? 1 : err.exit) : 0 )
+        })
+      })
+    }
+  })
 
 
   return root
