@@ -7,7 +7,7 @@
 
 
 // Current version, access using _seneca.version_ property
-var VERSION = '0.6.0'
+var VERSION = '0.6.1'
 
 
 // Node API modules
