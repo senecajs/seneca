@@ -2032,7 +2032,7 @@ function make_seneca( initial_options ) {
       process.on(signal,function(){
         root.close(function(err){
           if( err ) console.error(err);
-          //process.exit( err ? (null == err.exit ? 1 : err.exit) : 0 )
+          process.exit( err ? (null == err.exit ? 1 : err.exit) : 0 )
         })
       })
     }
