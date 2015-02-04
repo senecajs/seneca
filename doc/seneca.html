@@ -805,6 +805,8 @@ setup status log</p>
       (plugin.options &amp;&amp; plugin.options.tag$)
     plugin.service = meta.service || plugin.service
 
+    sd.__update_plugin__(meta)
+    
     <span class="hljs-keyword">var</span> pluginref = plugin.name+(plugin.tag?<span class="hljs-string">'/'</span>+plugin.tag:<span class="hljs-string">''</span>)
     private$.plugins[pluginref] = plugin
 
@@ -2953,6 +2955,7 @@ for use with async</p>
             <span class="hljs-keyword">if</span>( !undead ) {
               process.nextTick(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
                 <span class="hljs-keyword">if</span>( err ) console_error( err );
+                console_error( stderrmsg )
                 console_error(<span class="hljs-string">"\n\nSENECA TERMINATED at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
                               <span class="hljs-string">". See above for error report.\n\n"</span>)
                 process.exit(<span class="hljs-number">1</span>)
@@ -2971,30 +2974,13 @@ for use with async</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-74">&#182;</a>
               </div>
-              <p>this blocks, but that’s ok, we want to be sure the error description 
-is printed to STDERR</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span>( !undead ) {
-        console_error( stderrmsg )
-      }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-75">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
-              </div>
               <p>make sure we close down within options.deathdelay seconds</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span>( !undead ) {
         <span class="hljs-keyword">var</span> killtimer = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+          console_error( stderrmsg )
           console_error(<span class="hljs-string">"\n\nSENECA TERMINATED (on timeout) at "</span>+(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString())+
                         <span class="hljs-string">".\n\n"</span>)
           process.exit(<span class="hljs-number">2</span>);
@@ -3051,11 +3037,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-76">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
               <p>handle previous patterns that match this pattern</p>
 
@@ -3084,11 +3070,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-77">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
               <p>Primary export function, creates a new Seneca instance.</p>
 
@@ -3099,11 +3085,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-78">
+        <li id="section-77">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
               <p>Create instance.</p>
 
@@ -3115,11 +3101,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-79">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
               <p>Register default plugins, unless turned off by options.</p>
 
@@ -3133,11 +3119,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-80">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
               <p>Register plugins specified in options.</p>
 
@@ -3153,11 +3139,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-81">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
               <p>To reference builtin loggers when defining logging options.</p>
 
@@ -3168,11 +3154,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-82">
+        <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
               <p>Makes require(‘seneca’).use( … ) work by creating an on-the-fly instance.</p>
 
@@ -3186,11 +3172,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-83">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
               <p>Mostly for testing.</p>
 
@@ -3203,11 +3189,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-84">
+        <li id="section-83">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>Minor utils</p>
 
@@ -3220,11 +3206,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-85">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>Error code messages.</p>
 
@@ -3276,11 +3262,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-86">
+        <li id="section-85">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-85">&#182;</a>
               </div>
               <p>Intentional console output uses this function. Helps to find spurious debugging.</p>
 
@@ -3293,11 +3279,11 @@ is printed to STDERR</p>
         </li>
         
         
-        <li id="section-87">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <p>Intentional console errors use this function. Helps to find spurious debugging.</p>
 
