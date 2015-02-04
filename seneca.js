@@ -2119,6 +2119,7 @@ function makedie( instance, ctxt ) {
             if( !undead ) {
               process.nextTick(function() {
                 if( err ) console_error( err );
+                console_error( stderrmsg )
                 console_error("\n\nSENECA TERMINATED at "+(new Date().toISOString())+
                               ". See above for error report.\n\n")
                 process.exit(1)
@@ -2128,15 +2129,10 @@ function makedie( instance, ctxt ) {
         )
       }
 
-      // this blocks, but that's ok, we want to be sure the error description 
-      // is printed to STDERR
-      if( !undead ) {
-        console_error( stderrmsg )
-      }
-      
       // make sure we close down within options.deathdelay seconds
       if( !undead ) {
         var killtimer = setTimeout(function() {
+          console_error( stderrmsg )
           console_error("\n\nSENECA TERMINATED (on timeout) at "+(new Date().toISOString())+
                         ".\n\n")
           process.exit(2);
