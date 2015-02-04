@@ -10,7 +10,7 @@
 9.  run seneca-examples
 10. run well app
 11. test data-stores: mongo, jsonfile-store
-12. update version: package.json, README.md, lib/seneca.js, test/seneca.test.js
+12. update version: package.json, README.md, seneca.js, test/seneca.test.js
 13. run npm run build
 14. run npm test
 15. git, final commit+push
