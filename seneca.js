@@ -494,6 +494,8 @@ function make_seneca( initial_options ) {
       (plugin.options && plugin.options.tag$)
     plugin.service = meta.service || plugin.service
 
+    sd.__update_plugin__(meta)
+    
     var pluginref = plugin.name+(plugin.tag?'/'+plugin.tag:'')
     private$.plugins[pluginref] = plugin
 
