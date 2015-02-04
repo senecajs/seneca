@@ -35,17 +35,15 @@ seneca.add( {cmd:'salestax',country:'IE'}, function(args,callback){
 })
 
 
-var shop = seneca.pin({cmd:'*'})
-
-shop.salestax({net:100,country:'DE'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:DE', function(err,result){
   console.log( 'DE: '+result.total )
 })
 
-shop.salestax({net:100,country:'US',state:'NY'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:US,state:NY', function(err,result){
   console.log( 'US,NY: '+result.total )
 })
 
-shop.salestax({net:100,country:'IE',category:'reduced'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function(err,result){
   console.log( 'IE: '+result.total )
 })
 

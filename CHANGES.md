@@ -1,7 +1,11 @@
 
 ## 0.6.1: 2015-02-04
 
-   * Bug fixes for github issues: 92, 88, 86, 80
+   * "zig" style control flow for neater code
+   * Much improved error logging and action tracing
+   * Plugin initialization errors are fatal
+   * Transport mapping sub-system completely refactored
+   * Bug fixes for github issues: 92, 88, 86, 80, 97
 
 ## 0.5.21: 2014-10-07
 

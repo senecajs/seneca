@@ -110,15 +110,23 @@ There's a little but too much verbosity here, don't you think? Let's fix that:
 
 
 ```javascript
-var shop = seneca.pin({cmd:'*'})
-
-shop.salestax({net:100}, function(err,result){
+seneca.act('cmd:salestax,net:100', function(err,result){
   console.log( result.total )
 })
 ```
 
-By _pinning_ a pattern, you get a little API of matching function calls.
-The _shop_ object gets a set of methods that match the pattern: _shop.salestax_ and _shop.config_.
+Instead of providing an object, you can provide a string using an
+[abbreviated form of JSON](//github.com/rjrodger/jsonic). In fact, you
+can provide both:
+
+```javascript
+seneca.act('cmd:salestax', {net:100}, function(err,result){
+  console.log( result.total )
+})
+```
+
+This is a very convenient way of combining a pattern and parameter data.
+
 
 
 _Programmer Anarchy_
@@ -164,9 +172,7 @@ seneca.add( {cmd:'salestax'}, function(args,callback){
 
 seneca.client()
 
-var shop = seneca.pin({cmd:'*'})
-
-shop.salestax({net:100}, function(err,result){
+seneca.act('cmd:salestax,net:100', function(err,result){
   console.log( result.total )
 })
 ```
@@ -229,17 +235,15 @@ seneca.add( {cmd:'salestax',country:'IE'}, function(args,callback){
 })
 
 
-var shop = seneca.pin({cmd:'*'})
-
-shop.salestax({net:100,country:'DE'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:DE', function(err,result){
   console.log( 'DE: '+result.total )
 })
 
-shop.salestax({net:100,country:'US',state:'NY'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:US,state:NY', function(err,result){
   console.log( 'US,NY: '+result.total )
 })
 
-shop.salestax({net:100,country:'IE',category:'reduced'}, function(err,result){
+seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function(err,result){
   console.log( 'IE: '+result.total )
 })
 
