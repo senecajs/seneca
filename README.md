@@ -24,7 +24,7 @@ have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
 Current Version: 0.6.1-rc2
 
-Tested on: Node 0.10.36
+Tested on: Node 0.10.36, 0.11.16, 1.1.0 (iojs)
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
 

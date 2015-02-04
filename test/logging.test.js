@@ -9,11 +9,14 @@ function fmt(r){ return r.toString(true).replace(/\s+/g,'') }
 
 describe('logging', function() {
 
-  it('makelogrouter.happy', function() {
+  function A(){}; A.toString = function(){return 'A'};
+  function B(){}; B.toString = function(){return 'B'};
+  function C(){}; C.toString = function(){return 'C'};
 
+  it('makelogrouter.happy', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info',type:'init',handler:'A'},
-      {level:'info',type:'plugin',plugin:'red',handler:'B'},
+      {level:'info',type:'init',handler:A},
+      {level:'info',type:'plugin',plugin:'red',handler:B},
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:info->plugin:red->type:plugin-><B>*->type:init-><A>")
@@ -33,9 +36,9 @@ describe('logging', function() {
 
   it('makelogrouter.multiplex', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info',type:'init',handler:'A'},
-      {level:'info',type:'init',handler:'B'},
-      {level:'info',type:'init',handler:'C'},
+      {level:'info',type:'init',handler:A},
+      {level:'info',type:'init',handler:B},
+      {level:'info',type:'init',handler:C},
     ]})
 
     // fix printing for test
@@ -47,7 +50,7 @@ describe('logging', function() {
     
   it('makelogrouter.multival.comma', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info',type:'init,  status',handler:'A'}
+      {level:'info',type:'init,  status',handler:A}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:info->type:init-><A>status-><A>")
@@ -56,7 +59,7 @@ describe('logging', function() {
 
   it('makelogrouter.multival.space', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info',type:'init status',handler:'A'}
+      {level:'info',type:'init status',handler:A}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:info->type:init-><A>status-><A>")
@@ -65,7 +68,7 @@ describe('logging', function() {
 
   it('makelogrouter.multimultival', function() {
     var r = logging.makelogrouter({map:[
-      {level:'info,debug',type:'init,status',handler:'A'}
+      {level:'info,debug',type:'init,status',handler:A}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:info->type:init-><A>status-><A>debug->type:init-><A>status-><A>")
@@ -74,7 +77,7 @@ describe('logging', function() {
 
   it('makelogrouter.level.all', function() {
     var r = logging.makelogrouter({map:[
-      {level:'all',type:'init',handler:'A'}
+      {level:'all',type:'init',handler:A}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:debug->type:init-><A>info->type:init-><A>warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
@@ -83,7 +86,7 @@ describe('logging', function() {
 
   it('makelogrouter.level.upwards', function() {
     var r = logging.makelogrouter({map:[
-      {level:'warn+',type:'init',handler:'A'}
+      {level:'warn+',type:'init',handler:A}
     ]})
     //console.log(fmt(r))
     assert.equal(fmt(r), "level:warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
@@ -91,7 +94,10 @@ describe('logging', function() {
 
 
   it('makelogrouter.level.bad', function() {    
-    try { logging.makelogrouter({map:[ {level:'bad',type:'init',handler:'A'} ]}); assert.fail() }
+    try { 
+      logging.makelogrouter({map:[ {level:'bad',type:'init',handler:A} ]}); 
+      assert.fail() 
+    }
     catch( e ) { 
       assert.equal('invalid_log_level',e.code)
     }

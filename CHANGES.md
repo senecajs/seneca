@@ -1,4 +1,8 @@
 
+## 0.6.1: 2015-02-04
+
+   * Bug fixes for github issues: 92, 88, 86, 80
+
 ## 0.5.21: 2014-10-07
 
    * Bug fixes for github issues: 70, 65, 48, 45

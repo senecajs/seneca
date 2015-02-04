@@ -15,7 +15,6 @@ var seneca   = require('..')
 
 var gex           = require('gex')
 var parambulator  = require('parambulator')
-var fixturestdout = new require('fixture-stdout');
 var _             = require('lodash')
 
 
@@ -68,23 +67,15 @@ describe('seneca', function(){
 
 
   
-  it('require-use-safetynet', function(){
-
-    var fso = new fixturestdout()
-    try {
-      fso.capture( function onWrite (string, encoding, fd) {
-        return false;
+  it('require-use-safetynet', function(fin){
+    require('..')
+      .use('echo')
+      .act('role:echo,foo:1',function(err,out){
+        console.log(err)
+        if(err) return fin(err);
+        assert.equal(1,out.foo)
+        fin()
       })
-      require('..').use('echo')
-      fso.release()
-    }
-    catch(e){
-      console.log(e)
-      fso.release()
-      assert.fail()
-    }
-
-    require('..')(testopts).use('echo')
   })
 
 

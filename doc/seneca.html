@@ -479,7 +479,13 @@ is not considered part of the pattern, but rather an argument to validate when <
             internal: {
               actrouter:    patrun(),
               clientrouter: patrun(pin_patrun_customizer),
-              subrouter:    patrun(pin_patrun_customizer)
+              subrouter:    patrun(pin_patrun_customizer),
+              close_signals: {
+                SIGHUP:   <span class="hljs-literal">true</span>, 
+                SIGTERM:  <span class="hljs-literal">true</span>,
+                SIGINT:   <span class="hljs-literal">true</span>, 
+                SIGBREAK: <span class="hljs-literal">true</span>, 
+              }
             },
 
             default_plugins: {
@@ -538,7 +544,7 @@ is not considered part of the pattern, but rather an argument to validate when <
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.id = root.idgen()+<span class="hljs-string">'/'</span>+<span class="hljs-built_in">Date</span>.now()+<span class="hljs-string">'/'</span>+so.tag
+            <div class="content"><div class='highlight'><pre>  root.id = root.idgen()+<span class="hljs-string">'/'</span>+<span class="hljs-built_in">Date</span>.now()+<span class="hljs-string">'/'</span>+process.pid+<span class="hljs-string">'/'</span>+so.tag
 
   root.name = <span class="hljs-string">'Seneca/'</span>+root.version+<span class="hljs-string">'/'</span>+root.id
 
@@ -1769,8 +1775,8 @@ sets public seneca.closed property</p>
 
     self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'start'</span>)
     self.act(<span class="hljs-string">'role:seneca,cmd:close,closing$:true'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
-      <span class="hljs-keyword">this</span>.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'end'</span>,err)
-      <span class="hljs-keyword">if</span>( _.isFunction(done) ) <span class="hljs-keyword">return</span> done.call(<span class="hljs-keyword">this</span>,err);
+      self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'end'</span>,err)
+      <span class="hljs-keyword">if</span>( _.isFunction(done) ) <span class="hljs-keyword">return</span> done.call(self,err);
     })
   }</pre></div></div>
             
@@ -2002,6 +2008,7 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
 
     callargs.meta$ = {
       id:      actid,
+      tx:      tx,
       start:   actstart,
       pattern: actmeta.argpattern,
       action:  actmeta.id,
@@ -2335,7 +2342,7 @@ then provide cached result, if any. Return true in this case.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta)
+            <div class="content"><div class='highlight'><pre>    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta,instance)
     logging.makelogfuncs(delegate)
 
 
@@ -2820,6 +2827,18 @@ for use with async</p>
 
     done(<span class="hljs-literal">null</span>,common.copydata(val))
   }
+
+
+  _.each( so.internal.close_signals, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(active,signal)</span></span>{
+    <span class="hljs-keyword">if</span>(active) {
+      process.on(signal,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{
+        root.close(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{
+          <span class="hljs-keyword">if</span>( err ) <span class="hljs-built_in">console</span>.error(err);
+          process.exit( err ? (<span class="hljs-literal">null</span> == err.exit ? <span class="hljs-number">1</span> : err.exit) : <span class="hljs-number">0</span> )
+        })
+      })
+    }
+  })
 
 
   <span class="hljs-keyword">return</span> root
