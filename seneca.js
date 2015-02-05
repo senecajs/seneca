@@ -534,7 +534,7 @@ function make_seneca( initial_options ) {
           return self.die(error(err,plugin_err_code,plugin))
         }
 
-        if( so.debug.print.options ) {
+        if( so.debug.print && so.debug.print.options ) {
           console_log('\nSeneca Options: plugin: '+plugin.name+
                       (plugin.tag?'$'+plugin.tag:'')+'\n'+
                       '==================================================\n')
