@@ -71,6 +71,9 @@
     "test": "./test.sh",
     "build": "./build.sh"
   },
+  "browser": {
+    "./lib/optioner.js": "./lib/optioner.browser.js"
+  },
   "devDependencies": {
     "body-parser": "^1.11.0",
     "connect": "~3.3.4",
