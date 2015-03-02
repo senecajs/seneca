@@ -9,6 +9,8 @@
 // Current version, access using _seneca.version_ property
 var VERSION = '0.6.1'
 
+// Polyfills for cross-browser support.
+require('setimmediate');
 
 // Node API modules
 var util     = require('util')
