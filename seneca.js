@@ -2303,10 +2303,10 @@ function ERRMSGMAP() {
 
 // Intentional console output uses this function. Helps to find spurious debugging.
 function console_log() {
-  console.log.apply(null,arguments)
+  console.log.apply(console,arguments)
 }
 
 // Intentional console errors use this function. Helps to find spurious debugging.
 function console_error() {
-  console.error.apply(null,arguments)
+  console.error.apply(console,arguments)
 }
