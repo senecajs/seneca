@@ -1,0 +1,8 @@
+name: seneca
+ui: mocha-bdd
+browsers:
+  - name: firefox
+    platform: linux
+    version: latest
+  - name: chrome
+    version: beta
