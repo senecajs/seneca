@@ -71,7 +71,7 @@
   "scripts": {
     "test": "./test.sh",
     "build": "./build.sh",
-    "prepublish": "browserify seneca.js --standalone seneca > dist/seneca.browser.js",
+    "prepublish": "browserify seneca.js --standalone seneca > seneca.browser.js",
     "test-browser": "zuul --local 8080 -- test/*.test.js"
   },
   "browser": {
