@@ -21,8 +21,8 @@ var _             = require('lodash')
 // timerstub broken on node 0.11
 //var timerstub = require('timerstub')
 var timerstub = {
-  setTimeout:setTimeout,
-  setInterval:setInterval,
+  setTimeout:setTimeout.bind(null),
+  setInterval:setInterval.bind(null),
   Date:Date,
   wait:function(dur,fn){
     setTimeout(fn,dur)
