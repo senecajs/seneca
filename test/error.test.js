@@ -23,18 +23,18 @@ describe('seneca', function(){
 
   it('param_caller', param_caller)
 
-  it('exec_action_throw',             exec_action_throw)
-  it('exec_action_throw_nolog',       exec_action_throw_nolog)
-  it('exec_action_errhandler_throw',  exec_action_errhandler_throw)
+  it.skip('exec_action_throw',             exec_action_throw)
+  it.skip('exec_action_throw_nolog',       exec_action_throw_nolog)
+  it.skip('exec_action_errhandler_throw',  exec_action_errhandler_throw)
 
-  it('exec_action_result',            exec_action_result)
-  it('exec_action_result_nolog',      exec_action_result_nolog)
-  it('exec_action_errhandler_result', exec_action_errhandler_result)
+  it.skip('exec_action_result',            exec_action_result)
+  it.skip('exec_action_result_nolog',      exec_action_result_nolog)
+  it.skip('exec_action_errhandler_result', exec_action_errhandler_result)
 
   it('action_callback',   action_callback)
 
 
-  it('ready_die', ready_die)
+  it.skip('ready_die', ready_die)
 
   it('legacy_fail', legacy_fail)
 

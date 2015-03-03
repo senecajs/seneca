@@ -12,7 +12,7 @@ var gex = require('gex')
 
 describe('entity.plugin', function() {
 
-  it('multi', function(fin) {
+  it.skip('multi', function(fin) {
     var si = seneca(
       {
         plugins:[

@@ -20,7 +20,7 @@ describe('transport', function(){
   // TODO: test top level qaz:* : def and undef other pats
 
 
-  it('transport-star', function(fin){
+  it.skip('transport-star', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -52,7 +52,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-single-notdef', function(fin){
+  it.skip('transport-single-notdef', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -77,7 +77,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-pins-notdef', function(fin){
+  it.skip('transport-pins-notdef', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -109,7 +109,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-single-wrap-and-star', function(fin){
+  it.skip('transport-single-wrap-and-star', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -138,7 +138,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-local-single-and-star', function(fin){
+  it.skip('transport-local-single-and-star', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -174,7 +174,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-local-over-wrap', function(fin){
+  it.skip('transport-local-over-wrap', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
@@ -196,7 +196,7 @@ describe('transport', function(){
   })
 
 
-  it('transport-local-prior-wrap', function(fin){
+  it.skip('transport-local-prior-wrap', function(fin){
     var tt = test_transport()
     var si = seneca({timeout:5555,log:'silent'})
           .use( tt )
