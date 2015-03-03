@@ -6,3 +6,6 @@ browsers:
     version: latest
   - name: chrome
     version: beta
+browserify:
+  - options:
+    debug: true
