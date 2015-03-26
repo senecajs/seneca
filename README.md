@@ -258,8 +258,8 @@ _Examples_
 
 For more examples of Seneca in action, take a look at:
 
-   * [seneca-examples](github.com/rjrodger/seneca-examples)
-   * [nodezoo.com](github.com/rjrodger/seneca-examples)
-   * [Well!](github.com/nearform/well)
+   * [seneca-examples](//github.com/rjrodger/seneca-examples)
+   * [nodezoo.com](nodezoo.com/#q=seneca)
+   * [Well!](//github.com/nearform/well)
 
 
