@@ -193,7 +193,7 @@ _Keeping the Business Happy_
 
 The thing about business requirements is that have no respect for
 common sense, logic or orderly structure. The real world is
-messy. 
+messy.
 
 In our example, let's say some countries have single sales tax rate,
 and others have a variable rate, which depends either on locality, or product category.
@@ -258,8 +258,6 @@ _Examples_
 
 For more examples of Seneca in action, take a look at:
 
-   * [seneca-examples](github.com/rjrodger/seneca-examples)
-   * [nodezoo.com](github.com/rjrodger/seneca-examples)
-   * [Well!](github.com/nearform/well)
-
-
+   * [seneca-examples](http://github.com/rjrodger/seneca-examples)
+   * [nodezoo.com](http://github.com/rjrodger/seneca-examples)
+   * [Well!](http://github.com/nearform/well)
