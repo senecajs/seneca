@@ -1246,5 +1246,23 @@ describe('seneca', function(){
         fin()
       })
   })
+
+
+  it('strict',function(fin){
+    var si = seneca(testopts)
+    
+    si.add('a:1',function(a,d){d(null,"a")})
+    si.act('a:1',function(err,res){
+      assert.ok(err)
+      assert.equal('result_not_objarr', err.code)
+
+      si.options({strict:{result:false}})
+      si.act('a:1',function(err,res){
+        assert.ok(!err)
+        assert.equal('a', res)
+        fin()
+      })
+    })
+  })
 })
 

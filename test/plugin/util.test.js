@@ -68,17 +68,14 @@ describe('util', function() {
 
           // just use ent if given
           si.act({util:1,cmd:'A',foo:foos[0]},function(e,o){
-            //console.log('ent '+o)
             assert.equal(10,o.a)
 
             // load from id
             si.act({util:1,cmd:'A',foo:fooid[1]},function(e,o){
-              //console.log('load '+o)
               assert.equal(100,o.a)
 
               // initialize from data
               si.act({util:1,cmd:'A',foo:foos[1].data$()},function(e,o){
-                //console.log('data '+o)
                 assert.equal(20,o.a)
 
                 fin()

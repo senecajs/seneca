@@ -236,6 +236,15 @@ function make_seneca( initial_options ) {
 
             zig:{},
 
+
+            // Enforce strict behaviours. Relax when backwards compatibility needed.
+            strict: {
+
+              // Action result must be a plain object.
+              result: true
+            },
+
+
             trace:{
               act:     false,
               stack:   false,
@@ -274,7 +283,7 @@ function make_seneca( initial_options ) {
                 SIGTERM:  true,
                 SIGINT:   true, 
                 SIGBREAK: true, 
-              }
+              },
             },
 
             default_plugins: {
@@ -1380,7 +1389,7 @@ function make_seneca( initial_options ) {
       id:      actid,
       tx:      tx,
       start:   actstart,
-      pattern: actmeta.argpattern,
+      pattern: actmeta.pattern,
       action:  actmeta.id,
       entry:   prior_ctxt.entry,
       chain:   prior_ctxt.chain
@@ -1407,6 +1416,30 @@ function make_seneca( initial_options ) {
         var result  = arr(arguments)
         var call_cb = true
 
+        var resdata = result[1]
+
+        if( null == err && 
+            null != resdata && 
+            !(_.isPlainObject(resdata) || 
+              _.isArray(resdata) ||
+              !!resdata.entity$) &&
+            so.strict.result) 
+        {
+
+          // allow legacy patterns
+          if( !( 'generate_id' === callargs.cmd ||
+                 true === callargs.note || 
+                 'quickcode' === callargs.cmd )) 
+          {
+            err = error(
+              'result_not_objarr', {
+                pattern:actmeta.pattern,
+                args:util.inspect(common.clean(callargs)).replace(/\n/g,''),
+                result:resdata
+              })
+          }
+        }
+
         if( so.actcache ) {
           private$.actcache.set(actid,{
             result:result,
@@ -1423,6 +1456,7 @@ function make_seneca( initial_options ) {
                               actend-actstart,callargs,prior_ctxt)
           
           call_cb = out.call_cb
+          result[0] = out.err
 
           if( args.fatal$ ) {
             return instance.die(out.err)
@@ -2287,6 +2321,7 @@ function ERRMSGMAP() {
     act_execute: 'Action <%=pattern%> failed: <%=message%>.',
     act_callback: 'Action <%=pattern%> callback threw: <%=message%>.',
 
+    result_not_objarr: 'Action <%=pattern%> responded with result that was not an object or array: <%=result%>; Use option strict:{result:false} to allow; arguments were: <%=args%>',
 
     no_client: 'Transport client was not created; arguments were: "<%=args%>".',
 
