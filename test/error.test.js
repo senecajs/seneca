@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 "use strict";
 
 
@@ -15,6 +15,7 @@ var gex = require('gex')
 
 var testopts = {log:'silent'}
 
+process.setMaxListeners(0)
 
 describe('seneca', function(){
 
@@ -62,23 +63,29 @@ describe('seneca', function(){
       assert.equal('act_not_found',err.code)
       assert.equal('act_not_found',ctxt.errlog[9])
 
+      // ~~ CASE: callback; bad-default; err-result; err-logged
+      si.act('a:1,default$:"foo"',function(err,out){
+        assert.ok(null==out)
+        assert.equal('act_default_bad',err.code)
+        assert.equal('act_default_bad',ctxt.errlog[9])
 
-      // ~~ CASE: fragile; throws; err-logged
-      si.options({debug:{fragile:true}})
-      ctxt.errlog = null
+        // ~~ CASE: fragile; throws; err-logged
+        si.options({debug:{fragile:true}})
+        ctxt.errlog = null
 
-      try {
-        si.act('a:1',function(err,out){
+        try {
+          si.act('a:1',function(err,out){
+            assert.fail()
+          })
           assert.fail()
-        })
-        assert.fail()
-      }
-      catch(e) {
-        assert.equal('act_not_found',err.code)
-        assert.equal('act_not_found',ctxt.errlog[9])
-      }
+        }
+        catch(ex) {
+          assert.equal('act_not_found',ex.code)
+          assert.equal('act_not_found',ctxt.errlog[9])
+        }
         
-      return fin();
+        return fin();
+      })
     })
   }
 

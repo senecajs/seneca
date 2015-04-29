@@ -3,9 +3,6 @@
 "use strict"; 
 
 
-// TODO: handle multiple response callbacks!!!
-
-
 // Current version, access using _seneca.version_ property
 var VERSION = '0.6.1'
 
@@ -1149,7 +1146,7 @@ function make_seneca( initial_options ) {
 
     var spec    = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
     var args    = spec.pattern
-    var actcb   = spec.done
+    var actdone = spec.done
     var actmeta = self.findact(args)
 
     if( so.debug.act_caller ) {
@@ -1161,30 +1158,38 @@ function make_seneca( initial_options ) {
 
     // action pattern found
     if( actmeta ) {
-      do_act(self,actmeta,false,args,actcb)
+      do_act(self,actmeta,false,args,actdone)
       return self;
     }
 
     // action pattern not found
 
-    if( _.isObject( args.default$ ) ) {
+    if( _.isPlainObject( args.default$ ) ) {
       self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
-      if( actcb ) actcb.call( self, null, _.clone(args.default$) );
+      if( actdone ) actdone.call( self, null, _.clone(args.default$) );
       return self;
     }
-    
-    var err = error('act_not_found',
-                    {args:util.inspect(common.clean(args)).replace(/\n/g,'')})
+
+    var errcode = 'act_not_found'
+    var errinfo = { args: util.inspect(common.clean(args)).replace(/\n/g,'') }
+
+
+    if( !_.isUndefined( args.default$ ) ) {
+      errcode = 'act_default_bad'
+      errinfo.xdefault = util.inspect(args.default$)
+    }
+
+    var err = error( errcode, errinfo )
 
     if( args.fatal$ ) {
       return self.die(err)
     }
 
-    logging.log_act_not_found( root, err, so.trace.unknown )
+    logging.log_act_bad( root, err, so.trace.unknown )
 
     if( so.debug.fragile ) throw err;
 
-    if( actcb ) actcb.call( self, err );
+    if( actdone ) actdone.call( self, err );
     return self;
   }
 
@@ -1281,7 +1286,7 @@ function make_seneca( initial_options ) {
   }
 
 
-  // TODO: move repl functionality to seneca-reply
+  // TODO: move repl functionality to seneca-repl
 
   root.inrepl = function() {
     var self = this
@@ -2276,6 +2281,7 @@ function ERRMSGMAP() {
     act_if_expects_boolean: 'The method act_if expects a boolean value as its first argument, was: "<%=first%>".',
 
     act_not_found: 'No matching action pattern found for <%=args%>, and no default result provided (using a default$ property).',
+    act_default_bad: 'No matching action pattern found for <%=args%>, and default result is not a plain object: <%=xdefault%>.',
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument should be a string or object pattern.',
     act_invalid_args: 'Action <%=pattern%> has invalid arguments; <%=message%>; arguments were: <%=args%>.',
     act_execute: 'Action <%=pattern%> failed: <%=message%>.',

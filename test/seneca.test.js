@@ -312,7 +312,7 @@ describe('seneca', function(){
       assert.fail()
     }
     catch(e) {
-      assert.equal(e.code,'act_not_found')
+      assert.equal(e.code,'act_default_bad')
     }
 
 
