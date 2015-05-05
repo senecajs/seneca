@@ -6,6 +6,8 @@
 // Current version, access using _seneca.version_ property
 var VERSION = '0.6.1'
 
+// Polyfills for cross-browser support.
+require('setimmediate');
 
 // Node API modules
 var util     = require('util')
@@ -2160,8 +2162,10 @@ function makedie( instance, ctxt ) {
                 if( err ) console_error( err );
                 console_error( stderrmsg )
                 console_error("\n\nSENECA TERMINATED at "+(new Date().toISOString())+
-                              ". See above for error report.\n\n")
-                process.exit(1)
+                  ". See above for error report.\n\n")
+
+                // can not exit in the browser
+                //process.exit(1)
               })
             }
           }
@@ -2174,7 +2178,8 @@ function makedie( instance, ctxt ) {
           console_error( stderrmsg )
           console_error("\n\nSENECA TERMINATED (on timeout) at "+(new Date().toISOString())+
                         ".\n\n")
-          process.exit(2);
+          // can not exit in the browser
+          //process.exit(2);
         }, so.deathdelay);
         killtimer.unref();
       }
@@ -2344,10 +2349,10 @@ function ERRMSGMAP() {
 
 // Intentional console output uses this function. Helps to find spurious debugging.
 function console_log() {
-  console.log.apply(null,arguments)
+  console.log.apply(console,arguments)
 }
 
 // Intentional console errors use this function. Helps to find spurious debugging.
 function console_error() {
-  console.error.apply(null,arguments)
+  console.error.apply(console,arguments)
 }

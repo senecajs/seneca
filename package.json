@@ -52,6 +52,7 @@
     "seneca-mem-store": "~0.2.1",
     "seneca-transport": "~0.6.2",
     "seneca-web": "~0.3.3",
+    "setimmediate": "^1.0.2",
     "use-plugin": "~0.3.1",
     "zig": "~0.1.0"
   },
@@ -69,16 +70,23 @@
   },
   "scripts": {
     "test": "./test.sh",
-    "build": "./build.sh"
+    "build": "./build.sh",
+    "prepublish": "browserify seneca.js --standalone seneca > seneca.browser.js",
+    "test-browser": "zuul --local 8080 -- test/*.test.js"
+  },
+  "browser": {
+    "./lib/optioner.js": "./lib/optioner.browser.js"
   },
   "devDependencies": {
     "body-parser": "^1.11.0",
+    "browserify": "^9.0.3",
     "connect": "~3.3.4",
     "connect-query": "~0.2.0",
     "docco": "~0.6.3",
     "jshint": "~2.6.0",
     "mocha": "~2.1.0",
     "seneca-echo": "~0.2.0",
-    "seneca-error-test": "~0.2.2"
+    "seneca-error-test": "~0.2.2",
+    "zuul": "^2.0.0"
   }
 }

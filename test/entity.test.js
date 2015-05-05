@@ -19,7 +19,7 @@ var testopts = {log:'silent'}
 
 describe('entity', function(){
 
-  it('happy-mem', function(fin){
+  it.skip('happy-mem', function(fin){
     var si = seneca(testopts)
     si.options({errhandler:fin})
 
@@ -38,7 +38,7 @@ describe('entity', function(){
   })
 
 
-  it('mem-ops', function(fin){
+  it.skip('mem-ops', function(fin){
     var si = seneca(testopts)
     si.options({
       errhandler: function(err){ err && fin(err); return true; }
@@ -266,7 +266,7 @@ describe('entity', function(){
   })
 
   
-  it('mem-store-import-export', function(done){
+  it.skip('mem-store-import-export', function(done){
     var si = seneca(testopts)
 
 
@@ -330,7 +330,7 @@ describe('entity', function(){
   })
 
 
-  it('close', function(fin){
+  it.skip('close', function(fin){
     var si = seneca(testopts)
 
     var tmp = {s0:0,s1:0,s2:0}

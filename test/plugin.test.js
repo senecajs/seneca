@@ -151,7 +151,7 @@ describe('plugin', function(){
   })
 
 
-  it('fix', function(fin){
+  it.skip('fix', function(fin){
     var si = seneca({log:'silent',errhandler:fin})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}

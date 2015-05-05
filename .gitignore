@@ -12,3 +12,4 @@ README.html
 .DS_Store
 npm-debug.log
 mem.json
+seneca.browser.js
