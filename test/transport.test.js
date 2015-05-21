@@ -43,20 +43,16 @@ describe('transport', function(){
     var tt = make_test_transport()
 
     var server = seneca({timeout:5555,log:'silent',debug:{short_logs:true}})
-          //.use( tt )
-          .use('../../seneca-redis-transport')
+          .use( tt )
           .add('foo:1',testact)
           .add('foo:2',testact)
-          //.listen( {type:'test',pin:'foo:*'} )
-          .listen( {type:'redis',pin:'foo:*'} )
+          .listen( {type:'test',pin:'foo:*'} )
           .ready(function(){
 
             var si = seneca({timeout:5555,log:'silent',debug:{short_logs:true}})
-                  //.use( tt )
-                  .use('../../seneca-redis-transport')
+                  .use( tt )
 
-                  //.client( {type:'test', pin:'foo:*'} )
-                  .client( {type:'redis', pin:'foo:*'} )
+                  .client( {type:'test', pin:'foo:*'} )
 
                   .start(fin)
 
