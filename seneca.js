@@ -315,7 +315,10 @@ function make_seneca( initial_options ) {
 
   if( so.debug.short_logs ) { 
     so.idlen    = 2 
-    so.log.time = 'since'
+    if( _.isFunction(so.log) ) { 
+      so.log.time = 'since'
+    }
+
     root.idgen  = nid({length:so.idlen})
     root.id     = root.idgen()+'/'+so.tag
   }
