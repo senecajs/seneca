@@ -30,7 +30,7 @@ var zig          = require('zig')
 var gex          = require('gex')
 var executor     = require('gate-executor')
 
-var error        = require('eraro')({
+var error = require('eraro')({
   package:  'seneca',
   msgmap:   ERRMSGMAP(),
   override: true
@@ -90,6 +90,9 @@ function make_seneca( initial_options ) {
 
   var root = new Seneca()
   root.root      = root
+
+  root.start_time = Date.now()
+
   root.fixedargs = {}
 
   root.context = {}
@@ -263,6 +266,7 @@ function make_seneca( initial_options ) {
               undead:     false,
               print:      {},
               act_caller: false,
+              short_logs: false
             },
 
             deathdelay: 33333,
@@ -302,15 +306,21 @@ function make_seneca( initial_options ) {
 
   paramcheck.options.validate(so,thrower)
 
+
   // Identifier generator.
   root.idgen = nid({length:so.idlen})
 
-
   // Create a unique identifer for this instance.
-  root.id = root.idgen()+'/'+Date.now()+'/'+process.pid+'/'+so.tag
+  root.id = root.idgen()+'/'+root.start_time+'/'+process.pid+'/'+so.tag
+
+  if( so.debug.short_logs ) { 
+    so.idlen    = 2 
+    so.log.time = 'since'
+    root.idgen  = nid({length:so.idlen})
+    root.id     = root.idgen()+'/'+so.tag
+  }
 
   root.name = 'Seneca/'+root.version+'/'+root.id
-
 
   root.die = makedie( root, {
     type:   'sys',
@@ -319,11 +329,8 @@ function make_seneca( initial_options ) {
     id:     root.id
   })
 
-
-  private$.logrouter = logging.makelogrouter(so.log)
-
-  root.log = logging.makelog(private$.logrouter,root.id)
-
+  // Configure logging
+  root.log = logging.makelog(so.log,root.id,root.start_time)
 
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
@@ -439,10 +446,10 @@ function make_seneca( initial_options ) {
 
 
   function api_logroute(entry,handler) {
-    if( 0 === arguments.length ) return private$.logrouter.toString()
+    if( 0 === arguments.length ) return root.log.router.toString()
 
     entry.handler = handler || entry.handler
-    logging.makelogroute(entry,private$.logrouter)
+    logging.makelogroute(entry,root.log.router)
   }
 
 
@@ -1847,8 +1854,7 @@ function make_seneca( initial_options ) {
       (null == options) ? optioner.get() : optioner.set( options );
 
     if( options && options.log ) {
-      private$.logrouter = logging.makelogrouter(so.log)
-      self.log = logging.makelog(private$.logrouter,self.id)
+      self.log = logging.makelog(so.log,self.id,self.start_time)
     }
 
     return so
