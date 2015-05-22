@@ -307,7 +307,97 @@ describe('transport', function(){
                   .end()
           })
   })
-  
+
+
+  it('transport-init-ordering', function(fin){
+    var tt = make_test_transport()
+
+    var inits = {}
+
+    seneca({timeout:5555,log:'silent',debug:{short_logs:true}})
+          .use( tt )
+          .add('foo:1',testact)
+          .use(function bar(){
+            this.add('bar:1',testact)
+            this.add('init:bar',function(a,d){inits.bar=1;d()})
+          })
+
+          .client()
+
+          .add('foo:2',testact)
+          .use(function zed(){
+            this.add('zed:1',testact)
+            this.add('init:zed',function(a,d){inits.zed=1;d()})
+          })
+
+          .listen()
+
+          .add('foo:3',testact)
+          .use(function qux(){
+            this.add('qux:1',testact)
+            this.add('init:qux',function(a,d){inits.qux=1;d()})
+          })
+
+      .ready(function(){
+        assert.ok(inits.bar)
+        assert.ok(inits.zed)
+        assert.ok(inits.qux)
+
+        this.close(fin)
+      })
+  })  
+
+
+  it('transport-no-plugin-init', function(fin){
+    var tt = make_test_transport()
+
+    var inits = {}
+
+    seneca({timeout:5555,log:'silent',debug:{short_logs:true}})
+      .use( tt )
+      .client()
+
+      .add('foo:1',testact)
+      .use(function bar(){
+        this.add('bar:1',testact)
+      })
+
+      .listen()
+
+      .add('foo:2',testact)
+      .use(function zed(){
+        this.add('zed:1',testact)
+      })
+
+      .ready(function(){
+        this.
+          start(fin)
+
+         .wait('foo:1')
+          .step(function(out){
+            assert.equal(1,out.foo)
+            return true;
+          })
+
+          .wait('bar:1')
+          .step(function(out){
+            assert.equal(2,out.bar)
+            return true;
+          })
+
+          .wait('zed:1')
+          .step(function(out){
+            assert.equal(1,out.zed)
+            return true;
+          })
+
+          .end(function(err){
+            if(err) return fin(err);
+            this.close(fin)
+          })
+      })
+  })  
+
 })
 
 

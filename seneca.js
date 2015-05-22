@@ -530,11 +530,12 @@ function make_seneca( initial_options ) {
 
     self.act(
       {
-        init:plugin.name,
-        tag:plugin.tag,
-        default$:{},
-        gate$:true,
-        fatal$:true
+        init:     plugin.name,
+        tag:      plugin.tag,
+        default$: {},
+        gate$:    true,
+        fatal$:   true,
+        local$:   true
       },
       function(err,out) {
         if( err ) {
@@ -1076,9 +1077,17 @@ function make_seneca( initial_options ) {
 
   
   function api_findact(args) {
-    var actmeta = private$.actrouter.find(args)
+    var local  = true
+    var remote = true
 
-    if( !actmeta ) {
+    if( _.isBoolean(args.local$) ) {
+      local  = args.local$
+      remote = !args.local$
+    }
+
+    var actmeta = local && private$.actrouter.find(args)
+
+    if( remote && !actmeta ) {
       actmeta = private$.clientrouter.find(args)
     }
 
