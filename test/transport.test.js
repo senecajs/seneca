@@ -39,6 +39,39 @@ describe('transport', function(){
   // TODO: test top level qaz:* : def and undef other pats
 
 
+  it('transport-exact-single', function(fin){
+    var tt = make_test_transport()
+
+    seneca({tag:'srv',timeout:5555,log:'silent',debug:{short_logs:true}})
+      .use( tt )
+      .add('foo:1',function(args,done){
+
+        // ensure action id is transferred for traceability
+        assert.equal('aaa',args.meta$.id)
+        testact.call(this,args,done)
+      })
+      .listen( {type:'test',pin:'foo:1'} )
+      .ready(function(){
+
+        var si = seneca({tag:'cln',timeout:5555,log:'silent',
+                         debug:{short_logs:true}})
+              .use( tt )
+        
+              .client( {type:'test', pin:'foo:1'} )
+        
+              .start(fin)
+
+              .wait('foo:1,actid$:aaa')
+              .step(function(out){
+                assert.ok(1,out.foo)
+                return true;
+              })
+        
+              .end()
+      })
+  })
+
+
   it('transport-star', function(fin){
     var tt = make_test_transport()
 
