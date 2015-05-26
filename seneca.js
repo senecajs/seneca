@@ -1403,8 +1403,9 @@ function make_seneca( initial_options ) {
     // build callargs
     var callargs = args
 
-    // TODO: remove!
-    callargs.actid$ = actid
+    // remove actid so that user manipulation of args for subsequent use does
+    // not cause inadvertent hit on existing action
+    delete callargs.actid$
 
     callargs.meta$ = {
       id:      actid,
