@@ -1,4 +1,9 @@
 
+## 0.6.2: 2015-05
+
+   * Bug fixes for github issues: 106, 125, 87, 110, 114
+   * Added logging option: --seneca.log.short makes all ids 2 chars in length
+
 ## 0.6.1: 2015-02-04
 
    * "zig" style control flow for neater code
