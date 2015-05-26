@@ -8,3 +8,4 @@ require('../..')()
   .act('s:c,d:3')
 
   .end()
+  .close()
