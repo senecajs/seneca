@@ -313,10 +313,8 @@ function make_seneca( initial_options ) {
   // Create a unique identifer for this instance.
   root.id = root.idgen()+'/'+root.start_time+'/'+process.pid+'/'+so.tag
 
-  if( so.debug.short_logs ) { 
+  if( so.debug.short_logs || so.log.short ) { 
     so.idlen    = 2 
-    so.log.time = 'since'
-
     root.idgen  = nid({length:so.idlen})
     root.id     = root.idgen()+'/'+so.tag
   }
@@ -331,7 +329,11 @@ function make_seneca( initial_options ) {
   })
 
   // Configure logging
-  root.log = logging.makelog(so.log,root.id,root.start_time)
+  root.log = logging.makelog(so.log,{
+    id:    root.id,
+    start: root.start_time,
+    short: !!so.debug.short_logs
+  })
 
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.

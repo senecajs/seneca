@@ -1,4 +1,4 @@
-require('../..')({log:'silent',debug:{short_logs:true}})
+require('../..')()
   .use('biz')
 
   .start()
