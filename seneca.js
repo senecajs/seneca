@@ -667,7 +667,7 @@ function make_seneca( initial_options ) {
 
     // TODO: validate pin, pins args
 
-    var pins = config.pins || [config.pin] || ['']
+    var pins = config.pins || [config.pin||'']
 
     pins = _.map(pins, function(pin){
       return _.isString(pin) ? jsonic(pin) : pin
@@ -2280,7 +2280,7 @@ function init( seneca_options, more_options ) {
   if( so.default_plugins.transport )    { seneca.use('transport') }
   if( so.default_plugins.web )          { seneca.use('web') }
   if( so.default_plugins['mem-store'] ) { seneca.use('mem-store') }
-
+  
   // Register plugins specified in options.
   _.each(so.plugins, function(plugindesc) {
     seneca.use(plugindesc)
