@@ -1,8 +1,9 @@
 
-## 0.6.2: 2015-05
+## 0.6.2: 2015-06
 
-   * Bug fixes for github issues: 106, 125, 87, 110, 114
+   * Bug fixes for github issues: 106, 125, 87, 110, 114, 130
    * Added logging option: --seneca.log.short makes all ids 2 chars in length
+   * Added debug option: --seneca.print.tree(.all) - prints pattern tree to console
 
 ## 0.6.1: 2015-02-04
 

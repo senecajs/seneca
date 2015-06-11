@@ -53,29 +53,28 @@ describe('util', function() {
       foo_ent.make$({a:2}).save$(function(e,o){
         fooid[2]=o.id; foos.push(o)
 
-        si.add({util:1,cmd:'A'},function(args,done){
+        si.add({bar:1,cmd:'A'},function(args,done){
           var foo = args.foo
           foo.a = 10 * foo.a
           foo.save$(done)
         })
 
-
         si.act({
           role:'util',cmd:'ensure_entity',
-          pin:{util:1,cmd:'*'},
+          pin:{bar:1,cmd:'*'},
           entmap:{ foo:foo_ent }
         }, function(){
 
           // just use ent if given
-          si.act({util:1,cmd:'A',foo:foos[0]},function(e,o){
+          si.act({bar:1,cmd:'A',foo:foos[0]},function(e,o){
             assert.equal(10,o.a)
 
             // load from id
-            si.act({util:1,cmd:'A',foo:fooid[1]},function(e,o){
+            si.act({bar:1,cmd:'A',foo:fooid[1]},function(e,o){
               assert.equal(100,o.a)
 
               // initialize from data
-              si.act({util:1,cmd:'A',foo:foos[1].data$()},function(e,o){
+              si.act({bar:1,cmd:'A',foo:foos[1].data$()},function(e,o){
                 assert.equal(20,o.a)
 
                 fin()

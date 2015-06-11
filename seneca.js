@@ -30,6 +30,7 @@ var zig          = require('zig')
 var gex          = require('gex')
 var executor     = require('gate-executor')
 
+
 var error = require('eraro')({
   package:  'seneca',
   msgmap:   ERRMSGMAP(),
@@ -43,6 +44,7 @@ var store        = require('./lib/store')
 var logging      = require('./lib/logging')
 var plugin_util  = require('./lib/plugin-util')
 var makeoptioner = require('./lib/optioner')
+var cmdline      = require('./lib/cmdline')
 
 
 // Utility functions
@@ -217,8 +219,7 @@ function make_seneca( initial_options ) {
 
 
 
-
-  var argv = minimist(process.argv.slice(2))
+  var argv = cmdline(root)
 
 
   // Resolve options.
@@ -396,8 +397,6 @@ function make_seneca( initial_options ) {
   private$.clientrouter = so.internal.clientrouter
   private$.subrouter    = so.internal.subrouter
 
-
-
   root.on('newListener', function(eventname) {
     if( 'ready' == eventname ) {
       if( !private$.wait_for_ready ) {
@@ -406,7 +405,6 @@ function make_seneca( initial_options ) {
       }
     }
   })
-
 
   root.toString = api_toString
    
@@ -695,6 +693,7 @@ function make_seneca( initial_options ) {
           },
           log:        self.log,
           argpattern: common.argpattern(pin),
+          pattern:    common.argpattern(pin),
           id:         'CLIENT',
           client$:    true
         })
@@ -1009,7 +1008,6 @@ function make_seneca( initial_options ) {
     }
 
     var addroute  = true
-    var priormeta = self.findact( pattern )
 
     actmeta.args = _.clone( pattern )
     actmeta.pattern = common.argpattern( pattern )
@@ -1019,9 +1017,13 @@ function make_seneca( initial_options ) {
 
     actmeta.id = self.idgen()
 
-
-
     actmeta.func = action
+
+    var priormeta = self.findact( pattern )
+
+    if( priormeta && priormeta.pattern !== actmeta.pattern ) {
+      priormeta = null
+    }
 
     if( priormeta ) {
       if( _.isFunction(priormeta.handle) ) {
@@ -2018,16 +2020,14 @@ function make_seneca( initial_options ) {
 
 
 
-
-
-
-
-
   // Add builtin actions.
   root.add( {role:'seneca',  stats:true},  action_seneca_stats )
   root.add( {role:'seneca',  ready:true},  action_seneca_ready )
   root.add( {role:'seneca',  cmd:'close'}, action_seneca_close )
   root.add( {role:'options', cmd:'get'},   action_options_get  )
+
+  cmdline.handle( root, argv )
+
 
 
   // Define builtin actions.

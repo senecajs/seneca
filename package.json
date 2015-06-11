@@ -35,6 +35,7 @@
     "Alexandru Mircea"
   ],
   "dependencies": {
+    "archy": "~1.0.0",
     "async": "~0.9.0",
     "eraro": "~0.4.1",
     "gate-executor": "~0.2.2",
