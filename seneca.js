@@ -954,6 +954,7 @@ function make_seneca( initial_options ) {
 
       // TODO: other cases
 
+      // Subs are triggered via events
       self.on('act-in',  annotate( 'in$',  private$.handle_sub))
       self.on('act-out', annotate( 'out$', private$.handle_sub))
     }
@@ -987,7 +988,10 @@ function make_seneca( initial_options ) {
     var action    = args.action
     var actmeta   = args.actmeta || {}
 
-    actmeta.sub = !!pattern.sub$
+    actmeta.sub       = !!pattern.sub$
+
+    // Deprecate a pattern by providing a string message using deprecate$ key.
+    actmeta.deprecate = pattern.deprecate$
 
     pattern = self.util.clean(args.pattern)
 
@@ -1419,6 +1423,9 @@ function make_seneca( initial_options ) {
       chain:   prior_ctxt.chain
     }
     
+    if( actmeta.deprecate ) {
+      instance.log.warn( 'DEPRECATED', actmeta.pattern, actmeta.deprecate )
+    }
 
     logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
     
