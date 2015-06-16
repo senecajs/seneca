@@ -290,12 +290,12 @@ describe('entity', function(){
       },
 
       function(next){
-        si.act('role:mem-store,cmd:export',{file:'mem.json'}, function(e){
+        si.act('role:mem-store,cmd:export', function(e,out){
           assert.ok( null == e)
 
           var si2 = seneca(testopts)
 
-          si2.act('role:mem-store,cmd:import',{file:'mem.json'}, function(e){
+          si2.act('role:mem-store,cmd:import',{json:out.json}, function(e){
             assert.ok( null == e)
 
             si2.act('role:mem-store,cmd:dump',function(e,o){
