@@ -245,7 +245,10 @@ function make_seneca( initial_options ) {
             strict: {
 
               // Action result must be a plain object.
-              result: true
+              result: true,
+
+              // Delegate fixedargs override action args
+              fixedargs: true,
             },
 
 
@@ -1826,7 +1829,9 @@ function make_seneca( initial_options ) {
       var args = spec.pattern
       var cb   = spec.done
 
-      args = _.extend({},args,fixedargs)
+      args = ( so.strict.fixedargs ? 
+               _.extend({},args,fixedargs) : 
+               _.extend({},fixedargs,args) )
 
       act.call(this,args,cb)
 
@@ -1842,12 +1847,15 @@ function make_seneca( initial_options ) {
         vfa[k]=v
       })
 
-      strdesc = self.toString()+(_.keys(vfa).length?'/'+common.owndesc(vfa,0,false):'')
+      strdesc = self.toString()+
+        (_.keys(vfa).length?'/'+common.owndesc(vfa,0,false):'')
 
       return strdesc
     }
 
-    delegate.fixedargs = _.extend({},fixedargs,self.fixedargs)
+    delegate.fixedargs = ( so.strict.fixedargs ? 
+                           _.extend({},fixedargs,self.fixedargs) : 
+                           _.extend({},self.fixedargs,fixedargs) )
     
     delegate.delegate = function(further_fixedargs) {
       var args = _.extend({},delegate.fixedargs,further_fixedargs||{})
