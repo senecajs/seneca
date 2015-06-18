@@ -233,7 +233,11 @@ function make_seneca( initial_options ) {
             tag:             '-',
             idlen:           12,
             timeout:         33333,
-            status_interval: 60000,
+
+            status: {
+              interval: 60000,
+              running:  false,
+            },
 
             actcache:        true,
             actcache_size:   1111,
@@ -260,7 +264,7 @@ function make_seneca( initial_options ) {
 
             stats: {
               size:     1024,
-              duration: 60000,
+              interval: 60000,
               running:  false
             },
 
@@ -270,7 +274,8 @@ function make_seneca( initial_options ) {
               undead:     false,
               print:      {},
               act_caller: false,
-              short_logs: false
+              short_logs: false,
+              callpoint:  false,
             },
 
             deathdelay: 33333,
@@ -310,6 +315,9 @@ function make_seneca( initial_options ) {
 
   paramcheck.options.validate(so,thrower)
 
+  var callpoint = !so.debug.callpoint ? _.noop : function() {
+    return error.callpoint( new Error(), ['/seneca/'] )
+  }
 
   // Identifier generator.
   root.idgen = nid({length:so.idlen})
@@ -326,10 +334,11 @@ function make_seneca( initial_options ) {
   root.name = 'Seneca/'+root.version+'/'+root.id
 
   root.die = makedie( root, {
-    type:   'sys',
-    plugin: 'seneca',
-    tag:    root.version,
-    id:     root.id
+    type:      'sys',
+    plugin:    'seneca',
+    tag:       root.version,
+    id:        root.id,
+    callpoint: callpoint
   })
 
   // Configure logging
@@ -362,23 +371,25 @@ function make_seneca( initial_options ) {
   })
     
 
-  // TODO: encapsulate
   // setup status log
-  if( 0 < so.status_interval && so.status_log ) {
+  if( 0 < so.status.interval && so.status.running ) {
     private$.stats = private$.stats || {}
     setInterval(function() {
-      var stats = {alive:(Date.now()-private$.stats.start),act:private$.stats.act}
-      root.log.info('status',stats)
-    },so.status_interval)
+      var status = {
+        alive: (Date.now()-private$.stats.start),
+        act:   private$.stats.act
+      }
+      root.log.info('status',status)
+    },so.status.interval)
   }
 
   if( so.stats ) {
-    private$.timestats = new stats.NamedStats( so.stats.size, so.stats.duration )
+    private$.timestats = new stats.NamedStats( so.stats.size, so.stats.interval )
 
     if( so.stats.running ) {
       setInterval(function() {
         private$.timestats.calculate()
-      }, so.stats.duration )
+      }, so.stats.interval )
     }
   }
 
@@ -433,7 +444,7 @@ function make_seneca( initial_options ) {
 
 
   // say hello, printing identifier to log
-  root.log.info('hello',root.toString())
+  root.log.info( 'hello', root.toString(), callpoint() )
 
 
   // dump options if debugging
@@ -442,8 +453,8 @@ function make_seneca( initial_options ) {
   })
 
   if( so.debug.print.options ) {
-    console_log('\nSeneca Options: before plugins\n'+
-                '==============================\n')
+    console_log('\nSeneca Options ('+root.id+'): before plugins\n'+
+                '===\n')
     console_log(util.inspect(so,{depth:null}))
     console_log('')
   }
@@ -487,7 +498,7 @@ function make_seneca( initial_options ) {
       {makedie:makedie}
     )
 
-    self.log.debug('register','init',fullname)
+    self.log.debug( 'register', 'init', fullname, callpoint() )
     
     var plugin_options = plugin_util.resolve_options(fullname,plugin,so)
 
@@ -553,15 +564,15 @@ function make_seneca( initial_options ) {
         }
 
         if( so.debug.print && so.debug.print.options ) {
-          console_log('\nSeneca Options: plugin: '+plugin.name+
+          console_log('\nSeneca Options ('+self.id+'): plugin: '+plugin.name+
                       (plugin.tag?'$'+plugin.tag:'')+'\n'+
-                      '==================================================\n')
+                      '===\n')
           console_log(util.inspect(plugin_options,{depth:null}))
           console_log('')
         }
 
 
-        return self.log.debug('register','ready',pluginref,out)
+        return self.log.debug( 'register', 'ready', pluginref, out )
       }
     )
 
@@ -640,6 +651,10 @@ function make_seneca( initial_options ) {
   function api_listen() {
     var self = this
 
+    self.log.info.apply(self,_.flatten([
+      'listen',arguments[0],Array.prototype.slice.call(arguments,1),callpoint()
+    ]))
+
     var opts   = self.options().transport || {}
     var config = parseConfig( arr(arguments), opts )
 
@@ -654,6 +669,10 @@ function make_seneca( initial_options ) {
 
   function api_client() {
     var self = this
+
+    self.log.info.apply(self,_.flatten([
+      'client',arguments[0],Array.prototype.slice.call(arguments,1),callpoint()
+    ]))
 
     var opts   = self.options().transport || {}
     var config = parseConfig( arr(arguments), opts )
@@ -991,7 +1010,7 @@ function make_seneca( initial_options ) {
     var action    = args.action
     var actmeta   = args.actmeta || {}
 
-    actmeta.sub       = !!pattern.sub$
+    actmeta.sub = !!pattern.sub$
 
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = pattern.deprecate$
@@ -1066,7 +1085,7 @@ function make_seneca( initial_options ) {
     
     if( addroute ) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD', 
-                     actmeta.id, common.argpattern(pattern) ]
+                     actmeta.id, common.argpattern(pattern), callpoint() ]
       var isplugin = self.context.isplugin
       var logger   = self.log.log || self.log
 
@@ -1202,7 +1221,7 @@ function make_seneca( initial_options ) {
     // action pattern not found
 
     if( _.isPlainObject( args.default$ ) ) {
-      self.log.debug('act','-','-','DEFAULT',self.util.clean(args))
+      self.log.debug('act','-','-','DEFAULT',self.util.clean(args),callpoint())
       if( actdone ) actdone.call( self, null, _.clone(args.default$) );
       return self;
     }
@@ -1254,7 +1273,7 @@ function make_seneca( initial_options ) {
     
     self.closed = true
 
-    self.log.debug('close','start')
+    self.log.debug( 'close', 'start', callpoint() )
     self.act('role:seneca,cmd:close,closing$:true',function(err) {
       self.log.debug('close','end',err)
       if( _.isFunction(done) ) return done.call(self,err);
@@ -1268,6 +1287,10 @@ function make_seneca( initial_options ) {
   // if using .on('ready',fn) it will be be called for each ready event
   function api_ready(ready) {
     var self = this
+
+    if( so.debug.callpoint ) {
+      self.log.debug( 'ready', 'register', callpoint() )
+    }
 
     if( _.isFunction(ready) ) {
       self.once('ready',function(){
@@ -1395,6 +1418,8 @@ function make_seneca( initial_options ) {
     var args = _.clone(origargs)
     prior_ctxt = prior_ctxt || {chain:[],entry:true,depth:1}
 
+    var act_callpoint = callpoint()
+
     var tx = origargs.tx$ || 
           instance.fixedargs.tx$ || 
           instance.idgen()
@@ -1404,7 +1429,7 @@ function make_seneca( initial_options ) {
 
     cb = cb || common.noop
 
-    if( act_cache_check( instance, args, prior_ctxt, cb ) ) return;
+    if( act_cache_check( instance, args, prior_ctxt, cb, act_callpoint ) ) return;
 
     var actstats = act_stats_call( actmeta.pattern )
 
@@ -1427,10 +1452,12 @@ function make_seneca( initial_options ) {
     }
     
     if( actmeta.deprecate ) {
-      instance.log.warn( 'DEPRECATED', actmeta.pattern, actmeta.deprecate )
+      instance.log.warn( 'DEPRECATED', actmeta.pattern, actmeta.deprecate, 
+                         act_callpoint )
     }
 
-    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
+    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt, 
+                        act_callpoint )
     
     instance.emit('act-in', callargs)
 
@@ -1487,7 +1514,7 @@ function make_seneca( initial_options ) {
           actstats.fails++
 
           var out = act_error(instance,err,actmeta,result,cb,
-                              actend-actstart,callargs,prior_ctxt)
+                              actend-actstart,callargs,prior_ctxt,act_callpoint)
           
           call_cb = out.call_cb
           result[0] = out.err
@@ -1502,7 +1529,7 @@ function make_seneca( initial_options ) {
 
           logging.log_act_out( 
             root, {actid:actid,duration:actend-actstart}, 
-            actmeta, callargs, result, prior_ctxt )
+            actmeta, callargs, result, prior_ctxt, act_callpoint )
 
           private$.stats.act.done++
           actstats.done++
@@ -1520,16 +1547,13 @@ function make_seneca( initial_options ) {
 
           // handle throws of non-Error values
           if( !util.isError(ex) ) {
-            if( _.isObject(ex) ) {
-              err = new Error(common.owndesc(ex,1))
-            }
-            else {
-              err = new Error(''+ex)
-            }
+            err = ( _.isObject(ex) ? 
+                    new Error(common.owndesc(ex,1)) :
+                    err = new Error(''+ex) )
           }
 
-          callback_error(
-            instance,err,actmeta,result,cb,actend-actstart,callargs,prior_ctxt)
+          callback_error( instance, err, actmeta, result, cb,
+                          actend-actstart, callargs, prior_ctxt, act_callpoint )
         }
       }
       catch(ex) {
@@ -1577,7 +1601,7 @@ function make_seneca( initial_options ) {
 
 
   function act_error( instance, err, actmeta, result, cb, 
-                      duration, callargs, prior_ctxt ) 
+                      duration, callargs, prior_ctxt, act_callpoint ) 
   {
     var call_cb = true
 
@@ -1606,7 +1630,7 @@ function make_seneca( initial_options ) {
     err.details.plugin = err.details.plugin || {}
 
     logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
-                         actmeta, callargs, prior_ctxt, err )
+                         actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit('act-err',callargs,err)
 
@@ -1619,7 +1643,7 @@ function make_seneca( initial_options ) {
 
 
   function callback_error( instance, err, actmeta, result, cb,
-                           duration, callargs, prior_ctxt ) 
+                           duration, callargs, prior_ctxt, act_callpoint ) 
   {
     if( !err.seneca ) {
       err = error(err,'act_callback',_.extend(
@@ -1640,7 +1664,7 @@ function make_seneca( initial_options ) {
     err.details.plugin = err.details.plugin || {}
 
     logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
-                         actmeta, callargs, prior_ctxt, err )
+                         actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit('act-err',callargs,err,result[1])
 
@@ -1653,11 +1677,12 @@ function make_seneca( initial_options ) {
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
   //
-  //    * _instance_    (object)    &rarr;  seneca instance
-  //    * _args_        (object)    &rarr;  action arguments
-  //    * _prior_ctxt_  (object?)   &rarr;  prior action context, if any
-  //    * _actcb_       (function)  &rarr;  action arguments
-  function act_cache_check( instance, args, prior_ctxt, actcb ) {
+  //    * _instance_      (object)    &rarr;  seneca instance
+  //    * _args_          (object)    &rarr;  action arguments
+  //    * _prior_ctxt_    (object?)   &rarr;  prior action context, if any
+  //    * _actcb_         (function)  &rarr;  action callback
+  //    * _act_callpoint_ (function)  &rarr;  action call point
+  function act_cache_check( instance, args, prior_ctxt, actcb, act_callpoint ) {
     assert.ok( _.isObject(instance), 'act_cache_check; instance; isObject')
     assert.ok( _.isObject(args),     'act_cache_check; args; isObject')
     assert.ok( !prior_ctxt || _.isObject(prior_ctxt),     
@@ -1674,7 +1699,8 @@ function make_seneca( initial_options ) {
         var actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
         
-        logging.log_act_cache( root, {actid:actid}, actmeta, args, prior_ctxt )
+        logging.log_act_cache( root, {actid:actid}, actmeta, 
+                               args, prior_ctxt, act_callpoint )
         
         if( actcb ) actcb.apply( instance, actdetails.result );
         return true;
@@ -1819,10 +1845,13 @@ function make_seneca( initial_options ) {
   function api_delegate(fixedargs) {
     var self = this
 
+
     var delegate = Object.create(self)
     var act = self.act
 
     delegate.did = nid()
+
+    self.log.debug( 'delegate', fixedargs, delegate.did, callpoint() )
 
     delegate.act = function() {
       var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
@@ -1881,6 +1910,10 @@ function make_seneca( initial_options ) {
 
   function api_options( options ) {
     var self = this
+
+    if( null != options ) {
+      self.log.debug( 'options', 'set', options, callpoint() )
+    }
 
     so = private$.exports.options = 
       (null == options) ? optioner.get() : optioner.set( options );
@@ -2146,7 +2179,8 @@ function makedie( instance, ctxt ) {
 
       var logargs = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, 
                      err.code, err.message, err.details, 
-                     instance.fixedargs.fatal$?'all-errors-fatal':'-']
+                     instance.fixedargs.fatal$?'all-errors-fatal':'-',
+                     ctxt.callpoint()]
 
       instance.log.fatal.apply( instance, logargs )
 

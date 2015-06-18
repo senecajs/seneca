@@ -431,7 +431,11 @@ is not considered part of the pattern, but rather an argument to validate when <
             tag:             <span class="hljs-string">'-'</span>,
             idlen:           <span class="hljs-number">12</span>,
             timeout:         <span class="hljs-number">33333</span>,
-            status_interval: <span class="hljs-number">60000</span>,
+
+            status: {
+              interval: <span class="hljs-number">60000</span>,
+              running:  <span class="hljs-literal">false</span>,
+            },
 
             actcache:        <span class="hljs-literal">true</span>,
             actcache_size:   <span class="hljs-number">1111</span>,
@@ -493,7 +497,7 @@ is not considered part of the pattern, but rather an argument to validate when <
 
             stats: {
               size:     <span class="hljs-number">1024</span>,
-              duration: <span class="hljs-number">60000</span>,
+              interval: <span class="hljs-number">60000</span>,
               running:  <span class="hljs-literal">false</span>
             },
 
@@ -503,7 +507,8 @@ is not considered part of the pattern, but rather an argument to validate when <
               undead:     <span class="hljs-literal">false</span>,
               print:      {},
               act_caller: <span class="hljs-literal">false</span>,
-              short_logs: <span class="hljs-literal">false</span>
+              short_logs: <span class="hljs-literal">false</span>,
+              callpoint:  <span class="hljs-literal">false</span>,
             },
 
             deathdelay: <span class="hljs-number">33333</span>,
@@ -553,7 +558,11 @@ is not considered part of the pattern, but rather an argument to validate when <
 
   <span class="hljs-keyword">var</span> so = optioner.set( initial_options )
 
-  paramcheck.options.validate(so,thrower)</pre></div></div>
+  paramcheck.options.validate(so,thrower)
+
+  <span class="hljs-keyword">var</span> callpoint = !so.debug.callpoint ? _.noop : <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> error.callpoint( <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(), [<span class="hljs-string">'/seneca/'</span>] )
+  }</pre></div></div>
             
         </li>
         
@@ -594,10 +603,11 @@ is not considered part of the pattern, but rather an argument to validate when <
   root.name = <span class="hljs-string">'Seneca/'</span>+root.version+<span class="hljs-string">'/'</span>+root.id
 
   root.die = makedie( root, {
-    type:   <span class="hljs-string">'sys'</span>,
-    plugin: <span class="hljs-string">'seneca'</span>,
-    tag:    root.version,
-    id:     root.id
+    type:      <span class="hljs-string">'sys'</span>,
+    plugin:    <span class="hljs-string">'seneca'</span>,
+    tag:       root.version,
+    id:        root.id,
+    callpoint: callpoint
   })</pre></div></div>
             
         </li>
@@ -674,26 +684,28 @@ same as action errors, these are unexpected internal issues.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
-              <p>TODO: encapsulate
-setup status log</p>
+              <p>setup status log</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( <span class="hljs-number">0</span> &lt; so.status_interval &amp;&amp; so.status_log ) {
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( <span class="hljs-number">0</span> &lt; so.status.interval &amp;&amp; so.status.running ) {
     private$.stats = private$.stats || {}
     setInterval(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">var</span> stats = {alive:(<span class="hljs-built_in">Date</span>.now()-private$.stats.start),act:private$.stats.act}
-      root.log.info(<span class="hljs-string">'status'</span>,stats)
-    },so.status_interval)
+      <span class="hljs-keyword">var</span> status = {
+        alive: (<span class="hljs-built_in">Date</span>.now()-private$.stats.start),
+        act:   private$.stats.act
+      }
+      root.log.info(<span class="hljs-string">'status'</span>,status)
+    },so.status.interval)
   }
 
   <span class="hljs-keyword">if</span>( so.stats ) {
-    private$.timestats = <span class="hljs-keyword">new</span> stats.NamedStats( so.stats.size, so.stats.duration )
+    private$.timestats = <span class="hljs-keyword">new</span> stats.NamedStats( so.stats.size, so.stats.interval )
 
     <span class="hljs-keyword">if</span>( so.stats.running ) {
       setInterval(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
         private$.timestats.calculate()
-      }, so.stats.duration )
+      }, so.stats.interval )
     }
   }
 
@@ -759,7 +771,7 @@ setup status log</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.log.info(<span class="hljs-string">'hello'</span>,root.toString())</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  root.log.info( <span class="hljs-string">'hello'</span>, root.toString(), callpoint() )</pre></div></div>
             
         </li>
         
@@ -779,8 +791,8 @@ setup status log</p>
   })
 
   if( so.debug.print.options ) {
-    console_log('\nSeneca Options: before plugins\n'+
-                '==============================\n')
+    console_log('\nSeneca Options ('+root.id+'): before plugins\n'+
+                '===\n')
     console_log(util.inspect(so,{depth:null}))
     console_log('')
   }
@@ -824,7 +836,7 @@ setup status log</p>
       {makedie:makedie}
     )
 
-    self.log.debug('register','init',fullname)
+    self.log.debug( 'register', 'init', fullname, callpoint() )
     
     var plugin_options = plugin_util.resolve_options(fullname,plugin,so)
 
@@ -914,15 +926,15 @@ setup status log</p>
         }
 
         <span class="hljs-keyword">if</span>( so.debug.print &amp;&amp; so.debug.print.options ) {
-          console_log(<span class="hljs-string">'\nSeneca Options: plugin: '</span>+plugin.name+
+          console_log(<span class="hljs-string">'\nSeneca Options ('</span>+self.id+<span class="hljs-string">'): plugin: '</span>+plugin.name+
                       (plugin.tag?<span class="hljs-string">'$'</span>+plugin.tag:<span class="hljs-string">''</span>)+<span class="hljs-string">'\n'</span>+
-                      <span class="hljs-string">'==================================================\n'</span>)
+                      <span class="hljs-string">'===\n'</span>)
           console_log(util.inspect(plugin_options,{depth:<span class="hljs-literal">null</span>}))
           console_log(<span class="hljs-string">''</span>)
         }
 
 
-        <span class="hljs-keyword">return</span> self.log.debug(<span class="hljs-string">'register'</span>,<span class="hljs-string">'ready'</span>,pluginref,out)
+        <span class="hljs-keyword">return</span> self.log.debug( <span class="hljs-string">'register'</span>, <span class="hljs-string">'ready'</span>, pluginref, out )
       }
     )
 
@@ -1022,6 +1034,10 @@ setup status log</p>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_listen</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
 
+    self.log.info.apply(self,_.flatten([
+      <span class="hljs-string">'listen'</span>,<span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>],<span class="hljs-built_in">Array</span>.prototype.slice.call(<span class="hljs-built_in">arguments</span>,<span class="hljs-number">1</span>),callpoint()
+    ]))
+
     <span class="hljs-keyword">var</span> opts   = self.options().transport || {}
     <span class="hljs-keyword">var</span> config = parseConfig( arr(<span class="hljs-built_in">arguments</span>), opts )
 
@@ -1036,6 +1052,10 @@ setup status log</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_client</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
+
+    self.log.info.apply(self,_.flatten([
+      <span class="hljs-string">'client'</span>,<span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>],<span class="hljs-built_in">Array</span>.prototype.slice.call(<span class="hljs-built_in">arguments</span>,<span class="hljs-number">1</span>),callpoint()
+    ]))
 
     <span class="hljs-keyword">var</span> opts   = self.options().transport || {}
     <span class="hljs-keyword">var</span> config = parseConfig( arr(<span class="hljs-built_in">arguments</span>), opts )</pre></div></div>
@@ -1536,7 +1556,7 @@ before bringing client online.</p>
     <span class="hljs-keyword">var</span> action    = args.action
     <span class="hljs-keyword">var</span> actmeta   = args.actmeta || {}
 
-    actmeta.sub       = !!pattern.sub$</pre></div></div>
+    actmeta.sub = !!pattern.sub$</pre></div></div>
             
         </li>
         
@@ -1646,7 +1666,7 @@ this “.handle” hack is just to make seneca.close work</p>
     
     <span class="hljs-keyword">if</span>( addroute ) {
       <span class="hljs-keyword">var</span> addlog = [ actmeta.sub ? <span class="hljs-string">'SUB'</span> : <span class="hljs-string">'ADD'</span>, 
-                     actmeta.id, common.argpattern(pattern) ]
+                     actmeta.id, common.argpattern(pattern), callpoint() ]
       <span class="hljs-keyword">var</span> isplugin = self.context.isplugin
       <span class="hljs-keyword">var</span> logger   = self.log.log || self.log
 
@@ -1816,7 +1836,7 @@ known patterns, and the most specific one wins.</p>
             
             <div class="content"><div class='highlight'><pre>
     <span class="hljs-keyword">if</span>( _.isPlainObject( args.default$ ) ) {
-      self.log.debug(<span class="hljs-string">'act'</span>,<span class="hljs-string">'-'</span>,<span class="hljs-string">'-'</span>,<span class="hljs-string">'DEFAULT'</span>,self.util.clean(args))
+      self.log.debug(<span class="hljs-string">'act'</span>,<span class="hljs-string">'-'</span>,<span class="hljs-string">'-'</span>,<span class="hljs-string">'DEFAULT'</span>,self.util.clean(args),callpoint())
       <span class="hljs-keyword">if</span>( actdone ) actdone.call( self, <span class="hljs-literal">null</span>, _.clone(args.default$) );
       <span class="hljs-keyword">return</span> self;
     }
@@ -1878,7 +1898,7 @@ sets public seneca.closed property</p>
     
     self.closed = <span class="hljs-literal">true</span>
 
-    self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'start'</span>)
+    self.log.debug( <span class="hljs-string">'close'</span>, <span class="hljs-string">'start'</span>, callpoint() )
     self.act(<span class="hljs-string">'role:seneca,cmd:close,closing$:true'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>) </span>{
       self.log.debug(<span class="hljs-string">'close'</span>,<span class="hljs-string">'end'</span>,err)
       <span class="hljs-keyword">if</span>( _.isFunction(done) ) <span class="hljs-keyword">return</span> done.call(self,err);
@@ -1902,6 +1922,10 @@ if using .on(‘ready’,fn) it will be be called for each ready event</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_ready</span>(<span class="hljs-params">ready</span>) </span>{
     <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
+
+    <span class="hljs-keyword">if</span>( so.debug.callpoint ) {
+      self.log.debug( <span class="hljs-string">'ready'</span>, <span class="hljs-string">'register'</span>, callpoint() )
+    }
 
     <span class="hljs-keyword">if</span>( _.isFunction(ready) ) {
       self.once(<span class="hljs-string">'ready'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
@@ -2082,6 +2106,8 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
     <span class="hljs-keyword">var</span> args = _.clone(origargs)
     prior_ctxt = prior_ctxt || {chain:[],entry:<span class="hljs-literal">true</span>,depth:<span class="hljs-number">1</span>}
 
+    <span class="hljs-keyword">var</span> act_callpoint = callpoint()
+
     <span class="hljs-keyword">var</span> tx = origargs.tx$ || 
           instance.fixedargs.tx$ || 
           instance.idgen()
@@ -2091,7 +2117,7 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
 
     cb = cb || common.noop
 
-    <span class="hljs-keyword">if</span>( act_cache_check( instance, args, prior_ctxt, cb ) ) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">if</span>( act_cache_check( instance, args, prior_ctxt, cb, act_callpoint ) ) <span class="hljs-keyword">return</span>;
 
     <span class="hljs-keyword">var</span> actstats = act_stats_call( actmeta.pattern )</pre></div></div>
             
@@ -2137,10 +2163,12 @@ not cause inadvertent hit on existing action</p>
     }
     
     <span class="hljs-keyword">if</span>( actmeta.deprecate ) {
-      instance.log.warn( <span class="hljs-string">'DEPRECATED'</span>, actmeta.pattern, actmeta.deprecate )
+      instance.log.warn( <span class="hljs-string">'DEPRECATED'</span>, actmeta.pattern, actmeta.deprecate, 
+                         act_callpoint )
     }
 
-    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt )
+    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt, 
+                        act_callpoint )
     
     instance.emit(<span class="hljs-string">'act-in'</span>, callargs)
 
@@ -2209,7 +2237,7 @@ not cause inadvertent hit on existing action</p>
           actstats.fails++
 
           <span class="hljs-keyword">var</span> out = act_error(instance,err,actmeta,result,cb,
-                              actend-actstart,callargs,prior_ctxt)
+                              actend-actstart,callargs,prior_ctxt,act_callpoint)
           
           call_cb = out.call_cb
           result[<span class="hljs-number">0</span>] = out.err
@@ -2224,7 +2252,7 @@ not cause inadvertent hit on existing action</p>
 
           logging.log_act_out( 
             root, {actid:actid,duration:actend-actstart}, 
-            actmeta, callargs, result, prior_ctxt )
+            actmeta, callargs, result, prior_ctxt, act_callpoint )
 
           private$.stats.act.done++
           actstats.done++
@@ -2266,16 +2294,13 @@ not cause inadvertent hit on existing action</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">if</span>( !util.isError(ex) ) {
-            <span class="hljs-keyword">if</span>( _.isObject(ex) ) {
-              err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(common.owndesc(ex,<span class="hljs-number">1</span>))
-            }
-            <span class="hljs-keyword">else</span> {
-              err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">''</span>+ex)
-            }
+            err = ( _.isObject(ex) ? 
+                    <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(common.owndesc(ex,<span class="hljs-number">1</span>)) :
+                    err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">''</span>+ex) )
           }
 
-          callback_error(
-            instance,err,actmeta,result,cb,actend-actstart,callargs,prior_ctxt)
+          callback_error( instance, err, actmeta, result, cb,
+                          actend-actstart, callargs, prior_ctxt, act_callpoint )
         }
       }
       <span class="hljs-keyword">catch</span>(ex) {
@@ -2323,7 +2348,7 @@ not cause inadvertent hit on existing action</p>
 
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">act_error</span>(<span class="hljs-params"> instance, err, actmeta, result, cb, 
-                      duration, callargs, prior_ctxt </span>) 
+                      duration, callargs, prior_ctxt, act_callpoint </span>) 
   </span>{
     <span class="hljs-keyword">var</span> call_cb = <span class="hljs-literal">true</span>
 
@@ -2364,7 +2389,7 @@ not cause inadvertent hit on existing action</p>
     err.details.plugin = err.details.plugin || {}
 
     logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
-                         actmeta, callargs, prior_ctxt, err )
+                         actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit(<span class="hljs-string">'act-err'</span>,callargs,err)
 
@@ -2377,7 +2402,7 @@ not cause inadvertent hit on existing action</p>
 
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">callback_error</span>(<span class="hljs-params"> instance, err, actmeta, result, cb,
-                           duration, callargs, prior_ctxt </span>) 
+                           duration, callargs, prior_ctxt, act_callpoint </span>) 
   </span>{
     <span class="hljs-keyword">if</span>( !err.seneca ) {
       err = error(err,<span class="hljs-string">'act_callback'</span>,_.extend(
@@ -2398,7 +2423,7 @@ not cause inadvertent hit on existing action</p>
     err.details.plugin = err.details.plugin || {}
 
     logging.log_act_err( root, {actid:callargs.actid$,duration:duration}, 
-                         actmeta, callargs, prior_ctxt, err )
+                         actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit(<span class="hljs-string">'act-err'</span>,callargs,err,result[<span class="hljs-number">1</span>])
 
@@ -2419,15 +2444,16 @@ not cause inadvertent hit on existing action</p>
               <p>Check if actid has already been seen, and if action cache is active,
 then provide cached result, if any. Return true in this case.</p>
 <ul>
-<li><em>instance</em>    (object)    &rarr;  seneca instance</li>
-<li><em>args</em>        (object)    &rarr;  action arguments</li>
-<li><em>prior_ctxt</em>  (object?)   &rarr;  prior action context, if any</li>
-<li><em>actcb</em>       (function)  &rarr;  action arguments</li>
+<li><em>instance</em>      (object)    &rarr;  seneca instance</li>
+<li><em>args</em>          (object)    &rarr;  action arguments</li>
+<li><em>prior_ctxt</em>    (object?)   &rarr;  prior action context, if any</li>
+<li><em>actcb</em>         (function)  &rarr;  action callback</li>
+<li><em>act_callpoint</em> (function)  &rarr;  action call point</li>
 </ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">act_cache_check</span>(<span class="hljs-params"> instance, args, prior_ctxt, actcb </span>) </span>{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">act_cache_check</span>(<span class="hljs-params"> instance, args, prior_ctxt, actcb, act_callpoint </span>) </span>{
     assert.ok( _.isObject(instance), <span class="hljs-string">'act_cache_check; instance; isObject'</span>)
     assert.ok( _.isObject(args),     <span class="hljs-string">'act_cache_check; args; isObject'</span>)
     assert.ok( !prior_ctxt || _.isObject(prior_ctxt),     
@@ -2444,7 +2470,8 @@ then provide cached result, if any. Return true in this case.</p>
         <span class="hljs-keyword">var</span> actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
         
-        logging.log_act_cache( root, {actid:actid}, actmeta, args, prior_ctxt )
+        logging.log_act_cache( root, {actid:actid}, actmeta, 
+                               args, prior_ctxt, act_callpoint )
         
         <span class="hljs-keyword">if</span>( actcb ) actcb.apply( instance, actdetails.result );
         <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
@@ -2646,10 +2673,13 @@ then provide cached result, if any. Return true in this case.</p>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_delegate</span>(<span class="hljs-params">fixedargs</span>) </span>{
     <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
 
+
     <span class="hljs-keyword">var</span> delegate = <span class="hljs-built_in">Object</span>.create(self)
     <span class="hljs-keyword">var</span> act = self.act
 
     delegate.did = nid()
+
+    self.log.debug( <span class="hljs-string">'delegate'</span>, fixedargs, delegate.did, callpoint() )
 
     delegate.act = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">var</span> spec = parse_pattern( self, common.arrayify(<span class="hljs-built_in">arguments</span>), <span class="hljs-string">'done:f?'</span> )
@@ -2720,6 +2750,10 @@ For example, data for individual web requests.</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_options</span>(<span class="hljs-params"> options </span>) </span>{
     <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
+
+    <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != options ) {
+      self.log.debug( <span class="hljs-string">'options'</span>, <span class="hljs-string">'set'</span>, options, callpoint() )
+    }
 
     so = private$.exports.options = 
       (<span class="hljs-literal">null</span> == options) ? optioner.get() : optioner.set( options );
@@ -3058,7 +3092,8 @@ for use with async</p>
 
       <span class="hljs-keyword">var</span> logargs = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id, 
                      err.code, err.message, err.details, 
-                     instance.fixedargs.fatal$?<span class="hljs-string">'all-errors-fatal'</span>:<span class="hljs-string">'-'</span>]
+                     instance.fixedargs.fatal$?<span class="hljs-string">'all-errors-fatal'</span>:<span class="hljs-string">'-'</span>,
+                     ctxt.callpoint()]
 
       instance.log.fatal.apply( instance, logargs )
 
