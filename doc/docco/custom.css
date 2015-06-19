@@ -1,0 +1,8 @@
+.annotation ul, .annotation ol {
+    margin: 5px 0;
+}
+.annotation ul li, .annotation ol li {
+    font-size: 14px;
+    line-height: 18px;
+    margin: 5px 0;
+}
