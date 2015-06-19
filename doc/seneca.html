@@ -31,8 +31,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* Copyright (c) 2010-2015 Richard Rodger, MIT License */</span>
-<span class="hljs-comment">/* jshint node:true, asi:true, eqnull:true */</span>
-<span class="hljs-pi">"use strict"</span>;</pre></div></div>
+<span class="hljs-comment">/* jshint node:true, asi:true, eqnull:true */</span></pre></div></div>
             
         </li>
         
@@ -43,11 +42,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Current version, access using <em>seneca.version</em> property</p>
+              <style> p,ul,li { margin:5px !important; } </style>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.1'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-pi">"use strict"</span>;</pre></div></div>
             
         </li>
         
@@ -57,6 +56,21 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Current version, access using <em>seneca.version</em> property.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.1'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>Node API modules</p>
 
@@ -72,13 +86,13 @@
         </li>
         
         
-        <li id="section-4">
+        <li id="section-5">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>External modules</p>
+              <p>External modules.</p>
 
             </div>
             
@@ -94,24 +108,18 @@
 <span class="hljs-keyword">var</span> zig          = <span class="hljs-built_in">require</span>(<span class="hljs-string">'zig'</span>)
 <span class="hljs-keyword">var</span> gex          = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gex'</span>)
 <span class="hljs-keyword">var</span> executor     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gate-executor'</span>)
-
-
-<span class="hljs-keyword">var</span> error = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eraro'</span>)({
-  package:  <span class="hljs-string">'seneca'</span>,
-  msgmap:   ERRMSGMAP(),
-  override: <span class="hljs-literal">true</span>
-})</pre></div></div>
+<span class="hljs-keyword">var</span> eraro        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eraro'</span>)</pre></div></div>
             
         </li>
         
         
-        <li id="section-5">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Internal modules</p>
+              <p>Internal modules.</p>
 
             </div>
             
@@ -126,32 +134,23 @@
         </li>
         
         
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>Abbreviations</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> arr = common.arrayify</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Exports</p>
+              <p>Create utilities.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">module</span>.exports = init</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> arr = common.arrayify
+
+<span class="hljs-keyword">var</span> error = eraro({
+  package:  <span class="hljs-string">'seneca'</span>,
+  msgmap:   ERRMSGMAP(),
+  override: <span class="hljs-literal">true</span>
+})</pre></div></div>
             
         </li>
         
@@ -162,15 +161,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Create a new Seneca instance.</p>
-<ul>
-<li>initial_options  &rarr;  options</li>
-</ul>
+              <p>Module exports.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_seneca</span>(<span class="hljs-params"> initial_options </span>) </span>{
-  <span class="hljs-comment">/* jshint validthis:true */</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">module</span>.exports = init</pre></div></div>
             
         </li>
         
@@ -181,25 +176,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Create a private context.</p>
+              <p>Default options.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> private$ = {
-    stats: {
-      start: <span class="hljs-built_in">Date</span>.now(),
-      act: {
-        calls: <span class="hljs-number">0</span>,
-        done:  <span class="hljs-number">0</span>,
-        fails: <span class="hljs-number">0</span>,
-        cache: <span class="hljs-number">0</span>
-      },
-      actmap:{}
-    }
-  }
-
-
-  initial_options = initial_options || {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> DEFAULT_OPTIONS = {</pre></div></div>
             
         </li>
         
@@ -210,24 +191,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>Seneca is an EventEmitter.</p>
+              <p>Tag this Seneca instance, will be appended to instance identifier.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Seneca</span>(<span class="hljs-params"></span>) </span>{
-    events.EventEmitter.call(<span class="hljs-keyword">this</span>)
-    <span class="hljs-keyword">this</span>.setMaxListeners(<span class="hljs-number">0</span>)
-  }
-  util.inherits(Seneca, events.EventEmitter)
-
-  <span class="hljs-keyword">var</span> root = <span class="hljs-keyword">new</span> Seneca()
-  root.root = root
-
-  root.start_time = <span class="hljs-built_in">Date</span>.now()
-
-  root.fixedargs = {}
-
-  root.context = {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  tag:             <span class="hljs-string">'-'</span>,</pre></div></div>
             
         </li>
         
@@ -238,11 +206,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>Expose the current version of Seneca</p>
+              <p>Standard length of identifiers for actions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.version = VERSION</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  idlen:           <span class="hljs-number">12</span>,</pre></div></div>
             
         </li>
         
@@ -253,69 +221,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <h3 id="seneca-add">seneca.add</h3>
-<p>Add an message pattern and action function.</p>
-<p><code>seneca.add( pattern, action )</code></p>
-<ul>
-<li><em>pattern</em> (object or string)  &rarr;  pattern definition</li>
-<li><em>action</em> (function)           &rarr;  function executed when input to <pre><code>                                  <span class="hljs-string">`seneca.act`</span> matches pattern
-</code></pre></li>
-</ul>
-<p><code>seneca.add( pattern_string, pattern_object, action )</code></p>
-<ul>
-<li><em>pattern_string</em> (string)  &rarr;  pattern definition as jsonic string</li>
-<li><em>pattern_object</em> (object)  &rarr;  pattern definition as object</li>
-<li><em>action</em> (function)        &rarr;  function executed when input to <pre><code>                               <span class="hljs-string">`seneca.act`</span> matches pattern.
-</code></pre></li>
-</ul>
-<p>The pattern is defined by the top level properties of the
-<em>pattern</em> parameter.  In the case where the pattern is a string,
-it is first parsed by
-<a href="https://github.com/rjrodger/jsonic">jsonic</a></p>
-<p>If the value of a pattern property is a sub-object, this is
-interpreted as a
-<a href="https://github.com/rjrodger/parambulator">parambulator</a>
-validation check. In this case, the property is not considered
-part of the pattern, but rather an argument to validate when
-<em>seneca.act</em> is called.</p>
+              <p>Standard timeout for actions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.add = api_add
-
-
-  root.sub        = api_sub       <span class="hljs-comment">// Subscribe to a message pattern.</span>
-  root.logroute   = api_logroute
-  root.register   = api_register
-  root.depends    = api_depends
-  root.export     = api_export
-  root.make       = api_make
-  root.make$      = api_make
-  root.listen     = api_listen
-  root.client     = api_client
-  root.cluster    = api_cluster
-  root.hasplugin  = api_hasplugin
-  root.findplugin = api_findplugin
-  root.pin        = api_pin
-  root.has        = api_hasact
-  root.hasact     = api_hasact
-  root.actroutes  = api_actroutes
-  root.list       = api_list
-  root.act        = api_act
-  root.act_if     = api_act_if
-  root.wrap       = api_wrap
-  root.close      = api_close
-  root.ready      = api_ready
-  root.use        = api_use
-  root.seneca     = api_seneca
-  root.fix        = api_fix
-  root.delegate   = api_delegate
-  root.options    = api_options
-  root.repl       = api_repl
-  root.findact    = api_findact
-  root.start      = api_start
-
-  root.findact.mark  = <span class="hljs-string">'top'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  timeout:         <span class="hljs-number">11111</span>,</pre></div></div>
             
         </li>
         
@@ -326,63 +236,17 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>Legacy API; Deprecated.</p>
+              <p>Register (true) default plugins. Set false to not register when
+using custom versions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-  root.startrepl = api_repl
-
-  root.fail = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
-    <span class="hljs-keyword">var</span> args = common.arrayify(<span class="hljs-built_in">arguments</span>)
-
-    <span class="hljs-keyword">var</span> cb = _.isFunction(<span class="hljs-built_in">arguments</span>[<span class="hljs-built_in">arguments</span>.length-<span class="hljs-number">1</span>]) ?
-          <span class="hljs-built_in">arguments</span>[<span class="hljs-built_in">arguments</span>.length-<span class="hljs-number">1</span>] : <span class="hljs-literal">null</span>
-
-    <span class="hljs-keyword">if</span>( cb ) {
-      args.pop()
-    }
-
-    <span class="hljs-keyword">if</span>( _.isObject( args[<span class="hljs-number">0</span>] ) ) {
-      <span class="hljs-keyword">var</span> code = args[<span class="hljs-number">0</span>].code
-      <span class="hljs-keyword">if</span>( _.isString(code) ) {
-        args.unshift(code)
-      }
-    }
-
-    <span class="hljs-keyword">var</span> err = error.apply(<span class="hljs-literal">null</span>,args)
-    err.callpoint = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>().stack.match(<span class="hljs-regexp">/^.*\n.*\n\s*(.*)/</span>)[<span class="hljs-number">1</span>]
-    err.seneca = { code: err.code, valmap:err.details }
-
-    <span class="hljs-keyword">this</span>.log.error(err)
-    <span class="hljs-keyword">if</span>( so.errhandler ) {
-      so.errhandler.call(<span class="hljs-keyword">this</span>,err)
-    }
-
-    <span class="hljs-keyword">if</span>( cb ) {
-      cb.call(<span class="hljs-keyword">this</span>,err)
-    }
-
-    <span class="hljs-keyword">return</span> err;
-  }
-
-
-
-  <span class="hljs-keyword">var</span> paramcheck = {}
-
-  paramcheck.options = parambulator({
-    tag:        { string$:<span class="hljs-literal">true</span> },
-    idlen:      { integer$:<span class="hljs-literal">true</span> },
-    timeout:    { integer$:<span class="hljs-literal">true</span> },
-    errhandler: { <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-title">$</span>:<span class="hljs-title">true</span> },
-  },</span>{
-    topname:       <span class="hljs-string">'options'</span>,
-    msgprefix:     <span class="hljs-string">'seneca( {...} ): '</span>,
-  })
-
-
-
-  <span class="hljs-keyword">var</span> argv = cmdline(root)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  default_plugins: {
+    basic:       <span class="hljs-literal">true</span>,
+    <span class="hljs-string">'mem-store'</span>: <span class="hljs-literal">true</span>,
+    transport:   <span class="hljs-literal">true</span>,
+    web:         <span class="hljs-literal">true</span>,
+  },</pre></div></div>
             
         </li>
         
@@ -393,14 +257,14 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>Resolve options.</p>
+              <p>Settings for network REPL.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> optioner = private$.optioner =
-        make_optioner(
-          argv,
-          initial_options.module || <span class="hljs-built_in">module</span>.parent || <span class="hljs-built_in">module</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  repl:{
+    port: <span class="hljs-number">30303</span>,
+    host: <span class="hljs-literal">null</span>,
+  },</pre></div></div>
             
         </li>
         
@@ -411,24 +275,11 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>Default options.</p>
+              <p>Debug settings.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          {
-            tag:             <span class="hljs-string">'-'</span>,
-            idlen:           <span class="hljs-number">12</span>,
-            timeout:         <span class="hljs-number">33333</span>,
-
-            status: {
-              interval: <span class="hljs-number">60000</span>,
-              running:  <span class="hljs-literal">false</span>,
-            },
-
-            actcache:        <span class="hljs-literal">true</span>,
-            actcache_size:   <span class="hljs-number">1111</span>,
-
-            zig:{},</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  debug: {</pre></div></div>
             
         </li>
         
@@ -439,11 +290,11 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>Enforce strict behaviours. Relax when backwards compatibility needed.</p>
+              <p>Throw (some) errors from seneca.act.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            strict: {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    fragile:    <span class="hljs-literal">false</span>,</pre></div></div>
             
         </li>
         
@@ -454,11 +305,11 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>Action result must be a plain object.</p>
+              <p>Fatal errors … aren’t fatal. Not for production!</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>              result: <span class="hljs-literal">true</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    undead:     <span class="hljs-literal">false</span>,</pre></div></div>
             
         </li>
         
@@ -469,70 +320,11 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>Delegate fixedargs override action args</p>
+              <p>Print debug info to console</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>              fixedargs: <span class="hljs-literal">true</span>,
-            },
-
-
-            trace:{
-              act:     <span class="hljs-literal">false</span>,
-              stack:   <span class="hljs-literal">false</span>,
-              unknown: <span class="hljs-string">'warn'</span>
-            },
-
-            stats: {
-              size:     <span class="hljs-number">1024</span>,
-              interval: <span class="hljs-number">60000</span>,
-              running:  <span class="hljs-literal">false</span>
-            },
-
-            debug:{
-              allargs:    <span class="hljs-literal">false</span>,
-              fragile:    <span class="hljs-literal">false</span>,
-              undead:     <span class="hljs-literal">false</span>,
-              print:      {},
-              act_caller: <span class="hljs-literal">false</span>,
-              short_logs: <span class="hljs-literal">false</span>,
-              callpoint:  <span class="hljs-literal">false</span>,
-            },
-
-            deathdelay: <span class="hljs-number">33333</span>,
-
-            admin:{
-              local:  <span class="hljs-literal">false</span>,
-              prefix: <span class="hljs-string">'/admin'</span>
-            },
-
-            plugin:{},
-
-            internal: {
-              actrouter:    patrun(),
-              clientrouter: patrun(pin_patrun_customizer),
-              subrouter:    patrun(pin_patrun_customizer),
-              close_signals: {
-                SIGHUP:   <span class="hljs-literal">true</span>,
-                SIGTERM:  <span class="hljs-literal">true</span>,
-                SIGINT:   <span class="hljs-literal">true</span>,
-                SIGBREAK: <span class="hljs-literal">true</span>,
-              },
-            },
-
-            default_plugins: {
-              basic:       <span class="hljs-literal">true</span>,
-              <span class="hljs-string">'mem-store'</span>: <span class="hljs-literal">true</span>,
-              transport:   <span class="hljs-literal">true</span>,
-              web:         <span class="hljs-literal">true</span>,
-            },
-
-            repl:{
-              port: <span class="hljs-number">30303</span>,
-              host: <span class="hljs-literal">null</span>,
-            },
-          }
-        )</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    print: {</pre></div></div>
             
         </li>
         
@@ -543,21 +335,12 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>not needed after this point, and screws up debug printing</p>
+              <p>Print options. Best used via —seneca.print.options.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">delete</span> initial_options.module
-
-  <span class="hljs-keyword">var</span> so = optioner.set( initial_options )
-
-  paramcheck.options.validate(so,thrower)
-
-  <span class="hljs-keyword">var</span> callpoint = !so.debug.callpoint ? _.noop : <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> error.callpoint(
-      <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(),
-      [<span class="hljs-string">'/seneca/seneca.js'</span>,<span class="hljs-string">'/seneca/lib/'</span>, <span class="hljs-string">'/lodash.js'</span>] )
-  }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      options: <span class="hljs-literal">false</span>,
+    },</pre></div></div>
             
         </li>
         
@@ -568,11 +351,11 @@ part of the pattern, but rather an argument to validate when
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>Identifier generator.</p>
+              <p>Trace action caller and place in args.caller$.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.idgen = nid({length:so.idlen})</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    act_caller: <span class="hljs-literal">false</span>,</pre></div></div>
             
         </li>
         
@@ -582,6 +365,532 @@ part of the pattern, but rather an argument to validate when
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Shorten all identifiers to 2 characters.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    short_logs: <span class="hljs-literal">false</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Record and log callpoints (calling code locations).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    callpoint:  <span class="hljs-literal">false</span>,
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Enforce strict behaviours. Relax when backwards compatibility needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  strict: {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Action result must be a plain object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    result: <span class="hljs-literal">true</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Delegate fixedargs override action args</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fixedargs: <span class="hljs-literal">true</span>,
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Action cache. Makes inbound messages idempotent.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  actcache: {
+    active: <span class="hljs-literal">true</span>,
+    size:   <span class="hljs-number">11111</span>,
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Action executor tracing. See gate-executor module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  trace: {
+    act:     <span class="hljs-literal">false</span>,
+    stack:   <span class="hljs-literal">false</span>,
+    unknown: <span class="hljs-string">'warn'</span>
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Action statistics settings. See rolling-stats module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  stats: {
+    size:     <span class="hljs-number">1024</span>,
+    interval: <span class="hljs-number">60000</span>,
+    running:  <span class="hljs-literal">false</span>
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Wait time for plugins to close gracefully.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  deathdelay: <span class="hljs-number">11111</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Default seneca-admin settings.
+TODO: move to seneca-admin!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  admin: {
+    local:  <span class="hljs-literal">false</span>,
+    prefix: <span class="hljs-string">'/admin'</span>
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Plugin settings</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  plugin: {},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Internal settings.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  internal: {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Close instance on these signals, if true.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    close_signals: {
+      SIGHUP:   <span class="hljs-literal">true</span>,
+      SIGTERM:  <span class="hljs-literal">true</span>,
+      SIGINT:   <span class="hljs-literal">true</span>,
+      SIGBREAK: <span class="hljs-literal">true</span>,
+    },
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Log status at periodic intervals.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  status: {
+    interval: <span class="hljs-number">60000</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>By default, does not run.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    running:  <span class="hljs-literal">false</span>,
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>zig module settings for seneca.start() chaining.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  zig:{},
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Create a new Seneca instance.</p>
+<ul>
+<li><em>initial_options</em> <code>o</code> &rarr; instance options</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_seneca</span>(<span class="hljs-params"> initial_options </span>) </span>{
+  <span class="hljs-comment">/* jshint validthis:true */</span>
+
+  initial_options = initial_options || {} <span class="hljs-comment">// ensure defined</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>Create a private context.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> private$ = make_private()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Create a new root Seneca instance.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> root = <span class="hljs-keyword">new</span> Seneca()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>Define public member variables.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.root       = root
+  root.start_time = <span class="hljs-built_in">Date</span>.now()
+  root.fixedargs  = {}
+  root.context    = {}
+  root.version    = VERSION</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>Seneca methods. Official API.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.add        = api_add        <span class="hljs-comment">// Add a message pattern and action.</span>
+  root.act        = api_act        <span class="hljs-comment">// Perform action that matches pattern.</span>
+  root.sub        = api_sub        <span class="hljs-comment">// Subscribe to a message pattern.</span>
+  root.use        = api_use        <span class="hljs-comment">// Define a plugin.</span>
+  root.make       = api_make       <span class="hljs-comment">// Make a new entity object.</span>
+  root.listen     = api_listen     <span class="hljs-comment">// Listen for inbound messages.</span>
+  root.client     = api_client     <span class="hljs-comment">// Send outbound messages.</span>
+  root.export     = api_export     <span class="hljs-comment">// Export plain objects from a plugin.</span>
+  root.has        = api_has        <span class="hljs-comment">// True if action pattern defined.</span>
+  root.find       = api_find       <span class="hljs-comment">// Find action by pattern</span>
+  root.list       = api_list       <span class="hljs-comment">// List (a subset of) action patterns.</span>
+  root.ready      = api_ready      <span class="hljs-comment">// Callback when plugins initialized.</span>
+  root.close      = api_close      <span class="hljs-comment">// Close and shutdown plugins.</span>
+  root.options    = api_options    <span class="hljs-comment">// Get and set options.</span>
+  root.repl       = api_repl       <span class="hljs-comment">// Open a REPL on a local port.</span>
+  root.start      = api_start      <span class="hljs-comment">// Start an action chain.</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Method aliases.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.make$      = api_make
+  root.hasact     = api_has</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>Non-API methods.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.logroute   = api_logroute
+  root.register   = api_register
+  root.depends    = api_depends
+  root.cluster    = api_cluster
+  root.hasplugin  = api_hasplugin
+  root.findplugin = api_findplugin
+  root.pin        = api_pin
+  root.actroutes  = api_actroutes
+  root.act_if     = api_act_if
+  root.wrap       = api_wrap
+  root.seneca     = api_seneca
+  root.fix        = api_fix
+  root.delegate   = api_delegate</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Legacy API; Deprecated.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.startrepl = api_repl
+  root.findact   = api_find</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>Create internal tools.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> paramcheck = make_paramcheck()
+  <span class="hljs-keyword">var</span> argv       = cmdline(root)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>Create option resolver.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  private$.optioner = make_optioner( 
+    argv,
+    initial_options.module || <span class="hljs-built_in">module</span>.parent || <span class="hljs-built_in">module</span>,
+    DEFAULT_OPTIONS )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>Not needed after this point, and screws up debug printing.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">delete</span> initial_options.module</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Define options</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> so = private$.optioner.set( initial_options )
+  paramcheck.options.validate(so,thrower)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>These need to come from options as required during construction.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  so.internal.actrouter    = so.internal.actrouter    || patrun()
+  so.internal.clientrouter = so.internal.clientrouter || patrun(pin_patrun_customizer)
+  so.internal.subrouter    = so.internal.subrouter    || patrun(pin_patrun_customizer)
+
+  root.fail = make_legacy_fail( so )
+
+  <span class="hljs-keyword">var</span> callpoint = make_callpoint( so.debug.callpoint )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Identifier generator.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  root.idgen = nid({length:so.idlen})</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>Create a unique identifer for this instance.</p>
 
@@ -608,11 +917,11 @@ part of the pattern, but rather an argument to validate when
         </li>
         
         
-        <li id="section-22">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>Configure logging</p>
 
@@ -627,11 +936,11 @@ part of the pattern, but rather an argument to validate when
         </li>
         
         
-        <li id="section-23">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>Error events are fatal, unless you’re undead.  These are not the
 same as action errors, these are unexpected internal issues.</p>
@@ -643,11 +952,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>TODO: support options</p>
 
@@ -673,11 +982,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>setup status log</p>
 
@@ -715,7 +1024,10 @@ same as action errors, these are unexpected internal issues.</p>
     builtin:   <span class="hljs-string">''</span>
   })
 
-  private$.actcache       = lrucache({max:so.actcache_size})
+  private$.actcache = ( so.actcache.active ? 
+                        lrucache({max:so.actcache.size}) :
+                        {set:_.noop} )
+
   private$.wait_for_ready = <span class="hljs-literal">false</span>
 
   private$.actrouter    = so.internal.actrouter
@@ -756,11 +1068,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>say hello, printing identifier to log</p>
 
@@ -771,30 +1083,30 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>dump options if debugging</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  root.log.debug('options',function() {
-    return util.inspect(so,false,null).replace(/[\r\n]/g,' ')
+            <div class="content"><div class='highlight'><pre>  root.log.debug(<span class="hljs-string">'options'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> util.inspect(so,<span class="hljs-literal">false</span>,<span class="hljs-literal">null</span>).replace(<span class="hljs-regexp">/[\r\n]/g</span>,<span class="hljs-string">' '</span>)
   })
 
-  if( so.debug.print.options ) {
-    console_log('\nSeneca Options ('+root.id+'): before plugins\n'+
-                '===\n')
-    console_log(util.inspect(so,{depth:null}))
-    console_log('')
+  <span class="hljs-keyword">if</span>( so.debug.print.options ) {
+    console_log(<span class="hljs-string">'\nSeneca Options ('</span>+root.id+<span class="hljs-string">'): before plugins\n'</span>+
+                <span class="hljs-string">'===\n'</span>)
+    console_log(util.inspect(so,{depth:<span class="hljs-literal">null</span>}))
+    console_log(<span class="hljs-string">''</span>)
   }
 
 
-  function api_logroute(entry,handler) {
-    if( 0 === arguments.length ) return root.log.router.toString()
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_logroute</span>(<span class="hljs-params">entry,handler</span>) </span>{
+    <span class="hljs-keyword">if</span>( <span class="hljs-number">0</span> === <span class="hljs-built_in">arguments</span>.length ) <span class="hljs-keyword">return</span> root.log.router.toString()
 
     entry.handler = handler || entry.handler
     logging.makelogroute(entry,root.log.router)
@@ -802,57 +1114,47 @@ same as action errors, these are unexpected internal issues.</p>
 
 
 
-  paramcheck.register = parambulator({
-    type$:     'object',
-    required$: ['name','init'],
-    string$:   ['name'],
-    function$: ['init','service'],
-    object$:   ['options']
-  },{
-    topname:       'plugin',
-    msgprefix:     'register(plugin): ',
-  })
 
 
 
-  function api_register( plugin ) {
-    var self = this
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_register</span>(<span class="hljs-params"> plugin </span>) </span>{
+    <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
 
     paramcheck.register.validate(plugin,thrower)
 
-    var fullname = plugin.name+(plugin.tag?'/'+plugin.tag:'')
-    var tag      = plugin.tag||'-'
+    <span class="hljs-keyword">var</span> fullname = plugin.name+(plugin.tag?<span class="hljs-string">'/'</span>+plugin.tag:<span class="hljs-string">''</span>)
+    <span class="hljs-keyword">var</span> tag      = plugin.tag||<span class="hljs-string">'-'</span>
 
     plugin.fullname = fullname
 
-    var sd = plugin_util.make_delegate(
+    <span class="hljs-keyword">var</span> sd = plugin_util.make_delegate(
       self,
       plugin,
       {makedie:makedie}
     )
 
-    self.log.debug( 'register', 'init', fullname, callpoint() )
+    self.log.debug( <span class="hljs-string">'register'</span>, <span class="hljs-string">'init'</span>, fullname, callpoint() )
 
-    var plugin_options = plugin_util.resolve_options(fullname,plugin,so)
+    <span class="hljs-keyword">var</span> plugin_options = plugin_util.resolve_options(fullname,plugin,so)
 
-    sd.log.debug('DEFINE',plugin_options)
+    sd.log.debug(<span class="hljs-string">'DEFINE'</span>,plugin_options)
 
-    var meta
-    try {
+    <span class="hljs-keyword">var</span> meta
+    <span class="hljs-keyword">try</span> {
       meta = plugin_util.define_plugin( sd, plugin, plugin_options )
     }
-    catch(e) {
-      return sd.die(e)
+    <span class="hljs-keyword">catch</span>(e) {
+      <span class="hljs-keyword">return</span> sd.die(e)
     }</pre></div></div>
             
         </li>
         
         
-        <li id="section-28">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>legacy api for service function</p>
 
@@ -880,11 +1182,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>LEGACY</p>
 
@@ -982,11 +1284,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Legacy aliases</p>
 
@@ -1005,11 +1307,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>all optional</p>
 
@@ -1058,11 +1360,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>Queue messages while waiting for client to become active.</p>
 
@@ -1080,11 +1382,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>TODO: validate pin, pins args</p>
 
@@ -1103,11 +1405,11 @@ same as action errors, these are unexpected internal issues.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>Only wrap if pin is specific.
 Don’t want to wrap all patterns, esp. system ones!</p>
@@ -1123,11 +1425,11 @@ Don’t want to wrap all patterns, esp. system ones!</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>For patterns not locally defined.</p>
 
@@ -1150,11 +1452,11 @@ Don’t want to wrap all patterns, esp. system ones!</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>Create client.</p>
 
@@ -1171,11 +1473,11 @@ Don’t want to wrap all patterns, esp. system ones!</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>Process any messages waiting for this client,
 before bringing client online.</p>
@@ -1233,11 +1535,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>TODO: accept a jsonic string</p>
 
@@ -1255,11 +1557,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
               <p>Default transport is web</p>
 
@@ -1270,11 +1572,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-70">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>Aliases.</p>
 
@@ -1336,11 +1638,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-71">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
               <p>get plugin instance</p>
 
@@ -1465,11 +1767,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-72">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
               <p>TODO: not really satisfactory</p>
 
@@ -1486,11 +1788,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-73">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-73">&#182;</a>
               </div>
               <p>TODO: other cases</p>
 
@@ -1499,11 +1801,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-74">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-74">&#182;</a>
               </div>
               <p>Subs are triggered via events</p>
 
@@ -1534,13 +1836,35 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
-              <p>params: argstr,argobj,actfunc,actmeta</p>
+              <h3 id="seneca-add">seneca.add</h3>
+<p>Add an message pattern and action function.</p>
+<p><code>seneca.add( pattern, action )</code>  </p>
+<ul>
+<li><em>pattern</em> <code>o|s</code> &rarr; pattern definition</li>
+<li><em>action</em> <code>f</code> &rarr; pattern action function</li>
+</ul>
+<p><code>seneca.add( pattern_string, pattern_object, action )</code>  </p>
+<ul>
+<li><em>pattern_string</em> <code>s</code> &rarr; pattern definition as jsonic string</li>
+<li><em>pattern_object</em> <code>o</code> &rarr; pattern definition as object</li>
+<li><em>action</em> <code>f</code> &rarr; pattern action function</li>
+</ul>
+<p>The pattern is defined by the top level properties of the
+<em>pattern</em> parameter.  In the case where the pattern is a string,
+it is first parsed by
+<a href="https://github.com/rjrodger/jsonic">jsonic</a></p>
+<p>If the value of a pattern property is a sub-object, this is
+interpreted as a
+<a href="https://github.com/rjrodger/parambulator">parambulator</a>
+validation check. In this case, the property is not considered
+part of the pattern, but rather an argument to validate when
+<em>seneca.act</em> is called.</p>
 
             </div>
             
@@ -1562,11 +1886,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
               <p>Deprecate a pattern by providing a string message using deprecate$ key.</p>
 
@@ -1600,11 +1924,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-77">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
               <p>deprecated</p>
 
@@ -1616,7 +1940,7 @@ before bringing client online.</p>
 
     actmeta.func = action
 
-    <span class="hljs-keyword">var</span> priormeta = self.findact( pattern )
+    <span class="hljs-keyword">var</span> priormeta = self.find( pattern )
 
     <span class="hljs-keyword">if</span>( priormeta &amp;&amp; priormeta.pattern !== actmeta.pattern ) {
       priormeta = <span class="hljs-literal">null</span>
@@ -1639,11 +1963,11 @@ before bringing client online.</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
               <p>FIX: need a much better way to support layered actions
 this “.handle” hack is just to make seneca.close work</p>
@@ -1687,7 +2011,7 @@ this “.handle” hack is just to make seneca.close work</p>
 
 
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_findact</span>(<span class="hljs-params">args</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_find</span>(<span class="hljs-params">args</span>) </span>{
     <span class="hljs-keyword">var</span> local  = <span class="hljs-literal">true</span>
     <span class="hljs-keyword">var</span> remote = <span class="hljs-literal">true</span>
 
@@ -1711,18 +2035,18 @@ this “.handle” hack is just to make seneca.close work</p>
 
 
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_hasact</span>(<span class="hljs-params">args</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_has</span>(<span class="hljs-params">args</span>) </span>{
     <span class="hljs-keyword">return</span> !!private$.actrouter.find(args)
   }</pre></div></div>
             
         </li>
         
         
-        <li id="section-49">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
               <p>TODO: deprecate</p>
 
@@ -1797,11 +2121,11 @@ this “.handle” hack is just to make seneca.close work</p>
         </li>
         
         
-        <li id="section-50">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
               <p>Perform an action. The properties of the first argument are matched against
 known patterns, and the most specific one wins.</p>
@@ -1814,7 +2138,7 @@ known patterns, and the most specific one wins.</p>
     <span class="hljs-keyword">var</span> spec    = parse_pattern( self, common.arrayify(<span class="hljs-built_in">arguments</span>), <span class="hljs-string">'done:f?'</span> )
     <span class="hljs-keyword">var</span> args    = spec.pattern
     <span class="hljs-keyword">var</span> actdone = spec.done
-    <span class="hljs-keyword">var</span> actmeta = self.findact(args)
+    <span class="hljs-keyword">var</span> actmeta = self.find(args)
 
     <span class="hljs-keyword">if</span>( so.debug.act_caller ) {
       args.caller$ = <span class="hljs-string">'\n    Action call arguments and location: '</span>+
@@ -1826,11 +2150,11 @@ known patterns, and the most specific one wins.</p>
         </li>
         
         
-        <li id="section-51">
+        <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
               <p>action pattern found</p>
 
@@ -1844,11 +2168,11 @@ known patterns, and the most specific one wins.</p>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
               <p>action pattern not found</p>
 
@@ -1902,11 +2226,11 @@ known patterns, and the most specific one wins.</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-83">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>close seneca instance
 sets public seneca.closed property</p>
@@ -1928,11 +2252,11 @@ sets public seneca.closed property</p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>useful when defining services!
 note: has EventEmitter.once semantics
@@ -1976,11 +2300,11 @@ if using .on(‘ready’,fn) it will be be called for each ready event</p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-85">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-85">&#182;</a>
               </div>
               <p>use(‘pluginname’) - built-in, or provide calling code ‘require’ as seneca opt
 use( require(‘pluginname’) ) - plugin object, init will be called
@@ -1994,11 +2318,11 @@ if first arg has property senecaplugin</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <p>Allow chaining with seneca.use(‘options’, {…})
 see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rjrodger/seneca/issues/80</a></p>
@@ -2025,11 +2349,11 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
         </li>
         
         
-        <li id="section-57">
+        <li id="section-87">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
               <p>TODO: move repl functionality to seneca-repl</p>
 
@@ -2174,11 +2498,11 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
         </li>
         
         
-        <li id="section-58">
+        <li id="section-88">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-88">&#182;</a>
               </div>
               <p>Return self. Mostly useful as a check that this is a Seneca instance.</p>
 
@@ -2191,11 +2515,11 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
         </li>
         
         
-        <li id="section-59">
+        <li id="section-89">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-89">&#182;</a>
               </div>
               <p>Describe this instance using the form: Seneca/VERSION/ID</p>
 
@@ -2229,11 +2553,11 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
         </li>
         
         
-        <li id="section-60">
+        <li id="section-90">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-90">&#182;</a>
               </div>
               <p>build callargs</p>
 
@@ -2244,11 +2568,11 @@ see <a href="https://github.com/rjrodger/seneca/issues/80">https://github.com/rj
         </li>
         
         
-        <li id="section-61">
+        <li id="section-91">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-91">&#182;</a>
               </div>
               <p>remove actid so that user manipulation of args for subsequent use does
 not cause inadvertent hit on existing action</p>
@@ -2306,11 +2630,11 @@ not cause inadvertent hit on existing action</p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-92">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-92">&#182;</a>
               </div>
               <p>allow legacy patterns</p>
 
@@ -2329,13 +2653,11 @@ not cause inadvertent hit on existing action</p>
           }
         }
 
-        <span class="hljs-keyword">if</span>( so.actcache ) {
-          private$.actcache.set(actid,{
-            result:result,
-            actmeta:actmeta,
-            when:<span class="hljs-built_in">Date</span>.now()
-          })
-        }
+        private$.actcache.set(actid,{
+          result:  result,
+          actmeta: actmeta,
+          when:    <span class="hljs-built_in">Date</span>.now()
+        })
 
         <span class="hljs-keyword">if</span>( err ) {
           private$.stats.act.fails++
@@ -2380,11 +2702,11 @@ not cause inadvertent hit on existing action</p>
         </li>
         
         
-        <li id="section-63">
+        <li id="section-93">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-93">&#182;</a>
               </div>
               <p>for exceptions thrown inside the callback</p>
 
@@ -2396,11 +2718,11 @@ not cause inadvertent hit on existing action</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-94">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-94">&#182;</a>
               </div>
               <p>handle throws of non-Error values</p>
 
@@ -2486,11 +2808,11 @@ not cause inadvertent hit on existing action</p>
         </li>
         
         
-        <li id="section-65">
+        <li id="section-95">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-95">&#182;</a>
               </div>
               <p>Special legacy case for seneca-perm</p>
 
@@ -2551,11 +2873,11 @@ not cause inadvertent hit on existing action</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-96">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-96">&#182;</a>
               </div>
               <p>Check if actid has already been seen, and if action cache is active,
 then provide cached result, if any. Return true in this case.</p>
@@ -2579,7 +2901,7 @@ then provide cached result, if any. Return true in this case.</p>
 
     <span class="hljs-keyword">var</span> actid = args.actid$
 
-    <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != actid &amp;&amp; so.actcache ) {
+    <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != actid &amp;&amp; so.actcache.active ) {
       <span class="hljs-keyword">var</span> actdetails = private$.actcache.get(actid)
 
       <span class="hljs-keyword">if</span>( actdetails ) {
@@ -2600,11 +2922,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-97">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-97">&#182;</a>
               </div>
               <p>Resolve action stats object, creating if ncessary, and count a call.</p>
 <ul>
@@ -2635,11 +2957,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-68">
+        <li id="section-98">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-98">&#182;</a>
               </div>
               <p>automate actid log insertion</p>
 
@@ -2679,11 +3001,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-69">
+        <li id="section-99">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-99">&#182;</a>
               </div>
               <p>Check if action parameters pass parambulator spec, if any.</p>
 <ul>
@@ -2716,11 +3038,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-70">
+        <li id="section-100">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-100">&#182;</a>
               </div>
               <p>string args override object args</p>
 
@@ -2738,11 +3060,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-71">
+        <li id="section-101">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
+                <a class="pilcrow" href="#section-101">&#182;</a>
               </div>
               <p>Precedence of arguments in add,act is left-to-right</p>
 
@@ -2838,11 +3160,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-72">
+        <li id="section-102">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
+                <a class="pilcrow" href="#section-102">&#182;</a>
               </div>
               <p>Somewhere to put contextual data for this delegate.
 For example, data for individual web requests.</p>
@@ -2871,8 +3193,9 @@ For example, data for individual web requests.</p>
       self.log.debug( <span class="hljs-string">'options'</span>, <span class="hljs-string">'set'</span>, options, callpoint() )
     }
 
-    so = private$.exports.options =
-      (<span class="hljs-literal">null</span> == options) ? optioner.get() : optioner.set( options );
+    so = private$.exports.options =( (<span class="hljs-literal">null</span> == options) ? 
+                                     private$.optioner.get() : 
+                                     private$.optioner.set( options ) )
 
     <span class="hljs-keyword">if</span>( options &amp;&amp; options.log ) {
       self.log = logging.makelog(so.log,self.id,self.start_time)
@@ -2985,11 +3308,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-73">
+        <li id="section-103">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-103">&#182;</a>
               </div>
               <p>Create entity delegate.</p>
 
@@ -3005,11 +3328,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-74">
+        <li id="section-104">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-104">&#182;</a>
               </div>
               <p>Template entity that makes all others.</p>
 
@@ -3020,11 +3343,11 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-75">
+        <li id="section-105">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-105">&#182;</a>
               </div>
               <p>DEPRECATED
 for use with async</p>
@@ -3057,11 +3380,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-76">
+        <li id="section-106">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-106">&#182;</a>
               </div>
               <p>Add builtin actions.</p>
 
@@ -3077,11 +3400,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-77">
+        <li id="section-107">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
+                <a class="pilcrow" href="#section-107">&#182;</a>
               </div>
               <p>Define builtin actions.</p>
 
@@ -3163,11 +3486,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-78">
+        <li id="section-108">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-108">&#182;</a>
               </div>
               <p>Utilities</p>
 
@@ -3194,11 +3517,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-79">
+        <li id="section-109">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-109">&#182;</a>
               </div>
               <p>undead is only for testing, do not use in production</p>
 
@@ -3257,11 +3580,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-80">
+        <li id="section-110">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-110">&#182;</a>
               </div>
               <p>terminate process, err (if defined) is from seneca.close</p>
 
@@ -3284,11 +3607,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-81">
+        <li id="section-111">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
+                <a class="pilcrow" href="#section-111">&#182;</a>
               </div>
               <p>make sure we close down within options.deathdelay seconds</p>
 
@@ -3353,11 +3676,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-82">
+        <li id="section-112">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
+                <a class="pilcrow" href="#section-112">&#182;</a>
               </div>
               <p>handle previous patterns that match this pattern</p>
 
@@ -3386,11 +3709,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-83">
+        <li id="section-113">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
+                <a class="pilcrow" href="#section-113">&#182;</a>
               </div>
               <p>Primary export function, creates a new Seneca instance.</p>
 
@@ -3401,11 +3724,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-84">
+        <li id="section-114">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
+                <a class="pilcrow" href="#section-114">&#182;</a>
               </div>
               <p>Create instance.</p>
 
@@ -3417,11 +3740,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-85">
+        <li id="section-115">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
+                <a class="pilcrow" href="#section-115">&#182;</a>
               </div>
               <p>Register default plugins, unless turned off by options.</p>
 
@@ -3435,11 +3758,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-86">
+        <li id="section-116">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-116">&#182;</a>
               </div>
               <p>Register plugins specified in options.</p>
 
@@ -3455,11 +3778,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-87">
+        <li id="section-117">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
+                <a class="pilcrow" href="#section-117">&#182;</a>
               </div>
               <p>To reference builtin loggers when defining logging options.</p>
 
@@ -3470,11 +3793,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-88">
+        <li id="section-118">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-88">&#182;</a>
+                <a class="pilcrow" href="#section-118">&#182;</a>
               </div>
               <p>Makes require(‘seneca’).use( … ) work by creating an on-the-fly instance.</p>
 
@@ -3488,11 +3811,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-89">
+        <li id="section-119">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-89">&#182;</a>
+                <a class="pilcrow" href="#section-119">&#182;</a>
               </div>
               <p>Mostly for testing.</p>
 
@@ -3505,11 +3828,111 @@ for use with async</p>
         </li>
         
         
-        <li id="section-90">
+        <li id="section-120">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-90">&#182;</a>
+                <a class="pilcrow" href="#section-120">&#182;</a>
+              </div>
+              <h3 id="declarations">Declarations</h3>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-121">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-121">&#182;</a>
+              </div>
+              <p>Seneca is an EventEmitter.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Seneca</span>(<span class="hljs-params"></span>) </span>{
+  events.EventEmitter.call(<span class="hljs-keyword">this</span>)
+  <span class="hljs-keyword">this</span>.setMaxListeners(<span class="hljs-number">0</span>)
+}
+util.inherits(Seneca, events.EventEmitter)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-122">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-122">&#182;</a>
+              </div>
+              <p>Private member variables of Seneca object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_private</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> {
+    stats: {
+      start: <span class="hljs-built_in">Date</span>.now(),
+      act: {
+        calls: <span class="hljs-number">0</span>,
+        done:  <span class="hljs-number">0</span>,
+        fails: <span class="hljs-number">0</span>,
+        cache: <span class="hljs-number">0</span>
+      },
+      actmap:{}
+    }
+  }
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-123">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-123">&#182;</a>
+              </div>
+              <p>Make parambulators.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>function make_paramcheck() {
+  var paramcheck = {}
+
+  paramcheck.options = parambulator({
+    tag:        { string$:true },
+    idlen:      { integer$:true },
+    timeout:    { integer$:true },
+    errhandler: { function$:true },
+  },{
+    topname:       'options',
+    msgprefix:     'seneca( {...} ): ',
+  })
+
+  paramcheck.register = parambulator({
+    type$:     'object',
+    required$: ['name','init'],
+    string$:   ['name'],
+    function$: ['init','service'],
+    object$:   ['options']
+  },{
+    topname:       'plugin',
+    msgprefix:     'register(plugin): ',
+  })
+
+  return paramcheck
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-124">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-124">&#182;</a>
               </div>
               <p>Minor utils</p>
 
@@ -3522,11 +3945,83 @@ for use with async</p>
         </li>
         
         
-        <li id="section-91">
+        <li id="section-125">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-91">&#182;</a>
+                <a class="pilcrow" href="#section-125">&#182;</a>
+              </div>
+              <p>Callpoint resolver. Indicates location in calling code.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_callpoint</span>(<span class="hljs-params"> active </span>) </span>{
+  <span class="hljs-keyword">if</span>( active ) { 
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">return</span> error.callpoint(
+        <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(),
+        [<span class="hljs-string">'/seneca/seneca.js'</span>,<span class="hljs-string">'/seneca/lib/'</span>, <span class="hljs-string">'/lodash.js'</span>] )
+    } 
+
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> _.noop;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-126">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-126">&#182;</a>
+              </div>
+              <p>For backwards compatibility</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_legacy_fail</span>(<span class="hljs-params">so</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">var</span> args = common.arrayify(<span class="hljs-built_in">arguments</span>)
+
+    <span class="hljs-keyword">var</span> cb = _.isFunction(<span class="hljs-built_in">arguments</span>[<span class="hljs-built_in">arguments</span>.length-<span class="hljs-number">1</span>]) ?
+          <span class="hljs-built_in">arguments</span>[<span class="hljs-built_in">arguments</span>.length-<span class="hljs-number">1</span>] : <span class="hljs-literal">null</span>
+
+    <span class="hljs-keyword">if</span>( cb ) {
+      args.pop()
+    }
+
+    <span class="hljs-keyword">if</span>( _.isObject( args[<span class="hljs-number">0</span>] ) ) {
+      <span class="hljs-keyword">var</span> code = args[<span class="hljs-number">0</span>].code
+      <span class="hljs-keyword">if</span>( _.isString(code) ) {
+        args.unshift(code)
+      }
+    }
+
+    <span class="hljs-keyword">var</span> err = error.apply(<span class="hljs-literal">null</span>,args)
+    err.callpoint = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>().stack.match(<span class="hljs-regexp">/^.*\n.*\n\s*(.*)/</span>)[<span class="hljs-number">1</span>]
+    err.seneca = { code: err.code, valmap:err.details }
+
+    <span class="hljs-keyword">this</span>.log.error(err)
+    <span class="hljs-keyword">if</span>( so.errhandler ) {
+      so.errhandler.call(<span class="hljs-keyword">this</span>,err)
+    }
+
+    <span class="hljs-keyword">if</span>( cb ) {
+      cb.call(<span class="hljs-keyword">this</span>,err)
+    }
+
+    <span class="hljs-keyword">return</span> err;
+  }
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-127">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-127">&#182;</a>
               </div>
               <p>Error code messages.</p>
 
@@ -3613,11 +4108,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-92">
+        <li id="section-128">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-92">&#182;</a>
+                <a class="pilcrow" href="#section-128">&#182;</a>
               </div>
               <p>Intentional console output uses this function. Helps to find spurious debugging.</p>
 
@@ -3630,11 +4125,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-93">
+        <li id="section-129">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-93">&#182;</a>
+                <a class="pilcrow" href="#section-129">&#182;</a>
               </div>
               <p>Intentional console errors use this function. Helps to find spurious debugging.</p>
 

@@ -663,6 +663,7 @@ describe('seneca', function(){
 
   it('pin-star', function() {
     var si = seneca(testopts)
+
     si.add('a:1,b:x',function(){})
     si.add('a:1,c:y',function(){})
 

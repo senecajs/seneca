@@ -1,9 +1,10 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 /* jshint node:true, asi:true, eqnull:true */
+// <style> p,ul,li { margin:5px !important; } </style>
 "use strict";
 
 
-// Current version, access using _seneca.version_ property
+// Current version, access using _seneca.version_ property.
 var VERSION = '0.6.1'
 
 
@@ -16,7 +17,7 @@ var assert = require('assert')
 var vm     = require('vm')
 
 
-// External modules
+// External modules.
 var _            = require('lodash')
 var nid          = require('nid')
 var jsonic       = require('jsonic')
@@ -29,16 +30,10 @@ var lrucache     = require('lru-cache')
 var zig          = require('zig')
 var gex          = require('gex')
 var executor     = require('gate-executor')
+var eraro        = require('eraro')
 
 
-var error = require('eraro')({
-  package:  'seneca',
-  msgmap:   ERRMSGMAP(),
-  override: true
-})
-
-
-// Internal modules
+// Internal modules.
 var make_entity   = require('./lib/entity')
 var store         = require('./lib/store')
 var logging       = require('./lib/logging')
@@ -48,282 +43,238 @@ var cmdline       = require('./lib/cmdline')
 var common        = require('./lib/common')
 
 
-// Abbreviations
+// Create utilities.
 var arr = common.arrayify
 
+var error = eraro({
+  package:  'seneca',
+  msgmap:   ERRMSGMAP(),
+  override: true
+})
 
-// Exports
+
+// Module exports.
 module.exports = init
 
 
+// Default options.
+var DEFAULT_OPTIONS = {
+
+  // Tag this Seneca instance, will be appended to instance identifier.
+  tag:             '-',
+
+  // Standard length of identifiers for actions.
+  idlen:           12,
+
+  // Standard timeout for actions.
+  timeout:         11111,
+
+  // Register (true) default plugins. Set false to not register when
+  // using custom versions.
+  default_plugins: {
+    basic:       true,
+    'mem-store': true,
+    transport:   true,
+    web:         true,
+  },
+
+  // Settings for network REPL.
+  repl:{
+    port: 30303,
+    host: null,
+  },
+
+  // Debug settings.
+  debug: {
+
+    // Throw (some) errors from seneca.act.
+    fragile:    false,
+
+    // Fatal errors ... aren't fatal. Not for production!
+    undead:     false,
+
+    // Print debug info to console
+    print: {
+      // Print options. Best used via --seneca.print.options.
+      options: false,
+    },
+
+    // Trace action caller and place in args.caller$.
+    act_caller: false,
+
+    // Shorten all identifiers to 2 characters.
+    short_logs: false,
+
+    // Record and log callpoints (calling code locations).
+    callpoint:  false,
+  },
+
+  // Enforce strict behaviours. Relax when backwards compatibility needed.
+  strict: {
+
+    // Action result must be a plain object.
+    result: true,
+
+    // Delegate fixedargs override action args
+    fixedargs: true,
+  },
+
+  // Action cache. Makes inbound messages idempotent.
+  actcache: {
+    active: true,
+    size:   11111,
+  },
+
+  // Action executor tracing. See gate-executor module.
+  trace: {
+    act:     false,
+    stack:   false,
+    unknown: 'warn'
+  },
+
+  // Action statistics settings. See rolling-stats module.
+  stats: {
+    size:     1024,
+    interval: 60000,
+    running:  false
+  },
+
+  // Wait time for plugins to close gracefully.
+  deathdelay: 11111,
+
+  // Default seneca-admin settings.
+  // TODO: move to seneca-admin!
+  admin: {
+    local:  false,
+    prefix: '/admin'
+  },
+
+  // Plugin settings
+  plugin: {},
+
+  // Internal settings.
+  internal: {
+
+    // Close instance on these signals, if true.
+    close_signals: {
+      SIGHUP:   true,
+      SIGTERM:  true,
+      SIGINT:   true,
+      SIGBREAK: true,
+    },
+  },
+
+  // Log status at periodic intervals.
+  status: {
+    interval: 60000,
+
+    // By default, does not run.
+    running:  false,
+  },
+
+  // zig module settings for seneca.start() chaining.
+  zig:{},
+}
+
+
+
 // Create a new Seneca instance.
-//
-//    * initial_options  &rarr;  options
+// * _initial_options_ `o` &rarr; instance options
 function make_seneca( initial_options ) {
   /* jshint validthis:true */
 
+  initial_options = initial_options || {} // ensure defined
+
 
   // Create a private context.
-  var private$ = {
-    stats: {
-      start: Date.now(),
-      act: {
-        calls: 0,
-        done:  0,
-        fails: 0,
-        cache: 0
-      },
-      actmap:{}
-    }
-  }
+  var private$ = make_private()
 
 
-  initial_options = initial_options || {}
-
-  // Seneca is an EventEmitter.
-  function Seneca() {
-    events.EventEmitter.call(this)
-    this.setMaxListeners(0)
-  }
-  util.inherits(Seneca, events.EventEmitter)
-
+  // Create a new root Seneca instance.
   var root = new Seneca()
-  root.root = root
 
+
+  // Define public member variables.
+  root.root       = root
   root.start_time = Date.now()
-
-  root.fixedargs = {}
-
-  root.context = {}
-
-  // Expose the current version of Seneca
-  root.version = VERSION
+  root.fixedargs  = {}
+  root.context    = {}
+  root.version    = VERSION
 
 
-
-  // ### seneca.add
-  // Add an message pattern and action function.
-  //
-  // `seneca.add( pattern, action )`
-  //
-  //    * _pattern_ (object or string)  &rarr;  pattern definition
-  //    * _action_ (function)           &rarr;  function executed when input to 
-  //                                            `seneca.act` matches pattern
-  //
-  // `seneca.add( pattern_string, pattern_object, action )`
-  //
-  //    * _pattern_string_ (string)  &rarr;  pattern definition as jsonic string
-  //    * _pattern_object_ (object)  &rarr;  pattern definition as object
-  //    * _action_ (function)        &rarr;  function executed when input to 
-  //                                         `seneca.act` matches pattern.
-  //
-  // The pattern is defined by the top level properties of the
-  // _pattern_ parameter.  In the case where the pattern is a string,
-  // it is first parsed by
-  // [jsonic](https://github.com/rjrodger/jsonic)
-  //
-  // If the value of a pattern property is a sub-object, this is
-  // interpreted as a
-  // [parambulator](https://github.com/rjrodger/parambulator)
-  // validation check. In this case, the property is not considered
-  // part of the pattern, but rather an argument to validate when
-  // _seneca.act_ is called.
-  root.add = api_add
+  // Seneca methods. Official API.
+  root.add        = api_add        // Add a message pattern and action.
+  root.act        = api_act        // Perform action that matches pattern.
+  root.sub        = api_sub        // Subscribe to a message pattern.
+  root.use        = api_use        // Define a plugin.
+  root.make       = api_make       // Make a new entity object.
+  root.listen     = api_listen     // Listen for inbound messages.
+  root.client     = api_client     // Send outbound messages.
+  root.export     = api_export     // Export plain objects from a plugin.
+  root.has        = api_has        // True if action pattern defined.
+  root.find       = api_find       // Find action by pattern
+  root.list       = api_list       // List (a subset of) action patterns.
+  root.ready      = api_ready      // Callback when plugins initialized.
+  root.close      = api_close      // Close and shutdown plugins.
+  root.options    = api_options    // Get and set options.
+  root.repl       = api_repl       // Open a REPL on a local port.
+  root.start      = api_start      // Start an action chain.
 
 
-  root.sub        = api_sub       // Subscribe to a message pattern.
+  // Method aliases.
+  root.make$      = api_make
+  root.hasact     = api_has
+
+
+  // Non-API methods.
   root.logroute   = api_logroute
   root.register   = api_register
   root.depends    = api_depends
-  root.export     = api_export
-  root.make       = api_make
-  root.make$      = api_make
-  root.listen     = api_listen
-  root.client     = api_client
   root.cluster    = api_cluster
   root.hasplugin  = api_hasplugin
   root.findplugin = api_findplugin
   root.pin        = api_pin
-  root.has        = api_hasact
-  root.hasact     = api_hasact
   root.actroutes  = api_actroutes
-  root.list       = api_list
-  root.act        = api_act
   root.act_if     = api_act_if
   root.wrap       = api_wrap
-  root.close      = api_close
-  root.ready      = api_ready
-  root.use        = api_use
   root.seneca     = api_seneca
   root.fix        = api_fix
   root.delegate   = api_delegate
-  root.options    = api_options
-  root.repl       = api_repl
-  root.findact    = api_findact
-  root.start      = api_start
-
-  root.findact.mark  = 'top'
 
 
   // Legacy API; Deprecated.
-
   root.startrepl = api_repl
-
-  root.fail = function(){
-    var args = common.arrayify(arguments)
-
-    var cb = _.isFunction(arguments[arguments.length-1]) ?
-          arguments[arguments.length-1] : null
-
-    if( cb ) {
-      args.pop()
-    }
-
-    if( _.isObject( args[0] ) ) {
-      var code = args[0].code
-      if( _.isString(code) ) {
-        args.unshift(code)
-      }
-    }
-
-    var err = error.apply(null,args)
-    err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
-    err.seneca = { code: err.code, valmap:err.details }
-
-    this.log.error(err)
-    if( so.errhandler ) {
-      so.errhandler.call(this,err)
-    }
-
-    if( cb ) {
-      cb.call(this,err)
-    }
-
-    return err;
-  }
+  root.findact   = api_find
 
 
-
-  var paramcheck = {}
-
-  paramcheck.options = parambulator({
-    tag:        { string$:true },
-    idlen:      { integer$:true },
-    timeout:    { integer$:true },
-    errhandler: { function$:true },
-  },{
-    topname:       'options',
-    msgprefix:     'seneca( {...} ): ',
-  })
+  // Create internal tools.
+  var paramcheck = make_paramcheck()
+  var argv       = cmdline(root)
 
 
+  // Create option resolver.
+  private$.optioner = make_optioner( 
+    argv,
+    initial_options.module || module.parent || module,
+    DEFAULT_OPTIONS )
 
-  var argv = cmdline(root)
-
-
-  // Resolve options.
-  var optioner = private$.optioner =
-        make_optioner(
-          argv,
-          initial_options.module || module.parent || module,
-
-          // Default options.
-          {
-            tag:             '-',
-            idlen:           12,
-            timeout:         33333,
-
-            status: {
-              interval: 60000,
-              running:  false,
-            },
-
-            actcache:        true,
-            actcache_size:   1111,
-
-            zig:{},
-
-
-            // Enforce strict behaviours. Relax when backwards compatibility needed.
-            strict: {
-
-              // Action result must be a plain object.
-              result: true,
-
-              // Delegate fixedargs override action args
-              fixedargs: true,
-            },
-
-
-            trace:{
-              act:     false,
-              stack:   false,
-              unknown: 'warn'
-            },
-
-            stats: {
-              size:     1024,
-              interval: 60000,
-              running:  false
-            },
-
-            debug:{
-              allargs:    false,
-              fragile:    false,
-              undead:     false,
-              print:      {},
-              act_caller: false,
-              short_logs: false,
-              callpoint:  false,
-            },
-
-            deathdelay: 33333,
-
-            admin:{
-              local:  false,
-              prefix: '/admin'
-            },
-
-            plugin:{},
-
-            internal: {
-              actrouter:    patrun(),
-              clientrouter: patrun(pin_patrun_customizer),
-              subrouter:    patrun(pin_patrun_customizer),
-              close_signals: {
-                SIGHUP:   true,
-                SIGTERM:  true,
-                SIGINT:   true,
-                SIGBREAK: true,
-              },
-            },
-
-            default_plugins: {
-              basic:       true,
-              'mem-store': true,
-              transport:   true,
-              web:         true,
-            },
-
-            repl:{
-              port: 30303,
-              host: null,
-            },
-          }
-        )
-
-  // not needed after this point, and screws up debug printing
+  // Not needed after this point, and screws up debug printing.
   delete initial_options.module
 
-  var so = optioner.set( initial_options )
 
+  // Define options
+  var so = private$.optioner.set( initial_options )
   paramcheck.options.validate(so,thrower)
 
-  var callpoint = !so.debug.callpoint ? _.noop : function() {
-    return error.callpoint(
-      new Error(),
-      ['/seneca/seneca.js','/seneca/lib/', '/lodash.js'] )
-  }
+  // These need to come from options as required during construction.
+  so.internal.actrouter    = so.internal.actrouter    || patrun()
+  so.internal.clientrouter = so.internal.clientrouter || patrun(pin_patrun_customizer)
+  so.internal.subrouter    = so.internal.subrouter    || patrun(pin_patrun_customizer)
+
+  root.fail = make_legacy_fail( so )
+
+  var callpoint = make_callpoint( so.debug.callpoint )
+
 
   // Identifier generator.
   root.idgen = nid({length:so.idlen})
@@ -410,7 +361,10 @@ function make_seneca( initial_options ) {
     builtin:   ''
   })
 
-  private$.actcache       = lrucache({max:so.actcache_size})
+  private$.actcache = ( so.actcache.active ? 
+                        lrucache({max:so.actcache.size}) :
+                        {set:_.noop} )
+
   private$.wait_for_ready = false
 
   private$.actrouter    = so.internal.actrouter
@@ -475,16 +429,6 @@ function make_seneca( initial_options ) {
 
 
 
-  paramcheck.register = parambulator({
-    type$:     'object',
-    required$: ['name','init'],
-    string$:   ['name'],
-    function$: ['init','service'],
-    object$:   ['options']
-  },{
-    topname:       'plugin',
-    msgprefix:     'register(plugin): ',
-  })
 
 
 
@@ -1008,7 +952,29 @@ function make_seneca( initial_options ) {
 
 
 
-  // params: argstr,argobj,actfunc,actmeta
+  // ### seneca.add
+  // Add an message pattern and action function.
+  //
+  // `seneca.add( pattern, action )`  
+  //    * _pattern_ `o|s` &rarr; pattern definition
+  //    * _action_ `f` &rarr; pattern action function
+  //
+  // `seneca.add( pattern_string, pattern_object, action )`  
+  //    * _pattern_string_ `s` &rarr; pattern definition as jsonic string
+  //    * _pattern_object_ `o` &rarr; pattern definition as object
+  //    * _action_ `f` &rarr; pattern action function
+  //
+  // The pattern is defined by the top level properties of the
+  // _pattern_ parameter.  In the case where the pattern is a string,
+  // it is first parsed by
+  // [jsonic](https://github.com/rjrodger/jsonic)
+  //
+  // If the value of a pattern property is a sub-object, this is
+  // interpreted as a
+  // [parambulator](https://github.com/rjrodger/parambulator)
+  // validation check. In this case, the property is not considered
+  // part of the pattern, but rather an argument to validate when
+  // _seneca.act_ is called.
   function api_add() {
     var self = this
     var args = parse_pattern(self,arguments,'action:f actmeta:o?')
@@ -1057,7 +1023,7 @@ function make_seneca( initial_options ) {
 
     actmeta.func = action
 
-    var priormeta = self.findact( pattern )
+    var priormeta = self.find( pattern )
 
     if( priormeta && priormeta.pattern !== actmeta.pattern ) {
       priormeta = null
@@ -1117,7 +1083,7 @@ function make_seneca( initial_options ) {
 
 
 
-  function api_findact(args) {
+  function api_find(args) {
     var local  = true
     var remote = true
 
@@ -1141,7 +1107,7 @@ function make_seneca( initial_options ) {
 
 
 
-  function api_hasact(args) {
+  function api_has(args) {
     return !!private$.actrouter.find(args)
   }
 
@@ -1224,7 +1190,7 @@ function make_seneca( initial_options ) {
     var spec    = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
     var args    = spec.pattern
     var actdone = spec.done
-    var actmeta = self.findact(args)
+    var actmeta = self.find(args)
 
     if( so.debug.act_caller ) {
       args.caller$ = '\n    Action call arguments and location: '+
@@ -1607,13 +1573,11 @@ function make_seneca( initial_options ) {
           }
         }
 
-        if( so.actcache ) {
-          private$.actcache.set(actid,{
-            result:result,
-            actmeta:actmeta,
-            when:Date.now()
-          })
-        }
+        private$.actcache.set(actid,{
+          result:  result,
+          actmeta: actmeta,
+          when:    Date.now()
+        })
 
         if( err ) {
           private$.stats.act.fails++
@@ -1809,7 +1773,7 @@ function make_seneca( initial_options ) {
 
     var actid = args.actid$
 
-    if( null != actid && so.actcache ) {
+    if( null != actid && so.actcache.active ) {
       var actdetails = private$.actcache.get(actid)
 
       if( actdetails ) {
@@ -2032,8 +1996,9 @@ function make_seneca( initial_options ) {
       self.log.debug( 'options', 'set', options, callpoint() )
     }
 
-    so = private$.exports.options =
-      (null == options) ? optioner.get() : optioner.set( options );
+    so = private$.exports.options =( (null == options) ? 
+                                     private$.optioner.get() : 
+                                     private$.optioner.set( options ) )
 
     if( options && options.log ) {
       self.log = logging.makelog(so.log,self.id,self.start_time)
@@ -2156,6 +2121,8 @@ function make_seneca( initial_options ) {
 
   // Template entity that makes all others.
   private$.entity = make_entity({},sd)
+
+  private$.exports.Entity = make_entity.Entity
 
 
   // DEPRECATED
@@ -2477,9 +2444,115 @@ if( require.main === module ) {
 }
 
 
+
+// ### Declarations
+
+// Seneca is an EventEmitter.
+function Seneca() {
+  events.EventEmitter.call(this)
+  this.setMaxListeners(0)
+}
+util.inherits(Seneca, events.EventEmitter)
+
+// Private member variables of Seneca object.
+function make_private() {
+  return {
+    stats: {
+      start: Date.now(),
+      act: {
+        calls: 0,
+        done:  0,
+        fails: 0,
+        cache: 0
+      },
+      actmap:{}
+    }
+  }
+}
+
+
+// Make parambulators.
+function make_paramcheck() {
+  var paramcheck = {}
+
+  paramcheck.options = parambulator({
+    tag:        { string$:true },
+    idlen:      { integer$:true },
+    timeout:    { integer$:true },
+    errhandler: { function$:true },
+  },{
+    topname:       'options',
+    msgprefix:     'seneca( {...} ): ',
+  })
+
+  paramcheck.register = parambulator({
+    type$:     'object',
+    required$: ['name','init'],
+    string$:   ['name'],
+    function$: ['init','service'],
+    object$:   ['options']
+  },{
+    topname:       'plugin',
+    msgprefix:     'register(plugin): ',
+  })
+
+  return paramcheck
+}
+
+
 // Minor utils
 function thrower(err) {
   if( err ) throw err;
+}
+
+
+// Callpoint resolver. Indicates location in calling code.
+function make_callpoint( active ) {
+  if( active ) { 
+    return function() {
+      return error.callpoint(
+        new Error(),
+        ['/seneca/seneca.js','/seneca/lib/', '/lodash.js'] )
+    } 
+
+  } else return _.noop;
+}
+
+
+// For backwards compatibility
+function make_legacy_fail(so) {
+  return function(){
+    var args = common.arrayify(arguments)
+
+    var cb = _.isFunction(arguments[arguments.length-1]) ?
+          arguments[arguments.length-1] : null
+
+    if( cb ) {
+      args.pop()
+    }
+
+    if( _.isObject( args[0] ) ) {
+      var code = args[0].code
+      if( _.isString(code) ) {
+        args.unshift(code)
+      }
+    }
+
+    var err = error.apply(null,args)
+    err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
+    err.seneca = { code: err.code, valmap:err.details }
+
+    this.log.error(err)
+    if( so.errhandler ) {
+      so.errhandler.call(this,err)
+    }
+
+    if( cb ) {
+      cb.call(this,err)
+    }
+
+    return err;
+  }
 }
 
 
