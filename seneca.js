@@ -8,16 +8,16 @@ var VERSION = '0.6.1'
 
 
 // Node API modules
-var util     = require('util')
-var events   = require('events')
-var net      = require('net')
-var repl     = require('repl')
-var assert   = require('assert')
+var util   = require('util')
+var events = require('events')
+var net    = require('net')
+var repl   = require('repl')
+var assert = require('assert')
+var vm     = require('vm')
 
 
 // External modules
 var _            = require('lodash')
-var minimist     = require('minimist')
 var nid          = require('nid')
 var jsonic       = require('jsonic')
 var patrun       = require('patrun')
@@ -39,23 +39,20 @@ var error = require('eraro')({
 
 
 // Internal modules
-var make_entity  = require('./lib/entity')
-var store        = require('./lib/store')
-var logging      = require('./lib/logging')
-var plugin_util  = require('./lib/plugin-util')
-var makeoptioner = require('./lib/optioner')
-var cmdline      = require('./lib/cmdline')
-
-
-// Utility functions
-var common   = require('./lib/common')
+var make_entity   = require('./lib/entity')
+var store         = require('./lib/store')
+var logging       = require('./lib/logging')
+var plugin_util   = require('./lib/plugin-util')
+var make_optioner = require('./lib/optioner')
+var cmdline       = require('./lib/cmdline')
+var common        = require('./lib/common')
 
 
 // Abbreviations
 var arr = common.arrayify
 
 
-// Exports.
+// Exports
 module.exports = init
 
 
@@ -91,7 +88,7 @@ function make_seneca( initial_options ) {
   util.inherits(Seneca, events.EventEmitter)
 
   var root = new Seneca()
-  root.root      = root
+  root.root = root
 
   root.start_time = Date.now()
 
@@ -127,14 +124,11 @@ function make_seneca( initial_options ) {
   root.add = api_add
 
 
-  root.sub = api_sub
-
-
+  root.sub        = api_sub       // Subscribe to a message pattern.
   root.logroute   = api_logroute
   root.register   = api_register
   root.depends    = api_depends
   root.export     = api_export
-
   root.make       = api_make
   root.make$      = api_make
   root.listen     = api_listen
@@ -143,10 +137,8 @@ function make_seneca( initial_options ) {
   root.hasplugin  = api_hasplugin
   root.findplugin = api_findplugin
   root.pin        = api_pin
-
   root.has        = api_hasact
   root.hasact     = api_hasact
-
   root.actroutes  = api_actroutes
   root.list       = api_list
   root.act        = api_act
@@ -158,17 +150,17 @@ function make_seneca( initial_options ) {
   root.seneca     = api_seneca
   root.fix        = api_fix
   root.delegate   = api_delegate
-
   root.options    = api_options
+  root.repl       = api_repl
+  root.findact    = api_findact
+  root.start      = api_start
 
-
-  root.findact       = api_findact
   root.findact.mark  = 'top'
-
-  root.start = api_start
 
 
   // Legacy API; Deprecated.
+
+  root.startrepl = api_repl
 
   root.fail = function(){
     var args = common.arrayify(arguments)
@@ -224,7 +216,7 @@ function make_seneca( initial_options ) {
 
   // Resolve options.
   var optioner = private$.optioner = 
-        makeoptioner( 
+        make_optioner( 
           argv, 
           initial_options.module || module.parent || module,
           
@@ -304,7 +296,12 @@ function make_seneca( initial_options ) {
               'mem-store': true, 
               transport:   true, 
               web:         true, 
-            }
+            },
+
+            repl:{
+              port: 30303,
+              host: null,
+            },
           }
         )
 
@@ -316,7 +313,9 @@ function make_seneca( initial_options ) {
   paramcheck.options.validate(so,thrower)
 
   var callpoint = !so.debug.callpoint ? _.noop : function() {
-    return error.callpoint( new Error(), ['/seneca/'] )
+    return error.callpoint( 
+      new Error(), 
+      ['/seneca/seneca.js','/seneca/lib/', '/lodash.js'] )
   }
 
   // Identifier generator.
@@ -1010,6 +1009,11 @@ function make_seneca( initial_options ) {
     var action    = args.action
     var actmeta   = args.actmeta || {}
 
+    var add_callpoint = callpoint()
+    if( add_callpoint ) {
+      actmeta.callpoint = add_callpoint
+    }
+
     actmeta.sub = !!pattern.sub$
 
     // Deprecate a pattern by providing a string message using deprecate$ key.
@@ -1085,7 +1089,8 @@ function make_seneca( initial_options ) {
     
     if( addroute ) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD', 
-                     actmeta.id, common.argpattern(pattern), callpoint() ]
+                     actmeta.id, common.argpattern(pattern), action.name, 
+                     callpoint() ]
       var isplugin = self.context.isplugin
       var logger   = self.log.log || self.log
 
@@ -1107,6 +1112,10 @@ function make_seneca( initial_options ) {
   function api_findact(args) {
     var local  = true
     var remote = true
+
+    if( _.isString( args ) ) {
+      args = jsonic( args )
+    }
 
     if( _.isBoolean(args.local$) ) {
       local  = args.local$
@@ -1130,6 +1139,7 @@ function make_seneca( initial_options ) {
 
 
 
+  // TODO: deprecate
   root.findpins = root.pinact = function() {
     var pins = []
     var patterns = _.flatten(arr(arguments))
@@ -1173,11 +1183,14 @@ function make_seneca( initial_options ) {
 
 
   function api_list( args ) {
+    args = _.isString(args) ? jsonic(args) : args
+
     var found = private$.actrouter.list( args )
     
     found = _.map( found, function(entry) {
       return entry.match
     })
+
     return found
   }
 
@@ -1363,44 +1376,129 @@ function make_seneca( initial_options ) {
   }
 
 
-  root.startrepl = function(in_opts) {
+  function api_repl(in_opts) {
     var self = this
 
-    var repl_opts = _.extend({repl:{listen:10170}},so,in_opts)
+    var repl_opts = _.extend(so.repl,in_opts)
     
-    net.createServer(function (socket) {
-      var actout =  function() {
-        socket.write(''+arr(arguments)+'\n')
+    net.createServer( function(socket) {
+      var actout = function() {
+        var out = arguments[0] || arguments[1]
+        socket.write(util.inspect(out)+'\n')
       }
       
       var r = repl.start({
-        prompt: 'seneca '+socket.remoteAddress+':'+socket.remotePort+'> ', 
-        input: socket, output: socket, terminal: true, useGlobal: false
+        prompt:    'seneca '+root.id+'> ', 
+        input:     socket, 
+        output:    socket, 
+        terminal:  false, 
+        useGlobal: false,
+        eval:      evaluate
       })
       
       r.on('exit', function () {
-        self.removeListener('act-out',actout)
         socket.end()
       })
       
-      r.context.seneca = self.delegate()
-      
-      var orig_act = r.context.seneca.act
-      r.context.seneca.act = function() {
-        var args = arr(arguments)
-        args.repl$=true
-        orig_act.apply(self,args)
-        return r.context.seneca
+      var act_index_map = {}
+      var act_index = 1000000
+      function fmt_index(i) {
+        return (''+i).substring(1)
       }
 
-      self.on('act-out',actout)
+      var sd = root.delegate({repl$:true})
       
-    }).listen(repl_opts.repl.listen)
+      sd.on_act_in = function on_act_in( actmeta, args ) {
+        socket.write('IN  '+fmt_index(act_index)+
+                     ': '+util.inspect(sd.util.clean(args))+
+                     ' # '+
+                     args.meta$.id+' '+
+                     actmeta.pattern+' '+
+                     actmeta.id+' '+
+                     actmeta.func.name+' '+
+                     (actmeta.callpoint?actmeta.callpoint:'')+
+                     '\n')
+        act_index_map[actmeta.id] = act_index
+        act_index++
+      }
+
+      sd.on_act_out = function on_act_out( actmeta, out ) {
+        var cur_index = act_index_map[actmeta.id]
+        socket.write('OUT '+fmt_index(cur_index)+
+                     ': '+util.inspect(sd.util.clean(out))+'\n')
+      }
+
+      sd.on_act_err = function on_act_err( actmeta, err ) {
+        var cur_index = act_index_map[actmeta.id]
+        socket.write('ERR '+fmt_index(cur_index)+
+                     ': '+err.message+'\n')
+      }
+
+        /*
+      sd.act = function act() {
+
+        var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
+        var args = spec.pattern
+        var done = spec.done
+
+        socket.write('IN  '+fmt_index(act_index)+
+                     ': '+util.inspect(sd.util.clean(args))+'\n')
+        var out_index = act_index
+        act_index++
+
+
+        self.act.call(this,args,function(err,out){
+          if( err ) {
+            socket.write('ERR '+fmt_index(act_index)+': '+err.message+'\n')
+          }
+          else {
+            socket.write('OUT '+fmt_index(out_index)+
+                         ': '+util.inspect(sd.util.clean(out))+'\n')
+          }
+
+          done(err,out)
+        })
+      }
+         */
+
+      r.context.s = r.context.seneca = sd
+
+
+      function evaluate(cmd, context, filename, callback) {
+        var result
+
+        cmd = cmd.replace(/[\r\n]+$/,'')
+
+        try {
+          var args = jsonic(cmd)
+          context.s.act(args,function(err,out){
+            if( err ) return callback( err.message );
+            return callback( null, root.util.clean(out) );
+          })
+        }
+        catch( e ) {
+          try {
+            var script = vm.createScript(cmd, {
+              filename: filename,
+              displayErrors: false
+            })
+            result = script.runInContext(context, { displayErrors: false });
+
+            result = result === root ? null : result 
+            callback(null, result)
+          }
+          catch( e ) {
+            return callback( e.message )
+          }
+        }
+      }
+    
+    }).listen( repl_opts.port, repl_opts.host )
   }
 
 
   
-  /// Return self. Mostly useful as a check that this is a Seneca instance.
+  // Return self. Mostly useful as a check that this is a Seneca instance.
   function api_seneca() {
     return this
   }
@@ -1519,6 +1617,10 @@ function make_seneca( initial_options ) {
           call_cb = out.call_cb
           result[0] = out.err
 
+          if( _.isFunction(delegate.on_act_err) ) {
+            delegate.on_act_err(actmeta,result[0])
+          }
+
           if( args.fatal$ ) {
             return instance.die(out.err)
           }
@@ -1530,6 +1632,10 @@ function make_seneca( initial_options ) {
           logging.log_act_out( 
             root, {actid:actid,duration:actend-actstart}, 
             actmeta, callargs, result, prior_ctxt, act_callpoint )
+
+          if( _.isFunction(delegate.on_act_out) ) {
+            delegate.on_act_out(actmeta,result[1])
+          }
 
           private$.stats.act.done++
           actstats.done++
@@ -1591,6 +1697,9 @@ function make_seneca( initial_options ) {
             cb(err)
           }
 
+          if( _.isFunction(delegate.on_act_in) ) {
+            delegate.on_act_in(actmeta,callargs)
+          }
           actmeta.func.call(delegate,callargs,cb)
         },
       }
