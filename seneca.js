@@ -219,6 +219,7 @@ function make_seneca( initial_options ) {
   root.options    = api_options    // Get and set options.
   root.repl       = api_repl       // Open a REPL on a local port.
   root.start      = api_start      // Start an action chain.
+  root.error      = api_error      // Set global error handler.
 
 
   // Method aliases.
@@ -2106,6 +2107,13 @@ function make_seneca( initial_options ) {
     }
 
     return sd
+  }
+
+
+  
+  function api_error( errhandler ) {
+    this.options( {errhandler:errhandler} )
+    return this
   }
 
 
