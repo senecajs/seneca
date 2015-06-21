@@ -721,7 +721,8 @@ TODO: move to seneca-admin!</p>
   root.close      = api_close      <span class="hljs-comment">// Close and shutdown plugins.</span>
   root.options    = api_options    <span class="hljs-comment">// Get and set options.</span>
   root.repl       = api_repl       <span class="hljs-comment">// Open a REPL on a local port.</span>
-  root.start      = api_start      <span class="hljs-comment">// Start an action chain.</span></pre></div></div>
+  root.start      = api_start      <span class="hljs-comment">// Start an action chain.</span>
+  root.error      = api_error      <span class="hljs-comment">// Set global error handler.</span></pre></div></div>
             
         </li>
         
@@ -3303,6 +3304,13 @@ For example, data for individual web requests.</p>
     }
 
     <span class="hljs-keyword">return</span> sd
+  }
+
+
+  
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_error</span>(<span class="hljs-params"> errhandler </span>) </span>{
+    <span class="hljs-keyword">this</span>.options( {errhandler:errhandler} )
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
   }</pre></div></div>
             
         </li>

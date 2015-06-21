@@ -1,21 +1,24 @@
 echo ---seneca-basic---
-cd ../../seneca-basic
-npm test
-
-echo ---seneca-echo---
-cd ../seneca-echo
-npm test
+cd ../seneca-basic
+./test.sh link
 
 echo ---seneca-mem-store---
 cd ../seneca-mem-store
-npm test
+./test.sh link
 
 echo ---seneca-transport---
 cd ../seneca-transport
-npm test
+./test.sh link
 
 echo ---seneca-web---
 cd ../seneca-web
-npm test
+./test.sh link
+
+
+# not included, but used in tests
+echo ---seneca-echo---
+cd ../seneca-echo
+./test.sh link
+
 
 

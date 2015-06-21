@@ -2,6 +2,7 @@
 ## 0.6.2: 2015-06
 
    * REPL enhanced, now accepts literal jsonic patterns and traces action flow
+   * Option debug.callpoint adds call point source file and line number tracing to logging
    * Bug fixes for github issues: 106, 125, 87, 110, 114, 130
    * Added logging option: --seneca.log.short makes all ids 2 chars in length
    * Added debug option: --seneca.print.tree(.all) - prints pattern tree to console
