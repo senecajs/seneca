@@ -14,9 +14,9 @@ IE: 113.5
 sales-tax-plugin/app
 {"total":123}
 {role=shop,cmd=salestax,net=100}
-100
-{total=123}
 123
+{total=123}
+
 {cmd=salestax,role=shop,net=100}
-100
+123
 {total=123}

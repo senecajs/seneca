@@ -61,7 +61,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.1'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.2'</span></pre></div></div>
             
         </li>
         
@@ -721,7 +721,8 @@ TODO: move to seneca-admin!</p>
   root.close      = api_close      <span class="hljs-comment">// Close and shutdown plugins.</span>
   root.options    = api_options    <span class="hljs-comment">// Get and set options.</span>
   root.repl       = api_repl       <span class="hljs-comment">// Open a REPL on a local port.</span>
-  root.start      = api_start      <span class="hljs-comment">// Start an action chain.</span></pre></div></div>
+  root.start      = api_start      <span class="hljs-comment">// Start an action chain.</span>
+  root.error      = api_error      <span class="hljs-comment">// Set global error handler.</span></pre></div></div>
             
         </li>
         
@@ -1942,9 +1943,11 @@ part of the pattern, but rather an argument to validate when
 
     <span class="hljs-keyword">var</span> priormeta = self.find( pattern )
 
+
     <span class="hljs-keyword">if</span>( priormeta &amp;&amp; priormeta.pattern !== actmeta.pattern ) {
       priormeta = <span class="hljs-literal">null</span>
     }
+
 
     <span class="hljs-keyword">if</span>( priormeta ) {
       <span class="hljs-keyword">if</span>( _.isFunction(priormeta.handle) ) {
@@ -2623,7 +2626,9 @@ not cause inadvertent hit on existing action</p>
             <span class="hljs-literal">null</span> != resdata &amp;&amp;
             !(_.isPlainObject(resdata) ||
               _.isArray(resdata) ||
-              !!resdata.entity$) &amp;&amp;
+              !!resdata.entity$ ||
+              !!resdata.force$
+             ) &amp;&amp;
             so.strict.result)
         {</pre></div></div>
             
@@ -2642,7 +2647,9 @@ not cause inadvertent hit on existing action</p>
             
             <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">if</span>( !( <span class="hljs-string">'generate_id'</span> === callargs.cmd ||
                  <span class="hljs-literal">true</span> === callargs.note ||
-                 <span class="hljs-string">'quickcode'</span> === callargs.cmd ))
+                 <span class="hljs-string">'native'</span> === callargs.cmd ||
+                 <span class="hljs-string">'quickcode'</span> === callargs.cmd 
+               ))
           {
             err = error(
               <span class="hljs-string">'result_not_objarr'</span>, {
@@ -3115,9 +3122,24 @@ then provide cached result, if any. Return true in this case.</p>
     <span class="hljs-keyword">var</span> delegate = <span class="hljs-built_in">Object</span>.create(self)
     <span class="hljs-keyword">var</span> act = self.act
 
-    delegate.did = nid()
+    delegate.did = nid()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-102">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-102">&#182;</a>
+              </div>
+              <p>TODO: clean up data description handling</p>
 
-    self.log.debug( <span class="hljs-string">'delegate'</span>, fixedargs, delegate.did, callpoint() )
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    self.log.debug( <span class="hljs-string">'delegate'</span>, 
+                    common.descdata(_.omit(fixedargs,[<span class="hljs-string">'req$'</span>,<span class="hljs-string">'res$'</span>]),<span class="hljs-number">1</span>,<span class="hljs-literal">false</span>), 
+                    delegate.did, callpoint() )
 
     delegate.act = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">var</span> spec = parse_pattern( self, common.arrayify(<span class="hljs-built_in">arguments</span>), <span class="hljs-string">'done:f?'</span> )
@@ -3160,11 +3182,11 @@ then provide cached result, if any. Return true in this case.</p>
         </li>
         
         
-        <li id="section-102">
+        <li id="section-103">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-102">&#182;</a>
+                <a class="pilcrow" href="#section-103">&#182;</a>
               </div>
               <p>Somewhere to put contextual data for this delegate.
 For example, data for individual web requests.</p>
@@ -3303,16 +3325,23 @@ For example, data for individual web requests.</p>
     }
 
     <span class="hljs-keyword">return</span> sd
+  }
+
+
+  
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api_error</span>(<span class="hljs-params"> errhandler </span>) </span>{
+    <span class="hljs-keyword">this</span>.options( {errhandler:errhandler} )
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
   }</pre></div></div>
             
         </li>
         
         
-        <li id="section-103">
+        <li id="section-104">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-103">&#182;</a>
+                <a class="pilcrow" href="#section-104">&#182;</a>
               </div>
               <p>Create entity delegate.</p>
 
@@ -3328,26 +3357,28 @@ For example, data for individual web requests.</p>
         </li>
         
         
-        <li id="section-104">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-104">&#182;</a>
-              </div>
-              <p>Template entity that makes all others.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  private$.entity = make_entity({},sd)</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-105">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-105">&#182;</a>
+              </div>
+              <p>Template entity that makes all others.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  private$.entity = make_entity({},sd)
+
+  private$.exports.Entity = make_entity.Entity</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-106">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-106">&#182;</a>
               </div>
               <p>DEPRECATED
 for use with async</p>
@@ -3380,11 +3411,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-106">
+        <li id="section-107">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-106">&#182;</a>
+                <a class="pilcrow" href="#section-107">&#182;</a>
               </div>
               <p>Add builtin actions.</p>
 
@@ -3400,11 +3431,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-107">
+        <li id="section-108">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-107">&#182;</a>
+                <a class="pilcrow" href="#section-108">&#182;</a>
               </div>
               <p>Define builtin actions.</p>
 
@@ -3486,11 +3517,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-108">
+        <li id="section-109">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-108">&#182;</a>
+                <a class="pilcrow" href="#section-109">&#182;</a>
               </div>
               <p>Utilities</p>
 
@@ -3517,11 +3548,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-109">
+        <li id="section-110">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-109">&#182;</a>
+                <a class="pilcrow" href="#section-110">&#182;</a>
               </div>
               <p>undead is only for testing, do not use in production</p>
 
@@ -3580,11 +3611,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-110">
+        <li id="section-111">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-110">&#182;</a>
+                <a class="pilcrow" href="#section-111">&#182;</a>
               </div>
               <p>terminate process, err (if defined) is from seneca.close</p>
 
@@ -3607,11 +3638,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-111">
+        <li id="section-112">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-111">&#182;</a>
+                <a class="pilcrow" href="#section-112">&#182;</a>
               </div>
               <p>make sure we close down within options.deathdelay seconds</p>
 
@@ -3676,11 +3707,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-112">
+        <li id="section-113">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-112">&#182;</a>
+                <a class="pilcrow" href="#section-113">&#182;</a>
               </div>
               <p>handle previous patterns that match this pattern</p>
 
@@ -3709,11 +3740,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-113">
+        <li id="section-114">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-113">&#182;</a>
+                <a class="pilcrow" href="#section-114">&#182;</a>
               </div>
               <p>Primary export function, creates a new Seneca instance.</p>
 
@@ -3724,11 +3755,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-114">
+        <li id="section-115">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-114">&#182;</a>
+                <a class="pilcrow" href="#section-115">&#182;</a>
               </div>
               <p>Create instance.</p>
 
@@ -3740,11 +3771,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-115">
+        <li id="section-116">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-115">&#182;</a>
+                <a class="pilcrow" href="#section-116">&#182;</a>
               </div>
               <p>Register default plugins, unless turned off by options.</p>
 
@@ -3758,11 +3789,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-116">
+        <li id="section-117">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-116">&#182;</a>
+                <a class="pilcrow" href="#section-117">&#182;</a>
               </div>
               <p>Register plugins specified in options.</p>
 
@@ -3778,11 +3809,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-117">
+        <li id="section-118">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-117">&#182;</a>
+                <a class="pilcrow" href="#section-118">&#182;</a>
               </div>
               <p>To reference builtin loggers when defining logging options.</p>
 
@@ -3793,11 +3824,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-118">
+        <li id="section-119">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-118">&#182;</a>
+                <a class="pilcrow" href="#section-119">&#182;</a>
               </div>
               <p>Makes require(‘seneca’).use( … ) work by creating an on-the-fly instance.</p>
 
@@ -3811,11 +3842,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-119">
+        <li id="section-120">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-119">&#182;</a>
+                <a class="pilcrow" href="#section-120">&#182;</a>
               </div>
               <p>Mostly for testing.</p>
 
@@ -3828,11 +3859,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-120">
+        <li id="section-121">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-120">&#182;</a>
+                <a class="pilcrow" href="#section-121">&#182;</a>
               </div>
               <h3 id="declarations">Declarations</h3>
 
@@ -3841,11 +3872,11 @@ for use with async</p>
         </li>
         
         
-        <li id="section-121">
+        <li id="section-122">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-121">&#182;</a>
+                <a class="pilcrow" href="#section-122">&#182;</a>
               </div>
               <p>Seneca is an EventEmitter.</p>
 
@@ -3860,11 +3891,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-122">
+        <li id="section-123">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-122">&#182;</a>
+                <a class="pilcrow" href="#section-123">&#182;</a>
               </div>
               <p>Private member variables of Seneca object.</p>
 
@@ -3888,11 +3919,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-123">
+        <li id="section-124">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-123">&#182;</a>
+                <a class="pilcrow" href="#section-124">&#182;</a>
               </div>
               <p>Make parambulators.</p>
 
@@ -3928,11 +3959,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-124">
+        <li id="section-125">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-124">&#182;</a>
+                <a class="pilcrow" href="#section-125">&#182;</a>
               </div>
               <p>Minor utils</p>
 
@@ -3945,11 +3976,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-125">
+        <li id="section-126">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-125">&#182;</a>
+                <a class="pilcrow" href="#section-126">&#182;</a>
               </div>
               <p>Callpoint resolver. Indicates location in calling code.</p>
 
@@ -3969,11 +4000,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-126">
+        <li id="section-127">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-126">&#182;</a>
+                <a class="pilcrow" href="#section-127">&#182;</a>
               </div>
               <p>For backwards compatibility</p>
 
@@ -4017,11 +4048,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-127">
+        <li id="section-128">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-127">&#182;</a>
+                <a class="pilcrow" href="#section-128">&#182;</a>
               </div>
               <p>Error code messages.</p>
 
@@ -4108,11 +4139,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-128">
+        <li id="section-129">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-128">&#182;</a>
+                <a class="pilcrow" href="#section-129">&#182;</a>
               </div>
               <p>Intentional console output uses this function. Helps to find spurious debugging.</p>
 
@@ -4125,11 +4156,11 @@ util.inherits(Seneca, events.EventEmitter)</pre></div></div>
         </li>
         
         
-        <li id="section-129">
+        <li id="section-130">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-129">&#182;</a>
+                <a class="pilcrow" href="#section-130">&#182;</a>
               </div>
               <p>Intentional console errors use this function. Helps to find spurious debugging.</p>
 
