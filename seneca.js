@@ -1026,9 +1026,11 @@ function make_seneca( initial_options ) {
 
     var priormeta = self.find( pattern )
 
+
     if( priormeta && priormeta.pattern !== actmeta.pattern ) {
       priormeta = null
     }
+
 
     if( priormeta ) {
       if( _.isFunction(priormeta.handle) ) {
@@ -1933,7 +1935,10 @@ function make_seneca( initial_options ) {
 
     delegate.did = nid()
 
-    self.log.debug( 'delegate', fixedargs, delegate.did, callpoint() )
+    // TODO: clean up data description handling
+    self.log.debug( 'delegate', 
+                    common.descdata(_.omit(fixedargs,['req$','res$']),1,false), 
+                    delegate.did, callpoint() )
 
     delegate.act = function() {
       var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )

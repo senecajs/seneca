@@ -32,7 +32,8 @@
     "Maciej Małecki (http://mmalecki.com)",
     "Jake Pruitt",
     "Marian Radulescu",
-    "Alexandru Mircea"
+    "Alexandru Mircea",
+    "Adrian Rossouw"
   ],
   "dependencies": {
     "archy": "1.0.0",
@@ -52,7 +53,7 @@
     "seneca-basic": "0.3.0",
     "seneca-mem-store": "0.3.1",
     "seneca-transport": "0.7.1",
-    "seneca-web": "0.4.1",
+    "seneca-web": "0.4.2",
     "use-plugin": "0.3.1",
     "zig": "0.1.1"
   },
