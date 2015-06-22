@@ -1558,14 +1558,18 @@ function make_seneca( initial_options ) {
             null != resdata &&
             !(_.isPlainObject(resdata) ||
               _.isArray(resdata) ||
-              !!resdata.entity$) &&
+              !!resdata.entity$ ||
+              !!resdata.force$
+             ) &&
             so.strict.result)
         {
 
           // allow legacy patterns
           if( !( 'generate_id' === callargs.cmd ||
                  true === callargs.note ||
-                 'quickcode' === callargs.cmd ))
+                 'native' === callargs.cmd ||
+                 'quickcode' === callargs.cmd 
+               ))
           {
             err = error(
               'result_not_objarr', {
