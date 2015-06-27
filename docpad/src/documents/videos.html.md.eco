@@ -1,0 +1,77 @@
+---
+layout: main
+title: Seneca Videos and Talks
+---
+<section id="main-content">
+
+  <h2><%= @document.title %></h2>
+
+  <br>
+
+
+  <h3><a href="http://new.livestream.com/websummit/DeveloperStage2013/videos/33539894">
+      Falling in Love with Technical Debt</a></h3>
+
+  <h5>Web Summit 2013, Dublin, Ireland.</h5>
+  <p>The only way developers can finish projects on-time and under-budget is by taking on Technical Debt. Taking shortcuts, using quick fixes, and writing unmaintainable code builds up a technical debt that get the project delivered today. Tomorrow, there will be a reckoning, as development costs spiral and progress grinds to a halt. This talk helps you embrace the debt, love the cowboys, and gives you a way to make repayments.
+    <br><a href="http://www.slideshare.net/rjrodger/richard-rodger-technical-debt-web-summit-2013">Slide Deck</a>
+  </p>
+  <br>
+
+
+
+  <h3><a href="http://www.slideshare.net/rjrodger/the-seneca-pattern-at-engineyard-distill-2013-conference">
+      How to Write Big Apps (Updated)</a></h5>
+
+  <h5>Distill 2013, San Francisco, EngineYard's developer conference.</h5>
+  <p>
+    The Seneca pattern is a way to break your application into pieces so that you can put it back together again in many different ways. You don't have to worry about architecture, database choice, network design, scaling or even which objects to define - you can defer them all! Instead you focus on the "stuff that needs to happen" right from that start. A concrete, production implementation exists in Node.js, and you can also write components in other languages.
+    <br><a href="http://www.slideshare.net/rjrodger/the-seneca-pattern-at-engineyard-distill-2013-conference">Slide Deck</a>
+  </p>
+  <br>
+
+
+
+
+  <h3><a href="http://vimeo.com/56445867">How to Write Big Apps</a></h3>
+    <h5>NodeDublin 2012, Dublin, Ireland</h5>
+    <p>
+      Introducing Seneca, a new application-building framework for
+      large Node.js apps that have to organize complex business
+      logic.
+      <br><a href="http://www.slideshare.net/rjrodger/how-to-write-big-apps-richard-rodger-nodedublin-2012">Slide Deck</a>
+    </p>
+  <br>
+
+
+
+
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  
+
+</section>
+

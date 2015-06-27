@@ -1,0 +1,46 @@
+---
+layout: main
+title: Download and Install 
+---
+<section id="main-content">
+
+  <h3><%= @document.title %></h3>
+
+  <h4>Current Version: 0.6.1</h4>
+
+  <p>
+    Seneca is distributed as an <a href="http://npmjs.org/package/seneca">npm module</a>.
+    To download and install, open a terminal or command line prompt and go to your project folder.
+    Run the command:
+  </p>
+
+{% highlight bash %}
+$ npm install seneca
+{% endhighlight %}
+
+  <p>
+    In your code, you can import the Seneca module, and create a new object instance, with this code:
+  </p>
+
+{% highlight js %}
+var seneca = require('seneca')()
+{% endhighlight %}
+
+  <p>
+    Read the <a href="getting-started.html">Getting Started Guide</a> to start using Seneca in your app.
+  </p>
+
+  <p>
+    You can also clone Seneca directly from GitHub:
+    <a href="http://github.com/rjrodger/seneca">http://github.com/rjrodger/seneca</a>. 
+    Do this if you need to use a development branch.
+  </p>
+
+
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+</section>
+

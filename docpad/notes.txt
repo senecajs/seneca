@@ -1,0 +1,26 @@
+
+
+
+
+$ npm install docpad
+
+$ mkdir docpad; cd docpad
+$ ../node_modules/.bin/docpad run
+
+choose skeleton
+
+$ ../node_modules/.bin/docpad install marked
+$ ../node_modules/.bin/docpad install eco
+../node_modules/.bin/docpad install livereload
+
+edit src/documents/index.html.md
+
+$ ../node_modules/.bin/docpad generate
+$ ../node_modules/.bin/docpad deploy-ghpages --env static
+
+manually copy to gh-pages and commit
+ghpages plugin obliterates gh-pages commit history
+also uploads entire site each time
+
+
+

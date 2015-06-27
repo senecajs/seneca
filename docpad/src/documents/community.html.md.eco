@@ -1,0 +1,54 @@
+---
+layout: main
+title: Seneca Community
+---
+<section id="main-content">
+
+  <h3><%= @document.title %></h3>
+
+  <ul class="benefits">
+
+    <li>
+      <a href="http://twitter.com/senecajs">
+        <h5>@senecajs</h5>
+        <p>The Seneca Twitter account.</p>
+      </a>
+    </li>
+
+    <li>
+      <a href="https://groups.google.com/forum/#!forum/seneca-micro-services">
+        <h5>Google Group</h5>
+        <p>The mailing list for general discussion.</p>
+      </a>
+    </li>
+
+  </ul>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  
+
+</section>
+

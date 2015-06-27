@@ -1,0 +1,64 @@
+---
+layout: main
+title: Seneca Examples
+---
+<section id="main-content">
+
+  <h3><%= @document.title %></h3>
+
+  <ul class="benefits">
+
+    <li>
+      <a href="https://github.com/nearform/well">
+        <h5>Well! App</h5>
+        <!--<p></p>-->
+      </a>
+    </li>
+
+    <li>
+      <a href="https://github.com/rjrodger/seneca-examples/tree/master/data-entities">
+        <h5>Data Entities</h5>
+        <!--<p></p>-->
+      </a>
+    </li>
+
+    <li>
+      <a href="https://github.com/rjrodger/seneca-examples/tree/master/user-accounts">
+        <h5>User Accounts</h5>
+        <!--<p></p>-->
+      </a>
+    </li>
+
+    <li>
+      <a href="https://github.com/rjrodger/seneca-examples/tree/master/shopping-cart">
+        <h5>Shopping Cart</h5>
+        <!--<p></p>-->
+      </a>
+    </li>
+
+    <li>
+      <a href="https://github.com/rjrodger/seneca-examples/tree/master/plugin-web">
+        <h5>Plugins with Web Content</h5>
+        <!--<p></p>-->
+      </a>
+    </li>
+
+  </ul>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+  <br><br><br><br>
+
+</section>
+
