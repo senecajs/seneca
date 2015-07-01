@@ -2,39 +2,64 @@
 layout: main
 title: Download and Install 
 ---
-<section id="main-content">
 
-  <h3><%= @document.title %></h3>
+# <%= @document.title %>
 
-  <h4>Current Version: 0.6.1</h4>
+## Current Version: [0.6.2](https://github.com/rjrodger/seneca/tree/073e5d6b51f817a6287e4a16167c30ce3a8bf2eb)
 
-  <p>
-    Seneca is distributed as an <a href="http://npmjs.org/package/seneca">npm module</a>.
-    To download and install, open a terminal or command line prompt and go to your project folder.
-    Run the command:
-  </p>
+Seneca is distributed as an [npm
+module](http://npmjs.org/package/seneca).  To download and install,
+open a terminal or command line prompt and go to your project folder.
+Run the command:
 
-{% highlight bash %}
+
+``` bash
 $ npm install seneca
-{% endhighlight %}
+```
 
-  <p>
-    In your code, you can import the Seneca module, and create a new object instance, with this code:
-  </p>
+If you have set up a
+[package.json](https://docs.npmjs.com/files/package.json) file, then
+run this command to add Seneca to your dependencies:
 
-{% highlight js %}
-var seneca = require('seneca')()
-{% endhighlight %}
+``` bash
+$ npm install seneca --save
+```
 
-  <p>
-    Read the <a href="getting-started.html">Getting Started Guide</a> to start using Seneca in your app.
-  </p>
 
-  <p>
-    You can also clone Seneca directly from GitHub:
-    <a href="http://github.com/rjrodger/seneca">http://github.com/rjrodger/seneca</a>. 
-    Do this if you need to use a development branch.
-  </p>
+In your code, you can import the Seneca module, and create a new
+object instance, with this line of code:
+
+``` js
+>var seneca = require('seneca')()
+```
+
+Note that `require('seneca')` provides a function that _creates_ a
+Seneca instance. This is the same as the way you [create a new Express
+instance](http://expressjs.com/starter/hello-world.html).
+
+If you're using Seneca to create
+[microservices](http://martinfowler.com/articles/microservices.html),
+your service start-up code will often look like this:
+
+<div class="src-anno">
+&larr; load Seneca module, and create instance<br>
+&larr; register a service definition as a [Seneca plugin](http://senecajs.org/write-a-plugin.html)<br>
+&larr; listen for service clients on port 8001<br>
+</div>
+
+
+```js
+require('seneca')()
+  .use('my-service')
+  .listen(8001)
+```
+
+Read the [Getting Started Guide](/getting-started.html) to start using
+Seneca in your app.
+
+You can also clone Seneca directly from GitHub:
+[github.com/rjrodger/seneca](https://github.com/rjrodger/seneca).  Do
+this if you need to use a development branch.
 
 
 <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
@@ -42,5 +67,5 @@ var seneca = require('seneca')()
 <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
 <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
 
-</section>
+
 

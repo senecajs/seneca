@@ -1,12 +1,10 @@
 ---
 layout: main
+title: Build it Now, Scale it Later!
 ---
-<%="foo"%> barx
 <section id="main-content">
 
-  <h3>
-    Build it Now, Scale it Later!
-  </h3>
+  <h3><%= @document.title %></h3>
 
   <p>
     This toolkit lets you write clean code that you can scale without needing to refactor.
@@ -31,8 +29,8 @@ layout: main
 &larr; listen for messages (HTTP is the default)
 </div>
 
-<pre><code class="lang-js">
-require('seneca')()
+<div class="highlight"><pre><code class="lang-js"
+>require('seneca')()
   .add(
         { generate:'id'},
         function( message, done ) {
@@ -80,8 +78,8 @@ require('seneca')()
 <br>
 &larr; export a function for nid-style identifiers<br>
 </div>
-{% highlight js %}
-var nid = require('nid')
+<div class="highlight"><pre><code class="lang-js"
+>var nid = require('nid')
 
 exports.random = function( args, done ) {
   var len = args.len || 8
@@ -92,7 +90,7 @@ exports.random = function( args, done ) {
 exports.nid = function( args, done ) {
   done( null, {id: nid( args.len || 8 )} )
 }
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     Let's update the identifier service. The service receives JSON objects as
@@ -107,26 +105,26 @@ exports.nid = function( args, done ) {
 &larr; add the patterns to match,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and the actions to execute
 </div>
-{% highlight js %}
-var id = require('./id-module');
+<div class="highlight"><pre><code class="lang-js"
+>var id = require('./id-module');
 
 require('seneca')()
   .add( { generate:'id'}, id.random )
   .add( { generate:'id', type:'nid'}, id.nid )
   .listen()
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     You can also call the service directly over HTTP. The default port is 10101. Here's an example:
   </p>
 
-{% highlight bash %}
-$ curl -d '{"generate":"id"}' http://localhost:10101/act
+<div class="highlight"><pre><code class="lang-bash"
+>$ curl -d '{"generate":"id"}' http://localhost:10101/act
 {"id":"28375388"}
 
 $ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
 {"id":"8vo0n02o"}
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     The service is exposed via HTTP by default. You can also use other

@@ -48,10 +48,10 @@ acts on the provided pattern, running a command if it matches. Try the code:
 
 </p>
 
-{% highlight bash %}
-$ node example.js
+<div class="highlight"><pre><code class="lang-bash"
+>$ node example.js
 { answer: 3 }
-{% endhighlight %}
+</code></pre></div>
   
 
 <p>
@@ -64,8 +64,8 @@ then used by your plugin to do some real work.
 Let's add another command:
 </p>
 
-{% highlight js %}
-seneca.add( {role:'math', cmd:'product'}, function(args,callback) {
+<div class="highlight"><pre><code class="lang-js"
+>seneca.add( {role:'math', cmd:'product'}, function(args,callback) {
   var product = args.left * args.right
   callback(null,{answer:product})
 })
@@ -75,13 +75,13 @@ seneca.act( {role:'math', cmd:'product', left:3, right:4},
               if( err ) return console.error( err )
               console.log(result)
             })
-{% endhighlight %}
+</code></pre></div>
 
-{% highlight bash %}
-$ node example.js
+<div class="highlight"><pre><code class="lang-bash"
+>$ node example.js
 { answer: 3 }
 { answer: 12 }
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You can add new commands whenever you like, wherever you like. 
@@ -90,13 +90,13 @@ You can add new commands whenever you like, wherever you like.
 
 <p>This named argument style is fun, but if you want a real API, you can have that too:</p>
 
-{% highlight js %}
-function print(err,result) {console.log(result)}
+<div class="highlight"><pre><code class="lang-js"
+>function print(err,result) {console.log(result)}
 
 var math = seneca.pin({role:'math',cmd:'*'})
 math.sum( {left:1,right:2}, print )
 math.product( {left:1,right:2}, print )
-{% endhighlight %}
+</code></pre></div>
 
 
 <p>
@@ -131,8 +131,8 @@ command needs to live on a separate server. You can move it there with
 <i>no changes to your calling code</i>. First, set up the server:
 </p>
 
-{% highlight js %}
-seneca.add({role:'math', cmd:'product'}, function(args,callback) {
+<div class="highlight"><pre><code class="lang-js"
+>seneca.add({role:'math', cmd:'product'}, function(args,callback) {
   var product = args.left * args.right
   callback(null,{answer:product})
 })
@@ -144,7 +144,7 @@ var app = connect()
   .use( connect.json() )
   .use( seneca.service() )
   .listen(10171)
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>seneca.use</code> method loads in a plugin. In this case,
@@ -159,8 +159,8 @@ returning a middleware function from the
 
 <p>On the client side, just <i>transport</i> the remote patterns:</p>
 
-{% highlight js %}
-seneca.use('transport',{
+<div class="highlight"><pre><code class="lang-js"
+>seneca.use('transport',{
   pins:[ {role:'math',cmd:'product'} ]
 })
 
@@ -170,7 +170,7 @@ seneca.act( {role:'math', cmd:'product', left:3, right:4},
               console.log(result)
             })
 
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>pins</code> option to the <i>transport</i> plugin accepts a
@@ -198,8 +198,8 @@ an <a href="http://en.wikipedia.org/wiki/Active_record_pattern">Active
 Record</a> style - it's nice and easy. 
 </p>
 
-{% highlight js %}
-var product = seneca.make('product')
+<div class="highlight"><pre><code class="lang-js"
+>var product = seneca.make('product')
 product.name = 'apple'
 product.price = 100
 
@@ -213,7 +213,7 @@ product.save$(function( err, product ) {
     console.log( 'loaded: '+product )
   })
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>make</code> method creates an "Active Record"-ish object for
@@ -228,8 +228,8 @@ You get an in-memory data store automatically, so the above code works
 out of the box without any database configuration. Here's how you would use MongoDB:
 </p>
 
-{% highlight js %}
-seneca.use( 'mongo-store', 
+<div class="highlight"><pre><code class="lang-js"
+>seneca.use( 'mongo-store', 
             {name:'mydata',host:'127.0.0.1',port:27017} )
 
 seneca.ready( function(err,seneca){
@@ -249,7 +249,7 @@ seneca.ready( function(err,seneca){
     })
   })
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>seneca.use</code> method tells <i>Seneca</i> to load a
@@ -261,9 +261,9 @@ the MongoDB database.
 <p>
 To use the <i>mongo-store</i> plugin, you'll need to install it:
 
-{% highlight bash %}
-npm install seneca-mongo-store
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-bash"
+>npm install seneca-mongo-store
+</code></pre></div>
 </p>
 
 <p>
@@ -276,8 +276,8 @@ code is <i>exactly the same</i>. Swapping databases at any stage of your project
 How is the database layer implemented? It's just another set of commands. Here's the same code again:
 </p>
 
-{% highlight js %}
-var product = seneca.make('product')
+<div class="highlight"><pre><code class="lang-js"
+>var product = seneca.make('product')
 product.name = 'apple'
 product.price = 100
 
@@ -296,7 +296,7 @@ seneca.act(
         console.log( 'loaded: '+product )
       })
   })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You can add support for your favorite database by writing a plugin with commands for

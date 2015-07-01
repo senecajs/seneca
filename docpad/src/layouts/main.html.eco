@@ -20,6 +20,7 @@
   </head>
 
   <body>
+
     <header>
       <div class="inner">
         <a href="http://senecajs.org">
@@ -34,9 +35,11 @@
 
     <div id="content-wrapper">
       <div class="inner clearfix">
+        <section id="main-content">
 
 <%- @content %>
 
+        <section>
       <aside id="sidebar">
 
         <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">

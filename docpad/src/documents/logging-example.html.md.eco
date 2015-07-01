@@ -27,13 +27,13 @@ Here's some code to calculate sales tax. It won't work, because you
 haven't actually told Seneca how to do that yet.
 </p>
 
-{% highlight js %}
-var seneca = require('seneca')()
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('seneca')()
 
 seneca.act( {cmd:'salestax', net:100}, function(err,result){
   console.log( result.total )
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 
@@ -51,15 +51,15 @@ this file using Node.js, and you'll see the following output:
 
 </p>
 
-{% highlight bash %}
-$ node sales-tax-error.js
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-error.js
 [-isodate-]	INFO	init	start
 [-isodate-]	INFO	init	end
 [-isodate-]	ERROR	fail	seneca/act_not_found	
   Seneca: act(args,cb): 
     action not found for args = {"cmd":"salestax","net":100}	
 { [Error: ...] }
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 Seneca outputs some logging information so you can track what's going
@@ -75,24 +75,24 @@ The <i>ERROR</i> entry tells you what went wrong: no action pattern matched the 
 You can fix this by defining an action:
 </p>
 
-{% highlight js %}
-seneca.add( {cmd:'salestax'}, function(args,callback){
+<div class="highlight"><pre><code class="lang-js"
+>seneca.add( {cmd:'salestax'}, function(args,callback){
   var rate  = 0.23
   var total = args.net * (1+rate)
   callback(null,{total:total})
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The file <i>sales-tax.js</i> in the examples folder contains the new code. Run it:
 </p>
 
-{% highlight bash %}
-$ node sales-tax.js
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax.js
 [-isodate-]	INFO	init	start
 [-isodate-]	INFO	init	end
 123
-{% endhighlight %}
+</code></pre></div>
 
 
 
@@ -100,10 +100,10 @@ $ node sales-tax.js
 
 <p>You might find that logging output annoying. Turn it off with:</p>
 
-{% highlight bash %}
-$ node sales-tax.js --seneca.log.quiet
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax.js --seneca.log.quiet
 123
-{% endhighlight %}
+</code></pre></div>
 
 
 
@@ -111,8 +111,8 @@ $ node sales-tax.js --seneca.log.quiet
 
 
 
-{% highlight bash %}
-node sales-tax.js --seneca.log.print
+<div class="highlight"><pre><code class="lang-bash"
+>node sales-tax.js --seneca.log.print
 [-isodate-]	INFO	init	start
 ... lots of init stuff ...
 [-isodate-]	INFO	init	end
@@ -120,7 +120,7 @@ node sales-tax.js --seneca.log.print
 [-isodate-]	DEBUG	act	in	90xkee	{cmd=salestax,net=100}
 [-isodate-]	DEBUG	act	out	90xkee	{total=123}
 123
-{% endhighlight %}
+</code></pre></div>
 
 
 <p>
@@ -136,12 +136,12 @@ Let do that now:
 
 
 
-{% highlight bash %}
-node sales-tax.js --seneca.log=type:act
+<div class="highlight"><pre><code class="lang-bash"
+>node sales-tax.js --seneca.log=type:act
 [-isodate-]	DEBUG	act	in	actid0	{cmd=salestax,net=100}
 [-isodate-]	DEBUG	act	out	actid0	{total=123}
 123
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 
@@ -170,15 +170,15 @@ country which applies that rate (using two letter country codes).
 Here's the client code, in the file <i>sales-tax-log.js</i>:
 </p>
 
-{% highlight js %}
-var seneca = require('seneca')()
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('seneca')()
 seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
 seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
 
 seneca.act( {cmd:'salestax', country:'IE', net:100})
 seneca.act( {cmd:'salestax', country:'UK', net:200})
 seneca.act( {cmd:'salestax', country:'UK', net:300})
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 Since you're using log files to trace the commands, you can drop the
@@ -189,8 +189,8 @@ callback function from the <i>act</i> method call.
 Now you need a plugin - that's in the <i>sales-tax-plugin.js</i> file:
 </p>
 
-{% highlight js %}
-module.exports = function( seneca, options, callback ) {
+<div class="highlight"><pre><code class="lang-js"
+>module.exports = function( seneca, options, callback ) {
 
   var salestax = {
     hits:0,
@@ -215,7 +215,7 @@ module.exports = function( seneca, options, callback ) {
 
   callback(null,{name:'sales-tax',tag:salestax.country})
 }
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The plugin creates a separate instance of the <i>salestax</i> object
@@ -230,8 +230,8 @@ a Seneca instance, a set of options, and a callback. Using the Seneca instance, 
 finally call the callback, optionally providing some meta data:
 </p>
 
-{% highlight js %}
-module.exports = function( seneca, options, callback ) {
+<div class="highlight"><pre><code class="lang-js"
+>module.exports = function( seneca, options, callback ) {
 
   seneca.add( { ... }, function(args,callback) {
     ...
@@ -239,7 +239,7 @@ module.exports = function( seneca, options, callback ) {
 
   callback(null,{name:'plugin-name'})
 }
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 This initialization function is called each time you load a plugin
@@ -248,26 +248,26 @@ optionally providing a tag string in the meta data:
 </p>
 
 
-{% highlight js %}
-  ...
+<div class="highlight"><pre><code class="lang-js"
+>  ...
   callback(null,{name:'plugin-name',tag:'tag-string'})
   ...
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The sales tax plugin uses the country code as a tag:
 </p>
 
-{% highlight js %}
-  callback(null,{name:'sales-tax',tag:salestax.country})
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-js"
+>  callback(null,{name:'sales-tax',tag:salestax.country})
+</code></pre></div>
 
 <p>
 Run this code, and filter the log to show only debug output from the sales-tax plugin:
 </p>
 
-{% highlight bash %}
-$ node sales-tax-log.js --seneca.log=plugin:sales-tax
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-log.js --seneca.log=plugin:sales-tax
 
 [-isodate-]	DEBUG	plugin	sales-tax	IE	annv4h	
   net:	100	total:	123	tax:	{hits=1,rate=0.23,country=IE}
@@ -277,15 +277,15 @@ $ node sales-tax-log.js --seneca.log=plugin:sales-tax
 
 [-isodate-]	DEBUG	plugin	sales-tax	UK	cwxcts	
   net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
-{% endhighlight %}
+</code></pre></div>
 
 
 <p>
 These logs appear because the plugin calls <i>seneca.log.debug</i> and provides the information about the sales tax calculation:
 </p>
 
-{% highlight js %}
-  seneca.add( {cmd:'salestax',country:salestax.country}, function(args,callback){
+<div class="highlight"><pre><code class="lang-js"
+>  seneca.add( {cmd:'salestax',country:salestax.country}, function(args,callback){
     var total = salestax.calc(args.net)
     salestax.hits++
 
@@ -296,7 +296,7 @@ These logs appear because the plugin calls <i>seneca.log.debug</i> and provides 
 
     callback(null,{total:total})
   })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The object <i>seneca.log</i> has convenience functions for the built-in log levels:
@@ -321,15 +321,15 @@ entry type. This allows you to see the data passing into and out of
 actions:
 </p>
 
-{% highlight bash %}
-$ node sales-tax-log.js --seneca.log=type:act
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-log.js --seneca.log=type:act
 [-isodate-]	DEBUG	act	in	uk74hd	{cmd=salestax,country=IE,net=100}
 [-isodate-]	DEBUG	act	out	uk74hd	{total=123}
 [-isodate-]	DEBUG	act	in	qv5sts	{cmd=salestax,country=UK,net=200}
 [-isodate-]	DEBUG	act	out	qv5sts	{total=240}
 [-isodate-]	DEBUG	act	in	7j9q4a	{cmd=salestax,country=UK,net=300}
 [-isodate-]	DEBUG	act	out	7j9q4a	{total=360}
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You can see two entries for each action, <i>in</i>
@@ -342,8 +342,8 @@ Let's put this all together. You want to see the input and output
 data of the actions, and anything the sale tax plugin decides to log:
 </p>
 
-{% highlight bash %}
-$ node sales-tax-log.js --seneca.log=plugin:sales-tax --seneca.log=type:act
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-log.js --seneca.log=plugin:sales-tax --seneca.log=type:act
 
 [-isodate-]	DEBUG	act	in	cpvycd	{cmd=salestax,country=IE,net=100}
 [-isodate-]	DEBUG	plugin	sales-tax	IE	cpvycd	
@@ -359,7 +359,7 @@ $ node sales-tax-log.js --seneca.log=plugin:sales-tax --seneca.log=type:act
 [-isodate-]	DEBUG	plugin	sales-tax	UK	8ikumj	
   net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
 [-isodate-]	DEBUG	act	out	8ikumj	{total=360}
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 This shows the detailed processing of the sales tax calculation. The
@@ -373,13 +373,13 @@ other.
 The <i>tag</i> filter can be used to focus on a specific, tagged, plugin instance. Here's how you look at UK sales tax operations only:
 </p>
 
-{% highlight bash %}
-$ node sales-tax-log.js --seneca.log=plugin:sales-tax,tag:UK
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-log.js --seneca.log=plugin:sales-tax,tag:UK
 [-isodate-]	DEBUG	plugin	sales-tax	UK	i2r7wn	
   net:	200	total:	240	tax:	{hits=1,rate=0.2,country=UK}
 [-isodate-]	DEBUG	plugin	sales-tax	UK	8ir490	
   net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
-{% endhighlight %}
+</code></pre></div>
 
 
 
@@ -398,8 +398,8 @@ over HTTP and submits them to the local Seneca instance.
 
 <p>Here the code, in <i>sales-tax-app.js</i>, that sets up the app:</p>
 
-{% highlight js %}
-var http = require('http')
+<div class="highlight"><pre><code class="lang-js"
+>var http = require('http')
 
 var seneca = require('seneca')()
 seneca.use( 'sales-tax-plugin', {country:'IE',rate:0.23} )
@@ -411,16 +411,16 @@ var server = http.createServer(seneca.service())
 server.listen(3000)
 
 seneca.use('admin',{server:server,local:true})
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <i>transport</i> plugin works locally without any configuration,
 so all you have to do is load it in:
 </p>
 
-{% highlight js %}
-seneca.use('transport')
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-js"
+>seneca.use('transport')
+</code></pre></div>
 
 <p>
 The next step is to set up a simple HTTP server, using the standard
@@ -433,10 +433,10 @@ or <a href="http://expressjs.com">express</a> middleware, or directly
 with the standard HTTP API:
 </p>
 
-{% highlight js %}
-var server = http.createServer(seneca.service())
+<div class="highlight"><pre><code class="lang-js"
+>var server = http.createServer(seneca.service())
 server.listen(3000)
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <i>admin</i> plugin provides a web administration interface for
@@ -446,18 +446,18 @@ admininstration web interface locally without requiring a password,
 use the <i>local:true</i> option:
 </p>
 
-{% highlight js %}
-seneca.use('admin',{server:server,local:true})
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-js"
+>seneca.use('admin',{server:server,local:true})
+</code></pre></div>
 
 <p>
 Run this app, and open <a href="localhost:3000/admin">localhost:3000/admin</a>. You can
 still use command line logging - you can have multiple separate logging channels.
 </p>
 
-{% highlight bash %}
-$ node sales-tax-app.js --seneca.log=plugin:sales-tax
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-app.js --seneca.log=plugin:sales-tax
+</code></pre></div>
 
 
 <p>
@@ -472,8 +472,8 @@ code. The <i>transport</i> plugin is used again on the client-side to
 direct sales tax operations to the app:
 </p>
 
-{% highlight js %}
-var seneca = require('server')()
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('server')()
 
 seneca.use('transport',{
   remoteurl:'http://localhost:3000/transport',
@@ -483,7 +483,7 @@ seneca.use('transport',{
 seneca.act( {cmd:'salestax', country:'IE', net:100})
 seneca.act( {cmd:'salestax', country:'UK', net:200})
 seneca.act( {cmd:'salestax', country:'UK', net:300})
-{% endhighlight %}
+</code></pre></div>
 
 
 <p>
@@ -509,15 +509,15 @@ refactoring your code.
 With the app up and running, run the client:
 </p>
 
-{% highlight bash %}
-$ node sales-tax-log.js --seneca.log=plugin:sales-tax
+<div class="highlight"><pre><code class="lang-bash"
+>$ node sales-tax-log.js --seneca.log=plugin:sales-tax
 [-isodate-]	DEBUG	plugin	sales-tax	IE	dy6c6k	
   net:	100	total:	123	tax:	{hits=1,rate=0.23,country=IE}
 [-isodate-]	DEBUG	plugin	sales-tax	UK	qbfzrw	
   net:	200	total:	240	tax:	{hits=1,rate=0.2,country=UK}
 [-isodate-]	DEBUG	plugin	sales-tax	UK	wy5uah	
  net:	300	total:	360	tax:	{hits=2,rate=0.2,country=UK}
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You'll see corresponding log entries in the web interface, along with
@@ -532,8 +532,8 @@ You can define your own log handlers programmatically when you setup Seneca. The
 <i>sales-tax-log-handler.js</i> shows you how to do this:
 </p>
 
-{% highlight js %}
-var seneca = require('seneca')
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('seneca')
 
 // need this to get a reference to seneca.loghandler
 seneca = seneca({
@@ -551,7 +551,7 @@ seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
 seneca.act( {cmd:'salestax', country:'IE', net:100})
 seneca.act( {cmd:'salestax', country:'UK', net:200})
 seneca.act( {cmd:'salestax', country:'UK', net:300})
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 Running this script will output log entries both to the console (only where plugin is "sales-tax" ), and
@@ -582,8 +582,8 @@ stores your logs and makes them searchable. I wrote their Node.js API module :) 
 This example is in the file <i>sales-tax-logentries.js</i>: 
 </p>
 
-{% highlight js %}
-var logentries = require('node-logentries')
+<div class="highlight"><pre><code class="lang-js"
+>var logentries = require('node-logentries')
 
 var log = logentries.logger({
   token:'YOUR_TOKEN',
@@ -608,7 +608,7 @@ seneca.use( 'sales-tax-plugin', {country:'UK',rate:0.20} )
 seneca.act( {cmd:'salestax', country:'IE', net:100})
 seneca.act( {cmd:'salestax', country:'UK', net:200})
 seneca.act( {cmd:'salestax', country:'UK', net:300})
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You'll need to register a LogEntries.com account and get a token for this to work.
@@ -626,9 +626,9 @@ You can use custom handler functions to send logs anywhere you want, and process
 Log filters are dynamic. You can add new ones at runtime using the <i>seneca.logroute</i> method:
 </p>
 
-{% highlight js %}
-seneca.logroute( {level:'all', handler:seneca.handler.print} )
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-js"
+>seneca.logroute( {level:'all', handler:seneca.handler.print} )
+</code></pre></div>
 
 <p>
 If you omit the handler, any previous filter is removed. If you add

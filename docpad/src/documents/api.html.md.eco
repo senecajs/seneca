@@ -122,10 +122,10 @@ title: Seneca API
 
   <b>Example: registering the built-in mem-store plugin with custom options</b>
 
-{% highlight js %}
-var seneca = require('seneca')()
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('seneca')()
 seneca.use( 'mem-store', {web:{dump:true}} )
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     The second argument to the use method is an options object
@@ -144,8 +144,8 @@ seneca.use( 'mem-store', {web:{dump:true}} )
 
   <b>Example: creating your own (mini) plugin:</b>
 
-{% highlight js %}
-// file: mini.js
+<div class="highlight"><pre><code class="lang-js"
+>// file: mini.js
 module.exports = function( options ) {
   this.add( {foo:'bar'}, function( args, done ){
     done( null, {say:options.say})
@@ -159,7 +159,7 @@ seneca.act( {foo:'bar'}, function( err, out ){
   // prints 'hello'
   console.log( out.say )
 })
-{% endhighlight %}
+</code></pre></div>
 
 
   <h5>method signatures</h5>
@@ -202,15 +202,15 @@ seneca.act( {foo:'bar'}, function( err, out ){
   </p>
 
   <b>Example: waiting for the database connection before inserting data</b>
-{% highlight js %}
-var seneca = require('seneca')()
+<div class="highlight"><pre><code class="lang-js"
+>var seneca = require('seneca')()
 seneca.use( 'mongo-store', { host:..., port:..., name:... } )
 seneca.ready( function( err ) {
   if( err ) return console.log(err);
 
   seneca.make$('product',{name:'Apple',price:1.99}).save$()
 })
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     You can call ready more than once. If you need to register
@@ -227,9 +227,9 @@ seneca.ready( function( err ) {
         <li><b>ready</b>: function, callback with signature function(err), called after plugins initialize.</li>
       </ul>
       <p>Seneca also emits a 'ready' event, which you can use instead of this function:</p>
-{% highlight js %}
-seneca.on('ready', function(err){ ... })
-{% endhighlight %}
+<div class="highlight"><pre><code class="lang-js"
+>seneca.on('ready', function(err){ ... })
+</code></pre></div>
     </li>
   </ul>
 
@@ -257,8 +257,8 @@ seneca.on('ready', function(err){ ... })
   </p>
 
   <b>Example: defining an action</b>
-{% highlight js %}
-seneca.add( {foo:'bar'}, function( args, done ){
+<div class="highlight"><pre><code class="lang-js"
+>seneca.add( {foo:'bar'}, function( args, done ){
   done( null, { zoo:args.zoo } )
 })
 
@@ -266,7 +266,7 @@ seneca.act( {foo:'bar', zoo:'qaz'}, function( err, out ){
   // prints 'qaz'
   console.log( out.zoo )
 })
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     You can define actions at any time, any where. They don't need to

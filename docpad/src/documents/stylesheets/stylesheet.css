@@ -82,7 +82,7 @@ header h1 {
   letter-spacing: -1px;
   font-size: 72px;
   color: #261c1a;
-  margin-bottom: 0.2em;
+  margin-bottom: 40px;
   height:78px;
   width: 540px;
   font-weight: bold;
@@ -96,6 +96,7 @@ header h2 {
   line-height: 1.3;
   width: 540px;
   letter-spacing: 0;
+  margin-bottom: 40px;
 }
 
 .inner {
@@ -223,7 +224,7 @@ aside a.button1:hover {
 code, pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
   color: #222;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   font-size: 13px;
 }
 
@@ -292,6 +293,7 @@ form {
   font-size: 2.8em;
   letter-spacing: -1px;
   color: #474747;
+  margin-bottom: 20px;
 } 
 
 #main-content h1:before {
@@ -304,7 +306,7 @@ form {
   font-family: 'Open Sans', sans-serif;  
   font-size: 22px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
   color: #474747;
 } 
 #main-content h2:before {
@@ -317,7 +319,7 @@ form {
 font-family: 'Open Sans', sans-serif; 
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: #261c1a;
 } 
  
@@ -334,6 +336,7 @@ font-family: 'Open Sans', sans-serif;
   font-size: 15px;
   font-weight: bold;
   color: #261c1a;
+  margin-bottom: 10px;
 } 
 
 h4:before {
@@ -368,9 +371,9 @@ font-family: 'Open Sans', sans-serif;
 }
 
 .doc_title {
-	font-weight:700;
-	 font-family: 'Open Sans', sans-serif;
-	   color: #261c1a;
+    font-weight:700;
+    font-family: 'Open Sans', sans-serif;
+    color: #261c1a;
 }
 
 p {
@@ -654,6 +657,10 @@ div.highlight {
 div.highlight pre {
   border-radius: 8px;
   -moz-border-radius: 8px;
+}
+
+pre.highlight {
+  border-radius: 8px;
 }
 
 div.src-anno {
