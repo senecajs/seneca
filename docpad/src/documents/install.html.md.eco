@@ -9,7 +9,7 @@ title: Download and Install
 
 Seneca is distributed as an [npm
 module](http://npmjs.org/package/seneca).  To download and install,
-open a terminal or command line prompt and go to your project folder.
+open a terminal and go to your project folder.
 Run the command:
 
 

@@ -39,7 +39,7 @@
 
 <%- @content %>
 
-        <section>
+        </section>
       <aside id="sidebar">
 
         <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">
