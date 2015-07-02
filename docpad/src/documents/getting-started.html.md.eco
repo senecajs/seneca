@@ -2,63 +2,496 @@
 layout: main
 title: Getting Started
 ---
-<section id="main-content">
 
-  <h3><%= @document.title %></h3>
+<% section_link = (title,code) => %>
+<div class="section-link">
+<a name="<%- code %>"></a>
+<a href="#<%- code %>">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
 
-  <p>
-    This toolkit lets you focus on the real, "business" code of your app. Instead
-    of worrying about which database to use, how to structure your
-    components, or how to manage dependencies, you can just start
-    coding.
-  </p>
-
-  <p>
-    You write everything as a command. Your commands get called whenever
-    they match a set of properties. Your calling code doesn't know, or
-    care, which command gets the work done. A JavaScript object goes in,
-    and one comes out, asynchronously.
-  </p>
-
-  <p>
-    For practical details, visit the <a href="http://github.com/rjrodger/seneca">Seneca github project page</a>.
-  </p>
-
-  <p>Here's a command that sums two numbers:</p>
-
-<div class="highlight"><pre><code class="lang-js"
->var seneca = require('seneca')()
-
-seneca.add( {role:'math', cmd:'sum'}, function(args,callback) {
-  var sum = args.left + args.right
-  callback(null,{answer:sum})
-})
-
-seneca.act( {role:'math', cmd:'sum', left:1, right:2}, function(err,result) {
-  if( err ) return console.error( err )
-  console.log(result)
-})
-</code></pre></div>
+### <%= title %>
+<% end %>
 
 
-<p>
+# <%= @document.title %>
 
-<code>seneca.add</code> adds a new command. <code>seneca.act</code>
-acts on the provided pattern, running a command if it matches. Try the code:
+Seneca lets you build a microservice system without worrying about how
+things will fit together in production. You don't need to know where
+the other services are located, how many of them there are, or what
+they do. Everything external to your business logic, such as
+databases, caches, or third party integrations can likewise be hidden
+behind microservices.
 
-</p>
+This decoupling makes your system easy to build and change on a
+continuous basis. It works because Seneca has two core features.
 
-<div class="highlight"><pre><code class="lang-bash"
->$ node example.js
+   * **Transport Independence:** you can send messages between services in many ways, all hidden from your business logic.
+   * **Pattern Matching:** instead of fragile service discovery, you just let the world know what sort of messages you care about.
+
+Messages are JSON documents, with any internal structure you
+like. Messages can be sent via HTTP/S, TCP connections, message
+queues, publish/subscribe services or any mechanism that moves bits
+around. From your perspective as the writer of a service, you just
+send messages out into the world. You don't want to know which
+services get them &mdash; that creates fragile coupling.
+
+Then there are the messages you'd like to receive. You specify the
+property patterns that you care about, and Seneca (with a little
+configuration help) makes sure that you get any messages matching
+those patterns, sent by other services. The patterns are very simple,
+just a list of key-value pairs that the top level properties of the
+JSON message document must match.
+
+This _Getting Started_ guide will cover Seneca in a broad way, but
+won't go into too much depth. The [Next Steps](#next-steps) section at
+the end of this Page is your starting point for more details.
+
+
+<%= section_link 'A Simple Microservice', 'simple-microservice' %> 
+
+Let's start with some code. Here's a service that sums two numbers:
+
+``` js
+var seneca = require('seneca')()
+
+seneca.add( 
+  {role:'math', cmd:'sum'}, 
+  function( msg, respond ) {
+    var sum = msg.left + msg.right
+    respond( null, { answer: sum } )
+  })
+```
+
+To call this service, you write:
+
+``` js
+seneca.act( 
+  {role:'math', cmd:'sum', left:1, right:2}, 
+  function( err, result ) {
+    if( err ) return console.error( err )
+    console.log( result )
+  })
+```
+
+For the moment this is all happening in the same process, and there's
+no network traffic. In-process function calls are a type of message
+transport too!
+
+The example code to try this out is in
+[sum.js](https://github.com/senecajs/getting-started/blob/master/sum.js). To
+run the code, follow these steps:
+
+   1. Open a terminal, and `cd` to your projects folder
+   2. Run `git clone https://github.com/senecajs/getting-started`
+   3. Run `npm install` to install the dependent modules, including Seneca
+   3. Run `node sum.js`
+
+This guide assumes you already have [Node.js](http://nodejs.org) installed.
+
+When you run `sum.js`, you get the following output:
+
+``` bash
+2015-07-02T12:38:08.788Z	xi94dnm0nrky/1435840688779/64029/-	INFO	hello	Seneca/0.6.2/xi94dnm0nrky/1435840688779/64029/-	
 { answer: 3 }
-</code></pre></div>
+```
+
+The first line is logging information that Seneca prints to let you
+know that it has started. The second line is the result produced after
+the message has been matched and processed.
+
+The `seneca.add` method adds a new _action_ pattern to the Seneca
+instance. This pattern is matched against any JSON messages that the
+Seneca instance receives. The action is a function that is executed
+when a pattern matches a message.
+
+The `seneca.add` method has two parameters:
+
+  * `pattern`: the property pattern to match in messages,
+  * `action`: the function to execute if a message matches.
+
+The action function has two parameters:
+
+   * `msg`: the matching inbound message (provided as a plain object),
+   * `respond`: a callback function that you use to provide a respond to the message.
+
+The respond function is a callback with the standard `error, result`
+signature. Let's put this all together again:
+
+<div class="src-anno">
+<br>
+&larr; pattern to match<br>
+&larr; action function<br>
+&larr; the real work, adding two numbers<br>
+&larr; provide a result object; there's no error</br>
+</div>
+
+``` js
+seneca.add( 
+  {role:'math', cmd:'sum'}, 
+  function( msg, respond ) {
+    var sum = msg.left + msg.right
+    respond( null, { answer: sum } )
+  })
+```
+
+In the example code, the action computes the sum of two numbers,
+provided via the `left` and `right` properties of the message
+object. Not all messages generate a result, but as this is the most
+common case, Seneca allows you to provide the result via a callback
+function.
+
+In summary, the action pattern `role:math,cmd:sum` acts on the message
+
+``` js
+{ "role": "math", "cmd": "sum", left:1, right:2 }
+```
+
+to produce the result:
+
+``` js
+{ "answer": 3 }
+```
+
+There is nothing special about the properties `role` and `cmd`. They
+just happen to be the ones you are using for pattern matching.
+
+The `seneca.act` method submits a message to act on. It takes two parameters:
+
+   * `msg`: the message object,
+   * `response_callback`: a function that receives the message response, if any.
+
+The response callback is a function you provide with the standard
+`error, result` signature. If there was a problem (say, the message
+matched no patterns), then the first argument will be an
+[Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+object. If everything went to plan, the second argument will be the
+result object. In the example code, these arguments are simply printed
+to the console:
+
+
+<div class="src-anno" style="margin-left: 20px">
+<br>
+&larr; submitted message<br>
+&larr; response callback function<br>
+&larr; [early return on error](http://thenodeway.io/posts/understanding-error-first-callbacks/)<br>
+&larr; print result to console</br>
+</div>
+
+``` js
+seneca.act( 
+  {role:'math', cmd:'sum', left:1, right:2}, 
+  function( err, result ) {
+    if( err ) return console.error( err )
+    console.log( result )
+  })
+```
+
+The example code in the
+[sum.js](https://github.com/senecajs/getting-started/blob/master/sum.js)
+file shows you how to define and call an action pattern inside the
+same Node.js process. Soon you'll see how to split this code over
+multiple processes.
+
+
+<%= section_link 'How Patterns Work', 'how-patterns-work' %>
+
+
+Using patterns instead of network addresses or topics makes it much
+easier to extend and enhance your system over time by adding new
+microservices incrementally. Let's extend our system with the ability
+to multiply two numbers.
+
+We want messages that look like this:
+
+``` js
+{ "role": "math", "cmd": "product", left:3, right:4 }
+```
+
+to produce results like this:
+
+``` js
+{ "answer": 12 }
+```
+
+You can use the `role:math,cmd:sum` action pattern as a template to
+define a new `role:math,cmd:product` action:
+
+``` js
+seneca.add( 
+  {role:'math', cmd:'product'}, 
+  function( msg, respond ) {
+    var product = msg.left * msg.right
+    respond( null, { answer: product } )
+  })
+```
+
+And you can call it in exactly the same way:
+
+``` js
+seneca.act( 
+  {role:'math', cmd:'product', left:3, right:4}, 
+  console.log
+)
+```
+
+Here, you use `console.log` as a shortcut to print out both the error
+(if any), and the result. Running this code produces:
+
+``` bash
+null { answer: 12 }
+```
+
+Putting this all together, you get:
+
+``` js
+var seneca = require('seneca')()
+
+seneca.add( 
+  {role:'math', cmd:'sum'}, 
+  function( msg, respond ) {
+    var sum = msg.left + msg.right
+    respond( null, { answer: sum } )
+  })
+
+seneca.add( 
+  {role:'math', cmd:'product'}, 
+  function( msg, respond ) {
+    var product = msg.left * msg.right
+    respond( null, { answer: product } )
+  })
+
+
+seneca
+  .act( 
+    {role:'math', cmd:'sum', left:1, right:2}, 
+    console.log
+  )
+  .act( 
+    {role:'math', cmd:'product', left:3, right:4}, 
+    console.log
+  )
+```
+
+In this example the `seneca.act` calls are chained together. Seneca
+provides a chaining API as a convenience. Chained calls are executed
+in order, but *not* in series, so their results could come back in any
+order.
+
+This code is available in the
+[sum-product.js](https://github.com/senecajs/getting-started/blob/master/sum-product.js)
+file.
+
+
+<%= section_link 'Extending Functionality with Patterns', 'extend-with-patterns' %>
+
+
+Patterns make it easy to extend your functionality. Instead of adding
+`if` statements and complex logic, you add more patterns. Lets extend
+the addition action with the ability to force integer-only
+arithmetic. To do this, you can add a new property, `integer:true` to
+the message object. Then you provide a new action for messages that
+have this property:
+
+``` js
+seneca.add( 
+  {role:'math', cmd:'sum', integer:true}, 
+  function( msg, respond ) {
+    var sum = Math.floor(msg.left) + Math.floor(msg.right)
+    respond( null, { answer: sum } )
+  })
+```
+
+Now, the message:
+
+``` js
+{ "role": "math", "cmd": "sum", left:1.5, right:2.5, integer:true }
+```
+
+will produce the result:
+
+``` js
+{ "answer": 3 }  // == 1 + 2, as decimals removed
+```
+
+What happens if you add both patterns to the same system? How does
+Seneca choose which one to use? The more specific pattern always
+wins. That is, the pattern with the most matching attributes is the
+one that has precedence.
+
+Here's some code to show this:
+
+``` js
+var seneca = require('seneca')()
+
+seneca
+  .add( 
+    {role:'math', cmd:'sum'}, 
+    function( msg, respond ) {
+      var sum = msg.left + msg.right
+      respond( null, { answer: sum } )
+    })
+
+  // both these messages will match role:math,cmd:sum
+
+  .act( 
+    {role:'math', cmd:'sum', left:1.5, right:2.5}, 
+    console.log // prints { answer: 4 }
+  )
+  .act( 
+    // the extra integer property is just ignored!
+    {role:'math', cmd:'sum', left:1.5, right:2.5, integer:true}, 
+    console.log // prints { answer: 4 }
+  )
+
+
+  .add( 
+    {role:'math', cmd:'sum', integer:true}, 
+    function( msg, respond ) {
+      var sum = Math.floor(msg.left) + Math.floor(msg.right)
+      respond( null, { answer: sum } )
+    })
+
+  // this still matches role:math,cmd:sum
+  .act( 
+    {role:'math', cmd:'sum', left:1.5, right:2.5}, 
+    console.log // prints { answer: 4 }
+  )
+
+  // BUT this matches role:math,cmd:sum,integer:true
+  // because it's more specific - more properties match
+  .act( 
+    {role:'math', cmd:'sum', left:1.5, right:2.5, integer:true}, 
+    console.log // prints { answer: 3 } !!!
+  )
+```
+
+And the output it generates is:
+
+``` bash
+2015-07-02T15:34:06.094Z	69kfu5lr238x/1435851246084/64488/-	INFO	hello	Seneca/0.6.2/69kfu5lr238x/1435851246084/64488/-	
+null { answer: 4 }
+null { answer: 4 }
+null { answer: 4 }
+null { answer: 3 }
+```
+
+The first two `.act` calls both match the `role:math,cmd:sum` action
+pattern. Then the integer-only action pattern
+`role:math,cmd:sum,integer:true` is defined. After that, the third
+call to `.act` gos with the `role:math,cmd:sum` action, but the fourth
+goes with `role:math,cmd:sum,integer:true`. This code also
+demonstrates that you can chain `.add` and `.act` calls together. This
+code is available in the
+[sum-integer.js](https://github.com/senecajs/getting-started/blob/master/sum-integer.js)
+file.
+
+The ability to easily extend the behaviour of your actions by matching
+more specific kinds of messages is an easy way to handle new and
+changing requirements while your project is in development and when
+it is live and needs to adapt. It also has the advantage that you do
+not need to modify existing code, which is always dangerous. It's much
+safer to add new code to handle special cases. In a production system
+you won't even need to do a re-deploy. Your existing services can stay
+running as they are. All you need to do is start up your new service.
+
+
+<%= section_link 'Code Re-use with Patterns', 'reuse-with-patterns' %>
+
+Action patterns can call other action patterns to get their work
+done. Let's modify our example code to use this approach.
+
+``` js
+var seneca = require('seneca')()
+
+seneca
+  .add( 
+    'role:math,cmd:sum', 
+    function( msg, respond ) {
+      var sum = msg.left + msg.right
+      respond( null, { answer: sum } )
+    })
+
+  .add( 
+    'role:math,cmd:sum,integer:true', 
+    function( msg, respond ) {
+      
+      // reuse role:math,cmd:sum
+      this.act({
+        role:  'math', 
+        cmd:   'sum',
+        left:  Math.floor(msg.left),
+        right: Math.floor(msg.right),
+      }, respond)
+    })
+
+  // this matches role:math,cmd:sum
+  .act( 'role:math,cmd:sum,left:1.5,right:2.5', 
+        console.log // prints { answer: 4 }
+      )
+
+  // BUT this matches role:math,cmd:sum,integer:true
+  .act( 'role:math,cmd:sum,left:1.5,right:2.5,integer:true', 
+        console.log // prints { answer: 3 } !!!
+      )
+```
+
+In this version, the definition of the
+`role:math,cmd:sum,integer:true` action pattern uses the previously
+defined `role:math,cmd:sum` action pattern, but first modifies the
+message to convert the `left` and `right` properties into integers.
+
+Inside the action function, the context variable, `this`, is a
+reference to the current Seneca instance. This is the proper way to
+reference Seneca inside actions, as you will get the full context of
+the current action call. Among other things, this makes your logs more
+informative.
+
+This code uses an abbreviated form of JSON to specify the patterns and
+messages. For example, the object literal form
+
+``` js
+{role:'math', cmd:'sum', left:1.5, right:2.5}
+```
+
+becomes:
+
+``` js
+role:math,cmd:sum,left:1.5,right:2.5
+```
+
+This format, [jsonic](https://github.com/rjrodger/jsonic), which you
+provide as a string literal, is a convenience format to make patterns
+and messages more concise in your code.
+
+The code for the above example is available in the
+[sum-reuse.js](https://github.com/senecajs/getting-started/blob/master/sum-reuse.js)
+file.
+
+
+<%= section_link 'Patterns are Unique, with Overrides', 'patterns-unique-override' %> 
+
+  - uniqueness, priors, print tree
+
+- plugins
+  - define
+  - logging
+  - ref list of
+
+- services
+  - listen and client
+  - pins
+
+- web server integration
+  - express
+
+- data entities
+  - standard patterns
+  - simple active record
+  - namespaces
+
+- what next
   
 
-<p>
-You registered the pattern <code>{role:'math', cmd:'sum'}</code>. The
-input matched, and your code ran. The <code>left</code> and <code>right</code> arguments were
-then used by your plugin to do some real work.
-</p>
 
 <p>
 Let's add another command:
@@ -324,11 +757,13 @@ you don't need them anyway</a>!
 </p>
 
 
+<a name="next-steps"></a>
 <h4>What Next?</h4>
+
+For practical details, visit the <a href="http://github.com/rjrodger/seneca">Seneca github project page</a>.
 
 <p>
 The article <a href="https://blog.engineyard.com/2013/deploying-node-app">Deploying a Production Node.js App to Engine Yard</a> takes you step by step through the process of building a real application with Seneca.
 </p>
 
-        </section>
 

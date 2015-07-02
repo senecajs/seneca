@@ -48,6 +48,14 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+i, em {
+    font-style: italic;
+}
+b, strong {
+    font-weight: bold;
+}
+
+
 
 /* LAYOUT STYLES */
 body {
@@ -316,15 +324,15 @@ form {
 }
 
 #main-content h3 {
-font-family: 'Open Sans', sans-serif; 
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #261c1a;
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #474747;
 } 
  
 #main-content h3:before {
-font-family: 'Open Sans', sans-serif;
+    font-family: 'Open Sans', sans-serif;
   color: #261c1a;
   font-size: 20px;
   padding-right: 0.3em;
@@ -335,7 +343,7 @@ font-family: 'Open Sans', sans-serif;
  font-family: 'Open Sans', sans-serif; 
   font-size: 15px;
   font-weight: bold;
-  color: #261c1a;
+  color: #474747;
   margin-bottom: 10px;
 } 
 
@@ -405,13 +413,15 @@ blockquote {
 }
 
 ul li {
-  list-style: disc inside;
-  padding-left: 20px;
+  list-style: disc;
+  padding-left: 5px;
+  margin-left: 20px;
 }
 
 ol li {
-  list-style: decimal inside;
-  padding-left: 3px;
+  list-style: decimal;
+  padding-left: 5px;
+  margin-left: 20px;
 }
 
 dl dd {
@@ -688,4 +698,14 @@ span.anno-code {
 h4.filename {
   margin-left:10px;
   font-weight: normal;
+}
+
+
+div.section-link {
+  float: left;
+  margin-left: -30px;
+  margin-top: 2px;
+}
+div.section-link a {
+  text-decoration: none;
 }
