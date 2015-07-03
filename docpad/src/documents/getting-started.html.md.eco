@@ -81,10 +81,11 @@ The example code to try this out is in
 [sum.js](https://github.com/senecajs/getting-started/blob/master/sum.js). To
 run the code, follow these steps:
 
-   1. Open a terminal, and `cd` to your projects folder
-   2. Run `git clone https://github.com/senecajs/getting-started`
-   3. Run `npm install` to install the dependent modules, including Seneca
-   3. Run `node sum.js`
+   1. Open a terminal, and `cd` to your projects folder.
+   2. Run `git clone https://github.com/senecajs/getting-started`.
+   3. `cd` into the _getting-started_ folder.
+   4. Run `npm install` to install the dependent modules, including Seneca.
+   5. Run `node sum.js`.
 
 This guide assumes you already have [Node.js](http://nodejs.org) installed.
 
@@ -470,15 +471,367 @@ file.
 
 <%= section_link 'Patterns are Unique, with Overrides', 'patterns-unique-override' %> 
 
-  - uniqueness, priors, print tree
+The action patterns that you define are unique. They can only trigger
+one function. The patterns resolve using the rules:
 
-- plugins
-  - define
-  - logging
-  - ref list of
+   * more properties win, and
+   * if the patterns have the same number of properties, they are matched in alphabetical order.
+
+The reason that these rules are so simple is so that you can run them
+"in your head". It's very easy to understand which pattern will
+trigger which action function.
+
+Here are some examples:
+
+   * `a:1,b:2` wins over `a:1` as it has more properties.
+   * `a:1,b:2` wins over `a:1,c:3` as `b` is before `c` alphabetically.
+   * `a:1,b:2,d:4` wins over `a:1,c:3,d:4` as `b` is before `c` alphabetically.
+   * `a:1,b:2,c:3` wins over `a:1,b:2` as it has more properties.
+   * `a:1,b:2,c:3` wins over `a:1,c:3` as it has more properties.
+
+To see this in action, run the file
+[pattern-wins.js](https://github.com/senecajs/getting-started/blob/master/pattern-wins.js). For
+more details, see the [patrun](https://www.npmjs.com/package/patrun)
+module.
+
+It is sometimes useful to have a way of enhancing the behaviour of an
+action without rewriting it fully. For example, you might want to
+perform custom validation of the message properties, or capture
+message statistics, or add additional information to action results,
+or throttle message flow rates.
+
+In the example code, the addition action expects that the `left` and
+`right` properties are finite numbers. Also, it's useful to include
+the original input arguments in the output for debugging purposes. You
+can add a validation check, and debugging information, using the
+following code:
+
+``` js
+var seneca = require('seneca')()
+
+seneca
+  .add( 
+    'role:math,cmd:sum', 
+    function( msg, respond ) {
+      var sum = msg.left + msg.right
+      respond( null, { answer: sum } )
+    })
+
+  // override role:math,cmd:sum with additional functionality
+  .add( 
+    'role:math,cmd:sum', 
+    function( msg, respond ) {
+      
+      // bail out early if there's a problem
+      if( !Number.isFinite( msg.left ) ||
+          !Number.isFinite( msg.right ) ) 
+      {
+        return respond( new Error("Expected left and right to be numbers.") )
+      }
+
+      // call previous action function for role:math,cmd:sum
+      this.prior({
+        role:  'math', 
+        cmd:   'sum',
+        left:  msg.left,
+        right: msg.right,
+
+      }, function( err, result ) {
+        if( err ) return respond( err )
+
+        result.info = msg.left+'+'+msg.right
+        respond( null, result )
+      })
+    })
+
+  // enhanced role:math,cmd:sum
+  .act( 'role:math,cmd:sum,left:1.5,right:2.5', 
+        console.log // prints { answer: 4, info: '1.5+2.5' }
+      )
+```
+
+The Seneca instance provided to an action function via the the `this`
+context variable has a special `prior` method that calls the previous
+action definition for the current action pattern. The prior function has parameters:
+
+   * `msg`: the msg object, which you may have modified
+   * `response_callback`: a callback function, where you may modify the result
+
+The example code shows you how to modify both the inbound message, and
+the outbound result. Modification of either is optional &mdash; you
+may leave the data unchanged and use this mechanism for enhanced
+logging or auditing.
+
+The example code also shows good practices for error handling. It uses
+early returns to exit from the action function as soon as
+possible. This avoids spurious indentation from `if-else`
+statements. The error is provided using an `Error` object. This
+ensures stack trace capture and proper handling.
+
+Errors should only be used for invalid input or internal failures. For
+example, if you are executing a database query that returns no data,
+that is *not* an error, just a fact about the database. If the
+database connection fails, that is an error.
+
+The code for this example is in the
+[sum-valid.js](https://github.com/senecajs/getting-started/blob/master/sum-valid.js)
+file.
+
+
+<%= section_link 'Organising Patterns into Plugins', 'organize-plugins' %> 
+
+A Seneca instance is ultimately just a set of action patterns. You can
+organize them by using namespacing conventions in your patterns, such as
+`role:math`. To help with logging and debugging, Seneca supports a
+minimalist notion of a plugin to help organize patterns.
+
+A Seneca plugin is just a set of action patterns. The plugin can have
+a name, which is used to annotate logging entries. Plugins can be
+given a set of options to control their behaviour. Plugins also
+provide a mechanism for executing initialisation functions in the
+correct order. For example, you want your database connection to be
+established before you try to read data from the database.
+
+A Seneca plugin is a function that has a single parameter
+`options`. You pass this plugin definition function to the
+`seneca.use` method. Here is the minimal Seneca plugin (it does
+nothing!).
+
+``` js
+function minimal_plugin( options ) { 
+  console.log(options) 
+}
+
+require('seneca')()
+  .use( minimal_plugin, {foo:'bar'} )
+``` 
+
+The `seneca.use` method takes two parameters:
+
+   * `plugin`: plugin definition function, or plugin name,
+   * `options`: options object for the plugin.
+
+If you run the example code (in file
+[minimal-plugin.js](https://github.com/senecajs/getting-started/blob/master/minimal-plugin.js)),
+you'll get the following output:
+
+``` bash
+$ node minimal-plugin.js
+2015-07-03T15:23:00.038Z	gh7s1570egff/1435936980028/65900/-	INFO	hello	Seneca/0.6.2/gh7s1570egff/1435936980028/65900/-	
+{ foo: 'bar' }
+```
+
+Seneca provides detailed logging information when it starts, and also
+when running. Normally, the log level is set to `INFO` which means you
+don't see very much. To see all the logs, try:
+
+``` bash
+$ node minimal-plugin.js --seneca.log.all
+... lots of log lines ...
+```
+
+You can narrow this down by
+[grepping](http://www.cyberciti.biz/faq/howto-use-grep-command-in-linux-unix/)
+the log output for log lines relevant to plugin definition.
+
+``` bash
+$ node minimal-plugin.js --seneca.log.all | grep plugin | grep DEFINE
+2015...	3qf7...	DEBUG	plugin	basic           DEFINE	{}
+2015...	3qf7...	DEBUG	plugin	transport       DEFINE	{}
+2015...	3qf7...	DEBUG	plugin	web             DEFINE	{}
+2015...	3qf7...	DEBUG	plugin	mem-store       DEFINE	{}
+2015...	3qf7...	DEBUG	plugin	minimal_plugin  DEFINE	{foo=bar}
+```
+
+You can see that by default Seneca loads four built-in plugins:
+[_basic_](https://www.npmjs.com/package/seneca-basic),
+[_transport_](https://www.npmjs.com/package/seneca-transport),
+[_web_](https://www.npmjs.com/package/seneca-web), and
+[_mem-store_](https://www.npmjs.com/package/seneca-mem-store). These
+provide core functionalities for basic microservices. You can also see
+that your _minimal_plugin_ is in the list as well, and also shown are
+the options you provided: `{foo=bar}`. The name _minimal_plugin_ is
+obtained from the plugin definition function name, so you should
+always give your plugin definition function a name.
+
+Let's give the plugin some action patterns. The `this` context
+variable of the plugin definition function is an instance of Seneca
+that you can use to do this. Here's a _math_ plugin:
+
+``` js
+function math( options ) { 
+
+  this.add( 'role:math,cmd:sum', function( msg, respond ) {
+    respond( null, { answer: msg.left + msg.right } )
+  })
+
+  this.add( 'role:math,cmd:product', function( msg, respond ) {
+    respond( null, { answer: msg.left * msg.right } )
+  })
+
+}
+
+require('seneca')()
+  .use( math )
+  .act( 'role:math,cmd:sum,left:1,right:2', console.log )
+```
+
+Running this file
+[math-plugin.js](https://github.com/senecajs/getting-started/blob/master/math-plugin.js) generates the output:
+
+``` bash
+$ node math-plugin.js
+2015-07-03T15:43:13.067Z	xn5vquvubvjq/1435938193058/65962/-	INFO	hello	Seneca/0.6.2/xn5vquvubvjq/1435938193058/65962/-	
+null { answer: 3 }
+```
+
+Let's look at the logging output relevant to this plugin by grepping for the string "math":
+
+``` bash
+$ node math-plugin.js --seneca.log.all | grep math
+2015...	alqs...	DEBUG	delegate  {plugin$={name=math,tag=undefined},ungate$=true,fatal$=true}	29ny56	
+2015...	alqs...	DEBUG	register  init     math	
+2015...	alqs...	DEBUG	plugin    math     DEFINE	{}
+2015...	alqs...	DEBUG	plugin    math     ADD	qlh13h47d0nu	cmd:sum,role:math	sum	
+2015...	alqs...	DEBUG	plugin    math     ADD	10lk4seu3aee	cmd:product,role:math	product	
+2015...	alqs...	DEBUG	plugin    math     options	set	{math={}}	
+2015...	alqs...	DEBUG	act                -	-	DEFAULT	{init=math,tag=}	
+2015...	alqs...	DEBUG	register  ready    math	{}
+2015...	alqs...	DEBUG	register  install  math	{exports=[]}	
+2015...	alqs...	DEBUG	act       math     -	IN	pg7er4ouia1p/u5hfgtpmkeoy	cmd:sum,role:math	{role=math,cmd=sum,left=1,right=2}	ENTRY	A;qlh13h47d0nu	-	
+2015...	alqs...	DEBUG	act       math     -	OUT	pg7er4ouia1p/u5hfgtpmkeoy	cmd:sum,role:math	{answer=3}	EXIT	A;qlh13h47d0nu	5
+```
+
+There's detailed logging information on the plugin definition and
+initialization, which you can mostly ignore for now. The most
+interesting lines the ones showing the addition of action patterns
+within the _math_ plugin, and then the execution of the
+`role:math,cmd:sum,left:1,right:2` action, showing the inbound and
+outbound messages.
+
+``` bash
+...
+20.. al.. DEBUG plugin math   ADD ql.. cmd:sum,role:math     sum
+20.. al.. DEBUG plugin math   ADD 10.. cmd:product,role:math product
+...
+20.. al.. DEBUG act    math - IN  pg.. cmd:sum,role:math {role=math,cmd=sum,left=1,right=2} ENTRY A;ql.. -	
+20.. al.. DEBUG act    math - OUT pg.. cmd:sum,role:math {answer=3} EXIT A;ql.. 5
+...
+```
+
+With Seneca, you build up your system by defining a set of patterns
+that correspond to messages. You organize these patterns into plugins
+to make logging and debugging easier. You then combine one or more
+plugins into microservices. You'll create a _math_ microservice in the
+next section.
+
+Plugins often need to do some initialization work &mdash; such as
+connecting to a database. You don't do this work in the body of the
+plugin definition function. The definition function is synchronous by
+design, because all it does is _define_ the plugin. In fact, you
+should not call `seneca.act` at all in the plugin definition, just
+`seneca.add`.
+
+To initailize a plugin, you add a special action pattern:
+`init:<plugin-name>`. This action pattern is called in
+sequence for each plugin serially. The init function *must* call its
+`respond` callback without errors. If plugin initialization fails,
+then Seneca will exit the Node.js process. You want
+your microservics to fail-fast (and scream loudly) when there's a
+problem. All plugins must complete initialization before any actions
+are executed.
+
+To demonstrate initialization, let's add simplistic custom logging to
+the _math_ plugin. When the plugin starts, it opens a log file, and
+writes a log of all operations to the file. The file needs to open
+successfully and be writable. If this fails, the microservice should
+fail.
+
+``` js
+var fs = require('fs')
+
+function math( options ) { 
+
+  // the logging function, built by init
+  var log
+
+  // place all the patterns together
+  // this make it easier to see them at a glance
+  this.add( 'role:math,cmd:sum',     sum )
+  this.add( 'role:math,cmd:product', product )
+
+  // this is the special initialization pattern
+  this.add( 'init:math', init )
+
+
+  function init( msg, respond ) {
+    // log to a custom file
+    fs.open( options.logfile, 'a', function( err, fd ) {
+
+      // cannot open for writing, so fail
+      // this error is fatal to Seneca
+      if( err ) return respond( err )
+
+      log = make_log(fd)
+      respond()
+    })
+  }
+
+  function sum( msg, respond ) {
+    var out = { answer: msg.left + msg.right }
+    log( 'sum '+msg.left+'+'+msg.right+'='+out.answer+'\n' )
+    respond( null, out )
+  }
+
+  function product( msg, respond ) {
+    var out = { answer: msg.left * msg.right }
+    log( 'product '+msg.left+'*'+msg.right+'='+out.answer+'\n' )
+    respond( null, out )
+  }
+
+
+  function make_log( fd ) {
+    return function( entry ) {
+      fs.write( fd, new Date().toISOString()+' '+entry, null, 'utf8', function(err) {
+        if( err ) return console.log( err )
+
+        // ensure log entry is flushed
+        fs.fsync( fd, function(err) {
+          if( err ) return console.log( err )
+        })
+      }) 
+    }
+  }
+}
+
+require('seneca')()
+  .use( math, {logfile:'./math.log'} )
+  .act( 'role:math,cmd:sum,left:1,right:2', console.log )
+```
+
+In this plugin code, the patterns are organized at the top of the
+plugin so that they are easy to see. The action functions are defined
+below these. You can also see how the options are used to provide the
+location for the custom log file (it should go without saying that
+this is not a way to do production logging!).
+
+The initialization function _init_ does some asynchronous file
+system work, and so must complete before any actions can be
+performed. If it fails, the whole service will fail to initialize. To
+see this in action, try changing the log file location to something
+invalid, like say `'/math.log'`.
+
+This code is available in the
+[math-plugin-init.js](https://github.com/senecajs/getting-started/blob/master/math-plugin-init.js)
+file.
+
+
+<%= section_link 'Writing Microservices', 'writing-microservices' %> 
+
 
 - services
   - listen and client
+  - debug info, tree, list, etc
   - pins
 
 - web server integration
