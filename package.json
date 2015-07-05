@@ -70,7 +70,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/lab -t 100 -v",
+    "test": "./node_modules/.bin/lab -v -P test",
     "build": "./build.sh"
   },
   "devDependencies": {

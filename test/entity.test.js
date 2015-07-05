@@ -173,8 +173,8 @@ describe('entity', function(){
     assert.equal('$-/-/foo',foo.canon$({string$:true}))
     assert.equal(',,foo',''+foo.canon$({array:true}))
     assert.equal(',,foo',''+foo.canon$({array$:true}))
-    assert.equal("{ zone: undedoneed, base: undedoneed, name: 'foo' }",util.inspect(foo.canon$({object:true})))
-    assert.equal("{ 'zone$': undedoneed, 'base$': undedoneed, 'name$': 'foo' }",util.inspect(foo.canon$({object$:true})))
+    assert.equal("{ zone: undefined, base: undefined, name: 'foo' }",util.inspect(foo.canon$({object:true})))
+    assert.equal("{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }",util.inspect(foo.canon$({object$:true})))
     assert.equal(',,foo',''+foo.canon$({}))
 
     var b1_n1 = si.make$('b1/n1')
@@ -211,6 +211,7 @@ describe('entity', function(){
 
     var esc1 = si.make$('esc',{x:1,y_$:2})
     assert.equal( esc1.toString(), '$-/-/esc:{id=;x=1;y=2}' )
+
     done()
   })
 
@@ -290,7 +291,7 @@ describe('entity', function(){
       function(next){
         si.act('role:mem-store,cmd:dump',function(e,o){
           var t = gex(
-            '{"undedoneed":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+            '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
           ).on(JSON.stringify(o))
           assert.ok(t)
           next(e)
@@ -307,7 +308,7 @@ describe('entity', function(){
             assert.ok( null == e)
 
             si2.act('role:mem-store,cmd:dump',function(e,o){
-              assert.ok( gex('{"undedoneed":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
+              assert.ok( gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
 
               si2.make('a').load$({x:1},function(e,nx1){
                 assert.equal('$-/-/a:{id='+x1.id+';x=1}',''+nx1)

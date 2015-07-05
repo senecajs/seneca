@@ -4,10 +4,15 @@
 
 var assert = require('assert')
 
+var Lab = require('lab')
+
 var seneca = require('../..')
 
 
-var si   = seneca({log:'silent'})
+var si       = seneca({log:'silent'})
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 var util = si.pin({role:'util',cmd:'*'})
 
@@ -25,7 +30,7 @@ describe('util', function() {
         assert.ok( null == err)
         assert.equal( 4, code.length )
         assert.ok( null !=  /^[0-9a-z]{4,4}$/.exec(code) )
-        
+
         fin()
       })
     })
@@ -71,15 +76,15 @@ describe('util', function() {
               })
             })
           })
-        })        
-      })      
+        })
+      })
     })
 
-    
+
 
   })
 
-  
+
   it('note', function(fin) {
 
     si
@@ -125,12 +130,12 @@ describe('util', function() {
         assert.equal(1,o.length)
         assert.equal('aaa',o[0])
       })
-        
+
       .wait('role:util,note:true,cmd:pop,key:foo')
       .step(function(o){
         assert.equal('aaa',o.value)
       })
-        
+
       .wait('role:util,note:true,cmd:list,key:foo')
       .step(function(o){
         assert.equal(0,o.length)
