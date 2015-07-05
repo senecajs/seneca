@@ -79,7 +79,7 @@
     "connect-query": "~0.2.0",
     "docco": "0.7.0",
     "jshint": "2.8.0",
-    "lab": "5.12.1",
+    "lab": "5.13.0",
     "seneca-echo": "0.2.0",
     "seneca-error-test": "0.2.2"
   }
