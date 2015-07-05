@@ -5,9 +5,12 @@
 var assert = require('assert')
 var util   = require('util')
 
+var Lab    = require('lab')
 
 var testopts = {log:'silent'}
-
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 var seneca = require('..')
 
@@ -54,7 +57,7 @@ describe('seneca.util', function() {
     )).replace(/\s+/g,' ')
 
     var expect = "{ a: { aa: 1 }, b: { bb: { bbb: 1 } }, c: [ 1 ], d: { dd: 1 }, e: { ee: 1 }, f: [ 4, 5, 6 ] }"
-    
+
     assert.equal( str, expect )
   })
 
@@ -67,7 +70,7 @@ describe('seneca.util', function() {
     )).replace(/\s+/g,' ')
 
     var expect = "{ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } }"
-    
+
     assert.equal( str, expect )
     fin()
   })

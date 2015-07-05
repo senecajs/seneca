@@ -70,7 +70,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./test.sh",
+    "test": "./node_modules/.bin/lab -t 100 -v",
     "build": "./build.sh"
   },
   "devDependencies": {
@@ -79,7 +79,7 @@
     "connect-query": "~0.2.0",
     "docco": "0.7.0",
     "jshint": "2.8.0",
-    "mocha": "2.1.0",
+    "lab": "5.12.1",
     "seneca-echo": "0.2.0",
     "seneca-error-test": "0.2.2"
   }

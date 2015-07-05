@@ -12,16 +12,20 @@ var make_entity = require('../lib/entity')
 
 var async   = require('async')
 var gex     = require('gex')
+var Lab     = require('lab')
 
 
 var testopts = {log:'silent'}
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 
 describe('entity', function(){
 
-  it('happy-mem', function(fin){
+  it('happy-mem', function(done){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({errhandler:done})
 
     var fooent = si.make$('foo')
     assert.ok( fooent.is$('foo') )
@@ -33,15 +37,15 @@ describe('entity', function(){
       assert.equal(1,out.a)
       assert.equal(2,out.b)
 
-      fin()
+      done()
     })
   })
 
 
-  it('mem-ops', function(fin){
+  it('mem-ops', function(done){
     var si = seneca(testopts)
     si.options({
-      errhandler: function(err){ err && fin(err); return true; }
+      errhandler: function(err){ err && done(err); return true; }
     })
 
     var fooent = si.make$('foo')
@@ -118,20 +122,20 @@ describe('entity', function(){
     ;fooent.make$({b:1}).save$(function(){
 
     ;fooent.make$({b:2}).save$(function(){
-      
+
     ;fooent.list$(function(err,list){
       assert.equal(2,list.length)
 
     ;fooent.list$({b:1},function(err,list){
       assert.equal(1,list.length)
 
-      fin()
+      done()
     }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) })
 
   })
 
 
-  it('parsecanon', function(){
+  it('parsecanon', function(done){
     var si = seneca(testopts)
     function def(v,d){return void 0 == v ? d : v}
     function fmt(cn){ return def(cn.zone,'-')+'/'+def(cn.base,'-')+'/'+def(cn.name,'-') }
@@ -154,11 +158,12 @@ describe('entity', function(){
 
     var foo = si.make$('foo')
     assert.equal('a/b/c',fmt(foo.canon$({parse:'a/b/c'})))
+    done()
   })
 
 
 
-  it('make', function(){
+  it('make', function(done){
     var si = seneca(testopts)
 
     var foo = si.make$('foo')
@@ -168,8 +173,8 @@ describe('entity', function(){
     assert.equal('$-/-/foo',foo.canon$({string$:true}))
     assert.equal(',,foo',''+foo.canon$({array:true}))
     assert.equal(',,foo',''+foo.canon$({array$:true}))
-    assert.equal("{ zone: undefined, base: undefined, name: 'foo' }",util.inspect(foo.canon$({object:true})))
-    assert.equal("{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }",util.inspect(foo.canon$({object$:true})))
+    assert.equal("{ zone: undedoneed, base: undedoneed, name: 'foo' }",util.inspect(foo.canon$({object:true})))
+    assert.equal("{ 'zone$': undedoneed, 'base$': undedoneed, 'name$': 'foo' }",util.inspect(foo.canon$({object$:true})))
     assert.equal(',,foo',''+foo.canon$({}))
 
     var b1_n1 = si.make$('b1/n1')
@@ -206,11 +211,12 @@ describe('entity', function(){
 
     var esc1 = si.make$('esc',{x:1,y_$:2})
     assert.equal( esc1.toString(), '$-/-/esc:{id=;x=1;y=2}' )
+    done()
   })
 
 
 
-  it('toString', function(){
+  it('toString', function(done){
     var si = seneca(testopts)
 
     var f1 = si.make$('foo')
@@ -225,10 +231,11 @@ describe('entity', function(){
     var f3 = f1.make$({c:4})
     f3.d = 5
     assert.equal("$-/-/foo:{id=;c=4;d=5}",''+f3)
+    done()
   })
 
 
-  it('isa', function(){
+  it('isa', function(done){
     var si = seneca(testopts)
 
     var f1 = si.make$('foo')
@@ -263,9 +270,10 @@ describe('entity', function(){
     assert.ok( !f3.canon$({isa:['zar','far','bar']}) )
     assert.ok( !f3.canon$({isa:{zone:'zar',base:'far',name:'bar'}}) )
 
+    done()
   })
 
-  
+
   it('mem-store-import-export', function(done){
     var si = seneca(testopts)
 
@@ -282,7 +290,7 @@ describe('entity', function(){
       function(next){
         si.act('role:mem-store,cmd:dump',function(e,o){
           var t = gex(
-            '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+            '{"undedoneed":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
           ).on(JSON.stringify(o))
           assert.ok(t)
           next(e)
@@ -299,7 +307,7 @@ describe('entity', function(){
             assert.ok( null == e)
 
             si2.act('role:mem-store,cmd:dump',function(e,o){
-              assert.ok( gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
+              assert.ok( gex('{"undedoneed":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
 
               si2.make('a').load$({x:1},function(e,nx1){
                 assert.equal('$-/-/a:{id='+x1.id+';x=1}',''+nx1)
@@ -312,7 +320,7 @@ describe('entity', function(){
 
                     si2.make('c', 'b','a').load$({x:3},function(e,nx3){
                       assert.equal('$c/b/a:{id='+x3.id+';x=3}',''+nx3)
-                      
+
                       next()
                     })
                   })
@@ -330,7 +338,7 @@ describe('entity', function(){
   })
 
 
-  it('close', function(fin){
+  it('close', function(done){
     var si = seneca(testopts)
 
     var tmp = {s0:0,s1:0,s2:0}
@@ -368,7 +376,7 @@ describe('entity', function(){
     })
 
     si.close(function( err ){
-      if(err) return fin(err);
+      if(err) return done(err);
 
       //console.log(tmp)
 
@@ -378,7 +386,7 @@ describe('entity', function(){
       assert.equal(1,tmp.s1)
       assert.equal(1,tmp.s2)
 
-      fin()
+      done()
     })
   })
 

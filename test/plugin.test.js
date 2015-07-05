@@ -8,8 +8,14 @@ var util   = require('util')
 var assert = require('assert')
 
 var _   = require('lodash')
+var Lab = require('lab')
 
 var seneca = require('..')
+
+
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 
 describe('plugin', function(){
@@ -22,7 +28,7 @@ describe('plugin', function(){
       },
       log:'silent'
     })
-    
+
     try { si.use( {foo:1} ) } catch( e ) {
       assert.ok(e.seneca)
       assert.equal('plugin_no_name',e.code)
@@ -103,7 +109,7 @@ describe('plugin', function(){
       },
       log:'silent'
     })
-    
+
     si.use( function(){
       return {name:'aaa'}
     })
@@ -155,7 +161,7 @@ describe('plugin', function(){
     var si = seneca({log:'silent',errhandler:fin})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}
-    
+
     var plugin_aaa = function(opts){
       this.add({a:1},function(args,done){
         this.act('z:1',function(err,out){
@@ -238,7 +244,7 @@ describe('plugin', function(){
 
     si.use(function foo(){})
     si.use({init:function(){},name:'bar',tag:'aaa'})
-    
+
     assert.ok( si.hasplugin('foo') )
     assert.ok( si.hasplugin('foo','') )
     assert.ok( si.hasplugin('foo','-') )
