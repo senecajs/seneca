@@ -47,7 +47,7 @@ describe('transport', function(){
       .add('foo:1',function(args,done){
 
         // ensure action id is transferred for traceability
-        assert.equal('aaa',args.meta$.id)
+        assert.equal('aa/BB',args.meta$.id)
         testact.call(this,args,done)
       })
       .listen( {type:'test',pin:'foo:1'} )
@@ -61,7 +61,7 @@ describe('transport', function(){
         
               .start(fin)
 
-              .wait('foo:1,actid$:aaa')
+              .wait('foo:1,actid$:aa/BB')
               .step(function(out){
                 assert.ok(1,out.foo)
                 return true;

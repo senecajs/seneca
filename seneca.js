@@ -920,7 +920,7 @@ function make_seneca( initial_options ) {
               // TODO: not really satisfactory
               var err = error(ex,'sub_function_catch',{args:args,result:result})
               self.log.error(
-                'sub','err',args.actid$, err.message, args, error.stack )
+                'sub','err',args.meta.id$, err.message, args, error.stack )
             }
           })
         }
@@ -1495,11 +1495,15 @@ function make_seneca( initial_options ) {
 
     var act_callpoint = callpoint()
 
-    var tx = origargs.tx$ ||
+    var id_tx = ( args.id$ || args.actid$ || instance.idgen() ).split('/')
+
+    var tx = 
+          id_tx[1] ||
+          origargs.tx$ ||
           instance.fixedargs.tx$ ||
           instance.idgen()
 
-    var actid    = ( args.actid$ || (instance.idgen()+'/'+tx) )
+    var actid    = (id_tx[0] || instance.idgen()) + '/' + tx 
     var actstart = Date.now()
 
     cb = cb || common.noop
@@ -1514,7 +1518,8 @@ function make_seneca( initial_options ) {
 
     // remove actid so that user manipulation of args for subsequent use does
     // not cause inadvertent hit on existing action
-    delete callargs.actid$
+    delete callargs.id$
+    delete callargs.actid$ // legacy alias
 
     callargs.meta$ = {
       id:      actid,
@@ -1717,8 +1722,10 @@ function make_seneca( initial_options ) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    logging.log_act_err( root, {actid:callargs.actid$,duration:duration},
-                         actmeta, callargs, prior_ctxt, err, act_callpoint )
+    logging.log_act_err( root, {
+      actid:    callargs.id$ || callargs.actid$,
+      duration: duration
+    }, actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit('act-err',callargs,err)
 
@@ -1751,8 +1758,10 @@ function make_seneca( initial_options ) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    logging.log_act_err( root, {actid:callargs.actid$,duration:duration},
-                         actmeta, callargs, prior_ctxt, err, act_callpoint )
+    logging.log_act_err( root, {
+      actid:    callargs.id$ || callargs.actid$,
+      duration: duration
+    }, actmeta, callargs, prior_ctxt, err, act_callpoint )
 
     instance.emit('act-err',callargs,err,result[1])
 
@@ -1778,7 +1787,7 @@ function make_seneca( initial_options ) {
     assert.ok( !actcb || _.isFunction(actcb),
                'act_cache_check; actcb; isFunction')
 
-    var actid = args.actid$
+    var actid = args.id$ || args.actid$
 
     if( null != actid && so.actcache.active ) {
       var actdetails = private$.actcache.get(actid)
@@ -1823,7 +1832,9 @@ function make_seneca( initial_options ) {
 
 
     // automate actid log insertion
-    delegate.log = logging.make_delegate_log(callargs.actid$,actmeta,instance)
+    delegate.log = logging.make_delegate_log( 
+      (callargs.id$ || callargs.actid$), actmeta, instance
+    )
     logging.makelogfuncs(delegate)
 
 
@@ -1833,12 +1844,14 @@ function make_seneca( initial_options ) {
 
         var sub_prior_ctxt = _.clone(prior_ctxt)
         sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
-        sub_prior_ctxt.chain.push(callargs.actid$)
+        sub_prior_ctxt.chain.push( callargs.id$ || callargs.actid$ )
         sub_prior_ctxt.entry = false
         sub_prior_ctxt.depth++;
 
+        delete prior_args.id$
         delete prior_args.actid$
         delete prior_args.meta$
+        prior_args.tx$ = tx
 
         do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
       }

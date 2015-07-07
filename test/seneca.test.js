@@ -1043,7 +1043,7 @@ describe('seneca', function(){
       assert.equal(1,out.x) 
     })
 
-    si.act({actid$:'a',a:1},function(err,out){ 
+    si.act({id$:'a/B',a:1},function(err,out){ 
       if(err) return fin(err);
 
       assert.equal(2,out.x)
@@ -1053,7 +1053,7 @@ describe('seneca', function(){
 
         assert.equal(3,out.x)
 
-        si.act({actid$:'a',a:1},function(err,out){ 
+        si.act({id$:'a/B',a:1},function(err,out){ 
           if(err) return fin(err);
 
           assert.equal(2,out.x) 
