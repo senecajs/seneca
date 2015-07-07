@@ -52,7 +52,7 @@ the end of this Page is your starting point for more details.
 Let's start with some code. Here's a service that sums two numbers:
 
 ``` js
-var seneca = require('seneca')()
+var seneca = require( 'seneca' )()
 
 seneca.add( 
   {role:'math', cmd:'sum'}, 
@@ -245,7 +245,7 @@ null { answer: 12 }
 Putting this all together, you get:
 
 ``` js
-var seneca = require('seneca')()
+var seneca = require( 'seneca' )()
 
 seneca.add( 
   {role:'math', cmd:'sum'}, 
@@ -322,7 +322,7 @@ one that has precedence.
 Here's some code to show this:
 
 ``` js
-var seneca = require('seneca')()
+var seneca = require( 'seneca' )()
 
 seneca
   .add( 
@@ -402,7 +402,7 @@ Action patterns can call other action patterns to get their work
 done. Let's modify our example code to use this approach.
 
 ``` js
-var seneca = require('seneca')()
+var seneca = require( 'seneca' )()
 
 seneca
   .add( 
@@ -507,7 +507,7 @@ can add a validation check, and debugging information, using the
 following code:
 
 ``` js
-var seneca = require('seneca')()
+var seneca = require( 'seneca' )()
 
 seneca
   .add( 
@@ -602,7 +602,7 @@ function minimal_plugin( options ) {
   console.log(options) 
 }
 
-require('seneca')()
+require( 'seneca' )()
   .use( minimal_plugin, {foo:'bar'} )
 ``` 
 
@@ -671,7 +671,7 @@ function math( options ) {
 
 }
 
-require('seneca')()
+require( 'seneca' )()
   .use( math )
   .act( 'role:math,cmd:sum,left:1,right:2', console.log )
 ```
@@ -804,7 +804,7 @@ function math( options ) {
   }
 }
 
-require('seneca')()
+require( 'seneca' )()
   .use( math, {logfile:'./math.log'} )
   .act( 'role:math,cmd:sum,left:1,right:2', console.log )
 ```
@@ -827,6 +827,198 @@ file.
 
 
 <%= section_link 'Writing Microservices', 'writing-microservices' %> 
+
+Let's turn the _math_ plugin into a real microservice. First, you need
+to get organized. The business logic of the _math_ plugin, the
+functionality that it provides, is separate from whatever way it
+communicates with the outside world. Sometimes you might expose a web
+service. Other times you might listen on a message bus.
+
+It makes sense to put the business logic, the plugin definition, in
+its own file. Node.js modules are perfect for this:
+
+``` js
+module.exports = function math( options ) { 
+
+  this.add( 'role:math,cmd:sum', function sum( msg, respond ) {
+    respond( null, { answer: msg.left + msg.right } )
+  })
+
+  this.add( 'role:math,cmd:product', function product( msg, respond ) {
+    respond( null, { answer: msg.left * msg.right } )
+  })
+
+  this.wrap( 'role:math', function( msg, respond ) {
+    msg.left  = Number(msg.left).valueOf()
+    msg.right = Number(msg.right).valueOf()
+    this.prior( msg, respond )
+  })
+
+}
+```
+
+This plugin is defined in the
+[math.js](https://github.com/senecajs/getting-started/blob/master/math-plugin-init.js)
+file. You export the plugin definition function, and then call
+`seneca.use` with the name of the file. You can either
+[require](https://nodejs.org/api/modules.html) it in, or if you like
+to be terse, let Seneca make the `require` call:
+
+``` js
+// these are equivalent
+require( 'seneca' )()
+  .use( require('./math.js') )
+  .act( 'role:math,cmd:sum,left:1,right:2', console.log )
+
+require( 'seneca' )()
+  .use( 'math' ) // finds ./math.js in local folder
+  .act( 'role:math,cmd:sum,left:1,right:2', console.log )
+```
+
+The `seneca.wrap` method matches a set of patterns and overrides all
+of them with the same action extension function. This is the same as
+calling `seneca.add` manually for each one. It takes two parameters:
+
+   * `pin`: a _pin_ is a pattern-matching pattern
+   * `action`: action extension function
+
+A _pin_ is a pattern that matches other patterns (it "pins" them). The
+pin `role:math` will match the patterns `role:math,cmd:sum` and
+`role:math,cmd:product` that are registered with Seneca.
+
+In this case, you use `seneca.wrap` to make sure that the `left` and
+`right` properties are parsed as numberic values, even if they are
+provided as strings.
+
+Everything is still in the same process. Let's change that. First you
+need a microservice:
+
+``` js
+require( 'seneca' )()
+  .use( 'math' )
+  .listen()
+```
+
+Running this code
+([math-service.js](https://github.com/senecajs/getting-started/blob/master/math-service.js))
+starts a microservice process that listens on port 10101 for HTTP
+requests. This is *not* a web server. In this case, HTTP is being used
+as the transport mechanism for messages.
+
+You can try it out by sending a request to the microservice. Open the
+URL: `http://localhost:10101/act?role=math&cmd=sum&left=1&right=2` in
+a web browser, or use [curl](http://curl.haxx.se/) on the command line:
+
+``` bash
+$ curl -d '{"role":"math","cmd":"sum","left":1,"right":2}' http://localhost:10101/act
+``` 
+
+And what you get back is:
+
+``` js
+{"answer":3}
+```
+
+Next, you need a microservice client:
+
+``` js
+require( 'seneca' )()
+  .client()
+  .act('role:math,cmd:sum,left:1,right:2',console.log)
+```
+
+Running this code ([math-client.js](https://github.com/senecajs/getting-started/blob/master/math-client.js)) starts a microservice client that sends the JSON message:
+
+``` js
+{ "role":"math", "cmd":"sum", "left":1, "right":2 }
+```
+
+to the _math-service_ microservice above, which then responds with:
+
+``` js
+{ "answer":2 }
+```
+
+With Seneca, you create microservices by calling `seneca.listen`, and
+you talk to the services using `seneca.client`. In the example, you
+are using the default settings for the client and server, which is to
+communicate via HTTP over port 10101. Both `seneca.client` and
+`seneca.listen` accept the following parameters:
+
+   * _port_: optional integer; port number,
+   * _host_: optional string; host IP address,
+   * _spec_: optional object; full specification object.
+
+So long as the client and listen parameters are the same, the two
+services can communicate. Some examples:
+
+   * `seneca.client( 8080 )` &rarr; `seneca.listen( 8080 )` 
+   * `seneca.client( 8080, '192.168.0.2' )` &rarr; `seneca.listen( 8080, '192.168.0.2'  )` 
+   * `seneca.client( { port:8080, host:'192.168.0.2' } )` &rarr; `seneca.listen( { port:8080, host:'192.168.0.2' } )`
+
+
+Seneca provides you with **transport independence** because your
+business logic does not need to know how messages are transported, or
+which service will get them. This is specified in the service setup
+code or configuration. In this case, the code in the _math.js_ plugin
+*never* changes.
+
+The HTTP transport provides an easy way to integrate with Seneca
+microservices. But it does have all the overhead of HTTP. Another
+transport you can use is direct TCP connections. Seneca provides both
+HTTP and TCP options via the built-in
+[seneca-transport](https://www.npmjs.com/package/seneca-transport)
+plugin. Let's move to TCP:
+
+   * `seneca.client( { type:'tcp' } )` &rarr; `seneca.listen( { type:'tcp' } )`
+
+The default _client/listen_ configuration sends all messages that the
+client does not recognize over the listening server. Locally defined
+patterns are executed locally. It's usually preferable to specific
+exactly which patterns should be sent to which service, and you can do
+this using a _pin_.
+
+Let's put all this together into an example that sends `role:math`
+messages out over TCP on port 30303 (just an arbitrary port), and
+executes all other messages locally:
+
+First, the listening service ([math-pin-service.js](https://github.com/senecajs/getting-started/blob/master/math-pin-service.js)):
+
+``` js
+require( 'seneca' )()
+
+  .use( 'math' )
+
+  // listen for role:math messages
+  // IMPORTANT: must match client
+  .listen( { type:'tcp', pin:'role:math' } )
+```
+
+Then, the client ([math-pin-service.js](https://github.com/senecajs/getting-started/blob/master/math-pin-client.js)):
+
+``` js
+require( 'seneca' )()
+
+  // a local pattern
+  .add( 'say:hello', function( msg, respond ){ respond( null, {text:"Hi!"} ) } )
+
+  // send any role:math patterns out over the network
+  // IMPORTANT: must match listening service
+  .client( { type:'tcp', pin:'role:math' } )
+
+  // executed remotely
+  .act('role:math,cmd:sum,left:1,right:2',console.log)
+
+  // executed locally
+  .act('say:hello',console.log)
+```
+
+
+
+
+
+
+
 
 
 - services
