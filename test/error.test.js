@@ -47,7 +47,7 @@ describe('seneca', function(){
 
     // ~~ CASE: fire-and-forget; err-logged
     si.act('a:1')
-    assert.equal('act_not_found',ctxt.errlog[9])
+    assert.equal('act_not_found',ctxt.errlog[8])
 
     // ~~ CASE: callback; default
     ctxt.errlog = null
@@ -61,13 +61,13 @@ describe('seneca', function(){
     si.act('a:1',function(err,out){
       assert.ok(null==out)
       assert.equal('act_not_found',err.code)
-      assert.equal('act_not_found',ctxt.errlog[9])
+      assert.equal('act_not_found',ctxt.errlog[8])
 
       // ~~ CASE: callback; bad-default; err-result; err-logged
       si.act('a:1,default$:"foo"',function(err,out){
         assert.ok(null==out)
         assert.equal('act_default_bad',err.code)
-        assert.equal('act_default_bad',ctxt.errlog[9])
+        assert.equal('act_default_bad',ctxt.errlog[8])
 
         // ~~ CASE: fragile; throws; err-logged
         si.options({debug:{fragile:true}})
@@ -81,7 +81,7 @@ describe('seneca', function(){
         }
         catch(ex) {
           assert.equal('act_not_found',ex.code)
-          assert.equal('act_not_found',ctxt.errlog[9])
+          assert.equal('act_not_found',ctxt.errlog[8])
         }
         
         return fin();
@@ -101,7 +101,7 @@ describe('seneca', function(){
       // ~~ CASE: callback; args-invalid; err-result; err-logged
       si.act('a:1',function(err){
         assert.equal('act_invalid_args',err.code)
-        assert.equal('act_invalid_args',ctxt.errlog[15])
+        assert.equal('act_invalid_args',ctxt.errlog[14])
 
         // ~~ CASE: callback; args-valid
         si.act('a:1,b:1',function(err,out){
@@ -207,7 +207,7 @@ describe('seneca', function(){
         assert.ok( null == out )
         assert.equal('act_execute',err.code)
         assert.equal('a:1',err.details.pattern)
-        assert.equal('act_execute',ctxt.errlog[15])
+        assert.equal('act_execute',ctxt.errlog[14])
 
         ctxt.errlog = null
 
@@ -218,7 +218,7 @@ describe('seneca', function(){
               assert.equal(1,args.a)
               assert.equal('act_execute',err.code)
               assert.equal('a:1',err.details.pattern)
-              assert.equal('act_execute',ctxt.errlog[15])
+              assert.equal('act_execute',ctxt.errlog[14])
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
@@ -276,7 +276,7 @@ describe('seneca', function(){
         assert.ok( null == out )
         assert.equal('act_execute',err.code)
         assert.equal('a:1',err.details.pattern)
-        assert.equal('act_execute',ctxt.errlog[15])
+        assert.equal('act_execute',ctxt.errlog[14])
 
         ctxt.errlog = null
 
@@ -287,7 +287,7 @@ describe('seneca', function(){
               assert.equal(1,args.a)
               assert.equal('act_execute',err.code)
               assert.equal('a:1',err.details.pattern)
-              assert.equal('act_execute',ctxt.errlog[15])
+              assert.equal('act_execute',ctxt.errlog[14])
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
@@ -332,7 +332,7 @@ describe('seneca', function(){
         assert.equal('a:1', err.details.pattern, ctxt.name+'-B' )
 
         if( ctxt.log ) {
-          assert.equal('act_execute', ctxt.errlog[15], ctxt.name+'-C' )
+          assert.equal('act_execute', ctxt.errlog[14], ctxt.name+'-C' )
         }
         else {
           assert.ok( null == ctxt.errlog )
@@ -348,7 +348,7 @@ describe('seneca', function(){
             assert.equal('a:1', err.details.pattern, ctxt.name+'-E' )
 
             if( ctxt.log ) {
-              assert.equal('act_execute', ctxt.errlog[15], ctxt.name+'-F' )
+              assert.equal('act_execute', ctxt.errlog[14], ctxt.name+'-F' )
             }
 
             ctxt.fin()
@@ -375,7 +375,7 @@ describe('seneca', function(){
       assert.equal('seneca: Action a:1 callback threw: DDD.',err.message)
 
       if( log_it ) {
-        assert.equal('act_callback', ctxt.errlog[15], 'callback-H' )
+        assert.equal('act_callback', ctxt.errlog[14], 'callback-H' )
       }
       else {
         assert.ok( null == ctxt.errlog )

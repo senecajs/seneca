@@ -249,6 +249,8 @@ function make_seneca( initial_options ) {
 
 
   // Create internal tools.
+  var actnid     = nid({length:5})
+  var refnid     = function(){ return '('+actnid()+')' }
   var paramcheck = make_paramcheck()
   var argv       = cmdline(root)
 
@@ -438,6 +440,8 @@ function make_seneca( initial_options ) {
 
     paramcheck.register.validate(plugin,thrower)
 
+    //console.log('REG',plugin)
+
     var fullname = plugin.name+(plugin.tag?'/'+plugin.tag:'')
     var tag      = plugin.tag||'-'
 
@@ -468,12 +472,17 @@ function make_seneca( initial_options ) {
       meta = {service:meta}
     }
 
-    plugin.name    = meta.name    || plugin.name
-    plugin.tag     = meta.tag     || plugin.tag ||
+    plugin.name = meta.name || plugin.name
+    plugin.tag = 
+      meta.tag || 
+      plugin.tag ||
       (plugin.options && plugin.options.tag$)
+
+    plugin.fullname = plugin.name+(plugin.tag?'/'+plugin.tag:'')
+
     plugin.service = meta.service || plugin.service
 
-    sd.__update_plugin__(meta)
+    sd.__update_plugin__(plugin)
 
     var pluginref = plugin.name+(plugin.tag?'/'+plugin.tag:'')
     private$.plugins[pluginref] = plugin
@@ -984,6 +993,11 @@ function make_seneca( initial_options ) {
     var action    = args.action
     var actmeta   = args.actmeta || {}
 
+
+    actmeta.plugin_name     = actmeta.plugin_name || 'root'
+    actmeta.plugin_fullname = actmeta.plugin_fullname || 
+      actmeta.plugin_name + (actmeta.plugin_tag ? '/' + actmeta.plugin_tag : '')
+
     var add_callpoint = callpoint()
     if( add_callpoint ) {
       actmeta.callpoint = add_callpoint
@@ -1020,7 +1034,8 @@ function make_seneca( initial_options ) {
     // deprecated
     actmeta.argpattern = actmeta.pattern
 
-    actmeta.id = self.idgen()
+    //actmeta.id = self.idgen()
+    actmeta.id = refnid()
 
     actmeta.func = action
 
@@ -1072,9 +1087,12 @@ function make_seneca( initial_options ) {
       var logger   = self.log.log || self.log
 
       if( !isplugin ) {
-        addlog.unshift('-')
-        addlog.unshift('-')
-        addlog.unshift('-')
+        //addlog.unshift('-')
+        //addlog.unshift('-')
+        //addlog.unshift('-')
+        addlog.unshift(actmeta.plugin_tag)
+        addlog.unshift(actmeta.plugin_name)
+        addlog.unshift('plugin')
       }
 
       logger.debug.apply( self, addlog )
@@ -1832,9 +1850,7 @@ function make_seneca( initial_options ) {
 
 
     // automate actid log insertion
-    delegate.log = logging.make_delegate_log( 
-      (callargs.id$ || callargs.actid$), actmeta, instance
-    )
+    delegate.log = logging.make_delegate_log( callargs.meta$.id, actmeta, instance )
     logging.makelogfuncs(delegate)
 
 
@@ -1946,16 +1962,10 @@ function make_seneca( initial_options ) {
   function api_delegate(fixedargs) {
     var self = this
 
-
     var delegate = Object.create(self)
     var act = self.act
 
-    delegate.did = nid()
-
-    // TODO: clean up data description handling
-    self.log.debug( 'delegate', 
-                    common.descdata(_.omit(fixedargs,['req$','res$']),1,false), 
-                    delegate.did, callpoint() )
+    delegate.did = refnid()
 
     delegate.act = function() {
       var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
