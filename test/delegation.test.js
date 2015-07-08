@@ -9,16 +9,19 @@ var seneca_module = require('..')
 var common = require('../lib/common')
 
 
-var gex    = require('gex')
-
+var gex = require('gex')
+var Lab = require('lab')
 
 
 var testopts = {log:'silent'}
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 
 describe('delegation', function(){
 
-  it('happy', function() {
+  it('happy', function(done) {
     var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       cb(null,args)
@@ -37,11 +40,12 @@ describe('delegation', function(){
     sid.act({c:'C'},function(err,out){
       assert.ok(gex("{c=C,a$=A,b=B,*}").on( common.owndesc(out,1,true)))
     })
+    done()
   })
 
 
 
-  it('dynamic', function() {
+  it('dynamic', function(done) {
     var si = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
@@ -75,21 +79,23 @@ describe('delegation', function(){
       //console.log( 'OUT='+common.owndesc(out,0,true) )
       assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( common.owndesc(out,1,true)))
     })
+
+    done()
   })
 
 
-  it('logging.actid',function(){
+  it('logging.actid',function(done){
     var fail
     var si = seneca_module({
       log:{
         map:[{handler:function(){
         if( 'aaa'==arguments[6] ) {
-          if('debug'!=arguments[1]) fail='aaa,debug'; 
-          if('single'!=arguments[2]) fail='aaa,single'; 
+          if('debug'!=arguments[1]) fail='aaa,debug';
+          if('single'!=arguments[2]) fail='aaa,single';
         }
         else if( 'ppp'==arguments[6] ) {
-          if('debug'!=arguments[1]) fail='ppp,debug'; 
-          if('plugin'!=arguments[2]) fail='ppp,plugin'; 
+          if('debug'!=arguments[1]) fail='ppp,debug';
+          if('plugin'!=arguments[2]) fail='ppp,plugin';
         }
       }}]}
     })
@@ -122,12 +128,13 @@ describe('delegation', function(){
       console.log(fail)
       assert.fail(fail)
     }
-  
+
+    done()
   })
 
 
 
-  it('parent', function() {
+  it('parent', function(done) {
     var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
@@ -147,11 +154,12 @@ describe('delegation', function(){
       //console.dir( common.owndesc(out,0,true) )
       //assert.ok(gex("{c=C,parent$=*}").on( common.owndesc(out,1,true)))
     })
+    done()
   })
 
 
 
-  it('parent.plugin',function(){
+  it('parent.plugin',function(done){
     var si = seneca_module(testopts)
 
     si.use(function(opts){
@@ -205,7 +213,7 @@ describe('delegation', function(){
       //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{a=A,actid$=*,p1=1,p2=1,p3=1}").on( common.owndesc(out,1,true)))
     })
-  
+    done()
   })
 
 })

@@ -13,7 +13,12 @@ var seneca   = require('..')
 var gex   = require('gex')
 var _     = require('lodash')
 var async = require('async')
+var Lab   = require('lab')
 
+
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 process.setMaxListeners(0)
 
@@ -56,9 +61,9 @@ describe('transport', function(){
         var si = seneca({tag:'cln',timeout:5555,log:'silent',
                          debug:{short_logs:true}})
               .use( tt )
-        
+
               .client( {type:'test', pin:'foo:1'} )
-        
+
               .start(fin)
 
               .wait('foo:1,actid$:aa/BB')
@@ -66,7 +71,7 @@ describe('transport', function(){
                 assert.ok(1,out.foo)
                 return true;
               })
-        
+
               .end()
       })
   })
@@ -103,7 +108,7 @@ describe('transport', function(){
 
                   .wait(function(data,done){
                     si.act('bar:1',function(err,out){
-                      assert.equal('act_not_found',err.code)            
+                      assert.equal('act_not_found',err.code)
                       done()
                     })
                   })
@@ -178,7 +183,7 @@ describe('transport', function(){
                   assert.deepEqual( {baz:2,qoo:20}, out )
                   return true;
                 })
-              
+
                 .end()
             })
     })
@@ -378,7 +383,7 @@ describe('transport', function(){
 
         this.close(fin)
       })
-  })  
+  })
 
 
   it('transport-no-plugin-init', function(fin){
@@ -429,7 +434,7 @@ describe('transport', function(){
             this.close(fin)
           })
       })
-  })  
+  })
 
 })
 
@@ -459,7 +464,7 @@ function make_test_transport() {
       var listen_options = seneca.util.clean(_.extend({},options[type],args))
 
       tu.listen_topics( seneca, args, listen_options, function(topic) {
-        seneca.log.debug('listen', 'subscribe', topic+'_act', 
+        seneca.log.debug('listen', 'subscribe', topic+'_act',
                          listen_options, seneca)
 
         test_transport.queuemap[topic+'_act'] = async.queue(function(data,done){
@@ -517,4 +522,3 @@ function make_test_transport() {
     }
   }
 }
-
