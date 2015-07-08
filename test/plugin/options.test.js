@@ -5,13 +5,18 @@
 var assert = require('assert')
 var events = require('events')
 
+var Lab = require('lab')
 
 var seneca = require('../..')
+
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 
 describe('plugin.options', function() {
 
-  it('happy', function() {
+  it('happy', function(done) {
     var si = seneca({log:'silent'})
 
     si.use('options',{a:1})
@@ -19,5 +24,6 @@ describe('plugin.options', function() {
 
     si.use('options',require('./options.file.js'))
     assert.equal(2,si.export('options').b)
+    done()
   })
 })

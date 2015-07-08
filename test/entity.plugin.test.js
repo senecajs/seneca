@@ -8,7 +8,12 @@ var common = require('../lib/common')
 var seneca = require('..')
 
 var gex = require('gex')
+var Lab = require('lab')
 
+
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 describe('entity.plugin', function() {
 
@@ -59,7 +64,7 @@ describe('entity.plugin', function() {
     // handled by default mem instance
     var zen = si.make('zen')
     zen.d = 4
-    
+
 
     ;foo.save$( function(err,foo) {
       assert.ok( null == err)
@@ -70,7 +75,7 @@ describe('entity.plugin', function() {
         assert.ok( gex('$-/-/foo:{id=*;a=1}').on(''+fooR) )
 
 
-        
+
         ;bar.save$( function(err,bar) {
           assert.ok( null == err)
           assert.ok( gex('$-/-/bar:{id=*;b=2}').on(''+bar), ''+bar )

@@ -11,9 +11,13 @@ var seneca   = require('..')
 var common   = require('../lib/common')
 
 var gex = require('gex')
+var Lab = require('lab')
 
 
 var testopts = {log:'silent'}
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 process.setMaxListeners(0)
 
@@ -83,7 +87,7 @@ describe('seneca', function(){
           assert.equal('act_not_found',ex.code)
           assert.equal('act_not_found',ctxt.errlog[8])
         }
-        
+
         return fin();
       })
     })
@@ -97,7 +101,7 @@ describe('seneca', function(){
 
     si.ready(function(){
       si.add('a:1,b:{required$:true}',function(args,done){this.good({x:1})})
-      
+
       // ~~ CASE: callback; args-invalid; err-result; err-logged
       si.act('a:1',function(err){
         assert.equal('act_invalid_args',err.code)
@@ -184,7 +188,7 @@ describe('seneca', function(){
           if( 1 < aI ) return true;
           else fin();
         }
-        catch(e) { 
+        catch(e) {
           fin(e)
           return true;
         }
@@ -230,8 +234,8 @@ describe('seneca', function(){
           }
         })
         si.act('a:1')
-        
-      } 
+
+      }
       catch(e) { fin(e) }
     })
   }
@@ -253,7 +257,7 @@ describe('seneca', function(){
           if( 1 < aI ) return true;
           else fin();
         }
-        catch(e) { 
+        catch(e) {
           fin(e)
           return true;
         }
@@ -299,8 +303,8 @@ describe('seneca', function(){
           }
         })
         si.act('a:1')
-        
-      } 
+
+      }
       catch(e) { fin(e) }
     })
   }
@@ -357,7 +361,7 @@ describe('seneca', function(){
         })
         si.act('a:1')
 
-      } 
+      }
       catch(e) { ctxt.fin(e) }
     })
   }
@@ -385,7 +389,7 @@ describe('seneca', function(){
 
     si.ready(function(){
       si.add('a:1',function(args,done){this.good({x:1})})
-      
+
 
       setTimeout( function(){
         // ~~ CASE: action; callback; callback-throws; log
@@ -470,5 +474,3 @@ describe('seneca', function(){
   }
 
 })
-
-

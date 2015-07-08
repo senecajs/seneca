@@ -8,13 +8,19 @@ var util   = require('util')
 var assert = require('assert')
 
 var _   = require('lodash')
+var Lab = require('lab')
 
 var seneca = require('..')
 
 
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
+
+
 describe('plugin', function(){
 
-  it('bad', function() {
+  it('bad', function(done) {
     var si = seneca({
       // this lets you change undead per test
       debug:{
@@ -22,7 +28,7 @@ describe('plugin', function(){
       },
       log:'silent'
     })
-    
+
     try { si.use( {foo:1} ) } catch( e ) {
       assert.ok(e.seneca)
       assert.equal('plugin_no_name',e.code)
@@ -32,10 +38,11 @@ describe('plugin', function(){
       assert.ok(e.seneca)
       assert.equal('plugin_not_found',e.code)
     }
+    done()
   })
 
 
-  it('plugin-error-def', function(fin) {
+  it('plugin-error-def', function(done) {
     var si = seneca({
       debug:{
         undead:true
@@ -43,7 +50,7 @@ describe('plugin', function(){
       log:'silent',
       errhandler: function(err) {
         assert.equal('plugin-def',err.message)
-        fin()
+        done()
       }
     })
 
@@ -53,7 +60,7 @@ describe('plugin', function(){
   })
 
 
-  it('plugin-error-add', function(fin) {
+  it('plugin-error-add', function(done) {
     var si = seneca({
       debug:{
         undead:true
@@ -61,7 +68,7 @@ describe('plugin', function(){
       log:'silent',
       errhandler: function(err) {
         assert.equal('invalid_arguments',err.code)
-        fin()
+        done()
       }
     })
 
@@ -71,7 +78,7 @@ describe('plugin', function(){
   })
 
 
-  it('plugin-error-act', function(fin) {
+  it('plugin-error-act', function(done) {
     var cc = 0
 
     var si = seneca({
@@ -81,7 +88,7 @@ describe('plugin', function(){
       log:'silent',
       errhandler: function(err) {
         assert.equal('seneca: Action foo:1 failed: act-cb.',err.message)
-        cc++ && fin()
+        cc++ && done()
       }
     })
 
@@ -95,7 +102,7 @@ describe('plugin', function(){
   })
 
 
-  it('depends', function() {
+  it('depends', function(done) {
     var si = seneca({
       // this lets you change undead per test
       debug:{
@@ -103,7 +110,7 @@ describe('plugin', function(){
       },
       log:'silent'
     })
-    
+
     si.use( function(){
       return {name:'aaa'}
     })
@@ -148,14 +155,15 @@ describe('plugin', function(){
       this.depends('hhh','aaa','zzz')
       return {name:'hhh'}
     })
+    done()
   })
 
 
-  it('fix', function(fin){
-    var si = seneca({log:'silent',errhandler:fin})
+  it('fix', function(done){
+    var si = seneca({log:'silent',errhandler:done})
 
     function echo(args,done){done(null,_.extend({t:Date.now()},args))}
-    
+
     var plugin_aaa = function(opts){
       this.add({a:1},function(args,done){
         this.act('z:1',function(err,out){
@@ -205,7 +213,7 @@ describe('plugin', function(){
           assert.equal(1,out.w)
           assert.ok(out.t)
 
-          fin()
+          done()
         })
       })
     })
@@ -214,7 +222,7 @@ describe('plugin', function(){
   })
 
 
-  it('export',function(){
+  it('export',function(done){
     var si = seneca({
       // this lets you change undead per test
       debug:{
@@ -230,15 +238,16 @@ describe('plugin', function(){
     }})
 
     si.export('not-an-export')
+    done()
   })
 
 
-  it('hasplugin',function(){
+  it('hasplugin',function(done){
     var si = seneca({log:'silent'})
 
     si.use(function foo(){})
     si.use({init:function(){},name:'bar',tag:'aaa'})
-    
+
     assert.ok( si.hasplugin('foo') )
     assert.ok( si.hasplugin('foo','') )
     assert.ok( si.hasplugin('foo','-') )
@@ -248,7 +257,7 @@ describe('plugin', function(){
     assert.ok( !si.hasplugin('bar','-') )
     assert.ok( !si.hasplugin('bar','bbb') )
     assert.ok( si.hasplugin('bar','aaa') )
-
+    done()
   })
 
 })

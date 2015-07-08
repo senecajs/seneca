@@ -16,6 +16,12 @@ var seneca   = require('..')
 var gex           = require('gex')
 var parambulator  = require('parambulator')
 var _             = require('lodash')
+var Lab           = require('lab')
+
+
+var lab      = exports.lab = Lab.script()
+var describe = lab.describe
+var it       = lab.it
 
 
 // timerstub broken on node 0.11
@@ -39,7 +45,7 @@ process.setMaxListeners(0)
 
 describe('seneca', function(){
 
-  it('version', function(){
+  it('version', function(done){
     var start = Date.now()
     var si = seneca(testopts)
     assert.equal(si.version,VERSION)
@@ -49,11 +55,12 @@ describe('seneca', function(){
     assert.ok( end-start < 333 )
 
     assert.equal( si, si.seneca() )
+    done()
   })
 
 
 
-  it('quick', function(){
+  it('quick', function(done){
     var si = seneca(testopts)
     si.use(function quickplugin(opts){
       si.add({a:1},function(args,cb){cb(null,{b:2})})
@@ -64,24 +71,25 @@ describe('seneca', function(){
     si.act('a:1',function(err,out){
       assert.equal(out.b,2)
     })
+    done()
   })
 
 
-  
-  it('require-use-safetynet', function(fin){
+
+  it('require-use-safetynet', function(done){
     require('..')
       .use('echo')
       .act('role:echo,foo:1',function(err,out){
         console.log(err)
-        if(err) return fin(err);
+        if(err) return done(err);
         assert.equal(1,out.foo)
-        fin()
+        done()
       })
   })
 
 
 
-  it('ready-complex', function(fin){
+  it('ready-complex', function(done){
     var mark = {ec:0}
 
     timerstub.setTimeout(function(){
@@ -93,7 +101,7 @@ describe('seneca', function(){
       assert.ok(mark.p2,'p2')
       assert.ok(1===mark.ec,'ec')
 
-      fin()
+      done()
     },300)
 
 
@@ -127,27 +135,27 @@ describe('seneca', function(){
   })
 
 
-  it('ready-func', function(fin){
+  it('ready-func', function(done){
     var si = seneca(testopts)
 
     si.ready(function(){
       //console.log('READY FUNC')
-      fin()
+      done()
     })
   })
 
 
-  it('ready-event', function(fin){
+  it('ready-event', function(done){
     var si = seneca(testopts)
 
     si.on('ready',function(){
       //console.log('READY EVENT')
-      fin()
+      done()
     })
   })
 
 
-  it('ready-both', function(fin){
+  it('ready-both', function(done){
     var si = seneca(testopts)
     var tmp = {}
 
@@ -164,24 +172,24 @@ describe('seneca', function(){
 
     function complete(){
       if( tmp.a && tmp.b ) {
-        fin()
+        done()
       }
     }
   })
 
 
-  it('happy-error',function(fin){
+  it('happy-error',function(done){
     seneca({log:'silent'})
       .add('happy_error:1',function(args,done){done(new Error('happy-error'))})
       .act('happy_error:1',function(err){
         assert.ok( null != err )
         assert.equal('seneca: Action happy_error:1 failed: happy-error.',err.message)
-        fin()
+        done()
       })
   })
 
 
-  it('errhandler',function(fin){
+  it('errhandler',function(done){
     var tmp = {}
 
     function grab_all(err) {
@@ -211,30 +219,30 @@ describe('seneca', function(){
       assert.ok( null != tmp.grab )
 
       si.options({errhandler:pass_on})
-      
+
       si.act('cmd:pass',function(err){
         assert.ok( null != err )
         assert.ok( null != tmp.pass)
-        fin()
+        done()
       })
-      
+
     },100)
 
   })
 
 
-  it('register', function() {
+  it('register', function(done) {
     var si = seneca(testopts)
 
     var initfn = function(){}
     var emptycb = function(){}
 
 
-    try { si.register() } catch( e ) { 
+    try { si.register() } catch( e ) {
       assert.equal('no_input$',e.parambulator.code)
     }
 
-    try { si.register({}) } catch( e ) { 
+    try { si.register({}) } catch( e ) {
       assert.equal('name',e.parambulator.property)
       assert.equal('required$',e.parambulator.code)
     }
@@ -243,17 +251,18 @@ describe('seneca', function(){
       assert.equal('name',e.parambulator.property)
       assert.equal('string$',e.parambulator.code)
     }
-    
+
     try { si.register({name:'a',init:'b'},emptycb) } catch( e ) {
       assert.equal('init',e.parambulator.property)
       assert.equal('function$',e.parambulator.code)
     }
+    done()
   })
 
 
 
-  it('action-basic', function(fin) {
-    var si = seneca(testopts).error(fin)
+  it('action-basic', function(done) {
+    var si = seneca(testopts).error(done)
     si.options({debug:{fragile:true}})
 
     var a1 = 0
@@ -267,20 +276,20 @@ describe('seneca', function(){
       assert.ok( null == err)
       assert.equal('+100',out.s)
       assert.equal(100,a1)
-      
+
       si.act({op:'foo',a1:200}, function(err,out) {
         assert.ok( null == err)
         assert.equal('+200',out.s)
         assert.equal(200,a1)
 
-        fin()
+        done()
       })
     })
   })
 
 
-  it('action-add-invalid-args', function(fin) {
-    var si = seneca(testopts).error(fin)
+  it('action-add-invalid-args', function(done) {
+    var si = seneca(testopts).error(done)
 
     try {
       si.add({op:'bar'})
@@ -295,14 +304,14 @@ describe('seneca', function(){
       }
       catch(e) {
         assert.ok(e.message.match(/norma: invalid arguments/))
-        fin()
+        done()
       }
     }
   })
 
 
-  it('action-act-invalid-args', function(fin) {
-    var si = seneca(testopts).error(fin)
+  it('action-act-invalid-args', function(done) {
+    var si = seneca(testopts).error(done)
     si.options({debug:{fragile:true}})
 
     ;try {
@@ -340,23 +349,23 @@ describe('seneca', function(){
     catch(e) {
       assert.equal(e.code,'act_not_found')
 
-      fin()
+      done()
     } } } }
   })
 
 
-  it('action-default', function(fin) {
-    var si = seneca(testopts).error(fin)
+  it('action-default', function(done) {
+    var si = seneca(testopts).error(done)
 
     si.act({op:'bad',a1:100,default$:{a:1}}, function(err,out) {
       assert.deepEqual({a:1},out)
-      fin()
+      done()
     })
   })
 
 
-  it('action-override', function(fin) {
-    var si = seneca(testopts).error(fin)
+  it('action-override', function(done) {
+    var si = seneca(testopts).error(done)
 
     function foo(args,done) {
       done(null,{ a:args.a, s:this.toString(), foo:args.meta$ })
@@ -381,7 +390,7 @@ describe('seneca', function(){
         done(e,o)
       })
     }
-    
+
 
     si.ready( function(){
       si.add({op:'foo'},foo)
@@ -403,7 +412,7 @@ describe('seneca', function(){
             assert.ok( !o.bar.entry )
             assert.ok( !o.foo.entry )
 
-            fin()
+            done()
           })
         })
       })
@@ -413,8 +422,8 @@ describe('seneca', function(){
 
 
 
-  it('prior-nocache', function(fin){
-    var si = seneca({log:'silent',errhandler:fin,trace:{act:false}})
+  it('prior-nocache', function(done){
+    var si = seneca({log:'silent',errhandler:done,trace:{act:false}})
     var count = 0, called = ''
 
     si.ready( function(){
@@ -465,7 +474,7 @@ describe('seneca', function(){
             })
             .ready(function(){
               assert.equal('ABCDE',called)
-              fin()
+              done()
             })
 
         })
@@ -473,8 +482,8 @@ describe('seneca', function(){
   })
 
 
-  it('gating', function(fin){
-    var si = seneca({log:'silent',errhandler:fin})
+  it('gating', function(done){
+    var si = seneca({log:'silent',errhandler:done})
     var count = 0, called = ''
 
     si.add('foo:a',function(args,done){
@@ -482,7 +491,7 @@ describe('seneca', function(){
       count+=args.x
       done(null,{count:count})
     })
-    
+
     si
       .gate()
       .act('foo:a,x:10',function(err,out){
@@ -500,15 +509,15 @@ describe('seneca', function(){
       .ready(function(){
         assert.equal('ABC',called)
         assert.equal(1113,count)
-        fin()
+        done()
       })
   })
 
 
-  
 
 
-  it('act_if', function(fin) {
+
+  it('act_if', function(done) {
     var si = seneca({log:'silent'})
 
     si.add({op:'foo'},function(args,done) {
@@ -541,21 +550,21 @@ describe('seneca', function(){
       .add('a:2',function(args){this.good({b:args.a+2})})
 
     si.act_if( true, 'a:1', function(err,out){
-      if( err ) return fin(err);
+      if( err ) return done(err);
 
       assert.equal(2,out.b)
 
       si.act_if( false, 'a:2', function(err,out){
-        if( err ) return fin(err);
+        if( err ) return done(err);
         assert.fail()
       })
 
-      process.nextTick(fin)
+      process.nextTick(done)
     })
   })
 
 
-  it('plugins', function() {
+  it('plugins', function(done) {
     var si = seneca({plugins:['echo'],log:'silent'})
 
     si.act({role:'echo',baz:'bax'},function(err,out){
@@ -630,7 +639,7 @@ describe('seneca', function(){
 
       si.register( new Mock2(), function(err){
         assert.ok( null == err)
-        
+
         si.act({role:'mock1',cmd:'foo',foo:2},function(err,out){
           assert.equal('bar:foo:2',out)
         })
@@ -643,11 +652,12 @@ describe('seneca', function(){
     si.act({role:'echo',cmd:'foo',bar:1},function(err,out){
       assert.equal( JSON.stringify({cmd:'foo',bar:1}), JSON.stringify(out) )
     })
+    done()
   })
 
 
 
-  it('pin', function() {
+  it('pin', function(done) {
     var si = seneca({log:'silent'})
 
     var log = []
@@ -661,19 +671,21 @@ describe('seneca', function(){
       log.push('b'+args.p3)
       cb(null,{p3:args.p3})
     })
-    
+
     var api = si.pin({p1:'v1',p2:'*'})
 
     api.v2a({p3:'A'},function(e,r){assert.equal(r.p3,'A')})
     api.v2b({p3:'B'},function(e,r){assert.equal(r.p3,'B')})
-    
+
     var acts = si.pinact({p1:'v1',p2:'*'})
     assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",
                  util.inspect(acts))
+
+     done()
   })
 
 
-  it('pin-star', function() {
+  it('pin-star', function(done) {
     var si = seneca(testopts)
 
     si.add('a:1,b:x',function(){})
@@ -687,19 +699,20 @@ describe('seneca', function(){
     assert.ok( _.isFunction(pin_c.y) )
     assert.ok( null == pin_c.x )
 
-    assert.deepEqual( [ { a: '1', b: 'x' }, { a: '1', c: 'y' } ], 
+    assert.deepEqual( [ { a: '1', b: 'x' }, { a: '1', c: 'y' } ],
                       si.findpins('a:1') )
 
-    assert.deepEqual( [ { a: '1', b: 'x' } ], 
+    assert.deepEqual( [ { a: '1', b: 'x' } ],
                       si.findpins('a:1,b:*') )
 
-    assert.deepEqual( [ { a: '1', c: 'y' } ], 
+    assert.deepEqual( [ { a: '1', c: 'y' } ],
                       si.findpins('a:1,c:*') )
 
+    done()
   })
 
 
-  it('fire-and-forget', function() {
+  it('fire-and-forget', function(done) {
     var si = seneca({log:'silent'})
     si.add({a:1},function(args,done){done(null,args.a+1)})
     si.add({a:1,b:2},function(args,done){done(null,args.a+args.b)})
@@ -712,26 +725,27 @@ describe('seneca', function(){
     si.act('b:2',{a:1})
     si.act('',{a:1})
     si.act('',{a:1,b:2})
+    done()
   })
 
 
 
-  it('strargs', function() {
+  it('strargs', function(done) {
     var si = seneca({log:'silent'})
     si.add({a:1,b:2},function(args,done){
       done(null,(args.c||-1)+parseInt(args.b)+parseInt(args.a))})
 
-    si.act({a:1,b:2,c:3},function(err,out){ 
+    si.act({a:1,b:2,c:3},function(err,out){
       assert.ok( null == err); assert.equal(6,out) })
 
-    si.act('a:1,b:2',{c:3},function(err,out){ 
+    si.act('a:1,b:2',{c:3},function(err,out){
       assert.ok( null == err); assert.equal(6,out) })
 
-    si.act('a:1,b:2',function(err,out){ 
+    si.act('a:1,b:2',function(err,out){
       assert.ok( null == err); assert.equal(2,out) })
 
     // strargs win!!
-    si.act('a:1,b:2',{a:2},function(err,out){ 
+    si.act('a:1,b:2',{a:2},function(err,out){
       assert.ok( null == err); assert.equal(2,out) })
 
     try {
@@ -762,13 +776,14 @@ describe('seneca', function(){
     catch( e ) {
       assert.ok(e.message.match(/norma:/))
     }
+    done()
   })
 
 
-  it('moreobjargs', function(fin) {
+  it('moreobjargs', function(done) {
     var p0 = {c:6}
 
-    seneca({log:'silent',errhandler:fin})
+    seneca({log:'silent',errhandler:done})
 
       .add({a:1},{b:2},
            function(args,done){done(null,{c:args.c})})
@@ -778,7 +793,7 @@ describe('seneca', function(){
 
       .add('x:1',{x:2,y:3},{x:4,y:5,z:6},
            function(args,done){done(null,{k:args.k})})
-    
+
       .gate()
 
       .act('a:1,b:2,c:3',function(err,out){
@@ -810,8 +825,8 @@ describe('seneca', function(){
 
         // using root as ready seneca is fatal$
         this.root.options({errhandler:function(err){
-          if( 'act_invalid_args' != err.code ) return fin(err);
-          fin()
+          if( 'act_invalid_args' != err.code ) return done(err);
+          done()
         }})
 
         this.root.act('A:1,B:true,C:44')
@@ -820,20 +835,20 @@ describe('seneca', function(){
   })
 
 
-  it('string-add', function(fin) {
+  it('string-add', function(done) {
     seneca(testopts)
-      .error(fin)
+      .error(done)
 
-      .start(fin)
+      .start(done)
 
       .add("i:0,a:1,b:2",
            function(args,done){
              done(null,{v:(args.c||-1)+parseInt(args.b)+parseInt(args.a)})
            })
       .act("i:0,a:1,b:2,c:3",
-           function(err,out){ 
-             assert.ok( null == err ) 
-             assert.equal(6,out.v) 
+           function(err,out){
+             assert.ok( null == err )
+             assert.equal(6,out.v)
            })
 
       .add("i:1,a:1",{b:2},
@@ -841,8 +856,8 @@ describe('seneca', function(){
              done(null,{v:(args.c||-1)+parseInt(args.b)+parseInt(args.a)})
            })
       .act("i:1,a:1,b:2,c:3",
-           function(err,out){ 
-             assert.ok( null == err ) 
+           function(err,out){
+             assert.ok( null == err )
              assert.equal(6,out.v)
            })
 
@@ -851,9 +866,9 @@ describe('seneca', function(){
              done(null,{v:(args.c||-1)+parseInt(args.b)+parseInt(args.a)})
            })
       .act("i:2,a:1,b:2,c:3",
-           function(err,out){ 
-             assert.ok( null == err); 
-             assert.equal(6,out.v) 
+           function(err,out){
+             assert.ok( null == err);
+             assert.equal(6,out.v)
            })
 
       .end()
@@ -861,7 +876,7 @@ describe('seneca', function(){
 
 
 
-  it('fix', function() {
+  it('fix', function(done) {
     var si = seneca(testopts)
 
     function ab(args,done){done(null,{r:''+args.a+(args.b||'-')+(args.c||'-')+args.z})}
@@ -876,10 +891,12 @@ describe('seneca', function(){
     si
       .act('a:1,b:2,z:8',function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
       .act('a:1,c:3,z:9',function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
-  })  
+
+    done()
+  })
 
 
-  it('parambulator', function(fin) {
+  it('parambulator', function(done) {
     var si = seneca({log:'silent'})
 
     si.add({a:1,b:'q',c:{required$:true,string$:true}},
@@ -892,19 +909,19 @@ describe('seneca', function(){
     }
     si.add('a:2',foo)
 
-    si.act( {a:1,b:'q',c:'c'}, function(err){err&&fin(err)})
-    si.act( {a:2,b:'q'}, function(err){err&&fin(err)})
+    si.act( {a:1,b:'q',c:'c'}, function(err){err&&done(err)})
+    si.act( {a:2,b:'q'}, function(err){err&&done(err)})
 
-    si.act( {a:1,b:'q',c:1}, function(err){ 
-      assert.equal('act_invalid_args',err.code) 
+    si.act( {a:1,b:'q',c:1}, function(err){
+      assert.equal('act_invalid_args',err.code)
 
-      si.act( {a:1,b:'q'}, function(err){ 
-        assert.equal('act_invalid_args',err.code) 
+      si.act( {a:1,b:'q'}, function(err){
+        assert.equal('act_invalid_args',err.code)
 
-        si.act( {a:2}, function(err){ 
-          assert.equal('act_invalid_args',err.code) 
+        si.act( {a:2}, function(err){
+          assert.equal('act_invalid_args',err.code)
 
-          fin()
+          done()
         })
       })
     })
@@ -913,7 +930,7 @@ describe('seneca', function(){
 
 
 
-  it('act-param', function(fin){
+  it('act-param', function(done){
     seneca({log:'silent'})
 
       .add({a:1,b:{integer$:true}},function(args,done){
@@ -922,11 +939,11 @@ describe('seneca', function(){
       })
 
       .act({a:1,b:1},function(err,out){
-        try { 
+        try {
           assert.ok( null == err)
           assert.equal(2,out.a)
         }
-        catch(e) { return fin(e) }
+        catch(e) { return done(e) }
 
         this.act({a:1,b:"b"},function(err,out){
           try {
@@ -935,7 +952,7 @@ describe('seneca', function(){
                          "The property 'b', with current value: 'b', "+
                          "must be a integer (parent: top level).; arguments "+
                          "were: { a: 1, b: 'b' }.",err.message)
-          } catch(e) { return fin(e) }
+          } catch(e) { return done(e) }
 
           try {
             this.add({a:1,b:{notatypeatallatall$:true}},function(args,done){
@@ -945,9 +962,9 @@ describe('seneca', function(){
           catch(e){
             try {
               assert.ok(e.message.match(/Parambulator: Unknown rule/))
-            } catch(e) { return fin(e) }
+            } catch(e) { return done(e) }
 
-            fin()
+            done()
           }
         })
       })
@@ -955,8 +972,8 @@ describe('seneca', function(){
 
 
 
-  it('sub', function(fin){
-    var si = seneca(testopts,{errhandler:fin})
+  it('sub', function(done){
+    var si = seneca(testopts,{errhandler:done})
 
     var tmp = {a:0,as1:0,as2:0,as1_in:0,as1_out:0,all:0}
 
@@ -971,7 +988,7 @@ describe('seneca', function(){
     })
 
     si.act({a:1},function(err,out) {
-      if(err) return fin(err);
+      if(err) return done(err);
       assert.equal(1,out.b)
       assert.equal(1,tmp.a)
       assert.equal(0,tmp.as1)
@@ -998,7 +1015,7 @@ describe('seneca', function(){
       })
 
       si.act({a:1},function(err,out) {
-        if(err) return fin(err);
+        if(err) return done(err);
 
         assert.equal(1,out.b)
         assert.equal(2,tmp.a)
@@ -1012,7 +1029,7 @@ describe('seneca', function(){
         })
 
         si.act({a:1,x:1},function(err,out) {
-          if(err) return fin(err);
+          if(err) return done(err);
 
           assert.equal(1,out.b)
           assert.equal(3,tmp.a)
@@ -1021,16 +1038,16 @@ describe('seneca', function(){
 
           assert.ok( 0 < tmp.all )
 
-          fin()
+          done()
         })
       })
     })
   })
 
 
-  it('act-cache', function(fin){
+  it('act-cache', function(done){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({errhandler:done})
 
     var x = 0
 
@@ -1038,35 +1055,35 @@ describe('seneca', function(){
       x++;this.good({x:x})
     })
 
-    si.act({a:1},function(err,out){ 
-      if(err) return fin(err);
-      assert.equal(1,out.x) 
+    si.act({a:1},function(err,out){
+      if(err) return done(err);
+      assert.equal(1,out.x)
     })
 
     si.act({id$:'a/B',a:1},function(err,out){ 
-      if(err) return fin(err);
+      if(err) return done(err);
 
       assert.equal(2,out.x)
 
-      si.act({a:1},function(err,out){ 
-        if(err) return fin(err);
+      si.act({a:1},function(err,out){
+        if(err) return done(err);
 
         assert.equal(3,out.x)
 
         si.act({id$:'a/B',a:1},function(err,out){ 
-          if(err) return fin(err);
+          if(err) return done(err);
 
-          assert.equal(2,out.x) 
+          assert.equal(2,out.x)
 
           si.act('role:seneca,stats:true',function(err,stats){
-            if(err) return fin(err);
+            if(err) return done(err);
 
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
             assert.equal( '{ calls: 8, done: 8, fails: 0, cache: 1 }',
                           util.inspect(stats.act))
-            fin()
+            done()
           })
         })
       })
@@ -1074,9 +1091,9 @@ describe('seneca', function(){
   })
 
 
-  it('zig', function(fin){
+  it('zig', function(done){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({errhandler:done})
 
     si
       .add('a:1',function(a,d){d(0,{aa:a.aa})})
@@ -1090,7 +1107,7 @@ describe('seneca', function(){
         .start()
         .wait('a:1,aa:1')
         .end(function(e,o){
-          if(e) return fin(e);
+          if(e) return done(e);
           assert.equal(1,o.aa)
           do_zig1()
         })
@@ -1107,7 +1124,7 @@ describe('seneca', function(){
           d()
         })
         .end(function(e,o){
-          if(e) return fin(e);
+          if(e) return done(e);
           do_zig2()
         })
     }
@@ -1138,7 +1155,7 @@ describe('seneca', function(){
         .endif()
 
         .end(function(e,o){
-          if(e) return fin(e);
+          if(e) return done(e);
           assert.equal(2,tmp.aaaa)
           do_zig3()
         })
@@ -1182,16 +1199,16 @@ describe('seneca', function(){
         .wait('b:1,c:$.d')
         .end(function(e,o){
           assert.equal(2,o.c)
-          fin(e)
+          done(e)
         })
     }
 
   })
 
 
-  it('wrap',function(fin){
+  it('wrap',function(done){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({errhandler:done})
 
     si.add('a:1',function(args,done){done(null,{aa:args.aa})})
     si.add('b:2',function(args,done){done(null,{bb:args.bb})})
@@ -1214,7 +1231,7 @@ describe('seneca', function(){
     })
 
     si
-      .start(fin)
+      .start(done)
 
       .wait('a:1,aa:1')
       .step(function(out){
@@ -1264,14 +1281,14 @@ describe('seneca', function(){
       .step(function(out){
         assert.deepEqual({ bb: 2, ALL: 2 }, out)
       })
-    
+
       .end()
   })
 
 
-  it('meta',function(fin){
+  it('meta',function(done){
     var si = seneca(testopts)
-    si.options({errhandler:fin})
+    si.options({errhandler:done})
 
     var meta = {}
 
@@ -1285,22 +1302,22 @@ describe('seneca', function(){
       done(null,{bb:args.bb})
     })
 
-    si.start(fin)
+    si.start(done)
       .wait('a:1')
       .wait('b:2')
       .end(function(err){
-        if(err) return fin(err);
+        if(err) return done(err);
 
         assert.equal( 'a:1', meta.a.pattern )
         assert.equal( 'b:2', meta.b.pattern )
-        fin()
+        done()
       })
   })
 
 
-  it('strict',function(fin){
+  it('strict',function(done){
     var si = seneca({log:'silent'})
-    
+
     si.add('a:1',function(a,d){d(null,"a")})
     si.act('a:1',function(err,res){
       assert.ok(err)
@@ -1310,9 +1327,8 @@ describe('seneca', function(){
       si.act('a:1',function(err,res){
         assert.ok(!err)
         assert.equal('a', res)
-        fin()
+        done()
       })
     })
   })
 })
-
