@@ -1656,7 +1656,7 @@ function make_seneca( initial_options ) {
           // handle throws of non-Error values
           if( !util.isError(ex) ) {
             err = ( _.isObject(ex) ?
-                    new Error(common.owndesc(ex,1)) :
+                    new Error(jsonic.stringify(ex)) :
                     err = new Error(''+ex) )
           }
 
@@ -1991,7 +1991,8 @@ function make_seneca( initial_options ) {
       })
 
       strdesc = self.toString()+
-        (_.keys(vfa).length?'/'+common.owndesc(vfa,0,false):'')
+        //(_.keys(vfa).length?'/'+common.owndesc(vfa,0,false):'')
+        (_.keys(vfa).length?'/'+jsonic.stringify(vfa):'')
 
       return strdesc
     }

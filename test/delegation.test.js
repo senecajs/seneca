@@ -27,7 +27,7 @@ describe('delegation', function(){
 
 
     assert.ok(gex("Seneca/0.*.*/*").on(si.toString()))
-    assert.ok(gex("Seneca/0.*.*/*/{b=B}").on(sid.toString()))
+    assert.ok(gex("Seneca/0.*.*/*/{b:B}").on(sid.toString()))
 
 
     si.act({c:'C'},function(err,out){
