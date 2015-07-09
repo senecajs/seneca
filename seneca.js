@@ -841,7 +841,7 @@ function make_seneca( initial_options ) {
 
     var api = {
       toString: function() {
-        return 'pin:'+common.descdata(pattern,1)+'/'+thispin
+        return 'pin:'+common.argpattern(pattern)+'/'+thispin
       }
     }
 
@@ -1991,7 +1991,6 @@ function make_seneca( initial_options ) {
       })
 
       strdesc = self.toString()+
-        //(_.keys(vfa).length?'/'+common.owndesc(vfa,0,false):'')
         (_.keys(vfa).length?'/'+jsonic.stringify(vfa):'')
 
       return strdesc
@@ -2334,7 +2333,7 @@ function makedie( instance, ctxt ) {
             "Stack: "+stack+"\n\n"+
             "Instance: "+instance.toString()+fatalmodemsg+die_trace+"\n\n"+
             "When: "+new Date().toISOString()+"\n\n"+
-            "Log: "+common.owndesc(logargs,3)+"\n\n"+
+            "Log: "+jsonic.stringify(logargs)+"\n\n"+
             "Node:\n  "+util.inspect(process.versions).replace(/\s+/g,' ')+
             ",\n  "+util.inspect(process.features).replace(/\s+/g,' ')+
             ",\n  "+util.inspect(process.moduleLoadList).replace(/\s+/g,' ')+"\n\n"+

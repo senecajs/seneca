@@ -13,3 +13,5 @@ README.html
 npm-debug.log
 mem.json
 out
+test/coverage.html
+
