@@ -84,7 +84,7 @@ run the code, follow these steps:
    1. Open a terminal, and `cd` to your projects folder.
    2. Run `git clone https://github.com/senecajs/getting-started`.
    3. `cd` into the _getting-started_ folder.
-   4. Run `npm install` to install the dependent modules, including Seneca.
+   4. Run `npm install` to install the required modules, including Seneca.
    5. Run `node sum.js`.
 
 This guide assumes you already have [Node.js](http://nodejs.org) installed.
@@ -890,6 +890,38 @@ In this case, you use `seneca.wrap` to make sure that the `left` and
 `right` properties are parsed as numberic values, even if they are
 provided as strings.
 
+Sometimes it can be useful to see a visual tree of the patterns and
+any overrides in a Seneca instance. You can do this using the
+`--seneca.print.tree` command line option. The file
+[math-tree.js](https://github.com/senecajs/getting-started/blob/master/math-plugin-init.js) loads the _math_ plugin, but then does nothing:
+
+``` js
+require('seneca')()
+  .use('math')
+
+```
+
+We're just using it to show the action tree:
+
+``` bash
+$ node math-tree.js --seneca.print.tree
+2015-07-09T15:21:31.158Z 9vjqzroin2k4/1436455291148/78025/- INFO	hello	Seneca/0.6.2/9vjqzroin2k4/1436455291148/78025/-	
+Seneca action patterns for instance: 9vjqzroin2k4/1436455291148/78025/-
+├─┬ cmd:sum
+│ └─┬ role:math
+│   └── # math, (s1a28), 
+│       # math, (sw9ew), sum
+└─┬ cmd:product
+  └─┬ role:math
+    └── # math, (sxti2), 
+        # math, (b8gcw), product
+```
+
+Here you can see the name/value pairs of the action patterns arranged
+in a tree structure, and also any overrides. Action functions are
+indicated by the format: `# plugin, (action-id), function-name`.
+
+
 Everything is still in the same process. Let's change that. First you
 need a microservice:
 
@@ -994,7 +1026,8 @@ require( 'seneca' )()
   .listen( { type:'tcp', pin:'role:math' } )
 ```
 
-Then, the client ([math-pin-service.js](https://github.com/senecajs/getting-started/blob/master/math-pin-client.js)):
+Then, the client
+([math-pin-service.js](https://github.com/senecajs/getting-started/blob/master/math-pin-client.js)):
 
 ``` js
 require( 'seneca' )()
@@ -1013,18 +1046,228 @@ require( 'seneca' )()
   .act('say:hello',console.log)
 ```
 
+You can use filtered logging to trace the flow of messages. You can
+use the command line option `--seneca...` to control how Seneca runs,
+including the log output generated. Seneca logs have the following
+attributes, the most important of which, in order, are:
+
+   * `date-time`: when the log entry occurred
+   * `seneca-id`: identifier for the Seneca process
+   * `level`: one of _DEBUG_, _INFO_, _WARN_, _ERROR_, _FATAL_
+   * `type`: entry code, such as _act_, _plugin_, etc
+   * `plugin`: plugin name (actions without a plugin have _root$_)
+   * `case`: entry case, such as _IN_, _OUT_, _ADD_, etc.
+   * `action-id/transaction-id`: tracing identifier, **stays the same over the network**
+   * `pin`: the action pattern for this message
+   * `message`: the inbound or outbound message (truncated if too long)
+   
+If you run the above processes with `--seneca.log.all` then you'll get all the logs. If you look at the entries, you can see Seneca booting up all the internal plugins.
+
+``` bash
+$ node math-pin-service.js --seneca.log.all
+... lots of logs ...
+
+$ node math-pin-client.js --seneca.log.all
+... lots of logs ...
+```
+
+It's hard to see the log entries that you care about, the ones relevant to the _math_ plugin. To narrow the output, try this:
 
 
+``` bash
+$ node math-pin-service.js --seneca.log=plugin:math
+20.. 85.. DEBUG	plugin	math  DEFINE	{}
+20.. 85.. DEBUG	plugin	math  ADD	(f3ysr)	cmd:sum,role:math	sum	
+20.. 85.. DEBUG	plugin	math  ADD	(9mocb)	cmd:product,role:math	product	
+20.. 85.. DEBUG	plugin	math  ADD	(ydx70)	cmd:sum,role:math		
+20.. 85.. DEBUG	plugin	math  ADD	(ka7rj)	cmd:product,role:math		
+20.. 85.. DEBUG	plugin	math  options	set	{math:{}}	
+20.. 85.. DEBUG	act	math  IN	2682lsrziy1i/rst61586f7wl	cmd:sum,role:math	{role:math,cmd:sum,left:1,right:2}	ENTRY	(ydx70)	LISTEN	o2..	-	
+20.. 85.. DEBUG	act	math  IN	1k46jra7rhpd/rst61586f7wl	cmd:sum,role:math	{role:math,cmd:sum,left:1,right:2}	PRIOR;(ydx70)	(f3ysr)	-	-	-	
+20.. 85.. DEBUG	act	math  OUT	1k46jra7rhpd/rst61586f7wl	cmd:sum,role:math	{answer:3}	PRIOR;(ydx70)	(f3ysr)	-	-	0	-	
+20.. 85.. DEBUG	act	math  OUT	2682lsrziy1i/rst61586f7wl	cmd:sum,role:math	{answer:3}	EXI(ydx70)	LISTEN	o2..	1	-
+
+$ node math-pin-client.js --seneca.log=pin:role:math
+20.. o2.. DEBUG	act	remote$ IN	2682lsrziy1i/rst61586f7wl	role:math	{role:math,cmd:sum,left:1,right:2}	ENTRY	CLIENT	-	-	-	
+nu
+20.. o2.. DEBUG	act	remote$ OUT	2682lsrziy1i/rst61586f7wl	role:math	{answer:3}	EXIT	CLIENT	-	85..	15	-	
+null { answer: 3 }
+```
+
+On the listening server, the setting `--seneca.log=plugin:math`
+narrows the log to those entries where the `plugin` attribute is
+_math_. You can see the registration of the _math_ plugin, and the
+addition of its action patterns. If you remember, you used
+`seneca.wrap` to override the basic actions with a string to integer
+conversion. That means that the _role:math_ actions have two _ADD_
+lines in the logs. You'll also notice that each action gets an
+indentifer, of the form `(abcde)`. You can use this to find out the
+exact action function that gets executed when a message comes in.
+
+When a message comes in, an `IN` log entry is created. When the action
+function provides a result, an 'OUT' log entry is created. In the
+listening server logs above you can see this happening when the
+`{role:math,cmd:sum,left:1,right:2}` comes in over the network from
+the client.
+
+Look carefully at the generated unique action identifers:
+`2682lsrziy1i/rst61586f7wl` and `1k46jra7rhpd/rst61586f7wl`. These can
+be used to trace the flow of messages. The `IN` and `OUT` lines will
+have the same action identifier. Further, the second page, after the
+`/`, is a transaction identifer. All sub actions triggered by an
+initial action have the same transaction identifier, in this case
+`rst61586f7wl`.
+
+The action identifier persists over the network so that you can trace
+message flows when you have many microservices. Let's look at the
+client side. The setting `--seneca.log=pin:role:math` is another
+filter. This time it filters all log entries where the action pattern
+contains the specific pin, in this case `role:math`. 
+
+You can see that the action identifier `2682lsrziy1i/rst61586f7wl`
+originated on the client, and is passed over the listening server. You
+can also see that the client and listening server identifiers, `85..`
+and `o2..` (shortened for clarity) are given in the log entries so
+that you can tell which service sent which message.
+
+Also seen in the output of the client is the console.log printing of
+the results &mdash; these are not part of the logs, just ordinary
+printed output.
+
+There are many ways to configure your microservice communciation
+architecture. Take a look at the reference links at the end of this
+guide for more information.
 
 
+<%= section_link 'Web Server Integraton', 'web-server-integration' %> 
+
+Seneca is not a web framework. But you still need to connect it up to
+your web service API. Here's the easiest way to do that.
+
+The most important thing to remember is that you don't want to expose
+your internal action patterns to the outside world. That's not good
+security practice. Instead, define a set of API patterns, say with
+property `role:api`. Then you can hook them up to your internal
+microservices.
+
+Let's look at a simple example using
+[Express](http://expressjs.com). Here's the Express app
+([app.js](https://github.com/senecajs/getting-started/blob/master/math-pin-client.js)):
+
+``` js
+var seneca = require( 'seneca' )()
+      .use( 'api' )
+      .client( { type:'tcp', pin:'role:math' } )
+
+var app = require( 'express' )()
+      .use( require('body-parser').json() )
+      .use( seneca.export( 'web' ) )
+      .listen(3000)
+```
+
+You create a seneca instance, load the _api_ plugin, and then use
+`seneca.client` to send any `role:math` actions out to an external
+service. Your Express app is the microservice client.
+
+The integration between Seneca and Express happens in this line:
+
+``` js
+      .use( seneca.export( 'web' ) )
+```
+
+Seneca exports a middleware function that Express can use.
+
+Here's the _api_ plugin ([api.js](https://github.com/senecajs/getting-started/blob/master/math-pin-client.js)):
+
+``` js
+module.exports = function api( options ) {
+  
+  var valid_ops = { sum:'sum', product:'product' }
+
+  this.add( 'role:api,path:calculate', function( msg, respond ) {
+    this.act( 'role:math', {
+      cmd:   valid_ops[msg.operation],
+      left:  msg.left,
+      right: msg.right,
+    }, respond )
+  })
+
+  
+  this.add( 'init:api', function( msg, respond ) {
+    this.act('role:web',{use:{
+      prefix: '/api',
+      pin:    'role:api,path:*',
+      map: {
+        calculate: { GET:true, suffix:'/:operation' }
+      }
+    }}, respond )
+  })
+
+}
+```
+
+This is a normal Seneca plugin. The `role:api,path:calculate` pattern
+will be exposed via URL endpoint. The inbound message should have the
+property `operation` that specifies the calculation to perform: `sum`
+or `product`. You can see that the code create an explicit message for
+`role:math`. The `seneca.act` method allows you to build up the
+message both from a string (in this case `'role:math'`), and an
+object, merging the two together as a convenience.
+
+** Never use external input to create an action string. Always
+   explicitly create the internal message. This avoids injection
+   attacks. **
+
+The initialisation action makes a call to the pattern `role:web`, and
+defines the proeperty `use`. This is a definition object that defines
+a route mapping from URLs to action patterns. It has the properties:
+
+   * `prefix`: the URL prefix
+   * `pin`: the set of patterns to map
+   * `map`: the list of patterns property values to use as URL endpoints.
+
+Your URL endpoint starts with `/api/...`.
+
+The pin is `role:math,path:*`. This means map any patterns that have
+_role_ = _'api'_, and where a _path_ property is defined. In this
+case, there is only one match: `role:api,path:calculate`.
+
+The map has the property _calculate_ corresponding to the value of the
+_path_ property.
+
+Your URL endpoint starts with `/api/calculate/...`.
+
+The calculate property has a subobject that indicated that the HTTP
+method is GET, and that the URL should have a parameterised suffix
+(these work just like Express parameters).
+
+Your full URL endpoint is `/api/calculate/:operation`.
+
+The remaining message properties are obtained from the URL query
+string, and from any JSON body submitted with the HTTP request. In
+this case, we are using GET, so there is no body.
+
+You can re-use the microservice from the previous example. To run the
+app, start:
+
+``` bash
+$ node math-pin-service.js --seneca.log=plugin:math
+... logs as above ...
+
+$ node app.js --seneca.log=plugin:web,plugin:api
+... log entries for the web and api plugins ...
+```
+
+To exercise the app, load these URLs in a browser:
+
+`http://localhost:3000/api/calculate/sum?left=2&right=3` $rarr; `{"answer":5}`
+
+`http://localhost:3000/api/calculate/product?left=2&right=3` $rarr; `{"answer":6}`
+
+If you look at the log output, you can see the corresponding action
+calls.
 
 
-
-
-- services
-  - listen and client
-  - debug info, tree, list, etc
-  - pins
 
 - web server integration
   - express

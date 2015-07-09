@@ -440,8 +440,6 @@ function make_seneca( initial_options ) {
 
     paramcheck.register.validate(plugin,thrower)
 
-    //console.log('REG',plugin)
-
     var fullname = plugin.name+(plugin.tag?'/'+plugin.tag:'')
     var tag      = plugin.tag||'-'
 
@@ -673,11 +671,13 @@ function make_seneca( initial_options ) {
           func: function(args,done) {
             sendclient.send.call( this, args, done )
           },
-          log:        self.log,
-          argpattern: common.argpattern(pin),
-          pattern:    common.argpattern(pin),
-          id:         'CLIENT',
-          client$:    true
+          log:         self.log,
+          argpattern:  common.argpattern(pin),
+          pattern:     common.argpattern(pin),
+          id:          'CLIENT',
+          client$:     true,
+          plugin_name:     'remote$',
+          plugin_fullname: 'remote$',
         })
     })
 
@@ -993,8 +993,7 @@ function make_seneca( initial_options ) {
     var action    = args.action
     var actmeta   = args.actmeta || {}
 
-
-    actmeta.plugin_name     = actmeta.plugin_name || 'root'
+    actmeta.plugin_name     = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname || 
       actmeta.plugin_name + (actmeta.plugin_tag ? '/' + actmeta.plugin_tag : '')
 
@@ -1554,7 +1553,8 @@ function make_seneca( initial_options ) {
                          act_callpoint )
     }
 
-    logging.log_act_in( root, {actid:actid}, actmeta, callargs, prior_ctxt,
+    logging.log_act_in( root, {actid:actid,info:origargs.transport$}, 
+                        actmeta, callargs, prior_ctxt,
                         act_callpoint )
 
     instance.emit('act-in', callargs)
@@ -1563,6 +1563,7 @@ function make_seneca( initial_options ) {
 
     callargs = _.extend({},callargs,delegate.fixedargs)
 
+    var listen_origin = origargs.transport$ && origargs.transport$.origin
 
     var act_done = function(err) {
       try {
@@ -1576,6 +1577,7 @@ function make_seneca( initial_options ) {
         var call_cb = true
 
         var resdata = result[1]
+        var info    = result[2]
 
         if( null == err &&
             null != resdata &&
@@ -1632,7 +1634,12 @@ function make_seneca( initial_options ) {
           result[0] = null
 
           logging.log_act_out(
-            root, {actid:actid,duration:actend-actstart},
+            root, {
+              actid:    actid,
+              duration: actend-actstart,
+              info:     info,
+              listen:   listen_origin
+            },
             actmeta, callargs, result, prior_ctxt, act_callpoint )
 
           if( _.isFunction(delegate.on_act_out) ) {
@@ -1645,7 +1652,7 @@ function make_seneca( initial_options ) {
 
         try {
           if( call_cb ) {
-            cb.apply(delegate,result) // note: err == result[0]
+            cb.apply(delegate,result.slice(0,2)) // note: err == result[0]
           }
         }
 
@@ -1860,13 +1867,14 @@ function make_seneca( initial_options ) {
 
         var sub_prior_ctxt = _.clone(prior_ctxt)
         sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
-        sub_prior_ctxt.chain.push( callargs.id$ || callargs.actid$ )
+        sub_prior_ctxt.chain.push( actmeta.id )
         sub_prior_ctxt.entry = false
         sub_prior_ctxt.depth++;
 
         delete prior_args.id$
         delete prior_args.actid$
         delete prior_args.meta$
+        delete prior_args.transport$
         prior_args.tx$ = tx
 
         do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
