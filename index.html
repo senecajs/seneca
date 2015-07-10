@@ -1,19 +1,53 @@
----
-layout: main
----
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
+
+    <meta name="generator" content="DocPad v6.78.1" />
+    
+  </head>
+
+  <body>
+
+    <header>
+      <div class="inner">
+        <a href="http://senecajs.org">
+          <img src="images/building.png"/>
+          <span style="color:black; font: 52px 'Lobster'">Seneca</span>
+          <!--<img src="images/logo.png"/>-->
+        </a>
+        <p style="color:black; font: 24px 'Lobster'">A Micro-Services toolkit for Node.js</p>
+      </div>
+    </header>
+
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
 <section id="main-content">
 
-  <h3>
-    Build it Now, Scale it Later!
-  </h3>
+  <h3>Build it Now, Scale it Later!</h3>
 
   <p>
     This toolkit lets you write clean code that you can scale without needing to refactor.
     Start with everything in one process, and split it all out onto multiple systems when you need to.
   </p>
-  
+
   <p>
-    Here's
+    Here&#39;s
     a <a href="http://new.livestream.com/websummit/DeveloperStage2013/videos/33534085">micro-service
     (video)</a> that generates identifiers. You send the micro-service
     JSON objects. It responds with a new JSON object.
@@ -22,46 +56,47 @@ layout: main
 <div class="src-anno">
 &larr; load <a href="http://npmjs.org/package/seneca">seneca</a> module, and create instance<br>
 &larr; add a JSON message <span class="anno-em">pattern</span> to match<br>
-&larr; the pattern is <span class="anno-em anno-code">{...,"generate":"id",...}</span><br>
+&larr; the pattern is <span class="anno-em anno-code">{...,&quot;generate&quot;:&quot;id&quot;,...}</span><br>
 &larr; the <span class="anno-em">action</span> function for the pattern,<br>
 &larr; <span class="anno-em">done</span> is a regular callback function<br>
 &larr; send back another JSON message as the result,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which is <span class="anno-em anno-code">{"id":"0.123456789"}</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which is <span class="anno-em anno-code">{&quot;id&quot;:&quot;0.123456789&quot;}</span><br>
 &larr; listen for messages (HTTP is the default)
 </div>
-{% highlight js %}
-require('seneca')()                       
-  .add( 
-        { generate:'id'},                 
-        function( message, done ) {
-          done( null, 
-                {id:''+Math.random()} )
+
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+  .add(
+        { generate:<span class="hljs-string">'id'</span>},
+        <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( message, done )</span> </span>{
+          done( <span class="hljs-literal">null</span>,
+                {id:<span class="hljs-string">''</span>+<span class="hljs-built_in">Math</span>.random()} )
         })
   .listen()
-{% endhighlight %}
+</code></pre>
 
   <p>
-    Here's a client that connects to the identifier generating service (you could also do this manually over HTTP).
+    Here&#39;s a client that connects to the identifier generating service (you could also do this manually over HTTP).
   </p>
 
 <div class="src-anno" style="left:370px">
 <br>
 &larr; become a client<br>
-&larr; send a message: <span class="anno-em anno-code">{"generate":"id"}</span><br>
+&larr; send a message: <span class="anno-em anno-code">{&quot;generate&quot;:&quot;id&quot;}</span><br>
 &larr; the result arrives via a callback function<br>
-&larr; print out the result: <span class="anno-em anno-code">{"id":"0.123456789"}</span><br>
+&larr; print out the result: <span class="anno-em anno-code">{&quot;id&quot;:&quot;0.123456789&quot;}</span><br>
 </div>
-{% highlight js %}
-require('seneca')()
+
+
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
   .client()
-  .act( { generate:'id' },
-        function( err, result ) {
-          console.log(JSON.stringify(result))
+  .act( { generate:<span class="hljs-string">'id'</span> },
+        <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, result )</span> </span>{
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(result))
         })
-{% endhighlight %}
+</code></pre></div>
 
   <p>
-    Let's put the logic that generates identifiers into it's own module,
+    Let&#39;s put the logic that generates identifiers into it&#39;s own module,
     and add some features.  This is just a normal Node.js module.
   </p>
 
@@ -76,22 +111,21 @@ require('seneca')()
 <br>
 &larr; export a function for nid-style identifiers<br>
 </div>
-{% highlight js %}
-var nid = require('nid')
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> nid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nid'</span>)
 
-exports.random = function( args, done ) {
-  var len = args.len || 8
-  done( null, 
-        {id: (''+(Math.pow(10,len)*Math.abs(Math.random()))).substring(0,len)} )
+exports.random = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+  <span class="hljs-keyword">var</span> len = args.len || <span class="hljs-number">8</span>
+  done( <span class="hljs-literal">null</span>,
+        {id: (<span class="hljs-string">''</span>+(<span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">10</span>,len)*<span class="hljs-built_in">Math</span>.abs(<span class="hljs-built_in">Math</span>.random()))).substring(<span class="hljs-number">0</span>,len)} )
 }
 
-exports.nid = function( args, done ) {
-  done( null, {id: nid( args.len || 8 )} )
+exports.nid = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+  done( <span class="hljs-literal">null</span>, {id: nid( args.len || <span class="hljs-number">8</span> )} )
 }
-{% endhighlight %}
+</code></pre></div>
 
   <p>
-    Let's update the identifier service. The service receives JSON objects as
+    Let&#39;s update the identifier service. The service receives JSON objects as
     messages, and can use <i>pattern matching</i> to decide what to do
     with them.
   </p>
@@ -103,26 +137,24 @@ exports.nid = function( args, done ) {
 &larr; add the patterns to match,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and the actions to execute
 </div>
-{% highlight js %}
-var id = require('./id-module');
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> id = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./id-module'</span>);
 
-require('seneca')()
-  .add( { generate:'id'}, id.random )
-  .add( { generate:'id', type:'nid'}, id.nid )
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+  .add( { generate:<span class="hljs-string">'id'</span>}, id.random )
+  .add( { generate:<span class="hljs-string">'id'</span>, type:<span class="hljs-string">'nid'</span>}, id.nid )
   .listen()
-{% endhighlight %}
+</code></pre></div>
 
   <p>
-    You can also call the service directly over HTTP. The default port is 10101. Here's an example:
+    You can also call the service directly over HTTP. The default port is 10101. Here&#39;s an example:
   </p>
 
-{% highlight bash %}
-$ curl -d '{"generate":"id"}' http://localhost:10101/act
-{"id":"28375388"}
+<div class="highlight"><pre class="highlight"><code class="hljs bash">$ curl <span class="hljs-operator">-d</span> <span class="hljs-string">'{"generate":"id"}'</span> &lt;a href=<span class="hljs-string">"http://localhost:10101/act"</span>&gt;http://localhost:<span class="hljs-number">10101</span>/act&lt;/a&gt;
+{<span class="hljs-string">"id"</span>:<span class="hljs-string">"28375388"</span>}
 
-$ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
-{"id":"8vo0n02o"}
-{% endhighlight %}
+$ curl <span class="hljs-operator">-d</span> <span class="hljs-string">'{"generate":"id","type":"nid"}'</span> &lt;a href=<span class="hljs-string">"http://localhost:10101/act"</span>&gt;http://localhost:<span class="hljs-number">10101</span>/act&lt;/a&gt;
+{<span class="hljs-string">"id"</span>:<span class="hljs-string">"8vo0n02o"</span>}
+</code></pre></div>
 
   <p>
     The service is exposed via HTTP by default. You can also use other
@@ -178,7 +210,7 @@ $ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
 
 
   <br><br><br><br>
-  
+
   <a name="benefit-organized"></a>
   <h3>Get Your Code Organized</h3>
 
@@ -192,33 +224,33 @@ $ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
 
   <p>
     This means you can think about your system in a much more natural style, right from the start.
-    Let's say you're building a simple e-commerce website. What are the use cases?
-    
+    Let&#39;s say you&#39;re building a simple e-commerce website. What are the use cases?
+
     <img src="images/cart-use-cases.jpg">
 
     Define a set of patterns for these use cases:
     <ul>
-      <li><code>{case:"list", what:"product"}</code></li>
-      <li><code>{case:"show", what:"product"}</code></li>
-      <li><code>{case:"cart-add"}</code></li>
-      <li><code>{case:"cart-remove"}</code></li>
-      <li><code>{case:"checkout"}</code></li>
+      <li><code>{case:&quot;list&quot;, what:&quot;product&quot;}</code></li>
+      <li><code>{case:&quot;show&quot;, what:&quot;product&quot;}</code></li>
+      <li><code>{case:&quot;cart-add&quot;}</code></li>
+      <li><code>{case:&quot;cart-remove&quot;}</code></li>
+      <li><code>{case:&quot;checkout&quot;}</code></li>
     </ul>
-    Then you can send these messages to "get stuff done":
+    Then you can send these messages to &quot;get stuff done&quot;:
     <ul>
-      <li><code>{<b>case:"list", what:"product"</b>}</code></li>
-      <li><code>{<b>case:"show", what:"product"</b>, <i>id:"1234"</i>}</code></li>
-      <li><code>{<b>case:"cart-add"</b>, <i>product:"1234", cart:"5678"</i>}</code></li>
-      <li><code>{<b>case:"cart-remove"</b>, <i>product:"1234", cart:"5678"</i>}</code></li>
-      <li><code>{<b>case:"checkout"</b>, <i>cart:"5678"</i>}</code></li>
+      <li><code>{<b>case:&quot;list&quot;, what:&quot;product&quot;</b>}</code></li>
+      <li><code>{<b>case:&quot;show&quot;, what:&quot;product&quot;</b>, <i>id:&quot;1234&quot;</i>}</code></li>
+      <li><code>{<b>case:&quot;cart-add&quot;</b>, <i>product:&quot;1234&quot;, cart:&quot;5678&quot;</i>}</code></li>
+      <li><code>{<b>case:&quot;cart-remove&quot;</b>, <i>product:&quot;1234&quot;, cart:&quot;5678&quot;</i>}</code></li>
+      <li><code>{<b>case:&quot;checkout&quot;</b>, <i>cart:&quot;5678&quot;</i>}</code></li>
     </ul>
   </p>
 
   <p>
-    Now, let's say you need to customize the business logic. For
+    Now, let&#39;s say you need to customize the business logic. For
     example, if you spend more than $50, you get a discount.  You can
     easily see that a good place to add this code is in
-    the <code>{case:"cart-add"}</code> pattern. When you add a new
+    the <code>{case:&quot;cart-add&quot;}</code> pattern. When you add a new
     product to the cart, check the total, and add a discount line item
     to the cart if the total is over $50.
   </p>
@@ -238,7 +270,7 @@ $ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
   <br><br><br><br>
 
   <h3>
-    Who's Using Seneca?
+    Who&#39;s Using Seneca?
   </h3>
 
   <ul class="using">
@@ -273,3 +305,70 @@ $ curl -d '{"generate":"id","type":"nid"}' http://localhost:10101/act
 
 </section>
 
+        </section>
+      <aside id="sidebar">
+
+        <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">
+          <span class="new_margin">Download &</span>
+          <span class="new_margin">install</span>
+        </a>
+
+        <a href="getting-started.html" class="button1" style="background-image: url(../images/menu-start.png);">
+          <span class="new_margin">Getting</span>
+          <span class="new_margin">started</span>
+        </a>
+
+        <a href="plugins.html" class="button1" style="background-image: url(../images/menu-plugins.png);">
+          <span class="new_margin">All the</span>
+          <span class="new_margin">Plugins</span>
+        </a>
+
+        <a href="videos.html" class="button1" style="background-image: url(../images/menu-video.png);">
+          <span class="new_margin">Videos and</span>
+          <span class="new_margin">Talks</span>
+        </a>
+
+        <a href="http://senecajs.tumblr.com" class="button1" style="background-image: url(../images/menu-updates.png);">
+          <span class="new_margin">Updates</span>
+          <span class="new_margin">and releases</span>
+        </a>
+
+        <a href="documentation.html" class="button1" style="background-image: url(../images/menu-docu.png);">
+          <span class="new_margin">Documentation</span>
+          <span class="new_margin">goodness</span>
+        </a>
+
+        <a href="case-studies.html" class="button1" style="background-image: url(../images/menu-prod.png);">
+          <span class="new_margin">Seneca</span>
+          <span class="new_margin">in production</span>
+        </a>
+
+        <a href="https://github.com/rjrodger/seneca" class="button1" style="background-image: url(../images/menu-github.png);">
+          <span class="new_margin">Github</span>
+          <span class="new_margin">rjrodger/seneca</span>
+        </a>
+          
+        <a href="http://twitter.com/senecajs" class="button1" style="background-image: url(../images/menu-twitter.png);">
+          <span class="new_margin">Twitter</span>
+          <span class="new_margin">@senecajs</span>
+        </a>
+                  
+      </aside>
+      
+      </div>
+    </div>
+
+    
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57673-6', 'senecajs.org');
+  ga('send', 'pageview');
+
+</script>  
+  </body>
+</html>

@@ -1,334 +1,1539 @@
----
-layout: main
----
-<section id="main-content">
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
 
-  <h3>Getting Started</h3>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-  <p>
-    This toolkit lets you focus on the real, "business" code of your app. Instead
-    of worrying about which database to use, how to structure your
-    components, or how to manage dependencies, you can just start
-    coding.
-  </p>
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
 
-  <p>
-    You write everything as a command. Your commands get called whenever
-    they match a set of properties. Your calling code doesn't know, or
-    care, which command gets the work done. A JavaScript object goes in,
-    and one comes out, asynchronously.
-  </p>
+    <meta name="generator" content="DocPad v6.78.1" />
+    
+  </head>
 
-  <p>
-    For practical details, visit the <a href="http://github.com/rjrodger/seneca">Seneca github project page</a>.
-  </p>
+  <body>
 
-  <p>Here's a command that sums two numbers:</p>
-
-{% highlight js %}
-var seneca = require('seneca')()
-
-seneca.add( {role:'math', cmd:'sum'}, function(args,callback) {
-  var sum = args.left + args.right
-  callback(null,{answer:sum})
-})
-
-seneca.act( {role:'math', cmd:'sum', left:1, right:2}, function(err,result) {
-  if( err ) return console.error( err )
-  console.log(result)
-})
-
-{% endhighlight %}
+    <header>
+      <div class="inner">
+        <a href="http://senecajs.org">
+          <img src="images/building.png"/>
+          <span style="color:black; font: 52px 'Lobster'">Seneca</span>
+          <!--<img src="images/logo.png"/>-->
+        </a>
+        <p style="color:black; font: 24px 'Lobster'">A Micro-Services toolkit for Node.js</p>
+      </div>
+    </header>
 
 
-<p>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
 
-<code>seneca.add</code> adds a new command. <code>seneca.act</code>
-acts on the provided pattern, running a command if it matches. Try the code:
-
-</p>
-
-{% highlight bash %}
-$ node example.js
-{ answer: 3 }
-{% endhighlight %}
-  
-
-<p>
-You registered the pattern <code>{role:'math', cmd:'sum'}</code>. The
-input matched, and your code ran. The <code>left</code> and <code>right</code> arguments were
-then used by your plugin to do some real work.
-</p>
-
-<p>
-Let's add another command:
-</p>
-
-{% highlight js %}
-seneca.add( {role:'math', cmd:'product'}, function(args,callback) {
-  var product = args.left * args.right
-  callback(null,{answer:product})
-})
-
-seneca.act( {role:'math', cmd:'product', left:3, right:4}, 
-            function(err,result) {
-              if( err ) return console.error( err )
-              console.log(result)
-            })
-{% endhighlight %}
-
-{% highlight bash %}
-$ node example.js
-{ answer: 3 }
-{ answer: 12 }
-{% endhighlight %}
-
-<p>
-You can add new commands whenever you like, wherever you like. 
-</p>
-
-
-<p>This named argument style is fun, but if you want a real API, you can have that too:</p>
-
-{% highlight js %}
-function print(err,result) {console.log(result)}
-
-var math = seneca.pin({role:'math',cmd:'*'})
-math.sum( {left:1,right:2}, print )
-math.product( {left:1,right:2}, print )
-{% endhighlight %}
-
-
-<p>
-By <i>pinning</i> the pattern <code>{role:'math',cmd:'*'}</code> you created an object with methods that matched all the
-<code>cmd</code> properties.
-</p>
-
-  <h3>Why use Seneca?</h3>
-
-<p>
-<i>Seneca</i> provides plugins - sets of commands - that look after the foundations of your app for you:
+<h1 id="getting-started">Getting Started</h1>
+<p>Seneca lets you build a <a href="http://martinfowler.com/articles/microservices.html">microservice
+system</a> without
+worrying about how things will fit together in production. You don&#39;t
+need to know where the other services are located, how many of them
+there are, or what they do. Everything external to your business
+logic, such as databases, caches, or third party integrations can
+likewise be hidden behind microservices.</p>
+<p>This decoupling makes your system easy to build and change on a
+continuous basis. It works because Seneca has two core features.</p>
 <ul>
-  <li>Organize your business logic
-  <li>Network API
-  <li>Data layer
-  <li>Caching
-  <li>Logging
-  <li>User management
-  <li>Distributed processing
+<li><strong>Transport Independence:</strong> you can send messages between services in many ways, all hidden from your business logic.</li>
+<li><strong>Pattern Matching:</strong> instead of fragile service discovery, you just let the world know what sort of messages you care about.</li>
 </ul>
+<p>Messages are JSON documents, with any internal structure you
+like. Messages can be sent via HTTP/S, TCP connections, message
+queues, publish/subscribe services or any mechanism that moves bits
+around. From your perspective as the writer of a service, you just
+send messages out into the world. You don&#39;t want to know which
+services get them &mdash; that creates fragile coupling.</p>
+<p>Then there are the messages you&#39;d like to receive. You specify the
+property patterns that you care about, and Seneca (with a little
+configuration help) makes sure that you get any messages matching
+those patterns, sent by other services. The patterns are very simple,
+just a list of key-value pairs that the top level properties of the
+JSON message document must match.</p>
+<p>This <em>Getting Started</em> guide will cover Seneca in a broad way, but
+won&#39;t go into too much depth. The <a href="#next-steps">Next Steps</a> section at
+the end of this Page is your starting point for more details.</p>
+<div class="section-link">
+<a name="simple-microservice"></a>
+<a href="#simple-microservice">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
 
-You write your own plugins and commands using the same system. 
-</p>
+<h3 id="a-simple-microservice">A Simple Microservice</h3>
+<p>Let&#39;s start with some code. Here&#39;s a service that sums two numbers:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
 
-<p>
-<i>Seneca</i> is not a web framework, it's a business logic organizer. You can use it with any web framework.
-</p>
-
-<p>
-Here's an example of how this helps you. Let's say the <i>product</i>
-command needs to live on a separate server. You can move it there with
-<i>no changes to your calling code</i>. First, set up the server:
-</p>
-
-{% highlight js %}
-seneca.add({role:'math', cmd:'product'}, function(args,callback) {
-  var product = args.left * args.right
-  callback(null,{answer:product})
-})
-
-seneca.use('transport')
-
-var connect = require('connect')
-var app = connect()
-  .use( connect.json() )
-  .use( seneca.service() )
-  .listen(10171)
-{% endhighlight %}
-
-<p>
-The <code>seneca.use</code> method loads in a plugin. In this case,
-the <i>transport</i> plugin, which can accept commands over a HTTP
-interface. <i>Seneca</i> exposes any plugin HTTP interface by
-returning a middleware function from the
-<code>seneca.service</code> method. You can use this directly with the 
-<a href="http://www.senchalabs.org/connect">connect</a> or 
-<a href="http://expressjs.com">express</a> modules.
-</p>
-
-
-<p>On the client side, just <i>transport</i> the remote patterns:</p>
-
-{% highlight js %}
-seneca.use('transport',{
-  pins:[ {role:'math',cmd:'product'} ]
-})
-
-seneca.act( {role:'math', cmd:'product', left:3, right:4}, 
-            function(err,result) {
-              if( err ) return console.error( err )
-              console.log(result)
-            })
-
-{% endhighlight %}
-
-<p>
-The <code>pins</code> option to the <i>transport</i> plugin accepts a
-set of patterns that will be sent over to the server (running on
-localhost by default).  The <i>transport</i> plugin just
-calls <code>seneca.add</code> for each pin, and proxies the input and
-output to the remote server.
-</p>
-
-<p>
-Your calling code, the <code>seneca.act</code> call, <i>does not
-change</i>. You now have a distributed system with no
-refactoring. Fire up a few <i>math.product</i> servers, put them
-behind a load balancer, and now you have a scalable system too.
-</p>
-
-
-
-  <h3>But what about data storage?</h3>
-
-<p>
-You really need a common database layer so that plugins and commands
-can all deal with data in the same way. Let's go with
-an <a href="http://en.wikipedia.org/wiki/Active_record_pattern">Active
-Record</a> style - it's nice and easy. 
-</p>
-
-{% highlight js %}
-var product = seneca.make('product')
-product.name = 'apple'
-product.price = 100
-
-product.save$(function( err, product ) {
-  if( err ) return console.error( err )
-  console.log( 'saved: '+product )
-
-  // product.id was generated for you
-  product.load$({id:product.id},function( err, product ) {
-    if( err ) return console.error( err )
-    console.log( 'loaded: '+product )
+seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: sum } )
   })
-})
-{% endhighlight %}
+</code></pre>
+<p>To call this service, you write:</p>
+<pre class="highlight"><code class="hljs javascript">seneca.act( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, result )</span> </span>{
+    <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.error( err )
+    <span class="hljs-built_in">console</span>.log( result )
+  })
+</code></pre>
+<p>For the moment this is all happening in the same process, and there&#39;s
+no network traffic. In-process function calls are a type of message
+transport too!</p>
+<p>The example code to try this out is in <a href="https://github.com/senecajs/getting-started/blob/master/sum.js">sum.js</a>. To run
+the code, follow these steps:</p>
+<ol>
+<li>Open a terminal, and <code>cd</code> to your projects folder.</li>
+<li>Run <code>git clone https://github.com/senecajs/getting-started</code>.</li>
+<li><code>cd</code> into the <em>getting-started</em> folder.</li>
+<li>Run <code>npm install</code> to install the required modules, including Seneca.</li>
+<li>Run <code>node sum.js</code>.</li>
+</ol>
+<p>This guide assumes you already have <a href="http://nodejs.org">Node.js</a> installed.</p>
+<p>When you run <code>sum.js</code>, you get the following output:</p>
+<pre class="highlight"><code class="hljs bash"><span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">02</span>T12:<span class="hljs-number">38</span>:<span class="hljs-number">08.788</span>Z    xi94dnm0nrky/<span class="hljs-number">1435840688779</span>/<span class="hljs-number">64029</span>/-    INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/xi94dnm0nrky/<span class="hljs-number">1435840688779</span>/<span class="hljs-number">64029</span>/-    
+{ answer: <span class="hljs-number">3</span> }
+</code></pre>
+<p>The first line is logging information that Seneca prints to let you
+know that it has started. The second line is the result produced after
+the message has been matched and processed.</p>
+<p>The <code>seneca.add</code> method adds a new <em>action</em> pattern to the Seneca
+instance. This pattern is matched against any JSON messages that the
+Seneca instance receives. The action is a function that is executed
+when a pattern matches a message.</p>
+<p>The <code>seneca.add</code> method has two parameters:</p>
+<ul>
+<li><code>pattern</code>: the property pattern to match in messages,</li>
+<li><code>action</code>: the function to execute if a message matches.</li>
+</ul>
+<p>The action function has two parameters:</p>
+<ul>
+<li><code>msg</code>: the matching inbound message (provided as a plain object),</li>
+<li><code>respond</code>: a callback function that you use to provide a respond to the message.</li>
+</ul>
+<p>The respond function is a callback with the standard <code>error, result</code>
+signature. Let&#39;s put this all together again:</p>
+<div class="src-anno">
+<br>
+&larr; pattern to match<br>
+&larr; action function<br>
+&larr; the real work, adding two numbers<br>
+&larr; provide a result object; there&#39;s no error</br>
+</div>
 
-<p>
-The <code>make</code> method creates an "Active Record"-ish object for
-you. The properties of this object store your data.  Call
-the <code>save$</code> and <code>load$</code> methods to save and load
-your data from the database.  You also get the <code>list$</code>
-method for queries, and <code>remove$</code> for deleting.
-</p>
+<pre class="highlight"><code class="hljs javascript">seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: sum } )
+  })
+</code></pre>
+<p>In the example code, the action computes the sum of two numbers,
+provided via the <code>left</code> and <code>right</code> properties of the message
+object. Not all messages generate a result, but as this is the most
+common case, Seneca allows you to provide the result via a callback
+function.</p>
+<p>In summary, the action pattern <code>role:math,cmd:sum</code> acts on the message</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"role"</span>: <span class="hljs-string">"math"</span>, <span class="hljs-string">"cmd"</span>: <span class="hljs-string">"sum"</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span> }
+</code></pre>
+<p>to produce the result:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"answer"</span>: <span class="hljs-number">3</span> }
+</code></pre>
+<p>There is nothing special about the properties <code>role</code> and <code>cmd</code>. They
+just happen to be the ones you are using for pattern matching.</p>
+<p>The <code>seneca.act</code> method submits a message to act on. It takes two parameters:</p>
+<ul>
+<li><code>msg</code>: the message object,</li>
+<li><code>response_callback</code>: a function that receives the message response, if any.</li>
+</ul>
+<p>The response callback is a function you provide with the standard
+<code>error, result</code> signature. If there was a problem (say, the message
+matched no patterns), then the first argument will be an
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a>
+object. If everything went to plan, the second argument will be the
+result object. In the example code, these arguments are simply printed
+to the console:</p>
+<div class="src-anno" style="margin-left: 20px">
+<br>
+&larr; submitted message<br>
+&larr; response callback function<br>
+&larr; <a href="http://thenodeway.io/posts/understanding-error-first-callbacks/">early return on error</a><br>
+&larr; print result to console</br>
+</div>
 
-<p>
-You get an in-memory data store automatically, so the above code works
-out of the box without any database configuration. Here's how you would use MongoDB:
-</p>
+<pre class="highlight"><code class="hljs javascript">seneca.act( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, result )</span> </span>{
+    <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.error( err )
+    <span class="hljs-built_in">console</span>.log( result )
+  })
+</code></pre>
+<p>The example code in the
+<a href="https://github.com/senecajs/getting-started/blob/master/sum.js">sum.js</a>
+file shows you how to define and call an action pattern inside the
+same Node.js process. Soon you&#39;ll see how to split this code over
+multiple processes.</p>
+<div class="section-link">
+<a name="how-patterns-work"></a>
+<a href="#how-patterns-work">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
 
-{% highlight js %}
-seneca.use( 'mongo-store', 
-            {name:'mydata',host:'127.0.0.1',port:27017} )
+<h3 id="how-patterns-work">How Patterns Work</h3>
+<p>Using patterns instead of network addresses or topics makes it much
+easier to extend and enhance your system over time by adding new
+microservices incrementally. Let&#39;s extend our system with the ability
+to multiply two numbers.</p>
+<p>We want messages that look like this:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"role"</span>: <span class="hljs-string">"math"</span>, <span class="hljs-string">"cmd"</span>: <span class="hljs-string">"product"</span>, left:<span class="hljs-number">3</span>, right:<span class="hljs-number">4</span> }
+</code></pre>
+<p>to produce results like this:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"answer"</span>: <span class="hljs-number">12</span> }
+</code></pre>
+<p>You can use the <code>role:math,cmd:sum</code> action pattern as a template to
+define a new <code>role:math,cmd:product</code> action:</p>
+<pre class="highlight"><code class="hljs javascript">seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'product'</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> product = msg.left * msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: product } )
+  })
+</code></pre>
+<p>And you can call it in exactly the same way:</p>
+<pre class="highlight"><code class="hljs javascript">seneca.act( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'product'</span>, left:<span class="hljs-number">3</span>, right:<span class="hljs-number">4</span>}, 
+  <span class="hljs-built_in">console</span>.log
+)
+</code></pre>
+<p>Here, you use <code>console.log</code> as a shortcut to print out both the error
+(if any), and the result. Running this code produces:</p>
+<pre class="highlight"><code class="hljs bash">null { answer: <span class="hljs-number">12</span> }
+</code></pre>
+<p>Putting this all together, you get:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
 
-seneca.ready( function(err,seneca){
-  if( err ) return console.error( 'ERROR:'+err )
+seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: sum } )
+  })
 
-  var product = seneca.make('product')
-  product.name = 'apple'
-  product.price = 100
+seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'product'</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> product = msg.left * msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: product } )
+  })
 
-  product.save$(function( err, product ) {
-    if( err ) return console.error( err )
 
-    // product.id is a MongoDB id this time
-    product.load$({id:product.id},function( err, product ) {
-      if( err ) return console.error( err )
-      console.log( 'loaded: '+product )
+seneca
+  .act( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span>}, 
+    <span class="hljs-built_in">console</span>.log
+  )
+  .act( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'product'</span>, left:<span class="hljs-number">3</span>, right:<span class="hljs-number">4</span>}, 
+    <span class="hljs-built_in">console</span>.log
+  )
+</code></pre>
+<p>In this example the <code>seneca.act</code> calls are chained together. Seneca
+provides a chaining API as a convenience. Chained calls are executed
+in order, but <em>not</em> in series, so their results could come back in any
+order.</p>
+<p>This code is available in the
+<a href="https://github.com/senecajs/getting-started/blob/master/sum-product.js">sum-product.js</a>
+file.</p>
+<div class="section-link">
+<a name="extend-with-patterns"></a>
+<a href="#extend-with-patterns">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="extending-functionality-with-patterns">Extending Functionality with Patterns</h3>
+<p>Patterns make it easy to extend your functionality. Instead of adding
+<code>if</code> statements and complex logic, you add more patterns. Lets extend
+the addition action with the ability to force integer-only
+arithmetic. To do this, you can add a new property, <code>integer:true</code> to
+the message object. Then you provide a new action for messages that
+have this property:</p>
+<pre class="highlight"><code class="hljs javascript">seneca.add( 
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, integer:<span class="hljs-literal">true</span>}, 
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> sum = <span class="hljs-built_in">Math</span>.floor(msg.left) + <span class="hljs-built_in">Math</span>.floor(msg.right)
+    respond( <span class="hljs-literal">null</span>, { answer: sum } )
+  })
+</code></pre>
+<p>Now, the message:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"role"</span>: <span class="hljs-string">"math"</span>, <span class="hljs-string">"cmd"</span>: <span class="hljs-string">"sum"</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>, integer:<span class="hljs-literal">true</span> }
+</code></pre>
+<p>will produce the result:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"answer"</span>: <span class="hljs-number">3</span> }  <span class="hljs-comment">// == 1 + 2, as decimals removed</span>
+</code></pre>
+<p>What happens if you add both patterns to the same system? How does
+Seneca choose which one to use? The more specific pattern always
+wins. That is, the pattern with the most matching attributes is the
+one that has precedence.</p>
+<p>Here&#39;s some code to show this:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+seneca
+  .add( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>}, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+      <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+      respond( <span class="hljs-literal">null</span>, { answer: sum } )
+    })
+
+  <span class="hljs-comment">// both these messages will match role:math,cmd:sum</span>
+
+  .act( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>}, 
+    <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 4 }</span>
+  )
+  .act( 
+    <span class="hljs-comment">// the extra integer property is just ignored!</span>
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>, integer:<span class="hljs-literal">true</span>}, 
+    <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 4 }</span>
+  )
+
+
+  .add( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, integer:<span class="hljs-literal">true</span>}, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+      <span class="hljs-keyword">var</span> sum = <span class="hljs-built_in">Math</span>.floor(msg.left) + <span class="hljs-built_in">Math</span>.floor(msg.right)
+      respond( <span class="hljs-literal">null</span>, { answer: sum } )
+    })
+
+  <span class="hljs-comment">// this still matches role:math,cmd:sum</span>
+  .act( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>}, 
+    <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 4 }</span>
+  )
+
+  <span class="hljs-comment">// BUT this matches role:math,cmd:sum,integer:true</span>
+  <span class="hljs-comment">// because it's more specific - more properties match</span>
+  .act( 
+    {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>, integer:<span class="hljs-literal">true</span>}, 
+    <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 3 } !!!</span>
+  )
+</code></pre>
+<p>And the output it generates is:</p>
+<pre class="highlight"><code class="hljs bash"><span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">02</span>T15:<span class="hljs-number">34</span>:<span class="hljs-number">06.094</span>Z    <span class="hljs-number">69</span>kfu5lr238x/<span class="hljs-number">1435851246084</span>/<span class="hljs-number">64488</span>/-    INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/<span class="hljs-number">69</span>kfu5lr238x/<span class="hljs-number">1435851246084</span>/<span class="hljs-number">64488</span>/-    
+null { answer: <span class="hljs-number">4</span> }
+null { answer: <span class="hljs-number">4</span> }
+null { answer: <span class="hljs-number">4</span> }
+null { answer: <span class="hljs-number">3</span> }
+</code></pre>
+<p>The first two <code>.act</code> calls both match the <code>role:math,cmd:sum</code> action
+pattern. Then the integer-only action pattern
+<code>role:math,cmd:sum,integer:true</code> is defined. After that, the third
+call to <code>.act</code> gos with the <code>role:math,cmd:sum</code> action, but the fourth
+goes with <code>role:math,cmd:sum,integer:true</code>. This code also
+demonstrates that you can chain <code>.add</code> and <code>.act</code> calls together. This
+code is available in the
+<a href="https://github.com/senecajs/getting-started/blob/master/sum-integer.js">sum-integer.js</a>
+file.</p>
+<p>The ability to easily extend the behaviour of your actions by matching
+more specific kinds of messages is an easy way to handle new and
+changing requirements while your project is in development and when
+it is live and needs to adapt. It also has the advantage that you do
+not need to modify existing code, which is always dangerous. It&#39;s much
+safer to add new code to handle special cases. In a production system
+you won&#39;t even need to do a re-deploy. Your existing services can stay
+running as they are. All you need to do is start up your new service.</p>
+<div class="section-link">
+<a name="reuse-with-patterns"></a>
+<a href="#reuse-with-patterns">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="code-re-use-with-patterns">Code Re-use with Patterns</h3>
+<p>Action patterns can call other action patterns to get their work
+done. Let&#39;s modify our example code to use this approach.</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+seneca
+  .add( 
+    <span class="hljs-string">'role:math,cmd:sum'</span>, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+      <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+      respond( <span class="hljs-literal">null</span>, { answer: sum } )
+    })
+
+  .add( 
+    <span class="hljs-string">'role:math,cmd:sum,integer:true'</span>, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+
+      <span class="hljs-comment">// reuse role:math,cmd:sum</span>
+      <span class="hljs-keyword">this</span>.act({
+        role:  <span class="hljs-string">'math'</span>, 
+        cmd:   <span class="hljs-string">'sum'</span>,
+        left:  <span class="hljs-built_in">Math</span>.floor(msg.left),
+        right: <span class="hljs-built_in">Math</span>.floor(msg.right),
+      }, respond)
+    })
+
+  <span class="hljs-comment">// this matches role:math,cmd:sum</span>
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1.5,right:2.5'</span>, 
+        <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 4 }</span>
+      )
+
+  <span class="hljs-comment">// BUT this matches role:math,cmd:sum,integer:true</span>
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1.5,right:2.5,integer:true'</span>, 
+        <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 3 } !!!</span>
+      )
+</code></pre>
+<p>In this version, the definition of the
+<code>role:math,cmd:sum,integer:true</code> action pattern uses the previously
+defined <code>role:math,cmd:sum</code> action pattern, but first modifies the
+message to convert the <code>left</code> and <code>right</code> properties into integers.</p>
+<p>Inside the action function, the context variable, <code>this</code>, is a
+reference to the current Seneca instance. This is the proper way to
+reference Seneca inside actions, as you will get the full context of
+the current action call. Among other things, this makes your logs more
+informative.</p>
+<p>This code uses an abbreviated form of JSON to specify the patterns and
+messages. For example, the object literal form</p>
+<pre class="highlight"><code class="hljs javascript">{role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1.5</span>, right:<span class="hljs-number">2.5</span>}
+</code></pre>
+<p>becomes:</p>
+<pre class="highlight"><code class="hljs javascript">role:math,cmd:sum,left:<span class="hljs-number">1.5</span>,right:<span class="hljs-number">2.5</span>
+</code></pre>
+<p>This format, <a href="https://github.com/rjrodger/jsonic">jsonic</a>, which you
+provide as a string literal, is a convenience format to make patterns
+and messages more concise in your code.</p>
+<p>The code for the above example is available in the
+<a href="https://github.com/senecajs/getting-started/blob/master/sum-reuse.js">sum-reuse.js</a>
+file.</p>
+<div class="section-link">
+<a name="patterns-unique-override"></a>
+<a href="#patterns-unique-override">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="patterns-are-unique-with-overrides">Patterns are Unique, with Overrides</h3>
+<p>The action patterns that you define are unique. They can only trigger
+one function. The patterns resolve using the rules:</p>
+<ul>
+<li>more properties win, and</li>
+<li>if the patterns have the same number of properties, they are matched in alphabetical order.</li>
+</ul>
+<p>The reason that these rules are so simple is so that you can run them
+&quot;in your head&quot;. It&#39;s very easy to understand which pattern will
+trigger which action function.</p>
+<p>Here are some examples:</p>
+<ul>
+<li><code>a:1,b:2</code> wins over <code>a:1</code> as it has more properties.</li>
+<li><code>a:1,b:2</code> wins over <code>a:1,c:3</code> as <code>b</code> is before <code>c</code> alphabetically.</li>
+<li><code>a:1,b:2,d:4</code> wins over <code>a:1,c:3,d:4</code> as <code>b</code> is before <code>c</code> alphabetically.</li>
+<li><code>a:1,b:2,c:3</code> wins over <code>a:1,b:2</code> as it has more properties.</li>
+<li><code>a:1,b:2,c:3</code> wins over <code>a:1,c:3</code> as it has more properties.</li>
+</ul>
+<p>To see this in action, run the file
+<a href="https://github.com/senecajs/getting-started/blob/master/pattern-wins.js">pattern-wins.js</a>. For
+more details, see the <a href="https://www.npmjs.com/package/patrun">patrun</a>
+module.</p>
+<p>It is sometimes useful to have a way of enhancing the behaviour of an
+action without rewriting it fully. For example, you might want to
+perform custom validation of the message properties, or capture
+message statistics, or add additional information to action results,
+or throttle message flow rates.</p>
+<p>In the example code, the addition action expects that the <code>left</code> and
+<code>right</code> properties are finite numbers. Also, it&#39;s useful to include
+the original input arguments in the output for debugging purposes. You
+can add a validation check, and debugging information, using the
+following code:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+seneca
+  .add( 
+    <span class="hljs-string">'role:math,cmd:sum'</span>, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+      <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+      respond( <span class="hljs-literal">null</span>, { answer: sum } )
+    })
+
+  <span class="hljs-comment">// override role:math,cmd:sum with additional functionality</span>
+  .add( 
+    <span class="hljs-string">'role:math,cmd:sum'</span>, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+
+      <span class="hljs-comment">// bail out early if there's a problem</span>
+      <span class="hljs-keyword">if</span>( !<span class="hljs-built_in">Number</span>.isFinite( msg.left ) ||
+          !<span class="hljs-built_in">Number</span>.isFinite( msg.right ) ) 
+      {
+        <span class="hljs-keyword">return</span> respond( <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Expected left and right to be numbers."</span>) )
+      }
+
+      <span class="hljs-comment">// call previous action function for role:math,cmd:sum</span>
+      <span class="hljs-keyword">this</span>.prior({
+        role:  <span class="hljs-string">'math'</span>, 
+        cmd:   <span class="hljs-string">'sum'</span>,
+        left:  msg.left,
+        right: msg.right,
+
+      }, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, result )</span> </span>{
+        <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> respond( err )
+
+        result.info = msg.left+<span class="hljs-string">'+'</span>+msg.right
+        respond( <span class="hljs-literal">null</span>, result )
+      })
+    })
+
+  <span class="hljs-comment">// enhanced role:math,cmd:sum</span>
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1.5,right:2.5'</span>, 
+        <span class="hljs-built_in">console</span>.log <span class="hljs-comment">// prints { answer: 4, info: '1.5+2.5' }</span>
+      )
+</code></pre>
+<p>The Seneca instance provided to an action function via the the <code>this</code>
+context variable has a special <code>prior</code> method that calls the previous
+action definition for the current action pattern. The prior function has parameters:</p>
+<ul>
+<li><code>msg</code>: the msg object, which you may have modified</li>
+<li><code>response_callback</code>: a callback function, where you may modify the result</li>
+</ul>
+<p>The example code shows you how to modify both the inbound message, and
+the outbound result. Modification of either is optional &mdash; you
+may leave the data unchanged and use this mechanism for enhanced
+logging or auditing.</p>
+<p>The example code also shows good practices for error handling. It uses
+early returns to exit from the action function as soon as
+possible. This avoids spurious indentation from <code>if-else</code>
+statements. The error is provided using an <code>Error</code> object. This
+ensures stack trace capture and proper handling.</p>
+<p>Errors should only be used for invalid input or internal failures. For
+example, if you are executing a database query that returns no data,
+that is <em>not</em> an error, just a fact about the database. If the
+database connection fails, that is an error.</p>
+<p>The code for this example is in the
+<a href="https://github.com/senecajs/getting-started/blob/master/sum-valid.js">sum-valid.js</a>
+file.</p>
+<div class="section-link">
+<a name="organize-plugins"></a>
+<a href="#organize-plugins">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="organising-patterns-into-plugins">Organising Patterns into Plugins</h3>
+<p>A Seneca instance is ultimately just a set of action patterns. You can
+organize them by using namespacing conventions in your patterns, such as
+<code>role:math</code>. To help with logging and debugging, Seneca supports a
+minimalist notion of a plugin to help organize patterns.</p>
+<p>A Seneca plugin is just a set of action patterns. The plugin can have
+a name, which is used to annotate logging entries. Plugins can be
+given a set of options to control their behaviour. Plugins also
+provide a mechanism for executing initialisation functions in the
+correct order. For example, you want your database connection to be
+established before you try to read data from the database.</p>
+<p>A Seneca plugin is a function that has a single parameter
+<code>options</code>. You pass this plugin definition function to the
+<code>seneca.use</code> method. Here is the minimal Seneca plugin (it does
+nothing!).</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minimal_plugin</span><span class="hljs-params">( options )</span> </span>{ 
+  <span class="hljs-built_in">console</span>.log(options) 
+}
+
+<span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( minimal_plugin, {foo:<span class="hljs-string">'bar'</span>} )
+</code></pre>
+<p>The <code>seneca.use</code> method takes two parameters:</p>
+<ul>
+<li><code>plugin</code>: plugin definition function, or plugin name,</li>
+<li><code>options</code>: options object for the plugin.</li>
+</ul>
+<p>If you run the example code (in file
+<a href="https://github.com/senecajs/getting-started/blob/master/minimal-plugin.js">minimal-plugin.js</a>),
+you&#39;ll get the following output:</p>
+<pre class="highlight"><code class="hljs bash">$ node minimal-plugin.js
+<span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">03</span>T15:<span class="hljs-number">23</span>:<span class="hljs-number">00.038</span>Z    gh7s1570egff/<span class="hljs-number">1435936980028</span>/<span class="hljs-number">65900</span>/-    INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/gh7s1570egff/<span class="hljs-number">1435936980028</span>/<span class="hljs-number">65900</span>/-    
+{ foo: <span class="hljs-string">'bar'</span> }
+</code></pre>
+<p>Seneca provides detailed logging information when it starts, and also
+when running. Normally, the log level is set to <code>INFO</code> which means you
+don&#39;t see very much. To see all the logs, try:</p>
+<pre class="highlight"><code class="hljs bash">$ node minimal-plugin.js --seneca.log.all
+... lots of log lines ...
+</code></pre>
+<p>You can narrow this down by
+<a href="http://www.cyberciti.biz/faq/howto-use-grep-command-in-linux-unix/">grepping</a>
+the log output for log lines relevant to plugin definition.</p>
+<pre class="highlight"><code class="hljs bash">$ node minimal-plugin.js --seneca.log.all | grep plugin | grep DEFINE
+<span class="hljs-number">2015</span>...    <span class="hljs-number">3</span>qf7...    DEBUG    plugin    basic           DEFINE    {}
+<span class="hljs-number">2015</span>...    <span class="hljs-number">3</span>qf7...    DEBUG    plugin    transport       DEFINE    {}
+<span class="hljs-number">2015</span>...    <span class="hljs-number">3</span>qf7...    DEBUG    plugin    web             DEFINE    {}
+<span class="hljs-number">2015</span>...    <span class="hljs-number">3</span>qf7...    DEBUG    plugin    mem-store       DEFINE    {}
+<span class="hljs-number">2015</span>...    <span class="hljs-number">3</span>qf7...    DEBUG    plugin    minimal_plugin  DEFINE    {foo=bar}
+</code></pre>
+<p>You can see that by default Seneca loads four built-in plugins:
+<a href="https://www.npmjs.com/package/seneca-basic"><em>basic</em></a>,
+<a href="https://www.npmjs.com/package/seneca-transport"><em>transport</em></a>,
+<a href="https://www.npmjs.com/package/seneca-web"><em>web</em></a>, and
+<a href="https://www.npmjs.com/package/seneca-mem-store"><em>mem-store</em></a>. These
+provide core functionalities for basic microservices. You can also see
+that your <em>minimal_plugin</em> is in the list as well, and also shown are
+the options you provided: <code>{foo=bar}</code>. The name <em>minimal_plugin</em> is
+obtained from the plugin definition function name, so you should
+always give your plugin definition function a name.</p>
+<p>Let&#39;s give the plugin some action patterns. The <code>this</code> context
+variable of the plugin definition function is an instance of Seneca
+that you can use to do this. Here&#39;s a <em>math</em> plugin:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">math</span><span class="hljs-params">( options )</span> </span>{ 
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:sum'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    respond( <span class="hljs-literal">null</span>, { answer: msg.left + msg.right } )
+  })
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:product'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    respond( <span class="hljs-literal">null</span>, { answer: msg.left * msg.right } )
+  })
+
+}
+
+<span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( math )
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>Running this file
+<a href="https://github.com/senecajs/getting-started/blob/master/math-plugin.js">math-plugin.js</a> generates the output:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-plugin.js
+<span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">03</span>T15:<span class="hljs-number">43</span>:<span class="hljs-number">13.067</span>Z    xn5vquvubvjq/<span class="hljs-number">1435938193058</span>/<span class="hljs-number">65962</span>/-    INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/xn5vquvubvjq/<span class="hljs-number">1435938193058</span>/<span class="hljs-number">65962</span>/-    
+null { answer: <span class="hljs-number">3</span> }
+</code></pre>
+<p>Let&#39;s look at the logging output relevant to this plugin by grepping for the string &quot;math&quot;:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-plugin.js --seneca.log.all | grep math
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    delegate  {plugin$={name=math,tag=undefined},ungate$=<span class="hljs-literal">true</span>,fatal$=<span class="hljs-literal">true</span>}    <span class="hljs-number">29</span>ny56    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    register  init     math    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    plugin    math     DEFINE    {}
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    plugin    math     ADD    qlh13h47d0nu    cmd:sum,role:math    sum    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    plugin    math     ADD    <span class="hljs-number">10</span>lk4seu3aee    cmd:product,role:math    product    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    plugin    math     options    <span class="hljs-keyword">set</span>    {math={}}    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    act                -    -    DEFAULT    {init=math,tag=}    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    register  ready    math    {}
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    register  install  math    {exports=[]}    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    act       math     -    IN    pg7er4ouia1p/u5hfgtpmkeoy    cmd:sum,role:math    {role=math,cmd=sum,left=<span class="hljs-number">1</span>,right=<span class="hljs-number">2</span>}    ENTRY    A;qlh13h47d0nu    -    
+<span class="hljs-number">2015</span>...    alqs...    DEBUG    act       math     -    OUT    pg7er4ouia1p/u5hfgtpmkeoy    cmd:sum,role:math    {answer=<span class="hljs-number">3</span>}    EXIT    A;qlh13h47d0nu    <span class="hljs-number">5</span>
+</code></pre>
+<p>There&#39;s detailed logging information on the plugin definition and
+initialization, which you can mostly ignore for now. The most
+interesting lines the ones showing the addition of action patterns
+within the <em>math</em> plugin, and then the execution of the
+<code>role:math,cmd:sum,left:1,right:2</code> action, showing the inbound and
+outbound messages.</p>
+<pre class="highlight"><code class="hljs bash">...
+<span class="hljs-number">20</span>.. al.. DEBUG plugin math   ADD ql.. cmd:sum,role:math     sum
+<span class="hljs-number">20</span>.. al.. DEBUG plugin math   ADD <span class="hljs-number">10</span>.. cmd:product,role:math product
+...
+<span class="hljs-number">20</span>.. al.. DEBUG act    math - IN  pg.. cmd:sum,role:math {role=math,cmd=sum,left=<span class="hljs-number">1</span>,right=<span class="hljs-number">2</span>} ENTRY A;ql.. -    
+<span class="hljs-number">20</span>.. al.. DEBUG act    math - OUT pg.. cmd:sum,role:math {answer=<span class="hljs-number">3</span>} EXIT A;ql.. <span class="hljs-number">5</span>
+...
+</code></pre>
+<p>With Seneca, you build up your system by defining a set of patterns
+that correspond to messages. You organize these patterns into plugins
+to make logging and debugging easier. You then combine one or more
+plugins into microservices. You&#39;ll create a <em>math</em> microservice in the
+next section.</p>
+<p>Plugins often need to do some initialization work &mdash; such as
+connecting to a database. You don&#39;t do this work in the body of the
+plugin definition function. The definition function is synchronous by
+design, because all it does is <em>define</em> the plugin. In fact, you
+should not call <code>seneca.act</code> at all in the plugin definition, just
+<code>seneca.add</code>.</p>
+<p>To initailize a plugin, you add a special action pattern:
+<code>init:&lt;plugin-name&gt;</code>. This action pattern is called in
+sequence for each plugin serially. The init function <em>must</em> call its
+<code>respond</code> callback without errors. If plugin initialization fails,
+then Seneca will exit the Node.js process. You want
+your microservics to fail-fast (and scream loudly) when there&#39;s a
+problem. All plugins must complete initialization before any actions
+are executed.</p>
+<p>To demonstrate initialization, let&#39;s add simplistic custom logging to
+the <em>math</em> plugin. When the plugin starts, it opens a log file, and
+writes a log of all operations to the file. The file needs to open
+successfully and be writable. If this fails, the microservice should
+fail.</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">math</span><span class="hljs-params">( options )</span> </span>{ 
+
+  <span class="hljs-comment">// the logging function, built by init</span>
+  <span class="hljs-keyword">var</span> log
+
+  <span class="hljs-comment">// place all the patterns together</span>
+  <span class="hljs-comment">// this make it easier to see them at a glance</span>
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:sum'</span>,     sum )
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:product'</span>, product )
+
+  <span class="hljs-comment">// this is the special initialization pattern</span>
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'init:math'</span>, init )
+
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-comment">// log to a custom file</span>
+    fs.open( options.logfile, <span class="hljs-string">'a'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, fd )</span> </span>{
+
+      <span class="hljs-comment">// cannot open for writing, so fail</span>
+      <span class="hljs-comment">// this error is fatal to Seneca</span>
+      <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> respond( err )
+
+      log = make_log(fd)
+      respond()
+    })
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sum</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> out = { answer: msg.left + msg.right }
+    log( <span class="hljs-string">'sum '</span>+msg.left+<span class="hljs-string">'+'</span>+msg.right+<span class="hljs-string">'='</span>+out.answer+<span class="hljs-string">'\n'</span> )
+    respond( <span class="hljs-literal">null</span>, out )
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">product</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> out = { answer: msg.left * msg.right }
+    log( <span class="hljs-string">'product '</span>+msg.left+<span class="hljs-string">'*'</span>+msg.right+<span class="hljs-string">'='</span>+out.answer+<span class="hljs-string">'\n'</span> )
+    respond( <span class="hljs-literal">null</span>, out )
+  }
+
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_log</span><span class="hljs-params">( fd )</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( entry )</span> </span>{
+      fs.write( fd, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toISOString()+<span class="hljs-string">' '</span>+entry, <span class="hljs-literal">null</span>, <span class="hljs-string">'utf8'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
+        <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.log( err )
+
+        <span class="hljs-comment">// ensure log entry is flushed</span>
+        fs.fsync( fd, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
+          <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.log( err )
+        })
+      }) 
+    }
+  }
+}
+
+<span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( math, {logfile:<span class="hljs-string">'./math.log'</span>} )
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>In this plugin code, the patterns are organized at the top of the
+plugin so that they are easy to see. The action functions are defined
+below these. You can also see how the options are used to provide the
+location for the custom log file (it should go without saying that
+this is not a way to do production logging!).</p>
+<p>The initialization function <em>init</em> does some asynchronous file
+system work, and so must complete before any actions can be
+performed. If it fails, the whole service will fail to initialize. To
+see this in action, try changing the log file location to something
+invalid, like say <code>&#39;/math.log&#39;</code>.</p>
+<p>This code is available in the
+<a href="https://github.com/senecajs/getting-started/blob/master/math-plugin-init.js">math-plugin-init.js</a>
+file.</p>
+<div class="section-link">
+<a name="writing-microservices"></a>
+<a href="#writing-microservices">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="writing-microservices">Writing Microservices</h3>
+<p>Let&#39;s turn the <em>math</em> plugin into a real microservice. First, you need
+to get organized. The business logic of the <em>math</em> plugin, the
+functionality that it provides, is separate from whatever way it
+communicates with the outside world. Sometimes you might expose a web
+service. Other times you might listen on a message bus.</p>
+<p>It makes sense to put the business logic, the plugin definition, in
+its own file. Node.js modules are perfect for this:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">math</span><span class="hljs-params">( options )</span> </span>{ 
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:sum'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sum</span><span class="hljs-params">( msg, respond )</span> </span>{
+    respond( <span class="hljs-literal">null</span>, { answer: msg.left + msg.right } )
+  })
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:math,cmd:product'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">product</span><span class="hljs-params">( msg, respond )</span> </span>{
+    respond( <span class="hljs-literal">null</span>, { answer: msg.left * msg.right } )
+  })
+
+  <span class="hljs-keyword">this</span>.wrap( <span class="hljs-string">'role:math'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    msg.left  = <span class="hljs-built_in">Number</span>(msg.left).valueOf()
+    msg.right = <span class="hljs-built_in">Number</span>(msg.right).valueOf()
+    <span class="hljs-keyword">this</span>.prior( msg, respond )
+  })
+
+}
+</code></pre>
+<p>This plugin is defined in the
+<a href="https://github.com/senecajs/getting-started/blob/master/math.js">math.js</a>
+file. You export the plugin definition function, and then call
+<code>seneca.use</code> with the name of the file. You can either
+<a href="https://nodejs.org/api/modules.html">require</a> it in, or if you like
+to be terse, let Seneca make the <code>require</code> call:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-comment">// these are equivalent</span>
+<span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( <span class="hljs-built_in">require</span>(<span class="hljs-string">'./math.js'</span>) )
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>, <span class="hljs-built_in">console</span>.log )
+
+<span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( <span class="hljs-string">'math'</span> ) <span class="hljs-comment">// finds ./math.js in local folder</span>
+  .act( <span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>The <code>seneca.wrap</code> method matches a set of patterns and overrides all
+of them with the same action extension function. This is the same as
+calling <code>seneca.add</code> manually for each one. It takes two parameters:</p>
+<ul>
+<li><code>pin</code>: a <em>pin</em> is a pattern-matching pattern</li>
+<li><code>action</code>: action extension function</li>
+</ul>
+<p>A <em>pin</em> is a pattern that matches other patterns (it &quot;pins&quot; them). The
+pin <code>role:math</code> will match the patterns <code>role:math,cmd:sum</code> and
+<code>role:math,cmd:product</code> that are registered with Seneca.</p>
+<p>In this case, you use <code>seneca.wrap</code> to make sure that the <code>left</code> and
+<code>right</code> properties are parsed as numberic values, even if they are
+provided as strings.</p>
+<p>Sometimes it can be useful to see a visual tree of the patterns and
+any overrides in a Seneca instance. You can do this using the
+<code>--seneca.print.tree</code> command line option. The file
+<a href="https://github.com/senecajs/getting-started/blob/master/math-tree.js">math-tree.js</a> loads the <em>math</em> plugin, but then does nothing:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+  .use(<span class="hljs-string">'math'</span>)
+</code></pre>
+<p>We&#39;re just using it to show the action tree:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-tree.js --seneca.print.tree
+<span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">09</span>T15:<span class="hljs-number">21</span>:<span class="hljs-number">31.158</span>Z <span class="hljs-number">9</span>vjqzroin2k4/<span class="hljs-number">1436455291148</span>/<span class="hljs-number">78025</span>/- INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/<span class="hljs-number">9</span>vjqzroin2k4/<span class="hljs-number">1436455291148</span>/<span class="hljs-number">78025</span>/-    
+Seneca action patterns <span class="hljs-keyword">for</span> instance: <span class="hljs-number">9</span>vjqzroin2k4/<span class="hljs-number">1436455291148</span>/<span class="hljs-number">78025</span>/-
+├─┬ cmd:sum
+│ └─┬ role:math
+│   └── <span class="hljs-comment"># math, (s1a28), </span>
+│       <span class="hljs-comment"># math, (sw9ew), sum</span>
+└─┬ cmd:product
+  └─┬ role:math
+    └── <span class="hljs-comment"># math, (sxti2), </span>
+        <span class="hljs-comment"># math, (b8gcw), product</span>
+</code></pre>
+<p>Here you can see the name/value pairs of the action patterns arranged
+in a tree structure, and also any overrides. Action functions are
+indicated by the format: <code># plugin, (action-id), function-name</code>.</p>
+<p>Everything is still in the same process. Let&#39;s change that. First you
+need a microservice:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( <span class="hljs-string">'math'</span> )
+  .listen()
+</code></pre>
+<p>Running this code
+(<a href="https://github.com/senecajs/getting-started/blob/master/math-service.js">math-service.js</a>)
+starts a microservice process that listens on port 10101 for HTTP
+requests. This is <em>not</em> a web server. In this case, HTTP is being used
+as the transport mechanism for messages.</p>
+<p>You can try it out by sending a request to the microservice. Open the
+URL: <code>http://localhost:10101/act?role=math&amp;cmd=sum&amp;left=1&amp;right=2</code> in
+a web browser, or use <a href="http://curl.haxx.se/">curl</a> on the command line:</p>
+<pre class="highlight"><code class="hljs bash">$ curl <span class="hljs-operator">-d</span> <span class="hljs-string">'{"role":"math","cmd":"sum","left":1,"right":2}'</span> http://localhost:<span class="hljs-number">10101</span>/act
+</code></pre>
+<p>And what you get back is:</p>
+<pre class="highlight"><code class="hljs javascript">{<span class="hljs-string">"answer"</span>:<span class="hljs-number">3</span>}
+</code></pre>
+<p>Next, you need a microservice client:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .client()
+  .act(<span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>,<span class="hljs-built_in">console</span>.log)
+</code></pre>
+<p>Running this code (<a href="https://github.com/senecajs/getting-started/blob/master/math-client.js">math-client.js</a>) starts a microservice client that sends the JSON message:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"role"</span>:<span class="hljs-string">"math"</span>, <span class="hljs-string">"cmd"</span>:<span class="hljs-string">"sum"</span>, <span class="hljs-string">"left"</span>:<span class="hljs-number">1</span>, <span class="hljs-string">"right"</span>:<span class="hljs-number">2</span> }
+</code></pre>
+<p>to the <em>math-service</em> microservice above, which then responds with:</p>
+<pre class="highlight"><code class="hljs javascript">{ <span class="hljs-string">"answer"</span>:<span class="hljs-number">2</span> }
+</code></pre>
+<p>With Seneca, you create microservices by calling <code>seneca.listen</code>, and
+you talk to the services using <code>seneca.client</code>. In the example, you
+are using the default settings for the client and server, which is to
+communicate via HTTP over port 10101. Both <code>seneca.client</code> and
+<code>seneca.listen</code> accept the following parameters:</p>
+<ul>
+<li><em>port</em>: optional integer; port number,</li>
+<li><em>host</em>: optional string; host IP address,</li>
+<li><em>spec</em>: optional object; full specification object.</li>
+</ul>
+<p>So long as the client and listen parameters are the same, the two
+services can communicate. Some examples:</p>
+<ul>
+<li><code>seneca.client( 8080 )</code> &rarr; <code>seneca.listen( 8080 )</code> </li>
+<li><code>seneca.client( 8080, &#39;192.168.0.2&#39; )</code> &rarr; <code>seneca.listen( 8080, &#39;192.168.0.2&#39;  )</code> </li>
+<li><code>seneca.client( { port:8080, host:&#39;192.168.0.2&#39; } )</code> &rarr; <code>seneca.listen( { port:8080, host:&#39;192.168.0.2&#39; } )</code></li>
+</ul>
+<p>Seneca provides you with <strong>transport independence</strong> because your
+business logic does not need to know how messages are transported, or
+which service will get them. This is specified in the service setup
+code or configuration. In this case, the code in the <em>math.js</em> plugin
+<em>never</em> changes.</p>
+<p>The HTTP transport provides an easy way to integrate with Seneca
+microservices. But it does have all the overhead of HTTP. Another
+transport you can use is direct TCP connections. Seneca provides both
+HTTP and TCP options via the built-in
+<a href="https://www.npmjs.com/package/seneca-transport">seneca-transport</a>
+plugin. Let&#39;s move to TCP:</p>
+<ul>
+<li><code>seneca.client( { type:&#39;tcp&#39; } )</code> &rarr; <code>seneca.listen( { type:&#39;tcp&#39; } )</code></li>
+</ul>
+<p>The default <em>client/listen</em> configuration sends all messages that the
+client does not recognize over the listening server. Locally defined
+patterns are executed locally. It&#39;s usually preferable to specific
+exactly which patterns should be sent to which service, and you can do
+this using a <em>pin</em>.</p>
+<p>Let&#39;s put all this together into an example that sends <code>role:math</code>
+messages out over TCP on port 30303 (just an arbitrary port), and
+executes all other messages locally:</p>
+<p>First, the listening service (<a href="https://github.com/senecajs/getting-started/blob/master/math-pin-service.js">math-pin-service.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+  .use( <span class="hljs-string">'math'</span> )
+
+  <span class="hljs-comment">// listen for role:math messages</span>
+  <span class="hljs-comment">// IMPORTANT: must match client</span>
+  .listen( { type:<span class="hljs-string">'tcp'</span>, pin:<span class="hljs-string">'role:math'</span> } )
+</code></pre>
+<p>Then, the client
+(<a href="https://github.com/senecajs/getting-started/blob/master/math-pin-service.js">math-pin-service.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+  <span class="hljs-comment">// a local pattern</span>
+  .add( <span class="hljs-string">'say:hello'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span></span>{ respond( <span class="hljs-literal">null</span>, {text:<span class="hljs-string">"Hi!"</span>} ) } )
+
+  <span class="hljs-comment">// send any role:math patterns out over the network</span>
+  <span class="hljs-comment">// IMPORTANT: must match listening service</span>
+  .client( { type:<span class="hljs-string">'tcp'</span>, pin:<span class="hljs-string">'role:math'</span> } )
+
+  <span class="hljs-comment">// executed remotely</span>
+  .act(<span class="hljs-string">'role:math,cmd:sum,left:1,right:2'</span>,<span class="hljs-built_in">console</span>.log)
+
+  <span class="hljs-comment">// executed locally</span>
+  .act(<span class="hljs-string">'say:hello'</span>,<span class="hljs-built_in">console</span>.log)
+</code></pre>
+<p>You can use filtered logging to trace the flow of messages. You can
+use the command line option <code>--seneca...</code> to control how Seneca runs,
+including the log output generated. Seneca logs have the following
+attributes, the most important of which, in order, are:</p>
+<ul>
+<li><code>date-time</code>: when the log entry occurred</li>
+<li><code>seneca-id</code>: identifier for the Seneca process</li>
+<li><code>level</code>: one of <em>DEBUG</em>, <em>INFO</em>, <em>WARN</em>, <em>ERROR</em>, <em>FATAL</em></li>
+<li><code>type</code>: entry code, such as <em>act</em>, <em>plugin</em>, etc</li>
+<li><code>plugin</code>: plugin name (actions without a plugin have <em>root$</em>)</li>
+<li><code>case</code>: entry case, such as <em>IN</em>, <em>OUT</em>, <em>ADD</em>, etc.</li>
+<li><code>action-id/transaction-id</code>: tracing identifier, <strong>stays the same over the network</strong></li>
+<li><code>pin</code>: the action pattern for this message</li>
+<li><code>message</code>: the inbound or outbound message (truncated if too long)</li>
+</ul>
+<p>If you run the above processes with <code>--seneca.log.all</code> then you&#39;ll get all the logs. If you look at the entries, you can see Seneca booting up all the internal plugins.</p>
+<pre class="highlight"><code class="hljs bash">$ node math-pin-service.js --seneca.log.all
+... lots of logs ...
+
+$ node math-pin-client.js --seneca.log.all
+... lots of logs ...
+</code></pre>
+<p>It&#39;s hard to see the log entries that you care about, the ones relevant to the <em>math</em> plugin. To narrow the output, try this:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-pin-service.js --seneca.log=plugin:math
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  DEFINE    {}
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  ADD    (f3ysr)    cmd:sum,role:math    sum    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  ADD    (<span class="hljs-number">9</span>mocb)    cmd:product,role:math    product    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  ADD    (ydx70)    cmd:sum,role:math        
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  ADD    (ka7rj)    cmd:product,role:math        
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    plugin    math  options    <span class="hljs-keyword">set</span>    {math:{}}    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    act    math  IN    <span class="hljs-number">2682</span>lsrziy1i/rst61586f7wl    cmd:sum,role:math    {role:math,cmd:sum,left:<span class="hljs-number">1</span>,right:<span class="hljs-number">2</span>}    ENTRY    (ydx70)    LISTEN    o2..    -    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    act    math  IN    <span class="hljs-number">1</span>k46jra7rhpd/rst61586f7wl    cmd:sum,role:math    {role:math,cmd:sum,left:<span class="hljs-number">1</span>,right:<span class="hljs-number">2</span>}    PRIOR;(ydx70)    (f3ysr)    -    -    -    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    act    math  OUT    <span class="hljs-number">1</span>k46jra7rhpd/rst61586f7wl    cmd:sum,role:math    {answer:<span class="hljs-number">3</span>}    PRIOR;(ydx70)    (f3ysr)    -    -    <span class="hljs-number">0</span>    -    
+<span class="hljs-number">20</span>.. <span class="hljs-number">85</span>.. DEBUG    act    math  OUT    <span class="hljs-number">2682</span>lsrziy1i/rst61586f7wl    cmd:sum,role:math    {answer:<span class="hljs-number">3</span>}    EXI(ydx70)    LISTEN    o2..    <span class="hljs-number">1</span>    -
+
+$ node math-pin-client.js --seneca.log=pin:role:math
+<span class="hljs-number">20</span>.. o2.. DEBUG    act    remote$ IN    <span class="hljs-number">2682</span>lsrziy1i/rst61586f7wl    role:math    {role:math,cmd:sum,left:<span class="hljs-number">1</span>,right:<span class="hljs-number">2</span>}    ENTRY    CLIENT    -    -    -    
+nu
+<span class="hljs-number">20</span>.. o2.. DEBUG    act    remote$ OUT    <span class="hljs-number">2682</span>lsrziy1i/rst61586f7wl    role:math    {answer:<span class="hljs-number">3</span>}    EXIT    CLIENT    -    <span class="hljs-number">85</span>..    <span class="hljs-number">15</span>    -    
+null { answer: <span class="hljs-number">3</span> }
+</code></pre>
+<p>On the listening server, the setting <code>--seneca.log=plugin:math</code>
+narrows the log to those entries where the <code>plugin</code> attribute is
+<em>math</em>. You can see the registration of the <em>math</em> plugin, and the
+addition of its action patterns. If you remember, you used
+<code>seneca.wrap</code> to override the basic actions with a string to integer
+conversion. That means that the <em>role:math</em> actions have two <em>ADD</em>
+lines in the logs. You&#39;ll also notice that each action gets an
+indentifer, of the form <code>(abcde)</code>. You can use this to find out the
+exact action function that gets executed when a message comes in.</p>
+<p>When a message comes in, an <code>IN</code> log entry is created. When the action
+function provides a result, an &#39;OUT&#39; log entry is created. In the
+listening server logs above you can see this happening when the
+<code>{role:math,cmd:sum,left:1,right:2}</code> comes in over the network from
+the client.</p>
+<p>Look carefully at the generated unique action identifers:
+<code>2682lsrziy1i/rst61586f7wl</code> and <code>1k46jra7rhpd/rst61586f7wl</code>. These can
+be used to trace the flow of messages. The <code>IN</code> and <code>OUT</code> lines will
+have the same action identifier. Further, the second page, after the
+<code>/</code>, is a transaction identifer. All sub actions triggered by an
+initial action have the same transaction identifier, in this case
+<code>rst61586f7wl</code>.</p>
+<p>The action identifier persists over the network so that you can trace
+message flows when you have many microservices. Let&#39;s look at the
+client side. The setting <code>--seneca.log=pin:role:math</code> is another
+filter. This time it filters all log entries where the action pattern
+contains the specific pin, in this case <code>role:math</code>. </p>
+<p>You can see that the action identifier <code>2682lsrziy1i/rst61586f7wl</code>
+originated on the client, and is passed over the listening server. You
+can also see that the client and listening server identifiers, <code>85..</code>
+and <code>o2..</code> (shortened for clarity) are given in the log entries so
+that you can tell which service sent which message.</p>
+<p>Also seen in the output of the client is the console.log printing of
+the results &mdash; these are not part of the logs, just ordinary
+printed output.</p>
+<p>There are many ways to configure your microservice communciation
+architecture. Take a look at the reference links at the end of this
+guide for more information.</p>
+<div class="section-link">
+<a name="web-server-integration"></a>
+<a href="#web-server-integration">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="web-server-integraton">Web Server Integraton</h3>
+<p>Seneca is not a web framework. But you still need to connect it up to
+your web service API. Here&#39;s the easiest way to do that.</p>
+<p>The most important thing to remember is that you don&#39;t want to expose
+your internal action patterns to the outside world. That&#39;s not good
+security practice. Instead, define a set of API patterns, say with
+property <code>role:api</code>. Then you can hook them up to your internal
+microservices.</p>
+<p>Let&#39;s look at a simple example using
+<a href="http://expressjs.com">Express</a>. Here&#39;s the Express app
+(<a href="https://github.com/senecajs/getting-started/blob/master/app.js">app.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+      .use( <span class="hljs-string">'api'</span> )
+      .client( { type:<span class="hljs-string">'tcp'</span>, pin:<span class="hljs-string">'role:math'</span> } )
+
+<span class="hljs-keyword">var</span> app = <span class="hljs-built_in">require</span>( <span class="hljs-string">'express'</span> )()
+      .use( <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>).json() )
+      .use( seneca.export( <span class="hljs-string">'web'</span> ) )
+      .listen(<span class="hljs-number">3000</span>)
+</code></pre>
+<p>You create a seneca instance, load the <em>api</em> plugin, and then use
+<code>seneca.client</code> to send any <code>role:math</code> actions out to an external
+service. Your Express app is the microservice client.</p>
+<p>The integration between Seneca and Express happens in this line:</p>
+<pre class="highlight"><code class="hljs javascript">      .use( seneca.export( <span class="hljs-string">'web'</span> ) )
+</code></pre>
+<p>Seneca exports a middleware function that Express can use.</p>
+<p>Here&#39;s the <em>api</em> plugin (<a href="https://github.com/senecajs/getting-started/blob/master/api.js">api.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">api</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">var</span> valid_ops = { sum:<span class="hljs-string">'sum'</span>, product:<span class="hljs-string">'product'</span> }
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:api,path:calculate'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.act( <span class="hljs-string">'role:math'</span>, {
+      cmd:   valid_ops[msg.operation],
+      left:  msg.left,
+      right: msg.right,
+    }, respond )
+  })
+
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'init:api'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.act(<span class="hljs-string">'role:web'</span>,{use:{
+      prefix: <span class="hljs-string">'/api'</span>,
+      pin:    <span class="hljs-string">'role:api,path:*'</span>,
+      map: {
+        calculate: { GET:<span class="hljs-literal">true</span>, suffix:<span class="hljs-string">'/:operation'</span> }
+      }
+    }}, respond )
+  })
+
+}
+</code></pre>
+<p>This is a normal Seneca plugin. The <code>role:api,path:calculate</code> pattern
+will be exposed via URL endpoint. The inbound message should have the
+property <code>operation</code> that specifies the calculation to perform: <code>sum</code>
+or <code>product</code>. You can see that the code creates an explicit message
+for <code>role:math</code>, and makes a small attempt to sanitize the input. The
+<code>seneca.act</code> method allows you to build up the message both from a
+string (in this case <code>&#39;role:math&#39;</code>), and an object, merging the two
+together as a convenience.</p>
+<p><strong> Never use external input to create an action string. Always
+   explicitly create the internal message. This avoids injection
+   attacks. </strong></p>
+<p>The initialisation action makes a call to the pattern <code>role:web</code>, and
+defines the property <code>use</code>. This is a definition object that defines
+a route mapping from URLs to action patterns. It has the properties:</p>
+<ul>
+<li><code>prefix</code>: the URL prefix</li>
+<li><code>pin</code>: the set of patterns to map</li>
+<li><code>map</code>: the list of pin wildcard property values to use as URL endpoints.</li>
+</ul>
+<p>Your URL endpoint starts with <code>/api/...</code>.</p>
+<p>The pin is <code>role:math,path:*</code>. This means map any patterns that have
+<em>role</em> = <em>&#39;api&#39;</em>, and where a <em>path</em> property is defined. In this
+case, there is only one match: <code>role:api,path:calculate</code>.</p>
+<p>The map has the property <em>calculate</em> corresponding to the value of the
+<em>path</em> property.</p>
+<p>Your URL endpoint starts with <code>/api/calculate/...</code>.</p>
+<p>The calculate property has a subobject that indicates that the HTTP
+method is GET, and that the URL should have a parameterised suffix
+(these work just like Express parameters).</p>
+<p>Your full URL endpoint is <code>/api/calculate/:operation</code>.</p>
+<p>The remaining message properties are obtained from the URL query
+string, and from any JSON body submitted with the HTTP request. In
+this case, we are using GET, so there is no body.</p>
+<p>You can re-use the microservice from the previous example. To run the
+app, start:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-pin-service.js --seneca.log=plugin:math
+... logs as above ...
+
+$ node app.js --seneca.log=plugin:web,plugin:api
+... log entries <span class="hljs-keyword">for</span> the web and api plugins ...
+</code></pre>
+<p>To exercise the app, load these URLs in a browser:</p>
+<p><code>http://localhost:3000/api/calculate/sum?left=2&amp;right=3</code> &rarr; <code>{&quot;answer&quot;:5}</code></p>
+<p><code>http://localhost:3000/api/calculate/product?left=2&amp;right=3</code> &rarr; <code>{&quot;answer&quot;:6}</code></p>
+<p>If you look at the log output, you can see the corresponding action
+calls. You&#39;ll also see the line:</p>
+<pre class="highlight"><code class="hljs bash"><span class="hljs-number">20</span>.. ks.. DEBUG    plugin    web  ACT  f7../b8..  role:web  http  get  /api/calculate/:operation
+</code></pre>
+<p>Look for lines like this to see what URL endpoints you are building.</p>
+<div class="section-link">
+<a name="data-storage"></a>
+<a href="#data-storage">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="data-storage">Data Storage</h3>
+<p>You&#39;ll need to persist your data. Especially if you plan to build
+real-world systems! You can do anything you like inside Seneca
+actions, and use any kind of database layer. However, why not use the
+power of pattern matching and microservices to make your life easier?</p>
+<p>The pattern matching approach also means you can postpone the debate
+about microservice data &mdash; do services &quot;own&quot; data, do they access
+a shared database, etc. The pattern matching approach means you can
+reconfigure your system any which way later on.</p>
+<p>Seneca provides a simple data abstraction layer (&quot;ORM&quot;), based on the
+following operations:</p>
+<ul>
+<li><strong>load</strong>: load an entity by identifier</li>
+<li><strong>save</strong>: create or update (if you provide an identifier) an entity</li>
+<li><strong>list</strong>: list entities matching a simple query</li>
+<li><strong>remove</strong>: delete an entity by identifier</li>
+</ul>
+<p>The patterns are:</p>
+<ul>
+<li><strong>load</strong>: <code>role:entity,cmd:load,name:&lt;entity-name&gt;</code></li>
+<li><strong>save</strong>: <code>role:entity,cmd:save,name:&lt;entity-name&gt;</code></li>
+<li><strong>list</strong>: <code>role:entity,cmd:list,name:&lt;entity-name&gt;</code></li>
+<li><strong>remove</strong>: <code>role:entity,cmd:remove,name:&lt;entity-name&gt;</code></li>
+</ul>
+<p>A plugin can provide access to a database (say
+<a href="https://www.npmjs.com/package/seneca-mysql-store">MySQL</a>) by
+providing implementations of these patterns.</p>
+<p>The reason that Seneca supports data persistence as a core feature is
+that it makes microservice development much easier when data
+persistence is provided by the same mechanism as everything else:
+pattern-matched messages.</p>
+<p>Using the data persistence patterns directly can become tedious, so
+Seneca also provides a more familiar
+<a href="https://en.wikipedia.org/wiki/Active_record_pattern">ActiveRecord</a>-style
+interface. To create a record object, you call the <code>seneca.make</code>
+method. The record object has methods <code>load$</code>, <code>save$</code>, <code>list$</code> and
+<code>remove$</code> (the trailing <code>$</code> avoids clashes with data fields). The
+data fields are just the object properties.</p>
+<p>Let&#39;s create and save a simple data entity that stores &quot;product&quot; details:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+<span class="hljs-keyword">var</span> product = seneca.make(<span class="hljs-string">'product'</span>)
+product.name = <span class="hljs-string">'Apple'</span>
+product.price = <span class="hljs-number">1.99</span>
+
+<span class="hljs-comment">// sends role:entity,cmd:save,name:product messsage</span>
+product.save$( <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>Run the file <a href="https://github.com/senecajs/getting-started/blob/master/product.js">product.js</a> to test this. You&#39;ll see the output:</p>
+<pre class="highlight"><code class="hljs bash"><span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">10</span>T10:<span class="hljs-number">33</span>:<span class="hljs-number">18.195</span>Z f7ajdotgpxu9/<span class="hljs-number">1436524398186</span>/<span class="hljs-number">79031</span>/- INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/f7ajdotgpxu9/<span class="hljs-number">1436524398186</span>/<span class="hljs-number">79031</span>/-    
+null $-/-/product:{id=<span class="hljs-number">3</span>i402d;name=Apple;price=<span class="hljs-number">1.99</span>}
+</code></pre>
+<p>The response to the <code>role:entity,cmd:save</code> message is the record
+object, which prints itself as
+<code>$-/-/product:{id=3i402d;name=Apple;price=1.99}</code>. You can see that it
+auto-generated an identifier for you.</p>
+<p>Seneca comes with a built-in data persistence plugin:
+<a href="https://www.npmjs.com/package/seneca-mem-store">mem-store</a>. This
+plugin just stores the data in-memory, and does not actually persist
+it anywhere. It&#39;s very useful for writing fast unit tests!</p>
+<p>Because all data operations go via the same set of messages, you can
+very easily swap databases, at any time. No need to make database
+choice at the start of your project! Maybe use
+<a href="https://www.npmjs.com/package/seneca-mongo-store">MongoDB</a> to begin
+with when your schemas are in development, and switch to
+<a href="https://www.npmjs.com/package/seneca-postgres-store">Postgres</a> for
+the final few months before go-live and production.</p>
+<p>Let&#39;s build a little shop, and integrate it into our existing
+microservice system. First, here&#39;s a simple <em>shop</em> plugin, with some
+messages for adding products, getting product details, and making a
+purchase (see <a href="https://github.com/senecajs/getting-started/blob/master/shop.js">shop.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:shop,get:product'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.make( <span class="hljs-string">'product'</span> ).load$( msg.id, respond )
+  })
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:shop,add:product'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.make( <span class="hljs-string">'product'</span> ).data$(msg.data).save$(respond)
+  })
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:shop,cmd:purchase'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.make( <span class="hljs-string">'product'</span> ).load$(msg.id, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, product )</span> </span>{
+      <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> respond( err )
+
+      <span class="hljs-keyword">this</span>
+        .make( <span class="hljs-string">'purchase'</span> )
+        .data$({
+          when:    <span class="hljs-built_in">Date</span>.now(),
+          product: product.id,
+          name:    product.name,
+          price:   product.price,
+        })
+        .save$( <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, purchase )</span> </span>{
+          <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> respond( err )
+
+          <span class="hljs-keyword">this</span>.act(<span class="hljs-string">'role:shop,info:purchase'</span>,{purchase:purchase})
+          respond(<span class="hljs-literal">null</span>,purchase)
+        })
     })
   })
-})
-{% endhighlight %}
 
-<p>
-The <code>seneca.use</code> method tells <i>Seneca</i> to load a
-plugin, including any commands the plugin exposes. In this case,
-you're loading the <i>mongo-store</i> plugin, which lets you talk to
-the MongoDB database.
-</p>
-
-<p>
-To use the <i>mongo-store</i> plugin, you'll need to install it:
-
-{% highlight bash %}
-npm install seneca-mongo-store
-{% endhighlight %}
-</p>
-
-<p>
-The <code>seneca.ready</code> method waits for the database connection
-to be established. Apart from plugin configuration, your data logic
-code is <i>exactly the same</i>. Swapping databases at any stage of your project is trivial.
-</p>
-
-<p>
-How is the database layer implemented? It's just another set of commands. Here's the same code again:
-</p>
-
-{% highlight js %}
-var product = seneca.make('product')
-product.name = 'apple'
-product.price = 100
-
-seneca.act( 
-  { role:'entity', cmd:'save', ent:product},
-  function( err, product ) {
-    if( err ) return console.error( err )
-    console.log( 'saved: '+product )
-
-    seneca.act( 
-      // q is: the query - find matching property values
-      // qent is: entity type we want back
-      { role:'entity', cmd:'load', q:{id:product.id}, qent:product},
-      function( err, product ) {
-        if( err ) return console.error( err )
-        console.log( 'loaded: '+product )
-      })
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:shop,info:purchase'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.log.info(<span class="hljs-string">'purchase'</span>,msg.purchase)
+    respond()
   })
-{% endhighlight %}
+}
+</code></pre>
+<p>The <code>role:shop,get:product</code> pattern retrieves a product from the
+&quot;database&quot;. You provide the identifier via the <code>id</code> property. Notice
+the <code>respond</code> callback is simply passed along to the <code>load$</code> method to
+use as its callback.</p>
+<p>The <code>role:shop,add:product</code> pattern adds a new product to the
+&quot;database&quot;. You provide the data fields via the <code>data</code> object
+property. The <code>data$</code> method is a shortcut for setting all the data
+fields from the provided object (in this case, <code>msg.data</code>). Again,
+<code>respond</code> is passed along.</p>
+<p>The <code>role:shop,cmd:purchase</code> pattern creates a new row in the
+<code>purchase</code> table (a small part of what would happen in the real world
+when you hit the <em>Checkout</em> button). The <code>product</code> identifier and
+details for that transaction are recorded (prices change!). The action
+function also emits a <code>role:shop,info:purchase</code> message, <strong>but does
+not expect a response</strong>. This a <a href="http://oredev.org/2013/wed-fri-conference/implementing-micro-service-architectures">common microservice
+pattern</a>
+&mdash; letting the world know that something has happened, but not
+caring who gets the message.</p>
+<p>Finally, you provide a default implementation for the
+<code>role:shop,info:purchase</code> message. This is useful for debugging and
+unit testing. In the example code, you can see that it uses the
+<code>seneca.log.info</code> method to log the purchase event. The <code>seneca.log</code>
+object provides a method for each of the log levels: <code>debug</code>, <code>info</code>,
+<code>warn</code>, <code>error</code>, <code>fatal</code>. These methods also annotate your log entries
+with the name of your plugin.</p>
+<p>Let&#39;s create simple unit test for this plugin. Writing unit tests for
+Seneca plugins is very easy &mdash; verify that inbound messages
+generate the right responses.  Here&#39;s the unit test code 
+(<a href="https://github.com/senecajs/getting-started/blob/master/shop-test.js">shop-test.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>)
 
-<p>
-You can add support for your favorite database by writing a plugin with commands for
-each of the entity operations: <code>save</code>, <code>load</code>,
-etc. Here are some of the data stores <i>Seneca</i> supports:
-<ul> 
-  <li>Memory (transient) - built in
-  <li>JSON files (on disk) - <a href="http://github.com/rjrodger/seneca-jsonfile-store">seneca-jsonfile-store</a>
-  <li>JSON resources (REST API) - <a href="http://github.com/rjrodger/seneca-jsonrest-store">seneca-jsonrest-store</a>
-  <li>MongoDB - <a href="http://github.com/rjrodger/seneca-mongo-store">seneca-mongo-store</a>
-  <li>MySQL - <a href="https://github.com/mirceaalexandru/seneca-mysql-store">seneca-mysql-store</a>
-  <li>PostgreSQL - <a href="https://github.com/marianr/seneca-postgres-store">seneca-postgres-store</a>
-  <li>Redis - <a href="https://github.com/bamse16/seneca-redis-store">seneca-redis-store</a>
-  <li>CouchDB - <a href="https://github.com/bamse16/seneca-couch-store">seneca-couch-store</a>
-  <li>SQLite - <a href="https://github.com/bamse16/seneca-sqlite">seneca-sqlite-store</a>
-</ul> 
-</p>
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+      .use(<span class="hljs-string">'shop'</span>)
 
-<p>
-You can even decide to save different entities into different
-databases - for example, put user profiles into MongoDB, purchase
-transactions into MySQL, and sessions into Redis.  You do need to stay
-database independent by avoiding table joins, <a href="http://en.wikipedia.org/wiki/Denormalization">but
-you don't need them anyway</a>!
-</p>
+      <span class="hljs-comment">// uncomment to send messages to the shop-stats service</span>
+      <span class="hljs-comment">// .client({port:9003,pin:'role:shop,info:purchase'})</span>
+
+      .error( assert.fail )
+
+add_product()
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add_product</span><span class="hljs-params">()</span> </span>{
+  seneca.act( 
+    <span class="hljs-string">'role:shop,add:product,data:{name:Apple,price:1.99}'</span>, 
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, save_apple )</span> </span>{
+
+      <span class="hljs-keyword">this</span>.act( 
+        <span class="hljs-string">'role:shop,get:product'</span>, {id:save_apple.id}, 
+        <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, load_apple )</span> </span>{
+
+          assert.equal( load_apple.name, save_apple.name )
+
+          do_purchase( load_apple )
+        })
+    })
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_purchase</span><span class="hljs-params">( apple )</span> </span>{
+  seneca.act(
+    <span class="hljs-string">'role:shop,cmd:purchase'</span>,{id:apple.id},
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, purchase)</span> </span>{
+      assert.equal( purchase.product, apple.id )
+    }
+  )
+}
+</code></pre>
+<p>This code uses the built-in Node.js
+<a href="https://nodejs.org/api/assert.html">assert</a> module. It loads the
+<code>shop</code> plugin, and then exercises the <code>role:shop</code> messages. If you run
+the test file, you&#39;ll see the output:</p>
+<pre class="highlight"><code class="hljs bash">$ node shop-test.js
+<span class="hljs-number">20</span>.. h3.. INFO hello  Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/h3s0y3fckpde/<span class="hljs-number">1436528824335</span>/<span class="hljs-number">79305</span>/- 
+<span class="hljs-number">20</span>.. h3.. INFO plugin shop ACT gj.. info:purchase,role:shop purchase {when:<span class="hljs-number">1436528824554</span>,product:<span class="hljs-number">90</span>vzcc,name:Apple,price:<span class="hljs-number">1.99</span>,id:ntzosx}
+</code></pre>
+<p>This output includes the log entry that you created with
+<code>seneca.log.info</code> in the implementation of the
+<code>role:shop,info:purchase</code> action.</p>
+<p>Let&#39;s run a separate service to capture the purchase message
+events. For the sake of example we&#39;ll just count the number of
+purchases per product. Here&#39;s the <a href="https://github.com/senecajs/getting-started/blob/master/shop-stats.js">shop-stats.js</a>
+microservice:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> stats = {}
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+  .add(<span class="hljs-string">'role:shop,info:purchase'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> product_name = msg.purchase.name
+    stats[product_name] = stats[product_name] || <span class="hljs-number">0</span>
+    stats[product_name]++
+    <span class="hljs-built_in">console</span>.log(stats)
+    respond()
+  })
+  .listen({port:<span class="hljs-number">9003</span>,pin:<span class="hljs-string">'role:shop,info:purchase'</span>})
+</code></pre>
+<p>This service listens on port 9003, and prints out a product purchase
+statistics report every time a new purchase is made. Notice that you
+are providing an implementation of <code>role:shop,info:purchase</code>.</p>
+<p>To see this in action, uncomment the line in <a href="https://github.com/senecajs/getting-started/blob/master/shop-test.js">shop-test.js</a>:</p>
+<pre class="highlight"><code class="hljs javascript">      <span class="hljs-comment">// uncomment to send messages to the shop-stats service</span>
+      <span class="hljs-comment">// .client({port:9003,pin:'role:shop,info:purchase'})</span>
+</code></pre>
+<p>And then run both:</p>
+<pre class="highlight"><code class="hljs bash">$ node shop-test.js
+<span class="hljs-number">20</span>.. j0.. INFO hello  Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/j0z5x7zz2r0l/<span class="hljs-number">1436529606670</span>/<span class="hljs-number">79365</span>/-    
+<span class="hljs-number">20</span>.. j0.. INFO client {port:<span class="hljs-number">9003</span>,pin:role:shop,info:purchase}
+
+$ node shop-stats.js
+<span class="hljs-number">20</span>.. wb.. INFO hello  Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">2</span>/wbxim58g0vgd/<span class="hljs-number">1436529589836</span>/<span class="hljs-number">79362</span>/-    
+<span class="hljs-number">20</span>.. wb.. INFO listen {port:<span class="hljs-number">9003</span>,pin:role:shop,info:purchase}    
+{ Apple: <span class="hljs-number">1</span> }
+</code></pre>
+<div class="section-link">
+<a name="altogether"></a>
+<a href="#altogether">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="bringing-it-altogether">Bringing it Altogether</h3>
+<p>You&#39;re going to run four services. In the real world, you&#39;d use
+something like <a href="https://www.docker.com/">Docker</a> to keep yourself
+sane. For the purposes of this example, you&#39;ll run everything in the
+terminal as bare processes.</p>
+<p>The services are:</p>
+<ul>
+<li><a href="https://github.com/senecajs/getting-started/blob/master/shop-stats.js">shop-stats.js</a>: collect shop statistics</li>
+<li><a href="https://github.com/senecajs/getting-started/blob/master/shop-service.js">shop-service.js</a>: provide shop functionality</li>
+<li><a href="https://github.com/senecajs/getting-started/blob/master/math-pin-service.js">math-pin-service.js</a>: provide math functionality (as above)</li>
+<li><a href="https://github.com/senecajs/getting-started/blob/master/app-all.js">app-all.js</a>: web server</li>
+</ul>
+<p>The services <code>shop-stats</code> and <code>math-pin-service</code> are the same as
+before, so you can spin them up right away:</p>
+<pre class="highlight"><code class="hljs bash">$ node math-pin-service.js --seneca.log.all
+
+$ node shop-stats.js --seneca.log.all
+</code></pre>
+<p>In this example, we&#39;re using <code>--seneca.log.all</code> to log at the highest
+level of detail. There&#39;s a lot of output. Look out for the <code>act</code>
+lines, and the <code>IN</code> and <code>OUT</code> cases, and you can trace the message
+flows.</p>
+<p>We need a <a href="https://github.com/senecajs/getting-started/blob/master/shop-service.js">shop-service.js</a>:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+  .use( <span class="hljs-string">'shop'</span> )
+  .listen( { port:<span class="hljs-number">9002</span>, pin:<span class="hljs-string">'role:shop'</span> } )
+  .client( { port:<span class="hljs-number">9003</span>, pin:<span class="hljs-string">'role:shop,info:purchase'</span> } )
+</code></pre>
+<p>This service listens for inbound <code>role:shop</code> messages, <strong>but</strong> sends
+any <code>role:shop,info:purchase</code> messages out onto the network. Seneca
+lets you mix and match <code>client</code> and <code>listen</code> configurations. Remember,
+<strong>the client and listen pins must match</strong>.</p>
+<p>In this configuration, we&#39;ve put the <code>shop-service</code> on local port
+9002, and the <code>shop-stats</code> service on local port 9003. In production,
+you might use a <a href="https://www.npmjs.com/package/seneca-rabbitmq-transport">message
+bus</a>, or have
+<a href="https://www.npmjs.com/package/seneca-redis-transport">multiple
+clients</a>, or <a href="https://github.com/coreos/flannel">an
+overlay network</a>, or even <a href="https://www.consul.io/">service
+discovery</a> to configure the port and host.</p>
+<p>Start the <code>shop</code> service:</p>
+<pre class="highlight"><code class="hljs bash">$ node shop-service.js --seneca.log.all
+</code></pre>
+<p>The shop functionality is exposed via the URL endpoints
+<code>/api/shop/get</code> and <code>/api/shop/purchase</code>. We need to add these to the
+<em>api</em> plugin (<a href="https://github.com/senecajs/getting-started/blob/master/api-all.js">api-all.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript">  ...
+
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'role:api,path:shop'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> shopmsg = { role:<span class="hljs-string">'shop'</span>, id:msg.id }
+    <span class="hljs-keyword">if</span>( <span class="hljs-string">'get'</span>      == msg.operation ) shopmsg.get = <span class="hljs-string">'product'</span>
+    <span class="hljs-keyword">if</span>( <span class="hljs-string">'purchase'</span> == msg.operation ) shopmsg.cmd = <span class="hljs-string">'purchase'</span>
+
+    <span class="hljs-keyword">this</span>.act( shopmsg, respond )
+  })
 
 
-<h4>What Next?</h4>
+  <span class="hljs-keyword">this</span>.add( <span class="hljs-string">'init:api'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
 
-<p>
-The article <a href="https://blog.engineyard.com/2013/deploying-node-app">Deploying a Production Node.js App to Engine Yard</a> takes you step by step through the process of building a real application with Seneca.
-</p>
+    ...
+
+    <span class="hljs-keyword">this</span>.act(<span class="hljs-string">'role:web'</span>,{use:{
+      prefix: <span class="hljs-string">'/api'</span>,
+      pin:    <span class="hljs-string">'role:api,path:*'</span>,
+      map: {
+        shop: { GET:<span class="hljs-literal">true</span>, POST:<span class="hljs-literal">true</span>, suffix:<span class="hljs-string">'/:operation'</span> },
+      }
+    }})
+
+    respond()
+  })
+</code></pre>
+<p>Finally, we need to update the web server to send <code>role:shop</code> messages
+to the <code>shop-service</code> (<a href="https://github.com/senecajs/getting-started/blob/master/app-all.js">app-all.js</a>):</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+      .use( <span class="hljs-string">'api-all'</span> )
+      .client( { type:<span class="hljs-string">'tcp'</span>, pin:<span class="hljs-string">'role:math'</span> } )
+      .client( { port:<span class="hljs-number">9002</span>,  pin:<span class="hljs-string">'role:shop'</span> } )
+
+<span class="hljs-keyword">var</span> app = <span class="hljs-built_in">require</span>( <span class="hljs-string">'express'</span> )()
+      .use( <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>).json() )
+      .use( seneca.export( <span class="hljs-string">'web'</span> ) )
+      .listen(<span class="hljs-number">3000</span>)
+
+<span class="hljs-comment">// create a dummy product</span>
+seneca.act(
+  <span class="hljs-string">'role:shop,add:product'</span>,{data:{name:<span class="hljs-string">'Apple'</span>,price:<span class="hljs-number">1.99</span>}},
+  <span class="hljs-built_in">console</span>.log
+)
+</code></pre>
+<p>We&#39;ve also added a dummy product for testing. When you run the web service with:</p>
+<pre class="highlight"><code class="hljs bash">$ node app-all.js --seneca.log.all
+</code></pre>
+<p>the last line of the output will be something like:</p>
+<pre class="highlight"><code class="hljs bash">null $-/-/product:{id=mbm07t;name=Apple;price=<span class="hljs-number">1.99</span>}
+</code></pre>
+<p>Copy the product identifier, in this case <code>mbm07t</code>. You can use this
+to exercise the system.</p>
+<p>First, get the product details:</p>
+<p><code>http://localhost:3000/api/shop/get?id=mbm07t</code> &rarr; <code>{&quot;name&quot;:&quot;Apple&quot;,&quot;price&quot;:1.99,&quot;id&quot;:&quot;mbm07t&quot;}</code></p>
+<p>Then, make a purchase:</p>
+<pre class="highlight"><code class="hljs bash">$ curl <span class="hljs-operator">-d</span> <span class="hljs-string">'{"id":"mbm07t"}'</span> -H <span class="hljs-string">"content-type:application/json"</span> http://localhost:<span class="hljs-number">3000</span>/api/shop/purchase
+{<span class="hljs-string">"when"</span>:<span class="hljs-number">1436536799159</span>,<span class="hljs-string">"product"</span>:<span class="hljs-string">"mbm07t"</span>,<span class="hljs-string">"name"</span>:<span class="hljs-string">"Apple"</span>,<span class="hljs-string">"price"</span>:<span class="hljs-number">1.99</span>,<span class="hljs-string">"id"</span>:<span class="hljs-string">"ny09dx"</span>}
+</code></pre>
+<p>You need to do this using <code>curl</code> on the command line, as it has to be
+a HTTP POST request. Also note the need for the corrent content type
+header: <code>application/json</code>.</p>
+<p>Look at the logging output of all services. You&#39;ll be able to trace
+the action identifiers and transaction identifiers accross all the
+services.</p>
+<p>Don&#39;t forget that the <em>math</em> service still works:</p>
+<p><code>http://localhost:3000/api/calculate/sum?left=2&amp;right=3</code> &rarr; <code>{&quot;answer&quot;:5}</code></p>
+<p><strong> The <em>math</em> and <em>shop</em> services can be changed, updated, deployed, or
+even removed independently. </strong></p>
+<p>Changes to one service do not affect the others. This is how
+microservices give you <a href="http://www.thoughtworks.com/talks/software-development-21st-century-xconf-europe-2014">continuous
+delivery</a>.</p>
+<div class="section-link">
+<a name="next-steps"></a>
+<a href="#next-steps">&nbsp;&nbsp;&sect;&nbsp;&nbsp;</a>
+</div>
+
+<h3 id="next-steps">Next Steps</h3>
+<p>For more information on the functionality that Seneca provides, read
+these articles:</p>
+<ul>
+<li><a href="/write-a-plugin.html">Writing plugins</a>,</li>
+<li><a href="/logging-example.html">Understanding logging</a>,</li>
+<li><a href="/data-entities.html">Data entities</a>.</li>
+</ul>
+<p>For more information about inter-service communication, read the
+<a href="https://github.com/rjrodger/seneca-transport">seneca-transport</a>
+documentation, and also read the
+<a href="https://github.com/senecajs/deploy-example">salestax</a> examples.</p>
+<p>For an example of a real system, read the
+<a href="https://github.com/rjrodger/nodezoo">nodezoo.com</a> articles.</p>
+<p>There are also some <a href="http://www.richardrodger.com/speaking">conference talks on
+Seneca</a>.</p>
+<p>If you have questions, you can:</p>
+<ul>
+<li>Tweet to <a href="https://twitter.com/senecajs">@senecajs</a>,</li>
+<li>Post a <a href="https://github.com/rjrodger/seneca/issues">github issue</a>,</li>
+<li>Start a <a href="https://gitter.im/rjrodger/seneca">conversation</a>.</li>
+</ul>
+<p>Good luck, and stay micro!</p>
+<p><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></p>
+
 
         </section>
+      <aside id="sidebar">
 
+        <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">
+          <span class="new_margin">Download &</span>
+          <span class="new_margin">install</span>
+        </a>
+
+        <a href="getting-started.html" class="button1" style="background-image: url(../images/menu-start.png);">
+          <span class="new_margin">Getting</span>
+          <span class="new_margin">started</span>
+        </a>
+
+        <a href="plugins.html" class="button1" style="background-image: url(../images/menu-plugins.png);">
+          <span class="new_margin">All the</span>
+          <span class="new_margin">Plugins</span>
+        </a>
+
+        <a href="videos.html" class="button1" style="background-image: url(../images/menu-video.png);">
+          <span class="new_margin">Videos and</span>
+          <span class="new_margin">Talks</span>
+        </a>
+
+        <a href="http://senecajs.tumblr.com" class="button1" style="background-image: url(../images/menu-updates.png);">
+          <span class="new_margin">Updates</span>
+          <span class="new_margin">and releases</span>
+        </a>
+
+        <a href="documentation.html" class="button1" style="background-image: url(../images/menu-docu.png);">
+          <span class="new_margin">Documentation</span>
+          <span class="new_margin">goodness</span>
+        </a>
+
+        <a href="case-studies.html" class="button1" style="background-image: url(../images/menu-prod.png);">
+          <span class="new_margin">Seneca</span>
+          <span class="new_margin">in production</span>
+        </a>
+
+        <a href="https://github.com/rjrodger/seneca" class="button1" style="background-image: url(../images/menu-github.png);">
+          <span class="new_margin">Github</span>
+          <span class="new_margin">rjrodger/seneca</span>
+        </a>
+          
+        <a href="http://twitter.com/senecajs" class="button1" style="background-image: url(../images/menu-twitter.png);">
+          <span class="new_margin">Twitter</span>
+          <span class="new_margin">@senecajs</span>
+        </a>
+                  
+      </aside>
+      
+      </div>
+    </div>
+
+    
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57673-6', 'senecajs.org');
+  ga('send', 'pageview');
+
+</script>  
+  </body>
+</html>

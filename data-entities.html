@@ -1,12 +1,48 @@
----
-layout: main
----
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
+
+    <meta name="generator" content="DocPad v6.78.1" />
+    
+  </head>
+
+  <body>
+
+    <header>
+      <div class="inner">
+        <a href="http://senecajs.org">
+          <img src="images/building.png"/>
+          <span style="color:black; font: 52px 'Lobster'">Seneca</span>
+          <!--<img src="images/logo.png"/>-->
+        </a>
+        <p style="color:black; font: 24px 'Lobster'">A Micro-Services toolkit for Node.js</p>
+      </div>
+    </header>
+
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
 <section id="main-content">
 
   <h3>Seneca Data Entities</h3>
 
 <p>
-The Seneca framework provides a data entity API based loosely on the <a href="http://www.martinfowler.com/eaaCatalog/activeRecord.html">ActiveRecord style</a>. Here's how it works.</p>
+The Seneca framework provides a data entity API based loosely on the <a href="http://www.martinfowler.com/eaaCatalog/activeRecord.html">ActiveRecord style</a>. Here&#39;s how it works.</p>
 
 
 <h4>The Seneca Philosophy</h4>
@@ -29,10 +65,9 @@ To keep things organized, a few conventions are used. A <i>role</i> property ide
 For example:
 </p>
 
-{% highlight js %}
-seneca.act( {role:'entity', cmd:'save', ent:{...}}, 
-            function(err,result){ ... } )
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.act( {role:<span class="hljs-string">'entity'</span>, cmd:<span class="hljs-string">'save'</span>, ent:{...}}, 
+            <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,result)</span></span>{ ... } )
+</code></pre></div>
 
 <p>
 This action will save data entities to persistent storage, as part of the group of actions that perform the <i>role</i> of data persistence.
@@ -55,22 +90,20 @@ However, you cannot add business logic to these objects. <i><b>Business logic be
 First you need a Seneca instance:
 </p>
 
-{% highlight js %}
-var seneca = require('seneca')()
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+</code></pre></div>
 
 <p>
 Then you can create data entity objects:
 </p>
 
-{% highlight js %}
-var foo = seneca.make('foo')
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo = seneca.make(<span class="hljs-string">'foo'</span>)
+</code></pre></div>
 
 <p>
 The entity name is <i>foo</i>. If your underlying data store is
 MongoDB, this data entity corresponds to the <i>foo</i>
-collection. As a convenience, so you don't have to hook up a database, Seneca provides a transient in-memory store out of the
+collection. As a convenience, so you don&#39;t have to hook up a database, Seneca provides a transient in-memory store out of the
 box (so you can just start coding!).
 </p>
 
@@ -78,10 +111,9 @@ box (so you can just start coding!).
 Next, add some data fields:
 </p>
 
-{% highlight js %}
-foo.name = 'Apple'
-foo.price = 1.99
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">foo.name = <span class="hljs-string">'Apple'</span>
+foo.price = <span class="hljs-number">1.99</span>
+</code></pre></div>
 
 <p>
 The data fields are just ordinary JavaScript object properties.
@@ -91,11 +123,10 @@ The data fields are just ordinary JavaScript object properties.
 Now, you need to save the data:
 </p>
 
-{% highlight js %}
-foo.save$(function(err,foo){
-  console.log(foo)
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">foo.save$(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,foo)</span></span>{
+  <span class="hljs-built_in">console</span>.log(foo)
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>save$</code> method invokes the <i>role:entity, cmd:save</i>
@@ -105,7 +136,7 @@ action, passing in the foo object as the value of <i>ent</i> argument.
 <p>
 The reason for the $ suffix is to namespace the <i>cmd</i>
 methods. You can always be 100% certain that vanilla property names
-"just work". Stick to alphanumeric characters and underscore and you'll be fine.
+&quot;just work&quot;. Stick to alphanumeric characters and underscore and you&#39;ll be fine.
 </p>
 
 <p>
@@ -117,19 +148,18 @@ storage, and includes a unique <i>id</i> property.
 </p>
 
 <p>
-Once you've saved the data entity, you'll want to load it again at
+Once you&#39;ve saved the data entity, you&#39;ll want to load it again at
 some point. Use the <code>load$</code> method to do this, passing in
 the <i>id</i> property.
 </p>
 
 
-{% highlight js %}
-var id = '...'
-var foo_entity = seneca.make('foo')
-foo_entity.load$( id, function(err,foo){
-  console.log(foo)
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> id = <span class="hljs-string">'...'</span>
+<span class="hljs-keyword">var</span> foo&lt;em&gt;entity = seneca.make(<span class="hljs-string">'foo'</span>)
+foo_entity.load$( id, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,foo)</span></span>{
+  <span class="hljs-built_in">console</span>.log(foo)
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 You can call the <code>load$</code> method on any data entity object
@@ -141,30 +171,28 @@ To delete entities, you also use the <i>id</i> property, with the
 <code>remove$</code> method:
 </p>
 
-{% highlight js %}
-var id = '...'
-var foo_entity = seneca.make('foo')
-foo_entity.remove$( id, function(err){ ... })
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> id = <span class="hljs-string">'...'</span>
+<span class="hljs-keyword">var</span> foo_entity = seneca.make(<span class="hljs-string">'foo'</span>)
+foo_entity.remove$( id, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{ ... })
+</code></pre></div>
 
 <p>
 To get a list of entities that match a query, use
 the <code>list$</code> method:
 </p>
 
-{% highlight js %}
-var foo_entity = seneca.make('foo')
-foo_entity.list$( {price:1.99}, function(err,list){
-  list.forEach(function( foo ){
-    console.log(foo)
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo_entity = seneca.make(<span class="hljs-string">'foo'</span>)
+foo_entity.list$( {price:<span class="hljs-number">1.99</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,list)</span></span>{
+  list.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( foo )</span></span>{
+    <span class="hljs-built_in">console</span>.log(foo)
   })
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The matching entities are returned as an array. The query is a set of
 property values, all of which must match.  This is equivalent to a SQL
-query of the form: <code> col1 = 'val1' AND col2 = 'val2' AND ... </code>. 
+query of the form: <code> col1 = &#39;val1&#39; AND col2 = &#39;val2&#39; AND ... </code>. 
 Seneca provides a common query format that works
 across all data stores. The trade-off is that these queries have
 limited expressiveness (more on this later, including the get-out-of-jail options).
@@ -174,11 +202,10 @@ limited expressiveness (more on this later, including the get-out-of-jail option
 One thing you can do is sort the results:
 </p>
 
-{% highlight js %}
-foo_entity.list$( {price:1.99, sort$:{price:-1}}, function(err,list){
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">foo_entity.list$( {price:<span class="hljs-number">1.99</span>, sort$:{price:-<span class="hljs-number">1</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,list)</span></span>{
   ...
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>sort$</code> meta argument takes a sub-object containing a single key, the field to sort. The value <code>+1</code> means sort ascending,
@@ -204,23 +231,22 @@ different types of data in different ways. To make this easier, Seneca provides 
 
 <ul>
 <li><i>name</i>: the primary name of the entity. For example: <i>product</i></li>
-<li><i>base</i>: group name for entities that "belong together". For example: <i>shop</i></li>
+<li><i>base</i>: group name for entities that &quot;belong together&quot;. For example: <i>shop</i></li>
 <li><i>zone</i>: name for a data set belonging to a business entity, geography, or customer. For example: <i>tenant001</i></li>
 </ul>
 
 <p>
-The zone and base are optional. You can just use the name element in the same way you use ordinary database tables, and you'll be just fine.
-Here's an example of creating a <i>foo</i> entity (as seen above):
+The zone and base are optional. You can just use the name element in the same way you use ordinary database tables, and you&#39;ll be just fine.
+Here&#39;s an example of creating a <i>foo</i> entity (as seen above):
 </p>
 
-{% highlight js %}
-var foo_entity = seneca.make('foo')
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo_entity = seneca.make(<span class="hljs-string">'foo'</span>)
+</code></pre></div>
 
 <p>
 Often, a set of plugins that provide the related functions, will use
 the same <i>base</i>. This ensures that the entities used by these
-plugins won't interfere with your own entities.
+plugins won&#39;t interfere with your own entities.
 </p>
 
 <p>
@@ -230,15 +256,14 @@ which handle user accounts, and login/logout, use the <i>sys</i> base,
 and work with the following entities:
 </p>
 
-{% highlight js %}
-var sys_user  = seneca.make('sys','user')
-var sys_login = seneca.make('sys','login')
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> sys_user  = seneca.make(<span class="hljs-string">'sys'</span>,<span class="hljs-string">'user'</span>)
+<span class="hljs-keyword">var</span> sys_login = seneca.make(<span class="hljs-string">'sys'</span>,<span class="hljs-string">'login'</span>)
+</code></pre></div>
 
 <p>
 The underlying database needs to have a name for the table or
 collection associated with an entity. The convention is to join the
-base and name with an underscore, as <code>'_'</code> is accepted by most database
+base and name with an underscore, as <code>&#39;</em>&#39;</code> is accepted by most database
 systems as a valid name character.  This means that <i>name</i>, <i>base</i> and
 <i>zone</i> values should only be alphanumeric, and to be completely safe,
 should never start with a number.
@@ -258,7 +283,7 @@ may need to isolate customer data into separate physical databases.
 <p>
 The zone is never part of the database table name. You use it by
 registering multiple instances of the same database plugin, pointing
-at different physical databases. Seneca's pattern matching makes this
+at different physical databases. Seneca&#39;s pattern matching makes this
 automatic for you (see the entity type mapping examples below).
 </p>
 
@@ -272,59 +297,53 @@ You can also use the zone for custom business rules. The zone, base and name app
 The <i>make</i> method is available on both the main Seneca object, and on each entity object (where it always has a $ suffix):
 </p>
 
-{% highlight js %}
-// the alias make$ will also work
-var foo = seneca.make('foo') 
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-comment">// the alias make$ will also work</span>
+<span class="hljs-keyword">var</span> foo = seneca.make(<span class="hljs-string">'foo'</span>) 
 
-// make() does not exist to avoid property clashes
-var bar = foo.make$('bar') 
-{% endhighlight %}
+<span class="hljs-comment">// make() does not exist to avoid property clashes</span>
+<span class="hljs-keyword">var</span> bar = foo.make$(<span class="hljs-string">'bar'</span>) 
+</code></pre></div>
 
 <p>
 It optionally accepts up to three string arguments, specifying the zone, base and name, always in that order:
 </p>
 
-{% highlight js %}
-var foo = seneca.make('foo') 
-var bar_foo = seneca.make('bar','foo') 
-var zen_bar_foo = seneca.make('zen','bar','foo') 
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo = seneca.make(<span class="hljs-string">'foo'</span>) 
+<span class="hljs-keyword">var</span> bar_foo = seneca.make(<span class="hljs-string">'bar'</span>,<span class="hljs-string">'foo'</span>) 
+<span class="hljs-keyword">var</span> zen_bar_foo = seneca.make(<span class="hljs-string">'zen'</span>,<span class="hljs-string">'bar'</span>,<span class="hljs-string">'foo'</span>) 
+</code></pre></div>
 
 <p>
 When no arguments are given, calling <code>make$</code> on an entity will create a new instance of the same kind (same zone, base and name):
 </p>
 
-{% highlight js %}
-var foo = seneca.make('foo') 
-var morefoo = foo.make$()
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo = seneca.make(<span class="hljs-string">'foo'</span>) 
+<span class="hljs-keyword">var</span> morefoo = foo.make$()
+</code></pre></div>
 
 <p>
 No data is copied, you get a completely new, empty, data entity (use <code>clone$</code> instead to copy the data).
 If you pass in an object as the last argument to <code>make$</code>, it will be used to initialize the entity data fields:
 </p>
 
-{% highlight js %}
-var foo = seneca.make('foo', {price:1.99,color:'red'}) 
-console.log('price is '+foo.price+' and color is '+foo.color)
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> foo = seneca.make(<span class="hljs-string">'foo'</span>, {price:<span class="hljs-number">1.99</span>,color:<span class="hljs-string">'red'</span>}) 
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'price is '</span>+foo.price+<span class="hljs-string">' and color is '</span>+foo.color)
+</code></pre></div>
 
 
 <p>
 If you call the <code>toString</code> method on an entity, it will indicate the zone, base and name using the syntax <i>zone/base/name</i> as a prefix to the entity data:
 </p>
 
-{% highlight text %}
-$zone/base/name:{id=...;prop=val,...}
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs bash"><span class="hljs-variable">$zone</span>/base/name:{id=...;prop=val,...}
+</code></pre></div>
 
 <p>
-If any of the namespace elements are not defined, a minus <code>'-'</code> is used as placeholder:
+If any of the namespace elements are not defined, a minus <code>&#39;-&#39;</code> is used as placeholder:
 </p>
 
-{% highlight text %}
-$-/-/name:{id=...;prop=val,...}
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs bash">$-/-/name:{id=...;prop=val,...}
+</code></pre></div>
 
 <p>
 The syntax <i>zone/base/name</i> is also used a shorthand for an
@@ -335,7 +354,7 @@ that have base <i>bar</i>.
 <h4>Using Databases to Store Entity Data</h4>
 
 <p>
-To store persistent data, you'll need to use an external
+To store persistent data, you&#39;ll need to use an external
 database. Each database needs a plugin that understands how to talk to
 that database. The plugins normally use a specific driver module to do the actual talking.
 </p>
@@ -349,14 +368,13 @@ uses the <a href="http://mongodb.github.io/node-mongodb-native/">mongodb</a> mod
 Using a data store plugin is easy. Register with Seneca and supply the database connection details as options to the plugin:
 </p>
 
-{% highlight js %}
-var seneca = require('seneca')()
-seneca.use('mongo-store',{
-  name:'dbname',
-  host:'127.0.0.1',
-  port:27017
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use(<span class="hljs-string">'mongo-store'</span>,{
+  name:<span class="hljs-string">'dbname'</span>,
+  host:<span class="hljs-string">'127.0.0.1'</span>,
+  port:<span class="hljs-number">27017</span>
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The database connection will need to be established before you can
@@ -364,17 +382,16 @@ save data. Use the <code>seneca.ready</code> function to supply a
 callback that will be called once the database is good to go:
 </p>
 
-{% highlight js %}
-seneca.ready(function(err){
-  var apple = seneca.make$('fruit')
-  apple.name  = 'Pink Lady'
-  apple.price = 1.99
-  apple.save$(function(err,apple){
-    if( err ) return console.log(err);
-    console.log( "apple = "+apple  )
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.ready(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{
+  <span class="hljs-keyword">var</span> apple = seneca.make$(<span class="hljs-string">'fruit'</span>)
+  apple.name  = <span class="hljs-string">'Pink Lady'</span>
+  apple.price = <span class="hljs-number">1.99</span>
+  apple.save$(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,apple)</span></span>{
+    <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.log( <span class="hljs-string">"apple = "</span>+apple  )
   })
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The <code>seneca.ready</code> function works for any plugin that has a callback dependency
@@ -385,22 +402,20 @@ like this - it will only be triggered once all the plugins are ready.
 To close any open database connections, use the <code>seneca.close</code> method:
 </p>
 
-{% highlight js %}
-seneca.close(function(err){
-  console.log('database closed!')
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.close(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'database closed!'</span>)
 })
-{% endhighlight %}
+</code></pre></div>
 
 
 <h5>Data Store Plugins</h5>
 
 <p>
-To use a data store plugin, you'll normally need to install the module via npm:
+To use a data store plugin, you&#39;ll normally need to install the module via npm:
 </p>
 
-{% highlight bash %}
-npm install seneca-mongo-store
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs bash">npm install seneca-mongo-store
+</code></pre></div>
 
 <p>
 The data store plugins use a naming convention of the form seneca-<i>database</i>-store. The suffix <i>db</i> is dropped. Here are some of the existing data store plugins:
@@ -418,9 +433,8 @@ The data store plugins use a naming convention of the form seneca-<i>database</i
 Refer to their project pages for details on behaviour and configuration options. As a convenience, Seneca allows you to drop the <i>seneca-</i> prefix when registering the plugin:
 </p>
 
-{% highlight js %}
-seneca.use('mongo-store',{ ... })
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.use(<span class="hljs-string">'mongo-store'</span>,{ ... })
+</code></pre></div>
 
 <p>
 The default, built-in data store is <i>mem-store</i>, which provides a
@@ -431,8 +445,8 @@ later point.
 </p>
 
 <p>
-If you'd like to add support for a database to Seneca, 
-here's the <a href="/data-store-guide.html">guide to writing data store plugins</a> 
+If you&#39;d like to add support for a database to Seneca, 
+here&#39;s the <a href="/data-store-guide.html">guide to writing data store plugins</a> 
 </p>
 
 
@@ -455,7 +469,7 @@ to specify the data entity types that it should support. All others will be igno
 The map is a set of key-value pairs, where the key is an entity type
 pattern, and the value a list of entity <i>cmd</i>s 
 (such as <i>save</i>,<i>load</i>,<i>list</i>,<i>remove</i>,...), 
-or <code>'*'</code>, which means the mapping applies to all <i>cmd</i>s.
+or <code>&#39;<em>&#39;</code>, which means the mapping applies to all <i>cmd</i>s.
 </p>
 
 <p>
@@ -463,25 +477,23 @@ The example mapping below means that all entities with the name <i>tmp</i>,
 regardless of zone or base, will use the transient <i>mem-store</i>:
 </p>
 
-{% highlight js %}
-seneca.use('mem-store',{ map:{ 
-  '-/-/tmp':'*'
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.use(<span class="hljs-string">'mem-store'</span>,{ map:{ 
+  <span class="hljs-string">'-/-/tmp'</span>:<span class="hljs-string">'&lt;/em&gt;'</span>
 }})
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 To use different databases for different groups of data, use the <i>base</i> element:
 </p>
 
-{% highlight js %}
-seneca.use('jsonfile-store',{ 
-  folder:'json-data', map:{'-/json/-':'*'}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.use(<span class="hljs-string">'jsonfile-store'</span>,{ 
+  folder:<span class="hljs-string">'json-data'</span>, map:{<span class="hljs-string">'-/json/-'</span>:<span class="hljs-string">'&lt;em&gt;'</span>}
 })
 
-seneca.use('level-store',{ 
-  folder:'level-data', map:{'-/level/-':'*'}
+seneca.use(<span class="hljs-string">'level-store'</span>,{ 
+  folder:<span class="hljs-string">'level-data'</span>, map:{<span class="hljs-string">'-/level/-'</span>:<span class="hljs-string">'&lt;/em&gt;'</span>}
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 This mapping sends -/json/- entities to
@@ -494,22 +506,21 @@ data store.
 <p>
 Here it is in action:
 
-{% highlight js %}
-seneca.ready(function(err,seneca){
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.ready(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,seneca)</span></span>{
 
   ;seneca
-    .make$('json','foo',{propA:'val1',propB:'val2'})
-    .save$(function(err,json_foo){
-      console.log(''+json_foo)
+    .make$(<span class="hljs-string">'json'</span>,<span class="hljs-string">'foo'</span>,{propA:<span class="hljs-string">'val1'</span>,propB:<span class="hljs-string">'val2'</span>})
+    .save$(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,json_foo)</span></span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">''</span>+json_foo)
 
   ;seneca
-    .make$('level','bar',{propA:'val3',propB:'val4'})
-    .save$(function(err,level_bar){
-      console.log(''+level_bar)
+    .make$(<span class="hljs-string">'level'</span>,<span class="hljs-string">'bar'</span>,{propA:<span class="hljs-string">'val3'</span>,propB:<span class="hljs-string">'val4'</span>})
+    .save$(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,level_bar)</span></span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">''</span>+level_bar)
 
   }) })
 })
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 The full source code is available in the data-entities folder of the <a href="https://github.com/rjrodger/seneca-examples">seneca examples repository</a>.
@@ -527,16 +538,15 @@ You can track and debug the activity of data entities by reviewing the action lo
 For example, run the example above, that uses both the jsonfile store and the leveldb store, using the <code>--seneca.log=type:act</code> log filter, and you get the output:
 </p>
 
-{% highlight bash %}
-$ node main.js --seneca.log=type:act
+<div class="highlight"><pre class="highlight"><code class="hljs bash">$ node main.js --seneca.log=<span class="hljs-built_in">type</span>:act
 ...
-2013-04-18T10:05:45.818Z	DEBUG	act	jsonfile-store	BCL	wa8xc5	In	{cmd=save,role=entity,ent=$-/json/foo:{id=;propA=val1;propB=val2},name=foo,base=json}	gx38qi
-2013-04-18T10:05:45.821Z	DEBUG	act	jsonfile-store	BCL	wa8xc5	OUT	[$-/json/foo:{id=ulw8ew;propA=val1;propB=val2}]	gx38qi
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">05</span>:<span class="hljs-number">45.818</span>Z    DEBUG    act    jsonfile-store    BCL    wa8xc5    In    {cmd=save,role=entity,ent=$-/json/foo:{id=;propA=val1;propB=val2},name=foo,base=json}    gx38qi
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">05</span>:<span class="hljs-number">45.821</span>Z    DEBUG    act    jsonfile-store    BCL    wa8xc5    OUT    [$-/json/foo:{id=ulw8ew;propA=val1;propB=val2}]    gx38qi
 ...
-2013-04-18T10:05:45.822Z	DEBUG	act	level-store	GPN	8dnjyt	IN	{cmd=save,role=entity,ent=$-/level/bar:{id=;propA=val3;propB=val4},name=bar,base=level}	8ml1p7
-2013-04-18T10:05:45.826Z	DEBUG	act	level-store	GPN	8dnjyt	OUT	[$-/level/bar:{id=7de92fc0-f402-411d-80ea-59e435a8c398;propA=val3;propB=val4}]	8ml1p7
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">05</span>:<span class="hljs-number">45.822</span>Z    DEBUG    act    level-store    GPN    <span class="hljs-number">8</span>dnjyt    IN    {cmd=save,role=entity,ent=$-/level/bar:{id=;propA=val3;propB=val4},name=bar,base=level}    <span class="hljs-number">8</span>ml1p7
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">05</span>:<span class="hljs-number">45.826</span>Z    DEBUG    act    level-store    GPN    <span class="hljs-number">8</span>dnjyt    OUT    [$-/level/bar:{id=<span class="hljs-number">7</span>de92fc0<span class="hljs-operator">-f</span>402-<span class="hljs-number">411</span>d-<span class="hljs-number">80</span>ea-<span class="hljs-number">59</span>e435a8c398;propA=val3;propB=val4}]    <span class="hljs-number">8</span>ml1p7
 ...
-{% endhighlight %}
+</code></pre></div>
 
 <p>
 This shows the <i>role:entity, cmd:save</i> action of both data
@@ -555,11 +565,10 @@ Once the action completes, the <code>OUT</code> log entries show the returned da
 The data stores themselves also generate logging output. Try <code>--seneca.log=type:plugin</code> to see this:
 </p>
 
-{% highlight bash %}
-$ node main.js --seneca.log=type:plugin
-2013-04-18T10:39:54.961Z	DEBUG	plugin	jsonfile-store	QSG	cop6lx	save/insert	$-/json/foo:{id=nt7usm;propA=val1;propB=val2}	jsonfile-store~QSG~-/json/-
-2013-04-18T10:40:19.802Z	DEBUG	plugin	level-store	JNG	save/insert	$-/level/bar:{id=7166037e-112d-448c-9afa-84e69d84aa25;propA=val3;propB=val4}	level-store~JNG~-/level/-
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs bash">$ node main.js --seneca.log=<span class="hljs-built_in">type</span>:plugin
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">39</span>:<span class="hljs-number">54.961</span>Z    DEBUG    plugin    jsonfile-store    QSG    cop6lx    save/insert    $-/json/foo:{id=nt7usm;propA=val1;propB=val2}    jsonfile-store~QSG~-/json/-
+<span class="hljs-number">2013</span>-<span class="hljs-number">04</span>-<span class="hljs-number">18</span>T10:<span class="hljs-number">40</span>:<span class="hljs-number">19.802</span>Z    DEBUG    plugin    level-store    JNG    save/insert    $-/level/bar:{id=<span class="hljs-number">7166037</span>e-<span class="hljs-number">112</span>d-<span class="hljs-number">448</span>c-<span class="hljs-number">9</span>afa-<span class="hljs-number">84</span>e69d84aa25;propA=val3;propB=val4}    level-store~JNG~-/level/-
+</code></pre></div>
 
 <p>
 In this case, the data stores creates a log entry for each save operation that inserts data. The entity data is also shown.
@@ -584,8 +593,75 @@ Each data store plugin instance can be ths be described by the name of the data 
 
 <br /><br /><br />
 <p>
-That's all folks! Corrections and comments: please tweet <a href="https://twitter.com/senecajs">@senecajs</a>.
+That&#39;s all folks! Corrections and comments: please tweet <a href="https://twitter.com/senecajs">@senecajs</a>.
 </p>
 
         </section>
 
+        </section>
+      <aside id="sidebar">
+
+        <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">
+          <span class="new_margin">Download &</span>
+          <span class="new_margin">install</span>
+        </a>
+
+        <a href="getting-started.html" class="button1" style="background-image: url(../images/menu-start.png);">
+          <span class="new_margin">Getting</span>
+          <span class="new_margin">started</span>
+        </a>
+
+        <a href="plugins.html" class="button1" style="background-image: url(../images/menu-plugins.png);">
+          <span class="new_margin">All the</span>
+          <span class="new_margin">Plugins</span>
+        </a>
+
+        <a href="videos.html" class="button1" style="background-image: url(../images/menu-video.png);">
+          <span class="new_margin">Videos and</span>
+          <span class="new_margin">Talks</span>
+        </a>
+
+        <a href="http://senecajs.tumblr.com" class="button1" style="background-image: url(../images/menu-updates.png);">
+          <span class="new_margin">Updates</span>
+          <span class="new_margin">and releases</span>
+        </a>
+
+        <a href="documentation.html" class="button1" style="background-image: url(../images/menu-docu.png);">
+          <span class="new_margin">Documentation</span>
+          <span class="new_margin">goodness</span>
+        </a>
+
+        <a href="case-studies.html" class="button1" style="background-image: url(../images/menu-prod.png);">
+          <span class="new_margin">Seneca</span>
+          <span class="new_margin">in production</span>
+        </a>
+
+        <a href="https://github.com/rjrodger/seneca" class="button1" style="background-image: url(../images/menu-github.png);">
+          <span class="new_margin">Github</span>
+          <span class="new_margin">rjrodger/seneca</span>
+        </a>
+          
+        <a href="http://twitter.com/senecajs" class="button1" style="background-image: url(../images/menu-twitter.png);">
+          <span class="new_margin">Twitter</span>
+          <span class="new_margin">@senecajs</span>
+        </a>
+                  
+      </aside>
+      
+      </div>
+    </div>
+
+    
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57673-6', 'senecajs.org');
+  ga('send', 'pageview');
+
+</script>  
+  </body>
+</html>

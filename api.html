@@ -1,6 +1,42 @@
----
-layout: main
----
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
+
+    <meta name="generator" content="DocPad v6.78.1" />
+    
+  </head>
+
+  <body>
+
+    <header>
+      <div class="inner">
+        <a href="http://senecajs.org">
+          <img src="images/building.png"/>
+          <span style="color:black; font: 52px 'Lobster'">Seneca</span>
+          <!--<img src="images/logo.png"/>-->
+        </a>
+        <p style="color:black; font: 24px 'Lobster'">A Micro-Services toolkit for Node.js</p>
+      </div>
+    </header>
+
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
 <section id="main-content" class="api">
 
   <a name="top"></a>
@@ -49,7 +85,7 @@ layout: main
     <li>
       <a name="short-m-make" href="#long-m-make">
         <h5><b>make</b>( <small>entity-canon, properties</small> )</h5>
-        <p>Create an instance of a data entity. The entity-canon defines the kind of entity to create ('product', 'sys/user', ...), and the properties (optional) define the values of some of the entity fields.</p>
+        <p>Create an instance of a data entity. The entity-canon defines the kind of entity to create (&#39;product&#39;, &#39;sys/user&#39;, ...), and the properties (optional) define the values of some of the entity fields.</p>
       </a>
     </li>
 
@@ -101,7 +137,7 @@ layout: main
 
   </ul>
 
-  
+
   <br><br>
   <h3>Detailed Method Descriptions</h3>
 
@@ -121,16 +157,15 @@ layout: main
 
   <b>Example: registering the built-in mem-store plugin with custom options</b>
 
-{% highlight js %}
-var seneca = require('seneca')()
-seneca.use( 'mem-store', {web:{dump:true}} )
-{% endhighlight %}
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use( <span class="hljs-string">'mem-store'</span>, {web:{dump:<span class="hljs-literal">true</span>}} )
+</code></pre></div>
 
   <p>
     The second argument to the use method is an options object
     containing configuration properties specific to the plugin. Refer
     to the documentation for each plugin to find out how to use
-    them. If you're using the options plugin, properties in the
+    them. If you&#39;re using the options plugin, properties in the
     options argument will override options loaded externally.
   <p>
 
@@ -143,22 +178,21 @@ seneca.use( 'mem-store', {web:{dump:true}} )
 
   <b>Example: creating your own (mini) plugin:</b>
 
-{% highlight js %}
-// file: mini.js
-module.exports = function( options ) {
-  this.add( {foo:'bar'}, function( args, done ){
-    done( null, {say:options.say})
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-comment">// file: mini.js</span>
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span></span>{
+    done( <span class="hljs-literal">null</span>, {say:options.say})
   })
 }
 
-// file: app.js
-var seneca = require('seneca')()
-seneca.use( 'mini', {say:'hello'} )
-seneca.act( {foo:'bar'}, function( err, out ){
-  // prints 'hello'
-  console.log( out.say )
+<span class="hljs-comment">// file: app.js</span>
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use( <span class="hljs-string">'mini'</span>, {say:<span class="hljs-string">'hello'</span>} )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, out )</span></span>{
+  <span class="hljs-comment">// prints 'hello'</span>
+  <span class="hljs-built_in">console</span>.log( out.say )
 })
-{% endhighlight %}
+</code></pre></div>
 
 
   <h5>method signatures</h5>
@@ -201,15 +235,14 @@ seneca.act( {foo:'bar'}, function( err, out ){
   </p>
 
   <b>Example: waiting for the database connection before inserting data</b>
-{% highlight js %}
-var seneca = require('seneca')()
-seneca.use( 'mongo-store', { host:..., port:..., name:... } )
-seneca.ready( function( err ) {
-  if( err ) return console.log(err);
+<div class="highlight"><pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use( <span class="hljs-string">'mongo-store'</span>, { host:..., port:..., name:... } )
+seneca.ready( <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err )</span> </span>{
+  <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.log(err);
 
-  seneca.make$('product',{name:'Apple',price:1.99}).save$()
+  seneca.make$(<span class="hljs-string">'product'</span>,{name:<span class="hljs-string">'Apple'</span>,price:<span class="hljs-number">1.99</span>}).save$()
 })
-{% endhighlight %}
+</code></pre></div>
 
   <p>
     You can call ready more than once. If you need to register
@@ -225,10 +258,9 @@ seneca.ready( function( err ) {
       <ul>
         <li><b>ready</b>: function, callback with signature function(err), called after plugins initialize.</li>
       </ul>
-      <p>Seneca also emits a 'ready' event, which you can use instead of this function:</p>
-{% highlight js %}
-seneca.on('ready', function(err){ ... })
-{% endhighlight %}
+      <p>Seneca also emits a &#39;ready&#39; event, which you can use instead of this function:</p>
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.on(<span class="hljs-string">'ready'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{ ... })
+</code></pre></div>
     </li>
   </ul>
 
@@ -241,14 +273,14 @@ seneca.on('ready', function(err){ ... })
     Add an action to the Seneca instance. You provide a key/value pair
     pattern that Seneca will match against objects that are submitted
     using the add method. When an object is submitted, Seneca will
-    check the object's top-level properties in alphabetical order to
+    check the object&#39;s top-level properties in alphabetical order to
     see if there is a matching action.
   </p>
 
   <p>
     The action is a function that accepts two arguments. The first is
     the object that was submitted, and the second is a callback tat
-    you should call once your action has completed it's work. The
+    you should call once your action has completed it&#39;s work. The
     callback has the standard signature function( err, result ). The
     callback must always be called, especially to report errors. The
     action result is optional, and you do not have to supply one if it
@@ -256,21 +288,20 @@ seneca.on('ready', function(err){ ... })
   </p>
 
   <b>Example: defining an action</b>
-{% highlight js %}
-seneca.add( {foo:'bar'}, function( args, done ){
-  done( null, { zoo:args.zoo } )
+<div class="highlight"><pre class="highlight"><code class="hljs javascript">seneca.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span></span>{
+  done( <span class="hljs-literal">null</span>, { zoo:args.zoo } )
 })
 
-seneca.act( {foo:'bar', zoo:'qaz'}, function( err, out ){
-  // prints 'qaz'
-  console.log( out.zoo )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>, zoo:<span class="hljs-string">'qaz'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, out )</span></span>{
+  <span class="hljs-comment">// prints 'qaz'</span>
+  <span class="hljs-built_in">console</span>.log( out.zoo )
 })
-{% endhighlight %}
+</code></pre></div>
 
   <p>
-    You can define actions at any time, any where. They don't need to
+    You can define actions at any time, any where. They don&#39;t need to
     be associated with a plugin.  Actions defined inside a plugin do
-    get some logging meta-data however, so they're easier to manage in
+    get some logging meta-data however, so they&#39;re easier to manage in
     the long run.
   </p>
 
@@ -468,3 +499,70 @@ seneca.act( {foo:'bar', zoo:'qaz'}, function( err, out ){
 
 </section>
 
+        </section>
+      <aside id="sidebar">
+
+        <a href="install.html" class="button1" style="background-image: url(../images/menu-down.png);">
+          <span class="new_margin">Download &</span>
+          <span class="new_margin">install</span>
+        </a>
+
+        <a href="getting-started.html" class="button1" style="background-image: url(../images/menu-start.png);">
+          <span class="new_margin">Getting</span>
+          <span class="new_margin">started</span>
+        </a>
+
+        <a href="plugins.html" class="button1" style="background-image: url(../images/menu-plugins.png);">
+          <span class="new_margin">All the</span>
+          <span class="new_margin">Plugins</span>
+        </a>
+
+        <a href="videos.html" class="button1" style="background-image: url(../images/menu-video.png);">
+          <span class="new_margin">Videos and</span>
+          <span class="new_margin">Talks</span>
+        </a>
+
+        <a href="http://senecajs.tumblr.com" class="button1" style="background-image: url(../images/menu-updates.png);">
+          <span class="new_margin">Updates</span>
+          <span class="new_margin">and releases</span>
+        </a>
+
+        <a href="documentation.html" class="button1" style="background-image: url(../images/menu-docu.png);">
+          <span class="new_margin">Documentation</span>
+          <span class="new_margin">goodness</span>
+        </a>
+
+        <a href="case-studies.html" class="button1" style="background-image: url(../images/menu-prod.png);">
+          <span class="new_margin">Seneca</span>
+          <span class="new_margin">in production</span>
+        </a>
+
+        <a href="https://github.com/rjrodger/seneca" class="button1" style="background-image: url(../images/menu-github.png);">
+          <span class="new_margin">Github</span>
+          <span class="new_margin">rjrodger/seneca</span>
+        </a>
+          
+        <a href="http://twitter.com/senecajs" class="button1" style="background-image: url(../images/menu-twitter.png);">
+          <span class="new_margin">Twitter</span>
+          <span class="new_margin">@senecajs</span>
+        </a>
+                  
+      </aside>
+      
+      </div>
+    </div>
+
+    
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57673-6', 'senecajs.org');
+  ga('send', 'pageview');
+
+</script>  
+  </body>
+</html>

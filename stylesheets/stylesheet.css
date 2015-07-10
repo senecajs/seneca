@@ -48,6 +48,14 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+i, em {
+    font-style: italic;
+}
+b, strong {
+    font-weight: bold;
+}
+
+
 
 /* LAYOUT STYLES */
 body {
@@ -82,7 +90,7 @@ header h1 {
   letter-spacing: -1px;
   font-size: 72px;
   color: #261c1a;
-  margin-bottom: 0.2em;
+  margin-bottom: 40px;
   height:78px;
   width: 540px;
   font-weight: bold;
@@ -96,6 +104,7 @@ header h2 {
   line-height: 1.3;
   width: 540px;
   letter-spacing: 0;
+  margin-bottom: 40px;
 }
 
 .inner {
@@ -219,10 +228,11 @@ aside a.button1:hover {
     display:block;
 }
 
+
 code, pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
   color: #222;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   font-size: 13px;
 }
 
@@ -245,6 +255,7 @@ pre code {
   border: none;
   padding: 0;
 }
+
 
 ul, ol, dl {
   margin-bottom: 20px;
@@ -290,6 +301,7 @@ form {
   font-size: 2.8em;
   letter-spacing: -1px;
   color: #474747;
+  margin-bottom: 20px;
 } 
 
 #main-content h1:before {
@@ -302,7 +314,7 @@ form {
   font-family: 'Open Sans', sans-serif;  
   font-size: 22px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
   color: #474747;
 } 
 #main-content h2:before {
@@ -312,15 +324,15 @@ form {
 }
 
 #main-content h3 {
-font-family: 'Open Sans', sans-serif; 
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: #261c1a;
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #474747;
 } 
  
 #main-content h3:before {
-font-family: 'Open Sans', sans-serif;
+    font-family: 'Open Sans', sans-serif;
   color: #261c1a;
   font-size: 20px;
   padding-right: 0.3em;
@@ -331,7 +343,8 @@ font-family: 'Open Sans', sans-serif;
  font-family: 'Open Sans', sans-serif; 
   font-size: 15px;
   font-weight: bold;
-  color: #261c1a;
+  color: #474747;
+  margin-bottom: 10px;
 } 
 
 h4:before {
@@ -366,9 +379,9 @@ font-family: 'Open Sans', sans-serif;
 }
 
 .doc_title {
-	font-weight:700;
-	 font-family: 'Open Sans', sans-serif;
-	   color: #261c1a;
+    font-weight:700;
+    font-family: 'Open Sans', sans-serif;
+    color: #261c1a;
 }
 
 p {
@@ -400,13 +413,15 @@ blockquote {
 }
 
 ul li {
-  list-style: disc inside;
-  padding-left: 20px;
+  list-style: disc;
+  padding-left: 5px;
+  margin-left: 20px;
 }
 
 ol li {
-  list-style: decimal inside;
-  padding-left: 3px;
+  list-style: decimal;
+  padding-left: 5px;
+  margin-left: 20px;
 }
 
 dl dd {
@@ -654,6 +669,10 @@ div.highlight pre {
   -moz-border-radius: 8px;
 }
 
+pre.highlight {
+  border-radius: 8px;
+}
+
 div.src-anno {
   left:330px;
   position:absolute;
@@ -679,4 +698,14 @@ span.anno-code {
 h4.filename {
   margin-left:10px;
   font-weight: normal;
+}
+
+
+div.section-link {
+  float: left;
+  margin-left: -30px;
+  margin-top: 2px;
+}
+div.section-link a {
+  text-decoration: none;
 }
