@@ -879,18 +879,24 @@ describe('seneca', function(){
   it('fix', function(done) {
     var si = seneca(testopts)
 
-    function ab(args,done){done(null,{r:''+args.a+(args.b||'-')+(args.c||'-')+args.z})}
+    function ab(args,done){
+      done(null,{r:''+args.a+(args.b||'-')+(args.c||'-')+args.z})
+    }
 
     si
       .fix('a:1')
       .add('b:2',ab)
       .add('c:3',ab)
-      .act('b:2,z:8',function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
-      .act('c:3,z:9',function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
+      .act('b:2,z:8',
+           function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
+      .act('c:3,z:9',
+           function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
 
     si
-      .act('a:1,b:2,z:8',function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
-      .act('a:1,c:3,z:9',function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
+      .act('a:1,b:2,z:8',
+           function(err,out){assert.ok( null == err);assert.equal('12-8',out.r)})
+      .act('a:1,c:3,z:9',
+           function(err,out){assert.ok( null == err);assert.equal('1-39',out.r)})
 
     done()
   })

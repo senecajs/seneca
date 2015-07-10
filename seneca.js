@@ -1210,6 +1210,9 @@ function make_seneca( initial_options ) {
     var spec    = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
     var args    = spec.pattern
     var actdone = spec.done
+
+
+    args = _.extend(args,self.fixedargs)
     var actmeta = self.find(args)
 
     if( so.debug.act_caller ) {
@@ -1521,6 +1524,7 @@ function make_seneca( initial_options ) {
           instance.idgen()
 
     var actid    = (id_tx[0] || instance.idgen()) + '/' + tx 
+
     var actstart = Date.now()
 
     cb = cb || common.noop
@@ -1561,7 +1565,7 @@ function make_seneca( initial_options ) {
 
     var delegate = act_make_delegate( instance, tx, callargs, actmeta, prior_ctxt )
 
-    callargs = _.extend({},callargs,delegate.fixedargs)
+    callargs = _.extend({},callargs,delegate.fixedargs,{tx$:tx})
 
     var listen_origin = origargs.transport$ && origargs.transport$.origin
 
@@ -1849,17 +1853,19 @@ function make_seneca( initial_options ) {
 
 
   function act_make_delegate( instance, tx, callargs, actmeta, prior_ctxt ) {
-    var delegate_args = { tx$: tx }
+    var delegate_args = {}
     if( null != callargs.gate$ ) {
       delegate_args.ungate$ = !!callargs.gate$
     }
+
     var delegate = instance.delegate( delegate_args )
 
+    // special overrides
+    if( tx ) { delegate.fixedargs.tx$ = tx }
 
     // automate actid log insertion
     delegate.log = logging.make_delegate_log( callargs.meta$.id, actmeta, instance )
     logging.makelogfuncs(delegate)
-
 
     if( actmeta.priormeta ) {
       delegate.prior = function(prior_args,prior_cb) {
@@ -1975,7 +1981,10 @@ function make_seneca( initial_options ) {
 
     delegate.did = refnid()
 
+
+      /*
     delegate.act = function() {
+
       var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
       var args = spec.pattern
       var cb   = spec.done
@@ -1984,10 +1993,12 @@ function make_seneca( initial_options ) {
                _.extend({},args,fixedargs) :
                _.extend({},fixedargs,args) )
 
+
       act.call(this,args,cb)
 
       return delegate
     }
+       */
 
     var strdesc
     delegate.toString = function() {
