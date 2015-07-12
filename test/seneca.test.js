@@ -4,7 +4,7 @@
 
 // mocha seneca.test.js
 
-var VERSION = '0.6.2'
+var VERSION = '0.6.3'
 
 var util   = require('util')
 var stream = require('stream')
