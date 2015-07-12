@@ -5,7 +5,7 @@ test/db
 *.bak
 *.tmp
 *.log
-node_modules
+node_modules*
 README.html
 *.off
 *-off

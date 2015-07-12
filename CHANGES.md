@@ -1,5 +1,14 @@
 
-## 0.6.2: 2015-06
+## 0.6.3: 2015-07
+
+   * Use lab instead of mocha for unit testing
+   * Use jsonic.stringify for consistent object string descriptions
+   * Fix action-id/transaction-id edge cases; ids now transfer fully over priors and processes
+   * Moved to docpad for github pages site
+   * Rewrote getting started guide
+   * Bug fixes for github issues: 135
+
+## 0.6.2: 2015-06-22
 
    * REPL enhanced, now accepts literal jsonic patterns and traces action flow
    * Option debug.callpoint adds call point source file and line number tracing to logging
