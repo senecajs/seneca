@@ -1,7 +1,7 @@
-2015-06-21T22:04:57.069Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	act	shop	-	IN	ffp32g0bs89h/dwjtfdjjpmcr	role:shop,cmd:salestax	{role=shop,cmd=salestax,net=100}	ENTRY	A;e7kkojcbscof	-	
-2015-06-21T22:04:57.103Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	plugin	shop		ACT		role:shop,cmd:salestax	apply-tax	100	123	0.23
-2015-06-21T22:04:57.104Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	act	shop	-	OUT	ffp32g0bs89h/dwjtfdjjpmcr	role:shop,cmd:salestax	{total=123}	EXIT	A;e7kkojcbscof	34	-	
-2015-06-21T22:04:57.104Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	plugin	shop		ACT		role:shop,cmd:salestax	test	123
-2015-06-21T22:04:57.758Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	act	shop	-	IN	0opxjibkzztl/qp2lwdhpcp59	role:shop,cmd:salestax	{cmd=salestax,role=shop,net=100}	ENTRY	A;e7kkojcbscof	-	
-2015-06-21T22:04:57.761Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	plugin	shop		ACT		role:shop,cmd:salestax	apply-tax	100	123	0.23
-2015-06-21T22:04:57.762Z	tvi29slpp4km/1434924296913/45566/-	DEBUG	act	shop	-	OUT	0opxjibkzztl/qp2lwdhpcp59	role:shop,cmd:salestax	{total=123}	EXIT	A;e7kkojcbscof	4	-	
+2015-07-12T16:48:13.745Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	act	shop       	IN	k4p7w5g0s2s5/v4dzvcxbbs3z	cmd:salestax,role:shop	{role:shop,cmd:salestax,net:100}	ENTRY	(bcfhw)	-	-	-	
+2015-07-12T16:48:13.770Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	plugin	shop       	ACT	k4p7w5g0s2s5/v4dzvcxbbs3z	cmd:salestax,role:shop	apply-tax	100	123	0.23
+2015-07-12T16:48:13.770Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	act	shop       	OUT	k4p7w5g0s2s5/v4dzvcxbbs3z	cmd:salestax,role:shop	{total:123}	EXIT	(bcfhw)	-	-	25	-	
+2015-07-12T16:48:13.770Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	plugin	shop       	ACT	k4p7w5g0s2s5/v4dzvcxbbs3z	cmd:salestax,role:shop	test	123
+2015-07-12T16:48:14.538Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	act	shop       	IN	y8jedc5d0bb6/tidwknbhyudt	cmd:salestax,role:shop	{cmd:salestax,role:shop,net:100}	ENTRY	(bcfhw)	-	-	-	
+2015-07-12T16:48:14.539Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	plugin	shop       	ACT	y8jedc5d0bb6/tidwknbhyudt	cmd:salestax,role:shop	apply-tax	100	123	0.23
+2015-07-12T16:48:14.539Z sj31vbc0m4pj/1436719693630/83321/- DEBUG	act	shop       	OUT	y8jedc5d0bb6/tidwknbhyudt	cmd:salestax,role:shop	{total:123}	EXIT	(bcfhw)	-	-	1	-	
