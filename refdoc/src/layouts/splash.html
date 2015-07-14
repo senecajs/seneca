@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster'>
+    <link rel="stylesheet" href="/stylesheets/stylesheet.css" />
+
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="navbar-960">
+        <div class="navbar-header">
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#nav-collapsed">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="collapse navbar-collapse" id="nav-collapsed">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href='/quick-start'>Get Started</a></li>
+            <li><a href='/docs'>Docs</a></li>
+            <li><a href='/plugins'>Plugins</a></li>
+            <li><a href='/samples'>Samples</a></li>
+            <li><a href='/api'>API Guide</a></li>
+            <li><a href='/contact'>Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class='container'>
+      <header class="row clearfix hp">
+        <div class="col-md-12 column">
+          <h1 class="center">
+            <span>Seneca</span>
+          </h1>
+          <h2 class="center">
+            <i class="fa fa-cogs box-icons"></i>
+            <i class="fa fa-cubes box-icons"></i>
+            <i class="fa fa-smile-o box-icons"></i>
+            <p>A tookit that makes creation and management of microservice systems easy.</p>
+          </h2>
+        </div>
+      </header>
+
+      <div class='row clearfix hp'>
+        <section class="install">
+          <pre> $ npm install seneca --save </pre>
+        </section>
+      </div>
+
+      <div class="row clearfix hp">
+        <div class="col-md-4">
+          <a class="grey-box" href="https://github.com/rjrodger/seneca">
+            <i class="fa fa-download fa-5x"></i>
+            <h3>Download &amp; Install</h3>
+          </a>
+        </div>
+
+        <div class="col-md-4">
+          <a class="grey-box" href="/quick-start/">
+            <i class="fa fa-bolt fa-5x"></i>
+            <h3>Quick Start</h3>
+          </a>
+        </div>
+
+        <div class="col-md-4">
+          <a class="grey-box" href="/releases/">
+            <i class="fa fa-refresh fa-5x"></i>
+            <h3>Updates &amp; Releases</h3>
+          </a>
+        </div>
+      </div>
+
+      <div class="row clearfix hp">
+      <section class="col-md-6">
+          <h2 class="center">Action Based API</h2>
+          <p class="center">
+            Seneca is built from the ground up as an action based toolkit. Map your requirements
+            straight to business logic and use Seneca's expressive filtering syntax to glue
+            microservices together with ease.
+          </p>
+        </section>
+
+        <section class="col-md-6">
+          <h2 class="center">Pluggable Transport</h2>
+          <p class="center">
+            Transport and storage concerns are handled in Seneca as plugins. Use TCP for one service
+            and HTTP for another. Our storage api allows data storage to be handled on a per entity
+            basis so you can use the best solution without Seneca getting in the way.
+          </p>
+        </section>
+
+        <section class="col-md-6">
+          <h2 class="center">Storage Neutral</h2>
+          <p class="center">
+            Seneca provides a lean core, but is massively extensible via plugins. We provide a vast
+            array of in house plugins and also list any community ones in our plugin section. We have many
+            of the basic plugins already covered and provide an excelent guide for building your own.
+          </p>
+        </section>
+
+        <section class="col-md-6">
+          <h2 class="center">Massively Extensible</h2>
+          <p class="center">
+            Seneca provides a lean core, but is massively extensible via plugins. We provide a vast
+            array of in house plugins and also list any community ones in our plugin section. We have many
+            of the basic plugins already covered and provide an excelent guide for building your own.
+          </p>
+        </section>
+      </div>
+
+      <section class="content row">
+        {{{ contents }}}
+      </section>
+    </div>
+
+    <footer>
+      <div class="footer-one">
+        <div class="col-md-12 column">
+          <header class="row clearfix hp">
+            <div class="col-md-12 column">
+              <h1 class="center">
+                <span>Seneca</span>
+              </h1>
+            </div>
+          </header>
+          <div class="row clearfix social">
+            <div class="col-md-4 column">
+              <p>
+                <a href="https://github.com/rjrodger/seneca">
+                  <i class="fa fa-github fa-2x"></i>
+                  Github
+                </a>
+              </p>
+            </div>
+            <div class="col-md-4 column">
+              <p>
+                <a href="/docs">
+                  <i class="fa fa-bookmark fa-2x"></i>
+                  Documentation
+                </a>
+              </p>
+            </div>
+            <div class="col-md-4 column">
+              <p>
+                <a href="https://twitter.com/senecajs">
+                  <i class="fa fa-twitter fa-2x"></i>
+                  Twitter
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-two">
+        © seneca 2015. Powered by <a href="http://metalsmith.io">MetalSmith</a>, hosted by <a href="http://surge.sh">Surge</a>. A <a href="http://nearform.com">nearFrom</a> project.
+      </div>
+    </footer>
+  </body>
+</html>
