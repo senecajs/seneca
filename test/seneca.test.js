@@ -423,6 +423,8 @@ describe('seneca', function(){
   it('action-extend', function(done) {
     var si = seneca(testopts).error(done)
 
+    si.options( {strict:{add:false}} )
+
     function foo(args,done) {
       done(null,{ a:args.a, s:this.toString(), foo:args.meta$ })
     }

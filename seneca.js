@@ -115,8 +115,11 @@ var DEFAULT_OPTIONS = {
     // Action result must be a plain object.
     result: true,
 
-    // Delegate fixedargs override action args
+    // Delegate fixedargs override action args.
     fixedargs: true,
+
+    // Adding a pattern overrides existing pattern only if matches exactly.
+    add: true,
   },
 
   // Action cache. Makes inbound messages idempotent.
@@ -1039,6 +1042,12 @@ function make_seneca( initial_options ) {
     actmeta.func = action
 
     var priormeta = self.find( pattern )
+
+    // only exact action patterns are overridden
+    // use .wrap for pin-based patterns
+    if( so.strict.add && priormeta && priormeta.pattern !== actmeta.pattern ) {
+      priormeta = null
+    }
 
 
     if( priormeta ) {

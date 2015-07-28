@@ -555,8 +555,7 @@ seneca
 
 The Seneca instance provided to an action function via the the `this`
 context variable has a special `prior` method that calls the previous
-action definition for the current action pattern, or the next action
-that matches the pattern.
+action definition for the current action pattern.
 
 The prior function has parameters:
 
