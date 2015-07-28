@@ -420,6 +420,53 @@ describe('seneca', function(){
 
   })
 
+  it('action-extend', function(done) {
+    var si = seneca(testopts).error(done)
+
+    function foo(args,done) {
+      done(null,{ a:args.a, s:this.toString(), foo:args.meta$ })
+    }
+
+    function bar(args,done) {
+      var pargs = { a:args.a, s:args.s }
+      this.prior(pargs,function(e,o){
+        o.b = 2
+        o.bar = args.meta$
+        done(e,o)
+      })
+    }
+
+    function zed(args,done) {
+      var m = args.meta$
+      args.z = 3
+      this.prior(args,function(e,o){
+        o.z = 3
+        o.zed = args.meta$
+        done(e,o)
+      })
+    }
+
+    si.ready( function(){
+      si.add({op:'foo'},foo)
+      si.add({op:'foo', a:1}, bar)
+      si.add({op:'foo', a:1, b:2}, zed)
+
+      si.act('op:foo,a:1',function(e,o){
+        assert.ok(gex('1~Seneca/0.6.*'+'/*').on(''+o.a+'~'+o.s))
+        assert.ok( !o.foo.entry )
+        assert.ok( o.bar.entry )
+
+        si.act('op:foo,a:1,b:2',function(e,o){
+          assert.ok(gex('1~2~Seneca/0.6.*'+'/*').on(''+o.a+'~'+o.b+'~'+o.s))
+          assert.ok( !o.foo.entry )
+          assert.ok( !o.bar.entry )
+          assert.ok( o.zed.entry )
+          done()
+        })
+      })
+    })
+
+  })
 
 
   it('prior-nocache', function(done){
