@@ -1041,11 +1041,6 @@ function make_seneca( initial_options ) {
     var priormeta = self.find( pattern )
 
 
-    if( priormeta && priormeta.pattern !== actmeta.pattern ) {
-      priormeta = null
-    }
-
-
     if( priormeta ) {
       if( _.isFunction(priormeta.handle) ) {
         priormeta.handle(action)
