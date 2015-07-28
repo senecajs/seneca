@@ -1748,7 +1748,7 @@ function make_seneca( initial_options ) {
 
     // Special legacy case for seneca-perm
     else if( err.orig && 
-             _.isString(err.org.code) && 
+             _.isString(err.orig.code) && 
              0 === err.orig.code.indexOf('perm/') ) 
     {
       err = err.orig
