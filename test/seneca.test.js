@@ -359,7 +359,26 @@ describe('seneca', function(){
 
     si.act({op:'bad',a1:100,default$:{a:1}}, function(err,out) {
       assert.deepEqual({a:1},out)
-      done()
+
+      si.add('a:0',function(m,r){
+        this.prior(m,r)
+      })
+
+      si.act('a:0,default$:{y:2}',function(e,o){
+        assert.equal(null,e)
+        assert.deepEqual({y:2},o)
+
+        si.add('a:0',function(m,r){
+          this.prior(m,r)
+        })
+
+        si.act('a:0,default$:{y:3}',function(e,o){
+          assert.equal(null,e)
+          assert.deepEqual({y:3},o)
+
+          done()
+        })
+      })
     })
   })
 

@@ -1885,6 +1885,11 @@ function make_seneca( initial_options ) {
         delete prior_args.actid$
         delete prior_args.meta$
         delete prior_args.transport$
+
+        if( callargs.default$ ) {
+          prior_args.default$ = callargs.default$
+        }
+
         prior_args.tx$ = tx
 
         do_act(delegate,actmeta.priormeta,sub_prior_ctxt,prior_args,prior_cb)
@@ -1896,7 +1901,9 @@ function make_seneca( initial_options ) {
         delegate.prior(prior_args,prior_cb)
       }
     }
-    else delegate.prior = common.nil
+    else delegate.prior = function( msg, done ) {
+      return done( null, callargs.default$ ? callargs.default$ : null )
+    }
 
     return delegate;
   }
