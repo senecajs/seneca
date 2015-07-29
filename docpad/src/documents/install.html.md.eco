@@ -5,7 +5,7 @@ title: Download and Install
 
 # <%= @document.title %>
 
-## Current Version: [0.6.3](https://github.com/rjrodger/seneca/tree/89ac2394ffb60d3ae7dbb9bbc28460bf4d334aa1)
+## Current Version: [0.6.4](https://github.com/rjrodger/seneca/releases/tag/0.6.4)
 
 Seneca is distributed as an [npm
 module](http://npmjs.org/package/seneca).  To download and install,
