@@ -3,6 +3,7 @@
 
 
 var assert = require('assert')
+var _ = require('lodash');
 
 
 var seneca_module = require('..')
@@ -13,7 +14,7 @@ var gex = require('gex')
 var Lab = require('lab')
 
 
-var testopts = {log:'silent'}
+var testopts = {log:'errors'}
 var lab      = exports.lab = Lab.script()
 var describe = lab.describe
 var it       = lab.it
@@ -22,6 +23,8 @@ var it       = lab.it
 describe('delegation', function(){
 
   it('happy', function(done) {
+    var complete = _.after(2, done)
+
     var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       cb(null,args)
@@ -34,57 +37,55 @@ describe('delegation', function(){
 
 
     si.act({c:'C'},function(err,out){
+      complete()
       assert.ok(gex("{c=C,*}").on( common.owndesc(out,1,true)))
     })
 
     sid.act({c:'C'},function(err,out){
+      complete();
       assert.ok(gex("{c=C,a$=A,b=B,*}").on( common.owndesc(out,1,true)))
     })
-    done()
+
   })
 
 
 
   it('dynamic', function(done) {
+    var complete = _.after(4, done);
+
     var si = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
-      //console.log('C='+this)
       cb(null,args)
     })
     si.add({d:'D'},function(args,cb){
-      //console.log('D='+this)
       this.act({c:'C',d:'D'},cb)
     })
     var sid = si.delegate({a$:'A',b:'B'})
 
-    //console.log('si ='+si)
-    //console.log('sid='+sid)
-
     si.act({c:'C'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
+      complete();
       assert.ok(gex("{c=C,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     si.act({d:'D'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
+      complete();
       assert.ok(gex("{c=C,d=D,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     sid.act({c:'C'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
+      complete();
       assert.ok(gex("{c=C,a$=A,b=B,actid$=*}").on( common.owndesc(out,1,true)))
     })
 
     sid.act({d:'D'},function(err,out){
-      //console.log( 'OUT='+common.owndesc(out,0,true) )
+      complete();
       assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( common.owndesc(out,1,true)))
     })
-
-    done()
   })
 
 
   it('logging.actid',function(done){
+    var complete = _.after(2, done);
     var fail
     var si = seneca_module({
       log:{
@@ -115,26 +116,26 @@ describe('delegation', function(){
 
 
     si.act({a:'A'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{a=A,*}").on( common.owndesc(out,1,true)))
+      console.trace()
+      complete()
     })
 
     si.act({p:'P'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{p=P,*}").on( common.owndesc(out,1,true)))
+      console.trace()
+      complete()
     })
 
     if( fail ) {
       console.log(fail)
       assert.fail(fail)
     }
-
-    done()
   })
 
 
 
-  it('parent', function(done) {
+  it.skip('parent', function(done) {
     var si  = seneca_module(testopts)
     si.add({c:'C'},function(args,cb){
       //console.log('C='+this)
@@ -153,14 +154,15 @@ describe('delegation', function(){
     si.act({c:'C'},function(err,out){
       //console.dir( common.owndesc(out,0,true) )
       //assert.ok(gex("{c=C,parent$=*}").on( common.owndesc(out,1,true)))
+      done()
     })
-    done()
   })
 
 
 
   it('parent.plugin',function(done){
     var si = seneca_module(testopts)
+    var complete = _.after(3, done);
 
     si.use(function(opts){
       this.add({a:'A'},function(args,cb){
@@ -172,6 +174,7 @@ describe('delegation', function(){
     })
 
     si.act({a:'A'},function(err,out){
+      complete()
       //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{a=A,actid$=*,p1=1}").on( common.owndesc(out,1,true)))
     })
@@ -191,6 +194,7 @@ describe('delegation', function(){
     })
 
     si.act({a:'A'},function(err,out){
+      complete()
       //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{a=A,actid$=*,p1=1,p2=1}").on( common.owndesc(out,1,true)))
     })
@@ -212,8 +216,8 @@ describe('delegation', function(){
     si.act({a:'A'},function(err,out){
       //console.dir( common.owndesc(out,0,true) )
       assert.ok(gex("{a=A,actid$=*,p1=1,p2=1,p3=1}").on( common.owndesc(out,1,true)))
+      complete()
     })
-    done()
   })
 
 })
