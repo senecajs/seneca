@@ -1,5 +1,13 @@
 
-## 0.6.3: 2015-07
+## 0.6.5: 2015-08 IN PROGRESS
+
+   * revert to non-strict adds so that priors can be subset patterns, see issues 145, 149
+
+## 0.6.4: 2015-07-29
+
+   * bug fixes for issues: 144, 141, 143
+
+## 0.6.3: 2015-07-12
 
    * Use lab instead of mocha for unit testing
    * Use jsonic.stringify for consistent object string descriptions

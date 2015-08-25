@@ -8,15 +8,15 @@ var VERSION = '0.6.4'
 
 var util   = require('util')
 var stream = require('stream')
-var assert  = require('assert')
+var assert = require('assert')
 
-var common   = require('../lib/common')
-var seneca   = require('..')
+var common = require('../lib/common')
+var seneca = require('..')
 
-var gex           = require('gex')
-var parambulator  = require('parambulator')
-var _             = require('lodash')
-var Lab           = require('lab')
+var gex          = require('gex')
+var parambulator = require('parambulator')
+var _            = require('lodash')
+var Lab          = require('lab')
 
 
 var lab      = exports.lab = Lab.script()

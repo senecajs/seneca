@@ -119,7 +119,7 @@ var DEFAULT_OPTIONS = {
     fixedargs: true,
 
     // Adding a pattern overrides existing pattern only if matches exactly.
-    add: true,
+    add: false,
   },
 
   // Action cache. Makes inbound messages idempotent.
@@ -1010,6 +1010,11 @@ function make_seneca( initial_options ) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = pattern.deprecate$
 
+    var strict_add 
+          = (pattern.strict$ && null != pattern.strict$.add) 
+          ? !!pattern.strict$.add
+          : !!so.strict.add
+
     pattern = self.util.clean(args.pattern)
 
     if( 0 === _.keys( pattern ) ) {
@@ -1045,7 +1050,7 @@ function make_seneca( initial_options ) {
 
     // only exact action patterns are overridden
     // use .wrap for pin-based patterns
-    if( so.strict.add && priormeta && priormeta.pattern !== actmeta.pattern ) {
+    if( strict_add && priormeta && priormeta.pattern !== actmeta.pattern ) {
       priormeta = null
     }
 
@@ -1905,7 +1910,8 @@ function make_seneca( initial_options ) {
       }
     }
     else delegate.prior = function( msg, done ) {
-      return done( null, callargs.default$ ? callargs.default$ : null )
+      var out = callargs.default$ ? callargs.default$ : null
+      return done.call( delegate, null, out )
     }
 
     return delegate;
