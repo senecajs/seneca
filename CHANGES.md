@@ -6,6 +6,7 @@
 ## 0.6.4: 2015-07-29
 
    * bug fixes for issues: 144, 141, 143
+   * documentation article on priors, issue 147
 
 ## 0.6.3: 2015-07-12
 

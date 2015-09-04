@@ -12,6 +12,7 @@ var make_entity = require('../lib/entity')
 
 var async   = require('async')
 var gex     = require('gex')
+var _       = require('lodash')
 var Lab     = require('lab')
 
 
@@ -210,7 +211,7 @@ describe('entity', function(){
     assert.equal('c/b/a',ap.entity$)
 
     var esc1 = si.make$('esc',{x:1,y_$:2})
-    assert.equal( esc1.toString(), '$-/-/esc:{id=;x=1;y=2}' )
+    assert.equal( esc1.toString(), '$-/-/esc;id=;{x:1,y:2}' )
 
     done()
   })
@@ -222,17 +223,30 @@ describe('entity', function(){
 
     var f1 = si.make$('foo')
     f1.a = 1
-    assert.equal("$-/-/foo:{id=;a=1}",''+f1)
+    assert.equal("$-/-/foo;id=;{a:1}",''+f1)
 
     var f2 = si.make$('foo')
     f2.a = 2
     f2.b = 3
-    assert.equal("$-/-/foo:{id=;a=2;b=3}",''+f2)
+    assert.equal("$-/-/foo;id=;{a:2,b:3}",''+f2)
 
     var f3 = f1.make$({c:4})
     f3.d = 5
-    assert.equal("$-/-/foo:{id=;c=4;d=5}",''+f3)
+    assert.equal("$-/-/foo;id=;{c:4,d:5}",''+f3)
     done()
+
+
+    var si = seneca(_.extend(testopts,{entity:{hide:{
+      'foo':{a:true,b:true},
+      'bar':['c','d']
+    }}}))
+
+
+    assert.equal( "$-/-/foo;id=;{c:3,d:4}", 
+                  si.make('foo',{a:1,b:2,c:3,d:4}).toString() )
+
+    assert.equal( "$-/-/bar;id=;{a:1,b:2}", 
+                  si.make('bar',{a:1,b:2,c:3,d:4}).toString() )
   })
 
 
@@ -276,7 +290,7 @@ describe('entity', function(){
 
 
   it('mem-store-import-export', function(done){
-    var si = seneca(testopts)
+    var si = seneca(testopts).error(done)
 
 
     // NOTE: zone is NOT saved! by design!
@@ -310,17 +324,18 @@ describe('entity', function(){
             si2.act('role:mem-store,cmd:dump',function(e,o){
               assert.ok( gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)) )
 
+
               si2.make('a').load$({x:1},function(e,nx1){
-                assert.equal('$-/-/a:{id='+x1.id+';x=1}',''+nx1)
+                assert.equal('$-/-/a;id='+x1.id+';{x:1}',''+nx1)
 
                 si2.make('a').load$({x:1},function(e,nx1){
-                  assert.equal('$-/-/a:{id='+x1.id+';x=1}',''+nx1)
+                  assert.equal('$-/-/a;id='+x1.id+';{x:1}',''+nx1)
 
                   si2.make('b','a').load$({x:2},function(e,nx2){
-                    assert.equal('$-/b/a:{id='+x2.id+';x=2}',''+nx2)
+                    assert.equal('$-/b/a;id='+x2.id+';{x:2}',''+nx2)
 
                     si2.make('c', 'b','a').load$({x:3},function(e,nx3){
-                      assert.equal('$c/b/a:{id='+x3.id+';x=3}',''+nx3)
+                      assert.equal('$c/b/a;id='+x3.id+';{x:3}',''+nx3)
 
                       next()
                     })
