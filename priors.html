@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Seneca, a Micro-Services toolkit for Node.js</title>
+
+    <meta name="generator" content="DocPad v6.78.1" />
+    
+  </head>
+
+  <body>
+
+    <header>
+      <div class="inner">
+        <a href="http://senecajs.org">
+          <img src="images/building.png"/>
+          <span style="color:black; font: 52px 'Lobster'">Seneca</span>
+          <!--<img src="images/logo.png"/>-->
+        </a>
+        <p style="color:black; font: 24px 'Lobster'">A Micro-Services toolkit for Node.js</p>
+      </div>
+    </header>
+
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
+<h1 id="seneca-prior-actions">Seneca Prior Actions</h1>
+<h2 id="the-seneca-software-component-model">The Seneca software component model</h2>
+<ul>
+<li>s/w components: self-contained, reusable, extensible, composable</li>
+<li>ref to plugins article</li>
+<li>patterns are the API</li>
+<li>patterns meet these features: examples</li>
+</ul>
+<p>Software components are supposed to make your life easier. They are
+supposed let you write production-ready code faster. They do this in
+four ways. Software components are;</p>
+<ul>
+<li><em>self-contained</em>, so they don&#39;t step on each other&#39;s toes;</li>
+<li><em>reusable</em>, so you don&#39;t have to write so much code;</li>
+<li><em>extensible</em>, so they&#39;re actually useful in the real world;</li>
+<li><em>composable</em>, so you can build bigger things.</li>
+</ul>
+<p>Seneca <a href="write-a-plugin.html">plugins</a> are designed to deliver on these
+four features.</p>
+<h2 id="pattern-based-apis-make-this-easy">Pattern-based APIs make this easy</h2>
+<p>Seneca plugins are fundamentally just a list of action patterns. This
+makes them <em>self-contained</em> becuase you must use messages (that match
+the patterns) to interact with the plugin. They are <em>reusable</em>,
+because you can load them into any Seneca microservice. They are
+<em>extensible</em> because you can override patterns with your own
+functionality. And they are <em>composable</em> because you can build up
+pattern behaviour with a function callback chain.</p>
+<p>The ease of extensibility and composability are the primary benefits
+of the pattern-based approach. Let&#39;s look at a simple example. Here&#39;s
+a plugin that converts color values between representations.</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">color</span><span class="hljs-params">()</span> </span>{
+
+  <span class="hljs-keyword">var</span> map_name_hex = {
+    black: <span class="hljs-string">'000000'</span>, 
+    red:   <span class="hljs-string">'FF0000'</span>, 
+    green: <span class="hljs-string">'00FF00'</span>, 
+    blue:  <span class="hljs-string">'0000FF'</span>, 
+    white: <span class="hljs-string">'FFFFFF'</span>
+  }
+
+  <span class="hljs-keyword">this</span>
+    .add(<span class="hljs-string">'role:color,cmd:convert'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+      <span class="hljs-keyword">var</span> out = { hex: map_name_hex[msg.name] }
+      respond( <span class="hljs-literal">null</span>, out )
+    })
+})
+
+<span class="hljs-comment">// prints { hex: 'FF0000' }</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:red'</span>, <span class="hljs-built_in">console</span>.log )
+
+<span class="hljs-comment">// prints { hex: undefined } as yellow not recognized</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:yellow'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>This plugin only supports a limited range of colors. One way you can
+extend the set of supported colors is by adding special cases (in
+this case, we&#39;re ignoring the fact that the color name to hex feature
+is just a simple mapping data structure).</p>
+<pre class="highlight"><code class="hljs javascript">seneca.add(<span class="hljs-string">'role:color,cmd:convert,name:yellow'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+  respond( <span class="hljs-literal">null</span>, { hex: <span class="hljs-string">'FFFF00'</span> })
+})
+
+<span class="hljs-comment">// prints { hex: 'FFFF00' }</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:yellow'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p><em>This is standard Seneca best practice.</em> You are allowed to define
+ your own special cases.</p>
+<p>But what if you have many new colors you want to add? Another way to
+extend the <em>color</em> plugin is to <em>override</em> the existing pattern:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> more_name_hex = {
+  cyan:    <span class="hljs-string">'00FFFF'</span>, 
+  fuchsia: <span class="hljs-string">'FF00FF'</span>
+}
+
+seneca.add(<span class="hljs-string">'role:color,cmd:convert'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+  <span class="hljs-keyword">this</span>.prior( msg, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, out )</span> </span>{
+    <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> respond( out )
+
+    <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> == out.hex ) {
+      out.hex = more_name_hex[msg.name]
+    }
+
+    respond( <span class="hljs-literal">null</span>, out )
+  })
+})
+
+<span class="hljs-comment">// prints { hex: 'FFFF00' }, from override</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:cyan'</span>, <span class="hljs-built_in">console</span>.log )
+
+<span class="hljs-comment">// prints { hex: '00FFFF' }, from more specific custom pattern</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:yellow'</span>, <span class="hljs-built_in">console</span>.log )
+
+<span class="hljs-comment">// prints { hex: 'FF0000' }, from color plugin</span>
+seneca.act(<span class="hljs-string">'role:color,cmd:convert,name:red'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>The function <code>this.prior</code> is a reference to the <em>original</em> action
+function for the <em>role:color,cmd:convert</em> pattern. This original
+action function knows how to handle the colors black, red, green, blue
+and white.</p>
+<p>The new action function for <em>role:color,cmd:convert</em> first passes on
+the input message to the original action function, and if the original
+action function does recognize a color and produce a hex value, then
+it does nothing. This original action function is known as the
+<em>prior</em>. If the prior does not provide a hex value, then the new
+action function checks for the colors it knows about, cyan and
+fuchsia, and handles those. The color yellow is still handled by the
+special case action function that specifically matches <em>name:yellow</em>.</p>
+<p>Priors can be used in this way to customize the behavior of any action
+pattern.</p>
+<h2 id="understanding-priors">Understanding priors</h2>
+<p>Priors can be stacked. Each time you override an action pattern, you
+get a prior. This prior may have its own prior from a previous
+definition of the action pattern. Thus you can compose layers of
+additional functionality.</p>
+<p>For example, you can add validation, auditing, throttling, custom
+logging, input and output data manipulation, or trigger other
+messages. The calling code has no visibility of these cubstomizations,
+and no need to know about them, so the plugin remains self-contained.</p>
+<p>If you call <code>this.prior</code>, and there is no previous definition, then
+you get an empty response (<code>null</code>) back. In production code you should always
+handle this case.</p>
+<p>Priors can be <em>strict</em>. This means that a prior only exists if there
+is an <em>exact</em> matching action pattern. Normally, priors are not
+strict, so that sub-patterns will be priors. Here&#39;s an example.</p>
+<p>For the following patterns, added in this order:</p>
+<ul>
+<li><code>a:1</code></li>
+<li><code>a:1,b:2</code></li>
+<li><code>a:1,b:2,c:3</code></li>
+</ul>
+<p>The prior chain is:</p>
+<p><code>a:1,b:2,c:3</code> &rarr; <code>a:1,b:2</code> &rarr; <code>a:1</code>.</p>
+<p>In the example above, for <em>role:color,cmd:convert,name:yellow</em>, the
+prior is <em>role:color,cmd:convert</em>.</p>
+<p>If you use the strict setting, then the priors will only be for exact
+matches. For the following patterns, added in this order:</p>
+<ul>
+<li><code>a:1</code></li>
+<li><code>a:1,b:2,strict$:{add:false}</code></li>
+<li><code>a:1,b:2,c:3</code></li>
+</ul>
+<p>The prior chain is</p>
+<p><code>a:1,b:2,c:3</code> &rarr; <code>a:1,b:2</code> only.</p>
+<p>You can make every prior strict by setting the top level option:</p>
+<p><code>seneca( {strict:{add:true}} )</code></p>
+<h2 id="add-order-is-significant">Add order is significant</h2>
+<p>In the same way that the order of plugin definition is significant,
+the order of pattner overrides is also significant. Seneca checks only
+at definition time for matching priors. THis is deliberate, so that
+you have well-defined behaviour you can determine simply from reading
+the code.</p>
+<p>Using the example above, if you add patterns in the order:</p>
+<ul>
+<li><code>a:1,b:2,c:3</code></li>
+<li><code>a:1,b:2</code></li>
+<li><code>a:1</code></li>
+</ul>
+<p>Then there are <em>no</em> priors.</p>
+<p>For this reason, take care when adding plugins whose purpose is mainly
+to extend existing patterns. They should be added after the main
+plugin that adds functionality.</p>
+<h2 id="best-practices-for-data-entities">Best practices for data entities</h2>
+<p>The Seneca <a href="data-entities.html">data entity patterns</a> can be extended
+to handle special cases. You use calls to <code>this.prior</code> to perform the
+underlying data operations.</p>
+<p>For example, Let&#39;s say you want to add a <em>last_updated</em> field to every
+data entity. Override the <em>role:entity,cmd:save</em> pattern to do this:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.add(<span class="hljs-string">'role:entity,cmd:save'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+  msg.ent.last_updated = <span class="hljs-built_in">Date</span>.now()
+  <span class="hljs-keyword">this</span>.prior( msg, respond )
+})
+
+<span class="hljs-comment">// prints $-/-/foo;id=9wl7sn;{bar:1,last_updated:1441383791347}</span>
+seneca.make$(<span class="hljs-string">'foo'</span>).data$({bar:<span class="hljs-number">1</span>}).save$( <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>The <em>role:entity,cmd:save</em> message contains an <em>ent</em> property with the
+Seneca entity data, which you can modify as desired.</p>
+<p>In production systems, you&#39;ll tend to want to do a number of things to entities:</p>
+<ul>
+<li>define general custom behaviors for all entities,</li>
+<li>define custom behaviors for certain types of entity,</li>
+<li>define custom behaviors for single entities.</li>
+</ul>
+<p>Use the standard <code>role:entity,cmd:save|load|remove|list</code> action
+patterns to define general customizations, as per the example above.</p>
+<p>To define custom behaviour for a specific entity, make sure to add the
+pattern using the non-strict (default!) option:</p>
+<pre class="highlight"><code class="hljs javascript">seneca.add(<span class="hljs-string">'role:entity,cmd:save,name:bar'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+  msg.ent.zed = <span class="hljs-number">1</span>
+  <span class="hljs-keyword">this</span>.prior( msg, respond )
+})
+
+<span class="hljs-comment">// prints $-/-/foo;id=m3l3zp;{a:1,last_updated:1441384489162}</span>
+seneca.make$(<span class="hljs-string">'foo'</span>).data$({a:<span class="hljs-number">1</span>}).save$( <span class="hljs-built_in">console</span>.log )
+
+<span class="hljs-comment">// prints $-/-/bar;id=air0bm;{b:1,zed:1,last_updated:1441384489162}</span>
+seneca.make$(<span class="hljs-string">'bar'</span>).data$({b:<span class="hljs-number">1</span>}).save$( <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>The <em>bar</em> entity still gets the <em>last_updated</em> field. If you had used
+<code>strict$:{add:true}</code>, then it would not have.</p>
+<p>Take care when using the <em>base</em> and <em>zone</em> fields for namespacing
+entities. If you define a custom behavior for all entities of the same
+<em>base</em>, this will work as intended. But if you also define custom
+behaviors only using a <em>name</em>, then an entity that matches both the
+name and base will not trigger the base behavior, as it will not have
+the correct prior. Here&#39;s a simple example of how the patterns work:</p>
+<ul>
+<li><em>a:1</em></li>
+<li><em>a:1,b:2</em></li>
+<li><em>a:1,c:2</em></li>
+</ul>
+<p>has the prior chains:</p>
+<ul>
+<li><em>a:1,b:2</em> &rarr; <em>a:1</em></li>
+<li><em>a:1,c:2</em> &rarr; <em>a:1</em></li>
+</ul>
+<p>Thus, the input message <code>{a:1, b:2, c:3}</code> will match <code>_a:1,b:2_</code> as b
+precedes c alphabetically, and patterns are disambiguated
+alphabetically. It will <em>not</em> also match <code>_a:1,c:3_</code>.</p>
+<p>Similarly, if you have:</p>
+<ul>
+<li><em>role:entity,cmd:save,name:foo</em></li>
+<li><em>role:entity,cmd:save,base:bar</em></li>
+</ul>
+<p>Then <code>{role:entity,cmd:save,name:foo,base:bar}</code> will <em>not</em> trigger any
+custom priors for <em>base:bar</em>.</p>
+<p>The rule to follow is: if you are defining <em>base</em> behaviors, only
+define <em>name,base</em> behaviors for specific entities. if you are
+defining <em>zone</em> behaviors, only define <em>base,zone</em> and
+<em>name,base,zone</em> behaviors.</p>
+<h2 id="debugging-priors">Debugging priors</h2>
+<p>You can trace the structure of action patterns priors using the
+<code>--seneca.print.tree</code> command line option. Run the following code:</p>
+<pre class="highlight"><code class="hljs javascript"><span class="hljs-comment">// filename: prior-debug.js</span>
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca
+  .add(<span class="hljs-string">'a:1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    respond( <span class="hljs-literal">null</span>, { a:<span class="hljs-number">1</span> })
+  })
+
+  .add(<span class="hljs-string">'a:1,b:2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.prior( msg, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, out )</span> </span>{
+      out.b = <span class="hljs-number">2</span>
+      respond( err, out )
+    })
+  })
+
+  .add(<span class="hljs-string">'a:1,b:2,c:3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">this</span>.prior( msg, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, out )</span> </span>{
+      out.c = <span class="hljs-number">3</span>
+      respond( err, out )
+    })
+  })
+
+  .act( <span class="hljs-string">'a:1,b:2,c:3'</span>, <span class="hljs-built_in">console</span>.log )
+</code></pre>
+<p>And you&#39;ll see the output:</p>
+<pre class="highlight"><code class="hljs bash">$ node prior-debug.js --seneca.print.tree
+<span class="hljs-number">2015</span>-<span class="hljs-number">09</span>-<span class="hljs-number">04</span>T17:<span class="hljs-number">00</span>:<span class="hljs-number">55.445</span>Z <span class="hljs-number">5</span>ftqv0kxp9zn/<span class="hljs-number">1441386055436</span>/<span class="hljs-number">36136</span>/- INFO    hello    Seneca/<span class="hljs-number">0.6</span>.<span class="hljs-number">4</span>/<span class="hljs-number">5</span>ftqv0kxp9zn/<span class="hljs-number">1441386055436</span>/<span class="hljs-number">36136</span>/-    
+Seneca action patterns <span class="hljs-keyword">for</span> instance: <span class="hljs-number">5</span>ftqv0kxp9zn/<span class="hljs-number">1441386055436</span>/<span class="hljs-number">36136</span>/-
+└─┬ a:<span class="hljs-number">1</span>
+  ├── <span class="hljs-comment"># root$, (e7roo), </span>
+  └─┬ b:<span class="hljs-number">2</span>
+    ├── <span class="hljs-comment"># root$, (d77dx), </span>
+    │   <span class="hljs-comment"># root$, (e7roo), </span>
+    └─┬ c:<span class="hljs-number">3</span>
+      └── <span class="hljs-comment"># root$, (nzgbq), </span>
+          <span class="hljs-comment"># root$, (d77dx), </span>
+          <span class="hljs-comment"># root$, (e7roo), </span>
+
+null { a: <span class="hljs-number">1</span>, b: <span class="hljs-number">2</span>, c: <span class="hljs-number">3</span> }
+</code></pre>
+<p>The last line <code>{ a: 1, b: 2, c: 3 }</code> is the expected output from the
+prior chain for the action pattern <em>a:1,b:2,c:3</em>. Above that is an
+textual tree diagram of the defined patterns in the Seneca instance.</p>
+<p>Each pattern is represented by a leaf of the tree. On each leaf is a
+stack of prior function identifiers, showing the order in which the
+priors will be called.</p>
+<p>For <em>a:1,b:2,c:3</em>, you can see that the priors for <em>a:1,b:2</em> (d77dx),
+and <em>a:1</em> (e7roo) will form the prior chain.</p>
+<p>You can also use the option <code>--seneca.print.tree.all</code> to see all the
+system action patterns, not just your own.</p>
+<p>Running the above program using <code>--seneca.log.all</code> also shows you the
+log output that allows you to trace the execution of the action
+patterns. Here&#39;s a sample run, showing only the lines of interest:</p>
+<pre class="highlight"><code class="hljs bash">$ node prior-debug.js --seneca.log.all --seneca.log.short
+...
+     <span class="hljs-number">159</span> <span class="hljs-number">3</span>h/- DEBUG plugin root$  ADD (kjnse) a:<span class="hljs-number">1</span>  
+     <span class="hljs-number">159</span> <span class="hljs-number">3</span>h/- DEBUG plugin root$  ADD (xtpzn) a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>  
+     <span class="hljs-number">160</span> <span class="hljs-number">3</span>h/- DEBUG plugin root$  ADD (<span class="hljs-number">460</span>jf) a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span> 
+...
+     <span class="hljs-number">160</span> <span class="hljs-number">3</span>h/- DEBUG act root$ IN  <span class="hljs-number">0</span>j/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span> {a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span>} ENTRY (<span class="hljs-number">460</span>jf) - - -
+     <span class="hljs-number">164</span> <span class="hljs-number">3</span>h/- DEBUG act root$ IN  <span class="hljs-number">7</span>e/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>     {a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span>} PRIOR;(<span class="hljs-number">460</span>jf) (xtpzn) - - - 
+     <span class="hljs-number">165</span> <span class="hljs-number">3</span>h/- DEBUG act root$ IN  me/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>         {a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span>} PRIOR;(<span class="hljs-number">460</span>jf),(xtpzn) (kjnse) - - - 
+     <span class="hljs-number">165</span> <span class="hljs-number">3</span>h/- DEBUG act root$ OUT me/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>         {a:<span class="hljs-number">1</span>}         PRIOR;(<span class="hljs-number">460</span>jf),(xtpzn) (kjnse) - - <span class="hljs-number">0</span> - 
+     <span class="hljs-number">167</span> <span class="hljs-number">3</span>h/- DEBUG act root$ OUT <span class="hljs-number">7</span>e/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>     {a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>}     PRIOR;(<span class="hljs-number">460</span>jf) (xtpzn) - - <span class="hljs-number">3</span> - 
+     <span class="hljs-number">167</span> <span class="hljs-number">3</span>h/- DEBUG act root$ OUT <span class="hljs-number">0</span>j/<span class="hljs-number">12</span> a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span> {a:<span class="hljs-number">1</span>,b:<span class="hljs-number">2</span>,c:<span class="hljs-number">3</span>} EXIT (<span class="hljs-number">460</span>jf) - - <span class="hljs-number">7</span> -
+</code></pre>
+<p>Here you can see the definitions of the action patterns, which gives
+the action identifiers:</p>
+<ul>
+<li>a:1         &rarr; (kjnse)  </li>
+<li>a:1,b:2     &rarr; (xtpzn) </li>
+<li>a:1,b:2,c:3 &rarr; (460jf) </li>
+</ul>
+<p>These identifiers are included in the log lines of the IN/OUT actions
+calls so that you can follow the prior calls.</p>
+<p>In addition, the message and transaction identifiers, starting with
+<code>0j/12</code>, allow you to trace all the messages generated by the intial
+message.</p>
+<h1 id="help">Help</h1>
+<p>If you have questions on priors, you can:</p>
+<ul>
+<li>Tweet to <a href="https://twitter.com/senecajs">@senecajs</a>,</li>
+<li>Post a <a href="https://github.com/rjrodger/seneca/issues">github issue</a>,</li>
+<li>Start a <a href="https://gitter.im/rjrodger/seneca">conversation</a>.</li>
+</ul>
+<p><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></p>
+
+
+        </section>
+      <aside id="sidebar">
+
+        <a href="install.html" class="button1" style="background-image: url(images/menu-down.png);">
+          <span class="new_margin">Download &</span>
+          <span class="new_margin">install</span>
+        </a>
+
+        <a href="getting-started.html" class="button1" style="background-image: url(images/menu-start.png);">
+          <span class="new_margin">Getting</span>
+          <span class="new_margin">started</span>
+        </a>
+
+        <a href="plugins.html" class="button1" style="background-image: url(images/menu-plugins.png);">
+          <span class="new_margin">All the</span>
+          <span class="new_margin">Plugins</span>
+        </a>
+
+        <a href="videos.html" class="button1" style="background-image: url(images/menu-video.png);">
+          <span class="new_margin">Videos and</span>
+          <span class="new_margin">Talks</span>
+        </a>
+
+        <a href="http://senecajs.tumblr.com" class="button1" style="background-image: url(images/menu-updates.png);">
+          <span class="new_margin">Updates</span>
+          <span class="new_margin">and releases</span>
+        </a>
+
+        <a href="documentation.html" class="button1" style="background-image: url(images/menu-docu.png);">
+          <span class="new_margin">Documentation</span>
+          <span class="new_margin">goodness</span>
+        </a>
+
+        <a href="case-studies.html" class="button1" style="background-image: url(images/menu-prod.png);">
+          <span class="new_margin">Seneca</span>
+          <span class="new_margin">in production</span>
+        </a>
+
+        <a href="https://github.com/rjrodger/seneca" class="button1" style="background-image: url(images/menu-github.png);">
+          <span class="new_margin">Github</span>
+          <span class="new_margin">rjrodger/seneca</span>
+        </a>
+          
+        <a href="http://twitter.com/senecajs" class="button1" style="background-image: url(images/menu-twitter.png);">
+          <span class="new_margin">Twitter</span>
+          <span class="new_margin">@senecajs</span>
+        </a>
+                  
+      </aside>
+      
+      </div>
+    </div>
+
+    
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57673-6', 'senecajs.org');
+  ga('send', 'pageview');
+
+</script>  
+  </body>
+</html>
