@@ -446,7 +446,7 @@ using custom versions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    add: <span class="hljs-literal">true</span>,
+            <div class="content"><div class='highlight'><pre>    add: <span class="hljs-literal">false</span>,
   },</pre></div></div>
             
         </li>
@@ -1927,6 +1927,11 @@ part of the pattern, but rather an argument to validate when
             
             <div class="content"><div class='highlight'><pre>    actmeta.deprecate = pattern.deprecate$
 
+    <span class="hljs-keyword">var</span> strict_add 
+          = (pattern.strict$ &amp;&amp; <span class="hljs-literal">null</span> != pattern.strict$.add) 
+          ? !!pattern.strict$.add
+          : !!so.strict.add
+
     pattern = self.util.clean(args.pattern)
 
     <span class="hljs-keyword">if</span>( <span class="hljs-number">0</span> === _.keys( pattern ) ) {
@@ -1998,7 +2003,7 @@ use .wrap for pin-based patterns</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span>( so.strict.add &amp;&amp; priormeta &amp;&amp; priormeta.pattern !== actmeta.pattern ) {
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span>( strict_add &amp;&amp; priormeta &amp;&amp; priormeta.pattern !== actmeta.pattern ) {
       priormeta = <span class="hljs-literal">null</span>
     }
 
@@ -3118,7 +3123,8 @@ then provide cached result, if any. Return true in this case.</p>
       }
     }
     <span class="hljs-keyword">else</span> delegate.prior = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"> msg, done </span>) </span>{
-      <span class="hljs-keyword">return</span> done( <span class="hljs-literal">null</span>, callargs.default$ ? callargs.default$ : <span class="hljs-literal">null</span> )
+      <span class="hljs-keyword">var</span> out = callargs.default$ ? callargs.default$ : <span class="hljs-literal">null</span>
+      <span class="hljs-keyword">return</span> done.call( delegate, <span class="hljs-literal">null</span>, out )
     }
 
     <span class="hljs-keyword">return</span> delegate;
