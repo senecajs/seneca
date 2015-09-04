@@ -21,8 +21,8 @@
 20. git push
 21. npm publish
 22. git tag; git push --tags
-23. $ npm dist-tag add seneca@VERSION next
-24. $ npm dist-tag add seneca@VERSION plugin
+23. $ npm tag seneca@VERSION next
+24. $ npm tag seneca@VERSION plugin
 23. update gh-pages install.html; git push origin gh-pages
 24. update and publish plugins
 25. update tumblr
