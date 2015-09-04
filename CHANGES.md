@@ -1,5 +1,5 @@
 
-## 0.6.5: 2015-08 IN PROGRESS
+## 0.6.5: 2015-09-04 IN PROGRESS
 
    * revert to non-strict adds so that priors can be subset patterns, see issues 145, 149
 

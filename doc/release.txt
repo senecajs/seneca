@@ -1,5 +1,5 @@
 0.  Ensure all deps in node_modules installable from npm
-1.  Update CHANGELOG, date release
+1.  Update CHANGES.md, date release
 2.  Review github issues
 3.  run test/test-included-plugins.sh
 4.  run npm run build

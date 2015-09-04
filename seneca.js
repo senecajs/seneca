@@ -5,7 +5,7 @@
 
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.6.4'
+var VERSION = '0.6.5'
 
 
 // Node API modules
@@ -1010,10 +1010,8 @@ function make_seneca( initial_options ) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = pattern.deprecate$
 
-    var strict_add 
-          = (pattern.strict$ && null != pattern.strict$.add) 
-          ? !!pattern.strict$.add
-          : !!so.strict.add
+    var strict_add = (pattern.strict$ && null != pattern.strict$.add) ? 
+          !!pattern.strict$.add : !!so.strict.add
 
     pattern = self.util.clean(args.pattern)
 

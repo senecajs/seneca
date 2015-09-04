@@ -2,9 +2,7 @@
 "use strict";
 
 
-// mocha seneca.test.js
-
-var VERSION = '0.6.4'
+var VERSION = '0.6.5'
 
 var util   = require('util')
 var stream = require('stream')
