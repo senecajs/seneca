@@ -61,7 +61,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.4'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> VERSION = <span class="hljs-string">'0.6.5'</span></pre></div></div>
             
         </li>
         
@@ -1927,10 +1927,8 @@ part of the pattern, but rather an argument to validate when
             
             <div class="content"><div class='highlight'><pre>    actmeta.deprecate = pattern.deprecate$
 
-    <span class="hljs-keyword">var</span> strict_add 
-          = (pattern.strict$ &amp;&amp; <span class="hljs-literal">null</span> != pattern.strict$.add) 
-          ? !!pattern.strict$.add
-          : !!so.strict.add
+    <span class="hljs-keyword">var</span> strict_add = (pattern.strict$ &amp;&amp; <span class="hljs-literal">null</span> != pattern.strict$.add) ? 
+          !!pattern.strict$.add : !!so.strict.add
 
     pattern = self.util.clean(args.pattern)
 
