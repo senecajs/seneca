@@ -572,7 +572,7 @@ function make_seneca( initial_options ) {
       if( !_.contains(private$.plugin_order.byname,depname) &&
           !_.contains(private$.plugin_order.byname,'seneca-'+depname) ) {
         self.die(error('plugin_required',{name:args.pluginname,dependency:depname}))
-        return false
+        return false;
       }
       else return true;
     })
@@ -620,7 +620,7 @@ function make_seneca( initial_options ) {
     var config = parseConfig( arr(arguments), opts )
 
     self.act('role:transport,cmd:listen',{config:config,gate$:true},function(err) {
-      if( err ) return self.die(error(err,'transport_listen',config))
+      if( err ) return self.die(error(err,'transport_listen',config));
     })
 
     return self
@@ -1246,7 +1246,6 @@ function make_seneca( initial_options ) {
     var errcode = 'act_not_found'
     var errinfo = { args: util.inspect(common.clean(args)).replace(/\n/g,'') }
 
-
     if( !_.isUndefined( args.default$ ) ) {
       errcode = 'act_default_bad'
       errinfo.xdefault = util.inspect(args.default$)
@@ -1255,7 +1254,8 @@ function make_seneca( initial_options ) {
     var err = error( errcode, errinfo )
 
     if( args.fatal$ ) {
-      return self.die(err)
+      self.die(err)
+      return self;
     }
 
     logging.log_act_bad( root, err, so.trace.unknown )
@@ -1354,12 +1354,13 @@ function make_seneca( initial_options ) {
       plugindesc = private$.use( arg0, arg1, arg2 )
     }
     catch(e) {
-      return self.die( error(e,'plugin_'+e.code) );
+      self.die( error(e,'plugin_'+e.code) );
+      return self;
     }
 
     self.register( plugindesc )
 
-    return self
+    return self;
   }
 
 
@@ -1637,7 +1638,7 @@ function make_seneca( initial_options ) {
           }
 
           if( args.fatal$ ) {
-            return instance.die(out.err)
+            return instance.die(out.err);
           }
         }
         else {
@@ -2230,9 +2231,15 @@ function make_seneca( initial_options ) {
 
 
   // Add builtin actions.
+  root.add( {role:'seneca', cmd:'stats'},   action_seneca_stats )
+  root.add( {role:'seneca', cmd:'close'},   action_seneca_close )
+  root.add( {role:'seneca', info:'ready'},  action_seneca_ready )
+  root.add( {role:'seneca', info:'fatal'},  action_seneca_fatal )
+  root.add( {role:'seneca', get:'options'}, action_options_get  )
+
+  // Legacy builtin actions.
   root.add( {role:'seneca',  stats:true},  action_seneca_stats )
   root.add( {role:'seneca',  ready:true},  action_seneca_ready )
-  root.add( {role:'seneca',  cmd:'close'}, action_seneca_close )
   root.add( {role:'options', cmd:'get'},   action_options_get  )
 
   cmdline.handle( root, argv )
@@ -2240,6 +2247,11 @@ function make_seneca( initial_options ) {
 
 
   // Define builtin actions.
+
+  function action_seneca_fatal(args,done) {
+    done()
+  }
+
 
   function action_seneca_close(args,done) {
     this.emit('close')
@@ -2333,6 +2345,8 @@ function makedie( instance, ctxt ) {
         err = new Error( _.isString(err) ? err : util.inspect(err) )
       }
 
+      err.fatal$ = true
+
       var so = instance.options()
 
       // undead is only for testing, do not use in production
@@ -2384,6 +2398,8 @@ function makedie( instance, ctxt ) {
       if( instance.closed ) return;
 
       if( !undead ) {
+        instance.act('role:seneca,info:fatal,closing$:true',{err:err})
+
         instance.close(
           // terminate process, err (if defined) is from seneca.close
           function ( err ) {
