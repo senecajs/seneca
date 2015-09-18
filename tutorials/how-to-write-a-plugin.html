@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Seneca, a Micro-Services toolkit for Node.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster'>
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+  <link rel="stylesheet" href="/stylesheets/stylesheet.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-960">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Seneca</a>
+      </div>
+      <div class="collapse navbar-collapse" id="nav-collapsed">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href='/get-started'>Getting Started</a></li>
+          <li><a href='/tutorials'>Tutorials</a></li>
+          <li><a href='/api'>API</a></li>
+          <li><a href='/plugins'>Plugins</a></li>
+          <li><a href='/support'>Support</a></li>
+          <li><a href='/contribute'>Contribute</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="fullwidthtop">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <div class="header-box">
+          <img src="/images/icon-top.png" alt="design, develop, organise code" title="design, develop, organise code" height="auto" width="460">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row clearfix hp">
+      <h1 id="how-to-write-a-seneca-plugin">How to Write a Seneca Plugin</h1>
+<p>When you use the Seneca framework, you write plugins all the
+time. They’re an easy way to organize your action patterns.</p>
+<p>A Seneca plugin is just a function that gets passed an <em>options</em>
+object, and has a Seneca instance as its <em>this</em> variable. You
+then <a href="http://senecajs.org/api.html#long-m-add"><em>add</em></a> some action
+patterns in the body of the function, and you’re done. There is no
+callback.</p>
+<p>This article will show some plugin examples, with code, going from
+basic to advanced. It will cover the plugin API, and the conventions
+to use when writing them. You’ll need to log the behaviour of your
+plugins, and you’ll need to know how to debug them, so that will be
+discussed too.</p>
+<p>There are many Seneca plugins published on
+<a href="http://www.npmjs.org/search?q=seneca%20plugin">NPM</a>. Most of them
+can be extended and modifed by overriding their actions. You’ll also
+need to know how to do this.</p>
+<p>Finally, plugins provide you with a way to organize your own code, and
+to make use of the
+<a href="http://martinfowler.com/articles/microservices.html">micro-services</a>
+approach to software architecture, so that will be discussed too.</p>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="">A Simple Plugin</a></li>
+<li><a href="#wp-ismodule">A Plugin is a Module</a></li>
+<li><a href="#wp-name">Give Your Plugin a Name</a></li>
+<li><a href="#wp-options">Dealing with Options</a></li>
+</ul>
+<p><small style="float:right"><a href="#wp-contents">[top]</a></small></p>
+<h2 id="a-simple-plugin">A Simple Plugin</h2>
+<p>Let’s write a plugin that defines one action. The action uses the
+plugin <em>options</em> argument to build a result.</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> plugin = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    done( <span class="hljs-literal">null</span>, {color: options.color} )
+  })
+
+}</code></pre>
+
+
+<p>A plugin is just a function. You can see that there is no callback
+passed into this function that defines the plugin. So, how does Seneca
+know that the plugin has fully initialized? It’s an important
+questions, because the plugin might depend on establishing a database
+connection before it can operate properly.</p>
+<p>As with most things in Seneca, you define an action pattern to handle
+initialization, and make sure it happens in the proper order. We’ll
+talk about plugin initialization a little later. Many plugins don’t
+even need to initialize because all they do is define a set of action
+patterns.</p>
+<p>The example above defines a single action
+pattern, <em>foo:bar</em>. This action provides a result based on the
+options provided to the plugin. Plugin options are not required, but
+if they are provided, they are passed in as the first argument to the
+plugin definition function. The <em>options</em> argument is just a
+JavaScript object with some properties. Seneca makes sure it always
+exists. Even in the case where you have no options, you’ll still get
+an empty object.</p>
+<p>The context object of the plugin function (that is, the value
+of <em>this</em>), is a Seneca instance that you can use to define
+actions. That means you don’t need to
+call <code>require(&#39;seneca&#39;)</code> when defining a plugin. This
+Seneca instance provides the standard API, but the logging methods are
+special - they append infomation about the plugin. So when you
+call <code>this.log.debug(&#39;stuff about my plugin&#39;)</code>, the log
+output will contain extra fields identifying the plugin, such as its
+name. In this example, you haven’t given the plugin a name (you’ll see
+how to do that in a moment), so Seneca will generate a short random
+name for you.</p>
+<p>You can use the plugin by calling
+the <a href="http://senecajs.org/api.html#long-m-use">use</a> method
+of the Seneca object. This loads the plugin into Seneca, after which
+the action patterns defined by the plugin are available. You can then
+call the <a href="http://senecajs.org/api.html#long-m-act">act</a>
+method to trigger them, like so:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// simple.js</span>
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+<span class="hljs-keyword">var</span> plugin = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{ ... } <span class="hljs-comment">// as above</span>
+
+seneca.use( plugin, {color:<span class="hljs-string">'pink'</span>} )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>This code is available in
+the <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>
+example, in the <em>simple.js</em> script. Running the script produces:</p>
+<pre><code class="hljs bash">$ node simple.js
+null { color: <span class="hljs-string">'pink'</span> }</code></pre>
+
+
+<p>In the output, the <em>null</em> is the first argument
+to <em>console.log</em>, and indicates that there was no error.  The
+output is a JavaScript object with single property <em>color</em>, the
+value of which is set from the original options given to the plugin.</p>
+<p><small style="float:right"><a href="#wp-contents">[top]</a></small></a></p>
+<h2 id="a-plugin-is-a-module">A Plugin is a Module</h2>
+<p>The Seneca <em>use</em> method can also accept module references. That
+is, if you can <em>require</em> it, you can <em>use</em> it! Let’s update the
+simple example to show this. First, create a file called <em>foo.js</em>
+containing the plugin code (all the files in this article are available on
+the Seneca github
+at <a href="https://github.com/rjrodger/seneca/tree/master/doc/examples/write-a-plugin">doc/examples/write-a-plugin</a>).</p>
+<pre><code class="hljs js"><span class="hljs-comment">// foo.js</span>
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    done( <span class="hljs-literal">null</span>, {color: options.color} )
+  })
+
+}</code></pre>
+
+
+<p>The <em>foo.js</em> file is a normal JavaScript file you can load into Node.js with <em>require</em>. It exposes a single function that takes the plugin <em>options</em>. To use the plugin, the code is almost the same as before, except that you pass in the <em>foo.js</em> relative file path in the same way you would for <em>require</em>.</p>
+<pre><code class="hljs js"><span class="hljs-comment">// module.js</span>
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( <span class="hljs-string">'./foo.js'</span>, {color:<span class="hljs-string">'pink'</span>} )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>The code produces the same output as before:</p>
+<pre><code class="hljs bash">$ node module.js
+null { color: <span class="hljs-string">'pink'</span> }</code></pre>
+
+
+<p>As well as local files and local modules, you can use public plugin modules
+from <a href="https://www.npmjs.org/search?q=seneca">npmjs.org</a>. Let’s use
+the <a href="https://www.npmjs.org/package/seneca-echo">seneca-echo
+plugin</a> as an example. This plugin echoes back arguments you send
+to the <em>role:echo</em> pattern. First, <em>npm install</em> it:</p>
+<pre><code class="hljs bash">$ npm install seneca-echo</code></pre>
+
+
+<p>Then use it:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// echo.js</span>
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( <span class="hljs-string">'seneca-echo'</span> )
+seneca.act( {role:<span class="hljs-string">'echo'</span>, foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>Running <em>echo.js</em> produces:</p>
+<pre><code class="hljs js">$ node echo.js
+<span class="hljs-literal">null</span> { foo: <span class="hljs-string">'bar'</span> }</code></pre>
+
+
+<p>You aren’t using any options in this example. The <em>seneca-echo</em>
+plugin just reproduces the arguments passed in. In this
+case <em>foo:bar</em>. The <em>role</em> property is not included in
+the output.</p>
+<p>The Seneca framework comes
+with <a href="http://senecajs.org/plugins.html">many plugins</a>
+written by the community. Feel free to write one yourself (after
+reading this article!). By convention, public and generically useful
+plugins are prefixed with <em>seneca-</em> as part of their name. This
+lets you know the module is a Seneca plugin if you see it on
+NPM. However, its a bit tedious to type in “seneca-“ all the time, so
+you are allowed to abbreviate plugin names by dropping the “seneca-“
+prefix. That means you can use the the <em>seneca-echo</em> by just
+providing the “echo” part of the name:</p>
+<pre><code class="hljs js">seneca.use( <span class="hljs-string">'echo'</span> )</code></pre>
+
+
+<p><small style="float:right"><a href="#wp-contents">[top]</a></small></p>
+<h2 id="give-your-plugin-a-name">Give Your Plugin a Name</h2>
+<p>Your plugin needs a name. You can return a string from the plugin
+definition function to give it one. When you look at the Seneca logs,
+you can see what your plugin is doing. Let’s try it!</p>
+<pre><code class="hljs js"><span class="hljs-comment">// name0.js</span>
+
+<span class="hljs-keyword">var</span> plugin = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    done( <span class="hljs-literal">null</span>, {color: options.color} )
+  })
+
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'name0'</span>
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( plugin, {color:<span class="hljs-string">'pink'</span>} )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>And then run it like so:</p>
+<pre><code class="hljs bash">$ node name0.js --seneca.log=plugin:name0
+... DEBUG  act  name0  -  yvgt5y48wqjb  IN   {foo=bar}  ...
+... DEBUG  act  name0  -  yvgt5y48wqjb  OUT  {color=pink}  ...
+null { color: <span class="hljs-string">'pink'</span> }</code></pre>
+
+
+<p>This uses Seneca’s log filtering feature to focus on the log lines
+that you care about. For more details on log filtering, read
+the <a href="http://senecajs.org/logging-example.html">logging tutorial</a>.</p>
+<p>To avoid repetition, the public plugins drop their “seneca-“ prefix
+when registering their names. Try this:</p>
+<pre><code class="hljs bash">$ node echo.js --seneca.log=plugin:<span class="hljs-built_in">echo</span>
+... DEBUG  plugin  <span class="hljs-built_in">echo</span>  -  add  <span class="hljs-built_in">echo</span>  -  {role=<span class="hljs-built_in">echo</span>}  ...
+... DEBUG  act     <span class="hljs-built_in">echo</span>  -  lkmlk29r6uwt  IN   {role=<span class="hljs-built_in">echo</span>,foo=bar}  ...
+... DEBUG  act     <span class="hljs-built_in">echo</span>  -  lkmlk29r6uwt  OUT  {foo=bar}  ...
+null { foo: <span class="hljs-string">'bar'</span> }</code></pre>
+
+
+<p>You may have noticed something interesting. There were three lines of
+logging output that time. Why didn’t you see an “add” line for your
+“name0” plugin? During the execution of its definition function, it
+didn’t have a name. You only gave it one when you returned a
+name. Sometimes this is useful, because you can set a name
+dynamically. Still, is it possible to set the name intially? Yes! Just
+give the defining function a name:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// name1.js</span>
+
+<span class="hljs-keyword">var</span> plugin = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">name1</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    done( <span class="hljs-literal">null</span>, {color: options.color} )
+  })
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( plugin, {color:<span class="hljs-string">'pink'</span>} )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>Running this gives:</p>
+<pre><code class="hljs bash">$ node name1.js --seneca.log=plugin:name1
+... DEBUG  plugin  name1  -  add  name1  -  {foo=bar}  ...
+... DEBUG  act     name1  -  b3uamicogfnm  IN   {foo=bar}  ...
+... DEBUG  act     name1  -  b3uamicogfnm  OUT  {color=pink}  ...
+null { color: <span class="hljs-string">'pink'</span> }</code></pre>
+
+
+
+<p>When you load a plugin as a module then the module reference, as
+supplied to the <em>use</em> method, becomes the initial name of the
+module (Of course, you can override this by returning your own name)
+Here’s the <em>foo.js</em> plugin again:</p>
+<pre><code class="hljs bash">$ node module.js --seneca.log=plugin:./foo.js
+... DEBUG  plugin  ./foo.js  -  add  ./foo.js  -  {foo=bar}  ...
+... DEBUG  act     ./foo.js  -  <span class="hljs-number">47</span>ssblskuj59  IN   {foo=bar}  ...
+... DEBUG  act     ./foo.js  -  <span class="hljs-number">47</span>ssblskuj59  OUT  {color=pink}  ...
+null { color: <span class="hljs-string">'pink'</span> }</code></pre>
+
+
+
+<p>There’s an obvious risk that you might have a naming conflict. Seneca
+allows this because it’s more useful to have the ability to
+override plugins. If you’re defining your own set of plugin names,
+it’s best to choose a short prefix for your project. This is a good
+idea in general for many frameworks!</p>
+<p>For example, if you’re working on the Manhattan project, choose the
+prefix <em>mh</em>. Then call your “Trinity” plugin <em>mh-trinity</em>.</p>
+<p>There are no hard and fast rules for naming your action
+patterns. However, there are some conventions that help to organize
+the patterns. Your plugin is providing functionality to the
+system. This functionality fulfills a role in the system. So it makes
+sense to use the form <em>role:plugin-name</em> as part of your action
+pattern. This creates a pattern namespace to avoid clashes with other
+plugin patterns. The use of the word “role” also indicates that other
+plugins may override some aspects of this role (that is, aspects of
+this functionality) by providing extensions to some of the action
+patterns.</p>
+<p>For example,
+the <a href="https://github.com/rjrodger/seneca-vcache">seneca-vcache
+plugin</a> overrides the standard entity patterns, of the
+form <em>role:entity, cmd:*</em>. It does this to transparently add
+caching to the database store operations.</p>
+<p>Another common convention is to use the property “cmd” for the main
+public commands exposed by the plugin. So, you might have, for
+example:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> plugin = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">trinity</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-keyword">this</span>.add( {role:<span class="hljs-string">'trinity'</span>, cmd:<span class="hljs-string">'detonate'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    <span class="hljs-comment">// ... compress plutonium, etc</span>
+  })
+}</code></pre>
+
+
+<p>Many of the public Seneca plugins on NPM follow this pattern. You may
+find other patterns more useful in your own projects, so don’t feel
+obligated to follow this one.</p>
+<p>If you load a plugin multiple times, only the last one loaded will be
+used. You can however load multiple separate instances of the same
+plugin, by using tag strings. NOTE: the action patterns will still be
+overridden, unless the plugin handles this for you (like the example
+below). The data store plugins, in particular, use this mechanism to
+support multiple databases in the same system. For more details, read
+the <a href="http://senecajs.org/data-entities.html">data entities
+tutorial.</a></p>
+<p>Here’s a simple example that uses tags. In this case,
+the <em>bar.js</em> plugin defines an action pattern using one of its
+option properties. This means that different action patterns are
+defined depending on the options provided.</p>
+<pre><code class="hljs js"><span class="hljs-comment">// bar.js</span>
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-keyword">var</span> tag = <span class="hljs-keyword">this</span>.context.tag
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>, zed:options.zed}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span> </span>{
+    done( <span class="hljs-literal">null</span>, {color: options.color, tag:tag} )
+  })
+
+}</code></pre>
+
+
+<p>You can access the tag value from the context property of the plugin
+Seneca instance: <code>this.context.tag</code></p>
+<p>You still want to debug and track each instance of this plugin, so you
+provide a tag each time you register it with the <em>use</em>
+method. Tags can be supplied in two ways, either by description object
+for the plugin, or by suffixing a <em>$</em> character, and then the
+tag, to the plugin module reference. Here’s the example code:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// tags.js</span>
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( {name:<span class="hljs-string">'./bar.js'</span>,tag:<span class="hljs-string">'AAA'</span>}, {zed:<span class="hljs-number">1</span>,color:<span class="hljs-string">'red'</span>} )
+seneca.use( <span class="hljs-string">'./bar.js$BBB'</span>,              {zed:<span class="hljs-number">2</span>,color:<span class="hljs-string">'green'</span>} )
+
+seneca.act( {foo:<span class="hljs-string">'bar'</span>,zed:<span class="hljs-number">1</span>}, <span class="hljs-built_in">console</span>.log )
+seneca.act( {foo:<span class="hljs-string">'bar'</span>,zed:<span class="hljs-number">2</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+<p>Running this code produces the output:</p>
+<pre><code class="hljs bash">$ node tags.js
+null { color: <span class="hljs-string">'red'</span>, tag: <span class="hljs-string">'AAA'</span> }
+null { color: <span class="hljs-string">'green'</span>, tag: <span class="hljs-string">'BBB'</span> }</code></pre>
+
+
+<p>Using the debug log shows the different instances of the plugin in action:</p>
+<pre><code class="hljs bash">$ node tags.js --seneca.log=plugin:./bar.js
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=<span class="hljs-number">1</span>}  ...
+... DEBUG  plugin  ./bar.js  BBB  add  ./bar.js  BBB  {foo=bar,zed=<span class="hljs-number">2</span>}  ...
+... DEBUG  act     ./bar.js  AAA  pamds7vlteyv  IN   {foo=bar,zed=<span class="hljs-number">1</span>}  ...
+... DEBUG  act     ./bar.js  BBB  <span class="hljs-number">4</span>uxz90gcczn5  IN   {foo=bar,zed=<span class="hljs-number">2</span>}  ...
+... DEBUG  act     ./bar.js  AAA  pamds7vlteyv  OUT  {color=red,tag=AAA}  ...
+null { color: <span class="hljs-string">'red'</span>, tag: <span class="hljs-string">'AAA'</span> }
+... DEBUG  act     ./bar.js  BBB  <span class="hljs-number">4</span>uxz90gcczn5  OUT  {color=green,tag=BBB}  ...
+null { color: <span class="hljs-string">'green'</span>, tag: <span class="hljs-string">'BBB'</span> }</code></pre>
+
+
+<p>To isolate a tag, use these log settings:</p>
+<pre><code class="hljs bash">$ node tags.js --seneca.log=plugin:./bar.js,tag:AAA
+... DEBUG  plugin  ./bar.js  AAA  add  ./bar.js  AAA  {foo=bar,zed=<span class="hljs-number">1</span>}  ...
+... DEBUG  act     ./bar.js  AAA  <span class="hljs-number">9</span>rp8luozaf92  IN   {foo=bar,zed=<span class="hljs-number">1</span>}  ...
+... DEBUG  act     ./bar.js  AAA  <span class="hljs-number">9</span>rp8luozaf92  OUT  {color=red,tag=AAA}  ...
+null { color: <span class="hljs-string">'red'</span>, tag: <span class="hljs-string">'AAA'</span> }
+null { color: <span class="hljs-string">'green'</span>, tag: <span class="hljs-string">'BBB'</span> }</code></pre>
+
+
+<p><small style="float:right"><a href="#wp-contents">[top]</a></small></p>
+<h2 id="dealing-with-options">Dealing with Options</h2>
+<p>It’s useful to provide default option values for users of your
+plugin. Seneca provides a utility function to support
+this: <code>seneca.util.deepextend</code>. The <code>deepextend</code>
+function works much the same
+as <a href="http://underscorejs.org/#extend"><code>_.extend</code></a>,
+except that it can handle properties at any level. For example:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// deepextend.js</span>
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+<span class="hljs-keyword">var</span> foo = {
+  bar: <span class="hljs-number">1</span>,
+  colors: {
+    red:   <span class="hljs-number">50</span>,
+    green: <span class="hljs-number">100</span>,
+    blue:  <span class="hljs-number">150</span>,
+  }
+}
+
+<span class="hljs-keyword">var</span> bar = seneca.util.deepextend(foo,{
+  bar: <span class="hljs-number">2</span>,
+  colors: {
+    red: <span class="hljs-number">200</span>
+  }
+})
+
+<span class="hljs-built_in">console</span>.log(bar)
+<span class="hljs-comment">// { bar: 2, colors: { red: 200, green: 100, blue: 150 } }</span></code></pre>
+
+
+<p>The property <code>colors.red</code> is overridden, but the other colors retain
+their default values.</p>
+<p>You can use this in your own plugins. Let’s add default options to
+the <em>foo.js</em> module (as above).</p>
+<pre><code class="hljs js"><span class="hljs-comment">// foo-defopts.js</span>
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( options )</span> </span>{
+
+  <span class="hljs-comment">// Default options</span>
+  options = <span class="hljs-keyword">this</span>.util.deepextend({
+    color: <span class="hljs-string">'red'</span>,
+    box: {
+      width:  <span class="hljs-number">100</span>,
+      height: <span class="hljs-number">200</span>
+    }
+  },options)
+
+
+  <span class="hljs-keyword">this</span>.add( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( args, done )</span></span>{
+    done( <span class="hljs-literal">null</span>, { color:      options.color,
+                   box_width:  options.box.width,
+                   box_height: options.box.height
+                })
+  })
+
+  <span class="hljs-keyword">return</span> {name:<span class="hljs-string">'foo'</span>}
+}</code></pre>
+
+
+<p><small>
+(As an aside, note that you can also specify the name of the
+plugin by returning an object of the form <code>{name:...}</code>. You’ll
+see some more properties you can add this return object
+below).
+</small></p>
+<p>The default option structure is used as the base for the user supplied
+options. Let’s supply some user options that will override the defaults:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// module-defopts.js</span>
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( <span class="hljs-string">'./foo-defopts.js'</span>, {
+  color:<span class="hljs-string">'pink'</span>,
+  box:{
+    width:<span class="hljs-number">50</span>
+  }
+})
+
+seneca.act( {foo:<span class="hljs-string">'bar'</span>}, <span class="hljs-built_in">console</span>.log )</code></pre>
+
+
+
+<p>This code runs the <em>foo:bar</em> action, which produces:</p>
+<pre><code class="hljs bash">$ node module-defopts.js
+null { color: <span class="hljs-string">'pink'</span>, box_width: <span class="hljs-number">50</span>, box_height: <span class="hljs-number">200</span> }</code></pre>
+
+
+<p>The default values for <code>color</code> and <code>box.width</code> (<em>red</em> and <em>100</em>, respectively), have been overridden by the options provided as the second argument to <code>seneca.use</code> when the plugin is loaded (<em>pink</em> and <em>50</em>).</p>
+<p>You can load plugin options from configuration files. Seneca looks for a file named <em>seneca.options.js</em> in the current folder, and <em>requires</em> the file if it exists. This file should be a Node.js module that exports a JSON object. For example:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// seneca.options.js</span>
+<span class="hljs-built_in">module</span>.exports = {
+  zed: {
+    red:   <span class="hljs-number">50</span>,
+    green: <span class="hljs-number">100</span>,
+    blue:  <span class="hljs-number">150</span>,
+  },
+  <span class="hljs-string">'zed$tag0'</span>: {
+    red:   <span class="hljs-number">55</span>,
+  }
+}</code></pre>
+
+
+<p>You can specify global Seneca options in this file, and you can
+specify options for individual plugins. Top level properties that
+match the name of a plugin are used to provide options to plugins when
+they are loaded.</p>
+<p>Let’s see this in action. The <em>zed.js</em> script defines a plugin
+that prints out the plugin name and tag
+using <code>this.context</code> (see above), and also prints out the
+options provided to the plugin by Seneca.</p>
+<pre><code class="hljs js"><span class="hljs-comment">// zed.js</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">zed</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-built_in">console</span>.log( <span class="hljs-keyword">this</span>.context.name, <span class="hljs-keyword">this</span>.context.tag, options )
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( zed )</code></pre>
+
+
+<p>As the example <em>seneca.options.js</em> file defines a <em>zed</em> property, this is used to provide options to the <em>zed</em> plugin. Running the <em>zed.js</em> script prints out the options loaded from <em>seneca.options.js</em>:</p>
+<pre><code class="hljs bash">$ node zed.js
+zed undefined { red: <span class="hljs-number">50</span>, green: <span class="hljs-number">100</span>, blue: <span class="hljs-number">150</span> }</code></pre>
+
+
+<p>If you are using tags to create multiple instances of the same plugin, you can use the <em>$suffix</em> convention to specify options particular to a given tagged plugin instance. The <em>zed-tag.js</em> script is the same as the <em>zed.js</em> script, except that it also creates an additional tagged instance of the <em>zed</em> plugin. Note that the definition of the plugin uses a properties object, with the <code>init</code> property specifying the plugin definition function.</p>
+<pre><code class="hljs js"><span class="hljs-comment">// zed-tag.js</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">zed</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-built_in">console</span>.log( <span class="hljs-keyword">this</span>.context.name, <span class="hljs-keyword">this</span>.context.tag, options )
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.use( zed )
+seneca.use( {init:zed, name:<span class="hljs-string">'zed'</span>, tag:<span class="hljs-string">'tag0'</span>} )</code></pre>
+
+
+<p>The <em>seneca.options.js</em> file also defines a <em>zed$tag0</em> property, and the options for the <em>tag0</em> instance of the <em>zed</em> plugin are taken from this. However, if you run the code, you’ll notice that it also picks up the options defined for the main <em>zed</em> plugin. These become base defaults, so that the special case option, <code>red: 55</code> overrides the main value.</p>
+<pre><code class="hljs js">$ node zed-tag.js
+zed <span class="hljs-literal">undefined</span> { red: <span class="hljs-number">50</span>, green: <span class="hljs-number">100</span>, blue: <span class="hljs-number">150</span> }
+zed tag0       { red: <span class="hljs-number">55</span>, green: <span class="hljs-number">100</span>, blue: <span class="hljs-number">150</span> }</code></pre>
+
+
+<p>Sometimes you need to access to all the options provided to Seneca. For
+example, there is a global <em>timeout</em> value that you might want to
+use for timeouts. The <em>transport</em> family of plugins do this, see <a href="https://github.com/rjrodger/seneca-redis-transport/blob/master/redis-transport.js">redis-transport</a> for an example.</p>
+<p>Inside your plugin function, you can call <code>this.options()</code>
+to get back an object containing the entire Seneca options tree:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// zed-access.js</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">zed</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-built_in">console</span>.log( <span class="hljs-keyword">this</span>.options() )
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../../../lib/seneca.js'</span>)()
+
+seneca.use( zed )</code></pre>
+
+
+<p>Running this script produces:</p>
+<pre><code class="hljs bash">$ node zed-access.js
+{ ...
+  timeout: <span class="hljs-number">33333</span>,
+  ...
+  zed: { red: <span class="hljs-number">50</span>, green: <span class="hljs-number">100</span>, blue: <span class="hljs-number">150</span> },
+  <span class="hljs-string">'zed$tag0'</span>: { red: <span class="hljs-number">55</span> },
+  ...
+}</code></pre>
+
+
+<p>You are not required to use the <em>seneca.options.js</em> file. If it exists, it will be loaded and used as the base default for options. You can specify your own configuration file (or an object containing option values), by providing an argument to <code>seneca.options()</code>. This is useful for different deployment scenarios. For example, the file <em>dev.options.js</em> defines a custom configuration for the <em>zed</em> plugin:</p>
+<pre><code class="hljs js"><span class="hljs-comment">// dev.options.js</span>
+<span class="hljs-built_in">module</span>.exports = {
+  zed: {
+    green: <span class="hljs-number">110</span>,
+  }
+}</code></pre>
+
+
+<p>The <em>zed-dev.js</em> script uses this options file, but also gets the default options from <em>seneca.options.js</em>:</p>
+<pre><code class="hljs js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">zed</span><span class="hljs-params">( options )</span> </span>{
+  <span class="hljs-built_in">console</span>.log( <span class="hljs-keyword">this</span>.context.name, <span class="hljs-keyword">this</span>.context.tag, options )
+}
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.options(<span class="hljs-string">'./dev.options.js'</span>)
+
+seneca.use( zed )</code></pre>
+
+
+<p>And the output has the overridden value for the <code>green</code> option.</p>
+<pre><code class="hljs bash">$ node zed-dev.js
+zed undefined { red: <span class="hljs-number">50</span>, green: <span class="hljs-number">110</span>, blue: <span class="hljs-number">150</span> }</code></pre>
+
+
+
+<p>Finally, you can specify options on the command line, either via an argument, or an evironment variable. Here are some examples using the <em>zed-dev.js</em> script. Use the <code>--seneca.options</code> command line argument to provide option values. You can use “dot notation” to specify nested options, and you can specify multiple options:</p>
+<pre><code class="hljs bash">$ node zed-dev.js --seneca.options.zed.red=<span class="hljs-number">10</span> --seneca.options.zed.blue=<span class="hljs-number">200</span>
+zed undefined { red: <span class="hljs-number">10</span>, green: <span class="hljs-number">110</span>, blue: <span class="hljs-number">200</span> }</code></pre>
+
+
+<p>Alternatively, you can use the environment variable <code>SENECA_OPTIONS</code> to specify options that will be merged into the base defaults (using <code>seneca.util.deepextend</code>). The format is <a href="https://github.com/rjrodger/jsonic">jsonic</a>, a lenient, abbreviated, fully compatible version of JSON for lazy developers.</p>
+<pre><code class="hljs bash">$ SENECA_OPTIONS=<span class="hljs-string">"{zed:{red:10,blue:200}}"</span> node zed-dev.js
+zed undefined { red: <span class="hljs-number">10</span>, green: <span class="hljs-number">110</span>, blue: <span class="hljs-number">200</span> }</code></pre>
+
+
+<p>Command line options always override options from other sources. Here is the order of priority, from highest to lowest:</p>
+<ul>
+<li>Command line</li>
+<li>Environment variable</li>
+<li>Source code</li>
+<li>Custom options file</li>
+<li>Default options file</li>
+<li>Internal defaults</li>
+</ul>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-one">
+      <div class="col-md-12 column">
+        <header class="row clearfix hp">
+          <div class="col-md-12 column">
+            <h1 class="center">
+              <span>Seneca</span>
+            </h1>
+          </div>
+        </header>
+        <div class="row clearfix social">
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://github.com/rjrodger/seneca">
+                <i class="fa fa-github fa-2x"></i>
+                Github
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="/api">
+                <i class="fa fa-bookmark fa-2x"></i>
+                Documentation
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://twitter.com/senecajs">
+                <i class="fa fa-twitter fa-2x"></i>
+                Twitter
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-two">
+      © Seneca 2015. Powered by <a href="http://metalsmith.io">MetalSmith</a>, hosted by <a href="http://surge.sh">Surge</a>. A <a href="http://nearform.com">nearFrom</a> project.
+    </div>
+  </footer>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-57673-6', 'senecajs.org');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

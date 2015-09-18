@@ -1,0 +1,26 @@
+{
+  "name": "seneca-docs",
+  "version": "0.0.1",
+  "description": "The website for senecajs",
+  "main": "build.js",
+  "license": "MIT",
+  "private": "true",
+  "scripts": {
+    "build": "node build.js",
+    "docs": "node build.js -s"
+  },
+  "dependencies": {
+    "handlebars": "^3.0.3",
+    "metalsmith": "^1.7.0",
+    "metalsmith-download": "0.0.1",
+    "metalsmith-ignore": "^0.1.2",
+    "metalsmith-layouts": "^1.0.0",
+    "metalsmith-less": "^2.0.0",
+    "metalsmith-markdown": "^0.2.1",
+    "metalsmith-metallic": "^0.3.1",
+    "metalsmith-move-up": "1.0.0",
+    "metalsmith-serve": "0.0.3",
+    "metalsmith-watch": "^0.2.0",
+    "minimist": "^1.1.1"
+  }
+}
