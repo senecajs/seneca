@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Seneca, a Micro-Services toolkit for Node.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster'>
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+  <link rel="stylesheet" href="/stylesheets/stylesheet.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-960">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Seneca</a>
+      </div>
+      <div class="collapse navbar-collapse" id="nav-collapsed">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href='/get-started'>Getting Started</a></li>
+          <li><a href='/tutorials'>Tutorials</a></li>
+          <li><a href='/api'>API</a></li>
+          <li><a href='/plugins'>Plugins</a></li>
+          <li><a href='/support'>Support</a></li>
+          <li><a href='/contribute'>Contribute</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="fullwidthtop">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <div class="header-box">
+          <img src="/images/icon-top.png" alt="design, develop, organise code" title="design, develop, organise code" height="auto" width="460">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row clearfix hp">
+      <h1 id="logging-with-seneca">Logging with Seneca</h1>
+<p>This tutorial shows you how to control Seneca’s logging
+output.Clone the <a href="http://github.com/rjrodger/seneca">main
+Seneca repository</a> from github, and open the <em>doc/examples</em>
+folder.</p>
+<p>You’ll use the Sales Tax example code. This code shows you how to
+handle sales tax rules using Seneca. Take a look at
+the <a href="https://github.com/rjrodger/seneca">main README</a> for
+details. For this tutorial, you’ll focus on the logging output.</p>
+<p>Here’s some code to calculate sales tax. It won’t work, because you
+haven’t actually told Seneca how to do that yet.</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, net:<span class="hljs-number">100</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,result)</span></span>{
+<span class="hljs-built_in">console</span>.log( result.total )
+})</code></pre>
+
+
+
+<p>This invokes a Seneca action that, hopefully, calculates sales
+tax. Arbitrarily you’re using the property <em>cmd</em> to indicate what
+you want done (calculate sales tax), and <em>net</em> is net price
+before tax. The callback function returns the total price, and uses
+the standard Node.js signature (error object as first parameter).</p>
+<p>Let’s try to run this code, even though it will fail. In the examples
+folder, this code is saved in the file <em>sales-tax-error.js</em>. Run
+this file using Node.js, and you’ll see the following output:</p>
+<pre><code class="hljs bash">$ node sales-tax-error.js
+[-isodate-]    INFO    init    start
+[-isodate-]    INFO    init    end
+[-isodate-]    ERROR    fail    seneca/act_not_found
+Seneca: act(args,cb):
+action not found <span class="hljs-keyword">for</span> args = {<span class="hljs-string">"cmd"</span>:<span class="hljs-string">"salestax"</span>,<span class="hljs-string">"net"</span>:<span class="hljs-number">100</span>}
+{ [Error: ...] }</code></pre>
+
+
+<p>Seneca outputs some logging information so you can track what’s going
+on. The <em>INIT</em> entries log the start and end of the initialization phase, when Seneca loads plugins.
+The <em>ERROR</em> entry tells you what went wrong: no action pattern matched the input args in the JSON document:
+<code>{&quot;cmd&quot;:&quot;salestax&quot;,&quot;net&quot;:100}</code>. The code also prints the JavaScript Error object to the console. That’s the line:
+<code>if( err ) return console.error(err);</code></p>
+<p>You can fix this by defining an action:</p>
+<pre><code class="hljs js">seneca.add( {cmd:<span class="hljs-string">'salestax'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,callback)</span></span>{
+<span class="hljs-keyword">var</span> rate= <span class="hljs-number">0.23</span>
+<span class="hljs-keyword">var</span> total = args.net * (<span class="hljs-number">1</span>+rate)
+callback(<span class="hljs-literal">null</span>,{total:total})
+})</code></pre>
+
+
+<p>The file <em>sales-tax.js</em> in the examples folder contains the new code. Run it:</p>
+<pre><code class="hljs bash">$ node sales-tax.js
+[-isodate-]    INFO    init    start
+[-isodate-]    INFO    init    end
+<span class="hljs-number">123</span></code></pre>
+
+
+
+<p>Well that worked! 23% sales tax on a price of $100 gives a total of $123. Fabulous!</p>
+<p>You might find that logging output annoying. Turn it off with:</p>
+<pre><code class="hljs bash">$ node sales-tax.js --seneca.log.quiet
+<span class="hljs-number">123</span></code></pre>
+
+
+
+<p>Or you might be a logging freak, in which case, here’s the all-you-can-eat version:.</p>
+<pre><code class="hljs bash">node sales-tax.js --seneca.log.print
+[-isodate-]    INFO    init    start
+... lots of init stuff ...
+[-isodate-]    INFO    init    end
+[-isodate-]    INFO    add    {cmd=salestax}
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    <span class="hljs-number">90</span>xkee    {cmd=salestax,net=<span class="hljs-number">100</span>}
+[-isodate-]    DEBUG    act    out    <span class="hljs-number">90</span>xkee    {total=<span class="hljs-number">123</span>}
+<span class="hljs-number">123</span></code></pre>
+
+
+
+<p>So you might be wondering how to get finer-grained logging output. Logging can be filtered on:</p>
+<ul>
+<li><em>level</em>: DEBUG, INFO, WARN, ERROR, FATAL_</li>
+<li><em>type</em>: short string code, examples: init, plugin, error, …_</li>
+<li><em>plugin</em>: the names of the plugin_</li>
+<li><em>tag</em>: an identifier tag, used when you have multiple instances of the same plugin_</li>
+</ul>
+<p>Let do that now:</p>
+<pre><code class="hljs bash">node sales-tax.js --seneca.log=<span class="hljs-built_in">type</span>:act
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    actid0    {cmd=salestax,net=<span class="hljs-number">100</span>}
+[-isodate-]    DEBUG    act    out    actid0    {total=<span class="hljs-number">123</span>}
+<span class="hljs-number">123</span></code></pre>
+
+
+
+<p>The command line argument <em>–seneca.log</em> accepts a
+comma-separated list of filters. The filter <em>type:act</em> means only
+output the log entries of type <em>act</em>. The <em>type</em> is the third
+field. The <em>act</em> entries are very low level debugging logs
+showing the operation of individual actions. The logs show the input
+arguments, <em>in</em>, and the eventual output of the
+action <em>out</em>. Because these can be separated in time, a random
+action identifier (above: <em>actid0</em>) is generated for each action, so that you
+can match up the input and output.</p>
+<h2 id="logging-from-plugins">Logging from Plugins</h2>
+<p>Let’s turn the sales tax calculator into a plugin. This plugin accepts
+two configuration options. You can specify the tax rate, and the
+country which applies that rate (using two letter country codes).</p>
+<p>Here’s the client code, in the file <em>sales-tax-log.js</em>:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'IE'</span>,rate:<span class="hljs-number">0.23</span>} )
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'UK'</span>,rate:<span class="hljs-number">0.20</span>} )
+
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'IE'</span>, net:<span class="hljs-number">100</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">200</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">300</span>})</code></pre>
+
+
+<p>Since you’re using log files to trace the commands, you can drop the
+callback function from the <em>act</em> method call.</p>
+<p>Now you need a plugin - that’s in the <em>sales-tax-plugin.js</em> file:</p>
+<pre><code class="hljs js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( seneca, options, callback )</span> </span>{
+
+<span class="hljs-keyword">var</span> salestax = {
+hits:<span class="hljs-number">0</span>,
+rate:options.rate,
+country:options.country
+}
+salestax.calc = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(net)</span></span>{
+<span class="hljs-keyword">return</span> net * (<span class="hljs-number">1</span>+salestax.rate)
+}
+
+seneca.add(
+{cmd:<span class="hljs-string">'salestax'</span>,country:salestax.country},
+<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,callback)</span></span>{
+<span class="hljs-keyword">var</span> total = salestax.calc(args.net)
+salestax.hits++
+seneca.log.debug(args.actid$,
+ <span class="hljs-string">'net:'</span>,args.net,
+ <span class="hljs-string">'total:'</span>,total,
+ <span class="hljs-string">'tax:'</span>,salestax)
+callback(<span class="hljs-literal">null</span>,{total:total})
+})
+
+callback(<span class="hljs-literal">null</span>,{name:<span class="hljs-string">'sales-tax'</span>,tag:salestax.country})
+}</code></pre>
+
+
+<p>The plugin creates a separate instance of the <em>salestax</em> object
+for each country. This object stores the country rate, country code,
+and the number of times that sales tax for that country is calculated
+(hit count).</p>
+<p>This plugin follows the standard format for Seneca plugins. You provide a function that takes
+a Seneca instance, a set of options, and a callback. Using the Seneca instance, you add some actions, and
+finally call the callback, optionally providing some meta data:</p>
+<pre><code class="hljs js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( seneca, options, callback )</span> </span>{
+
+seneca.add( { ... }, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,callback)</span> </span>{
+...
+})
+
+callback(<span class="hljs-literal">null</span>,{name:<span class="hljs-string">'plugin-name'</span>})
+}</code></pre>
+
+
+<p>This initialization function is called each time you load a plugin
+with <em>seneca.use</em>. You can track separate plugin instances by
+optionally providing a tag string in the meta data:</p>
+<pre><code class="hljs js">...
+callback(<span class="hljs-literal">null</span>,{name:<span class="hljs-string">'plugin-name'</span>,tag:<span class="hljs-string">'tag-string'</span>})
+...</code></pre>
+
+
+<p>The sales tax plugin uses the country code as a tag:</p>
+<pre><code class="hljs js">callback(<span class="hljs-literal">null</span>,{name:<span class="hljs-string">'sales-tax'</span>,tag:salestax.country})</code></pre>
+
+
+<p>Run this code, and filter the log to show only debug output from the sales-tax plugin:</p>
+<pre><code class="hljs bash">$ node sales-tax-log.js --seneca.log=plugin:sales-tax
+
+[-isodate-]    DEBUG    plugin    sales-tax    IE    annv4h
+net:    <span class="hljs-number">100</span>    total:    <span class="hljs-number">123</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.23</span>,country=IE}
+
+[-isodate-]    DEBUG    plugin    sales-tax    UK    <span class="hljs-number">3</span>rkaa2
+net:    <span class="hljs-number">200</span>    total:    <span class="hljs-number">240</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.2</span>,country=UK}
+
+[-isodate-]    DEBUG    plugin    sales-tax    UK    cwxcts
+net:    <span class="hljs-number">300</span>    total:    <span class="hljs-number">360</span>    tax:    {hits=<span class="hljs-number">2</span>,rate=<span class="hljs-number">0.2</span>,country=UK}</code></pre>
+
+
+
+<p>These logs appear because the plugin calls <em>seneca.log.debug</em> and provides the information about the sales tax calculation:</p>
+<pre><code class="hljs js">seneca.add( {cmd:<span class="hljs-string">'salestax'</span>,country:salestax.country}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,callback)</span></span>{
+<span class="hljs-keyword">var</span> total = salestax.calc(args.net)
+salestax.hits++
+
+seneca.log.debug(args.actid$,
+ <span class="hljs-string">'net:'</span>,args.net,
+ <span class="hljs-string">'total:'</span>,total,
+ <span class="hljs-string">'tax:'</span>,salestax)
+
+callback(<span class="hljs-literal">null</span>,{total:total})
+})</code></pre>
+
+
+<p>The object <em>seneca.log</em> has convenience functions for the built-in log levels:</p>
+<ul>
+<li>seneca.log.debug</li>
+<li>seneca.log.info</li>
+<li>seneca.log.warn</li>
+<li>seneca.log.error</li>
+<li>seneca.log.fatal</li>
+</ul>
+<p>These functions concatenate all their arguments into an array, which is the content of the log message. This array is then
+formatted for display or storage by a handler function (which you can provide).
+To minimize impact on performance, log data is only evaluated if a
+matching log filter is active. The last argument to the logging
+function can be a function (which should return an array of values), which again is only executed if a logging
+filter matches.</p>
+<p>Here’s another example. This time, you filter on the <em>act</em> log
+entry type. This allows you to see the data passing into and out of
+actions:</p>
+<pre><code class="hljs bash">$ node sales-tax-log.js --seneca.log=<span class="hljs-built_in">type</span>:act
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    uk74hd    {cmd=salestax,country=IE,net=<span class="hljs-number">100</span>}
+[-isodate-]    DEBUG    act    out    uk74hd    {total=<span class="hljs-number">123</span>}
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    qv5sts    {cmd=salestax,country=UK,net=<span class="hljs-number">200</span>}
+[-isodate-]    DEBUG    act    out    qv5sts    {total=<span class="hljs-number">240</span>}
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    <span class="hljs-number">7</span>j9q4a    {cmd=salestax,country=UK,net=<span class="hljs-number">300</span>}
+[-isodate-]    DEBUG    act    out    <span class="hljs-number">7</span>j9q4a    {total=<span class="hljs-number">360</span>}</code></pre>
+
+
+<p>You can see two entries for each action, <em>in</em>
+and <em>out</em>. Each entry shows the JSON document data being passed
+into Seneca, and out of, Seneca. You can also see that each pair has the same action identifier, such as <em>uk74hd</em>.</p>
+<p>Let’s put this all together. You want to see the input and output
+data of the actions, and anything the sale tax plugin decides to log:</p>
+<pre><code class="hljs bash">$ node sales-tax-log.js --seneca.log=plugin:sales-tax --seneca.log=<span class="hljs-built_in">type</span>:act
+
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    cpvycd    {cmd=salestax,country=IE,net=<span class="hljs-number">100</span>}
+[-isodate-]    DEBUG    plugin    sales-tax    IE    cpvycd
+net:    <span class="hljs-number">100</span>    total:    <span class="hljs-number">123</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.23</span>,country=IE}
+[-isodate-]    DEBUG    act    out    cpvycd    {total=<span class="hljs-number">123</span>}
+
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    tx5zj3    {cmd=salestax,country=UK,net=<span class="hljs-number">200</span>}
+[-isodate-]    DEBUG    plugin    sales-tax    UK    tx5zj3
+net:    <span class="hljs-number">200</span>    total:    <span class="hljs-number">240</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.2</span>,country=UK}
+[-isodate-]    DEBUG    act    out    tx5zj3    {total=<span class="hljs-number">240</span>}
+
+[-isodate-]    DEBUG    act    <span class="hljs-keyword">in</span>    <span class="hljs-number">8</span>ikumj    {cmd=salestax,country=UK,net=<span class="hljs-number">300</span>}
+[-isodate-]    DEBUG    plugin    sales-tax    UK    <span class="hljs-number">8</span>ikumj
+net:    <span class="hljs-number">300</span>    total:    <span class="hljs-number">360</span>    tax:    {hits=<span class="hljs-number">2</span>,rate=<span class="hljs-number">0.2</span>,country=UK}
+[-isodate-]    DEBUG    act    out    <span class="hljs-number">8</span>ikumj    {total=<span class="hljs-number">360</span>}</code></pre>
+
+
+<p>This shows the detailed processing of the sales tax calculation. The
+action identifiers, which you can get using <em>args.actid$</em> inside
+an action function.You need to specify two <em>–seneca.log</em>
+filters, as the type is <em>plugin</em> for one, and <em>act</em> for the
+other.</p>
+<p>The <em>tag</em> filter can be used to focus on a specific, tagged, plugin instance. Here’s how you look at UK sales tax operations only:</p>
+<pre><code class="hljs bash">$ node sales-tax-log.js --seneca.log=plugin:sales-tax,tag:UK
+[-isodate-]    DEBUG    plugin    sales-tax    UK    i2r7wn
+net:    <span class="hljs-number">200</span>    total:    <span class="hljs-number">240</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.2</span>,country=UK}
+[-isodate-]    DEBUG    plugin    sales-tax    UK    <span class="hljs-number">8</span>ir490
+net:    <span class="hljs-number">300</span>    total:    <span class="hljs-number">360</span>    tax:    {hits=<span class="hljs-number">2</span>,rate=<span class="hljs-number">0.2</span>,country=UK}</code></pre>
+
+
+
+<h2 id="live-logs-in-your-browser">Live Logs in Your Browser</h2>
+<p>Console logs are fun, but live logs in your web browser are awesome! Seneca can do this too:</p>
+<p>You’ll need to create an app that provides a sales-tax calculation HTTP JSON API. Using the
+<em>transport</em> plugin this is easy. This plugin accepts JSON documents from remote clients
+over HTTP and submits them to the local Seneca instance.</p>
+<p>Here the code, in <em>sales-tax-app.js</em>, that sets up the app:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>)
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'IE'</span>,rate:<span class="hljs-number">0.23</span>} )
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'UK'</span>,rate:<span class="hljs-number">0.20</span>} )
+
+seneca.use(<span class="hljs-string">'transport'</span>)
+
+<span class="hljs-keyword">var</span> server = http.createServer(seneca.service())
+server.listen(<span class="hljs-number">3000</span>)
+
+seneca.use(<span class="hljs-string">'admin'</span>,{server:server,local:<span class="hljs-literal">true</span>})</code></pre>
+
+
+<p>The <em>transport</em> plugin works locally without any configuration,
+so all you have to do is load it in:</p>
+<pre><code class="hljs js">seneca.use(<span class="hljs-string">'transport'</span>)</code></pre>
+
+
+<p>The next step is to set up a simple HTTP server, using the standard
+Node.js <em>http</em> module. Any plugins that return a HTTP middleware
+function (by setting the <em>service</em> property when returning the
+plugin meta data), are wrapped up by Seneca into a single middleware
+function, returned by <em>seneca.service()</em>. You can use this as
+<a href="http://www.senchalabs.org/connect/">connect</a>
+or <a href="http://expressjs.com">express</a> middleware, or directly
+with the standard HTTP API:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> server = http.createServer(seneca.service())
+server.listen(<span class="hljs-number">3000</span>)</code></pre>
+
+
+<p>The <em>admin</em> plugin provides a web administration interface for
+Seneca. It uses web sockets, so you need to provide a reference to the
+http server object in the plugin options.To expose the
+admininstration web interface locally without requiring a password,
+use the <em>local:true</em> option:</p>
+<pre><code class="hljs js">seneca.use(<span class="hljs-string">'admin'</span>,{server:server,local:<span class="hljs-literal">true</span>})</code></pre>
+
+
+<p>Run this app, and open <a href="localhost:3000/admin">localhost:3000/admin</a>. You can
+still use command line logging - you can have multiple separate logging channels.</p>
+<pre><code class="hljs bash">$ node sales-tax-app.js --seneca.log=plugin:sales-tax</code></pre>
+
+
+
+<p>The administration interface let’s you set filtering options. They work the same way as the command line options.
+There’s nothing to log yet, so let’s generate some sales tax calculations!</p>
+<p>The file <em>sales-tax-app-client.js</em> contains the client
+code. The <em>transport</em> plugin is used again on the client-side to
+direct sales tax operations to the app:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'server'</span>)()
+
+seneca.use(<span class="hljs-string">'transport'</span>,{
+remoteurl:<span class="hljs-string">'http://localhost:3000/transport'</span>,
+pins:[ {cmd:<span class="hljs-string">'salestax'</span>} ]
+})
+
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'IE'</span>, net:<span class="hljs-number">100</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">200</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">300</span>})</code></pre>
+
+
+
+
+<p>You need to provide the <em>transport</em> plugin with some settings to
+get the sales tax operations sent over to the remote app.First,
+provide a <em>remoteurl</em>, which is the HTTP end point of the
+transport API provided by the app. Second the <em>pins</em> setting is
+an array of action patterns.If any of these match a submitted
+action, the action is sent over the wire to the remote app. In this
+case, anything where the <em>cmd</em> property is equal to the string
+“salestax”.</p>
+<p>The sales tax operations code is as before. This is the key idea
+behind Seneca - your business logic code stays the same, but you can
+move around and reconfigure where it happens without worrying about
+refactoring your code.</p>
+<p>With the app up and running, run the client:</p>
+<pre><code class="hljs bash">$ node sales-tax-log.js --seneca.log=plugin:sales-tax
+[-isodate-]    DEBUG    plugin    sales-tax    IE    dy6c6k
+net:    <span class="hljs-number">100</span>    total:    <span class="hljs-number">123</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.23</span>,country=IE}
+[-isodate-]    DEBUG    plugin    sales-tax    UK    qbfzrw
+net:    <span class="hljs-number">200</span>    total:    <span class="hljs-number">240</span>    tax:    {hits=<span class="hljs-number">1</span>,rate=<span class="hljs-number">0.2</span>,country=UK}
+[-isodate-]    DEBUG    plugin    sales-tax    UK    wy5uah
+ net:    <span class="hljs-number">300</span>    total:    <span class="hljs-number">360</span>    tax:    {hits=<span class="hljs-number">2</span>,rate=<span class="hljs-number">0.2</span>,country=UK}</code></pre>
+
+
+<p>You’ll see corresponding log entries in the web interface, along with
+entries for the transport plugin.</p>
+<h2 id="log-handlers">Log Handlers</h2>
+<p>You can define your own log handlers programmatically when you setup Seneca. The file
+<em>sales-tax-log-handler.js</em> shows you how to do this:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)
+
+<span class="hljs-comment">// need this to get a reference to seneca.loghandler</span>
+seneca = seneca({
+log:{
+map:[
+{plugin:<span class="hljs-string">'sales-tax'</span>,handler:<span class="hljs-string">'print'</span>},
+{level:<span class="hljs-string">'all'</span>,handler:seneca.loghandler.file(<span class="hljs-string">'salestax.log'</span>)}
+]
+}
+})
+
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'IE'</span>,rate:<span class="hljs-number">0.23</span>} )
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'UK'</span>,rate:<span class="hljs-number">0.20</span>} )
+
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'IE'</span>, net:<span class="hljs-number">100</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">200</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">300</span>})</code></pre>
+
+
+<p>Running this script will output log entries both to the console (only where plugin is “sales-tax” ), and
+to a log file <em>salestax.log</em>, which gets everything. In production you mostly just want to output to the console and use
+the operating system tools for file redirection. The file handler is mostly for creating special log files.</p>
+<p>The logging map allows you to send log entries to multiple locations based on the filters you specify. You can still use the
+command line argument <em>–seneca.log=…</em> to add further filters.</p>
+<p>The built-in handlers are:</p>
+<ul>
+<li><em>seneca.loghandler.print</em>: logs to the console</li>
+<li><em>seneca.loghandler.file(filepath)</em>: logs to a file</li>
+<li><em>seneca.loghandler.stream(WriteStream)</em>: logs to a stream</li>
+<li><em>seneca.loghandler.emitter(EventEmitter)</em>: logs using events</li>
+</ul>
+<p>You can write your own handler. It’s just a function that takes the
+log entry as first argument. The log entry is an array of values.</p>
+<p>Here’s an example using the <a href="http://logentries.com">LogEntries.com</a> service. This is cloud logging service that
+stores your logs and makes them searchable. I wrote their Node.js API module :) - <code>$ npm install node-logentries</code>.
+This example is in the file <em>sales-tax-logentries.js</em>:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">var</span> logentries = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-logentries'</span>)
+
+<span class="hljs-keyword">var</span> log = logentries.logger({
+token:<span class="hljs-string">'YOUR_TOKEN'</span>,
+
+<span class="hljs-comment">// redefine log levels to match the ones seneca uses</span>
+levels:{debug:<span class="hljs-number">0</span>,info:<span class="hljs-number">1</span>,warn:<span class="hljs-number">2</span>,error:<span class="hljs-number">3</span>,fatal:<span class="hljs-number">4</span>}
+})
+
+<span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../..'</span>)({
+log:{
+map:[
+{level:<span class="hljs-string">'all'</span>,handler:<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{
+log.log(<span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>],<span class="hljs-built_in">Array</span>.prototype.join.call(<span class="hljs-built_in">arguments</span>,<span class="hljs-string">'\t'</span>))
+}}
+]
+}
+})
+
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'IE'</span>,rate:<span class="hljs-number">0.23</span>} )
+seneca.use( <span class="hljs-string">'sales-tax-plugin'</span>, {country:<span class="hljs-string">'UK'</span>,rate:<span class="hljs-number">0.20</span>} )
+
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'IE'</span>, net:<span class="hljs-number">100</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">200</span>})
+seneca.act( {cmd:<span class="hljs-string">'salestax'</span>, country:<span class="hljs-string">'UK'</span>, net:<span class="hljs-number">300</span>})</code></pre>
+
+
+<p>You’ll need to register a LogEntries.com account and get a token for this to work.</p>
+<p>You can use custom handler functions to send logs anywhere you want, and process them anyway you need.</p>
+<h2 id="one-more-thing-">One More Thing …</h2>
+<p>Log filters are dynamic. You can add new ones at runtime using the <em>seneca.logroute</em> method:</p>
+<pre><code class="hljs js">seneca.logroute( {level:<span class="hljs-string">'all'</span>, handler:seneca.handler.print} )</code></pre>
+
+
+<p>If you omit the handler, any previous filter is removed. If you add
+multiple handlers for the same filter, the logs will be sent to all
+the handlers.This feature enables the administration web site to
+dynamically modify the filters at runtime.</p>
+<p>That’s all folks! Corrections and comments: please tweet <a href="https://twitter.com/senecajs">@senecajs</a>.</p>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-one">
+      <div class="col-md-12 column">
+        <header class="row clearfix hp">
+          <div class="col-md-12 column">
+            <h1 class="center">
+              <span>Seneca</span>
+            </h1>
+          </div>
+        </header>
+        <div class="row clearfix social">
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://github.com/rjrodger/seneca">
+                <i class="fa fa-github fa-2x"></i>
+                Github
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="/api">
+                <i class="fa fa-bookmark fa-2x"></i>
+                Documentation
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://twitter.com/senecajs">
+                <i class="fa fa-twitter fa-2x"></i>
+                Twitter
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-two">
+      © Seneca 2015. Powered by <a href="http://metalsmith.io">MetalSmith</a>, hosted by <a href="http://surge.sh">Surge</a>. A <a href="http://nearform.com">nearFrom</a> project.
+    </div>
+  </footer>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-57673-6', 'senecajs.org');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

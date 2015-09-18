@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Seneca, a Micro-Services toolkit for Node.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster'>
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+  <link rel="stylesheet" href="/stylesheets/stylesheet.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-960">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Seneca</a>
+      </div>
+      <div class="collapse navbar-collapse" id="nav-collapsed">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href='/get-started'>Getting Started</a></li>
+          <li><a href='/tutorials'>Tutorials</a></li>
+          <li><a href='/api'>API</a></li>
+          <li><a href='/plugins'>Plugins</a></li>
+          <li><a href='/support'>Support</a></li>
+          <li><a href='/contribute'>Contribute</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="fullwidthtop">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <div class="header-box">
+          <img src="/images/icon-top.png" alt="design, develop, organise code" title="design, develop, organise code" height="auto" width="460">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row clearfix hp">
+      <h1 id="plugins">Plugins</h1>
+<p><strong><em>Seneca</em></strong> is nothing without plugins, plugins are how we enable you to build awesome microservices, incredibly
+fast. Some plugins are maintained in-house, others provided by the community. We provide an npm link and
+total downloads per month for any plugins we find or publish ourselves so you only need to look in one place.</p>
+<h2 id="core-plugins">Core Plugins</h2>
+<p>We include a couple of plugins with Seneca by default in other to ensure you can create a working microservice
+out of the box, don’t worry, it’s not many!</p>
+<h4 id="-web-https-npmjs-org-package-seneca-web-"><a href="https://npmjs.org/package/seneca-web">Web</a></h4>
+<p><a href="https://npmjs.org/package/seneca-web"><img src="https://img.shields.io/npm/v/seneca-web.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-web"><img src="https://img.shields.io/npm/dm/seneca-web.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a web service API routing layer for Seneca action patterns. It translates HTTP requests with specific
+URL routes into action pattern calls. It’s a built-in dependency of the Seneca module, so you don’t need to
+include it manually.</p>
+<h4 id="-transport-https-npmjs-org-package-seneca-transport-"><a href="https://npmjs.org/package/seneca-transport">Transport</a></h4>
+<p><a href="https://npmjs.org/package/seneca-transport"><img src="https://img.shields.io/npm/v/seneca-transport.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-transport"><img src="https://img.shields.io/npm/dm/seneca-transport.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides the HTTP and TCP transport channels for microservice messages. It’s a built-in dependency of the Seneca
+module, so you don’t need to include it manually.</p>
+<h2 id="feature-plugins">Feature Plugins</h2>
+<p>Use these these plugins to kick-start your application development. They provide the basic business logic for
+many common use cases, like user accounts, shopping carts, or administration.  You can customize their behavior
+by overriding their actions.</p>
+<h4 id="-user-https-npmjs-org-package-seneca-user-"><a href="https://npmjs.org/package/seneca-user">User</a></h4>
+<p><a href="https://npmjs.org/package/seneca-user"><img src="https://img.shields.io/npm/v/seneca-user.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-user"><img src="https://img.shields.io/npm/dm/seneca-user.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides business logic for complete user management, such as login, logout, registration and password
+handling, using Seneca’s expressive action based API. This module compliments</p>
+<h4 id="-auth-https-npmjs-org-package-seneca-auth-"><a href="https://npmjs.org/package/seneca-auth">Auth</a></h4>
+<p><a href="https://npmjs.org/package/seneca-auth"><img src="https://img.shields.io/npm/v/seneca-auth.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-auth"><img src="https://img.shields.io/npm/dm/seneca-auth.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides the business logic for authentication via HTTP. Adds the ability to set up simple win/fail
+style conditions. The user plugin complements this one nicely.</p>
+<h4 id="-json-rest-api-https-npmjs-org-package-seneca-jsonrest-api-"><a href="https://npmjs.org/package/seneca-jsonrest-api">JSON REST API</a></h4>
+<p><a href="https://npmjs.org/package/seneca-jsonrest-api"><img src="https://img.shields.io/npm/v/seneca-jsonrest-api.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-jsonrest-api"><img src="https://img.shields.io/npm/dm/seneca-jsonrest-api.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides the ability to expose your data entities as a REST API. Works via pattern matching actions to HTTP
+verbs. Removes the need for additional plumbing to expose entities as resources.</p>
+<h4 id="-data-editor-https-npmjs-org-package-seneca-data-editor-"><a href="https://npmjs.org/package/seneca-data-editor">Data Editor</a></h4>
+<p><a href="https://npmjs.org/package/seneca-data-editor"><img src="https://img.shields.io/npm/v/seneca-data-editor.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-data-editor"><img src="https://img.shields.io/npm/dm/seneca-data-editor.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a administrative interface for editing all the data in your system.This module can be used in a
+standalone fashion, but also pairs well with seneca-admin. Inspired by the Django admin interface.</p>
+<h4 id="-admin-https-npmjs-org-package-seneca-admin-"><a href="https://npmjs.org/package/seneca-admin">Admin</a></h4>
+<p><a href="https://npmjs.org/package/seneca-admin"><img src="https://img.shields.io/npm/v/seneca-admin.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-admin"><img src="https://img.shields.io/npm/dm/seneca-admin.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides an administration console that returns interesting data about your microservice including
+streaming log, status summaries and action patterns. Can be locked to admin for safety purposes.</p>
+<h4 id="-email-https-npmjs-org-package-seneca-mail-"><a href="https://npmjs.org/package/seneca-mail">Email</a></h4>
+<p><a href="https://npmjs.org/package/seneca-mail"><img src="https://img.shields.io/npm/v/seneca-mail.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-mail"><img src="https://img.shields.io/npm/dm/seneca-mail.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides email delivery business logic, including the ability to have templates. Works with many
+different providers. Works well with the User plugin for handling things like welcome mails and
+password reminders.</p>
+<h4 id="-account-https-npmjs-org-package-seneca-account-"><a href="https://npmjs.org/package/seneca-account">Account</a></h4>
+<p><a href="https://npmjs.org/package/seneca-account"><img src="https://img.shields.io/npm/v/seneca-account.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-account"><img src="https://img.shields.io/npm/dm/seneca-account.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a user account system for the management of multiple users in a account. Handles account creation
+and management and user management within a given account. The User plugin compliments this one nicely.</p>
+<h4 id="-project-https-npmjs-org-package-seneca-project-"><a href="https://npmjs.org/package/seneca-project">Project</a></h4>
+<p><a href="https://npmjs.org/package/seneca-project"><img src="https://img.shields.io/npm/v/seneca-project.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-project"><img src="https://img.shields.io/npm/dm/seneca-project.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides all the actions needed to manage a project. Use this plugin to build out microservices
+that have the concept of ownership, grouping, starting and stopping or loading of some type of work. Works
+well with the accounts plugin.</p>
+<h4 id="-perm-https-npmjs-org-package-seneca-perm-"><a href="https://npmjs.org/package/seneca-perm">Perm</a></h4>
+<p><a href="https://npmjs.org/package/seneca-perm"><img src="https://img.shields.io/npm/v/seneca-perm.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-perm"><img src="https://img.shields.io/npm/dm/seneca-perm.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a permissions system for actions.This plugin works by wrapping existing actions with a permission
+checking action. If the permission test passes, the parent action can proceed. If not, a permission error
+is generated.</p>
+<h4 id="-vcache-https-npmjs-org-package-seneca-vcache-"><a href="https://npmjs.org/package/seneca-vcache">VCache</a></h4>
+<p><a href="https://npmjs.org/package/seneca-vcache"><img src="https://img.shields.io/npm/v/seneca-vcache.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-vcache"><img src="https://img.shields.io/npm/dm/seneca-vcache.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a data caching mechanism for data entities. Using this module will give your Seneca app a big
+performance boost. The caching mechanism goes beyond simple key-based caching using memcached. In addition,
+a smaller “hot” cache is maintained within the Node process. Data entities are given transient version numbers,
+and these are used to synchronize the hot cache with memcached.</p>
+<h4 id="-cart-https-npmjs-org-package-seneca-cart-"><a href="https://npmjs.org/package/seneca-cart">Cart</a></h4>
+<p><a href="https://npmjs.org/package/seneca-cart"><img src="https://img.shields.io/npm/v/seneca-cart.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-cart"><img src="https://img.shields.io/npm/dm/seneca-cart.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides complete shopping cart management business logic. This plugin works really well with the built in
+data entity api. Adds actions for adding, removing and editing items in a container (cart).</p>
+<h4 id="-pay-https-npmjs-org-package-seneca-pay-"><a href="https://npmjs.org/package/seneca-pay">Pay</a></h4>
+<p><a href="https://npmjs.org/package/seneca-pay"><img src="https://img.shields.io/npm/v/seneca-pay.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-pay"><img src="https://img.shields.io/npm/dm/seneca-pay.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides all the necessary components to build payments into your microservice. Includes support for Paypal
+express payments in the box. Makes setting up payment redirects a breeze.</p>
+<h4 id="-cms-https-npmjs-org-package-seneca-cms-"><a href="https://npmjs.org/package/seneca-cms">CMS</a></h4>
+<p><a href="https://npmjs.org/package/seneca-cms"><img src="https://img.shields.io/npm/v/seneca-cms.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-cms"><img src="https://img.shields.io/npm/dm/seneca-cms.svg?style=flat-square" alt="downloads"></a></p>
+<p>Provides a simple content management system. Use to create a more specialized system that fits your needs.
+Handles the management of unique entities in a system in a more coarse fashion than using the Entity API
+directly (which is used internally by this plugin).</p>
+<h4 id="-settings-https-npmjs-org-package-seneca-settings-"><a href="https://npmjs.org/package/seneca-settings">Settings</a></h4>
+<p><a href="https://npmjs.org/package/seneca-settings"><img src="https://img.shields.io/npm/v/seneca-settings.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-settings"><img src="https://img.shields.io/npm/dm/seneca-settings.svg?style=flat-square" alt="downloads"></a></p>
+<p>Settings rich settings for user accounts, can handle many different types of values including ratings,
+toggles, colors and ranges.</p>
+<h2 id="storage-plugins">Storage Plugins</h2>
+<p>Storage plugins work with our built-in <a href="">Entity API</a>. Storage plugins can be used on a per entity
+basis so feel free to mix and match. Each plugin is named after the storage it supports, making finding
+the right solution a simple task.</p>
+<h4 id="-mongo-store-https-npmjs-org-package-seneca-mongo-store-"><a href="https://npmjs.org/package/seneca-mongo-store">Mongo Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-mongo-store"><img src="https://img.shields.io/npm/v/seneca-mongo-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-mongo-store"><img src="https://img.shields.io/npm/dm/seneca-mongo-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-postgres-store-https-npmjs-org-package-seneca-postgres-store-"><a href="https://npmjs.org/package/seneca-postgres-store">Postgres Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-postgres-store"><img src="https://img.shields.io/npm/v/seneca-postgres-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-postgres-store"><img src="https://img.shields.io/npm/dm/seneca-postgres-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-mysql-store-https-npmjs-org-package-seneca-mysql-store-"><a href="https://npmjs.org/package/seneca-mysql-store">MySQL Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-mysql-store"><img src="https://img.shields.io/npm/v/seneca-mysql-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-mysql-store"><img src="https://img.shields.io/npm/dm/seneca-mysql-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-level-store-https-npmjs-org-package-seneca-level-store-"><a href="https://npmjs.org/package/seneca-level-store">Level Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-level-store"><img src="https://img.shields.io/npm/v/seneca-level-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-level-store"><img src="https://img.shields.io/npm/dm/seneca-level-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-json-file-store-https-npmjs-org-package-seneca-jsonfile-store-"><a href="https://npmjs.org/package/seneca-jsonfile-store">JSON File Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-jsonfile-store"><img src="https://img.shields.io/npm/v/seneca-jsonfile-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-jsonfile-store"><img src="https://img.shields.io/npm/dm/seneca-jsonfile-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-redis-store-https-npmjs-org-package-seneca-redis-store-"><a href="https://npmjs.org/package/seneca-redis-store">Redis Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-redis-store"><img src="https://img.shields.io/npm/v/seneca-redis-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-redis-store"><img src="https://img.shields.io/npm/dm/seneca-redis-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-dynamo-store-https-npmjs-org-package-seneca-dynamo-store-"><a href="https://npmjs.org/package/seneca-dynamo-store">Dynamo Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-dynamo-store"><img src="https://img.shields.io/npm/v/seneca-dynamo-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-dynamo-store"><img src="https://img.shields.io/npm/dm/seneca-dynamo-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-hana-store-https-npmjs-org-package-seneca-hana-store-"><a href="https://npmjs.org/package/seneca-hana-store">HANA Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-hana-store"><img src="https://img.shields.io/npm/v/seneca-hana-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-hana-store"><img src="https://img.shields.io/npm/dm/seneca-hana-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-sqlite-store-https-npmjs-org-package-seneca-sqlite-store-"><a href="https://npmjs.org/package/seneca-sqlite-store">SQLite Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-sqlite-store"><img src="https://img.shields.io/npm/v/seneca-sqlite-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-sqlite-store"><img src="https://img.shields.io/npm/dm/seneca-sqlite-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-riak-store-https-npmjs-org-package-seneca-riak-store-"><a href="https://npmjs.org/package/seneca-riak-store">Riak Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-riak-store"><img src="https://img.shields.io/npm/v/seneca-riak-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-riak-store"><img src="https://img.shields.io/npm/dm/seneca-riak-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-cassandra-store-https-npmjs-org-package-seneca-cassandra-store-"><a href="https://npmjs.org/package/seneca-cassandra-store">Cassandra Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-cassandra-store"><img src="https://img.shields.io/npm/v/seneca-cassandra-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-cassandra-store"><img src="https://img.shields.io/npm/dm/seneca-cassandra-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-couchdb-store-https-npmjs-org-package-seneca-couchdb-store-"><a href="https://npmjs.org/package/seneca-couchdb-store">CouchDB Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-couchdb-store"><img src="https://img.shields.io/npm/v/seneca-couchdb-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-couchdb-store"><img src="https://img.shields.io/npm/dm/seneca-couchdb-store.svg?style=flat-square" alt="downloads"></a></p>
+<h4 id="-simpledb-store-https-npmjs-org-package-seneca-simpledb-store-"><a href="https://npmjs.org/package/seneca-simpledb-store">SimpleDB Store</a></h4>
+<p><a href="https://npmjs.org/package/seneca-simpledb-store"><img src="https://img.shields.io/npm/v/seneca-simpledb-store.svg?style=flat-square" alt="version"></a>
+<a href="https://npmjs.org/package/seneca-simpledb-store"><img src="https://img.shields.io/npm/dm/seneca-simpledb-store.svg?style=flat-square" alt="downloads"></a></p>
+<h2 id="got-a-plugin-to-share-">Got a Plugin to share?</h2>
+<p>Our docs are open source, simply fork the <a href="https://github.com/rjrodger/seneca">seneca</a> repository, add your plugin to the appropriate section in the <a href="https://github.com/rjrodger/seneca/tree/gh-pages">gh-pages</a> branch under <code>/src/pages/plugins.index.md</code>,
+and send us on a PR, that way other people can find your awesome plugin easily.</p>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-one">
+      <div class="col-md-12 column">
+        <header class="row clearfix hp">
+          <div class="col-md-12 column">
+            <h1 class="center">
+              <span>Seneca</span>
+            </h1>
+          </div>
+        </header>
+        <div class="row clearfix social">
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://github.com/rjrodger/seneca">
+                <i class="fa fa-github fa-2x"></i>
+                Github
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="/api">
+                <i class="fa fa-bookmark fa-2x"></i>
+                Documentation
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://twitter.com/senecajs">
+                <i class="fa fa-twitter fa-2x"></i>
+                Twitter
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-two">
+      © Seneca 2015. Powered by <a href="http://metalsmith.io">MetalSmith</a>, hosted by <a href="http://surge.sh">Surge</a>. A <a href="http://nearform.com">nearFrom</a> project.
+    </div>
+  </footer>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-57673-6', 'senecajs.org');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

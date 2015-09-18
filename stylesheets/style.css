@@ -1,0 +1,262 @@
+
+/*
+ * Custom Css Stylesheet Additions
+ * Seneca Website
+ *
+ * Distributing author: BlueBottleDesign (www.bluebottledesign.com)
+ */
+
+
+
+
+/*~~~~~~~~~~~ Layout ~~~~~~~~~~~*/
+
+body {
+	font-family: "Open Sans", Helvetica, Arial, sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	color: #333333;
+	background-color: #F2F2E8;
+}
+
+
+/*~~~~~~~~~~~ Navigation ~~~~~~~~~~~*/
+
+
+.navbar {
+	width: 100%;
+	margin-right: auto;
+	margin-left: auto;
+	background-color: #fff;
+	-webkit-box-shadow: 0 1px 5px -1px #333;
+	-moz-box-shadow: 0 1px 5px -1px #333;
+	box-shadow: 0 1px 5px -1px #333;
+	font-family: "Bitter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 900;
+	color: #E17762;
+
+}
+
+.navbar-default .navbar-brand, .navbar-default .navbar-text, .navbar-default .navbar-nav > li > a  {
+	color: #E17762;
+}
+/*~~~~~~~~~~~ Headings ~~~~~~~~~~~*/
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+	font-family: "Bitter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 900;
+	line-height: 1.1;
+	color: inherit;
+}
+
+h1 {
+	line-height: 1.1875em;
+	width: 100%;
+	margin-bottom: 40px;
+}
+
+h2 {
+	font-size: 160%;
+	line-height: 1.3em;
+	font-weight: 900;
+	margin-bottom: 20px;
+}
+
+h3 {
+	font-size: 130%;
+	line-height: 1.3em;
+	font-weight: 900;
+	margin-bottom: 20px;
+}
+
+.header-box h2 {
+	font-size: 120%;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: -20px;
+	line-height: 1.3em;
+	width: 90%;
+	font-weight: 400;
+}
+
+/* ~~~~~~~~~ Links ~~~~~~~~~ */
+
+
+a {
+	color: #f07057;
+	font-weight: 700;
+}
+
+a:hover {
+	color: #333;
+}
+
+
+
+
+/* ~~~~~~~~~ Layout ~~~~~~~~~ */
+
+
+.fullwidthtop {
+	width: 100%;
+	padding: 30px;
+	margin-top: 51px;
+	margin-bottom: 30px;
+	background-color: #6CBDC4;
+	-webkit-box-shadow: 0 1px 5px -1px #333;
+	-moz-box-shadow: 0 1px 5px -1px #333;
+	box-shadow: 0 1px 5px -1px #333;
+}
+
+.header-box {
+	padding: 0;
+	font-size: 21px;
+	line-height: 2;
+	color: #fff;
+	text-align: center;
+}
+
+span.rule-r {		
+border-bottom: 1px solid #ddd;		
+height: 1px;		
+float: right;		
+width: 46%;		
+}		
+
+span.rule-l {		
+border-bottom: 1px solid #ddd;		
+height: 1px;		
+float: left;		
+width: 46%;		
+}
+
+
+/* ~~~~~~~~~ Star Divider ~~~~~~~~~ */
+
+
+.sep {
+	width: 64.583333333333%;
+	margin: 40px auto;
+	height: 20px;
+}
+
+span.star {
+	width: 20px;
+	height: 20px;
+	margin: 0 auto -11px auto;
+	display: block;
+}
+
+
+/* ~~~~~~~~~ Small Button ~~~~~~~~~ */
+
+
+.btn-primary {
+	font-weight: 600;
+	background: #f07057;
+	border:  #f07057;
+	-webkit-transition: background .35s ease-in-out;
+	-moz-transition: background .35s ease-in-out;
+	-ms-transition: background .35s ease-in-out;
+	-o-transition: background .35s ease-in-out;
+	transition: background .35s ease-in-out;
+}
+
+.btn-primary:hover {
+	background: #6CBDC4;
+	text-decoration: none;
+}
+
+
+
+
+/* ~~~~~~~~~ Flex Slider ~~~~~~~~~ */
+
+.social {
+	padding: 60px 0 30px 0;
+	font-style: normal;
+	font-weight: 900;
+	font-size: 1.2em;
+	text-transform: uppercase;
+	letter-spacing: 4px;
+}
+
+.social p a i {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 36px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+
+/* ~~~~~~~~~ Mobile Phone Specific CSS ~~~~~~~~~ */
+
+@media screen and (max-width: 450px) {
+
+img {
+	width: 100%;
+}
+
+.btn-primary {
+	margin: 0 0 10px 0;
+}
+
+a.white-box {
+	margin: 0 0 10px 0;
+}
+
+.jumbotron-hp h1 {
+	font-size: 70%;
+}
+
+ .jumbotron-hp h2 {
+	margin-top: -30px;
+	font-size: 70%;
+}
+}/* / mobile phone */
+
+
+
+
+
+
+
+
+/* ~~~~~~~~~ iPad Mini Specific CSS ~~~~~~~~~ */
+
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (-webkit-min-device-pixel-ratio: 1)  {
+
+
+.navbar-default .navbar-brand, .navbar-default .navbar-text, .navbar-default .navbar-nav > li > a  {
+	font-size: 90%;
+}
+
+
+a.white-box {
+	margin: 0 0 10px 0;
+}
+
+.btn-primary {
+	margin: 0 0 10px 0;
+}
+
+
+
+}/* / ipad mini */

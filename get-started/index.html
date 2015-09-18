@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Seneca, a Micro-Services toolkit for Node.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster'>
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+  <link rel="stylesheet" href="/stylesheets/stylesheet.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-960">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Seneca</a>
+      </div>
+      <div class="collapse navbar-collapse" id="nav-collapsed">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href='/get-started'>Getting Started</a></li>
+          <li><a href='/tutorials'>Tutorials</a></li>
+          <li><a href='/api'>API</a></li>
+          <li><a href='/plugins'>Plugins</a></li>
+          <li><a href='/support'>Support</a></li>
+          <li><a href='/contribute'>Contribute</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="fullwidthtop">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <div class="header-box">
+          <img src="/images/icon-top.png" alt="design, develop, organise code" title="design, develop, organise code" height="auto" width="460">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row clearfix hp">
+      <h1 id="getting-started">Getting Started</h1>
+<p>Seneca lets you build a <a href="http://martinfowler.com/articles/microservices.html">microservice system</a> without worrying about how things will fit together in production. You don’t need to know where the other services are located, how many of them there are, or what they do. Everything external to your business logic, such as databases, caches, or third party integrations can likewise be hidden behind microservices.</p>
+<p>This decoupling makes your system easy to build and change on a continuous basis. It works because Seneca has two core features.</p>
+<ul>
+<li>Transport Independence: you can send messages between services in many ways, all hidden from your business logic.</li>
+<li>Pattern Matching: instead of fragile service discovery, you just let the world know what sort of messages you care about.</li>
+</ul>
+<p>Messages are JSON documents, with any internal structure you like. Messages can be sent via HTTP/S, TCP connections, message queues, publish/subscribe services or any mechanism that moves bits around. From your perspective as the writer of a service, you just send messages out into the world. You don’t want to know which services get them — that creates fragile coupling.</p>
+<p>Then there are the messages you’d like to receive. You specify the property patterns that you care about, and Seneca (with a little configuration help) makes sure that you get any messages matching those patterns, sent by other services. The patterns are very simple, just a list of key-value pairs that the top level properties of the JSON message document must match.</p>
+<p>This Getting Started guide will cover Seneca in a broad way, but won’t go into too much depth. The <a href="#next-steps">Next Steps</a> section at the end of this Page is your starting point for more details.</p>
+<h2 id="a-simple-microservice">A Simple Microservice</h2>
+<p>Let’s start with some code. Here’s a service that sums two numbers:</p>
+<pre><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>( <span class="hljs-string">'seneca'</span> )()
+
+seneca.add(
+  { role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span> },
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(msg, respond)</span> </span>{
+    <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+    respond(<span class="hljs-literal">null</span>, { answer: sum })
+  })</code></pre>
+
+<p>To call this service, you write:</p>
+<pre><code class="hljs javascript">seneca.act(
+  { role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span> },
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(err, result)</span> </span>{
+    <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.error(err)
+    <span class="hljs-built_in">console</span>.log(result)
+  })</code></pre>
+
+<p>For the moment this is all happening in the same process, and there’s no network traffic. In-process function calls are a type of message transport too!</p>
+<p>The example code to try this out is in <a href="https://github.com/senecajs/getting-started/blob/master/sum.js">sum.js</a>. To run the code, follow these steps:</p>
+<ol>
+<li>Open a terminal, and <code>cd</code> to your projects folder.</li>
+<li>Run <code>git clone https://github.com/senecajs/getting-started</code>.</li>
+<li><code>cd</code> into the getting-started folder.</li>
+<li>Run <code>npm install</code> to install the required modules, including Seneca.</li>
+<li>Run <code>node sum.js</code>.</li>
+</ol>
+<p>This guide assumes you already have <a href="http://nodejs.org/">node.js</a> installed.</p>
+<p>When you run <code>sum.js</code>, you get the following output:</p>
+<pre><code class="hljs"><span class="hljs-number">2015</span>-<span class="hljs-number">07</span>-<span class="hljs-number">02</span><span class="hljs-string">T12:</span><span class="hljs-number">38</span>:<span class="hljs-number">08.788</span>Z    xi94dnm0nrky<span class="hljs-regexp">/1435840688779/</span><span class="hljs-number">64029</span><span class="hljs-regexp">/-    INFO    hello    Seneca/</span><span class="hljs-number">0.6</span><span class="hljs-number">.2</span><span class="hljs-regexp">/xi94dnm0nrky/</span><span class="hljs-number">1435840688779</span><span class="hljs-regexp">/64029/</span>-    
+{ <span class="hljs-string">answer:</span> <span class="hljs-number">3</span> }</code></pre>
+
+<p>The first line is logging information that Seneca prints to let you know that it has started. The second line is the result produced after the message has been matched and processed.</p>
+<p>The <code>seneca.add</code> method adds a new action pattern to the Seneca instance. This pattern is matched against any JSON messages that the Seneca instance receives. The action is a function that is executed when a pattern matches a message.</p>
+<p>The <code>seneca.add</code> method has two parameters:</p>
+<ul>
+<li><code>pattern</code>: the property pattern to match in messages,</li>
+<li><code>action</code>: the function to execute if a message matches.</li>
+</ul>
+<p>The action function has two parameters:</p>
+<ul>
+<li><code>msg</code>: the matching inbound message (provided as a plain object),</li>
+<li><code>respond</code>: a callback function that you use to provide a respond to the message.</li>
+</ul>
+<p>The respond function is a callback with the standard <code>error, result</code> signature. Let’s put this all together again:</p>
+<pre><code class="hljs javascript">seneca.add(
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>},
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( msg, respond )</span> </span>{
+    <span class="hljs-keyword">var</span> sum = msg.left + msg.right
+    respond( <span class="hljs-literal">null</span>, { answer: sum } )
+  })</code></pre>
+
+<p>In the example code, the action computes the sum of two numbers, provided via the <code>left</code> and <code>right</code> properties of the message object. Not all messages generate a result, but as this is the most common case, Seneca allows you to provide the result via a callback function.</p>
+<p>In summary, the action pattern <code>role:math, cmd:sum</code> acts on the message</p>
+<pre><code>{ "<span class="hljs-attribute">role</span>": <span class="hljs-value"><span class="hljs-string">"math"</span></span>, "<span class="hljs-attribute">cmd</span>": <span class="hljs-value"><span class="hljs-string">"sum"</span></span>, "<span class="hljs-attribute">left</span>": <span class="hljs-value"><span class="hljs-number">1</span></span>, "<span class="hljs-attribute">right</span>": <span class="hljs-value"><span class="hljs-number">2</span> </span>}</code></pre>
+
+<p>to produce the result:</p>
+<pre><code>{ "<span class="hljs-attribute">answer</span>": <span class="hljs-value"><span class="hljs-number">3</span> </span>}</code></pre>
+
+<p>There is nothing special about the properties <code>role</code> and <code>cmd</code>. They just happen to be the ones you are using for pattern matching.</p>
+<p>The <code>seneca.act</code> method submits a message to act on. It takes two parameters:</p>
+<ul>
+<li><code>msg</code>: the message object,</li>
+<li><code>response_callback</code>: a function that receives the message response, if any.</li>
+</ul>
+<p>The response callback is a function you provide with the standard <code>error, result</code> signature. If there was a problem (say, the message matched no patterns), then the first argument will be an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a> object. If everything went to plan, the second argument will be the result object. In the example code, these arguments are simply printed to the console:</p>
+<pre><code class="hljs js">seneca.act(
+  {role:<span class="hljs-string">'math'</span>, cmd:<span class="hljs-string">'sum'</span>, left:<span class="hljs-number">1</span>, right:<span class="hljs-number">2</span>},
+  <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">( err, result )</span> </span>{
+    <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.error( err )
+    <span class="hljs-built_in">console</span>.log( result )
+  })</code></pre>
+
+<p>The example code in the sum.js file shows you how to define and call an action pattern inside the same Node.js process. Soon you’ll see how to split this code over multiple processes.</p>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-one">
+      <div class="col-md-12 column">
+        <header class="row clearfix hp">
+          <div class="col-md-12 column">
+            <h1 class="center">
+              <span>Seneca</span>
+            </h1>
+          </div>
+        </header>
+        <div class="row clearfix social">
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://github.com/rjrodger/seneca">
+                <i class="fa fa-github fa-2x"></i>
+                Github
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="/api">
+                <i class="fa fa-bookmark fa-2x"></i>
+                Documentation
+              </a>
+            </p>
+          </div>
+          <div class="col-md-4 column">
+            <p>
+              <a href="https://twitter.com/senecajs">
+                <i class="fa fa-twitter fa-2x"></i>
+                Twitter
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-two">
+      © Seneca 2015. Powered by <a href="http://metalsmith.io">MetalSmith</a>, hosted by <a href="http://surge.sh">Surge</a>. A <a href="http://nearform.com">nearFrom</a> project.
+    </div>
+  </footer>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-57673-6', 'senecajs.org');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

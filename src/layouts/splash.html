@@ -117,22 +117,7 @@
       </div>
 
       <section class="content row">
-        <p><strong>Example: a barebones microservice</strong></p>
-<pre><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
-
-seneca.add({ role:<span class="hljs-string">'user'</span>, cmd:<span class="hljs-string">'login'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(args, callback)</span> </span>{
-  callback(<span class="hljs-literal">null</span>, { loggedIn:<span class="hljs-literal">true</span> })
-})
-
-seneca.listen()</code></pre>
-
-<p><strong>Example: a barebones client</strong></p>
-<pre><code class="hljs javascript"><span class="hljs-keyword">var</span> seneca = <span class="hljs-built_in">require</span>(<span class="hljs-string">'seneca'</span>)()
-<span class="hljs-keyword">var</span> client = seneca.client()
-
-client.act({ role:<span class="hljs-string">'user'</span>, cmd:<span class="hljs-string">'login'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(err, result)</span> </span>{
-  <span class="hljs-built_in">console</span>.log(result.loggedIn)
-})</code></pre>
+        {{{ contents }}}
       </section>
     </div>
 
