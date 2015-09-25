@@ -26,8 +26,9 @@ describe('logging', function() {
       {level:'info',type:'init',handler:A},
       {level:'info',type:'plugin',plugin:'red',handler:B},
     ]})
+
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:info->plugin:red->type:plugin-><B>*->type:init-><A>")
+    assert.equal(fmt(r), "level:info->plugin:red->type:plugin-><B>|type:init-><A>")
     done()
   })
 
@@ -39,7 +40,7 @@ describe('logging', function() {
 
     r = logging.makelogrouter(['level:info,type:plugin','level:debug,type:act'])
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:info->type:plugin-><print>debug->type:act-><print>")
+    assert.equal(fmt(r), "level:debug->type:act-><print>info->type:plugin-><print>")
     done()
   })
 
@@ -84,7 +85,7 @@ describe('logging', function() {
       {level:'info,debug',type:'init,status',handler:A}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:info->type:init-><A>status-><A>debug->type:init-><A>status-><A>")
+    assert.equal(fmt(r), "level:debug->type:init-><A>status-><A>info->type:init-><A>status-><A>")
     done()
   })
 
@@ -94,7 +95,7 @@ describe('logging', function() {
       {level:'all',type:'init',handler:A}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:debug->type:init-><A>info->type:init-><A>warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
+    assert.equal(fmt(r), "level:debug->type:init-><A>error->type:init-><A>fatal->type:init-><A>info->type:init-><A>warn->type:init-><A>")
     done()
   })
 
@@ -104,7 +105,7 @@ describe('logging', function() {
       {level:'warn+',type:'init',handler:A}
     ]})
     //console.log(fmt(r))
-    assert.equal(fmt(r), "level:warn->type:init-><A>error->type:init-><A>fatal->type:init-><A>")
+    assert.equal(fmt(r), "level:error->type:init-><A>fatal->type:init-><A>warn->type:init-><A>")
     done()
   })
 
