@@ -273,8 +273,7 @@ function make_seneca( initial_options ) {
   paramcheck.options.validate(so,thrower)
 
   // These need to come from options as required during construction.
-  so.internal.actrouter    = so.internal.actrouter    || patrun()
-  so.internal.clientrouter = so.internal.clientrouter || patrun(pin_patrun_customizer)
+  so.internal.actrouter    = so.internal.actrouter    || patrun({gex:true})
   so.internal.subrouter    = so.internal.subrouter    || patrun(pin_patrun_customizer)
 
   // DEPRECATED
@@ -376,7 +375,6 @@ function make_seneca( initial_options ) {
   private$.wait_for_ready = false
 
   private$.actrouter    = so.internal.actrouter
-  private$.clientrouter = so.internal.clientrouter
   private$.subrouter    = so.internal.subrouter
 
   root.on('newListener', function(eventname) {
@@ -660,21 +658,16 @@ function make_seneca( initial_options ) {
 
 
     _.each(pins,function(pin) {
-
-      // Only wrap if pin is specific.
-      // Don't want to wrap all patterns, esp. system ones!
-      if( 0 < _.keys(pin).length ) {
-        self.wrap(pin,function(args,done){
-          sendclient.send.call( this, args, done )
-        })
-      }
-
-      // For patterns not locally defined.
-      private$.clientrouter.add(
+      private$.actrouter.add(
         pin,
         {
           func: function(args,done) {
-            sendclient.send.call( this, args, done )
+            if( true == args.local$ ) {
+              this.prior(args,done)
+            }
+            else {
+              sendclient.send.call( this, args, done )
+            }
           },
           log:         self.log,
           argpattern:  common.argpattern(pin),
@@ -1120,16 +1113,7 @@ function make_seneca( initial_options ) {
       args = jsonic( args )
     }
 
-    if( _.isBoolean(args.local$) ) {
-      local  = args.local$
-      remote = !args.local$
-    }
-
-    var actmeta = local && private$.actrouter.find(args)
-
-    if( remote && !actmeta ) {
-      actmeta = private$.clientrouter.find(args)
-    }
+    var actmeta = private$.actrouter.find(args)
 
     return actmeta
   }
@@ -2269,7 +2253,9 @@ function make_seneca( initial_options ) {
 
 
   function action_seneca_stats( args, done ) {
+    args = args || {}
     var stats
+
 
     if( args.pattern && private$.stats.actmap[args.pattern] ) {
       stats = private$.stats.actmap[args.pattern]
@@ -2297,8 +2283,11 @@ function make_seneca( initial_options ) {
       }
     }
 
-    done(null,stats)
+    done && done(null,stats)
+    return stats
   }
+
+  root.stats = action_seneca_stats
 
 
   function action_options_get( args, done ) {
