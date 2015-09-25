@@ -277,7 +277,9 @@ function make_seneca( initial_options ) {
   so.internal.clientrouter = so.internal.clientrouter || patrun(pin_patrun_customizer)
   so.internal.subrouter    = so.internal.subrouter    || patrun(pin_patrun_customizer)
 
+  // DEPRECATED
   root.fail = make_legacy_fail( so )
+
 
   var callpoint = make_callpoint( so.debug.callpoint )
 
@@ -2433,7 +2435,7 @@ function makedie( instance, ctxt ) {
             "Seneca Panic\n"+
             "============\n\n"+
             panic.stack+
-            "\n\nOrginal Error:\n"+
+            "\n\nOriginal Error:\n"+
             (arguments[0] && arguments[0].stack ? arguments[0].stack : arguments[0])
       console_error(msg)
     }
