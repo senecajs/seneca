@@ -43,6 +43,31 @@ describe('entity', function(){
   })
 
 
+  it('setid-mem', function(done){
+    var si = seneca(testopts).error(done)
+
+    var z0 = si.make('zed')
+    z0.id$ = 0
+    z0.z = 0
+    z0.save$(function(e,z){
+      assert.equal(0,z.id)
+      assert.equal(0,z.z)
+
+      si.make('zed',{id$:1,z:1}).save$(function(e,z){
+        assert.equal(1,z.id)
+        assert.equal(1,z.z)
+
+        si.make('zed').data$({id$:2,z:2}).save$(function(e,z){
+          assert.equal(2,z.id)
+          assert.equal(2,z.z)
+
+          done()
+        })
+      })
+    })
+  })
+
+
   it('mem-ops', function(done){
     var si = seneca(testopts)
     si.options({
