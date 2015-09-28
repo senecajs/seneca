@@ -14,7 +14,7 @@ var jsonic   = require('jsonic')
 var Lab      = require('lab')
 
 
-var testopts = {log:'silent'}
+var testopts = { log: 'silent'}
 var lab      = exports.lab = Lab.script()
 var describe = lab.describe
 var it       = lab.it
@@ -22,21 +22,24 @@ var it       = lab.it
 
 describe('delegation', function(){
 
-  it('happy', function(done) {
-    var si  = seneca_module(testopts)
-    si.add({c:'C'},function(args,cb){
-      cb(null,args)
+  it('happy', function (done) {
+    var si = seneca_module(testopts)
+    si.add({ c: 'C' }, function (args, cb) {
+      cb(null, args)
     })
-    var sid = si.delegate({a$:'A',b:'B'})
+    var sid = si.delegate({ a$: 'A', b: 'B' })
 
     assert.ok(gex("Seneca/0.*.*/*").on(si.toString()))
     assert.ok(gex("Seneca/0.*.*/*/{b:B}").on(sid.toString()))
 
-    si.act({c:'C'},function(err,out){
-      assert.ok(gex("{c=C,*}").on( jsonic.stringify(out)))
-
-      sid.act({c:'C'},function(err,out){
-        assert.ok(gex("{c=C,a$=A,b=B,*}").on( jsonic.stringify(out)))
+    si.act({ c: 'C' }, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.c === 'C')
+      sid.act({ c: 'C' }, function (err, out) {
+        assert.ok(!err)
+        assert.ok(out.c === 'C')
+        assert.ok(out.a$ === 'A')
+        assert.ok(out.b === 'B')
         done()
       })
     })
@@ -44,40 +47,48 @@ describe('delegation', function(){
 
 
 
-  it('dynamic', function(done) {
+  it('dynamic', function (done) {
     var si = seneca_module(testopts)
-    si.add({c:'C'},function(args,cb){
-      //console.log('C='+this)
-      cb(null,args)
+    si.add({ c: 'C' }, function (args, cb) {
+      cb(null, args)
     })
-    si.add({d:'D'},function(args,cb){
-      //console.log('D='+this)
-      this.act({c:'C',d:'D'},cb)
+    si.add({ d: 'D' }, function (args, cb) {
+      this.act({ c: 'C', d: 'D' }, cb)
     })
-    var sid = si.delegate({a$:'A',b:'B'})
+    var sid = si.delegate({ a$: 'A', b: 'B' })
 
     async.series([
       function (next) {
-        si.act({c:'C'},function(err,out){
-          assert.ok(gex("{c=C,actid$=*}").on( jsonic.stringify(out)))
+        si.act({ c: 'C' }, function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.c === 'C')
           next()
         })
       },
       function (next) {
-        si.act({d:'D'},function(err,out){
-          assert.ok(gex("{c=C,d=D,actid$=*}").on( jsonic.stringify(out)))
+        si.act({ d: 'D' },function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.c === 'C')
+          assert.ok(out.d === 'D')
           next()
         })
       },
       function (next) {
-        sid.act({c:'C'},function(err,out){
-          assert.ok(gex("{c=C,a$=A,b=B,actid$=*}").on( jsonic.stringify(out)))
+        sid.act({ c: 'C' },function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.a$ === 'A')
+          assert.ok(out.c === 'C')
+          assert.ok(out.b === 'B')
           next()
         })
       },
       function (next) {
-        sid.act({d:'D'},function(err,out){
-          assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( jsonic.stringify(out)))
+        sid.act({ d: 'D' }, function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.a$ === 'A')
+          assert.ok(out.b === 'B')
+          assert.ok(out.c === 'C')
+          assert.ok(out.d === 'D')
           next()
         })
       }
@@ -88,17 +99,20 @@ describe('delegation', function(){
   it('logging.actid',function(done){
     var fail
     var si = seneca_module({
-      log:{
-        map:[{handler:function(){
-        if( 'aaa'==arguments[6] ) {
-          if('debug'!=arguments[1]) fail='aaa,debug';
-          if('single'!=arguments[2]) fail='aaa,single';
-        }
-        else if( 'ppp'==arguments[6] ) {
-          if('debug'!=arguments[1]) fail='ppp,debug';
-          if('plugin'!=arguments[2]) fail='ppp,plugin';
-        }
-      }}]}
+      log: {
+        map: [{
+          handler: function () {
+            if ('aaa'==arguments[6] ) {
+              if ('debug'!=arguments[1]) fail='aaa,debug';
+              if ('single'!=arguments[2]) fail='aaa,single';
+            }
+            else if ('ppp'==arguments[6] ) {
+              if ('debug'!=arguments[1]) fail='ppp,debug';
+              if ('plugin'!=arguments[2]) fail='ppp,plugin';
+            }
+          }
+        }]
+      }
     })
 
     si.add({a:'A'},function(args,cb){
@@ -115,12 +129,14 @@ describe('delegation', function(){
     })
 
 
-    si.act({a:'A'},function(err,out){
-      assert.ok(gex("{a=A,*}").on( jsonic.stringify(out)))
-      si.act({p:'P'},function(err,out){
-        assert.ok(gex("{p=P,*}").on( jsonic.stringify(out)))
+    si.act({a:'A'}, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.a === 'A')
+      si.act({ p: 'P' }, function (err, out) {
+        assert.ok(!err)
+        assert.ok(out.p === 'P')
 
-        if( fail ) {
+        if (fail) {
           console.log(fail)
           assert.fail(fail)
         }
@@ -166,8 +182,10 @@ describe('delegation', function(){
           return {name:'p1'}
         })
 
-        si.act({a:'A'},function(err,out){
-          assert.ok(gex("{a=A,actid$=*,p1=1}").on( jsonic.stringify(out)))
+        si.act({ a: 'A' }, function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.a === 'A')
+          assert.ok(out.p1 === 1)
           next()
         })
       },
@@ -185,8 +203,11 @@ describe('delegation', function(){
           return {name:'p2'}
         })
 
-        si.act({a:'A'},function(err,out){
-          assert.ok(gex("{a=A,actid$=*,p1=1,p2=1}").on( jsonic.stringify(out)))
+        si.act({ a: 'A' }, function (err, out) {
+          assert.ok(!err)
+          assert.ok(out.a === 'A')
+          assert.ok(out.p1 === 1)
+          assert.ok(out.p2 === 1)
           next()
         })
       },
@@ -205,7 +226,11 @@ describe('delegation', function(){
         })
 
         si.act({a:'A'},function(err,out){
-          assert.ok(gex("{a=A,actid$=*,p1=1,p2=1,p3=1}").on( jsonic.stringify(out)))
+          assert.ok(!err)
+          assert.ok(out.a === 'A')
+          assert.ok(out.p1 === 1)
+          assert.ok(out.p2 === 1)
+          assert.ok(out.p3 === 1)
           next()
         })
       }
