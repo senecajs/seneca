@@ -1,27 +1,21 @@
 /* Copyright (c) 2013-2015 Richard Rodger */
-"use strict";
-
+'use strict'
 
 var assert = require('assert')
 
-
 var seneca_module = require('..')
 
-
-var async    = require('async')
-var gex      = require('gex')
-var jsonic   = require('jsonic')
-var Lab      = require('lab')
-
+var async = require('async')
+var gex = require('gex')
+var jsonic = require('jsonic')
+var Lab = require('lab')
 
 var testopts = { log: 'silent'}
-var lab      = exports.lab = Lab.script()
+var lab = exports.lab = Lab.script()
 var describe = lab.describe
-var it       = lab.it
+var it = lab.it
 
-
-describe('delegation', function(){
-
+describe('delegation', function () {
   it('happy', function (done) {
     var si = seneca_module(testopts)
     si.add({ c: 'C' }, function (args, cb) {
@@ -29,8 +23,8 @@ describe('delegation', function(){
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
-    assert.ok(gex("Seneca/0.*.*/*").on(si.toString()))
-    assert.ok(gex("Seneca/0.*.*/*/{b:B}").on(sid.toString()))
+    assert.ok(gex('Seneca/0.*.*/*').on(si.toString()))
+    assert.ok(gex('Seneca/0.*.*/*/{b:B}').on(sid.toString()))
 
     si.act({ c: 'C' }, function (err, out) {
       assert.ok(!err)
@@ -44,8 +38,6 @@ describe('delegation', function(){
       })
     })
   })
-
-
 
   it('dynamic', function (done) {
     var si = seneca_module(testopts)
@@ -66,7 +58,7 @@ describe('delegation', function(){
         })
       },
       function (next) {
-        si.act({ d: 'D' },function (err, out) {
+        si.act({ d: 'D' }, function (err, out) {
           assert.ok(!err)
           assert.ok(out.c === 'C')
           assert.ok(out.d === 'D')
@@ -74,7 +66,7 @@ describe('delegation', function(){
         })
       },
       function (next) {
-        sid.act({ c: 'C' },function (err, out) {
+        sid.act({ c: 'C' }, function (err, out) {
           assert.ok(!err)
           assert.ok(out.a$ === 'A')
           assert.ok(out.c === 'C')
@@ -95,41 +87,39 @@ describe('delegation', function(){
     ], done)
   })
 
-
-  it('logging.actid',function(done){
+  it('logging.actid', function (done) {
     var fail
     var si = seneca_module({
       log: {
         map: [{
           handler: function () {
-            if ('aaa'==arguments[6] ) {
-              if ('debug'!=arguments[1]) fail='aaa,debug';
-              if ('single'!=arguments[2]) fail='aaa,single';
+            if ('aaa' == arguments[6]) {
+              if ('debug' != arguments[1]) fail = 'aaa,debug'
+              if ('single' != arguments[2]) fail = 'aaa,single'
             }
-            else if ('ppp'==arguments[6] ) {
-              if ('debug'!=arguments[1]) fail='ppp,debug';
-              if ('plugin'!=arguments[2]) fail='ppp,plugin';
+            else if ('ppp' == arguments[6]) {
+              if ('debug' != arguments[1]) fail = 'ppp,debug'
+              if ('plugin' != arguments[2]) fail = 'ppp,plugin'
             }
           }
         }]
       }
     })
 
-    si.add({a:'A'},function(args,cb){
+    si.add({a: 'A'}, function (args, cb) {
       this.log.debug('aaa')
-      cb(null,args)
+      cb(null, args)
     })
 
-    si.use(function(opts){
-      this.add({p:'P'},function(args,cb){
+    si.use(function (opts) {
+      this.add({p: 'P'}, function (args, cb) {
         this.log.debug('ppp')
-        cb(null,args)
+        cb(null, args)
       })
-      return {name:'p1'}
+      return {name: 'p1'}
     })
 
-
-    si.act({a:'A'}, function (err, out) {
+    si.act({a: 'A'}, function (err, out) {
       assert.ok(!err)
       assert.ok(out.a === 'A')
       si.act({ p: 'P' }, function (err, out) {
@@ -146,40 +136,38 @@ describe('delegation', function(){
     })
   })
 
-  it('parent', function(done) {
-    var si  = seneca_module(testopts)
-    si.add({c:'C'},function(args,cb){
-      //console.log('C='+this)
-      args.a=1
-      cb(null,args)
+  it('parent', function (done) {
+    var si = seneca_module(testopts)
+    si.add({c: 'C'}, function (args, cb) {
+      // console.log('C='+this)
+      args.a = 1
+      cb(null, args)
     })
-    si.add({c:'C'},function(args,cb){
-      this.parent(args,function(err,out){
-        out.p=1
-        cb(err,out)
+    si.add({c: 'C'}, function (args, cb) {
+      this.parent(args, function (err, out) {
+        out.p = 1
+        cb(err, out)
       })
     })
-    var sid = si.delegate({b:'B'})
+    var sid = si.delegate({b: 'B'})
 
-    si.act({c:'C'},function(err,out){
+    si.act({c: 'C'}, function (err, out) {
       done()
     })
   })
 
-
-
-  it('parent.plugin',function(done){
+  it('parent.plugin', function (done) {
     var si = seneca_module(testopts)
 
     async.series([
       function (next) {
-        si.use(function(opts){
-          this.add({a:'A'},function(args,cb){
-            this.log.debug('P','1')
-            args.p1=1
-            cb(null,args)
+        si.use(function (opts) {
+          this.add({a: 'A'}, function (args, cb) {
+            this.log.debug('P', '1')
+            args.p1 = 1
+            cb(null, args)
           })
-          return {name:'p1'}
+          return {name: 'p1'}
         })
 
         si.act({ a: 'A' }, function (err, out) {
@@ -190,17 +178,17 @@ describe('delegation', function(){
         })
       },
       function (next) {
-        si.use(function(opts){
-          this.add({a:'A'},function(args,cb){
-            this.log.debug('P','2a')
+        si.use(function (opts) {
+          this.add({a: 'A'}, function (args, cb) {
+            this.log.debug('P', '2a')
 
-            this.parent(args,function(err,out){
-              this.log.debug('P','2b')
-              out.p2=1
-              cb(err,out)
+            this.parent(args, function (err, out) {
+              this.log.debug('P', '2b')
+              out.p2 = 1
+              cb(err, out)
             })
           })
-          return {name:'p2'}
+          return {name: 'p2'}
         })
 
         si.act({ a: 'A' }, function (err, out) {
@@ -212,20 +200,20 @@ describe('delegation', function(){
         })
       },
       function (next) {
-        si.use(function(opts){
-          this.add({a:'A'},function(args,cb){
-            this.log.debug('P','3a')
+        si.use(function (opts) {
+          this.add({a: 'A'}, function (args, cb) {
+            this.log.debug('P', '3a')
 
-            this.parent(args,function(err,out){
-              this.log.debug('P','3b')
-              out.p3=1
-              cb(err,out)
+            this.parent(args, function (err, out) {
+              this.log.debug('P', '3b')
+              out.p3 = 1
+              cb(err, out)
             })
           })
-          return {name:'p3'}
+          return {name: 'p3'}
         })
 
-        si.act({a:'A'},function(err,out){
+        si.act({a: 'A'}, function (err, out) {
           assert.ok(!err)
           assert.ok(out.a === 'A')
           assert.ok(out.p1 === 1)
