@@ -985,11 +985,15 @@ function make_seneca( initial_options ) {
   // _seneca.act_ is called.
   function api_add() {
     var self = this
-    var args = parse_pattern(self,arguments,'action:f actmeta:o?')
+    var args = parse_pattern(self,arguments,'action:f? actmeta:o?')
 
     var pattern   = args.pattern
     var action    = args.action
     var actmeta   = args.actmeta || {}
+
+    action = action || function( msg, done ) {
+      done.call(this, null, msg.default$ || null)
+    }
 
     actmeta.plugin_name     = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname || 
@@ -1414,9 +1418,11 @@ function make_seneca( initial_options ) {
       }
 
       sd.on_act_out = function on_act_out( actmeta, out ) {
+        out = out.entity$ ? out : util.inspect(sd.util.clean(out))
+
         var cur_index = act_index_map[actmeta.id]
         socket.write('OUT '+fmt_index(cur_index)+
-                     ': '+util.inspect(sd.util.clean(out))+'\n')
+                     ': '+out+'\n')
       }
 
       sd.on_act_err = function on_act_err( actmeta, err ) {
@@ -1425,32 +1431,6 @@ function make_seneca( initial_options ) {
                      ': '+err.message+'\n')
       }
 
-        /*
-      sd.act = function act() {
-
-        var spec = parse_pattern( self, common.arrayify(arguments), 'done:f?' )
-        var args = spec.pattern
-        var done = spec.done
-
-        socket.write('IN  '+fmt_index(act_index)+
-                     ': '+util.inspect(sd.util.clean(args))+'\n')
-        var out_index = act_index
-        act_index++
-
-
-        self.act.call(this,args,function(err,out){
-          if( err ) {
-            socket.write('ERR '+fmt_index(act_index)+': '+err.message+'\n')
-          }
-          else {
-            socket.write('OUT '+fmt_index(out_index)+
-                         ': '+util.inspect(sd.util.clean(out))+'\n')
-          }
-
-          done(err,out)
-        })
-      }
-         */
 
       r.context.s = r.context.seneca = sd
 

@@ -286,28 +286,6 @@ describe('seneca', function(){
   })
 
 
-  it('action-add-invalid-args', function(done) {
-    var si = seneca(testopts).error(done)
-
-    try {
-      si.add({op:'bar'})
-      assert.fail()
-    }
-    catch(e) {
-      assert.ok(e.message.match(/norma: invalid arguments/))
-
-      try {
-        si.add('a:1',function(args,done){},123)
-        assert.fail()
-      }
-      catch(e) {
-        assert.ok(e.message.match(/norma: invalid arguments/))
-        done()
-      }
-    }
-  })
-
-
   it('action-act-invalid-args', function(done) {
     var si = seneca(testopts).error(done)
     si.options({debug:{fragile:true}})
@@ -1403,4 +1381,21 @@ describe('seneca', function(){
       })
     })
   })
+
+
+  it('add-noop',function(done){
+    seneca({log:'silent'})
+      .error(done)
+      .add('a:1')
+
+      .act('a:1',function(e,o){
+        assert.equal(null,o)
+
+        this.act('a:1,default$:{x:1}',function(e,o){
+          assert.equal(1,o.x)
+          done()
+        })
+      })
+  })
+
 })

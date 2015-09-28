@@ -60,24 +60,6 @@ describe('plugin', function(){
   })
 
 
-  it('plugin-error-add', function(done) {
-    var si = seneca({
-      debug:{
-        undead:true
-      },
-      log:'silent',
-      errhandler: function(err) {
-        assert.equal('invalid_arguments',err.code)
-        done()
-      }
-    })
-
-    si.use(function(){
-      this.add()
-    })
-  })
-
-
   it('plugin-error-act', function(done) {
     var cc = 0
 
