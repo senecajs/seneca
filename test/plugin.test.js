@@ -67,7 +67,7 @@ describe('plugin', function () {
     })
 
     si.use(function () {
-      this.add()
+      this.add(new Error())
     })
   })
 
