@@ -6,11 +6,12 @@ var assert = require('assert')
 
 
 var seneca_module = require('..')
-var common = require('../lib/common')
 
 
-var gex = require('gex')
-var Lab = require('lab')
+var async    = require('async')
+var gex      = require('gex')
+var jsonic   = require('jsonic')
+var Lab      = require('lab')
 
 
 var testopts = {log:'silent'}
@@ -28,19 +29,17 @@ describe('delegation', function(){
     })
     var sid = si.delegate({a$:'A',b:'B'})
 
-
     assert.ok(gex("Seneca/0.*.*/*").on(si.toString()))
     assert.ok(gex("Seneca/0.*.*/*/{b:B}").on(sid.toString()))
 
-
     si.act({c:'C'},function(err,out){
-      assert.ok(gex("{c=C,*}").on( common.owndesc(out,1,true)))
-    })
+      assert.ok(gex("{c=C,*}").on( jsonic.stringify(out)))
 
-    sid.act({c:'C'},function(err,out){
-      assert.ok(gex("{c=C,a$=A,b=B,*}").on( common.owndesc(out,1,true)))
+      sid.act({c:'C'},function(err,out){
+        assert.ok(gex("{c=C,a$=A,b=B,*}").on( jsonic.stringify(out)))
+        done()
+      })
     })
-    done()
   })
 
 
@@ -57,30 +56,32 @@ describe('delegation', function(){
     })
     var sid = si.delegate({a$:'A',b:'B'})
 
-    //console.log('si ='+si)
-    //console.log('sid='+sid)
-
-    si.act({c:'C'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,actid$=*}").on( common.owndesc(out,1,true)))
-    })
-
-    si.act({d:'D'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,d=D,actid$=*}").on( common.owndesc(out,1,true)))
-    })
-
-    sid.act({c:'C'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,a$=A,b=B,actid$=*}").on( common.owndesc(out,1,true)))
-    })
-
-    sid.act({d:'D'},function(err,out){
-      //console.log( 'OUT='+common.owndesc(out,0,true) )
-      assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( common.owndesc(out,1,true)))
-    })
-
-    done()
+    async.series([
+      function (next) {
+        si.act({c:'C'},function(err,out){
+          assert.ok(gex("{c=C,actid$=*}").on( jsonic.stringify(out)))
+          next()
+        })
+      },
+      function (next) {
+        si.act({d:'D'},function(err,out){
+          assert.ok(gex("{c=C,d=D,actid$=*}").on( jsonic.stringify(out)))
+          next()
+        })
+      },
+      function (next) {
+        sid.act({c:'C'},function(err,out){
+          assert.ok(gex("{c=C,a$=A,b=B,actid$=*}").on( jsonic.stringify(out)))
+          next()
+        })
+      },
+      function (next) {
+        sid.act({d:'D'},function(err,out){
+          assert.ok(gex("{c=C,d=D,actid$=*,a$=A,b=B}").on( jsonic.stringify(out)))
+          next()
+        })
+      }
+    ], done)
   })
 
 
@@ -115,24 +116,19 @@ describe('delegation', function(){
 
 
     si.act({a:'A'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{a=A,*}").on( common.owndesc(out,1,true)))
+      assert.ok(gex("{a=A,*}").on( jsonic.stringify(out)))
+      si.act({p:'P'},function(err,out){
+        assert.ok(gex("{p=P,*}").on( jsonic.stringify(out)))
+
+        if( fail ) {
+          console.log(fail)
+          assert.fail(fail)
+        }
+
+        done()
+      })
     })
-
-    si.act({p:'P'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{p=P,*}").on( common.owndesc(out,1,true)))
-    })
-
-    if( fail ) {
-      console.log(fail)
-      assert.fail(fail)
-    }
-
-    done()
   })
-
-
 
   it('parent', function(done) {
     var si  = seneca_module(testopts)
@@ -142,7 +138,6 @@ describe('delegation', function(){
       cb(null,args)
     })
     si.add({c:'C'},function(args,cb){
-      //console.log('PC='+this)
       this.parent(args,function(err,out){
         out.p=1
         cb(err,out)
@@ -151,10 +146,8 @@ describe('delegation', function(){
     var sid = si.delegate({b:'B'})
 
     si.act({c:'C'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      //assert.ok(gex("{c=C,parent$=*}").on( common.owndesc(out,1,true)))
+      done()
     })
-    done()
   })
 
 
@@ -162,58 +155,60 @@ describe('delegation', function(){
   it('parent.plugin',function(done){
     var si = seneca_module(testopts)
 
-    si.use(function(opts){
-      this.add({a:'A'},function(args,cb){
-        this.log.debug('P','1')
-        args.p1=1
-        cb(null,args)
-      })
-      return {name:'p1'}
-    })
-
-    si.act({a:'A'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{a=A,actid$=*,p1=1}").on( common.owndesc(out,1,true)))
-    })
-
-
-    si.use(function(opts){
-      this.add({a:'A'},function(args,cb){
-        this.log.debug('P','2a')
-
-        this.parent(args,function(err,out){
-          this.log.debug('P','2b')
-          out.p2=1
-          cb(err,out)
+    async.series([
+      function (next) {
+        si.use(function(opts){
+          this.add({a:'A'},function(args,cb){
+            this.log.debug('P','1')
+            args.p1=1
+            cb(null,args)
+          })
+          return {name:'p1'}
         })
-      })
-      return {name:'p2'}
-    })
 
-    si.act({a:'A'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{a=A,actid$=*,p1=1,p2=1}").on( common.owndesc(out,1,true)))
-    })
-
-
-    si.use(function(opts){
-      this.add({a:'A'},function(args,cb){
-        this.log.debug('P','3a')
-
-        this.parent(args,function(err,out){
-          this.log.debug('P','3b')
-          out.p3=1
-          cb(err,out)
+        si.act({a:'A'},function(err,out){
+          assert.ok(gex("{a=A,actid$=*,p1=1}").on( jsonic.stringify(out)))
+          next()
         })
-      })
-      return {name:'p3'}
-    })
+      },
+      function (next) {
+        si.use(function(opts){
+          this.add({a:'A'},function(args,cb){
+            this.log.debug('P','2a')
 
-    si.act({a:'A'},function(err,out){
-      //console.dir( common.owndesc(out,0,true) )
-      assert.ok(gex("{a=A,actid$=*,p1=1,p2=1,p3=1}").on( common.owndesc(out,1,true)))
-    })
-    done()
+            this.parent(args,function(err,out){
+              this.log.debug('P','2b')
+              out.p2=1
+              cb(err,out)
+            })
+          })
+          return {name:'p2'}
+        })
+
+        si.act({a:'A'},function(err,out){
+          assert.ok(gex("{a=A,actid$=*,p1=1,p2=1}").on( jsonic.stringify(out)))
+          next()
+        })
+      },
+      function (next) {
+        si.use(function(opts){
+          this.add({a:'A'},function(args,cb){
+            this.log.debug('P','3a')
+
+            this.parent(args,function(err,out){
+              this.log.debug('P','3b')
+              out.p3=1
+              cb(err,out)
+            })
+          })
+          return {name:'p3'}
+        })
+
+        si.act({a:'A'},function(err,out){
+          assert.ok(gex("{a=A,actid$=*,p1=1,p2=1,p3=1}").on( jsonic.stringify(out)))
+          next()
+        })
+      }
+    ], done)
   })
-
 })
