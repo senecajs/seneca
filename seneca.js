@@ -38,8 +38,8 @@ var make_entity   = require('./lib/entity')
 var store         = require('./lib/store')
 var logging       = require('./lib/logging')
 var plugin_util   = require('./lib/plugin-util')
+var print         = require('./lib/print')
 var make_optioner = require('./lib/optioner')
-var cmdline       = require('./lib/cmdline')
 var common        = require('./lib/common')
 
 
@@ -255,12 +255,10 @@ function make_seneca( initial_options ) {
   var actnid     = nid({length:5})
   var refnid     = function(){ return '('+actnid()+')' }
   var paramcheck = make_paramcheck()
-  var argv       = cmdline(root)
 
 
   // Create option resolver.
-  private$.optioner = make_optioner( 
-    argv,
+  private$.optioner = make_optioner(
     initial_options.module || module.parent || module,
     DEFAULT_OPTIONS )
 
@@ -368,7 +366,7 @@ function make_seneca( initial_options ) {
     builtin:   ''
   })
 
-  private$.actcache = ( so.actcache.active ? 
+  private$.actcache = ( so.actcache.active ?
                         lrucache({max:so.actcache.size}) :
                         {set:_.noop} )
 
@@ -474,8 +472,8 @@ function make_seneca( initial_options ) {
     }
 
     plugin.name = meta.name || plugin.name
-    plugin.tag = 
-      meta.tag || 
+    plugin.tag =
+      meta.tag ||
       plugin.tag ||
       (plugin.options && plugin.options.tag$)
 
@@ -963,11 +961,11 @@ function make_seneca( initial_options ) {
   // ### seneca.add
   // Add an message pattern and action function.
   //
-  // `seneca.add( pattern, action )`  
+  // `seneca.add( pattern, action )`
   //    * _pattern_ `o|s` &rarr; pattern definition
   //    * _action_ `f` &rarr; pattern action function
   //
-  // `seneca.add( pattern_string, pattern_object, action )`  
+  // `seneca.add( pattern_string, pattern_object, action )`
   //    * _pattern_string_ `s` &rarr; pattern definition as jsonic string
   //    * _pattern_object_ `o` &rarr; pattern definition as object
   //    * _action_ `f` &rarr; pattern action function
@@ -996,7 +994,7 @@ function make_seneca( initial_options ) {
     }
 
     actmeta.plugin_name     = actmeta.plugin_name || 'root$'
-    actmeta.plugin_fullname = actmeta.plugin_fullname || 
+    actmeta.plugin_fullname = actmeta.plugin_fullname ||
       actmeta.plugin_name + (actmeta.plugin_tag ? '/' + actmeta.plugin_tag : '')
 
     var add_callpoint = callpoint()
@@ -1009,7 +1007,7 @@ function make_seneca( initial_options ) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = pattern.deprecate$
 
-    var strict_add = (pattern.strict$ && null != pattern.strict$.add) ? 
+    var strict_add = (pattern.strict$ && null != pattern.strict$.add) ?
           !!pattern.strict$.add : !!so.strict.add
 
     pattern = self.util.clean(args.pattern)
@@ -1491,13 +1489,13 @@ function make_seneca( initial_options ) {
 
     var id_tx = ( args.id$ || args.actid$ || instance.idgen() ).split('/')
 
-    var tx = 
+    var tx =
           id_tx[1] ||
           origargs.tx$ ||
           instance.fixedargs.tx$ ||
           instance.idgen()
 
-    var actid    = (id_tx[0] || instance.idgen()) + '/' + tx 
+    var actid    = (id_tx[0] || instance.idgen()) + '/' + tx
 
     var actstart = Date.now()
 
@@ -1531,7 +1529,7 @@ function make_seneca( initial_options ) {
                          act_callpoint )
     }
 
-    logging.log_act_in( root, {actid:actid,info:origargs.transport$}, 
+    logging.log_act_in( root, {actid:actid,info:origargs.transport$},
                         actmeta, callargs, prior_ctxt,
                         act_callpoint )
 
@@ -1571,7 +1569,7 @@ function make_seneca( initial_options ) {
           if( !( 'generate_id' === callargs.cmd ||
                  true === callargs.note ||
                  'native' === callargs.cmd ||
-                 'quickcode' === callargs.cmd 
+                 'quickcode' === callargs.cmd
                ))
           {
             err = error(
@@ -1717,9 +1715,9 @@ function make_seneca( initial_options ) {
     }
 
     // Special legacy case for seneca-perm
-    else if( err.orig && 
-             _.isString(err.orig.code) && 
-             0 === err.orig.code.indexOf('perm/') ) 
+    else if( err.orig &&
+             _.isString(err.orig.code) &&
+             0 === err.orig.code.indexOf('perm/') )
     {
       err = err.orig
       result[0] = err
@@ -2033,8 +2031,8 @@ function make_seneca( initial_options ) {
       self.log.debug( 'options', 'set', options, callpoint() )
     }
 
-    so = private$.exports.options =( (null == options) ? 
-                                     private$.optioner.get() : 
+    so = private$.exports.options =( (null == options) ?
+                                     private$.optioner.get() :
                                      private$.optioner.set( options ) )
 
     if( options && options.log ) {
@@ -2146,7 +2144,7 @@ function make_seneca( initial_options ) {
   }
 
 
-  
+
   function api_error( errhandler ) {
     this.options( {errhandler:errhandler} )
     return this
@@ -2208,7 +2206,7 @@ function make_seneca( initial_options ) {
   root.add( {role:'seneca',  ready:true},  action_seneca_ready )
   root.add( {role:'options', cmd:'get'},   action_options_get  )
 
-  cmdline.handle( root, argv )
+  print( root, private$.optioner.get().argv )
 
 
 
@@ -2572,12 +2570,12 @@ function thrower(err) {
 
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint( active ) {
-  if( active ) { 
+  if( active ) {
     return function() {
       return error.callpoint(
         new Error(),
         ['/seneca/seneca.js','/seneca/lib/', '/lodash.js'] )
-    } 
+    }
 
   } else return _.noop;
 }
