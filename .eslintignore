@@ -1,0 +1,11 @@
+node_modules
+docpad
+doc
+test
+lib/entity.js
+lib/logging.js
+lib/optioner.js
+lib/plugin-util.js
+lib/print.js
+lib/store.js
+seneca.js
