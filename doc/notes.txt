@@ -1,6 +1,0 @@
-
-# 0.6.0:
-  - entity.data$ default canon format is string
-  - error msg if store has not yet connected to db
-  - prevent use of _ in zone, base, name, also ensure matches [a-zA-Z][a-zA-Z0-9]*, option to turn off for backwards compat
-  - delegate needs to have var self = this in all methods

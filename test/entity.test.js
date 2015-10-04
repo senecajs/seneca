@@ -21,6 +21,7 @@ var lab      = exports.lab = Lab.script()
 var describe = lab.describe
 var it       = lab.it
 
+process.setMaxListeners(0)
 
 describe('entity', function(){
 
@@ -267,10 +268,10 @@ describe('entity', function(){
     }}}))
 
 
-    assert.equal( "$-/-/foo;id=;{c:3,d:4}", 
+    assert.equal( "$-/-/foo;id=;{c:3,d:4}",
                   si.make('foo',{a:1,b:2,c:3,d:4}).toString() )
 
-    assert.equal( "$-/-/bar;id=;{a:1,b:2}", 
+    assert.equal( "$-/-/bar;id=;{a:1,b:2}",
                   si.make('bar',{a:1,b:2,c:3,d:4}).toString() )
   })
 
