@@ -223,7 +223,7 @@ function make_seneca( initial_options ) {
   root.repl       = api_repl       // Open a REPL on a local port.
   root.start      = api_start      // Start an action chain.
   root.error      = api_error      // Set global error handler.
-
+  root.decorate   = api_decorate   // Decorate seneca object with functions
 
   // Method aliases.
   root.make$      = api_make
@@ -406,6 +406,8 @@ function make_seneca( initial_options ) {
     cmds: store.cmds
   }
 
+  // Used for extending seneca with api_decorate
+  root._decorations = {}
 
   // say hello, printing identifier to log
   root.log.info( 'hello', root.toString(), callpoint() )
@@ -2172,6 +2174,19 @@ function make_seneca( initial_options ) {
   function api_error( errhandler ) {
     this.options( {errhandler:errhandler} )
     return this
+  }
+
+
+  // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
+  function api_decorate(property, method) {
+    assert.ok(property, 'property must be specified')
+    assert.ok(typeof property === 'string', 'property must be a string')
+    assert.ok(property[0] !== '_', 'property cannot start with _')
+    assert.ok(this._decorations[property] === undefined, 'seneca is already decorated with the property')
+    assert.ok(this[property] === undefined, 'cannot override a core seneca property')
+
+    this._decorations[property] = method
+    this[property] = method
   }
 
 
