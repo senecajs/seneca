@@ -660,7 +660,7 @@ function make_seneca( initial_options ) {
         pin,
         {
           func: function(args,done) {
-            if( true == args.local$ ) {
+            if( !!args.local$ ) {
               this.prior(args,done)
             }
             else {
