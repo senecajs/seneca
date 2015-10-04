@@ -2323,6 +2323,8 @@ function make_seneca( initial_options ) {
     }
   })
 
+  // Expose the Entity object so third-parties can do interesting things with it
+  private$.exports.Entity = make_entity.Entity
 
   return root
 }
