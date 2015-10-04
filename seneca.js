@@ -5,7 +5,7 @@
 
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.6.5'
+var VERSION = '0.7.0'
 
 
 // Node API modules
@@ -2285,7 +2285,7 @@ function make_seneca( initial_options ) {
       }
     }
 
-    done && done(null,stats)
+    if( done ) { done(null,stats) }
     return stats
   }
 
