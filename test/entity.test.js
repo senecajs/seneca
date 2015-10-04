@@ -21,6 +21,7 @@ var lab      = exports.lab = Lab.script()
 var describe = lab.describe
 var it       = lab.it
 
+process.setMaxListeners(0)
 
 describe('entity', function(){
 
@@ -39,6 +40,31 @@ describe('entity', function(){
       assert.equal(2,out.b)
 
       done()
+    })
+  })
+
+
+  it('setid-mem', function(done){
+    var si = seneca(testopts).error(done)
+
+    var z0 = si.make('zed')
+    z0.id$ = 0
+    z0.z = 0
+    z0.save$(function(e,z){
+      assert.equal(0,z.id)
+      assert.equal(0,z.z)
+
+      si.make('zed',{id$:1,z:1}).save$(function(e,z){
+        assert.equal(1,z.id)
+        assert.equal(1,z.z)
+
+        si.make('zed').data$({id$:2,z:2}).save$(function(e,z){
+          assert.equal(2,z.id)
+          assert.equal(2,z.z)
+
+          done()
+        })
+      })
     })
   })
 
@@ -242,10 +268,10 @@ describe('entity', function(){
     }}}))
 
 
-    assert.equal( "$-/-/foo;id=;{c:3,d:4}", 
+    assert.equal( "$-/-/foo;id=;{c:3,d:4}",
                   si.make('foo',{a:1,b:2,c:3,d:4}).toString() )
 
-    assert.equal( "$-/-/bar;id=;{a:1,b:2}", 
+    assert.equal( "$-/-/bar;id=;{a:1,b:2}",
                   si.make('bar',{a:1,b:2,c:3,d:4}).toString() )
   })
 
