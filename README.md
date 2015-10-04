@@ -1,4 +1,4 @@
-![Seneca](http://senecajs.surge.sh/files/assets/seneca-banner.png)
+![Seneca](http://senecajs.surge.sh/files/assets/seneca-logo.png)
 > A Node.js toolkit for Micro-Service Architectures
 
 
