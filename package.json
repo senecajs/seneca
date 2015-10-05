@@ -18,12 +18,14 @@
     "toolkit",
     "startup"
   ],
-  "version": "0.6.5",
+  "version": "0.7.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
     "Richard Rodger (http://richardrodger.com)",
+    "Wyatt Preul",
+    "Dean McDonnell",
     "Peter Elger",
     "Cristian Ianto",
     "Dominic Tarr",

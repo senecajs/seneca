@@ -1,7 +1,7 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 'use strict'
 
-var VERSION = '0.6.5'
+var VERSION = '0.7.0'
 
 var util = require('util')
 var stream = require('stream')
@@ -359,18 +359,18 @@ describe('seneca', function () {
     si.ready(function () {
       si.add({op: 'foo'}, foo)
       si.act('op:foo,a:1', function (e, o) {
-        assert.ok(gex('1~Seneca/0.6.*' + '/*').on('' + o.a + '~' + o.s))
+        assert.ok(gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(o.foo.entry)
 
         si.add({op: 'foo'}, bar)
         si.act('op:foo,a:1', function (e, o) {
-          assert.ok(gex('1~2~Seneca/0.6.*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
+          assert.ok(gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
           assert.ok(o.bar.entry)
           assert.ok(!o.foo.entry)
 
           si.add({op: 'foo'}, zed)
           si.act('op:foo,a:1', function (e, o) {
-            assert.ok(gex('1~2~3~Seneca/0.6.*' + '/*').on(
+            assert.ok(gex('1~2~3~Seneca/*' + '/*').on(
               '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s))
             assert.ok(o.zed.entry)
             assert.ok(!o.bar.entry)
@@ -419,13 +419,13 @@ describe('seneca', function () {
 
       si.act('op:foo,a:1', function (err, o) {
         assert.ok(!err)
-        assert.ok(gex('1~Seneca/0.6.*' + '/*').on('' + o.a + '~' + o.s))
+        assert.ok(gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(!o.foo.entry)
         assert.ok(o.bar.entry)
 
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
-          assert.ok(gex('1~2~Seneca/0.6.*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
+          assert.ok(gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
           assert.ok(!o.foo.entry)
           assert.ok(!o.bar.entry)
           assert.ok(o.zed.entry)

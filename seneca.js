@@ -4,7 +4,7 @@
 'use strict'
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.6.5'
+var VERSION = '0.7.0'
 
 // Node API modules
 var util = require('util')
@@ -607,11 +607,12 @@ function make_seneca (initial_options) {
       private$.actrouter.add(
         pin,
         {
-          func: function (args, done) {
-            if (true == args.local$) {
-              this.prior(args, done)
-            } else {
-              sendclient.send.call(this, args, done)
+          func: function(args,done) {
+            if( !!args.local$ ) {
+              this.prior(args,done)
+            }
+            else {
+              sendclient.send.call( this, args, done )
             }
           },
           log: self.log,
@@ -840,8 +841,10 @@ function make_seneca (initial_options) {
       pattern.in$ = true
     }
 
-    if (!private$.handle_sub) {
-      private$.handle_sub = function (args, result) {
+    if( !private$.handle_sub ) {
+      private$.handle_sub = function(args,result) {
+        if( true !== args.meta$.entry ) return;
+
         var subfuncs = private$.subrouter.find(args)
 
         if (subfuncs) {
@@ -927,7 +930,7 @@ function make_seneca (initial_options) {
       actmeta.callpoint = add_callpoint
     }
 
-    actmeta.sub = !!pattern.sub$
+    actmeta.sub   = !!pattern.sub$
 
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = pattern.deprecate$
@@ -1159,14 +1162,19 @@ function make_seneca (initial_options) {
     return self
   }
 
-  function api_wrap (pin, wrapper) {
+
+
+  function api_wrap(pin,meta,wrapper) {
     var pinthis = this
 
+    wrapper = _.isFunction(meta) ? meta : wrapper
+    meta    = _.isFunction(meta) ? {} : meta
+
     pin = _.isArray(pin) ? pin : [pin]
-    _.each(pin, function (p) {
-      _.each(pinthis.findpins(p), function (actpattern) {
-        pinthis.add(actpattern, function (args, done) {
-          wrapper.call(this, args, done)
+    _.each(pin, function(p) {
+      _.each( pinthis.findpins(p), function(actpattern) {
+        pinthis.add(actpattern,meta,function(args,done) {
+          wrapper.call(this,args,done)
         })
       })
     })
@@ -1199,9 +1207,11 @@ function make_seneca (initial_options) {
     if (_.isFunction(ready)) {
       self.once('ready', function () {
         try {
-          var ready_delegate = self.delegate({fatal$: true})
-          ready.call(ready_delegate)
-        } catch(ex) {
+          //var ready_delegate = self.delegate({fatal$:true})
+          //ready.call(ready_delegate)
+          ready.call(self)
+        }
+        catch(ex) {
           var re = ex
 
           if (!re.seneca) {
@@ -1262,10 +1272,15 @@ function make_seneca (initial_options) {
     })
   }
 
-  function api_repl (in_opts) {
+
+  function api_repl() {
     var self = this
 
-    var repl_opts = _.extend(so.repl, in_opts)
+    var in_opts = _.isObject(arguments[0]) ? in_opts : {}
+    in_opts.port = _.isNumber(arguments[0]) ? arguments[0] : in_opts.port
+    in_opts.host = _.isString(arguments[1]) ? arguments[1] : in_opts.host
+
+    var repl_opts = _.extend(so.repl,in_opts)
 
     net.createServer(function (socket) {
       var actout = function () {
@@ -1286,24 +1301,30 @@ function make_seneca (initial_options) {
         socket.end()
       })
 
+
       var act_index_map = {}
       var act_index = 1000000
       function fmt_index (i) {
         return ('' + i).substring(1)
       }
 
-      var sd = root.delegate({repl$: true})
+      var sd = root.delegate({repl$:true})
 
-      sd.on_act_in = function on_act_in (actmeta, args) {
-        socket.write('IN  ' + fmt_index(act_index) +
-          ': ' + util.inspect(sd.util.clean(args)) +
-          ' # ' +
-          args.meta$.id + ' ' +
-          actmeta.pattern + ' ' +
-          actmeta.id + ' ' +
-          actmeta.func.name + ' ' +
-          (actmeta.callpoint ? actmeta.callpoint : '') +
-          '\n')
+      r.on('error', function (err) {
+        sd.log.error('repl',err)
+      })
+
+
+      sd.on_act_in = function on_act_in( actmeta, args ) {
+        socket.write('IN  '+fmt_index(act_index)+
+                     ': '+util.inspect(sd.util.clean(args))+
+                     ' # '+
+                     args.meta$.id+' '+
+                     actmeta.pattern+' '+
+                     actmeta.id+' '+
+                     actmeta.func.name+' '+
+                     (actmeta.callpoint?actmeta.callpoint:'')+
+                     '\n')
         act_index_map[actmeta.id] = act_index
         act_index++
       }
@@ -1351,7 +1372,9 @@ function make_seneca (initial_options) {
         }
       }
 
-    }).listen(repl_opts.port, repl_opts.host)
+    }).listen( repl_opts.port, repl_opts.host )
+
+    return self
   }
 
   // Return self. Mostly useful as a check that this is a Seneca instance.
@@ -1426,12 +1449,18 @@ function make_seneca (initial_options) {
     var act_done = function (err) {
       try {
         var actend = Date.now()
-        private$.timestats.point(actend - actstart, actmeta.argpattern)
 
         prior_ctxt.depth--
         prior_ctxt.entry = prior_ctxt.depth <= 0
 
-        var result = arr(arguments)
+        //console.log('STAT',actid,actmeta.argpattern,prior_ctxt.entry,prior_ctxt.depth)
+
+        if( true === prior_ctxt.entry ) {
+          private$.timestats.point( actend-actstart, actmeta.argpattern )
+        }
+
+
+        var result  = arr(arguments)
         var call_cb = true
 
         var resdata = result[1]
@@ -2091,7 +2120,7 @@ function make_seneca (initial_options) {
       }
     }
 
-    done && done(null, stats)
+    if( done ) { done(null,stats) }
     return stats
   }
 
