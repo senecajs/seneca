@@ -4,7 +4,7 @@
 'use strict'
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.7.0'
+var VERSION = '0.7.1'
 
 // Node API modules
 var util = require('util')
@@ -847,8 +847,10 @@ function make_seneca (initial_options) {
 
         var subfuncs = private$.subrouter.find(args)
 
-        if (subfuncs) {
-          _.each(subfuncs, function (subfunc) {
+        if( subfuncs ) {
+          args.meta$.sub = subfuncs.pattern
+
+          _.each(subfuncs,function(subfunc){
             try {
               subfunc.call(self, args, result)
             } catch(ex) {
@@ -878,8 +880,9 @@ function make_seneca (initial_options) {
     }
 
     var subs = private$.subrouter.find(pattern)
-    if (!subs) {
-      private$.subrouter.add(pattern, subs = [])
+    if( !subs ) {
+      private$.subrouter.add(pattern,subs=[])
+      subs.pattern = common.argpattern(pattern)
     }
     subs.push(subargs.action)
 
@@ -1288,6 +1291,10 @@ function make_seneca (initial_options) {
         socket.write(util.inspect(out) + '\n')
       }
 
+      socket.on('error',function(err){
+        sd.log.error('repl-socket',err)
+      })
+
       var r = repl.start({
         prompt: 'seneca ' + root.id + '> ',
         input: socket,
@@ -1329,8 +1336,8 @@ function make_seneca (initial_options) {
         act_index++
       }
 
-      sd.on_act_out = function on_act_out (actmeta, out) {
-        out = out.entity$ ? out : util.inspect(sd.util.clean(out))
+      sd.on_act_out = function on_act_out( actmeta, out ) {
+        out = (out && out.entity$) ? out : util.inspect(sd.util.clean(out))
 
         var cur_index = act_index_map[actmeta.id]
         socket.write('OUT ' + fmt_index(cur_index) +
@@ -1350,11 +1357,16 @@ function make_seneca (initial_options) {
 
         cmd = cmd.replace(/[\r\n]+$/, '')
 
+        if( 'quit' == cmd || 'exit' == cmd ) {
+          socket.end()
+        }
+
         try {
           var args = jsonic(cmd)
-          context.s.act(args, function (err, out) {
-            if (err) return callback(err.message)
-            return callback(null, root.util.clean(out))
+          context.s.act(args,function(err,out){
+            if( err ) return callback( err.message );
+            return callback( null,
+                             (out && out.entity$) ? out : root.util.clean(out) );
           })
         } catch(e) {
           try {
@@ -2146,6 +2158,9 @@ function make_seneca (initial_options) {
       })
     }
   })
+
+  // Expose the Entity object so third-parties can do interesting things with it
+  private$.exports.Entity = make_entity.Entity
 
   return root
 }

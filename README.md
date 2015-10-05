@@ -1,4 +1,4 @@
-![Seneca](http://senecajs.surge.sh/files/assets/seneca-banner.png)
+![Seneca](http://senecajs.surge.sh/files/assets/seneca-logo.png)
 > A Node.js toolkit for Micro-Service Architectures
 
 
@@ -25,9 +25,9 @@ For a gentle introduction to this module, see the
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.7.0
+Current Version: 0.7.1
 
-Tested on: Node 4, 0.12, 0.11. 0.10.
+Tested on: Node 4, 0.12, 0.10.
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
 

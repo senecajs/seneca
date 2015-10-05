@@ -1,4 +1,9 @@
 
+## 0.7.1: 2015-10-05
+
+   * repl now supports quit/exit command
+   * seneca.sub provides subscription pattern via meta$.sub
+
 ## 0.7.0: 2015-10-04
 
    * support node 4
