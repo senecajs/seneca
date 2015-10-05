@@ -1,7 +1,7 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 'use strict'
 
-var VERSION = '0.7.0'
+var VERSION = '0.7.1'
 
 var util = require('util')
 var stream = require('stream')

@@ -25,7 +25,7 @@ For a gentle introduction to this module, see the
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.7.0
+Current Version: 0.7.1
 
 Tested on: Node 4, 0.12, 0.10.
 
