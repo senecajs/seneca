@@ -1,4 +1,15 @@
 
+## 0.7.1: 2015-10-05
+
+   * repl now supports quit/exit command
+   * seneca.sub provides subscription pattern via meta$.sub
+
+## 0.7.0: 2015-10-04
+
+   * support node 4
+   * update to patrun 0.5; now supports glob adds
+   * new documentation system
+
 ## 0.6.5: 2015-09-04
 
    * revert to non-strict adds so that priors can be subset patterns, see issues 145, 149

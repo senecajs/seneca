@@ -1,12 +1,15 @@
-# seneca - Node.js module
+![Seneca](http://senecajs.surge.sh/files/assets/seneca-logo.png)
+> A Node.js toolkit for Micro-Service Architectures
 
-## A Node.js toolkit for Micro-Service Architectures
 
 Seneca provides a toolkit for writing micro-services in Node.js. Seneca provides:
 
    * pattern matching: a wonderfully flexible way to handle business requirements
+
    * transport independence: how messages get to the right server is not something you should have to worry about
+
    * maturity: 5 years in production (before we called it _micro-services_), but was once taken out by [lightning](http://aws.amazon.com/message/67457/)
+
    * deep and wide ecosystem of [plugins](https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults)
 
 
@@ -22,9 +25,9 @@ For a gentle introduction to this module, see the
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.6.5
+Current Version: 0.7.1
 
-Tested on: Node 0.10, 0.11, 0.12, iojs.
+Tested on: Node 4, 0.12, 0.10.
 
 [![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
 
@@ -193,7 +196,7 @@ _Keeping the Business Happy_
 
 The thing about business requirements is that have no respect for
 common sense, logic or orderly structure. The real world is
-messy. 
+messy.
 
 In our example, let's say some countries have single sales tax rate,
 and others have a variable rate, which depends either on locality, or product category.
@@ -261,5 +264,3 @@ For more examples of Seneca in action, take a look at:
    * [seneca-examples](//github.com/rjrodger/seneca-examples)
    * [nodezoo.com](//nodezoo.com/#q=seneca)
    * [Well!](//github.com/nearform/well)
-
-

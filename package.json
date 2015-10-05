@@ -18,12 +18,14 @@
     "toolkit",
     "startup"
   ],
-  "version": "0.6.5",
+  "version": "0.7.1",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
     "Richard Rodger (http://richardrodger.com)",
+    "Wyatt Preul",
+    "Dean McDonnell",
     "Peter Elger",
     "Cristian Ianto",
     "Dominic Tarr",
@@ -47,7 +49,7 @@
     "nid": "0.3.2",
     "norma": "0.3.0",
     "parambulator": "1.5.1",
-    "patrun": "0.4.3",
+    "patrun": "0.5.0",
     "rolling-stats": "0.1.1",
     "seneca-basic": "0.3.0",
     "seneca-mem-store": "0.3.1",
@@ -79,7 +81,7 @@
     "connect-query": "0.2.0",
     "docco": "0.7.0",
     "jshint": "2.8.0",
-    "lab": "5.13.0",
+    "lab": "6.0.0",
     "seneca-echo": "0.2.0",
     "seneca-error-test": "0.2.2"
   }
