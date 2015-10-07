@@ -2085,7 +2085,7 @@ function make_seneca (initial_options) {
   root.add({role: 'seneca',  ready: true}, action_seneca_ready)
   root.add({role: 'options', cmd: 'get'}, action_options_get)
 
-  print(root, private$.optioner.get().argv)
+  print(root)
 
   // Define builtin actions.
 
