@@ -1,53 +1,59 @@
 ![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
 > A Node.js toolkit for Micro-Service Architectures
 
+# seneca
+[![Build Status][travis-badge]][travis-url]
+[![Gitter][gitter-badge]][gitter-url]
+
+[![js-standard-style][standard-badge]][standard-style]
+
+Seneca is a toolkit for organizing the business logic of your app. You can break down your app into "stuff that happens", rather than focusing on data models or managing dependencies.
 
 Seneca provides a toolkit for writing micro-services in Node.js. Seneca provides:
 
-   * pattern matching: a wonderfully flexible way to handle business requirements
+- __pattern matching:__ a wonderfully flexible way to handle business requirements
 
-   * transport independence: how messages get to the right server is not something you should have to worry about
+- __transport independence:__ how messages get to the right server is not something you should have to worry about
 
-   * maturity: 5 years in production (before we called it _micro-services_), but was once taken out by [lightning](http://aws.amazon.com/message/67457/)
+- __maturity:__ 5 years in production (before we called it _micro-services_), but was once taken out by [lightning][]
 
-   * deep and wide ecosystem of [plugins](https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults)
+- __plus:__ a deep and wide ecosystem of [plugins][]
 
-
-[![Gitter chat](https://badges.gitter.im/rjrodger/seneca.png)](https://gitter.im/rjrodger/seneca)
-
-Seneca is a toolkit for organizing the business logic of your app. You
-can break down your app into "stuff that happens", rather than
-focusing on data models or managing dependencies.
-
-For a gentle introduction to this module, see the
-[senecajs.org](http://senecajs.org) site.
-
-If you're using this module, feel free to contact me on twitter if you
-have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
-
-Current Version: 0.7.1
-
-Tested on: Node 4, 0.12, 0.10.
-
-[![Build Status](https://travis-ci.org/rjrodger/seneca.png?branch=master)](https://travis-ci.org/rjrodger/seneca)
-
-[Annotated Source Code](http://senecajs.org/doc/seneca.html).
-
-
-Use this module to define commands that work by taking in some JSON,
-and, optionally, returning some JSON. The command to run is selected
-by pattern-matching on the the input JSON.  There are built-in and
-optional sets of commands that help you build Minimum Viable Products:
-data storage, user management, distributed logic, caching, logging,
-etc.  And you can define your own product by breaking it into a set of
-commands - "stuff that happens".
+Use this module to define commands that work by taking in some JSON, and, optionally, returning some JSON. The command to run is selected by pattern-matching on the the input JSON.  There are built-in and optional sets of commands that help you build Minimum Viable Products: data storage, user management, distributed logic, caching, logging, etc.  And you can define your own product by breaking it into a set of commands - "stuff that happens".
 
 That's pretty much it.
 
+- __Version:__ 0.7.1
+- __Node:__ 0.10, 0.12, 4
 
-_Why do this?_
+[Annotated Source Code](http://senecajs.org/doc/seneca.html).
 
-It doesn't matter,
+If you're using this module, and need help, you can:
+
+- Post a [github issue][],
+- Tweet to [@senecajs][],
+- Ask on the [Gitter][gitter-url].
+
+If you are new to Seneca in general, please take a look at [senecajs.org][]. We have everything from
+tutorials to sample apps to help get you up and running quickly.
+
+## Install
+To install, simply use npm.
+
+```
+npm install seneca
+```
+
+## Test
+To run tests, simply use npm:
+
+```
+npm run test
+```
+
+## Why we built this?
+
+So that it doesn't matter,
 
    * who provides the functionality,
    * where it lives (on the network),
@@ -130,9 +136,7 @@ seneca.act('cmd:salestax', {net:100}, function(err,result){
 
 This is a very convenient way of combining a pattern and parameter data.
 
-
-
-_Programmer Anarchy_
+### Programmer Anarchy
 
 The way to build Node.js systems, is to build lots of little
 processes. Here's a great talk explaining why you should do this:
@@ -192,7 +196,7 @@ how.
 You can do this with every command.
 
 
-_Keeping the Business Happy_
+### Keeping the Business Happy
 
 The thing about business requirements is that have no respect for
 common sense, logic or orderly structure. The real world is
@@ -257,10 +261,32 @@ patterns. This lets you isolate complexity into well-defined
 places. It also means you can deal with special cases very easily.
 
 
-_Examples_
+## Examples
 
 For more examples of Seneca in action, take a look at:
 
    * [seneca-examples](//github.com/rjrodger/seneca-examples)
    * [nodezoo.com](//nodezoo.com/#q=seneca)
    * [Well!](//github.com/nearform/well)
+
+## Contributing
+The [Senecajs org][] encourage open participation. If you feel you can help in any way, be it with
+documentation, examples, extra testing, or new features please get in touch.
+
+## License
+Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
+
+[travis-badge]: https://travis-ci.org/rjrodger/seneca.svg
+[travis-url]: https://travis-ci.org/rjrodger/seneca
+[gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
+[gitter-url]: https://gitter.im/senecajs/seneca
+[standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
+[standard-style]: https://github.com/feross/standard
+
+[MIT]: ./LICENSE
+[Senecajs org]: https://github.com/senecajs/
+[senecajs.org]: http://senecajs.org/
+[github issue]: https://github.com/rjrodger/seneca/issues
+[@senecajs]: http://twitter.com/senecajs
+[lightning]: http://aws.amazon.com/message/67457/
+[plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
