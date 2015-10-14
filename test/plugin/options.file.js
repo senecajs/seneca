@@ -1,3 +1,3 @@
 module.exports = {
-  b:2
+  b: 2
 }

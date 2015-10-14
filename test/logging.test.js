@@ -1,7 +1,6 @@
 'use strict'
 
 var assert = require('assert')
-var util = require('util')
 
 var Lab = require('lab')
 
@@ -14,14 +13,14 @@ var it = lab.it
 function fmt (r) { return r.toString(true).replace(/\s+/g, '') }
 
 describe('logging', function () {
-  function A () {}; A.toString = function () {return 'A'}
-  function B () {}; B.toString = function () {return 'B'}
-  function C () {}; C.toString = function () {return 'C'}
+  function A () {}; A.toString = function () { return 'A' }
+  function B () {}; B.toString = function () { return 'B' }
+  function C () {}; C.toString = function () { return 'C' }
 
   it('makelogrouter.happy', function (done) {
     var r = logging.makelogrouter({map: [
-        {level: 'info',type: 'init',handler: A},
-        {level: 'info',type: 'plugin',plugin: 'red',handler: B},
+        {level: 'info', type: 'init', handler: A},
+        {level: 'info', type: 'plugin', plugin: 'red', handler: B}
     ]})
 
     // console.log(fmt(r))
@@ -42,13 +41,13 @@ describe('logging', function () {
 
   it('makelogrouter.multiplex', function (done) {
     var r = logging.makelogrouter({map: [
-        {level: 'info',type: 'init',handler: A},
-        {level: 'info',type: 'init',handler: B},
-        {level: 'info',type: 'init',handler: C},
+        {level: 'info', type: 'init', handler: A},
+        {level: 'info', type: 'init', handler: B},
+        {level: 'info', type: 'init', handler: C}
     ]})
 
     // fix printing for test
-    r.add({level: 'info',type: 'init'}, r.find({level: 'info',type: 'init'}).multiplex)
+    r.add({level: 'info', type: 'init'}, r.find({level: 'info', type: 'init'}).multiplex)
     // console.log(fmt(r))
     assert.equal(fmt(r), 'level:info->type:init-><A,B,C>')
     done()
@@ -56,7 +55,7 @@ describe('logging', function () {
 
   it('makelogrouter.multival.comma', function (done) {
     var r = logging.makelogrouter({map: [
-        {level: 'info',type: 'init,  status',handler: A}
+        {level: 'info', type: 'init,  status', handler: A}
     ]})
     // console.log(fmt(r))
     assert.equal(fmt(r), 'level:info->type:init-><A>status-><A>')
@@ -103,7 +102,7 @@ describe('logging', function () {
     try {
       logging.makelogrouter({map: [ {level: 'bad', type: 'init', handler: A} ]})
       assert.fail()
-    } catch(e ) {
+    } catch (e) {
       assert.equal('invalid_log_level', e.code)
     }
     done()

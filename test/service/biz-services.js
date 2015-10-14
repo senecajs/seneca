@@ -1,3 +1,2 @@
 require('../..')()
-  .use('service',{folder:'./biz-services'})
-
+  .use('service', {folder: './biz-services'})

@@ -16,10 +16,10 @@ lab.experiment('debug', function () {
 
     si.ready(function () {
       setImmediate(function () {
-        si.logroute({level: 'DEBUG',handler: function () {
+        si.logroute({level: 'DEBUG', handler: function () {
             // console.log(arguments)
-            assert.equal('foo', arguments[3])
-            done()
+          assert.equal('foo', arguments[3])
+          done()
         }})
 
         si.log.debug('foo')
