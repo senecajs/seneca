@@ -22,7 +22,6 @@ test/plugin/bad-require-plugin.js
 test/plugin/options.test.js
 test/plugin/bad-missing.js
 test/test-included-plugins.sh
-test/entity.test.js
 test/site
 test/site/id-service-extra.js
 test/site/prior-entity.js
