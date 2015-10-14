@@ -1,3 +1,3 @@
 require('../..')()
   .use('biz')
-  .listen( parseInt(process.argv[2]) )
+  .listen(parseInt(process.argv[2], 10))

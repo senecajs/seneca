@@ -1,3 +1,3 @@
 require('../..')()
   .use('biz')
-  .listen( {type:'queue'} )
+  .listen({type: 'queue'})
