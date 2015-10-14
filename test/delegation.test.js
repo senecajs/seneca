@@ -7,7 +7,6 @@ var seneca_module = require('..')
 
 var async = require('async')
 var gex = require('gex')
-var jsonic = require('jsonic')
 var Lab = require('lab')
 
 var testopts = { log: 'silent'}
@@ -93,13 +92,12 @@ describe('delegation', function () {
       log: {
         map: [{
           handler: function () {
-            if ('aaa' == arguments[6]) {
-              if ('debug' != arguments[1]) fail = 'aaa,debug'
-              if ('single' != arguments[2]) fail = 'aaa,single'
-            }
-            else if ('ppp' == arguments[6]) {
-              if ('debug' != arguments[1]) fail = 'ppp,debug'
-              if ('plugin' != arguments[2]) fail = 'ppp,plugin'
+            if (arguments[6] === 'aaa') {
+              if (arguments[1] !== 'debug') fail = 'aaa,debug'
+              if (arguments[2] !== 'single') fail = 'aaa,single'
+            } else if (arguments[6] === 'ppp') {
+              if (arguments[1] !== 'debug') fail = 'ppp,debug'
+              if (arguments[2] !== 'plugin') fail = 'ppp,plugin'
             }
           }
         }]
@@ -149,9 +147,9 @@ describe('delegation', function () {
         cb(err, out)
       })
     })
-    var sid = si.delegate({b: 'B'})
 
     si.act({c: 'C'}, function (err, out) {
+      assert.equal(err, null)
       done()
     })
   })

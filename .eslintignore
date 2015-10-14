@@ -1,7 +1,6 @@
 node_modules
 docpad
 doc
-test/delegation.test.js
 test/transport.test.js
 test/cmdline-run.js
 test/service
