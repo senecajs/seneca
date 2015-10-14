@@ -9,7 +9,7 @@ var async = require('async')
 var gex = require('gex')
 var Lab = require('lab')
 
-var testopts = { log: 'silent'}
+var testopts = {log: 'silent'}
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
