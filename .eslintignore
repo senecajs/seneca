@@ -2,8 +2,6 @@ node_modules
 docpad
 doc
 test/plugin/bad-syntax-plugin.js
-test/test-included-plugins.sh
-test/seneca.util.test.js
 lib/entity.js
 lib/logging.js
 lib/optioner.js
