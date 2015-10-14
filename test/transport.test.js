@@ -6,10 +6,8 @@
 var util = require('util')
 var assert = require('assert')
 
-var common = require('../lib/common')
 var seneca = require('..')
 
-var gex = require('gex')
 var _ = require('lodash')
 var async = require('async')
 var Lab = require('lab')
@@ -41,7 +39,7 @@ describe('transport', function () {
   it('transport-exact-single', function (done) {
     var tt = make_test_transport()
 
-    seneca({ tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }})
+    seneca({tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }})
       .use(tt)
       .add('foo:1', function (args, done) {
         // ensure action id is transferred for traceability
@@ -50,7 +48,7 @@ describe('transport', function () {
       })
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function () {
-        var si = seneca({tag: 'cln',timeout: 5555,log: 'silent',
+        seneca({tag: 'cln', timeout: 5555, log: 'silent',
         debug: {short_logs: true}})
           .use(tt)
 
@@ -71,13 +69,13 @@ describe('transport', function () {
   it('transport-star', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
       .add('foo:2', testact)
-      .listen({type: 'test',pin: 'foo:*'})
+      .listen({type: 'test', pin: 'foo:*'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        var si = seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
 
           .client({type: 'test', pin: 'foo:*'})
@@ -110,12 +108,12 @@ describe('transport', function () {
   it('transport-single-notdef', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
-      .listen({type: 'test',pin: 'foo:*'})
+      .listen({type: 'test', pin: 'foo:*'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        var si = seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
           .client({type: 'test', pin: 'foo:1'})
 
@@ -128,7 +126,7 @@ describe('transport', function () {
             .wait('foo:1,bar:1')
             .step(function (out) {
               assert.equal(1, tt.outmsgs.length)
-              assert.deepEqual({foo: 1,bar: 2}, out)
+              assert.deepEqual({foo: 1, bar: 2}, out)
               return true
             })
 
@@ -140,13 +138,13 @@ describe('transport', function () {
   it('transport-pins-notdef', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
       .add('baz:2', testact)
-      .listen({type: 'test',pins: ['foo:1', 'baz:2']})
+      .listen({type: 'test', pins: ['foo:1', 'baz:2']})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        var si = seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
           .client({type: 'test', pins: ['foo:1', 'baz:2']})
 
@@ -159,14 +157,14 @@ describe('transport', function () {
             .wait('foo:1,bar:1')
             .step(function (out) {
               assert.equal(1, tt.outmsgs.length)
-              assert.deepEqual({foo: 1,bar: 2}, out)
+              assert.deepEqual({foo: 1, bar: 2}, out)
               return true
             })
 
             .wait('baz:2,qoo:10')
             .step(function (out) {
               assert.equal(2, tt.outmsgs.length)
-              assert.deepEqual({baz: 2,qoo: 20}, out)
+              assert.deepEqual({baz: 2, qoo: 20}, out)
               return true
             })
 
@@ -178,16 +176,16 @@ describe('transport', function () {
   it('transport-single-wrap-and-star', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
       .add('qaz:1', testact)
-      .listen({type: 'test',pin: 'foo:1'})
-      .listen({type: 'test',pin: 'qaz:*'})
+      .listen({type: 'test', pin: 'foo:1'})
+      .listen({type: 'test', pin: 'qaz:*'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
-          .add('foo:1', function (args, done) {done(null, args)})
+          .add('foo:1', function (args, done) { done(null, args) })
 
           .client({type: 'test', pin: 'foo:1'})
           .client({type: 'test', pin: 'qaz:*'})
@@ -197,7 +195,7 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             assert.equal(1, tt.outmsgs.length)
-            assert.deepEqual({foo: 1,bar: 2}, out)
+            assert.deepEqual({foo: 1, bar: 2}, out)
             return true
           })
 
@@ -205,14 +203,14 @@ describe('transport', function () {
           .wait('foo:1,qaz:1,bar:1')
           .step(function (out) {
             assert.equal(2, tt.outmsgs.length)
-            assert.deepEqual({foo: 1,qaz: 1,bar: 2}, out)
+            assert.deepEqual({foo: 1, qaz: 1, bar: 2}, out)
             return true
           })
 
           .wait('foo:2,qaz:1,bar:1')
           .step(function (out) {
             assert.equal(3, tt.outmsgs.length)
-            assert.deepEqual({foo: 2,qaz: 1,bar: 2}, out)
+            assert.deepEqual({foo: 2, qaz: 1, bar: 2}, out)
             return true
           })
 
@@ -223,15 +221,15 @@ describe('transport', function () {
   it('transport-local-single-and-star', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:2,qaz:1', testact)
       .add('foo:2,qaz:2', testact)
-      .listen({type: 'test',pin: 'foo:2,qaz:*'})
+      .listen({type: 'test', pin: 'foo:2,qaz:*'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        var si = seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
-          .add('foo:1', function (args, done) {done(null, {foo: 1,local: 1})})
+          .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
 
           .client({type: 'test', pin: 'foo:2,qaz:*'})
 
@@ -241,21 +239,21 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             assert.equal(0, tt.outmsgs.length)
-            assert.deepEqual({foo: 1,local: 1}, out)
+            assert.deepEqual({foo: 1, local: 1}, out)
             return true
           })
 
           .wait('foo:2,qaz:1,bar:1')
           .step(function (out) {
             assert.equal(1, tt.outmsgs.length)
-            assert.deepEqual({foo: 2,qaz: 1,bar: 2}, out)
+            assert.deepEqual({foo: 2, qaz: 1, bar: 2}, out)
             return true
           })
 
           .wait('foo:2,qaz:2,bar:1')
           .step(function (out) {
             assert.equal(2, tt.outmsgs.length)
-            assert.deepEqual({foo: 2,qaz: 2,bar: 2}, out)
+            assert.deepEqual({foo: 2, qaz: 2, bar: 2}, out)
             return true
           })
 
@@ -266,24 +264,24 @@ describe('transport', function () {
   it('transport-local-over-wrap', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
-      .listen({type: 'test',pin: 'foo:1'})
+      .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
 
           .client({type: 'test', pin: 'foo:1'})
 
-          .add('foo:1', function (args, done) {done(null, {foo: 1,local: 1})})
+          .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
 
           .start()
 
           .wait('foo:1,bar:1')
           .step(function (out) {
             assert.equal(0, tt.outmsgs.length)
-            assert.deepEqual({foo: 1,local: 1}, out)
+            assert.deepEqual({foo: 1, local: 1}, out)
             return true
           })
 
@@ -294,12 +292,12 @@ describe('transport', function () {
   it('transport-local-prior-wrap', function (done) {
     var tt = make_test_transport()
 
-    var server = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .add('foo:1', testact)
-      .listen({type: 'test',pin: 'foo:1'})
+      .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
-        var si = seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+        seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
 
           .client({type: 'test', pin: 'foo:1'})
@@ -315,7 +313,7 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             assert.equal(1, tt.outmsgs.length)
-            assert.deepEqual({foo: 1,bar: 2,local: 1,qaz: 1}, out)
+            assert.deepEqual({foo: 1, bar: 2, local: 1, qaz: 1}, out)
             return true
           })
 
@@ -328,12 +326,12 @@ describe('transport', function () {
 
     var inits = {}
 
-    seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true }})
+    seneca({timeout: 5555, log: 'silent', debug: { short_logs: true }})
       .use(tt)
       .add('foo:1', testact)
       .use(function bar () {
         this.add('bar:1', testact)
-        this.add('init:bar', function (a, d) {inits.bar = 1;d()})
+        this.add('init:bar', function (a, d) { inits.bar = 1; d() })
       })
 
       .client()
@@ -341,7 +339,7 @@ describe('transport', function () {
       .add('foo:2', testact)
       .use(function zed () {
         this.add('zed:1', testact)
-        this.add('init:zed', function (a, d) {inits.zed = 1;d()})
+        this.add('init:zed', function (a, d) { inits.zed = 1; d() })
       })
 
       .listen()
@@ -349,7 +347,7 @@ describe('transport', function () {
       .add('foo:3', testact)
       .use(function qux () {
         this.add('qux:1', testact)
-        this.add('init:qux', function (a, d) {inits.qux = 1;d()})
+        this.add('init:qux', function (a, d) { inits.qux = 1; d() })
       })
 
       .ready(function () {
@@ -364,9 +362,7 @@ describe('transport', function () {
   it('transport-no-plugin-init', function (done) {
     var tt = make_test_transport()
 
-    var inits = {}
-
-    seneca({timeout: 5555,log: 'silent',debug: {short_logs: true}})
+    seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
       .client()
 
@@ -409,7 +405,6 @@ describe('transport', function () {
           })
       })
   })
-
 })
 
 // A simple transport that uses async.queue as the transport mechanism
@@ -424,8 +419,8 @@ function make_test_transport () {
 
     var tu = seneca.export('transport/utils')
 
-    seneca.add({role: 'transport',hook: 'listen',type: 'test'}, hook_listen_test)
-    seneca.add({role: 'transport',hook: 'client',type: 'test'}, hook_client_test)
+    seneca.add({role: 'transport', hook: 'listen', type: 'test'}, hook_listen_test)
+    seneca.add({role: 'transport', hook: 'client', type: 'test'}, hook_client_test)
 
     function hook_listen_test (args, done) {
       var seneca = this
@@ -438,7 +433,7 @@ function make_test_transport () {
 
         test_transport.queuemap[topic + '_act'] = async.queue(function (data, done) {
           tu.handle_request(seneca, data, listen_options, function (out) {
-            if (null == out) return done()
+            if (out == null) return done()
 
             test_transport.outmsgs.push(out)
 
