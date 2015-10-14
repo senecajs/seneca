@@ -1,12 +1,9 @@
 node_modules
 docpad
 doc
-test/common.test.js
 test/transport
 test/transport/receiver.js
 test/transport/sender.js
-test/prior.test.js
-test/entity.plugin.test.js
 test/plugin
 test/plugin/basic.test.js
 test/plugin/bad-init-timeout.js
@@ -24,12 +21,8 @@ test/plugin/bad-load-plugin.js
 test/plugin/bad-require-plugin.js
 test/plugin/options.test.js
 test/plugin/bad-missing.js
-test/launch.js
 test/test-included-plugins.sh
-test/debug.test.js
 test/entity.test.js
-test/logging.test.js
-test/repl.js
 test/site
 test/site/id-service-extra.js
 test/site/prior-entity.js
@@ -46,7 +39,6 @@ test/site/plugin.js
 test/site/database.js
 test/site/product-client.js
 test/seneca.util.test.js
-test/error.test.js
 test/fail
 test/fail/unknown-act.js
 test/fail/die-err.js
@@ -59,7 +51,6 @@ test/options/options.test.js
 test/options/fatal
 test/options/fatal/options.seneca.js
 test/options/fatal/fatal.js
-test/plugin.test.js
 lib/entity.js
 lib/logging.js
 lib/optioner.js

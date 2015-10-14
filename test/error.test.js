@@ -1,15 +1,11 @@
 /* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 'use strict'
 
-// mocha error.test.js
-
-var util = require('util')
 var assert = require('assert')
 
 var seneca = require('..')
 var common = require('../lib/common')
 
-var gex = require('gex')
 var Lab = require('lab')
 
 var testopts = {log: 'silent'}
@@ -49,20 +45,20 @@ describe('seneca', function () {
     // ~~ CASE: callback; default
     ctxt.errlog = null
     si.act('a:1,default$:{x:1}', function (err, out) {
-      assert.ok(null == err)
-      assert.ok(null == ctxt.errlog)
+      assert.equal(err, null)
+      assert.equal(ctxt.errlog, null)
       assert.ok(out.x)
     })
 
     // ~~ CASE: callback; no-default; err-result; err-logged
     si.act('a:1', function (err, out) {
-      assert.ok(null == out)
+      assert.equal(out, null)
       assert.equal('act_not_found', err.code)
       assert.equal('act_not_found', ctxt.errlog[8])
 
       // ~~ CASE: callback; bad-default; err-result; err-logged
       si.act('a:1,default$:"foo"', function (err, out) {
-        assert.ok(null == out)
+        assert.equal(out, null)
         assert.equal('act_default_bad', err.code)
         assert.equal('act_default_bad', ctxt.errlog[8])
 
@@ -71,11 +67,11 @@ describe('seneca', function () {
         ctxt.errlog = null
 
         try {
-          si.act('a:1', function (err, out) {
+          si.act('a:1', function () {
             assert.fail()
           })
           assert.fail()
-        } catch(ex) {
+        } catch (ex) {
           assert.equal('act_not_found', ex.code)
           assert.equal('act_not_found', ctxt.errlog[8])
         }
@@ -90,7 +86,7 @@ describe('seneca', function () {
     var si = make_seneca(ctxt)
 
     si.ready(function () {
-      si.add('a:1,b:{required$:true}', function (args, done) {this.good({x: 1})})
+      si.add('a:1,b:{required$:true}', function (args, done) { this.good({x: 1}) })
 
       // ~~ CASE: callback; args-invalid; err-result; err-logged
       si.act('a:1', function (err) {
@@ -99,7 +95,7 @@ describe('seneca', function () {
 
         // ~~ CASE: callback; args-valid
         si.act('a:1,b:1', function (err, out) {
-          assert.ok(null == err)
+          assert.equal(err, null)
           assert.equal(1, out.x)
           done()
         })
@@ -108,7 +104,7 @@ describe('seneca', function () {
   }
 
   function exec_action_throw (done) {
-    var ctxt = {errlog: null, done: done,log: true,name: 'throw'}
+    var ctxt = {errlog: null, done: done, log: true, name: 'throw'}
     var si = make_seneca(ctxt)
 
     si.add('a:1', function (args, done) {
@@ -119,7 +115,7 @@ describe('seneca', function () {
   }
 
   function exec_action_result (done) {
-    var ctxt = {errlog: null,done: done,log: true,name: 'result'}
+    var ctxt = {errlog: null, done: done, log: true, name: 'result'}
     var si = make_seneca(ctxt)
 
     si.add('a:1', function (args, done) {
@@ -130,7 +126,7 @@ describe('seneca', function () {
   }
 
   function exec_action_throw_nolog (done) {
-    var ctxt = {errlog: null,done: done,log: false,name: 'throw_nolog'}
+    var ctxt = {errlog: null, done: done, log: false, name: 'throw_nolog'}
     var si = make_seneca(ctxt)
 
     si.add('a:1', function (args, done) {
@@ -143,7 +139,7 @@ describe('seneca', function () {
   }
 
   function exec_action_result_nolog (done) {
-    var ctxt = {errlog: null,done: done,log: false,name: 'result_nolog'}
+    var ctxt = {errlog: null, done: done, log: false, name: 'result_nolog'}
     var si = make_seneca(ctxt)
 
     si.add('a:1', function (args, done) {
@@ -164,13 +160,13 @@ describe('seneca', function () {
         try {
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
-          assert.ok(-1 != err.message.indexOf('AAA' + aI))
+          assert.ok(err.message.indexOf('AAA' + aI) !== -1)
 
           aI++
 
-          if (1 < aI) return true
+          if (aI > 1) return true
           else done()
-        } catch(e) {
+        } catch (e) {
           done(e)
           return true
         }
@@ -187,7 +183,7 @@ describe('seneca', function () {
       // Need to use try-catch here as we've subverted the log
       // to test logging.
       try {
-        assert.ok(null == out)
+        assert.equal(out, null)
         assert.equal('act_execute', err.code)
         assert.equal('a:1', err.details.pattern)
         assert.equal('act_execute', ctxt.errlog[14])
@@ -196,7 +192,7 @@ describe('seneca', function () {
 
         // ~~ CASE: action-throws; no-callback; errhandler-nostop
         si.on('act-err', function (args, err) {
-          if (1 == aI) {
+          if (aI === 1) {
             try {
               assert.equal(1, args.a)
               assert.equal('act_execute', err.code)
@@ -205,15 +201,14 @@ describe('seneca', function () {
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
-              si.act('a:1', function (err, out) {
-                try { assert.fail() } catch(e) { done(e) }
+              si.act('a:1', function () {
+                try { assert.fail() } catch (e) { done(e) }
               })
-            } catch(e) { done(e) }
+            } catch (e) { done(e) }
           }
         })
         si.act('a:1')
-
-      } catch(e) { done(e) }
+      } catch (e) { done(e) }
     })
   }
 
@@ -226,13 +221,13 @@ describe('seneca', function () {
         try {
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
-          assert.ok(-1 != err.message.indexOf('AAA' + aI))
+          assert.ok(err.message.indexOf('AAA' + aI) !== -1)
 
           aI++
 
-          if (1 < aI) return true
+          if (aI > 1) return true
           else done()
-        } catch(e) {
+        } catch (e) {
           done(e)
           return true
         }
@@ -249,7 +244,7 @@ describe('seneca', function () {
       // Need to use try-catch here as we've subverted the log
       // to test logging.
       try {
-        assert.ok(null == out)
+        assert.equal(out, null)
         assert.equal('act_execute', err.code)
         assert.equal('a:1', err.details.pattern)
         assert.equal('act_execute', ctxt.errlog[14])
@@ -258,7 +253,7 @@ describe('seneca', function () {
 
         // ~~ CASE: action-throws; no-callback; errhandler-nostop
         si.on('act-err', function (args, err) {
-          if (1 == aI) {
+          if (aI === 1) {
             try {
               assert.equal(1, args.a)
               assert.equal('act_execute', err.code)
@@ -267,23 +262,22 @@ describe('seneca', function () {
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
-              si.act('a:1', function (err, out) {
-                try { assert.fail() } catch(e) { done(e) }
+              si.act('a:1', function () {
+                try { assert.fail() } catch (e) { done(e) }
               })
-            } catch(e) { done(e) }
+            } catch (e) { done(e) }
           }
         })
         si.act('a:1')
-
-      } catch(e) { done(e) }
+      } catch (e) { done(e) }
     })
   }
 
   function make_seneca (ctxt) {
     var si = seneca(testopts)
     si.options({
-      log: {map: [{level: 'error+',handler: function () {
-            ctxt.errlog = common.arrayify(arguments)
+      log: {map: [{level: 'error+', handler: function () {
+        ctxt.errlog = common.arrayify(arguments)
       }}]},
       trace: { unknown: 'error' }
     })
@@ -296,14 +290,14 @@ describe('seneca', function () {
       // Need to use try-catch here as we've subverted the log
       // to test logging.
       try {
-        assert.ok(null == out)
+        assert.equal(out, null)
         assert.equal('act_execute', err.code, ctxt.name + '-A')
         assert.equal('a:1', err.details.pattern, ctxt.name + '-B')
 
         if (ctxt.log) {
           assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-C')
         } else {
-          assert.ok(null == ctxt.errlog)
+          assert.equal(ctxt.errlog, null)
         }
 
         ctxt.errlog = null
@@ -320,11 +314,10 @@ describe('seneca', function () {
             }
 
             ctxt.done()
-          } catch(e) { ctxt.done(e) }
+          } catch (e) { ctxt.done(e) }
         })
         si.act('a:1')
-
-      } catch(e) { ctxt.done(e) }
+      } catch (e) { ctxt.done(e) }
     })
   }
 
@@ -335,23 +328,24 @@ describe('seneca', function () {
     var log_it = true
 
     si.options({errhandler: function (err) {
-        assert.equal('act_callback', err.code, 'callback-G')
-        assert.equal('seneca: Action a:1 callback threw: DDD.', err.message)
+      assert.equal('act_callback', err.code, 'callback-G')
+      assert.equal('seneca: Action a:1 callback threw: DDD.', err.message)
 
-        if (log_it) {
-          assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
-        } else {
-          assert.ok(null == ctxt.errlog)
-          done()
-        }
+      if (log_it) {
+        assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
+      } else {
+        assert.equal(ctxt.errlog, null)
+        done()
+      }
     }})
 
     si.ready(function () {
-      si.add('a:1', function (args, done) {this.good({x: 1})})
+      si.add('a:1', function (args, done) { this.good({x: 1}) })
 
       setTimeout(function () {
         // ~~ CASE: action; callback; callback-throws; log
         si.act('a:1', function (err, out) {
+          assert.equal(err, null)
           assert.ok(out.x)
           throw new Error('DDD')
         })
@@ -360,6 +354,7 @@ describe('seneca', function () {
       setTimeout(function () {
         // ~~ CASE: action; callback; callback-throws; no-log
         si.act('a:1', function (err, out) {
+          assert.equal(err, null)
           assert.ok(out.x)
           var e = new Error('DDD')
           e.log = false
@@ -368,7 +363,6 @@ describe('seneca', function () {
           throw e
         })
       }, 40)
-
     })
   }
 
@@ -381,7 +375,7 @@ describe('seneca', function () {
           assert.ok(err.foo)
           assert.equal('seneca: Ready function failed: EEE', err.message)
           done()
-        } catch(e) {done(e) }
+        } catch (e) { done(e) }
       }
     })
 
@@ -394,14 +388,14 @@ describe('seneca', function () {
 
   function legacy_fail (done) {
     var si = seneca({
-      log: 'silent',
+      log: 'silent'
     })
 
     si.options({errhandler: function (err) {
-        try {
-          assert.equal('foo', err.code)
-          assert.deepEqual({bar: 1}, err.details)
-        } catch(e) {done(e) }
+      try {
+        assert.equal('foo', err.code)
+        assert.deepEqual({bar: 1}, err.details)
+      } catch (e) { done(e) }
     }})
 
     var err = si.fail('foo', {bar: 1})
@@ -409,13 +403,13 @@ describe('seneca', function () {
     assert.deepEqual({bar: 1}, err.details)
 
     si.options({errhandler: function (err) {
-        try {
-          assert.equal('FOO', err.code)
-          assert.deepEqual({BAR: 1}, err.details)
-        } catch(e) {done(e) }
+      try {
+        assert.equal('FOO', err.code)
+        assert.deepEqual({BAR: 1}, err.details)
+      } catch (e) { done(e) }
     }})
 
-    var err = si.fail('FOO', {BAR: 1}, function (err) {
+    err = si.fail('FOO', {BAR: 1}, function (err) {
       assert.equal('FOO', err.code)
       assert.deepEqual({BAR: 1}, err.details)
       setImmediate(done)
