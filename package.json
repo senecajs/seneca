@@ -72,7 +72,10 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/lab -v -P test -L",
-    "build": "./build.sh"
+    "build": "./build.sh",
+    "prebuild-annotated": "npm install",
+    "build-annotated": "docco seneca.js -o doc && mv ./doc/seneca.html ./doc/index.html",
+    "serve-annotated": "npm run build-annotated && serve ./doc"
   },
   "devDependencies": {
     "async": "0.9.2",
@@ -85,6 +88,7 @@
     "jshint": "2.8.0",
     "lab": "6.0.0",
     "seneca-echo": "0.2.0",
-    "seneca-error-test": "0.2.2"
+    "seneca-error-test": "0.2.2",
+    "serve": "^1.4.0"
   }
 }
