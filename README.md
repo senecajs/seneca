@@ -26,7 +26,12 @@ That's pretty much it.
 - __Version:__ 0.7.1
 - __Node:__ 0.10, 0.12, 4
 
-[Annotated Source Code](http://senecajs.org/doc/seneca.html).
+Seneca's source can be read in an annotated fashion by,
+
+- viewing [online](http://senecajs.org/annotations/seneca.html).
+- running `npm run serve-annotated`
+
+Local annotations are served in your browser at port `3000`.
 
 If you're using this module, and need help, you can:
 
@@ -50,6 +55,7 @@ To run tests, simply use npm:
 ```
 npm run test
 ```
+
 
 ## Why we built this?
 
