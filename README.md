@@ -28,7 +28,7 @@ That's pretty much it.
 
 Seneca's source can be read in an annotated fashion by,
 
-- viewing [online](http://senecajs.org/annotated/seneca.html).
+- viewing [online](http://senecajs.org/annotations/seneca.html).
 - running `npm run serve-annotated`
 
 Local annotations are served in your browser at port `3000`.
