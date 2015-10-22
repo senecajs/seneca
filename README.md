@@ -29,9 +29,9 @@ That's pretty much it.
 Seneca's source can be read in an annotated fashion by,
 
 - viewing [online](http://senecajs.org/annotations/seneca.html).
-- running `npm run serve-annotated`
+- running `npm run annotate`
 
-Local annotations are served in your browser at port `3000`.
+The annotated source can be found locally at [./doc/seneca.html]().
 
 If you're using this module, and need help, you can:
 
@@ -271,7 +271,7 @@ places. It also means you can deal with special cases very easily.
 
 For more examples of Seneca in action, take a look at:
 
-   * [seneca-examples](//github.com/rjrodger/seneca-examples)
+   * [seneca-examples](//github.com/senecajs/seneca-examples)
    * [nodezoo.com](//nodezoo.com/#q=seneca)
    * [Well!](//github.com/nearform/well)
 
@@ -282,8 +282,8 @@ documentation, examples, extra testing, or new features please get in touch.
 ## License
 Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 
-[travis-badge]: https://travis-ci.org/rjrodger/seneca.svg
-[travis-url]: https://travis-ci.org/rjrodger/seneca
+[travis-badge]: https://travis-ci.org/senecajs/seneca.svg
+[travis-url]: https://travis-ci.org/senecajs/seneca
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
@@ -292,7 +292,7 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [MIT]: ./LICENSE
 [Senecajs org]: https://github.com/senecajs/
 [senecajs.org]: http://senecajs.org/
-[github issue]: https://github.com/rjrodger/seneca/issues
+[github issue]: https://github.com/senecajs/seneca/issues
 [@senecajs]: http://twitter.com/senecajs
 [lightning]: http://aws.amazon.com/message/67457/
 [plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
