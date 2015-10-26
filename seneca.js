@@ -1032,14 +1032,18 @@ function make_seneca (initial_options) {
   }
 
   function api_find (args) {
-    var local = true
-    var remote = true
-
     if (_.isString(args)) {
       args = jsonic(args)
     }
 
     var actmeta = private$.actrouter.find(args)
+
+    // if we have no destination, we look for
+    // a catch-all pattern and assign this, if
+    // it exists.
+    if (!actmeta) {
+      actmeta = private$.actrouter.find({})
+    }
 
     return actmeta
   }
