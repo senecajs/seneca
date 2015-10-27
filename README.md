@@ -23,7 +23,7 @@ Use this module to define commands that work by taking in some JSON, and, option
 
 That's pretty much it.
 
-- __Version:__ 0.7.1
+- __Version:__ 0.7.2
 - __Node:__ 0.10, 0.12, 4
 
 Seneca's source can be read in an annotated fashion by,

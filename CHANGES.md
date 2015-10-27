@@ -1,4 +1,9 @@
 
+## 0.7.2: 2015-10-27
+
+   * Fix support for catchall (without pins) clients. Issue 199. Pull
+     request 200.
+
 ## 0.7.1: 2015-10-05
 
    * repl now supports quit/exit command

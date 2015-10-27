@@ -4,7 +4,7 @@
 'use strict'
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.7.1'
+var VERSION = '0.7.2'
 
 // Node API modules
 var util = require('util')
@@ -339,8 +339,8 @@ function make_seneca (initial_options) {
     builtin: ''
   })
 
-  private$.actcache = (so.actcache.active
-    ? lrucache({max: so.actcache.size})
+  private$.actcache = (so.actcache.active?
+    lrucache({max: so.actcache.size})
     : {set: _.noop})
 
   private$.wait_for_ready = false
@@ -1763,7 +1763,7 @@ function make_seneca (initial_options) {
         sub_prior_ctxt.entry = false
         sub_prior_ctxt.depth++
 
-        delete prior_args.id$
+        ;delete prior_args.id$
         delete prior_args.actid$
         delete prior_args.meta$
         delete prior_args.transport$
