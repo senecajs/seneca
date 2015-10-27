@@ -278,6 +278,7 @@ describe('entity', function () {
 
     assert.ok(f1.canon$({isa: 'foo'}))
     assert.ok(f1.canon$({isa: [null, null, 'foo']}))
+    assert.ok(f1.canon$({isa: [void 0, void 0, 'foo']}))
     assert.ok(f1.canon$({isa: {name: 'foo'}}))
 
     assert.ok(!f1.canon$({isa: 'bar'}))
