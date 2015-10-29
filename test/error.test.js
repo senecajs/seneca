@@ -50,6 +50,15 @@ describe('seneca', function () {
       assert.ok(out.x)
     })
 
+    // ~~ CASE: callback; default Array
+    ctxt.errlog = null
+    si.act('a:1,default$:[1,"foo"]', function (err, out) {
+      assert.ok(err === null)
+      assert.ok(ctxt.errlog === null)
+      assert.equal(out[0], 1)
+      assert.ok(out[1], 'foo')
+    })
+
     // ~~ CASE: callback; no-default; err-result; err-logged
     si.act('a:1', function (err, out) {
       assert.equal(out, null)
