@@ -8,7 +8,17 @@ Each data store must define these patterns:
    * role:entity, cmd:save   - save a single entity, creating it if needed
    * role:entity, cmd:list   - list entities matching a query condition
    * role:entity, cmd:remove - remove an entity
+
+Deprecated patterns:
+
+This must still be supported where they exist already, but do not need
+to be added to new stores.
+
    * role:entity, cmd:native - provide access to the native driver
+
+The native driver should be exposed via seneca.export().
+See https://github.com/senecajs/seneca-mem-store for an example.
+
 
 If the data store is loaded under an entity mapping, then the
 following additional keys will potentially be part of pattern:
