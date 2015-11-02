@@ -1,4 +1,3 @@
-
 var seneca = require('../..')()
 
-seneca.die( 'foo' )
+seneca.die('foo')

@@ -1,4 +1,4 @@
 module.exports = {
-  a:1,
+  a: 1,
   foo: { aa: 1 }
 }

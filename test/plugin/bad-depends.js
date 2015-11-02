@@ -1,2 +1,2 @@
 require('../..')()
-  .depends('foo',['bar'])
+  .depends('foo', ['bar'])

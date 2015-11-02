@@ -1,9 +1,6 @@
 /* Copyright (c) 2013-2015 Richard Rodger, MIT License */
 'use strict'
 
-// mocha plugin.test.js
-
-var util = require('util')
 var assert = require('assert')
 
 var _ = require('lodash')
@@ -25,12 +22,12 @@ describe('plugin', function () {
       log: 'silent'
     })
 
-    try { si.use({foo: 1}) } catch(e) {
+    try { si.use({foo: 1}) } catch (e) {
       assert.ok(e.seneca)
       assert.equal('plugin_no_name', e.code)
     }
 
-    try { si.use('not-a-plugin-at-all-at-all') } catch(e) {
+    try { si.use('not-a-plugin-at-all-at-all') } catch (e) {
       assert.ok(e.seneca)
       assert.equal('plugin_not_found', e.code)
     }
@@ -148,7 +145,7 @@ describe('plugin', function () {
   })
 
   it('fix', function (done) {
-    var si = seneca({log: 'silent',errhandler: done})
+    var si = seneca({log: 'silent', errhandler: done})
 
     function echo (args, cb) {
       cb(null, _.extend({ t: Date.now() }, args))
@@ -157,6 +154,7 @@ describe('plugin', function () {
     var plugin_aaa = function (opts) {
       this.add({a: 1}, function (args, cb) {
         this.act('z:1', function (err, out) {
+          assert.equal(err, null)
           cb(null, _.extend({a: 1}, out))
         })
       })
@@ -169,7 +167,7 @@ describe('plugin', function () {
     assert.ok(si.hasact({z: 1}))
 
     si.act({a: 1}, function (err, out) {
-      assert.ok(null == err)
+      assert.equal(err, null)
       assert.equal(1, out.a)
       assert.equal(1, out.z)
       assert.ok(out.t)
@@ -180,23 +178,24 @@ describe('plugin', function () {
         .use(function (opts) {
           this.add({a: 1}, function (args, done) {
             this.act('z:1', function (err, out) {
-              done(null, _.extend({a: 1,w: 1}, out))
+              assert.equal(err, null)
+              done(null, _.extend({a: 1, w: 1}, out))
             })
           })
           return 'bbb'
         })
 
       assert.ok(si.hasact({a: 1}))
-      assert.ok(si.hasact({a: 1,q: 1}))
+      assert.ok(si.hasact({a: 1, q: 1}))
 
       si.act({a: 1}, function (err, out) {
-        assert.ok(null == err)
+        assert.equal(err, null)
         assert.equal(1, out.a)
         assert.equal(1, out.z)
         assert.ok(out.t)
 
         si.act({a: 1, q: 1}, function (err, out) {
-          assert.ok(null == err)
+          assert.equal(err, null)
           assert.equal(1, out.a)
           assert.equal(1, out.z)
           assert.equal(1, out.w)
@@ -206,7 +205,6 @@ describe('plugin', function () {
         })
       })
     })
-
   })
 
   it('export', function (done) {

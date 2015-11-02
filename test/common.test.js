@@ -1,9 +1,6 @@
 /* Copyright (c) 2014 Richard Rodger, MIT License */
 'use strict'
 
-// mocha common.test.js
-
-var util = require('util')
 var assert = require('assert')
 
 var Lab = require('lab')
@@ -105,9 +102,8 @@ describe('common', function () {
 
   it('argpattern', function (done) {
     assert.equal('a:1', common.argpattern({a: 1}))
-    assert.equal('a:1,b:2', common.argpattern({a: 1,b: 2}))
-    assert.equal('a:1,b:2', common.argpattern({a: 1,b: 2,c$: 3}))
+    assert.equal('a:1,b:2', common.argpattern({a: 1, b: 2}))
+    assert.equal('a:1,b:2', common.argpattern({a: 1, b: 2, c$: 3}))
     done()
   })
-
 })
