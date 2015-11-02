@@ -1,6 +1,3 @@
 {
-  "extends": "standard",
-  "rules": {
-    "no-labels": 0
-  }
+  "extends": "seneca"
 }
