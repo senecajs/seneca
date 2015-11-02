@@ -15,41 +15,17 @@ describe('CLI', function () {
   var launchPath = path.join(__dirname, 'launch')
 
   it('respects seneca.print.tree[.all] arg', function (done) {
-    var cli = childProcess.spawn('node', [launchPath, '--seneca.print.tree'])
-    var output = ''
-
-    cli.stdout.on('data', function (data) {
-      output += data
-    })
-
-    cli.stderr.on('data', function (data) {
-      assert(!data)
-    })
-
-    cli.once('close', function (code, signal) {
-      assert(code === 0)
-      assert(!signal)
-      assert(output.indexOf('Seneca action patterns') !== -1)
+    childProcess.exec(process.argv[0] + ' ' + launchPath + ' --seneca.print.tree', { env: { 'SENECA_LOG': 'all' } }, function (err, stdout, stderr) {
+      assert(!err)
+      assert(stdout.indexOf('Seneca') !== -1)
       done()
     })
   })
 
   it('won\'t display action patterns message when they aren\'t provided', function (done) {
-    var cli = childProcess.spawn('node', [launchPath])
-    var output = ''
-
-    cli.stdout.on('data', function (data) {
-      output += data
-    })
-
-    cli.stderr.on('data', function (data) {
-      assert(!data)
-    })
-
-    cli.once('close', function (code, signal) {
-      assert(code === 0)
-      assert(!signal)
-      assert(output.indexOf('Seneca action patterns') === -1)
+    childProcess.exec(process.argv[0] + ' ' + launchPath, function (err, stdout, stderr) {
+      assert(!err)
+      assert(stdout.indexOf('Seneca') === -1)
       done()
     })
   })
