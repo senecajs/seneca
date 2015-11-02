@@ -160,7 +160,8 @@ describe('options', function () {
     try {
       seneca({idlen: 'foo'})
       assert.fail()
-    } catch (e) {
+    }
+    catch (e) {
       assert.equal('integer$', e.parambulator.code)
     }
     done()
