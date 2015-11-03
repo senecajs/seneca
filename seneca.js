@@ -1145,7 +1145,7 @@ function make_seneca (initial_options) {
 
     // action pattern not found
 
-    if (_.isPlainObject(args.default$)) {
+    if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
       self.log.debug('act', '-', '-', 'DEFAULT', self.util.clean(args), callpoint())
       if (actdone) actdone.call(self, null, _.clone(args.default$))
       return self
@@ -2094,7 +2094,7 @@ function make_seneca (initial_options) {
   root.add({role: 'seneca',  ready: true}, action_seneca_ready)
   root.add({role: 'options', cmd: 'get'}, action_options_get)
 
-  print(root, private$.optioner.get().argv)
+  print(root)
 
   // Define builtin actions.
 
@@ -2513,7 +2513,7 @@ function ERRMSGMAP () {
       'result provided (using a default$ property).',
 
     act_default_bad: 'No matching action pattern found for <%=args%>, and default ' +
-      'result is not a plain object: <%=xdefault%>.',
+      'result is not a plain object or an array: <%=xdefault%>.',
 
     act_no_args: 'No action pattern defined in "<%=args%>"; the first argument ' +
       'should be a string or object pattern.',

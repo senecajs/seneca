@@ -182,8 +182,22 @@ describe('entity', function () {
     assert.equal('0/0/0', fmt(si.util.parsecanon('0/0/0')))
 
     var fail
-    try { si.util.parsecanon(''); fail = '' } catch (e) { assert.equal('invalid_canon', e.code) }
-    try { si.util.parsecanon('?'); fail = '?' } catch (e) { assert.equal('invalid_canon', e.code) }
+    try {
+      si.util.parsecanon('')
+      fail = ''
+    }
+    catch (e) {
+      assert.equal('invalid_canon', e.code)
+    }
+
+    try {
+      si.util.parsecanon('?')
+      fail = '?'
+    }
+    catch (e) {
+      assert.equal('invalid_canon', e.code)
+    }
+
     assert.equal(fail, void 0, fail)
 
     var foo = si.make$('foo')

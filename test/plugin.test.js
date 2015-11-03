@@ -22,12 +22,18 @@ describe('plugin', function () {
       log: 'silent'
     })
 
-    try { si.use({foo: 1}) } catch (e) {
+    try {
+      si.use({ foo: 1 })
+    }
+    catch (e) {
       assert.ok(e.seneca)
       assert.equal('plugin_no_name', e.code)
     }
 
-    try { si.use('not-a-plugin-at-all-at-all') } catch (e) {
+    try {
+      si.use('not-a-plugin-at-all-at-all')
+    }
+    catch (e) {
       assert.ok(e.seneca)
       assert.equal('plugin_not_found', e.code)
     }

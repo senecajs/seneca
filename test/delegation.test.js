@@ -95,7 +95,8 @@ describe('delegation', function () {
             if (arguments[6] === 'aaa') {
               if (arguments[1] !== 'debug') fail = 'aaa,debug'
               if (arguments[2] !== 'single') fail = 'aaa,single'
-            } else if (arguments[6] === 'ppp') {
+            }
+            else if (arguments[6] === 'ppp') {
               if (arguments[1] !== 'debug') fail = 'ppp,debug'
               if (arguments[2] !== 'plugin') fail = 'ppp,plugin'
             }
