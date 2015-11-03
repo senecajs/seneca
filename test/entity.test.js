@@ -18,6 +18,7 @@ var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 
+
 process.setMaxListeners(0)
 
 describe('entity', function () {
@@ -424,5 +425,25 @@ describe('entity', function () {
 
       done()
     })
+  })
+
+
+  it('entity.mapping', function (done) {
+    var si = seneca(testopts)
+
+    si.use('mem-store', {map: {'-/-/foo': '*'}})
+    si.use('mem-store', {map: {'-/-/bar': '*'}})
+
+    var plugins = si.plugins()
+
+    assert.ok(!plugins['mem-store/4'])
+    assert.ok(plugins['mem-store/3'])
+    assert.ok(plugins['mem-store/2'])
+    assert.ok(plugins['mem-store/1'])
+    assert.ok(!plugins['mem-store/0'])
+
+    // TODO: need to be able to introspect store map
+
+    done()
   })
 })

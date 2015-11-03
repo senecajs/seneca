@@ -1,6 +1,7 @@
 {
   "extends": "standard",
   "rules": {
-    "no-labels": 0
+    "no-labels": 0,
+    "no-multiple-empty-lines": 0
   }
 }

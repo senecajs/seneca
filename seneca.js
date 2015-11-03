@@ -218,6 +218,7 @@ function make_seneca (initial_options) {
   root.cluster = api_cluster
   root.hasplugin = api_hasplugin
   root.findplugin = api_findplugin
+  root.plugins = api_plugins
   root.pin = api_pin
   root.actroutes = api_actroutes
   root.act_if = api_act_if
@@ -372,10 +373,7 @@ function make_seneca (initial_options) {
     parsecanon: make_entity.parsecanon
   }
 
-  root.store = {
-    init: store.init,
-    cmds: store.cmds
-  }
+  root.store = store()
 
   // say hello, printing identifier to log
   root.log.info('hello', root.toString(), callpoint())
@@ -738,13 +736,14 @@ function make_seneca (initial_options) {
     else return self
   }
 
+
   function api_hasplugin (plugindesc, tag) {
     var self = this
     tag = ('' === tag || '-' === tag) ? null : tag
     return !!self.findplugin(plugindesc, tag)
   }
 
-  // get plugin instance
+
   function api_findplugin (plugindesc, tag) {
     var name = plugindesc.name || plugindesc
     tag = plugindesc.tag || tag
@@ -754,6 +753,12 @@ function make_seneca (initial_options) {
 
     return plugin
   }
+
+
+  function api_plugins () {
+    return _.clone( private$.plugins )
+  }
+
 
   function api_pin (pattern, pinopts) {
     var thispin = this
