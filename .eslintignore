@@ -3,4 +3,3 @@ docpad
 doc
 test/plugin/bad-syntax-plugin.js
 lib/logging.js
-seneca.js
