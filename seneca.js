@@ -1,5 +1,4 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
-/* jshint node:true, asi:true, eqnull:true */
 // <style> p,ul,li { margin:5px !important; } </style>
 'use strict'
 
