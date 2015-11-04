@@ -204,7 +204,7 @@ You can do this with every command.
 
 ### Keeping the Business Happy
 
-The thing about business requirements is that have no respect for
+The thing about business requirements is that they have no respect for
 common sense, logic or orderly structure. The real world is
 messy.
 
