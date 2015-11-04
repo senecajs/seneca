@@ -1583,16 +1583,15 @@ function make_seneca (initial_options) {
 
         // for exceptions thrown inside the callback
         catch (ex) {
-          var error = ex
-
+          var formattedErr = ex
           // handle throws of non-Error values
           if (!util.isError(ex)) {
-            error = (_.isObject(ex)
+            formattedErr = _.isObject(ex)
               ? new Error(jsonic.stringify(ex))
-              : error = new Error('' + ex))
+              : new Error('' + ex)
           }
 
-          callback_error(instance, error, actmeta, result, cb,
+          callback_error(instance, formattedErr, actmeta, result, cb,
             actend - actstart, callargs, prior_ctxt, act_callpoint)
         }
       }
@@ -1982,11 +1981,12 @@ function make_seneca (initial_options) {
       }
       else {
         fn = function (data, done) {
-          /* jshint evil:true */
-
           if (args.strargs) {
+            /*eslint-disable */
+            var $ = data
+            /*eslint-enable */
             _.each(actargs, function (v, k) {
-              if (_.isString(v) && 0 === v.indexOf('$.')) {
+              if (_.isString(v) && v.indexOf('$.') === 0) {
                 /*eslint-disable */
                 actargs[k] = eval(v)
                 /*eslint-enable */

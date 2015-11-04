@@ -609,7 +609,7 @@ describe('seneca', function () {
         return self
       }
       self.init = function (options) {
-        this.add({role: self.name, cmd: 'foo'}, function (args, cb) {
+        this.add({ role: self.name, cmd: 'foo' }, function (args, cb) {
           cb(null, 'foo:' + args.foo)
         })
       }
