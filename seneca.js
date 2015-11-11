@@ -1557,7 +1557,7 @@ function make_seneca (initial_options) {
 
         // for exceptions thrown inside the callback
         catch(ex) {
-          var err = ex
+          err = ex
 
           // handle throws of non-Error values
           if (!util.isError(ex)) {
