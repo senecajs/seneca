@@ -35,7 +35,8 @@
     "Jake Pruitt",
     "Marian Radulescu",
     "Alexandru Mircea",
-    "Adrian Rossouw (http://daemon.co.za)"
+    "Adrian Rossouw (http://daemon.co.za)",
+    "Aleksandar Ostojić"
   ],
   "dependencies": {
     "archy": "1.0.0",
@@ -68,7 +69,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/rjrodger/seneca.git"
+    "url": "git+ssh://git@github.com:Beats/seneca.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/lab -v -P test -L",
