@@ -35,7 +35,8 @@
     "Jake Pruitt",
     "Marian Radulescu",
     "Alexandru Mircea",
-    "Adrian Rossouw (http://daemon.co.za)"
+    "Adrian Rossouw (http://daemon.co.za)",
+    "Aleksandar Ostojić"
   ],
   "dependencies": {
     "archy": "1.0.0",
