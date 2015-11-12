@@ -69,7 +69,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:Beats/seneca.git"
+    "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/lab -v -P test -L",
