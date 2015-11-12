@@ -71,7 +71,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/lab -v -P test -L",
+    "test": "./node_modules/.bin/lab -v -P test -L -t 80",
     "lint": "./node_modules/.bin/lab -P test -dL",
     "build": "./build.sh",
     "annotate": "docco seneca.js -o doc"
