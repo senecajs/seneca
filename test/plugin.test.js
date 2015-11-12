@@ -5,8 +5,7 @@ var assert = require('assert')
 
 var _ = require('lodash')
 var Lab = require('lab')
-
-var seneca = require('..')
+var Seneca = require('..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -14,7 +13,7 @@ var it = lab.it
 
 describe('plugin', function () {
   it('bad', function (done) {
-    var si = seneca({
+    var si = Seneca({
       // this lets you change undead per test
       debug: {
         undead: true
@@ -41,7 +40,7 @@ describe('plugin', function () {
   })
 
   it('plugin-error-def', function (done) {
-    var si = seneca({
+    var si = Seneca({
       debug: {
         undead: true
       },
@@ -58,7 +57,7 @@ describe('plugin', function () {
   })
 
   it('plugin-error-add', function (done) {
-    var si = seneca({
+    var si = Seneca({
       debug: {
         undead: true
       },
@@ -77,7 +76,7 @@ describe('plugin', function () {
   it('plugin-error-act', function (done) {
     var cc = 0
 
-    var si = seneca({
+    var si = Seneca({
       debug: {
         undead: true
       },
@@ -98,7 +97,7 @@ describe('plugin', function () {
   })
 
   it('depends', function (done) {
-    var si = seneca({
+    var si = Seneca({
       // this lets you change undead per test
       debug: {
         undead: true
@@ -151,7 +150,7 @@ describe('plugin', function () {
   })
 
   it('fix', function (done) {
-    var si = seneca({log: 'silent', errhandler: done})
+    var si = Seneca({log: 'silent', errhandler: done})
 
     function echo (args, cb) {
       cb(null, _.extend({ t: Date.now() }, args))
@@ -214,7 +213,7 @@ describe('plugin', function () {
   })
 
   it('export', function (done) {
-    var si = seneca({
+    var si = Seneca({
       // this lets you change undead per test
       debug: {
         undead: true
@@ -233,7 +232,7 @@ describe('plugin', function () {
   })
 
   it('hasplugin', function (done) {
-    var si = seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
 
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
@@ -248,5 +247,33 @@ describe('plugin', function () {
     assert.ok(!si.hasplugin('bar', 'bbb'))
     assert.ok(si.hasplugin('bar', 'aaa'))
     done()
+  })
+
+  it('handles plugin with action that timesout', function (done) {
+    var seneca = Seneca({ log: 'silent', timeout: 10 })
+
+    seneca.use(function foo () {
+      this.add({ role: 'plugin', cmd: 'timeout' }, function () { })
+    })
+
+    seneca.act({ role: 'plugin', cmd: 'timeout' }, function (err) {
+      assert.ok(err)
+      done()
+    })
+  })
+
+  it('handles plugin action that throws an error', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    seneca.use(function foo () {
+      this.add({ role: 'plugin', cmd: 'throw' }, function () {
+        throw new Error()
+      })
+    })
+
+    seneca.act({ role: 'plugin', cmd: 'throw' }, function (err) {
+      assert.ok(err)
+      done()
+    })
   })
 })
