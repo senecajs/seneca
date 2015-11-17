@@ -5,12 +5,14 @@ var assert = require('assert')
 
 var seneca = require('..')
 
+
 var gex = require('gex')
 var Lab = require('lab')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+
 
 describe('entity.plugin', function () {
   it('multi', function (fin) {

@@ -210,21 +210,33 @@ describe('seneca', function () {
     var initfn = function () {}
     var emptycb = function () {}
 
-    try { si.register() } catch (e) {
+    try {
+      si.register()
+    }
+    catch (e) {
       assert.equal('no_input$', e.parambulator.code)
     }
 
-    try { si.register({}) } catch (e) {
+    try {
+      si.register({})
+    }
+    catch (e) {
       assert.equal('name', e.parambulator.property)
       assert.equal('required$', e.parambulator.code)
     }
 
-    try { si.register({name: 1, init: initfn}, emptycb) } catch (e) {
+    try {
+      si.register({name: 1, init: initfn}, emptycb)
+    }
+    catch (e) {
       assert.equal('name', e.parambulator.property)
       assert.equal('string$', e.parambulator.code)
     }
 
-    try { si.register({name: 'a', init: 'b'}, emptycb) } catch (e) {
+    try {
+      si.register({name: 'a', init: 'b'}, emptycb)
+    }
+    catch (e) {
       assert.equal('init', e.parambulator.property)
       assert.equal('function$', e.parambulator.code)
     }
@@ -266,7 +278,8 @@ describe('seneca', function () {
         assert.fail()
       })
       assert.fail()
-    } catch (e) {
+    }
+    catch (e) {
       assert.equal(e.code, 'act_not_found')
 
       try {
@@ -275,19 +288,22 @@ describe('seneca', function () {
           assert.fail()
         })
         assert.fail()
-      } catch (e) {
+      }
+      catch (e) {
         assert.equal(e.code, 'act_default_bad')
         try {
           si.act()
           assert.fail()
-        } catch (e) {
+        }
+        catch (e) {
           assert.equal(e.code, 'act_not_found')
           try {
             si.act(function () {
               assert.fail()
             })
             assert.fail()
-          } catch (e) {
+          }
+          catch (e) {
             assert.equal(e.code, 'act_not_found')
             done()
           }
@@ -549,7 +565,8 @@ describe('seneca', function () {
       si.act_if({op: 'foo', bar: '2'}, function () {
         assert.fail()
       })
-    } catch (e) {
+    }
+    catch (e) {
       assert.ok(e.message.match(/norma:/))
     }
 
@@ -592,7 +609,7 @@ describe('seneca', function () {
         return self
       }
       self.init = function (options) {
-        this.add({role: self.name, cmd: 'foo'}, function (args, cb) {
+        this.add({ role: self.name, cmd: 'foo' }, function (args, cb) {
           cb(null, 'foo:' + args.foo)
         })
       }
@@ -768,7 +785,8 @@ describe('seneca', function () {
           si.add('a:,b:2', function (args, cb) {
             cb()
           })
-        } catch (e) {
+        }
+        catch (e) {
           assert.equal(e.code, 'add_string_pattern_syntax')
           next()
         }
@@ -778,7 +796,8 @@ describe('seneca', function () {
           si.act('a:,b:2', {c: 3}, function () {
             assert.fail()
           })
-        } catch (e) {
+        }
+        catch (e) {
           assert.equal(e.code, 'add_string_pattern_syntax')
           next()
         }
@@ -788,7 +807,8 @@ describe('seneca', function () {
           si.add('a:1,b:2', 'bad-arg', function (args, cb) {
             cb()
           })
-        } catch (e) {
+        }
+        catch (e) {
           assert.ok(e.message.match(/norma:/))
           next()
         }
@@ -796,7 +816,8 @@ describe('seneca', function () {
       function (next) {
         try {
           si.add(123, function (args, cb) { cb() })
-        } catch (e) {
+        }
+        catch (e) {
           assert.ok(e.message.match(/norma:/))
           next()
         }
@@ -854,7 +875,9 @@ describe('seneca', function () {
       .ready(function () {
         // using root as ready seneca is fatal$
         this.root.options({errhandler: function (err) {
-          if (err.code !== 'act_invalid_args') return done(err)
+          if (err.code !== 'act_invalid_args') {
+            return done(err)
+          }
           done()
         }})
 
@@ -956,7 +979,8 @@ describe('seneca', function () {
         try {
           assert.ok(!err)
           assert.equal(2, out.a)
-        } catch (e) {
+        }
+        catch (e) {
           return done(e)
         }
 
@@ -967,7 +991,8 @@ describe('seneca', function () {
               "The property 'b', with current value: 'b', " +
               'must be a integer (parent: top level).; arguments ' +
               "were: { a: 1, b: 'b' }.", err.message)
-          } catch (e) {
+          }
+          catch (e) {
             return done(e)
           }
 
@@ -975,10 +1000,12 @@ describe('seneca', function () {
             this.add({a: 1, b: {notatypeatallatall$: true}}, function (args, cb) {
               assert.fail()
             })
-          } catch (e) {
+          }
+          catch (e) {
             try {
               assert.ok(e.message.match(/Parambulator: Unknown rule/))
-            } catch (e) {
+            }
+            catch (e) {
               return done(e)
             }
 
@@ -1350,5 +1377,20 @@ describe('seneca', function () {
           done()
         })
       })
+  })
+
+  it('cluster errors when node version is less than 0.12.0', function (done) {
+    var version = process.versions.node
+    var si = seneca(testopts)
+
+    si.die = function (err) {
+      process.versions.node = version
+      assert.strictEqual(err.code, 'bad_cluster_version')
+      done()
+    }
+
+    delete process.versions.node
+    process.versions.node = '0.11.99'
+    si.cluster()
   })
 })

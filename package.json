@@ -51,9 +51,10 @@
     "parambulator": "1.5.1",
     "patrun": "0.5.0",
     "rolling-stats": "0.1.1",
+    "semver": "5.0.3",
     "seneca-basic": "0.3.0",
     "seneca-mem-store": "0.3.1",
-    "seneca-transport": "0.7.2",
+    "seneca-transport": "0.8.2",
     "seneca-web": "0.4.3",
     "use-plugin": "0.3.1",
     "zig": "0.1.1"
@@ -71,7 +72,8 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/lab -v -P test -L",
+    "test": "./node_modules/.bin/lab -v -P test -L -t 80",
+    "lint": "./node_modules/.bin/lab -P test -dL",
     "build": "./build.sh",
     "annotate": "docco seneca.js -o doc"
   },
@@ -81,9 +83,9 @@
     "connect": "3.0.2",
     "connect-query": "0.2.0",
     "docco": "0.7.0",
-    "eslint-config-standard": "^4.4.0",
-    "eslint-plugin-standard": "^1.3.1",
-    "jshint": "2.8.0",
+    "eslint-config-seneca": "1.x.x",
+    "eslint-plugin-hapi": "2.x.x",
+    "eslint-plugin-standard": "1.x.x",
     "lab": "6.0.0",
     "seneca-echo": "0.2.0",
     "seneca-error-test": "0.2.2"

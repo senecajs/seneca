@@ -50,6 +50,15 @@ describe('seneca', function () {
       assert.ok(out.x)
     })
 
+    // ~~ CASE: callback; default Array
+    ctxt.errlog = null
+    si.act('a:1,default$:[1,"foo"]', function (err, out) {
+      assert.ok(err === null)
+      assert.ok(ctxt.errlog === null)
+      assert.equal(out[0], 1)
+      assert.ok(out[1], 'foo')
+    })
+
     // ~~ CASE: callback; no-default; err-result; err-logged
     si.act('a:1', function (err, out) {
       assert.equal(out, null)
@@ -71,7 +80,8 @@ describe('seneca', function () {
             assert.fail()
           })
           assert.fail()
-        } catch (ex) {
+        }
+        catch (ex) {
           assert.equal('act_not_found', ex.code)
           assert.equal('act_not_found', ctxt.errlog[8])
         }
@@ -164,9 +174,13 @@ describe('seneca', function () {
 
           aI++
 
-          if (aI > 1) return true
-          else done()
-        } catch (e) {
+          if (aI > 1) {
+            return true
+          }
+
+          done()
+        }
+        catch (e) {
           done(e)
           return true
         }
@@ -202,13 +216,22 @@ describe('seneca', function () {
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
               si.act('a:1', function () {
-                try { assert.fail() } catch (e) { done(e) }
+                try {
+                  assert.fail()
+                }
+                catch (e) {
+                  done(e)
+                }
               })
-            } catch (e) { done(e) }
+            }
+            catch (e) { done(e) }
           }
         })
         si.act('a:1')
-      } catch (e) { done(e) }
+      }
+      catch (e) {
+        done(e)
+      }
     })
   }
 
@@ -225,9 +248,13 @@ describe('seneca', function () {
 
           aI++
 
-          if (aI > 1) return true
-          else done()
-        } catch (e) {
+          if (aI > 1) {
+            return true
+          }
+
+          done()
+        }
+        catch (e) {
           done(e)
           return true
         }
@@ -263,13 +290,24 @@ describe('seneca', function () {
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
               si.act('a:1', function () {
-                try { assert.fail() } catch (e) { done(e) }
+                try {
+                  assert.fail()
+                }
+                catch (e) {
+                  done(e)
+                }
               })
-            } catch (e) { done(e) }
+            }
+            catch (e) {
+              done(e)
+            }
           }
         })
         si.act('a:1')
-      } catch (e) { done(e) }
+      }
+      catch (e) {
+        done(e)
+      }
     })
   }
 
@@ -296,7 +334,8 @@ describe('seneca', function () {
 
         if (ctxt.log) {
           assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-C')
-        } else {
+        }
+        else {
           assert.equal(ctxt.errlog, null)
         }
 
@@ -314,10 +353,16 @@ describe('seneca', function () {
             }
 
             ctxt.done()
-          } catch (e) { ctxt.done(e) }
+          }
+          catch (e) {
+            ctxt.done(e)
+          }
         })
         si.act('a:1')
-      } catch (e) { ctxt.done(e) }
+      }
+      catch (e) {
+        ctxt.done(e)
+      }
     })
   }
 
@@ -333,7 +378,8 @@ describe('seneca', function () {
 
       if (log_it) {
         assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
-      } else {
+      }
+      else {
         assert.equal(ctxt.errlog, null)
         done()
       }
@@ -375,7 +421,10 @@ describe('seneca', function () {
           assert.ok(err.foo)
           assert.equal('seneca: Ready function failed: EEE', err.message)
           done()
-        } catch (e) { done(e) }
+        }
+        catch (e) {
+          done(e)
+        }
       }
     })
 
@@ -395,7 +444,10 @@ describe('seneca', function () {
       try {
         assert.equal('foo', err.code)
         assert.deepEqual({bar: 1}, err.details)
-      } catch (e) { done(e) }
+      }
+      catch (e) {
+        done(e)
+      }
     }})
 
     var err = si.fail('foo', {bar: 1})
@@ -406,7 +458,10 @@ describe('seneca', function () {
       try {
         assert.equal('FOO', err.code)
         assert.deepEqual({BAR: 1}, err.details)
-      } catch (e) { done(e) }
+      }
+      catch (e) {
+        done(e)
+      }
     }})
 
     err = si.fail('FOO', {BAR: 1}, function (err) {

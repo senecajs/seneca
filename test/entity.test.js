@@ -18,6 +18,7 @@ var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 
+
 process.setMaxListeners(0)
 
 describe('entity', function () {
@@ -181,8 +182,22 @@ describe('entity', function () {
     assert.equal('0/0/0', fmt(si.util.parsecanon('0/0/0')))
 
     var fail
-    try { si.util.parsecanon(''); fail = '' } catch (e) { assert.equal('invalid_canon', e.code) }
-    try { si.util.parsecanon('?'); fail = '?' } catch (e) { assert.equal('invalid_canon', e.code) }
+    try {
+      si.util.parsecanon('')
+      fail = ''
+    }
+    catch (e) {
+      assert.equal('invalid_canon', e.code)
+    }
+
+    try {
+      si.util.parsecanon('?')
+      fail = '?'
+    }
+    catch (e) {
+      assert.equal('invalid_canon', e.code)
+    }
+
     assert.equal(fail, void 0, fail)
 
     var foo = si.make$('foo')
@@ -424,5 +439,25 @@ describe('entity', function () {
 
       done()
     })
+  })
+
+
+  it('entity.mapping', function (done) {
+    var si = seneca(testopts)
+
+    si.use('mem-store', {map: {'-/-/foo': '*'}})
+    si.use('mem-store', {map: {'-/-/bar': '*'}})
+
+    var plugins = si.plugins()
+
+    assert.ok(!plugins['mem-store/4'])
+    assert.ok(plugins['mem-store/3'])
+    assert.ok(plugins['mem-store/2'])
+    assert.ok(plugins['mem-store/1'])
+    assert.ok(!plugins['mem-store/0'])
+
+    // TODO: need to be able to introspect store map
+
+    done()
   })
 })

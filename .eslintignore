@@ -2,10 +2,4 @@ node_modules
 docpad
 doc
 test/plugin/bad-syntax-plugin.js
-lib/entity.js
 lib/logging.js
-lib/optioner.js
-lib/plugin-util.js
-lib/print.js
-lib/store.js
-seneca.js
