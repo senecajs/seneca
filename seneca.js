@@ -171,8 +171,6 @@ var DEFAULT_OPTIONS = {
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
 function make_seneca (initial_options) {
-  /* jshint validthis:true */
-
   initial_options = initial_options || {} // ensure defined
 
   // Create a private context.
@@ -718,7 +716,6 @@ function make_seneca (initial_options) {
   }
 
   function api_cluster () {
-    /* jshint loopfunc:true */
     var self = this
     var version = process.versions.node
 
@@ -2328,8 +2325,6 @@ function make_trace_act (opts) {
 }
 
 function pin_patrun_customizer (pat, data) {
-  /* jshint validthis:true */
-
   var pi = this
 
   var gexers = {}
