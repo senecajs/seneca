@@ -1557,7 +1557,7 @@ function make_seneca (initial_options) {
 
         // for exceptions thrown inside the callback
         catch(ex) {
-          var err = ex
+          err = ex
 
           // handle throws of non-Error values
           if (!util.isError(ex)) {
@@ -1913,11 +1913,11 @@ function make_seneca (initial_options) {
     delegate.context = {}
 
     delegate.client = function () {
-      return self.client.call(this, arguments)
+      return self.client.apply(this, arguments)
     }
 
     delegate.listen = function () {
-      return self.listen.call(this, arguments)
+      return self.listen.apply(this, arguments)
     }
 
     return delegate
