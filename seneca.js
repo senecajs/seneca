@@ -27,6 +27,7 @@ var zig = require('zig')
 var gex = require('gex')
 var executor = require('gate-executor')
 var eraro = require('eraro')
+var semver = require('semver')
 
 // Internal modules.
 var make_entity = require('./lib/entity')
@@ -719,6 +720,11 @@ function make_seneca (initial_options) {
   function api_cluster () {
     /* jshint loopfunc:true */
     var self = this
+    var version = process.versions.node
+
+    if (semver.lt(version, '0.12.0')) {
+      return self.die(error('bad_cluster_version', {version: version}))
+    }
 
     var cluster = require('cluster')
 
@@ -2572,7 +2578,9 @@ function ERRMSGMAP () {
     sub_function_catch: 'Pattern subscription function threw: <%=message%> on ' +
       'args: <%=args%>, result: <%=result%>.',
 
-    ready_failed: 'Ready function failed: <%=message%>'
+    ready_failed: 'Ready function failed: <%=message%>',
+
+    bad_cluster_version: 'Cluster API requires Node 0.12. Found <%=version%>'
   }
 }
 
