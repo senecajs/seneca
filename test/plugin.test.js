@@ -36,7 +36,7 @@ describe('plugin', function () {
       assert.ok(e.seneca)
       assert.equal('plugin_not_found', e.code)
     }
-    done()
+    si.close(done)
   })
 
   it('plugin-error-def', function (done) {
@@ -206,7 +206,7 @@ describe('plugin', function () {
           assert.equal(1, out.w)
           assert.ok(out.t)
 
-          done()
+          si.close(done)
         })
       })
     })
@@ -246,7 +246,7 @@ describe('plugin', function () {
     assert.ok(!si.hasplugin('bar', '-'))
     assert.ok(!si.hasplugin('bar', 'bbb'))
     assert.ok(si.hasplugin('bar', 'aaa'))
-    done()
+    si.close(done)
   })
 
   it('handles plugin with action that timesout', function (done) {
@@ -258,7 +258,7 @@ describe('plugin', function () {
 
     seneca.act({ role: 'plugin', cmd: 'timeout' }, function (err) {
       assert.ok(err)
-      done()
+      seneca.close(done)
     })
   })
 
@@ -273,7 +273,7 @@ describe('plugin', function () {
 
     seneca.act({ role: 'plugin', cmd: 'throw' }, function (err) {
       assert.ok(err)
-      done()
+      seneca.close(done)
     })
   })
 })

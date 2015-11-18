@@ -15,6 +15,13 @@ var it = lab.it
 var testopts = {log: 'test'}
 
 describe('prior', function () {
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
   it('add-general-to-specific', function (done) {
     seneca(testopts)
       .error(done)

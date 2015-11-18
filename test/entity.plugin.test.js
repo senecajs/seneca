@@ -15,7 +15,7 @@ var it = lab.it
 
 
 describe('entity.plugin', function () {
-  it('multi', function (fin) {
+  it('multi', function (done) {
     var si = seneca(
       {
         plugins: [
@@ -42,7 +42,7 @@ describe('entity.plugin', function () {
           }}
         ],
         log: 'silent',
-        errhandler: fin
+        errhandler: done
       })
 
     // mem/foo
@@ -93,7 +93,7 @@ describe('entity.plugin', function () {
                     assert.equal(err, null)
                     assert.ok(gex('$-/-/zen;id=*;{d:4}').on('' + zenR))
 
-                    fin()
+                    si.close(done)
                   })
                 })
               })

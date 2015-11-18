@@ -6,8 +6,6 @@ var lab = exports.lab = require('lab').script()
 var seneca = require('..')
 var testopts = {log: 'test'}
 
-process.setMaxListeners(0)
-
 lab.experiment('debug', function () {
   lab.test('logroute', function (done) {
     var si = seneca(testopts).error(done)

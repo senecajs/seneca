@@ -19,8 +19,6 @@ var describe = lab.describe
 var it = lab.it
 
 
-process.setMaxListeners(0)
-
 describe('entity', function () {
   it('happy-mem', function (done) {
     var si = seneca(testopts)
@@ -36,7 +34,7 @@ describe('entity', function () {
       assert.equal(1, out.a)
       assert.equal(2, out.b)
 
-      done()
+      si.close(done)
     })
   })
 
@@ -58,7 +56,7 @@ describe('entity', function () {
           assert.equal(2, z.id)
           assert.equal(2, z.z)
 
-          done()
+          si.close(done)
         })
       })
     })
@@ -161,7 +159,7 @@ describe('entity', function () {
                                             assert.equal(err, null)
                                             assert.equal(1, list.length)
 
-                                            done()
+                                            si.close(done)
                                           }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) }) })
   })
 
@@ -202,7 +200,7 @@ describe('entity', function () {
 
     var foo = si.make$('foo')
     assert.equal('a/b/c', fmt(foo.canon$({parse: 'a/b/c'})))
-    done()
+    si.close(done)
   })
 
   it('make', function (done) {
@@ -372,6 +370,7 @@ describe('entity', function () {
                     si2.make('c', 'b', 'a').load$({x: 3}, function (err, nx3) {
                       assert.equal(err, null)
                       assert.equal('$c/b/a;id=' + x3.id + ';{x:3}', '' + nx3)
+                      si2.close()
 
                       next()
                     })
@@ -384,6 +383,7 @@ describe('entity', function () {
       }
 
     ], function (err) {
+      si.close()
       done(err)
     }
    )

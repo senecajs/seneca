@@ -33,7 +33,7 @@ describe('delegation', function () {
         assert.ok(out.c === 'C')
         assert.ok(out.a$ === 'A')
         assert.ok(out.b === 'B')
-        done()
+        si.close(done)
       })
     })
   })
@@ -83,7 +83,9 @@ describe('delegation', function () {
           next()
         })
       }
-    ], done)
+    ], function () {
+      si.close(done)
+    })
   })
 
   it('logging.actid', function (done) {
@@ -130,7 +132,7 @@ describe('delegation', function () {
           assert.fail(fail)
         }
 
-        done()
+        si.close(done)
       })
     })
   })
@@ -151,7 +153,7 @@ describe('delegation', function () {
 
     si.act({c: 'C'}, function (err, out) {
       assert.equal(err, null)
-      done()
+      si.close(done)
     })
   })
 
@@ -221,6 +223,8 @@ describe('delegation', function () {
           next()
         })
       }
-    ], done)
+    ], function () {
+      si.close(done)
+    })
   })
 })
