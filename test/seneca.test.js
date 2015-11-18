@@ -1398,4 +1398,52 @@ describe('seneca', function () {
     process.versions.node = '0.11.99'
     si.cluster()
   })
+
+  describe('#decorate', function () {
+    it('can add a property to seneca', function (done) {
+      var si = seneca({ log: 'silent' })
+      si.decorate('foo', function () {
+        return 'bar'
+      })
+
+      assert.equal(si.foo(), 'bar')
+      done()
+    })
+
+    it('cannot override core property', function (done) {
+      var si = seneca({ log: 'silent' })
+
+      var fn = function () {
+        si.decorate('use', 'foo')
+      }
+
+      assert.throws(fn)
+      done()
+    })
+
+    it('cannot overwrite a decorated property', function (done) {
+      var si = seneca({ log: 'silent' })
+      si.decorate('foo', function () {
+        return 'bar'
+      })
+
+      var fn = function () {
+        si.decorate('foo', 'bar')
+      }
+
+      assert.throws(fn)
+      done()
+    })
+
+    it('cannot prefix a property with an underscore', function (done) {
+      var si = seneca({ log: 'silent' })
+
+      var fn = function () {
+        si.decorate('_use', 'foo')
+      }
+
+      assert.throws(fn)
+      done()
+    })
+  })
 })
