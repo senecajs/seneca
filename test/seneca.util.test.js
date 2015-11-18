@@ -15,6 +15,13 @@ var it = lab.it
 var seneca = require('..')
 
 describe('seneca.util', function () {
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
   var si = seneca(testopts)
 
   it('seneca.util.deepextend.happy', function (done) {

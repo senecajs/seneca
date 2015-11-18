@@ -12,6 +12,14 @@ var describe = lab.describe
 var it = lab.it
 
 describe('options', function () {
+  lab.before(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
+
   it('options-happy', function (done) {
     // loads ./seneca.options.js as well
     var si = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
@@ -27,7 +35,7 @@ describe('options', function () {
     assert.equal(4, opts.d)
     assert.equal(1, opts.foo.aa)
     assert.equal(4, opts.foo.dd)
-    done()
+    si.close(done)
   })
 
   it('options-getset', function (done) {
@@ -53,7 +61,7 @@ describe('options', function () {
     assert.equal(1, opts.foo.aa)
     assert.equal(4, opts.foo.dd)
     assert.equal(5, opts.foo.ee)
-    done()
+    si.close(done)
   })
 
   it('options-legacy', function (done) {
@@ -76,7 +84,7 @@ describe('options', function () {
     assert.equal(1, opts.foo.aa)
     assert.equal(4, opts.foo.dd)
     assert.equal(5, opts.foo.ee)
-    done()
+    si.close(done)
   })
 
   it('options-file-js', function (done) {
@@ -99,7 +107,7 @@ describe('options', function () {
     assert.equal(1, opts.foo.aa)
     assert.equal(4, opts.foo.dd)
     assert.equal(2, opts.foo.bb)
-    done()
+    si0.close(done)
   })
 
   it('options-file-json', function (done) {
@@ -122,7 +130,7 @@ describe('options', function () {
     assert.equal(1, opts.foo.aa)
     assert.equal(4, opts.foo.dd)
     assert.equal(3, opts.foo.cc)
-    done()
+    si0.close(done)
   })
 
   it('options-env', function (done) {
@@ -134,7 +142,7 @@ describe('options', function () {
     assert.equal(0, opts.log.map.length)
     assert.equal('bar', opts.foo)
     assert.equal(99, opts.a)
-    done()
+    si.close(done)
   })
 
   it('options-cmdline', function (done) {
@@ -146,14 +154,14 @@ describe('options', function () {
 
     assert.equal('bar', opts.foo)
     assert.equal(99, opts.a)
-    done()
+    si.close(done)
   })
 
   it('options-internal', function (done) {
     var si = seneca({log: 'silent'})
     var ar = si.options().internal.actrouter
     assert.ok(ar)
-    done()
+    si.close(done)
   })
 
   it('options-invalid', function (done) {

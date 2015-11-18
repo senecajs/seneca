@@ -1228,10 +1228,19 @@ function make_seneca (initial_options) {
 
     self.closed = true
 
+    // cleanup process event listeners
+    _.each(so.internal.close_signals, function (active, signal) {
+      if (active) {
+        process.removeListener(signal, handleClose)
+      }
+    })
+
     self.log.debug('close', 'start', callpoint())
     self.act('role:seneca,cmd:close,closing$:true', function (err) {
       self.log.debug('close', 'end', err)
-      if (_.isFunction(done)) return done.call(self, err)
+      if (_.isFunction(done)) {
+        return done.call(self, err)
+      }
     })
   }
 
@@ -2179,14 +2188,19 @@ function make_seneca (initial_options) {
     done(null, common.copydata(val))
   }
 
+  var handleClose = function () {
+    root.close(function (err) {
+      if (err) {
+        console.error(err)
+      }
+
+      process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
+    })
+  }
+
   _.each(so.internal.close_signals, function (active, signal) {
     if (active) {
-      process.on(signal, function () {
-        root.close(function (err) {
-          if (err) console.error(err)
-          process.exit(err ? (null == err.exit ? 1 : err.exit) : 0)
-        })
-      })
+      process.once(signal, handleClose)
     }
   })
 

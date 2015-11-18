@@ -16,8 +16,6 @@ var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 
-process.setMaxListeners(0)
-
 function testact (args, done) {
   var seneca = this
   setTimeout(function () {
@@ -35,6 +33,13 @@ function testact (args, done) {
 
 describe('transport', function () {
   // TODO: test top level qaz:* : def and undef other pats
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
 
   it('transport-exact-single', function (done) {
     var tt = make_test_transport()

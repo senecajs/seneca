@@ -13,9 +13,14 @@ var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 
-process.setMaxListeners(0)
-
 describe('seneca', function () {
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
   it('act_not_found', act_not_found)
 
   it('param_caller', param_caller)

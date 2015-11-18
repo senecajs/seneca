@@ -86,7 +86,7 @@
     "eslint-config-seneca": "1.x.x",
     "eslint-plugin-hapi": "2.x.x",
     "eslint-plugin-standard": "1.x.x",
-    "lab": "6.0.0",
+    "lab": "6.x.x",
     "seneca-echo": "0.2.0",
     "seneca-error-test": "0.2.2"
   }

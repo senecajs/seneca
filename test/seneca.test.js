@@ -30,9 +30,14 @@ var timerstub = {
 
 var testopts = { log: 'silent' }
 
-process.setMaxListeners(0)
-
 describe('seneca', function () {
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
   it('version', function (done) {
     var start = Date.now()
     var si = seneca(testopts)
