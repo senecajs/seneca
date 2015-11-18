@@ -2080,11 +2080,11 @@ function make_seneca (initial_options) {
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
   function api_decorate (property, method) {
-    assert.ok(property, 'property must be specified')
-    assert.ok(typeof property === 'string', 'property must be a string')
-    assert.ok(property[0] !== '_', 'property cannot start with _')
-    assert.ok(this._decorations[property] === undefined, 'seneca is already decorated with the property')
-    assert.ok(this[property] === undefined, 'cannot override a core seneca property')
+    assert(property, 'property must be specified')
+    assert(typeof property === 'string', 'property must be a string')
+    assert(property[0] !== '_', 'property cannot start with _')
+    assert(this._decorations[property] === undefined, 'seneca is already decorated with the property')
+    assert(this[property] === undefined, 'cannot override a core seneca property: ' + property)
 
     this._decorations[property] = method
     this[property] = method

@@ -1403,6 +1403,7 @@ describe('seneca', function () {
     it('can add a property to seneca', function (done) {
       var si = seneca({ log: 'silent' })
       si.decorate('foo', function () {
+        assert(this === si)
         return 'bar'
       })
 
