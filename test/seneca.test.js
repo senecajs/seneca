@@ -9,6 +9,7 @@ var assert = require('assert')
 var async = require('async')
 var gex = require('gex')
 var _ = require('lodash')
+var Joi = require('joi')
 var Lab = require('lab')
 
 var seneca = require('..')
@@ -969,6 +970,32 @@ describe('seneca', function () {
           done()
         })
       })
+    })
+  })
+
+  it('joi', function (done) {
+    var si = seneca({ log: 'silent' })
+
+    var schema = Joi.object().keys({
+      cmd: Joi.string(),
+      c: Joi.object().required()
+    })
+
+    si.add({ cmd: 'joi' }, function (args, cb) {
+      cb(null, {})
+    }, { parambulator: schema })
+
+    si.act({ cmd: 'joi', c: 'c' }, function (err) {
+      assert(err.code === 'act_invalid_args')
+    })
+
+    si.act({ cmd: 'joi' }, function (err) {
+      assert(err.code === 'act_invalid_args')
+    })
+
+    si.act({ cmd: 'joi', c: { test: true } }, function (err) {
+      assert(!err)
+      done()
     })
   })
 
