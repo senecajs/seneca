@@ -102,7 +102,7 @@
    * transport now uses patterns, no longer hard-coded into seneca.js
 
 ## 0.5.13: 2013-10-01
-   
+
    * moved pattern matcher into own module: patrun
    * added stats collection for actions
    * jshint applied to code, use npm run-script build
