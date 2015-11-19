@@ -2,6 +2,7 @@
 > A Node.js toolkit for Micro-Service Architectures
 
 # seneca
+[![npm version][npm-badge]][npm-url] 
 [![Build Status][travis-badge]][travis-url]
 [![Gitter][gitter-badge]][gitter-url]
 
@@ -284,6 +285,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [travis-url]: https://travis-ci.org/senecajs/seneca
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
+[npm-badge]: https://badge.fury.io/js/seneca.svg
+[npm-url]: https://badge.fury.io/js/seneca
 
 [MIT]: ./LICENSE
 [Senecajs org]: https://github.com/senecajs/
