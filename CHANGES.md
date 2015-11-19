@@ -1,3 +1,26 @@
+## 0.8.0: 2015-11-20
+
+   * Fixed seneca.print.tree[all] argument not being passed correctly to optioner.
+     Issue 177.
+   * Fix minor memory leak, when seneca closed it didn't detach process
+     listeners.  Pull request 230 and issue 226.
+   * Fix api_delegate not calling client and server with arguments.  Pull
+     request 218.
+   * Throw when trying to use seneca in cluster mode on node 0.10.  This is do to
+     to cluster support in node not working correctly prior to version 0.12.0.
+     Pull request 227.
+   * Outdated dependencies are updated to their latest stable ES5 versions.  
+     Pull request 236.
+   * New function added to seneca named `decorate`.  Used to extend the core
+     seneca object with new functionality.  Pull request 233.
+   * Support data store `merge$` ability.  Pull request 217.
+   * Support added for arrays to be used as defaults in actions. Issue 185.
+   * General code cleanup and linting of internal code to follow style guide.  
+     More tests were also added to increase code coverage.  Pull requests 207,
+     208, 214, 215, 223, 229, 238
+
+   For all of the release information please view the 0.8.0 milestone on github:
+   https://github.com/senecajs/seneca/milestones/0.8.0
 
 ## 0.7.2: 2015-10-27
 
@@ -146,6 +169,3 @@
 ## 0.5.3: 2013-03-26
 
    * seneca.util.deepextend supports boxed types, thanks Mircea!
-
-
-   
