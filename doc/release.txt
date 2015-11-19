@@ -3,8 +3,8 @@
 2.  Review github issues
 3.  Make sure you have a clean branch: git checkout -b release upstream/master
 3.  run prerelease.sh
-4.  run `npm version v0.0.0 -m "version 0.0.0"` with the version number replacing 0.0.0
-5.  update version: seneca.js, test/seneca.test.js
+4.  update version: seneca.js, test/seneca.test.js
+5.  run `npm version v0.0.0 -m "version 0.0.0"` with the version number replacing 0.0.0 
 6.  git push upstream master
 7.  git push upstream --tags
 8.  npm publish

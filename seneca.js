@@ -3,7 +3,7 @@
 'use strict'
 
 // Current version, access using _seneca.version_ property.
-var VERSION = '0.7.2'
+var VERSION = '0.8.0'
 
 // Node API modules
 var util = require('util')
