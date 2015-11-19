@@ -4,6 +4,7 @@ PWD=$(pwd -L)
 
 rm -rf node_modules
 npm install
+npm link
 
 sh ./test/test-included-plugins.sh
 ec=$?; if [[ $ec != 0 ]]; then exit $ec; fi
@@ -16,7 +17,6 @@ sh ./testrun.sh
 ec=$?; if [[ $ec != 0 ]]; then exit $ec; fi
 
 cd ../..
-npm link
 
 # setup test folder
 cd ..
