@@ -556,7 +556,7 @@ function make_seneca (initial_options) {
   function api_sub () {
     var self = this
 
-    var subargs = parse_pattern(self, arguments, 'action:f actmeta:o?')
+    var subargs = Common.parsePattern(self, arguments, 'action:f actmeta:o?')
     var pattern = subargs.pattern
     if (null == pattern.in$ &&
       null == pattern.out$ &&
@@ -643,7 +643,7 @@ function make_seneca (initial_options) {
   // _seneca.act_ is called.
   function api_add () {
     var self = this
-    var args = parse_pattern(self, arguments, 'action:f? actmeta:o?')
+    var args = Common.parsePattern(self, arguments, 'action:f? actmeta:o?')
 
     var pattern = args.pattern
     var action = args.action
@@ -858,7 +858,7 @@ function make_seneca (initial_options) {
   function api_act () {
     var self = this
 
-    var spec = parse_pattern(self, arrayify(arguments), 'done:f?')
+    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
 
@@ -1458,44 +1458,15 @@ function make_seneca (initial_options) {
     else return done()
   }
 
-  // string args override object args
-  function parse_pattern (instance, args, normaspec, fixed) {
-    args = Norma('{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}', args)
-
-    try {
-      return _.extend(
-        args,
-        { pattern: _.extend(
-            {},
-
-            // Precedence of arguments in add,act is left-to-right
-            args.moreobjargs ? args.moreobjargs : {},
-            args.objargs ? args.objargs : {},
-            args.strargs ? Jsonic(args.strargs) : {},
-
-            fixed || {})
-        })
-    }
-    catch (e) {
-      var col = (e.line === 1) ? e.column - 1 : e.column
-      throw internals.error('add_string_pattern_syntax', {
-        argstr: args,
-        syntax: e.message,
-        line: e.line,
-        col: col
-      })
-    }
-  }
-
   function api_fix () {
     var self = this
 
-    var defargs = parse_pattern(self, arguments)
+    var defargs = Common.parsePattern(self, arguments)
 
     var fix = self.delegate(defargs.pattern)
 
     fix.add = function () {
-      var args = parse_pattern(fix, arguments, 'rest:.*', defargs.pattern)
+      var args = Common.parsePattern(fix, arguments, 'rest:.*', defargs.pattern)
       var addargs = [args.pattern].concat(args.rest)
       return self.add.apply(fix, addargs)
     }
@@ -1573,7 +1544,7 @@ function make_seneca (initial_options) {
     options.zig = options.zig || {}
 
     function make_fn (self, origargs) {
-      var args = parse_pattern(self, origargs, 'fn:f?')
+      var args = Common.parsePattern(self, origargs, 'fn:f?')
 
       var actargs = _.extend(
         {},
