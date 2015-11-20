@@ -19,11 +19,11 @@ var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
 var Parambulator = require('parambulator')
-var Semver = require('semver')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
 
 // Internal modules.
+var Cluster = require('./lib/cluster')
 var Common = require('./lib/common')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
@@ -275,11 +275,11 @@ function make_seneca (initial_options) {
   // Non-API methods.
   root.logroute = api_logroute
   root.register = Plugins.register(so, private$, paramcheck, makedie, callpoint)
+  root.hasplugin = Plugins.isRegistered
+  root.findplugin = Plugins.find(private$)
+  root.plugins = Plugins.all(private$)
   root.depends = api_depends
-  root.cluster = api_cluster
-  root.hasplugin = api_hasplugin
-  root.findplugin = api_findplugin
-  root.plugins = api_plugins
+  root.cluster = Cluster
   root.pin = api_pin
   root.actroutes = api_actroutes
   root.act_if = api_act_if
@@ -480,63 +480,6 @@ function make_seneca (initial_options) {
     return private$.entity.make$.apply(private$.entity, args)
   }
   root.make$ = root.make
-
-  function api_cluster () {
-    var self = this
-    var version = process.versions.node
-
-    if (Semver.lt(version, '0.12.0')) {
-      return self.die(internals.error('bad_cluster_version', {version: version}))
-    }
-
-    var cluster = require('cluster')
-
-    if (cluster.isMaster) {
-      require('os').cpus().forEach(function () {
-        cluster.fork()
-      })
-
-      cluster.on('disconnect', function (worker) {
-        cluster.fork()
-      })
-
-      var noopinstance = self.delegate()
-      for (var fn in noopinstance) {
-        if (_.isFunction(noopinstance[fn])) {
-          noopinstance[fn] = function () {
-            return noopinstance
-          }
-        }
-      }
-
-      return noopinstance
-    }
-    else return self
-  }
-
-
-  function api_hasplugin (plugindesc, tag) {
-    var self = this
-    tag = ('' === tag || '-' === tag) ? null : tag
-    return !!self.findplugin(plugindesc, tag)
-  }
-
-
-  function api_findplugin (plugindesc, tag) {
-    var name = plugindesc.name || plugindesc
-    tag = plugindesc.tag || tag
-
-    var key = name + (tag ? '/' + tag : '')
-    var plugin = private$.plugins[key]
-
-    return plugin
-  }
-
-
-  function api_plugins () {
-    return _.clone( private$.plugins )
-  }
-
 
   function api_pin (pattern, pinopts) {
     var thispin = this
