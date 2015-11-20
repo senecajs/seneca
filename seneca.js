@@ -35,6 +35,7 @@ var PluginUtil = require('./lib/plugin-util')
 var Print = require('./lib/print')
 var Repl = require('./lib/repl')
 var Store = require('./lib/store')
+var Transport = require('./lib/transport')
 
 // Shortcuts
 var arrayify = Common.arrayify
@@ -236,6 +237,8 @@ function make_seneca (initial_options) {
   so.internal.actrouter = so.internal.actrouter || Patrun({gex: true})
   so.internal.subrouter = so.internal.subrouter || Patrun(pin_patrun_customizer)
 
+  var callpoint = make_callpoint(so.debug.callpoint)
+
   var repl = Repl(root, so)
 
   // Define public member variables.
@@ -251,8 +254,8 @@ function make_seneca (initial_options) {
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
   root.make = api_make // Make a new entity object.
-  root.listen = api_listen // Listen for inbound messages.
-  root.client = api_client // Send outbound messages.
+  root.listen = Transport.listen(callpoint) // Listen for inbound messages.
+  root.client = Transport.client(callpoint, private$) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = api_has // True if action pattern defined.
   root.find = api_find // Find action by pattern
@@ -291,8 +294,6 @@ function make_seneca (initial_options) {
 
   // DEPRECATED
   root.fail = Legacy.fail(so)
-
-  var callpoint = make_callpoint(so.debug.callpoint)
 
   // Identifier generator.
   root.idgen = Nid({length: so.idlen})
@@ -599,165 +600,6 @@ function make_seneca (initial_options) {
     return private$.entity.make$.apply(private$.entity, args)
   }
   root.make$ = root.make
-
-  function api_listen () {
-    var self = this
-
-    self.log.info.apply(self, _.flatten([
-      'listen', arguments[0], Array.prototype.slice.call(arguments, 1), callpoint()
-    ]))
-
-    var opts = self.options().transport || {}
-    var config = parseConfig(arrayify(arguments), opts)
-
-    self.act('role:transport,cmd:listen', { config: config, gate$: true }, function (err) {
-      if (err) return self.die(internals.error(err, 'transport_listen', config))
-    })
-
-    return self
-  }
-
-  function api_client () {
-    var self = this
-
-    self.log.info.apply(self, _.flatten([
-      'client', arguments[0], Array.prototype.slice.call(arguments, 1), callpoint()
-    ]))
-
-    var opts = self.options().transport || {}
-    var config = parseConfig(arrayify(arguments), opts)
-
-    // Queue messages while waiting for client to become active.
-    var sendqueue = []
-    var sendclient = {
-      send: function (args, done) {
-        var tosend = { instance: this, args: args, done: done }
-        self.log.debug('client', 'sendqueue-add', sendqueue.length + 1, config, tosend)
-        sendqueue.push(tosend)
-      }
-    }
-
-    // TODO: validate pin, pins args
-
-    var pins = config.pins || [config.pin || '']
-
-    pins = _.map(pins, function (pin) {
-      return _.isString(pin) ? Jsonic(pin) : pin
-    })
-
-    _.each(pins, function (pin) {
-      private$.actrouter.add(
-        pin,
-        {
-          func: function (args, done) {
-            if (args.local$) {
-              this.prior(args, done)
-            }
-            else {
-              sendclient.send.call( this, args, done )
-            }
-          },
-          log: self.log,
-          argpattern: Common.argpattern(pin),
-          pattern: Common.argpattern(pin),
-          id: 'CLIENT',
-          client$: true,
-          plugin_name: 'remote$',
-          plugin_fullname: 'remote$'
-        })
-    })
-
-    // Create client.
-    self.act(
-      'role:transport,cmd:client',
-      { config: config, gate$: true },
-      function (err, liveclient) {
-        if (err) {
-          return self.die(internals.error(err, 'transport_client', config))
-        }
-        if (liveclient === null) {
-          return self.die(internals.error('transport_client_null', Common.clean(config)))
-        }
-
-        // Process any messages waiting for this client,
-        // before bringing client online.
-        function sendnext () {
-          if (sendqueue.length === 0) {
-            sendclient = liveclient
-            self.log.debug('client', 'sendqueue-clear', config)
-          }
-          else {
-            var tosend = sendqueue.shift()
-            self.log.debug('client', 'sendqueue-processing',
-              sendqueue.length + 1, config, tosend)
-            sendclient.send.call(tosend.instance, tosend.args, tosend.done)
-            setImmediate(sendnext)
-          }
-        }
-        sendnext()
-      })
-
-    return self
-  }
-
-  function parseConfig (args, options) {
-    var out = {}
-
-    var config = args.config || args
-
-    if (_.isArray(config)) {
-      var arglen = config.length
-
-      if (1 === arglen) {
-        if (_.isObject(config[0])) {
-          out = config[0]
-        }
-        else {
-          out.port = parseInt(config[0], 10)
-        }
-      }
-      else if (2 === arglen) {
-        out.port = parseInt(config[0], 10)
-        out.host = config[1]
-      }
-      else if (3 === arglen) {
-        out.port = parseInt(config[0], 10)
-        out.host = config[1]
-        out.path = config[2]
-      }
-    }
-    // TODO: accept a jsonic string
-    else {
-      out = config
-    }
-
-    _.each(options, function (v, k) {
-      if (_.isObject(v)) {
-        return
-      }
-      out[k] = (void 0 === out[k] ? v : out[k])
-    })
-
-    // Default transport is web
-    out.type = out.type || 'web'
-
-    // Aliases.
-    if (out.type === 'direct' || out.type === 'http') {
-      out.type = 'web'
-    }
-
-    var base = options[out.type] || {}
-
-    out = _.extend({}, base, out)
-
-    if (out.type === 'web' || out.type === 'tcp') {
-      out.port = out.port === null ? base.port : out.port
-      out.host = out.host === null ? base.host : out.host
-      out.path = out.path === null ? base.path : out.path
-    }
-
-    return out
-  }
 
   function api_cluster () {
     var self = this
