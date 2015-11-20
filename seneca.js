@@ -41,131 +41,131 @@ var Store = require('./lib/store')
 // Shortcuts
 var arrayify = Common.arrayify
 
-var error = Eraro({
-  package: 'seneca',
-  msgmap: ERRMSGMAP(),
-  override: true
-})
-
 // Module exports.
 module.exports = init
 
-// Default options.
-var DEFAULT_OPTIONS = {
-  // Tag this Seneca instance, will be appended to instance identifier.
-  tag: '-',
+var internals = {
+  error: Eraro({
+    package: 'seneca',
+    msgmap: ERRMSGMAP(),
+    override: true
+  }),
+  defaults: {
+    // Tag this Seneca instance, will be appended to instance identifier.
+    tag: '-',
 
-  // Standard length of identifiers for actions.
-  idlen: 12,
+    // Standard length of identifiers for actions.
+    idlen: 12,
 
-  // Standard timeout for actions.
-  timeout: 11111,
+    // Standard timeout for actions.
+    timeout: 11111,
 
-  // Register (true) default plugins. Set false to not register when
-  // using custom versions.
-  default_plugins: {
-    basic: true,
-    'mem-store': true,
-    transport: true,
-    web: true
-  },
-
-  // Settings for network REPL.
-  repl: {
-    port: 30303,
-    host: null
-  },
-
-  // Debug settings.
-  debug: {
-    // Throw (some) errors from seneca.act.
-    fragile: false,
-
-    // Fatal errors ... aren't fatal. Not for production!
-    undead: false,
-
-    // Print debug info to console
-    print: {
-      // Print options. Best used via --seneca.print.options.
-      options: false
+    // Register (true) default plugins. Set false to not register when
+    // using custom versions.
+    default_plugins: {
+      basic: true,
+      'mem-store': true,
+      transport: true,
+      web: true
     },
 
-    // Trace action caller and place in args.caller$.
-    act_caller: false,
+    // Settings for network REPL.
+    repl: {
+      port: 30303,
+      host: null
+    },
 
-    // Shorten all identifiers to 2 characters.
-    short_logs: false,
+    // Debug settings.
+    debug: {
+      // Throw (some) errors from seneca.act.
+      fragile: false,
 
-    // Record and log callpoints (calling code locations).
-    callpoint: false
-  },
+      // Fatal errors ... aren't fatal. Not for production!
+      undead: false,
 
-  // Enforce strict behaviours. Relax when backwards compatibility needed.
-  strict: {
-    // Action result must be a plain object.
-    result: true,
+      // Print debug info to console
+      print: {
+        // Print options. Best used via --seneca.print.options.
+        options: false
+      },
 
-    // Delegate fixedargs override action args.
-    fixedargs: true,
+      // Trace action caller and place in args.caller$.
+      act_caller: false,
 
-    // Adding a pattern overrides existing pattern only if matches exactly.
-    add: false
-  },
+      // Shorten all identifiers to 2 characters.
+      short_logs: false,
 
-  // Action cache. Makes inbound messages idempotent.
-  actcache: {
-    active: true,
-    size: 11111
-  },
+      // Record and log callpoints (calling code locations).
+      callpoint: false
+    },
 
-  // Action executor tracing. See gate-executor module.
-  trace: {
-    act: false,
-    stack: false,
-    unknown: 'warn'
-  },
+    // Enforce strict behaviours. Relax when backwards compatibility needed.
+    strict: {
+      // Action result must be a plain object.
+      result: true,
 
-  // Action statistics settings. See rolling-stats module.
-  stats: {
-    size: 1024,
-    interval: 60000,
-    running: false
-  },
+      // Delegate fixedargs override action args.
+      fixedargs: true,
 
-  // Wait time for plugins to close gracefully.
-  deathdelay: 11111,
+      // Adding a pattern overrides existing pattern only if matches exactly.
+      add: false
+    },
 
-  // Default seneca-admin settings.
-  // TODO: move to seneca-admin!
-  admin: {
-    local: false,
-    prefix: '/admin'
-  },
+    // Action cache. Makes inbound messages idempotent.
+    actcache: {
+      active: true,
+      size: 11111
+    },
 
-  // Plugin settings
-  plugin: {},
+    // Action executor tracing. See gate-executor module.
+    trace: {
+      act: false,
+      stack: false,
+      unknown: 'warn'
+    },
 
-  // Internal settings.
-  internal: {
-    // Close instance on these signals, if true.
-    close_signals: {
-      SIGHUP: true,
-      SIGTERM: true,
-      SIGINT: true,
-      SIGBREAK: true
-    }
-  },
+    // Action statistics settings. See rolling-stats module.
+    stats: {
+      size: 1024,
+      interval: 60000,
+      running: false
+    },
 
-  // Log status at periodic intervals.
-  status: {
-    interval: 60000,
+    // Wait time for plugins to close gracefully.
+    deathdelay: 11111,
 
-    // By default, does not run.
-    running: false
-  },
+    // Default seneca-admin settings.
+    // TODO: move to seneca-admin!
+    admin: {
+      local: false,
+      prefix: '/admin'
+    },
 
-  // zig module settings for seneca.start() chaining.
-  zig: {}
+    // Plugin settings
+    plugin: {},
+
+    // Internal settings.
+    internal: {
+      // Close instance on these signals, if true.
+      close_signals: {
+        SIGHUP: true,
+        SIGTERM: true,
+        SIGINT: true,
+        SIGBREAK: true
+      }
+    },
+
+    // Log status at periodic intervals.
+    status: {
+      interval: 60000,
+
+      // By default, does not run.
+      running: false
+    },
+
+    // zig module settings for seneca.start() chaining.
+    zig: {}
+  }
 }
 
 // Create a new Seneca instance.
@@ -238,7 +238,7 @@ function make_seneca (initial_options) {
   // Create option resolver.
   private$.optioner = Optioner(
     initial_options.module || module.parent || module,
-    DEFAULT_OPTIONS)
+    internals.defaults)
 
   // Not needed after this point, and screws up debug printing.
   delete initial_options.module
@@ -481,7 +481,7 @@ function make_seneca (initial_options) {
             plugin.timeout = so.timeout
           }
 
-          return self.die(error(err, plugin_err_code, plugin))
+          return self.die(internals.error(err, plugin_err_code, plugin))
         }
 
         if (so.debug.print && so.debug.print.options) {
@@ -528,7 +528,7 @@ function make_seneca (initial_options) {
     _.every(deps, function (depname) {
       if (!_.contains(private$.plugin_order.byname, depname) &&
         !_.contains(private$.plugin_order.byname, 'seneca-' + depname)) {
-        self.die(error('plugin_required', { name: args.pluginname, dependency: depname }))
+        self.die(internals.error('plugin_required', { name: args.pluginname, dependency: depname }))
         return false
       }
       else return true
@@ -545,7 +545,7 @@ function make_seneca (initial_options) {
 
     var exportval = private$.exports[key]
     if (!exportval) {
-      return self.die(error('export_not_found', {key: key}))
+      return self.die(internals.error('export_not_found', {key: key}))
     }
 
     return exportval
@@ -571,7 +571,7 @@ function make_seneca (initial_options) {
     var config = parseConfig(arrayify(arguments), opts)
 
     self.act('role:transport,cmd:listen', { config: config, gate$: true }, function (err) {
-      if (err) return self.die(error(err, 'transport_listen', config))
+      if (err) return self.die(internals.error(err, 'transport_listen', config))
     })
 
     return self
@@ -633,10 +633,10 @@ function make_seneca (initial_options) {
       { config: config, gate$: true },
       function (err, liveclient) {
         if (err) {
-          return self.die(error(err, 'transport_client', config))
+          return self.die(internals.error(err, 'transport_client', config))
         }
         if (liveclient === null) {
-          return self.die(error('transport_client_null', Common.clean(config)))
+          return self.die(internals.error('transport_client_null', Common.clean(config)))
         }
 
         // Process any messages waiting for this client,
@@ -724,7 +724,7 @@ function make_seneca (initial_options) {
     var version = process.versions.node
 
     if (Semver.lt(version, '0.12.0')) {
-      return self.die(error('bad_cluster_version', {version: version}))
+      return self.die(internals.error('bad_cluster_version', {version: version}))
     }
 
     var cluster = require('cluster')
@@ -879,9 +879,9 @@ function make_seneca (initial_options) {
             }
             catch (ex) {
               // TODO: not really satisfactory
-              var err = error(ex, 'sub_function_catch', { args: args, result: result })
+              var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
               self.log.error(
-                'sub', 'err', args.meta.id$, err.message, args, error.stack)
+                'sub', 'err', args.meta.id$, err.message, args, err.stack)
             }
           })
         }
@@ -968,7 +968,7 @@ function make_seneca (initial_options) {
     pattern = self.util.clean(args.pattern)
 
     if (0 === _.keys(pattern)) {
-      throw error('add_empty_pattern', {args: Common.clean(args)})
+      throw internals.error('add_empty_pattern', {args: Common.clean(args)})
     }
 
     var pattern_rules = _.clone(action.validate || {})
@@ -1189,7 +1189,7 @@ function make_seneca (initial_options) {
       errinfo.xdefault = Util.inspect(args.default$)
     }
 
-    var err = error(errcode, errinfo)
+    var err = internals.error(errcode, errinfo)
 
     if (args.fatal$) {
       self.die(err)
@@ -1267,7 +1267,7 @@ function make_seneca (initial_options) {
           var re = ex
 
           if (!re.seneca) {
-            re = error(re, 'ready_failed', { message: ex.message, ready: ready })
+            re = internals.error(re, 'ready_failed', { message: ex.message, ready: ready })
           }
 
           self.die(re)
@@ -1301,7 +1301,7 @@ function make_seneca (initial_options) {
       plugindesc = private$.use(arg0, arg1, arg2)
     }
     catch (e) {
-      self.die(error(e, 'plugin_' + e.code))
+      self.die(internals.error(e, 'plugin_' + e.code))
       return self
     }
 
@@ -1537,7 +1537,7 @@ function make_seneca (initial_options) {
             'native' === callargs.cmd ||
             'quickcode' === callargs.cmd
            )) {
-            err = error(
+            err = internals.error(
               'result_not_objarr', {
                 pattern: actmeta.pattern,
                 args: Util.inspect(Common.clean(callargs)).replace(/\n/g, ''),
@@ -1633,7 +1633,7 @@ function make_seneca (initial_options) {
 
         fn: function (cb) {
           if (root.closed && !callargs.closing$) {
-            return cb(error('instance-closed', {args: Common.clean(callargs)}))
+            return cb(internals.error('instance-closed', {args: Common.clean(callargs)}))
           }
 
           delegate.good = function (out) {
@@ -1660,7 +1660,7 @@ function make_seneca (initial_options) {
     var call_cb = true
 
     if (!err.seneca) {
-      err = error(err, 'act_execute', _.extend(
+      err = internals.error(err, 'act_execute', _.extend(
         {},
         err.details,
         {
@@ -1705,7 +1705,7 @@ function make_seneca (initial_options) {
   function callback_error (instance, err, actmeta, result, cb,
     duration, callargs, prior_ctxt, act_callpoint) {
     if (!err.seneca) {
-      err = error(err, 'act_callback', _.extend(
+      err = internals.error(err, 'act_callback', _.extend(
         {},
         err.details,
         {
@@ -1852,7 +1852,7 @@ function make_seneca (initial_options) {
       actmeta.parambulator.validate(args, function (err) {
         if (err) {
           return done(
-            error('act_invalid_args', {
+            internals.error('act_invalid_args', {
               pattern: actmeta.pattern,
               message: err.message,
               args: Common.clean(args)
@@ -1885,7 +1885,7 @@ function make_seneca (initial_options) {
     }
     catch (e) {
       var col = (e.line === 1) ? e.column - 1 : e.column
-      throw error('add_string_pattern_syntax', {
+      throw internals.error('add_string_pattern_syntax', {
         argstr: args,
         syntax: e.message,
         line: e.line,
@@ -2482,7 +2482,7 @@ function thrower (err) {
 function make_callpoint (active) {
   if (active) {
     return function () {
-      return error.callpoint(
+      return internals.error.callpoint(
         new Error(),
         ['/seneca/seneca.js', '/seneca/lib/', '/lodash.js'])
     }
@@ -2511,7 +2511,7 @@ function make_legacy_fail (so) {
       }
     }
 
-    var err = error.apply(null, args)
+    var err = internals.error.apply(null, args)
     err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
     err.seneca = { code: err.code, valmap: err.details }
 
