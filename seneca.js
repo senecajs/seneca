@@ -1059,7 +1059,7 @@ function make_seneca (initial_options) {
 
     var actstart = Date.now()
 
-    cb = cb || Common.noop
+    cb = cb || _.noop
 
     if (act_cache_check(instance, args, prior_ctxt, cb, act_callpoint)) return
 
