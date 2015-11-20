@@ -9,6 +9,4 @@ node sales-tax-config.js
 node sales-tax-config-pin.js
 
 And also, from the perspective of logging:
-http://senecajs.org/logging-example.html
-
-
+http://senecajs.org/tutorials/logging-with-seneca.html

@@ -25,7 +25,7 @@ echo sales-tax-plugin/app >> testrun.log
 node sales-tax-app.js --seneca.log=plugin:shop > testrun.server.tmp &
 APP_SERVER_PID=$!
 sleep 1
-curl -s "http://localhost:3000/shop/salestax?net=100" >> testrun.log
+curl -s "http://localhost:3000/shop/salestax?net=100&country=UK" >> testrun.log
 echo "" >> testrun.log
 cat testrun.server.tmp | awk '{ print $9; }' >> testrun.log
 kill $APP_SERVER_PID
@@ -33,4 +33,3 @@ kill $APP_SERVER_PID
 
 
 diff testrun.log  testrun.correct
-
