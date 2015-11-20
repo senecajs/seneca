@@ -27,8 +27,9 @@ var Stats = require('rolling-stats')
 var Zig = require('zig')
 
 // Internal modules.
-var Errors = require('./lib/errors')
 var Common = require('./lib/common')
+var Errors = require('./lib/errors')
+var Legacy = require('./lib/legacy')
 var Logging = require('./lib/logging')
 var MakeEntity = require('./lib/entity')
 var Optioner = require('./lib/optioner')
@@ -283,7 +284,7 @@ function make_seneca (initial_options) {
   root.findact = api_find
 
   // DEPRECATED
-  root.fail = make_legacy_fail(so)
+  root.fail = Legacy.fail(so)
 
   var callpoint = make_callpoint(so.debug.callpoint)
 
@@ -2376,42 +2377,6 @@ function make_callpoint (active) {
   }
   else {
     return _.noop
-  }
-}
-
-// For backwards compatibility
-function make_legacy_fail (so) {
-  return function () {
-    var args = arrayify(arguments)
-
-    var cb = _.isFunction(arguments[arguments.length - 1])
-      ? arguments[arguments.length - 1] : null
-
-    if (cb) {
-      args.pop()
-    }
-
-    if (_.isObject(args[0])) {
-      var code = args[0].code
-      if (_.isString(code)) {
-        args.unshift(code)
-      }
-    }
-
-    var err = internals.error.apply(null, args)
-    err.callpoint = new Error().stack.match(/^.*\n.*\n\s*(.*)/)[1]
-    err.seneca = { code: err.code, valmap: err.details }
-
-    this.log.error(err)
-    if (so.errhandler) {
-      so.errhandler.call(this, err)
-    }
-
-    if (cb) {
-      cb.call(this, err)
-    }
-
-    return err
   }
 }
 
