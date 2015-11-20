@@ -6,7 +6,7 @@
 var VERSION = '0.8.0'
 
 // Node API modules
-var util = require('util')
+var Util = require('util')
 var events = require('events')
 var net = require('net')
 var repl = require('repl')
@@ -382,13 +382,13 @@ function make_seneca (initial_options) {
 
   // dump options if debugging
   root.log.debug('options', function () {
-    return util.inspect(so, false, null).replace(/[\r\n]/g, ' ')
+    return Util.inspect(so, false, null).replace(/[\r\n]/g, ' ')
   })
 
   if (so.debug.print.options) {
     console_log('\nSeneca Options (' + root.id + '): before plugins\n' +
       '===\n')
-    console_log(util.inspect(so, {depth: null}))
+    console_log(Util.inspect(so, {depth: null}))
     console_log('')
   }
 
@@ -488,7 +488,7 @@ function make_seneca (initial_options) {
           console_log('\nSeneca Options (' + self.id + '): plugin: ' + plugin.name +
             (plugin.tag ? '$' + plugin.tag : '') + '\n' +
             '===\n')
-          console_log(util.inspect(plugin_options, {depth: null}))
+          console_log(Util.inspect(plugin_options, {depth: null}))
           console_log('')
         }
 
@@ -1162,7 +1162,7 @@ function make_seneca (initial_options) {
 
     if (so.debug.act_caller) {
       args.caller$ = '\n    Action call arguments and location: ' +
-        (new Error(util.inspect(args).replace(/\n/g, '')).stack)
+        (new Error(Util.inspect(args).replace(/\n/g, '')).stack)
           .replace(/.*\/seneca\.js:.*\n/g, '')
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
@@ -1182,11 +1182,11 @@ function make_seneca (initial_options) {
     }
 
     var errcode = 'act_not_found'
-    var errinfo = { args: util.inspect(common.clean(args)).replace(/\n/g, '') }
+    var errinfo = { args: Util.inspect(common.clean(args)).replace(/\n/g, '') }
 
     if (!_.isUndefined(args.default$)) {
       errcode = 'act_default_bad'
-      errinfo.xdefault = util.inspect(args.default$)
+      errinfo.xdefault = Util.inspect(args.default$)
     }
 
     var err = error(errcode, errinfo)
@@ -1370,7 +1370,7 @@ function make_seneca (initial_options) {
 
       sd.on_act_in = function on_act_in (actmeta, args) {
         socket.write('IN  ' + fmt_index(act_index) +
-                     ': ' + util.inspect(sd.util.clean(args)) +
+                     ': ' + Util.inspect(sd.util.clean(args)) +
                      ' # ' +
                      args.meta$.id + ' ' +
                      actmeta.pattern + ' ' +
@@ -1383,7 +1383,7 @@ function make_seneca (initial_options) {
       }
 
       sd.on_act_out = function on_act_out (actmeta, out) {
-        out = (out && out.entity$) ? out : util.inspect(sd.util.clean(out))
+        out = (out && out.entity$) ? out : Util.inspect(sd.util.clean(out))
 
         var cur_index = act_index_map[actmeta.id]
         socket.write('OUT ' + fmt_index(cur_index) +
@@ -1540,7 +1540,7 @@ function make_seneca (initial_options) {
             err = error(
               'result_not_objarr', {
                 pattern: actmeta.pattern,
-                args: util.inspect(common.clean(callargs)).replace(/\n/g, ''),
+                args: Util.inspect(common.clean(callargs)).replace(/\n/g, ''),
                 result: resdata
               })
           }
@@ -1601,7 +1601,7 @@ function make_seneca (initial_options) {
         catch (ex) {
           var formattedErr = ex
           // handle throws of non-Error values
-          if (!util.isError(ex)) {
+          if (!Util.isError(ex)) {
             formattedErr = _.isObject(ex)
               ? new Error(jsonic.stringify(ex))
               : new Error('' + ex)
@@ -2239,8 +2239,8 @@ function makedie (instance, ctxt) {
       if (!err) {
         err = new Error('unknown')
       }
-      else if (!util.isError(err)) {
-        err = new Error(_.isString(err) ? err : util.inspect(err))
+      else if (!Util.isError(err)) {
+        err = new Error(_.isString(err) ? err : Util.inspect(err))
       }
 
       err.fatal$ = true
@@ -2264,8 +2264,8 @@ function makedie (instance, ctxt) {
         ', arch=' + process.arch +
         ', platform=' + process.platform +
         ',\n  path=' + process.execPath +
-        ',\n  argv=' + util.inspect(process.argv).replace(/\n/g, '') +
-        ',\n  env=' + util.inspect(process.env).replace(/\n/g, '')
+        ',\n  argv=' + Util.inspect(process.argv).replace(/\n/g, '') +
+        ',\n  env=' + Util.inspect(process.env).replace(/\n/g, '')
 
       var fatalmodemsg = instance.fixedargs.fatal$
         ? '\n  ALL ERRORS FATAL: action called with argument fatal$:true ' +
@@ -2278,14 +2278,14 @@ function makedie (instance, ctxt) {
         '==================\n\n' +
         'Message: ' + err.message + '\n\n' +
         'Code: ' + err.code + '\n\n' +
-        'Details: ' + util.inspect(err.details, {depth: null}) + '\n\n' +
+        'Details: ' + Util.inspect(err.details, {depth: null}) + '\n\n' +
         'Stack: ' + stack + '\n\n' +
         'Instance: ' + instance.toString() + fatalmodemsg + die_trace + '\n\n' +
         'When: ' + new Date().toISOString() + '\n\n' +
         'Log: ' + jsonic.stringify(logargs) + '\n\n' +
-        'Node:\n  ' + util.inspect(process.versions).replace(/\s+/g, ' ') +
-        ',\n  ' + util.inspect(process.features).replace(/\s+/g, ' ') +
-        ',\n  ' + util.inspect(process.moduleLoadList).replace(/\s+/g, ' ') + '\n\n' +
+        'Node:\n  ' + Util.inspect(process.versions).replace(/\s+/g, ' ') +
+        ',\n  ' + Util.inspect(process.features).replace(/\s+/g, ' ') +
+        ',\n  ' + Util.inspect(process.moduleLoadList).replace(/\s+/g, ' ') + '\n\n' +
         'Process: ' + procdesc + '\n\n'
 
       if (so.errhandler) {
@@ -2427,7 +2427,7 @@ function Seneca () {
   events.EventEmitter.call(this)
   this.setMaxListeners(0)
 }
-util.inherits(Seneca, events.EventEmitter)
+Util.inherits(Seneca, events.EventEmitter)
 
 // Private member variables of Seneca object.
 function make_private () {
