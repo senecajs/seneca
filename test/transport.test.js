@@ -6,6 +6,7 @@ var _ = require('lodash')
 var Async = require('async')
 var Code = require('code')
 var Seneca = require('..')
+var Transport = require('../lib/transport')
 var Lab = require('lab')
 
 // Test shortcuts
@@ -37,6 +38,315 @@ describe('transport', function () {
     process.removeAllListeners('SIGINT')
     process.removeAllListeners('SIGBREAK')
     done()
+  })
+
+  describe('listen()', function () {
+    it('supports null options', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca)
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports type as tcp option', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {
+            type: 'tcp'
+          }
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca, 8080, 'localhost', '/')
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports type as http option', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {
+            type: 'http'
+          }
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca, 8080, 'localhost', '/')
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports the port number as an argument', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca, 8080)
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports the port number and host as an argument', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca, 8080, 'localhost')
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports the port number, host, and path as an argument', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        listen.call(seneca, 8080, 'localhost', '/')
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('handles errors from action', function (done) {
+      var listen = Transport.listen(_.noop)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: function (pattern, options, callback) {
+          callback(new Error())
+        },
+        die: function (err) {
+          expect(err).to.exist()
+          done()
+        }
+      }
+
+      listen.call(seneca)
+    })
+  })
+
+  describe('client()', function () {
+    it('supports null options', function (done) {
+      var private$ = {
+        actrouter: {
+          add: _.noop
+        }
+      }
+      var client = Transport.client(_.noop, private$)
+      var seneca = {
+        log: {
+          info: function () {
+
+          }
+        },
+        options: function () {
+          return {}
+        },
+        act: _.noop
+      }
+
+      var fn = function () {
+        client.call(seneca)
+      }
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('supports send to client queueing', function (done) {
+      var private$ = {
+        actrouter: {
+          add: function (pin, options) {
+            options.func({}, _.noop)
+            done()
+          }
+        }
+      }
+      var client = Transport.client(_.noop, private$)
+      var seneca = {
+        log: {
+          info: _.noop,
+          debug: _.noop
+        },
+        options: function () {
+          return {
+            transport: {
+              pin: { cmd: 'pin' }
+            }
+          }
+        },
+        act: function (pattern, options, callback) {
+          callback(null, {})
+        }
+      }
+
+      client.call(seneca)
+    })
+
+    it('supports pins represented by strings', function (done) {
+      var private$ = {
+        actrouter: {
+          add: function (pin, options) {
+            options.func({}, _.noop)
+            done()
+          }
+        }
+      }
+      var client = Transport.client(_.noop, private$)
+      var seneca = {
+        log: {
+          info: _.noop,
+          debug: _.noop
+        },
+        options: function () {
+          return {
+            transport: {
+              pins: ['{ "cmd": "pin" }', null, { test: true }]
+            }
+          }
+        },
+        act: function (pattern, options, callback) {
+          callback(null, {})
+        }
+      }
+
+      client.call(seneca)
+    })
+
+    it('handles errors from act', function (done) {
+      var private$ = {
+        actrouter: {
+          add: function (pin, options) {
+            options.func({}, _.noop)
+          }
+        }
+      }
+      var client = Transport.client(_.noop, private$)
+      var seneca = {
+        log: {
+          info: _.noop,
+          debug: _.noop
+        },
+        options: function () {
+          return {
+            transport: {
+              pins: [{ test: true }]
+            }
+          }
+        },
+        act: function (pattern, options, callback) {
+          callback(new Error(), {})
+        },
+        die: function (err) {
+          expect(err).to.exist()
+          done()
+        }
+      }
+
+      client.call(seneca)
+    })
+
+    it('handles a null liveclient', function (done) {
+      var private$ = {
+        actrouter: {
+          add: function (pin, options) {
+            options.func({}, _.noop)
+          }
+        }
+      }
+      var client = Transport.client(_.noop, private$)
+      var seneca = {
+        log: {
+          info: _.noop,
+          debug: _.noop
+        },
+        options: function () {
+          return {
+            transport: {
+              pins: [{ test: true }]
+            }
+          }
+        },
+        act: function (pattern, options, callback) {
+          callback(null, null)
+        },
+        die: function (err) {
+          expect(err).to.exist()
+          done()
+        }
+      }
+
+      client.call(seneca)
+    })
   })
 
   it('transport-exact-single', function (done) {
