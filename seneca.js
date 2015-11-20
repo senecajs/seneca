@@ -6,28 +6,28 @@
 var VERSION = '0.8.0'
 
 // Node API modules
+var Assert = require('assert')
+var Events = require('events')
+var Net = require('net')
+var Repl = require('repl')
 var Util = require('util')
-var events = require('events')
-var net = require('net')
-var repl = require('repl')
-var assert = require('assert')
-var vm = require('vm')
+var Vm = require('vm')
 
 // External modules.
 var _ = require('lodash')
-var nid = require('nid')
-var jsonic = require('jsonic')
-var patrun = require('patrun')
-var parambulator = require('parambulator')
-var norma = require('norma')
-var stats = require('rolling-stats')
-var makeuse = require('use-plugin')
-var lrucache = require('lru-cache')
-var zig = require('zig')
-var gex = require('gex')
-var executor = require('gate-executor')
-var eraro = require('eraro')
-var semver = require('semver')
+var Eraro = require('eraro')
+var Executor = require('gate-executor')
+var Gex = require('gex')
+var Jsonic = require('jsonic')
+var Lrucache = require('lru-cache')
+var Makeuse = require('use-plugin')
+var Nid = require('nid')
+var Norma = require('norma')
+var Patrun = require('patrun')
+var Parambulator = require('parambulator')
+var Semver = require('semver')
+var Stats = require('rolling-stats')
+var Zig = require('zig')
 
 // Internal modules.
 var make_entity = require('./lib/entity')
@@ -41,7 +41,7 @@ var common = require('./lib/common')
 // Create utilities.
 var arr = common.arrayify
 
-var error = eraro({
+var error = Eraro({
   package: 'seneca',
   msgmap: ERRMSGMAP(),
   override: true
@@ -231,7 +231,7 @@ function make_seneca (initial_options) {
   root.findact = api_find
 
   // Create internal tools.
-  var actnid = nid({length: 5})
+  var actnid = Nid({length: 5})
   var refnid = function () { return '(' + actnid() + ')' }
   var paramcheck = make_paramcheck()
 
@@ -248,8 +248,8 @@ function make_seneca (initial_options) {
   paramcheck.options.validate(so, thrower)
 
   // These need to come from options as required during construction.
-  so.internal.actrouter = so.internal.actrouter || patrun({gex: true})
-  so.internal.subrouter = so.internal.subrouter || patrun(pin_patrun_customizer)
+  so.internal.actrouter = so.internal.actrouter || Patrun({gex: true})
+  so.internal.subrouter = so.internal.subrouter || Patrun(pin_patrun_customizer)
 
   // DEPRECATED
   root.fail = make_legacy_fail(so)
@@ -257,14 +257,14 @@ function make_seneca (initial_options) {
   var callpoint = make_callpoint(so.debug.callpoint)
 
   // Identifier generator.
-  root.idgen = nid({length: so.idlen})
+  root.idgen = Nid({length: so.idlen})
 
   // Create a unique identifer for this instance.
   root.id = root.idgen() + '/' + root.start_time + '/' + process.pid + '/' + so.tag
 
   if (so.debug.short_logs || so.log.short) {
     so.idlen = 2
-    root.idgen = nid({length: so.idlen})
+    root.idgen = Nid({length: so.idlen})
     root.id = root.idgen() + '/' + so.tag
   }
 
@@ -290,7 +290,7 @@ function make_seneca (initial_options) {
   root.on('error', root.die)
 
   // TODO: support options
-  private$.executor = executor({
+  private$.executor = Executor({
     trace: _.isFunction(so.trace.act) ? so.trace.act
       : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
     timeout: so.timeout,
@@ -320,7 +320,7 @@ function make_seneca (initial_options) {
   }
 
   if (so.stats) {
-    private$.timestats = new stats.NamedStats(so.stats.size, so.stats.interval)
+    private$.timestats = new Stats.NamedStats(so.stats.size, so.stats.interval)
 
     if (so.stats.running) {
       setInterval(function () {
@@ -332,7 +332,7 @@ function make_seneca (initial_options) {
   private$.plugins = {}
   private$.exports = { options: common.deepextend({}, so) }
   private$.plugin_order = { byname: [], byref: [] }
-  private$.use = makeuse({
+  private$.use = Makeuse({
     prefix: 'seneca-',
     module: module,
     msgprefix: false,
@@ -340,7 +340,7 @@ function make_seneca (initial_options) {
   })
 
   private$.actcache = (so.actcache.active
-    ? lrucache({ max: so.actcache.size })
+    ? Lrucache({ max: so.actcache.size })
     : { set: _.noop })
 
   private$.wait_for_ready = false
@@ -368,7 +368,7 @@ function make_seneca (initial_options) {
     argprops: common.argprops,
     print: common.print,
 
-    router: function () { return patrun() },
+    router: function () { return Patrun() },
     parsecanon: make_entity.parsecanon
   }
 
@@ -521,7 +521,7 @@ function make_seneca (initial_options) {
   function api_depends () {
     var self = this
 
-    var args = norma('{pluginname:s deps:a? moredeps:s*}', arguments)
+    var args = Norma('{pluginname:s deps:a? moredeps:s*}', arguments)
 
     var deps = args.deps || args.moredeps
 
@@ -602,7 +602,7 @@ function make_seneca (initial_options) {
     var pins = config.pins || [config.pin || '']
 
     pins = _.map(pins, function (pin) {
-      return _.isString(pin) ? jsonic(pin) : pin
+      return _.isString(pin) ? Jsonic(pin) : pin
     })
 
     _.each(pins, function (pin) {
@@ -723,7 +723,7 @@ function make_seneca (initial_options) {
     var self = this
     var version = process.versions.node
 
-    if (semver.lt(version, '0.12.0')) {
+    if (Semver.lt(version, '0.12.0')) {
       return self.die(error('bad_cluster_version', {version: version}))
     }
 
@@ -779,7 +779,7 @@ function make_seneca (initial_options) {
   function api_pin (pattern, pinopts) {
     var thispin = this
 
-    pattern = _.isString(pattern) ? jsonic(pattern) : pattern
+    pattern = _.isString(pattern) ? Jsonic(pattern) : pattern
 
     var methodkeys = []
     for (var key in pattern) {
@@ -980,7 +980,7 @@ function make_seneca (initial_options) {
     })
 
     if (0 < _.keys(pattern_rules).length) {
-      actmeta.parambulator = parambulator(pattern_rules, pm_custom_args)
+      actmeta.parambulator = Parambulator(pattern_rules, pm_custom_args)
     }
 
     var addroute = true
@@ -1066,7 +1066,7 @@ function make_seneca (initial_options) {
 
   function api_find (args) {
     if (_.isString(args)) {
-      args = jsonic(args)
+      args = Jsonic(args)
     }
 
     var actmeta = private$.actrouter.find(args)
@@ -1091,7 +1091,7 @@ function make_seneca (initial_options) {
     var patterns = _.flatten(arr(arguments))
 
     _.each(patterns, function (pattern) {
-      pattern = _.isString(pattern) ? jsonic(pattern) : pattern
+      pattern = _.isString(pattern) ? Jsonic(pattern) : pattern
       pins = pins.concat(_.map(private$.actrouter.list(pattern),
         function (desc) {
           return desc.match
@@ -1127,7 +1127,7 @@ function make_seneca (initial_options) {
   }
 
   function api_list (args) {
-    args = _.isString(args) ? jsonic(args) : args
+    args = _.isString(args) ? Jsonic(args) : args
 
     var found = private$.actrouter.list(args)
 
@@ -1140,7 +1140,7 @@ function make_seneca (initial_options) {
 
   function api_act_if () {
     var self = this
-    var args = norma('{execute:b actargs:.*}', arguments)
+    var args = Norma('{execute:b actargs:.*}', arguments)
 
     if (args.execute) {
       return self.act.apply(self, args.actargs)
@@ -1336,12 +1336,12 @@ function make_seneca (initial_options) {
 
     var repl_opts = _.extend(so.repl, in_opts)
 
-    net.createServer(function (socket) {
+    Net.createServer(function (socket) {
       socket.on('error', function (err) {
         sd.log.error('repl-socket', err)
       })
 
-      var r = repl.start({
+      var r = Repl.start({
         prompt: 'seneca ' + root.id + '> ',
         input: socket,
         output: socket,
@@ -1408,7 +1408,7 @@ function make_seneca (initial_options) {
         }
 
         try {
-          var args = jsonic(cmd)
+          var args = Jsonic(cmd)
           context.s.act(args, function (err, out) {
             if (err) {
               return callback(err.message)
@@ -1419,7 +1419,7 @@ function make_seneca (initial_options) {
         }
         catch (e) {
           try {
-            var script = vm.createScript(cmd, {
+            var script = Vm.createScript(cmd, {
               filename: filename,
               displayErrors: false
             })
@@ -1603,7 +1603,7 @@ function make_seneca (initial_options) {
           // handle throws of non-Error values
           if (!Util.isError(ex)) {
             formattedErr = _.isObject(ex)
-              ? new Error(jsonic.stringify(ex))
+              ? new Error(Jsonic.stringify(ex))
               : new Error('' + ex)
           }
 
@@ -1743,11 +1743,11 @@ function make_seneca (initial_options) {
   //    * _actcb_         (function)  &rarr;  action callback
   //    * _act_callpoint_ (function)  &rarr;  action call point
   function act_cache_check (instance, args, prior_ctxt, actcb, act_callpoint) {
-    assert.ok(_.isObject(instance), 'act_cache_check; instance; isObject')
-    assert.ok(_.isObject(args), 'act_cache_check; args; isObject')
-    assert.ok(!prior_ctxt || _.isObject(prior_ctxt),
+    Assert.ok(_.isObject(instance), 'act_cache_check; instance; isObject')
+    Assert.ok(_.isObject(args), 'act_cache_check; args; isObject')
+    Assert.ok(!prior_ctxt || _.isObject(prior_ctxt),
       'act_cache_check; prior_ctxt; isObject')
-    assert.ok(!actcb || _.isFunction(actcb),
+    Assert.ok(!actcb || _.isFunction(actcb),
       'act_cache_check; actcb; isFunction')
 
     var actid = args.id$ || args.actid$
@@ -1844,9 +1844,9 @@ function make_seneca (initial_options) {
   //    * _actmeta_  (object)    &rarr;  action meta data
   //    * _done_     (function)  &rarr;  callback function
   function act_param_check (args, actmeta, done) {
-    assert.ok(_.isObject(args), 'act_param_check; args; isObject')
-    assert.ok(_.isObject(actmeta), 'act_param_check; actmeta; isObject')
-    assert.ok(_.isFunction(done), 'act_param_check; done; isFunction')
+    Assert.ok(_.isObject(args), 'act_param_check; args; isObject')
+    Assert.ok(_.isObject(actmeta), 'act_param_check; actmeta; isObject')
+    Assert.ok(_.isFunction(done), 'act_param_check; done; isFunction')
 
     if (actmeta.parambulator) {
       actmeta.parambulator.validate(args, function (err) {
@@ -1867,7 +1867,7 @@ function make_seneca (initial_options) {
 
   // string args override object args
   function parse_pattern (instance, args, normaspec, fixed) {
-    args = norma('{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}', args)
+    args = Norma('{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}', args)
 
     try {
       return _.extend(
@@ -1878,7 +1878,7 @@ function make_seneca (initial_options) {
             // Precedence of arguments in add,act is left-to-right
             args.moreobjargs ? args.moreobjargs : {},
             args.objargs ? args.objargs : {},
-            args.strargs ? jsonic(args.strargs) : {},
+            args.strargs ? Jsonic(args.strargs) : {},
 
             fixed || {})
         })
@@ -1927,7 +1927,7 @@ function make_seneca (initial_options) {
       })
 
       strdesc = self.toString() +
-        (_.keys(vfa).length ? '/' + jsonic.stringify(vfa) : '')
+        (_.keys(vfa).length ? '/' + Jsonic.stringify(vfa) : '')
 
       return strdesc
     }
@@ -1986,7 +1986,7 @@ function make_seneca (initial_options) {
         {},
         args.moreobjargs ? args.moreobjargs : {},
         args.objargs ? args.objargs : {},
-        args.strargs ? jsonic(args.strargs) : {}
+        args.strargs ? Jsonic(args.strargs) : {}
      )
 
       var fn
@@ -2019,7 +2019,7 @@ function make_seneca (initial_options) {
       return fn
     }
 
-    var dzig = zig({
+    var dzig = Zig({
       timeout: options.zig.timeout || options.timeout,
       trace: options.zig.trace
     })
@@ -2080,11 +2080,11 @@ function make_seneca (initial_options) {
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
   function api_decorate (property, method) {
-    assert(property, 'property must be specified')
-    assert(typeof property === 'string', 'property must be a string')
-    assert(property[0] !== '_', 'property cannot start with _')
-    assert(this._decorations[property] === undefined, 'seneca is already decorated with the property')
-    assert(this[property] === undefined, 'cannot override a core seneca property: ' + property)
+    Assert(property, 'property must be specified')
+    Assert(typeof property === 'string', 'property must be a string')
+    Assert(property[0] !== '_', 'property cannot start with _')
+    Assert(this._decorations[property] === undefined, 'seneca is already decorated with the property')
+    Assert(this[property] === undefined, 'cannot override a core seneca property: ' + property)
 
     this._decorations[property] = method
     this[property] = method
@@ -2282,7 +2282,7 @@ function makedie (instance, ctxt) {
         'Stack: ' + stack + '\n\n' +
         'Instance: ' + instance.toString() + fatalmodemsg + die_trace + '\n\n' +
         'When: ' + new Date().toISOString() + '\n\n' +
-        'Log: ' + jsonic.stringify(logargs) + '\n\n' +
+        'Log: ' + Jsonic.stringify(logargs) + '\n\n' +
         'Node:\n  ' + Util.inspect(process.versions).replace(/\s+/g, ' ') +
         ',\n  ' + Util.inspect(process.features).replace(/\s+/g, ' ') +
         ',\n  ' + Util.inspect(process.moduleLoadList).replace(/\s+/g, ' ') + '\n\n' +
@@ -2361,7 +2361,7 @@ function pin_patrun_customizer (pat, data) {
   _.each(pat, function (v, k) {
     if (_.isString(v) && ~v.indexOf('*')) {
       delete pat[k]
-      gexers[k] = gex(v)
+      gexers[k] = Gex(v)
     }
   })
 
@@ -2424,10 +2424,10 @@ if (require.main === module) {
 
 // Seneca is an EventEmitter.
 function Seneca () {
-  events.EventEmitter.call(this)
+  Events.EventEmitter.call(this)
   this.setMaxListeners(0)
 }
-Util.inherits(Seneca, events.EventEmitter)
+Util.inherits(Seneca, Events.EventEmitter)
 
 // Private member variables of Seneca object.
 function make_private () {
@@ -2449,7 +2449,7 @@ function make_private () {
 function make_paramcheck () {
   var paramcheck = {}
 
-  paramcheck.options = parambulator({
+  paramcheck.options = Parambulator({
     tag: { string$: true },
     idlen: { integer$: true },
     timeout: { integer$: true },
@@ -2459,7 +2459,7 @@ function make_paramcheck () {
     msgprefix: 'seneca({...}): '
   })
 
-  paramcheck.register = parambulator({
+  paramcheck.register = Parambulator({
     type$: 'object',
     required$: ['name', 'init'],
     string$: ['name'],
