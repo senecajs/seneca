@@ -3,12 +3,11 @@
 2.  Review github issues
 3.  Make sure you have a clean branch: git checkout -b release upstream/master
 3.  run prerelease.sh
-4.  update version: seneca.js, test/seneca.test.js
-5.  run `npm version v0.0.0 -m "version 0.0.0"` with the version number replacing 0.0.0 
-6.  git push upstream master
-7.  git push upstream --tags
-8.  npm publish
-9.  npm tag seneca@VERSION next
-10. npm tag seneca@VERSION plugin
-11. update and publish plugins
-12. update tumblr
+4.  run `npm version v0.0.0 -m "version 0.0.0"` with the version number replacing 0.0.0
+5.  git push upstream master
+6.  git push upstream --tags
+7.  npm publish
+8.  npm tag seneca@VERSION next
+9. npm tag seneca@VERSION plugin
+10. update and publish plugins
+11. update tumblr

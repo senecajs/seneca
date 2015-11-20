@@ -1,8 +1,6 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 'use strict'
 
-var VERSION = '0.8.0'
-
 var util = require('util')
 var assert = require('assert')
 
@@ -11,6 +9,7 @@ var gex = require('gex')
 var _ = require('lodash')
 var Joi = require('joi')
 var Lab = require('lab')
+var Package = require('../package.json')
 
 var seneca = require('..')
 
@@ -42,7 +41,7 @@ describe('seneca', function () {
   it('version', function (done) {
     var start = Date.now()
     var si = seneca(testopts)
-    assert.equal(si.version, VERSION)
+    assert.equal(si.version, Package.version)
     var end = Date.now()
 
     // ensure startup time does not degenerate
