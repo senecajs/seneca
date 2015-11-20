@@ -2,9 +2,6 @@
 // <style> p,ul,li { margin:5px !important; } </style>
 'use strict'
 
-// Current version, access using _seneca.version_ property.
-var VERSION = '0.8.0'
-
 // Node API modules
 var Assert = require('assert')
 var Events = require('events')
@@ -33,6 +30,7 @@ var Legacy = require('./lib/legacy')
 var Logging = require('./lib/logging')
 var MakeEntity = require('./lib/entity')
 var Optioner = require('./lib/optioner')
+var Package = require('./package.json')
 var PluginUtil = require('./lib/plugin-util')
 var Print = require('./lib/print')
 var Repl = require('./lib/repl')
@@ -165,6 +163,14 @@ var internals = {
   }
 }
 
+// Seneca is an EventEmitter.
+function Seneca () {
+  Events.EventEmitter.call(this)
+  this.setMaxListeners(0)
+}
+Util.inherits(Seneca, Events.EventEmitter)
+
+
 module.exports = function init (seneca_options, more_options) {
   // Create instance.
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
@@ -237,7 +243,7 @@ function make_seneca (initial_options) {
   root.start_time = Date.now()
   root.fixedargs = {}
   root.context = {}
-  root.version = VERSION
+  root.version = Package.version
 
   // Seneca methods. Official API.
   root.add = api_add // Add a message pattern and action.
@@ -2310,13 +2316,6 @@ function pin_patrun_customizer (pat, data) {
 
 // ### Declarations
 
-// Seneca is an EventEmitter.
-function Seneca () {
-  Events.EventEmitter.call(this)
-  this.setMaxListeners(0)
-}
-Util.inherits(Seneca, Events.EventEmitter)
-
 // Private member variables of Seneca object.
 function make_private () {
   return {
@@ -2375,9 +2374,8 @@ function make_callpoint (active) {
         ['/seneca/seneca.js', '/seneca/lib/', '/lodash.js'])
     }
   }
-  else {
-    return _.noop
-  }
+
+  return _.noop
 }
 
 // Intentional console output uses this function. Helps to find spurious debugging.
