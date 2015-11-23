@@ -175,16 +175,16 @@ Util.inherits(Seneca, Events.EventEmitter)
 module.exports = function init (seneca_options, more_options) {
   // Create instance.
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
-  var so = seneca.options()
+  var options = seneca.options()
 
   // Register default plugins, unless turned off by options.
-  if (so.default_plugins.basic) { seneca.use('basic') }
-  if (so.default_plugins.transport) { seneca.use('transport') }
-  if (so.default_plugins.web) { seneca.use('web') }
-  if (so.default_plugins['mem-store']) { seneca.use('mem-store') }
+  if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
+  if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
+  if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
+  if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
 
   // Register plugins specified in options.
-  _.each(so.plugins, function (plugindesc) {
+  _.each(options.plugins, function (plugindesc) {
     seneca.use(plugindesc)
   })
 
