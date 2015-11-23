@@ -33,6 +33,47 @@ describe('logging', function () {
       done()
     })
 
+    it('handles null logspec', function (done) {
+      var fn = function () {
+        Logging.makelogrouter(null)
+      }
+
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('handles logspec thats an empty array', function (done) {
+      var fn = function () {
+        Logging.makelogrouter([])
+      }
+
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('handles logspec thats an empty object', function (done) {
+      var fn = function () {
+        Logging.makelogrouter({})
+      }
+
+      expect(fn).to.not.throw()
+      done()
+    })
+
+    it('short as an array', function (done) {
+      var router = Logging.makelogrouter(['level:info,type:plugin'])
+      expect(internals.format(router)).to.equal('level:info->type:plugin-><print>')
+
+      done()
+    })
+
+    it('short as an object', function (done) {
+      var router = Logging.makelogrouter({ level: 'info', type: 'plugin' })
+      expect(internals.format(router)).to.equal('level:info->type:plugin-><print>')
+
+      done()
+    })
+
     it('short', function (done) {
       var router = Logging.makelogrouter('level:info,type:plugin')
       expect(internals.format(router)).to.equal('level:info->type:plugin-><print>')
@@ -125,14 +166,26 @@ describe('logging', function () {
       done()
     })
 
-    it('works without a level or entry', function (done) {
+    it('supports a tag on the entry', function (done) {
       var router = {
-        findexact: function () {},
+        findexact: function () {
+          var prev = {
+            tag: 'test'
+          }
+          return prev
+        },
         remove: function () {},
-        add: function () {}
+        add: function (route, handler) {
+          handler()
+        }
       }
+      var entry = {
+        tag: 'test',
+        handler: function () {}
+      }
+
       var fn = function () {
-        Logging.makelogroute({}, router)
+        Logging.makelogroute(entry, router)
       }
       expect(fn).to.not.throw()
       done()
