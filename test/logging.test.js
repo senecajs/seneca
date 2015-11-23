@@ -1,16 +1,21 @@
 'use strict'
 
-var assert = require('assert')
-
+var Code = require('code')
 var Lab = require('lab')
+var Logging = require('../lib/logging')
 
-var logging = require('../lib/logging')
-
+// Test shortcuts
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var expect = Code.expect
 
-function fmt (r) { return r.toString(true).replace(/\s+/g, '') }
+
+var internals = {
+  format: function (router) {
+    return router.toString(true).replace(/\s+/g, '')
+  }
+}
 
 describe('logging', function () {
   function A () {}; A.toString = function () { return 'A' }
@@ -18,94 +23,89 @@ describe('logging', function () {
   function C () {}; C.toString = function () { return 'C' }
 
   it('makelogrouter.happy', function (done) {
-    var r = logging.makelogrouter({map: [
-        {level: 'info', type: 'init', handler: A},
-        {level: 'info', type: 'plugin', plugin: 'red', handler: B}
+    var router = Logging.makelogrouter({map: [
+        { level: 'info', type: 'init', handler: A },
+        { level: 'info', type: 'plugin', plugin: 'red', handler: B }
     ]})
 
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:info->plugin:red->type:plugin-><B>|type:init-><A>')
+    expect(internals.format(router)).to.equal('level:info->plugin:red->type:plugin-><B>|type:init-><A>')
     done()
   })
 
   it('makelogrouter.short', function (done) {
-    var r = logging.makelogrouter('level:info,type:plugin')
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:info->type:plugin-><print>')
+    var router = Logging.makelogrouter('level:info,type:plugin')
+    expect(internals.format(router)).to.equal('level:info->type:plugin-><print>')
 
-    r = logging.makelogrouter(['level:info,type:plugin', 'level:debug,type:act'])
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:debug->type:act-><print>info->type:plugin-><print>')
+    router = Logging.makelogrouter(['level:info,type:plugin', 'level:debug,type:act'])
+    expect(internals.format(router)).to.equal('level:debug->type:act-><print>info->type:plugin-><print>')
     done()
   })
 
   it('makelogrouter.multiplex', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'info', type: 'init', handler: A},
         {level: 'info', type: 'init', handler: B},
         {level: 'info', type: 'init', handler: C}
     ]})
 
     // fix printing for test
-    r.add({level: 'info', type: 'init'}, r.find({level: 'info', type: 'init'}).multiplex)
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:info->type:init-><A,B,C>')
+    router.add({level: 'info', type: 'init'}, router.find({level: 'info', type: 'init'}).multiplex)
+    expect(internals.format(router)).to.equal('level:info->type:init-><A,B,C>')
     done()
   })
 
   it('makelogrouter.multival.comma', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'info', type: 'init,  status', handler: A}
     ]})
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:info->type:init-><A>status-><A>')
+
+    expect(internals.format(router)).to.equal('level:info->type:init-><A>status-><A>')
     done()
   })
 
   it('makelogrouter.multival.space', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'info', type: 'init status', handler: A}
     ]})
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:info->type:init-><A>status-><A>')
+
+    expect(internals.format(router)).to.equal('level:info->type:init-><A>status-><A>')
     done()
   })
 
   it('makelogrouter.multimultival', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'info,debug', type: 'init,status', handler: A}
     ]})
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:debug->type:init-><A>status-><A>info->type:init-><A>status-><A>')
+
+    expect(internals.format(router)).to.equal('level:debug->type:init-><A>status-><A>info->type:init-><A>status-><A>')
     done()
   })
 
   it('makelogrouter.level.all', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'all', type: 'init', handler: A}
     ]})
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:debug->type:init-><A>error->type:init-><A>fatal->type:init-><A>info->type:init-><A>warn->type:init-><A>')
+
+    expect(internals.format(router)).to.equal('level:debug->type:init-><A>error->type:init-><A>fatal->type:init-><A>info->type:init-><A>warn->type:init-><A>')
     done()
   })
 
   it('makelogrouter.level.upwards', function (done) {
-    var r = logging.makelogrouter({map: [
+    var router = Logging.makelogrouter({map: [
         {level: 'warn+', type: 'init', handler: A}
     ]})
-    // console.log(fmt(r))
-    assert.equal(fmt(r), 'level:error->type:init-><A>fatal->type:init-><A>warn->type:init-><A>')
+
+    expect(internals.format(router)).to.equal('level:error->type:init-><A>fatal->type:init-><A>warn->type:init-><A>')
     done()
   })
 
   it('makelogrouter.level.bad', function (done) {
     try {
-      logging.makelogrouter({map: [ {level: 'bad', type: 'init', handler: A} ]})
-      assert.fail()
+      Logging.makelogrouter({ map: [ {level: 'bad', type: 'init', handler: A} ] })
     }
     catch (e) {
-      assert.equal('invalid_log_level', e.code)
+      expect(e.code).to.equal('invalid_log_level')
+      done()
     }
-    done()
   })
 })
