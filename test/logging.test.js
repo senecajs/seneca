@@ -191,4 +191,31 @@ describe('logging', function () {
       done()
     })
   })
+
+  describe('log_act_cache()', function () {
+    it('logs debug information', function (done) {
+      var instance = {
+        log: {
+          debug: function () {
+            expect(Object.keys(arguments).length).to.equal(8)
+            done()
+          }
+        }
+      }
+      var actinfo = {
+        actid: 'id'
+      }
+      var actmeta = {
+        pattern: 'pattern',
+        descdata: function () {}
+      }
+      var prior_ctxt = {
+        chain: [],
+        depth: 0,
+        entry: 'test'
+      }
+
+      Logging.log_act_cache(instance, actinfo, actmeta, {}, prior_ctxt, {})
+    })
+  })
 })
