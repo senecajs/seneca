@@ -284,8 +284,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 
 [travis-badge]: https://travis-ci.org/senecajs/seneca.svg
 [travis-url]: https://travis-ci.org/senecajs/seneca
-[coveralls-badge]: https://coveralls.io/github/senecajs/seneca.svg
-[coveralls-url]: https://coveralls.io/github/senecajs/seneca
+[coveralls-badge]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
+[coveralls-url]: https://coveralls.io/github/senecajs/seneca?branch=master
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [npm-badge]: https://badge.fury.io/js/seneca.svg
