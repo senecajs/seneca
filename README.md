@@ -4,6 +4,7 @@
 # seneca
 [![npm version][npm-badge]][npm-url] 
 [![Build Status][travis-badge]][travis-url]
+[![Coverage Status][coveralls-badge]][coveralls-url]
 [![Gitter][gitter-badge]][gitter-url]
 
 Seneca is a toolkit for organizing the business logic of your app. You can break down your app into "stuff that happens", rather than focusing on data models or managing dependencies.
@@ -283,6 +284,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 
 [travis-badge]: https://travis-ci.org/senecajs/seneca.svg
 [travis-url]: https://travis-ci.org/senecajs/seneca
+[coveralls-badge]: https://coveralls.io/github/senecajs/seneca.svg
+[coveralls-url]: https://coveralls.io/github/senecajs/seneca
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [npm-badge]: https://badge.fury.io/js/seneca.svg

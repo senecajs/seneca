@@ -5,6 +5,11 @@ node_js:
   - 0.12
   - 4
   - 5
+cache:
+  directories:
+      - node_modules
+after_script:
+  - npm run cov
 notifications:
   webhooks:
     urls:
