@@ -255,7 +255,7 @@ function make_seneca (initial_options) {
   root.use = api_use // Define a plugin.
   root.make = api_make // Make a new entity object.
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
-  root.client = Transport.client(callpoint, private$) // Send outbound messages.
+  root.client = Transport.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = api_has // True if action pattern defined.
   root.find = api_find // Find action by pattern

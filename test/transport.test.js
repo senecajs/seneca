@@ -197,12 +197,7 @@ describe('transport', function () {
 
   describe('client()', function () {
     it('supports null options', function (done) {
-      var private$ = {
-        actrouter: {
-          add: _.noop
-        }
-      }
-      var client = Transport.client(_.noop, private$)
+      var client = Transport.client(_.noop)
       var seneca = {
         log: {
           info: function () {
@@ -212,26 +207,23 @@ describe('transport', function () {
         options: function () {
           return {}
         },
-        act: _.noop
+        act: _.noop,
+        delegate: function () {
+          return this
+        },
+        add: _.noop
       }
 
       var fn = function () {
         client.call(seneca)
       }
+
       expect(fn).to.not.throw()
       done()
     })
 
     it('supports send to client queueing', function (done) {
-      var private$ = {
-        actrouter: {
-          add: function (pin, options) {
-            options.func({}, _.noop)
-            done()
-          }
-        }
-      }
-      var client = Transport.client(_.noop, private$)
+      var client = Transport.client(_.noop)
       var seneca = {
         log: {
           info: _.noop,
@@ -246,6 +238,12 @@ describe('transport', function () {
         },
         act: function (pattern, options, callback) {
           callback(null, {})
+        },
+        delegate: function () {
+          return this
+        },
+        add: function () {
+          done()
         }
       }
 
@@ -253,15 +251,7 @@ describe('transport', function () {
     })
 
     it('supports pins represented by strings', function (done) {
-      var private$ = {
-        actrouter: {
-          add: function (pin, options) {
-            options.func({}, _.noop)
-            done()
-          }
-        }
-      }
-      var client = Transport.client(_.noop, private$)
+      var client = Transport.client(_.noop)
       var seneca = {
         log: {
           info: _.noop,
@@ -276,6 +266,12 @@ describe('transport', function () {
         },
         act: function (pattern, options, callback) {
           callback(null, {})
+        },
+        delegate: function () {
+          return this
+        },
+        add: function () {
+          done()
         }
       }
 
@@ -283,14 +279,7 @@ describe('transport', function () {
     })
 
     it('handles errors from act', function (done) {
-      var private$ = {
-        actrouter: {
-          add: function (pin, options) {
-            options.func({}, _.noop)
-          }
-        }
-      }
-      var client = Transport.client(_.noop, private$)
+      var client = Transport.client(_.noop)
       var seneca = {
         log: {
           info: _.noop,
@@ -309,21 +298,18 @@ describe('transport', function () {
         die: function (err) {
           expect(err).to.exist()
           done()
-        }
+        },
+        delegate: function () {
+          return this
+        },
+        add: _.noop
       }
 
       client.call(seneca)
     })
 
     it('handles a null liveclient', function (done) {
-      var private$ = {
-        actrouter: {
-          add: function (pin, options) {
-            options.func({}, _.noop)
-          }
-        }
-      }
-      var client = Transport.client(_.noop, private$)
+      var client = Transport.client(_.noop)
       var seneca = {
         log: {
           info: _.noop,
@@ -342,7 +328,11 @@ describe('transport', function () {
         die: function (err) {
           expect(err).to.exist()
           done()
-        }
+        },
+        delegate: function () {
+          return this
+        },
+        add: _.noop
       }
 
       client.call(seneca)
