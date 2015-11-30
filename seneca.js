@@ -255,7 +255,7 @@ function make_seneca (initial_options) {
   root.use = api_use // Define a plugin.
   root.make = api_make // Make a new entity object.
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
-  root.client = Transport.client(callpoint) // Send outbound messages.
+  root.client = Transport.client(callpoint, makedie) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = api_has // True if action pattern defined.
   root.find = api_find // Find action by pattern
@@ -653,9 +653,12 @@ function make_seneca (initial_options) {
 
     var actmeta = args.actmeta || {}
 
+    // TODO: refactor plugin name, tag and fullname handling.
     actmeta.plugin_name = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname ||
-      actmeta.plugin_name + (actmeta.plugin_tag ? '/' + actmeta.plugin_tag : '')
+      actmeta.plugin_name +
+      (('-' === actmeta.plugin_tag ? void 0 : actmeta.plugin_tag)
+       ? '/' + actmeta.plugin_tag : '')
 
     var add_callpoint = callpoint()
     if (add_callpoint) {
@@ -663,6 +666,7 @@ function make_seneca (initial_options) {
     }
 
     actmeta.sub = !!raw_pattern.sub$
+    actmeta.client = !!raw_pattern.client$
 
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actmeta.deprecate = raw_pattern.deprecate$

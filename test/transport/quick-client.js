@@ -1,5 +1,3 @@
 require('../..')()
   .client()
-  .ready( function () {
-    this.act('a:1,x:1', console.log)
-  })
+  .act('a:1,x:1', console.log)

@@ -52,7 +52,8 @@ describe('transport', function () {
         options: function () {
           return {}
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -75,7 +76,8 @@ describe('transport', function () {
             type: 'tcp'
           }
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -98,7 +100,8 @@ describe('transport', function () {
             type: 'http'
           }
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -119,7 +122,8 @@ describe('transport', function () {
         options: function () {
           return {}
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -140,7 +144,8 @@ describe('transport', function () {
         options: function () {
           return {}
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -161,7 +166,8 @@ describe('transport', function () {
         options: function () {
           return {}
         },
-        act: _.noop
+        act: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -188,7 +194,8 @@ describe('transport', function () {
         die: function (err) {
           expect(err).to.exist()
           done()
-        }
+        },
+        context: {}
       }
 
       listen.call(seneca)
@@ -197,7 +204,7 @@ describe('transport', function () {
 
   describe('client()', function () {
     it('supports null options', function (done) {
-      var client = Transport.client(_.noop)
+      var client = Transport.client(_.noop, function () { return _.noop } )
       var seneca = {
         log: {
           info: function () {
@@ -209,9 +216,10 @@ describe('transport', function () {
         },
         act: _.noop,
         delegate: function () {
-          return this
+          return Object.create(this)
         },
-        add: _.noop
+        add: _.noop,
+        context: {}
       }
 
       var fn = function () {
@@ -223,12 +231,9 @@ describe('transport', function () {
     })
 
     it('supports send to client queueing', function (done) {
-      var client = Transport.client(_.noop)
+      var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
+        log: function () {},
         options: function () {
           return {
             transport: {
@@ -240,23 +245,24 @@ describe('transport', function () {
           callback(null, {})
         },
         delegate: function () {
-          return this
+          return Object.create(this)
         },
         add: function () {
           done()
-        }
+        },
+        context: {}
       }
+
+      seneca.log.info = _.noop
+      seneca.log.debug = _.noop
 
       client.call(seneca)
     })
 
     it('supports pins represented by strings', function (done) {
-      var client = Transport.client(_.noop)
+      var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
+        log: function () {},
         options: function () {
           return {
             transport: {
@@ -268,18 +274,29 @@ describe('transport', function () {
           callback(null, {})
         },
         delegate: function () {
-          return this
+          return Object.create(this)
         },
         add: function () {
           done()
-        }
+        },
+        context: {}
       }
+
+      seneca.log.info = _.noop
+      seneca.log.debug = _.noop
 
       client.call(seneca)
     })
 
     it('handles errors from act', function (done) {
-      var client = Transport.client(_.noop)
+      var client = Transport.client(
+        _.noop,
+        function () {
+          return function (err) {
+            expect(err).to.exist()
+            done()
+          }
+        })
       var seneca = {
         log: {
           info: _.noop,
@@ -295,21 +312,25 @@ describe('transport', function () {
         act: function (pattern, options, callback) {
           callback(new Error(), {})
         },
-        die: function (err) {
-          expect(err).to.exist()
-          done()
-        },
         delegate: function () {
-          return this
+          return Object.create(this)
         },
-        add: _.noop
+        add: _.noop,
+        context: {}
       }
 
       client.call(seneca)
     })
 
     it('handles a null liveclient', function (done) {
-      var client = Transport.client(_.noop)
+      var client = Transport.client(
+        _.noop,
+        function () {
+          return function (err) {
+            expect(err).to.exist()
+            done()
+          }
+        })
       var seneca = {
         log: {
           info: _.noop,
@@ -325,14 +346,11 @@ describe('transport', function () {
         act: function (pattern, options, callback) {
           callback(null, null)
         },
-        die: function (err) {
-          expect(err).to.exist()
-          done()
-        },
         delegate: function () {
-          return this
+          return Object.create(this)
         },
-        add: _.noop
+        add: _.noop,
+        context: {}
       }
 
       client.call(seneca)
@@ -623,6 +641,7 @@ describe('transport', function () {
           .end(done)
       })
   })
+
 
   it('transport-init-ordering', function (done) {
     var tt = make_test_transport()
