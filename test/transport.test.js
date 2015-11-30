@@ -656,7 +656,7 @@ describe('transport', function () {
         this.add('init:bar', function (a, d) { inits.bar = 1; d() })
       })
 
-      .client()
+      .client({type: 'test'})
 
       .add('foo:2', testact)
       .use(function zed () {
@@ -664,7 +664,7 @@ describe('transport', function () {
         this.add('init:zed', function (a, d) { inits.zed = 1; d() })
       })
 
-      .listen()
+      .listen({type: 'test'})
 
       .add('foo:3', testact)
       .use(function qux () {
@@ -686,14 +686,14 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
-      .client()
+      .client({type: 'test'})
 
       .add('foo:1', testact)
       .use(function bar () {
         this.add('bar:1', testact)
       })
 
-      .listen()
+      .listen({type: 'test'})
 
       .add('foo:2', testact)
       .use(function zed () {
@@ -726,6 +726,117 @@ describe('transport', function () {
             this.close(done)
           })
       })
+  })
+
+
+  it('transport-balance-exact', function (done) {
+    var bt = make_balance_transport()
+
+    var s0, s1, c0
+
+    make_s0()
+
+    function make_s0 () {
+      s0 = Seneca({
+        tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
+      })
+        .error(done)
+        .add('foo:1', function (args, done) {
+          // ensure action id is transferred for traceability
+          expect('aa/BB').to.equal(args.meta$.id)
+          args.s = 0
+          testact.call(this, args, done)
+        })
+        .add('bar:1', function (args, done) {
+          done( null, { bar: 1, q: 1 })
+        })
+        .listen({ port: 44440, pin: 'foo:1' })
+        .ready( make_s1 )
+    }
+
+    function make_s1 () {
+      s1 = Seneca({
+        tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
+      })
+        .error(done)
+        .add('foo:1', function (args, done) {
+          // ensure action id is transferred for traceability
+          expect('cc/DD').to.equal(args.meta$.id)
+          args.s = 1
+          testact.call(this, args, done)
+        })
+        .listen({ port: 44441, pin: 'foo:1' })
+        .ready( make_s9 )
+    }
+
+    function make_s9 () {
+      s1 = Seneca({
+        tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
+      })
+        .error(done)
+        .add('bar:2', function (args, done) {
+          done( null, { bar: 2, q: 2 })
+        })
+        .listen({ port: 44449, pin: 'foo:1' })
+        .ready( run_client )
+    }
+
+    function run_client () {
+      c0 = Seneca({
+        tag: 'cln', timeout: 5555, log: 'silent',
+        debug: {short_logs: true}
+      })
+        .error(done)
+        .use(bt)
+
+        .client({type: 'balance', pin: 'foo:1'})
+        .client({port: 44440, pin: 'foo:1'})
+        .client({port: 44441, pin: 'foo:1'})
+
+        .client({port: 44440, pin: 'bar:1'})
+        .client({port: 44449, pin: 'bar:2'})
+        .start()
+
+        .wait('foo:1,actid$:aa/BB')
+        .step(function (out) {
+          expect(out.foo).to.equal(1)
+          expect(out.s).to.equal(0)
+          return true
+        })
+
+        .wait('foo:1,actid$:cc/DD')
+        .step(function (out) {
+          expect(out.foo).to.equal(1)
+          expect(out.s).to.equal(1)
+          return true
+        })
+
+        .wait('bar:1')
+        .step(function (out) {
+          expect(out.q).to.equal(1)
+          return true
+        })
+
+        .wait('bar:1')
+        .step(function (out) {
+          expect(out.q).to.equal(1)
+          return true
+        })
+
+        .wait('bar:2')
+        .step(function (out) {
+          expect(out.q).to.equal(2)
+          return true
+        })
+
+        .end( function () {
+          s0.close( function () {
+            s1.close( function () {
+              c0.close( done )
+            })
+          })
+        })
+    }
   })
 })
 
@@ -807,3 +918,59 @@ function make_test_transport () {
     }
   }
 }
+
+
+// A simple load balancing transport
+function make_balance_transport () {
+  test_transport.outmsgs = []
+  test_transport.queuemap = {}
+
+  return test_transport
+
+  function test_transport (options) {
+    var seneca = this
+
+    var targets = []
+
+    seneca.options({
+      transport: {
+        balance: {
+          handle: function ( pat, action ) {
+            targets.push(action)
+          }
+        }
+      }
+    })
+
+    var tu = seneca.export('transport/utils')
+
+    seneca.add({
+      role: 'transport', hook: 'client', type: 'balance'
+    }, hook_client_test)
+
+    function hook_client_test (args, clientdone) {
+      var seneca = this
+      var type = args.type
+      var client_options = seneca.util.clean(_.extend({}, options[type], args))
+
+      tu.make_client(make_send, client_options, clientdone)
+
+      var index = -1
+
+      function make_send (spec, topic, send_done) {
+        seneca.log.debug('client', 'send', topic + '_res', client_options, seneca)
+
+        send_done(null, function (args, done) {
+          index = ( index + 1 ) % targets.length
+          targets[index].call( this, args, done )
+        })
+      }
+
+      seneca.add('role:seneca,cmd:close', function (close_args, done) {
+        var closer = this
+        closer.prior(close_args, done)
+      })
+    }
+  }
+}
+
