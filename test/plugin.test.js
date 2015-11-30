@@ -280,15 +280,9 @@ describe('plugin', function () {
   it('cannot call act during plugin initialization', function (done) {
     var seneca = Seneca({ log: 'silent' })
 
-    seneca.add({ role: 'plugin', cmd: 'echo' }, function (args, callback) {
-      callback(null, args)
-    })
-
     seneca.use(function foo () {
-      this.act({ role: 'plugin', cmd: 'echo', echo: 'back' }, function (err, result) {
-        assert(err)
-        done()
-      })
+      assert(this.act.name === 'deprecated')
+      done()
     })
   })
 })
