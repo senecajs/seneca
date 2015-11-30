@@ -1473,4 +1473,43 @@ describe('seneca', function () {
       done()
     })
   })
+
+  describe('#intercept', function () {
+    it('intercept', function (done) {
+      var si = seneca({ log: 'silent' }).error(done)
+
+      var i0 = function i0 ( msg, done ) {
+        msg.z = 1
+        var f = fm[msg.b]
+
+        f.call( this, msg, done )
+      }
+
+      var fm = {}
+
+      i0.handle = function ( a, t ) {
+        fm[a.b$] = t
+      }
+
+      si.add( 'a:1', i0 )
+
+      si.add( 'a:1,b$:1', function b1 ( msg, done ) {
+        done( null, {z: msg.z, b: 1} )
+      })
+
+      si.add( 'a:1,b$:2', function b2 ( msg, done ) {
+        done( null, {z: msg.z, b: 2} )
+      })
+
+      si.act('a:1,b:1', function (e, o) {
+        assert.equal(1, o.b)
+
+        si.act('a:1,b:2', function (e, o) {
+          assert.equal(2, o.b)
+
+          done()
+        })
+      })
+    })
+  })
 })

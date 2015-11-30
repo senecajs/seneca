@@ -645,13 +645,13 @@ function make_seneca (initial_options) {
     var self = this
     var args = Common.parsePattern(self, arguments, 'action:f? actmeta:o?')
 
-    var pattern = args.pattern
-    var action = args.action
-    var actmeta = args.actmeta || {}
+    var raw_pattern = args.pattern
 
-    action = action || function (msg, done) {
+    var action = args.action || function (msg, done) {
       done.call(this, null, msg.default$ || null)
     }
+
+    var actmeta = args.actmeta || {}
 
     actmeta.plugin_name = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname ||
@@ -662,15 +662,15 @@ function make_seneca (initial_options) {
       actmeta.callpoint = add_callpoint
     }
 
-    actmeta.sub = !!pattern.sub$
+    actmeta.sub = !!raw_pattern.sub$
 
     // Deprecate a pattern by providing a string message using deprecate$ key.
-    actmeta.deprecate = pattern.deprecate$
+    actmeta.deprecate = raw_pattern.deprecate$
 
-    var strict_add = (pattern.strict$ && pattern.strict$.add !== null)
-      ? !!pattern.strict$.add : !!so.strict.add
+    var strict_add = (raw_pattern.strict$ && raw_pattern.strict$.add !== null)
+      ? !!raw_pattern.strict$.add : !!so.strict.add
 
-    pattern = self.util.clean(args.pattern)
+    var pattern = self.util.clean(raw_pattern)
 
     if (0 === _.keys(pattern)) {
       throw internals.error('add_empty_pattern', {args: Common.clean(args)})
@@ -711,7 +711,7 @@ function make_seneca (initial_options) {
 
     if (priormeta) {
       if (_.isFunction(priormeta.handle)) {
-        priormeta.handle(action)
+        priormeta.handle( args.pattern, action )
         addroute = false
       }
       else {
