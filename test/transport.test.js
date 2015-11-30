@@ -732,7 +732,7 @@ describe('transport', function () {
   it('transport-balance-exact', function (done) {
     var bt = make_balance_transport()
 
-    var s0, s1, c0
+    var s0, s1, s9, c0
 
     make_s0()
 
@@ -770,7 +770,7 @@ describe('transport', function () {
     }
 
     function make_s9 () {
-      s1 = Seneca({
+      s9 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
         .error(done)
@@ -832,7 +832,9 @@ describe('transport', function () {
         .end( function () {
           s0.close( function () {
             s1.close( function () {
-              c0.close( done )
+              s9.close( function () {
+                c0.close( done )
+              })
             })
           })
         })
