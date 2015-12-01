@@ -276,4 +276,28 @@ describe('plugin', function () {
       seneca.close(done)
     })
   })
+
+  it('act during plugin initialization is deprecated', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    seneca.use(function foo () {
+      assert(this.act.name === 'deprecated')
+      done()
+    })
+  })
+
+  it('act outside of plugin initialization is not deprecated', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    var foo = function () {
+      this.add({ cmd: 'hi' }, function () {
+        assert(this.act.name !== 'deprecated')
+        done()
+      })
+    }
+    seneca.use(foo)
+    seneca.act({ cmd: 'hi' }, function () {
+
+    })
+  })
 })
