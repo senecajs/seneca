@@ -54,6 +54,7 @@
     "rolling-stats": "0.1.1",
     "semver": "5.1.0",
     "seneca-basic": "0.3.0",
+    "seneca-cluster": "0.0.1",
     "seneca-mem-store": "0.3.1",
     "seneca-transport": "0.8.2",
     "seneca-web": "0.4.4",
