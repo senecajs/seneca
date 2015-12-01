@@ -55,7 +55,7 @@ describe('repl', function () {
             sock.write('console.log(this)\n')
           }
           else if (state === 1) {
-            expect(result).to.contain('repl')
+            expect(result).to.contain('{')
             sock.write('seneca.quit\n')
           }
           else if (state === 2) {
