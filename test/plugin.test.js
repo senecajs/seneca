@@ -12,6 +12,14 @@ var describe = lab.describe
 var it = lab.it
 
 describe('plugin', function () {
+  lab.beforeEach(function (done) {
+    process.removeAllListeners('SIGHUP')
+    process.removeAllListeners('SIGTERM')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGBREAK')
+    done()
+  })
+
   it('bad', function (done) {
     var si = Seneca({
       // this lets you change undead per test
@@ -284,6 +292,23 @@ describe('plugin', function () {
       assert(this.act.name === 'deprecated')
       done()
     })
+  })
+
+  it('calling act from init actor is deprecated', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    seneca.add({ role: 'metrics', subscriptions: 'create' }, function (data, callback) {
+      callback()
+    })
+
+    seneca.add({ init: 'msgstats-metrics' }, function (msg, callback) {
+      seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
+        assert(!err)
+        done()
+      })
+    })
+
+    seneca.act({ init: 'msgstats-metrics' })
   })
 
   it('act outside of plugin initialization is not deprecated', function (done) {
