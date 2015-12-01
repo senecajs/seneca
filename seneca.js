@@ -404,10 +404,13 @@ function make_seneca (initial_options) {
     clean: Common.clean,
     copydata: Common.copydata,
     nil: Common.nil,
-    argprops: Common.argprops,
+    pattern: Common.argpattern,
     print: Common.print,
     router: function () { return Patrun() },
-    parsecanon: MakeEntity.parsecanon
+    parsecanon: MakeEntity.parsecanon,
+
+    // TODO: deprecate?
+    argprops: Common.argprops
   }
 
   root.store = Store()
@@ -1775,7 +1778,7 @@ function make_seneca (initial_options) {
   var handleClose = function () {
     root.close(function (err) {
       if (err) {
-        console.error(err)
+        console_error(err)
       }
 
       process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)

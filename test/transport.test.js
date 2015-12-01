@@ -924,9 +924,6 @@ function make_test_transport () {
 
 // A simple load balancing transport
 function make_balance_transport () {
-  test_transport.outmsgs = []
-  test_transport.queuemap = {}
-
   return test_transport
 
   function test_transport (options) {
