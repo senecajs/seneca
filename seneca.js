@@ -60,10 +60,11 @@ var internals = {
     // using custom versions.
     default_plugins: {
       basic: true,
+      cluster: true,
       'mem-store': true,
+      repl: true,
       transport: true,
-      web: true,
-      repl: true
+      web: true
     },
 
     // Debug settings.
@@ -174,10 +175,11 @@ module.exports = function init (seneca_options, more_options) {
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
-  if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
+  if (options.default_plugins.cluster) { seneca.use(Cluster, options.cluster) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
   if (options.default_plugins.repl) { seneca.use(Repl, options.repl) }
+  if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
+  if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
 
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {
@@ -272,7 +274,6 @@ function make_seneca (initial_options) {
   root.findplugin = Plugins.find(private$)
   root.plugins = Plugins.all(private$)
   root.depends = api_depends
-  root.cluster = Cluster
   root.pin = api_pin
   root.actroutes = api_actroutes
   root.act_if = api_act_if
