@@ -62,13 +62,8 @@ var internals = {
       basic: true,
       'mem-store': true,
       transport: true,
-      web: true
-    },
-
-    // Settings for network REPL.
-    repl: {
-      port: 30303,
-      host: null
+      web: true,
+      repl: true
     },
 
     // Debug settings.
@@ -182,6 +177,7 @@ module.exports = function init (seneca_options, more_options) {
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
+  if (options.default_plugins.repl) { seneca.use(Repl, options.repl) }
 
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {
@@ -239,8 +235,6 @@ function make_seneca (initial_options) {
 
   var callpoint = make_callpoint(so.debug.callpoint)
 
-  var repl = Repl(root, so)
-
   // Define public member variables.
   root.root = root
   root.start_time = Date.now()
@@ -263,7 +257,6 @@ function make_seneca (initial_options) {
   root.ready = api_ready // Callback when plugins initialized.
   root.close = api_close // Close and shutdown plugins.
   root.options = api_options // Get and set options.
-  root.repl = repl // Open a REPL on a local port.
   root.start = api_start // Start an action chain.
   root.error = api_error // Set global error handler.
   root.decorate = api_decorate // Decorate seneca object with functions
@@ -289,7 +282,6 @@ function make_seneca (initial_options) {
   root.delegate = api_delegate
 
   // Legacy API; Deprecated.
-  root.startrepl = repl
   root.findact = api_find
 
   // DEPRECATED
@@ -1654,11 +1646,11 @@ function make_seneca (initial_options) {
     Assert(property, 'property must be specified')
     Assert(typeof property === 'string', 'property must be a string')
     Assert(property[0] !== '_', 'property cannot start with _')
-    Assert(this._decorations[property] === undefined, 'seneca is already decorated with the property')
-    Assert(this[property] === undefined, 'cannot override a core seneca property: ' + property)
+    Assert(root._decorations[property] === undefined, 'seneca is already decorated with the property')
+    Assert(root[property] === undefined, 'cannot override a core seneca property: ' + property)
 
-    this._decorations[property] = method
-    this[property] = method
+    root._decorations[property] = method
+    root[property] = method
   }
 
   // Create entity delegate.
