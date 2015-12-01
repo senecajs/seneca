@@ -23,7 +23,6 @@ var Stats = require('rolling-stats')
 var Zig = require('zig')
 
 // Internal modules.
-var Cluster = require('./lib/cluster')
 var Common = require('./lib/common')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
@@ -175,7 +174,7 @@ module.exports = function init (seneca_options, more_options) {
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.cluster) { seneca.use(Cluster, options.cluster) }
+  if (options.default_plugins.cluster) { seneca.use(require('seneca-cluster')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
   if (options.default_plugins.repl) { seneca.use(Repl, options.repl) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
