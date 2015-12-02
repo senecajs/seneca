@@ -44,6 +44,15 @@ var internals = {
     msgmap: Errors,
     override: true
   }),
+  schema: Parambulator({
+    tag: { string$: true },
+    idlen: { integer$: true },
+    timeout: { integer$: true },
+    errhandler: { function$: true }
+  }, {
+    topname: 'options',
+    msgprefix: 'seneca({...}): '
+  }),
   defaults: {
     // Tag this Seneca instance, will be appended to instance identifier.
     tag: '-',
@@ -228,11 +237,9 @@ function make_seneca (initial_options) {
   // Create internal tools.
   var actnid = Nid({length: 5})
   var refnid = function () { return '(' + actnid() + ')' }
-  var paramcheck = make_paramcheck()
-
   // Define options
   var so = private$.optioner.set(initial_options)
-  paramcheck.options.validate(so, thrower)
+  internals.schema.validate(so, thrower)
 
   // These need to come from options as required during construction.
   so.internal.actrouter = so.internal.actrouter || Patrun({gex: true})
@@ -1971,23 +1978,6 @@ function make_private () {
       actmap: {}
     }
   }
-}
-
-// Make parambulators.
-function make_paramcheck () {
-  var paramcheck = {}
-
-  paramcheck.options = Parambulator({
-    tag: { string$: true },
-    idlen: { integer$: true },
-    timeout: { integer$: true },
-    errhandler: { function$: true }
-  }, {
-    topname: 'options',
-    msgprefix: 'seneca({...}): '
-  })
-
-  return paramcheck
 }
 
 // Minor utils
