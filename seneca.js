@@ -212,6 +212,9 @@ function make_seneca (initial_options) {
   // Create a new root Seneca instance.
   var root = new Seneca()
 
+  // expose private for plugins
+  root.private$ = private$
+
   // Create option resolver.
   private$.optioner = Optioner(
     initial_options.module || module.parent || module,
