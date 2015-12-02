@@ -60,6 +60,7 @@ var internals = {
       basic: true,
       cluster: true,
       'mem-store': true,
+      plugins: true,
       repl: true,
       transport: true,
       web: true
@@ -175,6 +176,7 @@ module.exports = function init (seneca_options, more_options) {
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
   if (options.default_plugins.cluster) { seneca.use(require('seneca-cluster')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
+  if (options.default_plugins.plugins) { seneca.use(Plugins) }
   if (options.default_plugins.repl) { seneca.use(require('seneca-repl'), options.repl) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
@@ -270,10 +272,7 @@ function make_seneca (initial_options) {
 
   // Non-API methods.
   root.logroute = api_logroute
-  root.register = Plugins.register(so, private$, paramcheck, makedie, callpoint)
-  root.hasplugin = Plugins.isRegistered
-  root.findplugin = Plugins.find(private$)
-  root.plugins = Plugins.all(private$)
+  root.register = Plugins.register(so, makedie, callpoint)
   root.depends = api_depends
   root.pin = api_pin
   root.actroutes = api_actroutes
@@ -1986,17 +1985,6 @@ function make_paramcheck () {
   }, {
     topname: 'options',
     msgprefix: 'seneca({...}): '
-  })
-
-  paramcheck.register = Parambulator({
-    type$: 'object',
-    required$: ['name', 'init'],
-    string$: ['name'],
-    function$: ['init', 'service'],
-    object$: ['options']
-  }, {
-    topname: 'plugin',
-    msgprefix: 'register(plugin): '
   })
 
   return paramcheck
