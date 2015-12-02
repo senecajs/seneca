@@ -1483,6 +1483,18 @@ describe('seneca', function () {
     })
   })
 
+  it('supports jsonic params to has', function (done) {
+    var si = seneca({ log: 'silent' })
+    si.add({ cmd: 'a' }, function (msg, done) {
+      done(null, {})
+    })
+
+    assert(si.has({cmd: 'a'}))
+    assert(si.has('cmd:a'))
+
+    done()
+  })
+
   describe('#intercept', function () {
     it('intercept', function (done) {
       var si = seneca({ log: 'silent' }).error(done)

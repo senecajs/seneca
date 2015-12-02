@@ -246,7 +246,7 @@ function make_seneca (initial_options) {
   })
 
   // These need to come from options as required during construction.
-  so.internal.actrouter = so.internal.actrouter || Patrun({gex: true})
+  so.internal.actrouter = so.internal.actrouter || Patrun({ gex: true })
   so.internal.subrouter = so.internal.subrouter || Patrun(pin_patrun_customizer)
 
   var callpoint = make_callpoint(so.debug.callpoint)
