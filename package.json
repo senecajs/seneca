@@ -75,7 +75,7 @@
     "url": "https://github.com/rjrodger/seneca.git"
   },
   "scripts": {
-    "cov": "lab -s -r lcov | coveralls",
+    "cov": "lab -s -P test -r lcov | coveralls",
     "test": "lab -v -P test -L -t 80",
     "lint": "lab -P test -dL",
     "annotate": "docco seneca.js -o doc"
