@@ -1474,6 +1474,15 @@ describe('seneca', function () {
     })
   })
 
+  it('can be closed', function (done) {
+    var si = seneca({ log: 'silent' })
+
+    si.close(function (err) {
+      assert(!err)
+      done()
+    })
+  })
+
   describe('#intercept', function () {
     it('intercept', function (done) {
       var si = seneca({ log: 'silent' }).error(done)
