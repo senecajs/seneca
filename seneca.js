@@ -1,5 +1,4 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
-// <style> p,ul,li { margin:5px !important; } </style>
 'use strict'
 
 // Node API modules
@@ -23,6 +22,7 @@ var Stats = require('rolling-stats')
 var Zig = require('zig')
 
 // Internal modules.
+var Actions = require('./lib/actions')
 var Common = require('./lib/common')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
@@ -268,7 +268,7 @@ function make_seneca (initial_options) {
   root.client = Transport.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = api_has // True if action pattern defined.
-  root.find = api_find // Find action by pattern
+  root.find = Actions.find // Find action by pattern
   root.list = api_list // List (a subset of) action patterns.
   root.ready = api_ready // Callback when plugins initialized.
   root.close = api_close // Close and shutdown plugins.
@@ -294,7 +294,7 @@ function make_seneca (initial_options) {
   root.delegate = api_delegate
 
   // Legacy API; Deprecated.
-  root.findact = api_find
+  root.findact = root.find
 
   // DEPRECATED
   root.fail = Legacy.fail(so)
@@ -777,23 +777,6 @@ function make_seneca (initial_options) {
     }
 
     return self
-  }
-
-  function api_find (args) {
-    if (_.isString(args)) {
-      args = Jsonic(args)
-    }
-
-    var actmeta = private$.actrouter.find(args)
-
-    // if we have no destination, we look for
-    // a catch-all pattern and assign this, if
-    // it exists.
-    if (!actmeta) {
-      actmeta = private$.actrouter.find({})
-    }
-
-    return actmeta
   }
 
   function api_has (args) {
