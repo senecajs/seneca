@@ -931,9 +931,9 @@ function make_seneca (initial_options) {
   // close seneca instance
   // sets public seneca.closed property
   function api_close (done) {
-    var self = this
+    var seneca = this
 
-    self.closed = true
+    seneca.closed = true
 
     // cleanup process event listeners
     _.each(so.internal.close_signals, function (active, signal) {
@@ -942,13 +942,18 @@ function make_seneca (initial_options) {
       }
     })
 
-    self.log.debug('close', 'start', callpoint())
-    self.act('role:seneca,cmd:close,closing$:true', function (err) {
-      self.log.debug('close', 'end', err)
+    seneca.log.debug('close', 'start', callpoint())
+    seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
+      seneca.log.debug('close', 'end', err)
       if (_.isFunction(done)) {
-        return done.call(self, err)
+        return done.call(seneca, err)
       }
     })
+
+    seneca.removeAllListeners('act-in')
+    seneca.removeAllListeners('act-out')
+    seneca.removeAllListeners('act-err')
+    seneca.removeAllListeners('ready')
   }
 
   // useful when defining services!
