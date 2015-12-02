@@ -32,7 +32,6 @@ var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
-var Repl = require('./lib/repl')
 var Store = require('./lib/store')
 var Transport = require('./lib/transport')
 
@@ -176,7 +175,7 @@ module.exports = function init (seneca_options, more_options) {
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
   if (options.default_plugins.cluster) { seneca.use(require('seneca-cluster')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
-  if (options.default_plugins.repl) { seneca.use(Repl, options.repl) }
+  if (options.default_plugins.repl) { seneca.use(require('seneca-repl'), options.repl) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
 
