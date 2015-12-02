@@ -261,7 +261,7 @@ function make_seneca (initial_options) {
   root.use = api_use // Define a plugin.
   root.make = api_make // Make a new entity object.
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
-  root.client = Transport.client(callpoint, makedie) // Send outbound messages.
+  root.client = Transport.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = api_has // True if action pattern defined.
   root.find = api_find // Find action by pattern
@@ -279,7 +279,7 @@ function make_seneca (initial_options) {
 
   // Non-API methods.
   root.logroute = api_logroute
-  root.register = Plugins.register(so, makedie, callpoint)
+  root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
   root.pin = api_pin
   root.actroutes = api_actroutes
@@ -309,7 +309,7 @@ function make_seneca (initial_options) {
 
   root.name = 'Seneca/' + root.version + '/' + root.id
 
-  root.die = makedie(root, {
+  root.die = Common.makedie(root, {
     type: 'sys',
     plugin: 'seneca',
     tag: root.version,
@@ -1783,7 +1783,7 @@ function make_seneca (initial_options) {
   var handleClose = function () {
     root.close(function (err) {
       if (err) {
-        console_error(err)
+        Common.console_error(err)
       }
 
       process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
@@ -1803,119 +1803,6 @@ function make_seneca (initial_options) {
 }
 
 // Utilities
-
-function makedie (instance, ctxt) {
-  ctxt = _.extend(ctxt, instance.die ? instance.die.context : {})
-
-  var die = function (err) {
-    var die_trace = '\n' + (new Error('die trace').stack)
-        .match(/^.*?\n.*\n(.*)/)[1]
-
-    try {
-      if (!err) {
-        err = new Error('unknown')
-      }
-      else if (!Util.isError(err)) {
-        err = new Error(_.isString(err) ? err : Util.inspect(err))
-      }
-
-      err.fatal$ = true
-
-      var so = instance.options()
-
-      // undead is only for testing, do not use in production
-      var undead = so.debug.undead || (err && err.undead)
-
-      var logargs = [ctxt.type, ctxt.plugin, ctxt.tag, ctxt.id,
-        err.code, err.message, err.details,
-        instance.fixedargs.fatal$ ? 'all-errors-fatal' : '-',
-        ctxt.callpoint()]
-
-      instance.log.fatal.apply(instance, logargs)
-
-      var stack = err.stack || ''
-      stack = stack.replace(/^.*?\n/, '\n')
-
-      var procdesc = '\n  pid=' + process.pid +
-        ', arch=' + process.arch +
-        ', platform=' + process.platform +
-        ',\n  path=' + process.execPath +
-        ',\n  argv=' + Util.inspect(process.argv).replace(/\n/g, '') +
-        ',\n  env=' + Util.inspect(process.env).replace(/\n/g, '')
-
-      var fatalmodemsg = instance.fixedargs.fatal$
-        ? '\n  ALL ERRORS FATAL: action called with argument fatal$:true ' +
-        '(probably a plugin init error, or using a plugin seneca instance' +
-        ', see senecajs.org/fatal.html)' : ''
-
-      var stderrmsg =
-      '\n\n' +
-        'Seneca Fatal Error\n' +
-        '==================\n\n' +
-        'Message: ' + err.message + '\n\n' +
-        'Code: ' + err.code + '\n\n' +
-        'Details: ' + Util.inspect(err.details, {depth: null}) + '\n\n' +
-        'Stack: ' + stack + '\n\n' +
-        'Instance: ' + instance.toString() + fatalmodemsg + die_trace + '\n\n' +
-        'When: ' + new Date().toISOString() + '\n\n' +
-        'Log: ' + Jsonic.stringify(logargs) + '\n\n' +
-        'Node:\n  ' + Util.inspect(process.versions).replace(/\s+/g, ' ') +
-        ',\n  ' + Util.inspect(process.features).replace(/\s+/g, ' ') +
-        ',\n  ' + Util.inspect(process.moduleLoadList).replace(/\s+/g, ' ') + '\n\n' +
-        'Process: ' + procdesc + '\n\n'
-
-      if (so.errhandler) {
-        so.errhandler.call(instance, err)
-      }
-
-      if (instance.closed) return
-
-      if (!undead) {
-        instance.act('role:seneca,info:fatal,closing$:true', {err: err})
-
-        instance.close(
-          // terminate process, err (if defined) is from seneca.close
-          function (err) {
-            if (!undead) {
-              process.nextTick(function () {
-                if (err) console_error(err)
-                console_error(stderrmsg)
-                console_error('\n\nSENECA TERMINATED at ' + (new Date().toISOString()) +
-                  '. See above for error report.\n\n')
-                process.exit(1)
-              })
-            }
-          }
-       )
-      }
-
-      // make sure we close down within options.deathdelay seconds
-      if (!undead) {
-        var killtimer = setTimeout(function () {
-          console_error(stderrmsg)
-          console_error('\n\nSENECA TERMINATED (on timeout) at ' +
-            (new Date().toISOString()) + '.\n\n')
-          process.exit(2)
-        }, so.deathdelay)
-        killtimer.unref()
-      }
-    }
-    catch (panic) {
-      var msg =
-      '\n\n' +
-        'Seneca Panic\n' +
-        '============\n\n' +
-        panic.stack +
-        '\n\nOriginal Error:\n' +
-        (arguments[0] && arguments[0].stack ? arguments[0].stack : arguments[0])
-      console_error(msg)
-    }
-  }
-
-  die.context = ctxt
-
-  return die
-}
 
 function make_trace_act (opts) {
   return function () {
@@ -2001,9 +1888,4 @@ function make_callpoint (active) {
 // Intentional console output uses this function. Helps to find spurious debugging.
 function console_log () {
   console.log.apply(null, arguments)
-}
-
-// Intentional console errors use this function. Helps to find spurious debugging.
-function console_error () {
-  console.error.apply(null, arguments)
 }

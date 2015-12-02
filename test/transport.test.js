@@ -6,6 +6,7 @@ var _ = require('lodash')
 var Async = require('async')
 var Code = require('code')
 var Seneca = require('..')
+var Common = require('../lib/common')
 var Transport = require('../lib/transport')
 var Lab = require('lab')
 
@@ -289,14 +290,15 @@ describe('transport', function () {
     })
 
     it('handles errors from act', function (done) {
-      var client = Transport.client(
-        _.noop,
-        function () {
-          return function (err) {
-            expect(err).to.exist()
-            done()
-          }
-        })
+      var client = Transport.client(_.noop)
+      var makedie = Common.makedie
+      Common.makedie = function () {
+        return function (err) {
+          Common.makedie = makedie
+          expect(err).to.exist()
+          done()
+        }
+      }
       var seneca = {
         log: {
           info: _.noop,
@@ -323,14 +325,16 @@ describe('transport', function () {
     })
 
     it('handles a null liveclient', function (done) {
-      var client = Transport.client(
-        _.noop,
-        function () {
-          return function (err) {
-            expect(err).to.exist()
-            done()
-          }
-        })
+      var client = Transport.client(_.noop)
+      var makedie = Common.makedie
+      Common.makedie = function () {
+        return function (err) {
+          Common.makedie = makedie
+          expect(err).to.exist()
+          done()
+        }
+      }
+
       var seneca = {
         log: {
           info: _.noop,
@@ -972,4 +976,3 @@ function make_balance_transport () {
     }
   }
 }
-
