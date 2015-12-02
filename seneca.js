@@ -267,9 +267,9 @@ function make_seneca (initial_options) {
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
   root.client = Transport.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
-  root.has = api_has // True if action pattern defined.
+  root.has = Actions.has // True if action pattern defined.
   root.find = Actions.find // Find action by pattern
-  root.list = api_list // List (a subset of) action patterns.
+  root.list = Actions.list // List (a subset of) action patterns.
   root.ready = api_ready // Callback when plugins initialized.
   root.close = api_close // Close and shutdown plugins.
   root.options = api_options // Get and set options.
@@ -279,14 +279,14 @@ function make_seneca (initial_options) {
 
   // Method aliases.
   root.make$ = api_make
-  root.hasact = api_has
+  root.hasact = root.has
 
   // Non-API methods.
   root.logroute = api_logroute
   root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
   root.pin = api_pin
-  root.actroutes = api_actroutes
+  root.actroutes = Actions.routes
   root.act_if = api_act_if
   root.wrap = api_wrap
   root.seneca = api_seneca
@@ -779,10 +779,6 @@ function make_seneca (initial_options) {
     return self
   }
 
-  function api_has (args) {
-    return !!private$.actrouter.find(args)
-  }
-
   // TODO: deprecate
   root.findpins = root.pinact = function () {
     var pins = []
@@ -798,42 +794,6 @@ function make_seneca (initial_options) {
     })
 
     return pins
-  }
-
-  function api_actroutes () {
-    return private$.actrouter.toString(function (d) {
-      var s = 'F='
-
-      if (d.plugin_fullname) {
-        s += d.plugin_fullname + '/'
-      }
-
-      s += d.id
-
-      while (d.priormeta) {
-        d = d.priormeta
-        s += ';'
-
-        if (d.plugin_fullname) {
-          s += d.plugin_fullname + '/'
-        }
-
-        s += d.id
-      }
-      return s
-    })
-  }
-
-  function api_list (args) {
-    args = _.isString(args) ? Jsonic(args) : args
-
-    var found = private$.actrouter.list(args)
-
-    found = _.map(found, function (entry) {
-      return entry.match
-    })
-
-    return found
   }
 
   function api_act_if () {
