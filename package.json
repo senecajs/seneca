@@ -82,6 +82,7 @@
   },
   "devDependencies": {
     "async": "0.9.2",
+    "bench": "0.3.x",
     "body-parser": "1.14.1",
     "code": "1.5.0",
     "connect": "3.4.0",
@@ -93,6 +94,7 @@
     "joi": "6.x.x",
     "lab": "6.2.0",
     "no-shadow-relaxed": "1.0.1",
+    "seneca": "latest",
     "seneca-echo": "0.3.0",
     "seneca-error-test": "0.2.2"
   }
