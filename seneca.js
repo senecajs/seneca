@@ -239,7 +239,11 @@ function make_seneca (initial_options) {
   var refnid = function () { return '(' + actnid() + ')' }
   // Define options
   var so = private$.optioner.set(initial_options)
-  internals.schema.validate(so, thrower)
+  internals.schema.validate(so, function (err) {
+    if (err) {
+      throw err
+    }
+  })
 
   // These need to come from options as required during construction.
   so.internal.actrouter = so.internal.actrouter || Patrun({gex: true})
@@ -427,10 +431,9 @@ function make_seneca (initial_options) {
   })
 
   if (so.debug.print.options) {
-    console_log('\nSeneca Options (' + root.id + '): before plugins\n' +
-      '===\n')
-    console_log(Util.inspect(so, {depth: null}))
-    console_log('')
+    console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
+    console.log(Util.inspect(so, { depth: null }))
+    console.log('')
   }
 
   function api_logroute (entry, handler) {
@@ -1813,7 +1816,7 @@ function make_trace_act (opts) {
       args.push(new Error('trace...').stack)
     }
 
-    console_log(args.join('\t'))
+    console.log(args.join('\t'))
   }
 }
 
@@ -1867,11 +1870,6 @@ function make_private () {
   }
 }
 
-// Minor utils
-function thrower (err) {
-  if (err) throw err
-}
-
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint (active) {
   if (active) {
@@ -1883,9 +1881,4 @@ function make_callpoint (active) {
   }
 
   return _.noop
-}
-
-// Intentional console output uses this function. Helps to find spurious debugging.
-function console_log () {
-  console.log.apply(null, arguments)
 }
