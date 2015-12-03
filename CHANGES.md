@@ -1,3 +1,18 @@
+## 0.9.0: 2015-12-03
+
+  * `act` now displays a deprecation warning when its invoked within a plugin
+    initialization function.  To disable deprecation warnings, run node with
+    `--no-deprecation`. PR 254
+  * `private$` is now exposed on seneca object. PR 260
+  * The repl is now an external plugin, enabled by default.  To disable set
+    `default_plugins.repl` to false when creating seneca object. PR 255
+  * Cluster is now an external plugin, enabled by default.  To disable set
+    `default_plugins.cluster` to false when creating seneca object. PR 256
+  * Closing seneca now removes all relevant event listeners. PR 259
+  * `has` function now converts strings to javascript objects. PR 262
+  * Internal cleanup and organization of code, as well as more tests.
+
+
 ## 0.8.0: 2015-11-20
 
    * Fixed seneca.print.tree[all] argument not being passed correctly to optioner.
@@ -22,15 +37,18 @@
    For all of the release information please view the 0.8.0 milestone on github:
    https://github.com/senecajs/seneca/milestones/0.8.0
 
+
 ## 0.7.2: 2015-10-27
 
    * Fix support for catchall (without pins) clients. Issue 199. Pull
      request 200.
 
+
 ## 0.7.1: 2015-10-05
 
    * repl now supports quit/exit command
    * seneca.sub provides subscription pattern via meta$.sub
+
 
 ## 0.7.0: 2015-10-04
 
@@ -38,14 +56,17 @@
    * update to patrun 0.5; now supports glob adds
    * new documentation system
 
+
 ## 0.6.5: 2015-09-04
 
    * revert to non-strict adds so that priors can be subset patterns, see issues 145, 149
+
 
 ## 0.6.4: 2015-07-29
 
    * bug fixes for issues: 144, 141, 143
    * documentation article on priors, issue 147
+
 
 ## 0.6.3: 2015-07-12
 
@@ -56,6 +77,7 @@
    * Rewrote getting started guide
    * Bug fixes for github issues: 135
 
+
 ## 0.6.2: 2015-06-22
 
    * REPL enhanced, now accepts literal jsonic patterns and traces action flow
@@ -65,6 +87,7 @@
    * Added debug option: --seneca.print.tree(.all) - prints pattern tree to console
    * Bug fixes and minor updates to seneca-transport, seneca-web, seneca-basic, seneca-mem-store
 
+
 ## 0.6.1: 2015-02-04
 
    * "zig" style control flow for neater code
@@ -73,9 +96,11 @@
    * Transport mapping sub-system completely refactored
    * Bug fixes for github issues: 92, 88, 86, 80, 97
 
+
 ## 0.5.21: 2014-10-07
 
    * Bug fixes for github issues: 70, 65, 48, 45
+
 
 ## 0.5.20: 2014-09-07
 
@@ -84,11 +109,13 @@
    * Refactored plugin code into lib/plugin-utils
    * Fixed most github issues
 
+
 ## 0.5.19: 2014-07-13
 
    * Removed builtin plugins - all now in separate modules.
    * Updated to seneca-web 0.2 - now with admin module
    * Fixed broken .client and .listen chaining
+
 
 ## 0.5.18: 2014-07-09
 
@@ -101,9 +128,11 @@
    * Added action execution cache
    * Improved error reporting
 
+
 ## 0.5.17: 2014-04-10
 
    * Moved standard store test to separate seneca-store-test module
+
 
 ## 0.5.16: 2014-04-09
 
@@ -114,9 +143,11 @@
    * started annotating source code
    * small improvement to error handling and logging
 
+
 ## 0.5.15: 2014-01-28
 
    * entity objects now use prototype style javascript objects - there's lots of them
+
 
 ## 0.5.14: 2013-10-30
 
@@ -124,11 +155,13 @@
    * moved transport to own module, seneca-transport
    * transport now uses patterns, no longer hard-coded into seneca.js
 
+
 ## 0.5.13: 2013-10-01
 
    * moved pattern matcher into own module: patrun
    * added stats collection for actions
    * jshint applied to code, use npm run-script build
+
 
 ## 0.5.12: 2013-09-13
 
@@ -137,14 +170,17 @@
    * deepextend can handle circular references
    * argprops cleans $ args
 
+
 ## 0.5.11: 2013-08-29
 
    * parambulator arg validation logged
+
 
 ## 0.5.10: 2013-08-18
 
    * added listen method for easy launching of services
    * added client method for easy http access of services
+
 
 ## 0.5.9: 2013-07-09
 
@@ -154,6 +190,7 @@
    * API CHANGE: seneca.http, mapping spec, data:true means place req.body into 'data' arg
    * API CHANGE: no async inside module def init:_plugin_ used instead for async init
    * API CHANGE: seneca.service replaced by seneca.export('web')
+
 
 ## 0.5.8: 2013-05-29
 
