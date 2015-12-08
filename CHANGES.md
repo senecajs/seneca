@@ -1,3 +1,7 @@
+## 0.9.1: 2015-12-03
+
+* Fixed pins only working when they are provided as strings plus additional tests PR 268
+
 ## 0.9.0: 2015-12-03
 
   * `act` now displays a deprecation warning when its invoked within a plugin
