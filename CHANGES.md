@@ -1,4 +1,4 @@
-## 0.9.1: 2015-12-03
+## 0.9.1: 2015-12-08
 
 * Fixed pins only working when they are provided as strings plus additional tests PR 268
 
