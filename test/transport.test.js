@@ -437,7 +437,7 @@ describe('transport', function () {
       .use(tt)
       .add('foo:1', testact)
       .add('foo:2', testact)
-      .listen({type: 'test', pin: {'foo':'*'}})
+      .listen({type: 'test', pin: {'foo': '*'}})
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
