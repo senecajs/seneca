@@ -430,6 +430,45 @@ describe('transport', function () {
       })
   })
 
+  it('transport-star-pin-object', function (done) {
+    var tt = make_test_transport()
+
+    Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+      .use(tt)
+      .add('foo:1', testact)
+      .add('foo:2', testact)
+      .listen({type: 'test', pin: {'foo': '*'}})
+      .ready(function () {
+        var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+          .use(tt)
+
+          .client({type: 'test', pin: {'foo': '*'}})
+
+          .start(done)
+
+          .wait('foo:1')
+          .step(function (out) {
+            expect(out.foo).to.equal(1)
+            return true
+          })
+
+          .wait('foo:2')
+          .step(function (out) {
+            expect(out.foo).to.equal(2)
+            return true
+          })
+
+          .wait(function (data, done) {
+            si.act('bar:1', function (err, out) {
+              expect(err.code).to.equal('act_not_found')
+              done()
+            })
+          })
+
+          .end()
+      })
+  })
+
   it('transport-single-notdef', function (done) {
     var tt = make_test_transport()
 
