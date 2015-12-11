@@ -38,6 +38,14 @@ describe('plugin', function () {
     }
 
     try {
+      si.use({ foo: 1 })
+    }
+    catch (e) {
+      assert.ok(e.seneca)
+      assert.equal('plugin_no_name', e.code)
+    }
+
+    try {
       si.use('not-a-plugin-at-all-at-all')
     }
     catch (e) {
@@ -61,6 +69,23 @@ describe('plugin', function () {
 
     si.use(function () {
       throw new Error('plugin-def')
+    })
+  })
+
+  it('plugin-error-deprecated', function (done) {
+    var si = Seneca({
+      debug: {
+        undead: true
+      },
+      log: 'silent',
+      errhandler: function (err) {
+        assert.equal('unsupported_legacy_plugin', err.code)
+        done()
+      }
+    })
+
+    si.use(function (options, register) {
+      return { name: 'OldPlugin' }
     })
   })
 
