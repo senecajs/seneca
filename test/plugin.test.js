@@ -285,15 +285,6 @@ describe('plugin', function () {
     })
   })
 
-  it('act during plugin initialization is deprecated', function (done) {
-    var seneca = Seneca({ log: 'silent' })
-
-    seneca.use(function foo () {
-      assert(this.act.name === 'deprecated')
-      done()
-    })
-  })
-
   it('calling act from init actor is deprecated', function (done) {
     var seneca = Seneca({ log: 'silent' })
 
