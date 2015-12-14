@@ -327,18 +327,26 @@ describe('plugin', function () {
     seneca.act({ init: 'msgstats-metrics' })
   })
 
-  it('act outside of plugin initialization is not deprecated', function (done) {
+  it('plugin actions receive errors in callback function', function (done) {
     var seneca = Seneca({ log: 'silent' })
+    seneca.fixedargs['fatal$'] = false
 
-    var foo = function () {
-      this.add({ cmd: 'hi' }, function () {
-        assert(this.act.name !== 'deprecated')
-        done()
+    seneca.use(function service () {
+      this.add({ role: 'plugin', cmd: 'throw' }, function (args, next) {
+        assert(args.blah === 'blah')
+        next(new Error('from action'))
       })
-    }
-    seneca.use(foo)
-    seneca.act({ cmd: 'hi' }, function () {
+    })
+    seneca.use(function client () {
+      var self = this
 
+      this.ready(function () {
+        self.act({ role: 'plugin', cmd: 'throw', blah: 'blah' }, function (err, result) {
+          assert(err)
+          assert(err.msg.indexOf('from action') !== -1)
+          done()
+        })
+      })
     })
   })
 })
