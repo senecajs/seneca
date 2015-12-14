@@ -1,6 +1,8 @@
-## 0.9.2: 2015-12-10
+## 0.9.2: 2015-12-14
 
 * Fixed seneca Error when loading old style plugin
+* Revert deprecation warning from 0.9.0 when calling `act` during plugin initialization
+
 
 ## 0.9.1: 2015-12-08
 
