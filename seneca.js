@@ -1110,15 +1110,15 @@ function make_seneca (initial_options) {
           var out = act_error(instance, err, actmeta, result, cb,
             actend - actstart, callargs, prior_ctxt, act_callpoint)
 
+          if (args.fatal$) {
+            return instance.die(out.err)
+          }
+
           call_cb = out.call_cb
           result[0] = out.err
 
           if (_.isFunction(delegate.on_act_err)) {
             delegate.on_act_err(actmeta, result[0])
-          }
-
-          if (args.fatal$) {
-            return instance.die(out.err)
           }
         }
         else {
@@ -1168,7 +1168,9 @@ function make_seneca (initial_options) {
     }
 
     act_param_check(origargs, actmeta, function (err) {
-      if (err) return act_done(err)
+      if (err) {
+        return act_done(err)
+      }
 
       var execspec = {
         id: actid,
@@ -1243,7 +1245,8 @@ function make_seneca (initial_options) {
 
     instance.emit('act-err', callargs, err)
 
-    if (so.errhandler) {
+    // when fatal$ is set, prefer to die instead
+    if (so.errhandler && (!callargs || !callargs.fatal$)) {
       call_cb = !so.errhandler.call(instance, err)
     }
 
@@ -1596,7 +1599,7 @@ function make_seneca (initial_options) {
   }
 
   function api_error (errhandler) {
-    this.options({errhandler: errhandler})
+    this.options({ errhandler: errhandler })
     return this
   }
 

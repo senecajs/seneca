@@ -1425,6 +1425,52 @@ describe('seneca', function () {
     si.cluster()
   })
 
+  describe('#error', function () {
+    it('isn\'t called twice on fatal errors when falta$: true', function (done) {
+      var si = seneca({ log: 'silent', debug: { undead: true } })
+
+      var count = 0
+      si.error(function () {
+        assert(++count === 1)
+      })
+
+      si.add({ role: 'foo', cmd: 'bar' }, function (args, cb) {
+        cb(new Error('test error'))
+      })
+
+      si.act({ role: 'foo', cmd: 'bar', fatal$: true }, function (err) {
+        assert(!err)
+      })
+
+      setTimeout(function () {
+        assert(count === 1)
+        done()
+      }, 200)
+    })
+
+    it('isn\'t called twice when fatal$: false', function (done) {
+      var si = seneca({ log: 'silent', debug: { undead: true } })
+
+      var count = 0
+      si.error(function () {
+        ++count
+      })
+
+      si.add({ role: 'foo', cmd: 'bar' }, function (args, cb) {
+        cb(new Error('test error'))
+      })
+
+      si.act({ role: 'foo', cmd: 'bar', fatal$: false }, function (err) {
+        assert(err)
+      })
+
+      setTimeout(function () {
+        assert(count === 1)
+        done()
+      }, 200)
+    })
+  })
+
   describe('#decorate', function () {
     it('can add a property to seneca', function (done) {
       var si = seneca({ log: 'silent' })
