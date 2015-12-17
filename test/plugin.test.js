@@ -116,7 +116,8 @@ describe('plugin', function () {
       log: 'silent',
       errhandler: function (err) {
         assert.equal('seneca: Action foo:1 failed: act-cb.', err.message)
-        cc++ && done()
+        cc++
+        done()
       }
     })
 
