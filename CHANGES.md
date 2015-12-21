@@ -1,3 +1,10 @@
+## 0.9.3: 2015-12-21
+
+* Fixed calling error handler twice with the same error. Issue #245
+* Fixed npm install error message. Issue #274
+* Updated transport plugin to recent version
+
+
 ## 0.9.2: 2015-12-14
 
 * Fixed seneca Error when loading old style plugin
