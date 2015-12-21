@@ -771,6 +771,15 @@ describe('transport', function () {
       })
   })
 
+  it('handles timeout from client connecting', function (done) {
+    var seneca = Seneca({ log: 'silent', timeout: 50 }).client({ port: 1 })
+    seneca.act({ cmd: 'test' }, function (err) {
+      expect(err).to.exist()
+      expect(err.message).to.contain('TIMEOUT')
+      done()
+    })
+  })
+
 
   it('transport-balance-exact', function (done) {
     var bt = make_balance_transport()
