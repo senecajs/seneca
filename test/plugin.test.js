@@ -1,15 +1,15 @@
 /* Copyright (c) 2013-2015 Richard Rodger, MIT License */
 'use strict'
 
-var assert = require('assert')
-
 var _ = require('lodash')
+var Code = require('code')
 var Lab = require('lab')
 var Seneca = require('..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var expect = Code.expect
 
 describe('plugin', function () {
   lab.beforeEach(function (done) {
@@ -33,24 +33,24 @@ describe('plugin', function () {
       si.use({ foo: 1 })
     }
     catch (e) {
-      assert.ok(e.seneca)
-      assert.equal('plugin_no_name', e.code)
+      expect(e.seneca).to.exist()
+      expect('plugin_no_name').to.equal(e.code)
     }
 
     try {
       si.use({ foo: 1 })
     }
     catch (e) {
-      assert.ok(e.seneca)
-      assert.equal('plugin_no_name', e.code)
+      expect(e.seneca).to.exist()
+      expect('plugin_no_name').to.equal(e.code)
     }
 
     try {
       si.use('not-a-plugin-at-all-at-all')
     }
     catch (e) {
-      assert.ok(e.seneca)
-      assert.equal('plugin_not_found', e.code)
+      expect(e.seneca).to.exist()
+      expect('plugin_not_found').to.equal(e.code)
     }
     si.close(done)
   })
@@ -62,7 +62,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        assert.equal('plugin-def', err.message)
+        expect('plugin-def').to.equal(err.message)
         done()
       }
     })
@@ -79,7 +79,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        assert.equal('unsupported_legacy_plugin', err.code)
+        expect('unsupported_legacy_plugin').to.equal(err.code)
         done()
       }
     })
@@ -96,7 +96,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        assert.equal('invalid_arguments', err.code)
+        expect('invalid_arguments').to.equal(err.code)
         done()
       }
     })
@@ -115,7 +115,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        assert.equal('seneca: Action foo:1 failed: act-cb.', err.message)
+        expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
         cc++
         done()
       }
@@ -149,7 +149,7 @@ describe('plugin', function () {
     })
 
     si.options({ errhandler: function (err) {
-      assert.equal('plugin_required', err.code)
+      expect('plugin_required').to.equal(err.code)
     }})
 
     si.use(function (opts) {
@@ -193,8 +193,8 @@ describe('plugin', function () {
     var plugin_aaa = function (opts) {
       this.add({a: 1}, function (args, cb) {
         this.act('z:1', function (err, out) {
-          assert.equal(err, null)
-          cb(null, _.extend({a: 1}, out))
+          expect(err).to.not.exist()
+          cb(null, _.extend({ a: 1 }, out))
         })
       })
       return 'aaa'
@@ -203,42 +203,42 @@ describe('plugin', function () {
     si.add({z: 1}, echo)
     si.use(plugin_aaa)
 
-    assert.ok(si.hasact({z: 1}))
+    expect(si.hasact({ z: 1 })).to.be.true()
 
     si.act({a: 1}, function (err, out) {
-      assert.equal(err, null)
-      assert.equal(1, out.a)
-      assert.equal(1, out.z)
-      assert.ok(out.t)
-      assert.ok(si.hasact({a: 1}))
+      expect(err).to.not.exist()
+      expect(1).to.equal(out.a)
+      expect(1).to.equal(out.z)
+      expect(out.t).to.exist()
+      expect(si.hasact({ a: 1 })).to.be.true()
 
       si
         .fix({q: 1})
         .use(function (opts) {
           this.add({a: 1}, function (args, done) {
             this.act('z:1', function (err, out) {
-              assert.equal(err, null)
+              expect(err).to.not.exist()
               done(null, _.extend({a: 1, w: 1}, out))
             })
           })
           return 'bbb'
         })
 
-      assert.ok(si.hasact({a: 1}))
-      assert.ok(si.hasact({a: 1, q: 1}))
+      expect(si.hasact({ a: 1 })).to.be.true()
+      expect(si.hasact({ a: 1, q: 1 })).to.be.true()
 
       si.act({a: 1}, function (err, out) {
-        assert.equal(err, null)
-        assert.equal(1, out.a)
-        assert.equal(1, out.z)
-        assert.ok(out.t)
+        expect(err).to.not.exist()
+        expect(1).to.equal(out.a)
+        expect(1).to.equal(out.z)
+        expect(out.t).to.exist()
 
         si.act({a: 1, q: 1}, function (err, out) {
-          assert.equal(err, null)
-          assert.equal(1, out.a)
-          assert.equal(1, out.z)
-          assert.equal(1, out.w)
-          assert.ok(out.t)
+          expect(err).to.not.exist()
+          expect(1).to.equal(out.a)
+          expect(1).to.equal(out.z)
+          expect(1).to.equal(out.w)
+          expect(out.t).to.exist()
 
           si.close(done)
         })
@@ -258,7 +258,7 @@ describe('plugin', function () {
     si.use(function badexport () {})
 
     si.options({ errhandler: function (err) {
-      assert.equal('export_not_found', err.code)
+      expect('export_not_found').to.equal(err.code)
       done()
     }})
 
@@ -271,15 +271,15 @@ describe('plugin', function () {
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
 
-    assert.ok(si.hasplugin('foo'))
-    assert.ok(si.hasplugin('foo', ''))
-    assert.ok(si.hasplugin('foo', '-'))
+    expect(si.hasplugin('foo')).to.be.true()
+    expect(si.hasplugin('foo', '')).to.be.true()
+    expect(si.hasplugin('foo', '-')).to.be.true()
 
-    assert.ok(!si.hasplugin('bar'))
-    assert.ok(!si.hasplugin('bar', ''))
-    assert.ok(!si.hasplugin('bar', '-'))
-    assert.ok(!si.hasplugin('bar', 'bbb'))
-    assert.ok(si.hasplugin('bar', 'aaa'))
+    expect(si.hasplugin('bar')).to.be.false()
+    expect(si.hasplugin('bar', '')).to.be.false()
+    expect(si.hasplugin('bar', '-')).to.be.false()
+    expect(si.hasplugin('bar', 'bbb')).to.be.false()
+    expect(si.hasplugin('bar', 'aaa')).to.be.true()
     si.close(done)
   })
 
@@ -291,7 +291,7 @@ describe('plugin', function () {
     })
 
     seneca.act({ role: 'plugin', cmd: 'timeout' }, function (err) {
-      assert.ok(err)
+      expect(err).to.exist()
       seneca.close(done)
     })
   })
@@ -306,7 +306,7 @@ describe('plugin', function () {
     })
 
     seneca.act({ role: 'plugin', cmd: 'throw' }, function (err) {
-      assert.ok(err)
+      expect(err).to.exist()
       seneca.close(done)
     })
   })
@@ -320,7 +320,7 @@ describe('plugin', function () {
 
     seneca.add({ init: 'msgstats-metrics' }, function (msg, callback) {
       seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
-        assert(!err)
+        expect(err).to.not.exist()
         done()
       })
     })
@@ -334,7 +334,7 @@ describe('plugin', function () {
 
     seneca.use(function service () {
       this.add({ role: 'plugin', cmd: 'throw' }, function (args, next) {
-        assert(args.blah === 'blah')
+        expect(args.blah).to.equal('blah')
         next(new Error('from action'))
       })
     })
@@ -343,8 +343,8 @@ describe('plugin', function () {
 
       this.ready(function () {
         self.act({ role: 'plugin', cmd: 'throw', blah: 'blah' }, function (err, result) {
-          assert(err)
-          assert(err.msg.indexOf('from action') !== -1)
+          expect(err).to.exist()
+          expect(err.msg).to.contain('from action')
           done()
         })
       })

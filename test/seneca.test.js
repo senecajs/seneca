@@ -2,10 +2,10 @@
 'use strict'
 
 var util = require('util')
-var assert = require('assert')
 
-var async = require('async')
-var gex = require('gex')
+var Async = require('async')
+var Code = require('code')
+var Gex = require('gex')
 var _ = require('lodash')
 var Joi = require('joi')
 var Lab = require('lab')
@@ -16,6 +16,8 @@ var seneca = require('..')
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var expect = Code.expect
+var assert = require('assert')
 
 // timerstub broken on node 0.11
 // var timerstub = require('timerstub')
@@ -41,13 +43,13 @@ describe('seneca', function () {
   it('version', function (done) {
     var start = Date.now()
     var si = seneca(testopts)
-    assert.equal(si.version, Package.version)
+    expect(si.version).to.equal(Package.version)
     var end = Date.now()
 
     // ensure startup time does not degenerate
-    assert.ok(end - start < 333)
+    expect(end - start).to.be.below(333)
 
-    assert.equal(si, si.seneca())
+    expect(si).to.equal(si.seneca())
     done()
   })
 
@@ -374,18 +376,18 @@ describe('seneca', function () {
     si.ready(function () {
       si.add({op: 'foo'}, foo)
       si.act('op:foo,a:1', function (e, o) {
-        assert.ok(gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
+        assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(o.foo.entry)
 
         si.add({op: 'foo'}, bar)
         si.act('op:foo,a:1', function (e, o) {
-          assert.ok(gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
+          assert.ok(Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
           assert.ok(o.bar.entry)
           assert.ok(!o.foo.entry)
 
           si.add({op: 'foo'}, zed)
           si.act('op:foo,a:1', function (e, o) {
-            assert.ok(gex('1~2~3~Seneca/*' + '/*').on(
+            assert.ok(Gex('1~2~3~Seneca/*' + '/*').on(
               '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s))
             assert.ok(o.zed.entry)
             assert.ok(!o.bar.entry)
@@ -432,13 +434,13 @@ describe('seneca', function () {
 
       si.act('op:foo,a:1', function (err, o) {
         assert.ok(!err)
-        assert.ok(gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
+        assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(!o.foo.entry)
         assert.ok(o.bar.entry)
 
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
-          assert.ok(gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
+          assert.ok(Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
           assert.ok(!o.foo.entry)
           assert.ok(!o.bar.entry)
           assert.ok(o.zed.entry)
@@ -763,7 +765,7 @@ describe('seneca', function () {
       cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
     })
 
-    async.series([
+    Async.series([
       function (next) {
         si.act({a: 1, b: 2, c: 3}, function (err, out) {
           assert.ok(!err)
