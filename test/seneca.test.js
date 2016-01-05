@@ -277,7 +277,7 @@ describe('seneca', function () {
   })
 
   it('passes seneca instance on callback function property', function (done) {
-    var si = seneca({ log: 'silent', bind: { act: true, add: true } }).error(done)
+    var si = seneca({ log: 'silent' }).error(done)
     si.add({ cmd: 'foo' }, function (args, reply) {
       reply(null, { did: reply.seneca.did })
     })
