@@ -1185,6 +1185,8 @@ function make_seneca (initial_options) {
         },
 
         fn: function (cb) {
+          cb.seneca = delegate
+
           if (root.closed && !callargs.closing$) {
             return cb(internals.error('instance-closed', {args: Common.clean(callargs)}))
           }
