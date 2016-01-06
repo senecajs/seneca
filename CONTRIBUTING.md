@@ -13,4 +13,4 @@ Code changes are welcome and should follow the guidelines below.
     * Run `npm run test-cov-html` to generate a report of test coverage
 * [Pull requests](http://help.github.com/send-pull-requests/) should be made to the [master branch](https://github.com/senecajs/seneca/tree/master).
 
-[Adapted with permission from Hapijs.](https://github.com/hapijs/hapi/issues/new)
+[Adapted with permission from Hapijs.](https://github.com/hapijs/hapi/)
