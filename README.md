@@ -275,8 +275,13 @@ For more examples of Seneca in action, take a look at:
    * [Well!](//github.com/nearform/well)
 
 ## Contributing
-The [Senecajs org][] encourage open participation. If you feel you can help in any way, be it with
-documentation, examples, extra testing, or new features please get in touch.
+The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
+bug reporting, documentation, examples, extra testing, or new features feel free to [create an issue][github issue],
+or better yet, [submit a pull request][github pull request].
+
+We have 2 main forms of documention for getting started with contributing:
+  - [Our very brief, and to the point, contributing.md](./CONTRIBUTING.md)
+  - [Our much more comprehensive contributing documentation.][contributing]
 
 ## License
 Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
@@ -294,6 +299,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [Senecajs org]: https://github.com/senecajs/
 [senecajs.org]: http://senecajs.org/
 [github issue]: https://github.com/senecajs/seneca/issues
+[github pull request]: https://github.com/senecajs/seneca/pulls
 [@senecajs]: http://twitter.com/senecajs
 [lightning]: http://aws.amazon.com/message/67457/
 [plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
+[contributing]: http://senecajs.org/contribute/
