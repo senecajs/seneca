@@ -276,6 +276,18 @@ describe('seneca', function () {
     })
   })
 
+  it('passes seneca instance on callback function property', function (done) {
+    var si = seneca({ log: 'silent' }).error(done)
+    si.add({ cmd: 'foo' }, function (args, reply) {
+      reply(null, { did: reply.seneca.did })
+    })
+    si.act({ cmd: 'foo' }, function (err, result) {
+      expect(err).to.not.exist()
+      expect(result.did).to.equal(this.did)
+      done()
+    })
+  })
+
   it('action-act-invalid-args', function (done) {
     var si = seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
