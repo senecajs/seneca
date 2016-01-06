@@ -800,9 +800,7 @@ function make_seneca (initial_options) {
   // Perform an action, if the action exists. Don't kill seneca, unless the user
   // provides a fatal$ flag.
   function api_publish () {
-    var self = this
-
-    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var spec = Common.parsePattern(this, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
 
@@ -810,7 +808,7 @@ function make_seneca (initial_options) {
       args.fatal$ = false
     }
 
-    return self.act(args, actdone)
+    return this.act(args, actdone)
   }
 
   function api_act_if () {
