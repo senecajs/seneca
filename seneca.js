@@ -261,6 +261,7 @@ function make_seneca (initial_options) {
   // Seneca methods. Official API.
   root.add = api_add // Add a message pattern and action.
   root.act = api_act // Perform action that matches pattern.
+  root.publish = api_publish // Perform action if pattern exists.
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
   root.make = api_make // Make a new entity object.
@@ -794,6 +795,22 @@ function make_seneca (initial_options) {
     })
 
     return pins
+  }
+
+  // Perform an action, if the action exists. Don't kill seneca, unless the user
+  // provides a fatal$ flag.
+  function api_publish () {
+    var self = this
+
+    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var args = spec.pattern
+    var actdone = spec.done
+
+    if (!args.fatal$) {
+      args.fatal$ = false
+    }
+
+    return self.act(args, actdone)
   }
 
   function api_act_if () {
