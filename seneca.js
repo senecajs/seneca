@@ -593,7 +593,7 @@ function make_seneca (initial_options) {
               // TODO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
               self.log.error(
-                'sub', 'err', args.meta.id$, err.message, args, err.stack)
+                'sub', 'err', args.meta$.id, err.message, args, err.stack)
             }
           })
         }
