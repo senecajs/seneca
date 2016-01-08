@@ -1325,20 +1325,29 @@ describe('seneca', function () {
     si.add('a:1,c:3', function (args, cb) { cb(null, {cc: args.cc}) })
     si.add('a:1,d:4', function (args, cb) { cb(null, {dd: args.dd}) })
 
-    si.wrap('a:1', function (args, cb) {
+    si.wrap('a:1', function first (args, cb) {
       this.prior(args, function (err, out) {
         out.X = 1
         cb(err, out)
       })
     })
 
+    function assertMetaName (name, pattern) {
+      var meta = si.find(pattern)
+      assert.equal(name, meta.func.name)
+    }
+
+    assertMetaName('first', 'a:1')
+
     // existence predicate!! d must exist
-    si.wrap('a:1,d:*', function (args, cb) {
+    si.wrap('a:1,d:*', function second (args, cb) {
       this.prior(args, function (err, out) {
         out.DD = 44
         cb(err, out)
       })
     })
+
+    assertMetaName('second', 'a:1,d:4')
 
     si
       .start()
