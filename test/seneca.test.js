@@ -1144,9 +1144,17 @@ describe('seneca', function () {
           assert.equal(2, tmp.as1)
           assert.equal(1, tmp.as2)
           assert.ok(tmp.all > 0)
-          done()
         })
       })
+    })
+
+    // we should not panic when sub handler throws
+    si.sub({fail: 1}, function () {
+      throw Error('Sub failed')
+    })
+
+    si.act({fail: 1}, function () {
+      done()
     })
   })
 
