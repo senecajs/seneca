@@ -412,30 +412,6 @@ describe('seneca', function () {
     })
   })
 
-  it('action-publish', function (done) {
-    var si = seneca(testopts).error(done)
-
-    si.options({strict: {add: false}})
-
-    function foo (args, next) {
-      next(null, { foo: args.meta$ })
-    }
-
-    si.ready(function () {
-      si.add({op: 'foo'}, foo)
-
-      si.publish('op:foo', function (err, o) {
-        assert.ok(!err)
-        assert.ok(o.foo.entry)
-        si.publish('op:bar', function (err, o) {
-          assert.ok(err)
-          assert.ok(!o)
-          done()
-        })
-      })
-    })
-  })
-
   it('action-extend', function (done) {
     var si = seneca(testopts).error(done)
 
