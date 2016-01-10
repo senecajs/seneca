@@ -891,9 +891,7 @@ function make_seneca (initial_options) {
     pin = _.isArray(pin) ? pin : [pin]
     _.each(pin, function (p) {
       _.each( pinthis.findpins(p), function (actpattern) {
-        pinthis.add(actpattern, meta, function (args, done) {
-          wrapper.call(this, args, done)
-        })
+        pinthis.add(actpattern, meta, wrapper)
       })
     })
   }
