@@ -72,14 +72,14 @@ Here's an example:
 ```javascript
 var seneca = require('seneca')()
 
-seneca.add( {cmd:'salestax'}, function(args,callback){
+seneca.add({ cmd: 'salestax' }, function (args, callback) {
   var rate  = 0.23
-  var total = args.net * (1+rate)
-  callback(null,{total:total})
+  var total = args.net * (1 + rate)
+  callback(null, { total: total })
 })
 
-seneca.act( {cmd:'salestax', net:100}, function(err,result){
-  console.log( result.total )
+seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
+  console.log(result.total)
 })
 ```
 
@@ -94,24 +94,24 @@ The _seneca.act_ method accepts an object, and runs the command, if any, that ma
 Where does the sales tax rate come from? Let's try it again:
 
 ```javascript
-seneca.add( {cmd:'config'}, function(args,callback){
+seneca.add({ cmd: 'config' }, function (args, callback) {
   var config = {
     rate: 0.23
   }
   var value = config[args.prop]
-  callback(null,{value:value})
+  callback(null, { value: value })
 })
 
-seneca.add( {cmd:'salestax'}, function(args,callback){
-  seneca.act( {cmd:'config', prop:'rate'}, function(err,result){
+seneca.add({ cmd: 'salestax' }, function (args, callback) {
+  seneca.act({ cmd: 'config', prop: 'rate' }, function (err, result) {
     var rate  = parseFloat(result.value)
-    var total = args.net * (1+rate)
-    callback(null,{total:total})
+    var total = args.net * (1 + rate)
+    callback(null, { total: total })
   })
 })
 
-seneca.act( {cmd:'salestax', net:100}, function(err,result){
-  console.log( result.total )
+seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
+  console.log(result.total)
 })
 ```
 
@@ -124,8 +124,8 @@ There's a little but too much verbosity here, don't you think? Let's fix that:
 
 
 ```javascript
-seneca.act('cmd:salestax,net:100', function(err,result){
-  console.log( result.total )
+seneca.act('cmd:salestax,net:100', function (err, result) {
+  console.log(result.total)
 })
 ```
 
@@ -134,8 +134,8 @@ Instead of providing an object, you can provide a string using an
 can provide both:
 
 ```javascript
-seneca.act('cmd:salestax', {net:100}, function(err,result){
-  console.log( result.total )
+seneca.act('cmd:salestax', { net: 100 }, function (err, result) {
+  console.log(result.total)
 })
 ```
 
@@ -151,12 +151,12 @@ Seneca makes this really easy. Let's put configuration out on the
 network into its own process:
 
 ```javascript
-seneca.add( {cmd:'config'}, function(args,callback){
+seneca.add({ cmd: 'config' }, function (args, callback) {
   var config = {
     rate: 0.23
   }
   var value = config[args.prop]
-  callback(null,{value:value})
+  callback(null, { value: value })
 })
 
 seneca.listen()
@@ -174,18 +174,18 @@ The client code looks like this:
 
 
 ```javascript
-seneca.add( {cmd:'salestax'}, function(args,callback){
-  seneca.act( {cmd:'config', prop:'rate'}, function(err,result){
+seneca.add({ cmd: 'salestax' }, function (args, callback) {
+  seneca.act({cmd: 'config', prop: 'rate' }, function (err, result) {
     var rate  = parseFloat(result.value)
-    var total = args.net * (1+rate)
-    callback(null,{total:total})
+    var total = args.net * (1 + rate)
+    callback(null, { total: total })
   })
 })
 
 seneca.client()
 
-seneca.act('cmd:salestax,net:100', function(err,result){
-  console.log( result.total )
+seneca.act('cmd:salestax,net:100', function (err, result) {
+  console.log(result.total)
 })
 ```
 
@@ -214,49 +214,49 @@ Here's the code. We'll rip out the configuration code for this example.
 
 ```javascript
 // fixed rate
-seneca.add( {cmd:'salestax'}, function(args,callback){
+seneca.add({ cmd: 'salestax' }, function (args, callback) {
   var rate  = 0.23
-  var total = args.net * (1+rate)
-  callback(null,{total:total})
+  var total = args.net * (1 + rate)
+  callback(null, { total: total })
 })
 
 
 // local rates
-seneca.add( {cmd:'salestax',country:'US'}, function(args,callback){
+seneca.add({ cmd: 'salestax', country: 'US' }, function (args, callback) {
   var state = {
     'NY': 0.04,
     'CA': 0.0625
     // ...
   }
   var rate = state[args.state]
-  var total = args.net * (1+rate)
-  callback(null,{total:total})
+  var total = args.net * (1 + rate)
+  callback(null, { total: total })
 })
 
 
 // categories
-seneca.add( {cmd:'salestax',country:'IE'}, function(args,callback){
+seneca.add({ cmd: 'salestax', country: 'IE' }, function (args, callback) {
   var category = {
     'top': 0.23,
     'reduced': 0.135
     // ...
   }
   var rate = category[args.category]
-  var total = args.net * (1+rate)
-  callback(null,{total:total})
+  var total = args.net * (1 + rate)
+  callback(null, { total: total })
 })
 
 
-seneca.act('cmd:salestax,net:100,country:DE', function(err,result){
-  console.log( 'DE: '+result.total )
+seneca.act('cmd:salestax,net:100,country:DE', function (err, result) {
+  console.log('DE: ' + result.total)
 })
 
-seneca.act('cmd:salestax,net:100,country:US,state:NY', function(err,result){
-  console.log( 'US,NY: '+result.total )
+seneca.act('cmd:salestax,net:100,country:US,state:NY', function (err, result) {
+  console.log('US,NY: ' + result.total)
 })
 
-seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function(err,result){
-  console.log( 'IE: '+result.total )
+seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function (err, result) {
+  console.log('IE: ' + result.total)
 })
 
 ```
