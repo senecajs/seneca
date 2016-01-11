@@ -721,7 +721,7 @@ function make_seneca (initial_options) {
 
     if (priormeta) {
       if (_.isFunction(priormeta.handle)) {
-        priormeta.handle( args.pattern, action )
+        priormeta.handle(args.pattern, action)
         addroute = false
       }
       else {
@@ -875,7 +875,7 @@ function make_seneca (initial_options) {
 
     pin = _.isArray(pin) ? pin : [pin]
     _.each(pin, function (p) {
-      _.each( pinthis.findpins(p), function (actpattern) {
+      _.each(pinthis.findpins(p), function (actpattern) {
         pinthis.add(actpattern, meta, wrapper)
       })
     })

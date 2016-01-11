@@ -205,7 +205,7 @@ describe('transport', function () {
 
   describe('client()', function () {
     it('supports null options', function (done) {
-      var client = Transport.client(_.noop, function () { return _.noop } )
+      var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
         log: {
           info: function () {
@@ -800,10 +800,10 @@ describe('transport', function () {
           testact.call(this, args, done)
         })
         .add('bar:1', function (args, done) {
-          done( null, { bar: 1, q: 1 })
+          done(null, { bar: 1, q: 1 })
         })
         .listen({ port: 44440, pin: 'foo:1' })
-        .ready( make_s1 )
+        .ready(make_s1)
     }
 
     function make_s1 () {
@@ -818,7 +818,7 @@ describe('transport', function () {
           testact.call(this, args, done)
         })
         .listen({ port: 44441, pin: 'foo:1' })
-        .ready( make_s9 )
+        .ready(make_s9)
     }
 
     function make_s9 () {
@@ -827,10 +827,10 @@ describe('transport', function () {
       })
         .error(done)
         .add('bar:2', function (args, done) {
-          done( null, { bar: 2, q: 2 })
+          done(null, { bar: 2, q: 2 })
         })
         .listen({ port: 44449, pin: 'foo:1' })
-        .ready( run_client )
+        .ready(run_client)
     }
 
     function run_client () {
@@ -881,11 +881,11 @@ describe('transport', function () {
           return true
         })
 
-        .end( function () {
-          s0.close( function () {
-            s1.close( function () {
-              s9.close( function () {
-                c0.close( done )
+        .end(function () {
+          s0.close(function () {
+            s1.close(function () {
+              s9.close(function () {
+                c0.close(done)
               })
             })
           })
@@ -986,7 +986,7 @@ function make_balance_transport () {
     seneca.options({
       transport: {
         balance: {
-          handle: function ( pat, action ) {
+          handle: function (pat, action) {
             targets.push(action)
           }
         }
@@ -1012,8 +1012,8 @@ function make_balance_transport () {
         seneca.log.debug('client', 'send', topic + '_res', client_options, seneca)
 
         send_done(null, function (args, done) {
-          index = ( index + 1 ) % targets.length
-          targets[index].call( this, args, done )
+          index = (index + 1) % targets.length
+          targets[index].call(this, args, done)
         })
       }
 

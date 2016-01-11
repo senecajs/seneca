@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+var Connect = require('connect')
+var Seneca = require('../..')
+
+var seneca = Seneca()
 
 seneca.use(function (seneca, options, callback) {
   seneca.add({role: 'math', cmd: 'sum'}, function (args, callback) {
@@ -22,9 +25,8 @@ seneca.use(function (seneca, options, callback) {
 
 seneca.use('transport')
 
-var connect = require('connect')
-connect()
-  .use(connect.query())
-  .use(connect.json())
+Connect()
+  .use(Connect.query())
+  .use(Connect.json())
   .use(seneca.service())
   .listen(10171)

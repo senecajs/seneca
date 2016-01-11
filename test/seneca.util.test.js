@@ -5,14 +5,13 @@
 var Util = require('util')
 var Code = require('code')
 var Lab = require('lab')
+var Seneca = require('..')
 
 var testopts = { log: 'silent' }
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
-
-var seneca = require('..')
 
 describe('seneca.util', function () {
   lab.beforeEach(function (done) {
@@ -22,7 +21,7 @@ describe('seneca.util', function () {
     process.removeAllListeners('SIGBREAK')
     done()
   })
-  var si = seneca(testopts)
+  var si = Seneca(testopts)
 
   it('seneca.util.deepextend.happy', function (done) {
     expect(Util.inspect(si.util.deepextend({}, {a: 1}, {b: {c: 2}}, {b: {c: 3, d: 4}}))).to.equal('{ a: 1, b: { c: 3, d: 4 } }')

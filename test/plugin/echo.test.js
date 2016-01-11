@@ -1,21 +1,21 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 'use strict'
 
-var assert = require('assert')
-var events = require('events')
-
+var Assert = require('assert')
+var Events = require('events')
 var Lab = require('lab')
-
-var seneca = require('../..')
+var Seneca = require('../..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
+
 
 describe('plugin.echo', function () {
   it('happy', function (done) {
-    var si = seneca({log: {map: [{type: 'init',
-    handler: seneca.loghandler.stream(process.stdout)}]}})
+    var si = Seneca({log: {map: [{type: 'init',
+    handler: Seneca.loghandler.stream(process.stdout)}]}})
     si.use('echo')
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
@@ -26,11 +26,11 @@ describe('plugin.echo', function () {
   })
 
   it('options', function (done) {
-    var printevents = new events.EventEmitter()
+    var printevents = new Events.EventEmitter()
     printevents.on('log', function (data) { console.log(data) })
 
-    var si = seneca({log: {map: [{type: 'init',
-    handler: seneca.loghandler.emitter(printevents)}]}})
+    var si = Seneca({log: {map: [{type: 'init',
+    handler: Seneca.loghandler.emitter(printevents)}]}})
     si.use('echo', {inject: {foo: 'bar'}})
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {

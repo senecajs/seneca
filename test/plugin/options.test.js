@@ -1,19 +1,18 @@
 /* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 'use strict'
 
-var assert = require('assert')
-
+var Assert = require('assert')
 var Lab = require('lab')
-
-var seneca = require('../..')
+var Seneca = require('../..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
 
 describe('plugin.options', function () {
   it('happy', function (done) {
-    var si = seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
 
     si.use('options', {a: 1})
     assert.equal(1, si.export('options').a)

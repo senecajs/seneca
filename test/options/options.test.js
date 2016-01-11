@@ -1,15 +1,15 @@
 /* Copyright (c) 2013-2015 Richard Rodger */
 'use strict'
 
-var assert = require('assert')
-
-var seneca = require('../..')
-
+var Assert = require('assert')
 var Lab = require('lab')
+var Seneca = require('../..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
+
 
 describe('options', function () {
   lab.before(function (done) {
@@ -22,7 +22,7 @@ describe('options', function () {
 
   it('options-happy', function (done) {
     // loads ./seneca.options.js as well
-    var si = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
+    var si = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
     var opts = si.options()
     assert.equal(1, opts.a)
@@ -39,7 +39,7 @@ describe('options', function () {
   })
 
   it('options-getset', function (done) {
-    var si = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
+    var si = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
     si.options({e: 5, foo: {ee: 5}})
     // console.log('a',a)
@@ -65,7 +65,7 @@ describe('options', function () {
   })
 
   it('options-legacy', function (done) {
-    var si = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
+    var si = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
     si.use('options', {e: 5, foo: {ee: 5}})
 
@@ -88,7 +88,7 @@ describe('options', function () {
   })
 
   it('options-file-js', function (done) {
-    var si0 = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
+    var si0 = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
     si0.options('./options.require.js')
 
@@ -111,7 +111,7 @@ describe('options', function () {
   })
 
   it('options-file-json', function (done) {
-    var si0 = seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
+    var si0 = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
     si0.options(__dirname + '/options.file.json')
 
@@ -136,7 +136,7 @@ describe('options', function () {
   it('options-env', function (done) {
     process.env.SENECA_LOG = 'silent'
     process.env.SENECA_OPTIONS = '{"foo":"bar","a":99}'
-    var si = seneca()
+    var si = Seneca()
     var opts = si.options()
 
     assert.equal(0, opts.log.map.length)
@@ -149,7 +149,7 @@ describe('options', function () {
     process.argv.push('--seneca.options.foo=bar')
     process.argv.push('--seneca.options.a=99')
 
-    var si = seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
     var opts = si.options()
 
     assert.equal('bar', opts.foo)
@@ -158,7 +158,7 @@ describe('options', function () {
   })
 
   it('options-internal', function (done) {
-    var si = seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
     var ar = si.options().internal.actrouter
     assert.ok(ar)
     si.close(done)
@@ -166,7 +166,7 @@ describe('options', function () {
 
   it('options-invalid', function (done) {
     try {
-      seneca({idlen: 'foo'})
+      Seneca({idlen: 'foo'})
       assert.fail()
     }
     catch (e) {
