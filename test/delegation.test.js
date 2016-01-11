@@ -21,8 +21,8 @@ describe('delegation', function () {
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
-    assert.ok(Gex('Seneca/0.*.*/*').on(si.toString()))
-    assert.ok(Gex('Seneca/0.*.*/*/{b:B}').on(sid.toString()))
+    assert.ok(Gex('Seneca/*.*.*/*').on(si.toString()))
+    assert.ok(Gex('Seneca/*.*.*/*/{b:B}').on(sid.toString()))
 
     si.act({ c: 'C' }, function (err, out) {
       assert.ok(!err)
