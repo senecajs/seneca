@@ -1,3 +1,11 @@
+## 1.0.0: 2016-01-11
+
+* Fixed API wrapper so that original function name preserved. Issue #296
+* Fixed CLI `--seneca.print.tree` arg so that it works correctly. Issue #235
+* Seneca instance now passed as property on `add` callback function.  PR #290
+* Dependencies updated to latest versions. PR #285 and #304
+
+
 ## 0.9.3: 2015-12-21
 
 * Fixed calling error handler twice with the same error. Issue #245
