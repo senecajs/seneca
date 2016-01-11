@@ -3,25 +3,24 @@
 
 // mocha entity.test.js
 
-var util = require('util')
-var assert = require('assert')
-
-var seneca = require('..')
-
-var async = require('async')
-var gex = require('gex')
+var Util = require('util')
+var Assert = require('assert')
 var _ = require('lodash')
+var Async = require('async')
+var Gex = require('gex')
 var Lab = require('lab')
+var Seneca = require('..')
 
-var testopts = {log: 'silent'}
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
+var testopts = { log: 'silent' }
 
 
 describe('entity', function () {
   it('happy-mem', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
     si.options({errhandler: done})
 
     var fooent = si.make$('foo')
@@ -39,7 +38,7 @@ describe('entity', function () {
   })
 
   it('setid-mem', function (done) {
-    var si = seneca(testopts).error(done)
+    var si = Seneca(testopts).error(done)
 
     var z0 = si.make('zed')
     z0.id$ = 0
@@ -63,7 +62,7 @@ describe('entity', function () {
   })
 
   it('mem-ops', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
     si.options({
       errhandler: function (err) { err && done(err); return true }
     })
@@ -164,7 +163,7 @@ describe('entity', function () {
   })
 
   it('parsecanon', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
     function def (v, d) { return v == null ? d : v }
     function fmt (cn) { return def(cn.zone, '-') + '/' + def(cn.base, '-') + '/' + def(cn.name, '-') }
 
@@ -204,7 +203,7 @@ describe('entity', function () {
   })
 
   it('make', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
 
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
@@ -213,8 +212,8 @@ describe('entity', function () {
     assert.equal('$-/-/foo', foo.canon$({string$: true}))
     assert.equal(',,foo', '' + foo.canon$({array: true}))
     assert.equal(',,foo', '' + foo.canon$({array$: true}))
-    assert.equal("{ zone: undefined, base: undefined, name: 'foo' }", util.inspect(foo.canon$({object: true})))
-    assert.equal("{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }", util.inspect(foo.canon$({object$: true})))
+    assert.equal("{ zone: undefined, base: undefined, name: 'foo' }", Util.inspect(foo.canon$({object: true})))
+    assert.equal("{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }", Util.inspect(foo.canon$({object$: true})))
     assert.equal(',,foo', '' + foo.canon$({}))
 
     var b1_n1 = si.make$('b1/n1')
@@ -256,7 +255,7 @@ describe('entity', function () {
   })
 
   it('toString', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
 
     var f1 = si.make$('foo')
     f1.a = 1
@@ -272,7 +271,7 @@ describe('entity', function () {
     assert.equal('$-/-/foo;id=;{c:4,d:5}', '' + f3)
     done()
 
-    si = seneca(_.extend(testopts, {entity: {hide: {
+    si = Seneca(_.extend(testopts, {entity: {hide: {
       'foo': {a: true, b: true},
       'bar': ['c', 'd']
     }}}))
@@ -285,7 +284,7 @@ describe('entity', function () {
   })
 
   it('isa', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
 
     var f1 = si.make$('foo')
 
@@ -321,20 +320,20 @@ describe('entity', function () {
   })
 
   it('mem-store-import-export', function (done) {
-    var si = seneca(testopts).error(done)
+    var si = Seneca(testopts).error(done)
 
     // NOTE: zone is NOT saved! by design!
 
     var x1, x2, x3
 
-    async.series([
+    Async.series([
       function (next) { si.make$('a', {x: 1}).save$(function (e, o) { x1 = o; next() }) },
       function (next) { si.make$('b', 'a', {x: 2}).save$(function (e, o) { x2 = o; next() }) },
       function (next) { si.make$('c', 'b', 'a', {x: 3}).save$(function (e, o) { x3 = o; next() }) },
 
       function (next) {
         si.act('role:mem-store,cmd:dump', function (e, o) {
-          var t = gex(
+          var t = Gex(
             '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
          ).on(JSON.stringify(o))
           assert.ok(t)
@@ -346,14 +345,14 @@ describe('entity', function () {
         si.act('role:mem-store,cmd:export', function (err, out) {
           assert.equal(err, null)
 
-          var si2 = seneca(testopts)
+          var si2 = Seneca(testopts)
 
           si2.act('role:mem-store,cmd:import', {json: out.json}, function (err) {
             assert.equal(err, null)
 
             si2.act('role:mem-store,cmd:dump', function (err, o) {
               assert.equal(err, null)
-              assert.ok(gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)))
+              assert.ok(Gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)))
 
               si2.make('a').load$({x: 1}, function (err, nx1) {
                 assert.equal(err, null)
@@ -390,7 +389,7 @@ describe('entity', function () {
   })
 
   it('close', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
 
     var tmp = {s0: 0, s1: 0, s2: 0}
 
@@ -443,7 +442,7 @@ describe('entity', function () {
 
 
   it('entity.mapping', function (done) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
 
     si.use('mem-store', {map: {'-/-/foo': '*'}})
     si.use('mem-store', {map: {'-/-/bar': '*'}})

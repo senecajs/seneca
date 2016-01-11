@@ -1,6 +1,6 @@
-var id = require('./id-module')
+var Id = require('./id-module')
 
 require('../..')()
-  .add({generate: 'id'}, id.random)
-  .add({generate: 'id', type: 'nid'}, id.nid)
+  .add({generate: 'id'}, Id.random)
+  .add({generate: 'id', type: 'nid'}, Id.nid)
   .listen()

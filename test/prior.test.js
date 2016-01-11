@@ -4,7 +4,7 @@
 var _ = require('lodash')
 var Code = require('code')
 var Lab = require('lab')
-var seneca = require('..')
+var Seneca = require('..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -22,7 +22,7 @@ describe('prior', function () {
     done()
   })
   it('add-general-to-specific', function (done) {
-    seneca(testopts)
+    Seneca(testopts)
       .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
@@ -36,7 +36,7 @@ describe('prior', function () {
   })
 
   it('add-strict-general-to-specific', function (done) {
-    seneca(_.extend({ strict: { add: true } }, testopts))
+    Seneca(_.extend({ strict: { add: true } }, testopts))
       .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
@@ -50,7 +50,7 @@ describe('prior', function () {
   })
 
   it('add-specific-to-general', function (done) {
-    seneca(testopts)
+    Seneca(testopts)
       .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
@@ -64,7 +64,7 @@ describe('prior', function () {
   })
 
   it('add-strict-specific-to-general', function (done) {
-    seneca(_.extend({strict: {add: true}}, testopts))
+    Seneca(_.extend({strict: {add: true}}, testopts))
       .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
@@ -78,7 +78,7 @@ describe('prior', function () {
   })
 
   it('add-general-to-specific-alpha', function (done) {
-    seneca(testopts)
+    Seneca(testopts)
       .error(done)
       .add('a:1', order_called(4))
       .add('a:1,c:1', order_called(3))
@@ -93,7 +93,7 @@ describe('prior', function () {
   })
 
   it('add-general-to-specific-reverse-alpha', function (done) {
-    seneca(testopts)
+    Seneca(testopts)
       .error(done)
       .add('a:1', order_called(4))
       .add('a:1,b:1', order_called(3))
@@ -108,7 +108,7 @@ describe('prior', function () {
   })
 
   it('add-strict-default', function (done) {
-    seneca(testopts)
+    Seneca(testopts)
       .error(done)
 
       .add('a:1', order_called(2))
@@ -129,7 +129,7 @@ describe('prior', function () {
   })
 
   it('add-strict-true', function (done) {
-    seneca(_.extend({strict: {add: true}}, testopts))
+    Seneca(_.extend({strict: {add: true}}, testopts))
       .error(done)
 
       .add('a:1', order_called(2))

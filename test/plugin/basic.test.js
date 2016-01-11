@@ -1,18 +1,17 @@
 /* Copyright (c) 2010-2015 Richard Rodger, MIT License */
 'use strict'
 
-var assert = require('assert')
-
+var Assert = require('assert')
 var Lab = require('lab')
+var Seneca = require('../..')
 
-var seneca = require('../..')
-
-var si = seneca({log: 'silent'})
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
-
+var assert = Assert
+var si = Seneca({log: 'silent'})
 var util = si.pin({role: 'util', cmd: '*'})
+
 
 describe('util', function () {
   it('generate_id', function (fin) {

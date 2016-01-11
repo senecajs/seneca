@@ -1,15 +1,15 @@
 /* Copyright (c) 2010-2014 Richard Rodger, MIT License */
 'use strict'
 
-var connect = require('connect')
-var seneca = require('../..')
+var Connect = require('connect')
+var Seneca = require('../..')
 
-var si = seneca()
+var si = Seneca()
 si.use('echo')
 
-connect()
-  .use(connect.logger())
-  .use(connect.json())
+Connect()
+  .use(Connect.logger())
+  .use(Connect.json())
   .use(si.export('web'))
   .listen(3000)
 

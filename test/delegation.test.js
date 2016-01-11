@@ -1,29 +1,28 @@
 /* Copyright (c) 2013-2015 Richard Rodger */
 'use strict'
 
-var assert = require('assert')
-
-var seneca_module = require('..')
-
-var async = require('async')
-var gex = require('gex')
+var Assert = require('assert')
+var Async = require('async')
+var Gex = require('gex')
 var Lab = require('lab')
+var Seneca = require('..')
 
-var testopts = {log: 'silent'}
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
+var testopts = { log: 'silent' }
 
 describe('delegation', function () {
   it('happy', function (done) {
-    var si = seneca_module(testopts)
+    var si = Seneca(testopts)
     si.add({ c: 'C' }, function (args, cb) {
       cb(null, args)
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
-    assert.ok(gex('Seneca/0.*.*/*').on(si.toString()))
-    assert.ok(gex('Seneca/0.*.*/*/{b:B}').on(sid.toString()))
+    assert.ok(Gex('Seneca/0.*.*/*').on(si.toString()))
+    assert.ok(Gex('Seneca/0.*.*/*/{b:B}').on(sid.toString()))
 
     si.act({ c: 'C' }, function (err, out) {
       assert.ok(!err)
@@ -39,7 +38,7 @@ describe('delegation', function () {
   })
 
   it('dynamic', function (done) {
-    var si = seneca_module(testopts)
+    var si = Seneca(testopts)
     si.add({ c: 'C' }, function (args, cb) {
       cb(null, args)
     })
@@ -48,7 +47,7 @@ describe('delegation', function () {
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
-    async.series([
+    Async.series([
       function (next) {
         si.act({ c: 'C' }, function (err, out) {
           assert.ok(!err)
@@ -90,7 +89,7 @@ describe('delegation', function () {
 
   it('logging.actid', function (done) {
     var fail
-    var si = seneca_module({
+    var si = Seneca({
       log: {
         map: [{
           handler: function () {
@@ -138,7 +137,7 @@ describe('delegation', function () {
   })
 
   it('parent', function (done) {
-    var si = seneca_module(testopts)
+    var si = Seneca(testopts)
     si.add({c: 'C'}, function (args, cb) {
       // console.log('C='+this)
       args.a = 1
@@ -158,9 +157,9 @@ describe('delegation', function () {
   })
 
   it('parent.plugin', function (done) {
-    var si = seneca_module(testopts)
+    var si = Seneca(testopts)
 
-    async.series([
+    Async.series([
       function (next) {
         si.use(function (opts) {
           this.add({a: 'A'}, function (args, cb) {

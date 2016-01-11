@@ -1,17 +1,16 @@
 /* Copyright (c) 2014-2015 Richard Rodger, MIT License */
 'use strict'
 
-var assert = require('assert')
-
-var seneca = require('..')
-var common = require('../lib/common')
-
+var Assert = require('assert')
 var Lab = require('lab')
+var Common = require('../lib/common')
+var Seneca = require('..')
 
-var testopts = {log: 'silent'}
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var assert = Assert
+var testopts = {log: 'silent'}
 
 describe('seneca', function () {
   lab.beforeEach(function (done) {
@@ -317,10 +316,10 @@ describe('seneca', function () {
   }
 
   function make_seneca (ctxt) {
-    var si = seneca(testopts)
+    var si = Seneca(testopts)
     si.options({
       log: {map: [{level: 'error+', handler: function () {
-        ctxt.errlog = common.arrayify(arguments)
+        ctxt.errlog = Common.arrayify(arguments)
       }}]},
       trace: { unknown: 'error' }
     })
@@ -418,7 +417,7 @@ describe('seneca', function () {
   }
 
   function ready_die (done) {
-    var si = seneca({
+    var si = Seneca({
       log: 'silent',
       debug: {undead: true},
       errhandler: function (err) {
@@ -441,7 +440,7 @@ describe('seneca', function () {
   }
 
   function legacy_fail (done) {
-    var si = seneca({
+    var si = Seneca({
       log: 'silent'
     })
 
