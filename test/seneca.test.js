@@ -18,17 +18,6 @@ var it = lab.it
 var expect = Code.expect
 var assert = Assert
 
-// timerstub broken on node 0.11
-// var timerstub = require('timerstub')
-var timerstub = {
-  setTimeout: setTimeout,
-  setInterval: setInterval,
-  Date: Date,
-  wait: function (dur, fn) {
-    setTimeout(fn, dur)
-  }
-}
-
 var testopts = { log: 'silent' }
 
 describe('seneca', function () {
@@ -82,9 +71,9 @@ describe('seneca', function () {
   })
 
   it('ready-complex', function (done) {
-    var mark = {ec: 0}
+    var mark = { ec: 0 }
 
-    timerstub.setTimeout(function () {
+    setTimeout(function () {
       assert.ok(mark.r0, 'r0')
       assert.ok(mark.r1, 'r1')
       assert.ok(mark.p1, 'p1')
@@ -92,37 +81,36 @@ describe('seneca', function () {
       assert.equal(mark.ec, 1, 'ec')
 
       done()
-    }, 300)
+    }, 100)
 
     var si = Seneca(testopts)
-    si.ready(function () {
-      mark.r0 = true
 
-      si.use(function p1 (opts) {
-        si.add({init: 'p1'}, function (args, done) {
-          timerstub.setTimeout(function () { mark.p1 = true; done() }, 40)
-        })
-      })
-
-      si.on('ready', function () {
-        mark.ec++
-      })
-
-      si.ready(function () {
-        mark.r1 = true
-
-        si.use(function p2 (opts) {
-          si.add({ init: 'p2' }, function (args, done) {
-            timerstub.setTimeout(function () {
-              mark.p2 = true
-              done()
-            }, 40)
-          })
-        })
+    si.use(function p1 (opts) {
+      si.add({ init: 'p1' }, function (args, cb) {
+        setTimeout(function () {
+          mark.p1 = true
+          cb()
+        }, 10)
       })
     })
 
-    timerstub.wait(400)
+    si.on('ready', function () {
+      mark.r0 = true
+      mark.ec++
+    })
+
+    si.use(function p2 (opts) {
+      si.add({ init: 'p2' }, function (args, cb) {
+        setTimeout(function () {
+          mark.p2 = true
+          cb()
+        }, 10)
+      })
+    })
+
+    si.ready(function () {
+      mark.r1 = true
+    })
   })
 
   it('ready-func', function (done) {
@@ -1144,31 +1132,33 @@ describe('seneca', function () {
       this.good({x: x})
     })
 
-    si.act({a: 1}, function (err, out) {
-      assert.ok(!err)
-      assert.equal(1, out.x)
-    })
-
-    si.act({id$: 'a/B', a: 1}, function (err, out) {
-      assert.ok(!err)
-      assert.equal(2, out.x)
-
+    si.ready(function () {
       si.act({a: 1}, function (err, out) {
         assert.ok(!err)
-        assert.equal(3, out.x)
+        assert.equal(1, out.x)
+      })
 
-        si.act({id$: 'a/B', a: 1}, function (err, out) {
+      si.act({id$: 'a/B', a: 1}, function (err, out) {
+        assert.ok(!err)
+        assert.equal(2, out.x)
+
+        si.act({a: 1}, function (err, out) {
           assert.ok(!err)
-          assert.equal(2, out.x)
+          assert.equal(3, out.x)
 
-          si.act('role:seneca,stats:true', function (err, stats) {
+          si.act({id$: 'a/B', a: 1}, function (err, out) {
             assert.ok(!err)
-            // --seneca.log.all and count INs
-            // ... | grep act | grep IN | wc -l
-            // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 8, done: 8, fails: 0, cache: 1 }',
-              Util.inspect(stats.act))
-            done()
+            assert.equal(2, out.x)
+
+            si.act('role:seneca,stats:true', function (err, stats) {
+              assert.ok(!err)
+              // --seneca.log.all and count INs
+              // ... | grep act | grep IN | wc -l
+              // sensitive to changes in plugin init and internal action calls
+              assert.equal('{ calls: 9, done: 9, fails: 0, cache: 1 }',
+                Util.inspect(stats.act))
+              done()
+            })
           })
         })
       })

@@ -41,6 +41,7 @@
   "dependencies": {
     "archy": "1.0.0",
     "eraro": "0.4.1",
+    "fastseries": "1.7.2",
     "gate-executor": "0.2.3",
     "gex": "0.2.2",
     "jsonic": "0.2.2",

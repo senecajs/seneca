@@ -18,6 +18,7 @@ var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
 var Parambulator = require('parambulator')
+var Series = require('fastseries')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
 
@@ -1676,9 +1677,60 @@ function make_seneca (initial_options) {
   }
 
   function action_seneca_ready (args, done) {
+    var self = this
     private$.wait_for_ready = false
-    this.emit('ready')
-    done()
+
+    init_plugins(self, function (err) {
+      if (err) {
+        self.emit('error', err)
+        return done()
+      }
+
+      self.emit('ready')
+      done()
+    })
+  }
+
+  function init_plugins (seneca, done) {
+    var init = function (plugin, next) {
+      seneca.act({
+        init: plugin.name,
+        tag: plugin.tag,
+        default$: {},
+        fatal$: true,
+        local$: true
+      },
+      function (err, out) {
+        if (err) {
+          var plugin_err_code = 'plugin_init'
+
+          plugin.plugin_error = err.message
+
+          if (err.code === 'action-timeout') {
+            plugin_err_code = 'plugin_init_timeout'
+            plugin.timeout = so.timeout
+          }
+
+          seneca.die(internals.error(err, plugin_err_code, plugin))
+          return next()
+        }
+
+        if (so.debug.print && so.debug.print.options) {
+          console.log('\nSeneca Options (' + seneca.id + '): plugin: ' + plugin.name +
+            (plugin.tag ? '$' + plugin.tag : '') + '\n' +
+            '===\n')
+          console.log(Util.inspect(plugin.plugin_options, { depth: null }))
+          console.log('')
+        }
+
+        var pluginref = plugin.name + (plugin.tag ? '/' + plugin.tag : '')
+        seneca.log.debug('register', 'ready', pluginref, out)
+        return next()
+      })
+    }
+
+    var series = Series({ results: false })
+    series({}, init, _.values(seneca.private$.plugins), done)
   }
 
   function action_seneca_stats (args, done) {
