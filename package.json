@@ -24,8 +24,8 @@
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
     "Richard Rodger (http://richardrodger.com)",
-    "Wyatt Preul",
-    "Dean McDonnell",
+    "Wyatt Preul (https://github.com/geek)",
+    "Dean McDonnell (https://github.com/mcdonnelldean)",
     "Peter Elger",
     "Cristian Ianto",
     "Dominic Tarr",
@@ -34,9 +34,19 @@
     "Maciej Małecki (http://mmalecki.com)",
     "Jake Pruitt",
     "Marian Radulescu",
-    "Alexandru Mircea",
+    "Alexandru Mircea (https://github.com/mirceaalexandru)",
     "Adrian Rossouw (http://daemon.co.za)",
-    "Aleksandar Ostojić"
+    "Aleksandar Ostojić",
+    "Maxence Dalmais (https://github.com/maxired)",
+    "Marius Ursache (https://github.com/bamse16)",
+    "Martin Betak (https://github.com/matobet)",
+    "Marian Radulescu (https://github.com/marianr)",
+    "Glen Keane (https://github.com/thekemkid)",
+    "Tane Piper (https://github.com/tanepiper)",
+    "Cristian Kiss (https://github.com/ckiss)",
+    "Paolo Chiodi (https://github.com/paolochiodi)",
+    "Matteo Collina (https://github.com/mcollina)",
+    "Adrien Becchis (https://github.com/AdrieanKhisbe)"
   ],
   "dependencies": {
     "archy": "1.0.0",
