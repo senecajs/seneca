@@ -7,9 +7,12 @@
 [![Coverage Status][coveralls-badge]][coveralls-url]
 [![Gitter][gitter-badge]][gitter-url]
 
-Seneca is a toolkit for organizing the business logic of your app. You can break down your app into "stuff that happens", rather than focusing on data models or managing dependencies.
+## About Seneca
+_Seneca_ is a toolkit for organizing the business logic of your app. You can break down your app into "stuff that happens", rather than focusing on data models or managing dependencies.
 
-Seneca provides a toolkit for writing micro-services in Node.js. Seneca provides:
+_Seneca_ provides a toolkit for writing micro-services in Node.js.
+
+_Seneca_ provides:
 
 - __pattern matching:__ a wonderfully flexible way to handle business requirements
 
@@ -19,9 +22,15 @@ Seneca provides a toolkit for writing micro-services in Node.js. Seneca provides
 
 - __plus:__ a deep and wide ecosystem of [plugins][]
 
-Use this module to define commands that work by taking in some JSON, and, optionally, returning some JSON. The command to run is selected by pattern-matching on the the input JSON.  There are built-in and optional sets of commands that help you build Minimum Viable Products: data storage, user management, distributed logic, caching, logging, etc.  And you can define your own product by breaking it into a set of commands - "stuff that happens".
+Use this module to define commands that work by taking in some JSON, and, optionally, returning some JSON.
+The command to run is selected by pattern-matching on the the input JSON.
+There are built-in and optional sets of commands that help you build Minimum Viable Products:
+data storage, user management, distributed logic, caching, logging, etc.
+And you can define your own product by breaking it into a set of commands - "stuff that happens".
 
-That's pretty much it.
+That's pretty much it. ;)
+
+## About Seneca Support
 
 - __Node:__ 0.10, 0.12, 4, 5
 
@@ -60,10 +69,10 @@ npm run test
 
 So that it doesn't matter,
 
-   * who provides the functionality,
-   * where it lives (on the network),
-   * what it depends on,
-   * it's easy to define blocks of functionality (plugins!).
+   * __who__ _provides_ the functionality,
+   * __where__ it _lives_ (on the network),
+   * __what__ it _depends_ on,
+   * it's __easy__ to _define blocks of functionality_ (plugins!).
 
 So long as _some_ command can handle a given JSON document, you're good.
 
@@ -84,12 +93,12 @@ seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
 ```
 
 In this code, whenever seneca sees the pattern
-<code>{cmd:'salestax'}</code>, it executes the function associated
+`{cmd:'salestax'}`, it executes the function associated
 with this pattern, which calculates sales tax. Yah!
 
-The _seneca.add_ method adds a new pattern, and the function to execute whenever that pattern occurs.
+The `seneca.add` method adds a new pattern, and the function to execute whenever that pattern occurs.
 
-The _seneca.act_ method accepts an object, and runs the command, if any, that matches.
+The `seneca.act` method accepts an object, and runs the command, if any, that matches.
 
 Where does the sales tax rate come from? Let's try it again:
 
@@ -115,7 +124,7 @@ seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
 })
 ```
 
-The _config_ command provides you with your configuration. This is
+The `config` command provides you with your configuration. This is
 cool because it doesn't matter _where_ it gets the configuration from
 - hard-coded, file system, database, network service, whatever. Did
 you have to define an abstraction API to make this work? Nope.
@@ -139,7 +148,7 @@ seneca.act('cmd:salestax', { net: 100 }, function (err, result) {
 })
 ```
 
-This is a very convenient way of combining a pattern and parameter data.
+This is a _very convenient way of combining a pattern and parameter data_.
 
 ### Programmer Anarchy
 
@@ -162,7 +171,7 @@ seneca.add({ cmd: 'config' }, function (args, callback) {
 seneca.listen()
 ```
 
-The _listen_ method starts a web server that listens for JSON
+The `listen`` method starts a web server that listens for JSON
 messages. When these arrive, they are submitted to the local Seneca
 instance, and executed as actions in the normal way.  The result is
 then returned to the client as the response to the HTTP
@@ -189,9 +198,9 @@ seneca.act('cmd:salestax,net:100', function (err, result) {
 })
 ```
 
-On the client-side, calling _seneca.client()_ means that Seneca will
+On the client-side, calling `seneca.client()` means that Seneca will
 send any actions it cannot match locally out over the network. In this
-case, the configuration server will match the _cmd:config_ pattern and
+case, the configuration server will match the `cmd:config` pattern and
 return the configuratin data.
 
 Again, notice that your sales tax code _does not change_. It does not
@@ -200,12 +209,10 @@ how.
 
 You can do this with every command.
 
-
 ### Keeping the Business Happy
 
 The thing about business requirements is that they have no respect for
-common sense, logic or orderly structure. The real world is
-messy.
+common sense, logic or orderly structure. The real world is messy.
 
 In our example, let's say some countries have single sales tax rate,
 and others have a variable rate, which depends either on locality, or product category.
@@ -274,8 +281,9 @@ For more examples of Seneca in action, take a look at:
    * [nodezoo.com](//nodezoo.com/#q=seneca)
    * [Well!](//github.com/nearform/well)
 
+
 ## Contributing
-The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
+The [Senecajs org][] __encourages open participation__. If you feel you can help in any way, be it with
 bug reporting, documentation, examples, extra testing, or new features feel free to [create an issue][github issue],
 or better yet, [submit a pull request][github pull request].
 
