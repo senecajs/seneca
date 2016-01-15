@@ -277,6 +277,88 @@ describe('seneca', function () {
     })
   })
 
+  it('seneca-mem-store plugin can be disabled', function (done) {
+    var options = { log: 'silent', default_plugins: { } }
+    options.default_plugins['mem-store'] = false
+    var si = Seneca(options).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-repl plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { repl: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-transport plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { transport: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-web plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { web: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
   it('action-basic', function (done) {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
