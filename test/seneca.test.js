@@ -359,6 +359,13 @@ describe('seneca', function () {
     })
   })
 
+  it('use() can be invoked without seneca instance', function (done) {
+    var si = Seneca.use('transport')
+    expect(si).to.exist()
+    expect(si instanceof Error).to.be.false()
+    done()
+  })
+
   it('action-basic', function (done) {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
