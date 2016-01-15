@@ -237,6 +237,46 @@ describe('seneca', function () {
     done()
   })
 
+  it('seneca-basic plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { basic: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-cluster plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { cluster: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
   it('action-basic', function (done) {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
