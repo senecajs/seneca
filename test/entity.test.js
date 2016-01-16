@@ -325,67 +325,69 @@ describe('entity', function () {
     // NOTE: zone is NOT saved! by design!
 
     var x1, x2, x3
+    si.ready(function () {
+      Async.series([
+        function (next) { si.make$('a', {x: 1}).save$(function (e, o) { x1 = o; next() }) },
+        function (next) { si.make$('b', 'a', {x: 2}).save$(function (e, o) { x2 = o; next() }) },
+        function (next) { si.make$('c', 'b', 'a', {x: 3}).save$(function (e, o) { x3 = o; next() }) },
 
-    Async.series([
-      function (next) { si.make$('a', {x: 1}).save$(function (e, o) { x1 = o; next() }) },
-      function (next) { si.make$('b', 'a', {x: 2}).save$(function (e, o) { x2 = o; next() }) },
-      function (next) { si.make$('c', 'b', 'a', {x: 3}).save$(function (e, o) { x3 = o; next() }) },
+        function (next) {
+          si.act('role:mem-store,cmd:dump', function (e, o) {
+            var t = Gex(
+              '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+           ).on(JSON.stringify(o))
+            assert.ok(t)
+            next(e)
+          })
+        },
 
-      function (next) {
-        si.act('role:mem-store,cmd:dump', function (e, o) {
-          var t = Gex(
-            '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
-         ).on(JSON.stringify(o))
-          assert.ok(t)
-          next(e)
-        })
-      },
-
-      function (next) {
-        si.act('role:mem-store,cmd:export', function (err, out) {
-          assert.equal(err, null)
-
-          var si2 = Seneca(testopts)
-
-          si2.act('role:mem-store,cmd:import', {json: out.json}, function (err) {
+        function (next) {
+          si.act('role:mem-store,cmd:export', function (err, out) {
             assert.equal(err, null)
 
-            si2.act('role:mem-store,cmd:dump', function (err, o) {
-              assert.equal(err, null)
-              assert.ok(Gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)))
-
-              si2.make('a').load$({x: 1}, function (err, nx1) {
+            var si2 = Seneca(testopts)
+            si2.ready(function () {
+              si2.act('role:mem-store,cmd:import', {json: out.json}, function (err) {
                 assert.equal(err, null)
-                assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                si2.make('a').load$({x: 1}, function (err, nx1) {
+                si2.act('role:mem-store,cmd:dump', function (err, o) {
                   assert.equal(err, null)
-                  assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
+                  assert.ok(Gex('{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}').on(JSON.stringify(o)))
 
-                  si2.make('b', 'a').load$({x: 2}, function (err, nx2) {
+                  si2.make('a').load$({x: 1}, function (err, nx1) {
                     assert.equal(err, null)
-                    assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
+                    assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                    si2.make('c', 'b', 'a').load$({x: 3}, function (err, nx3) {
+                    si2.make('a').load$({x: 1}, function (err, nx1) {
                       assert.equal(err, null)
-                      assert.equal('$c/b/a;id=' + x3.id + ';{x:3}', '' + nx3)
-                      si2.close()
+                      assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                      next()
+                      si2.make('b', 'a').load$({x: 2}, function (err, nx2) {
+                        assert.equal(err, null)
+                        assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
+
+                        si2.make('c', 'b', 'a').load$({x: 3}, function (err, nx3) {
+                          assert.equal(err, null)
+                          assert.equal('$c/b/a;id=' + x3.id + ';{x:3}', '' + nx3)
+                          si2.close()
+
+                          next()
+                        })
+                      })
                     })
                   })
                 })
               })
             })
           })
-        })
-      }
+        }
 
-    ], function (err) {
-      si.close()
-      done(err)
-    }
-   )
+      ], function (err) {
+        si.close()
+        done(err)
+      }
+     )
+   })
   })
 
   it('close', function (done) {
@@ -425,18 +427,20 @@ describe('entity', function () {
       })
     })
 
-    si.close(function (err) {
-      if (err) return done(err)
+    si.ready(function () {
+      si.close(function (err) {
+        if (err) return done(err)
 
-      // console.log(tmp)
+        // console.log(tmp)
 
-      // close gets called on all of them
-      // any store may have open db connections
-      assert.equal(1, tmp.s0)
-      assert.equal(1, tmp.s1)
-      assert.equal(1, tmp.s2)
+        // close gets called on all of them
+        // any store may have open db connections
+        assert.equal(1, tmp.s0)
+        assert.equal(1, tmp.s1)
+        assert.equal(1, tmp.s2)
 
-      done()
+        done()
+      })
     })
   })
 
@@ -447,16 +451,18 @@ describe('entity', function () {
     si.use('mem-store', {map: {'-/-/foo': '*'}})
     si.use('mem-store', {map: {'-/-/bar': '*'}})
 
-    var plugins = si.plugins()
+    si.ready(function () {
+      var plugins = si.plugins()
 
-    assert.ok(!plugins['mem-store/4'])
-    assert.ok(plugins['mem-store/3'])
-    assert.ok(plugins['mem-store/2'])
-    assert.ok(plugins['mem-store/1'])
-    assert.ok(!plugins['mem-store/0'])
+      assert.ok(!plugins['mem-store/4'])
+      assert.ok(plugins['mem-store/3'])
+      assert.ok(plugins['mem-store/2'])
+      assert.ok(plugins['mem-store/1'])
+      assert.ok(!plugins['mem-store/0'])
 
-    // TODO: need to be able to introspect store map
+      // TODO: need to be able to introspect store map
 
-    done()
+      done()
+    })
   })
 })
