@@ -36,35 +36,37 @@ describe('repl', function () {
   it('accepts local connections and responds to commands', function (done) {
     internals.availablePort(function (port) {
       var seneca = Seneca({ repl: { port: port } })
-      seneca.repl()
 
-      setTimeout(function () {
-        var sock = Net.connect(port)
-        var state = 0
+      seneca.ready(function () {
+        seneca.repl()
+        setTimeout(function () {
+          var sock = Net.connect(port)
+          var state = 0
 
-        sock.on('readable', function () {
-          var buffer = sock.read()
-          if (!buffer) {
-            return
-          }
+          sock.on('readable', function () {
+            var buffer = sock.read()
+            if (!buffer) {
+              return
+            }
 
-          var result = buffer.toString('ascii')
+            var result = buffer.toString('ascii')
 
-          if (state === 0) {
-            expect(result).to.contain('seneca')
-            sock.write('console.log(this)\n')
-          }
-          else if (state === 1) {
-            expect(result).to.contain('{')
-            sock.write('seneca.quit\n')
-          }
-          else if (state === 2) {
-            expect(result).to.contain('seneca')
-            done()
-          }
+            if (state === 0) {
+              expect(result).to.contain('seneca')
+              sock.write('console.log(this)\n')
+            }
+            else if (state === 1) {
+              expect(result).to.contain('{')
+              sock.write('seneca.quit\n')
+            }
+            else if (state === 2) {
+              expect(result).to.contain('seneca')
+              done()
+            }
 
-          state++
-        }, 100)
+            state++
+          }, 100)
+        })
       })
     })
   })

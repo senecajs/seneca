@@ -256,26 +256,6 @@ describe('seneca', function () {
     done()
   })
 
-  it('seneca-basic plugin can be disabled', function (done) {
-    var si = Seneca({ log: 'silent', default_plugins: { basic: false } }).error(done)
-    si.options({debug: {fragile: true}})
-
-    var a1 = 0
-
-    si.add({op: 'foo'}, function (args, cb) {
-      a1 = args.a1
-      cb(null, {s: '+' + a1})
-    })
-
-    si.act({op: 'foo', a1: 100}, function (err, out) {
-      assert.equal(err, null)
-      assert.equal('+100', out.s)
-      assert.equal(100, a1)
-
-      done()
-    })
-  })
-
   it('seneca-cluster plugin can be disabled', function (done) {
     var si = Seneca({ log: 'silent', default_plugins: { cluster: false } }).error(done)
     si.options({debug: {fragile: true}})
@@ -427,43 +407,45 @@ describe('seneca', function () {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
 
-    try {
-      si.act({op: 'bad', a1: 100}, function () {
-        assert.fail()
-      })
-      assert.fail()
-    }
-    catch (e) {
-      assert.equal(e.code, 'act_not_found')
-
+    si.ready(function () {
       try {
-      // default is not an object
-        si.act({op: 'bad', a1: 100, default$: 'qaz'}, function () {
+        si.act({op: 'bad', a1: 100}, function () {
           assert.fail()
         })
         assert.fail()
       }
       catch (e) {
-        assert.equal(e.code, 'act_default_bad')
+        assert.equal(e.code, 'act_not_found')
+
         try {
-          si.act()
+        // default is not an object
+          si.act({op: 'bad', a1: 100, default$: 'qaz'}, function () {
+            assert.fail()
+          })
           assert.fail()
         }
         catch (e) {
-          assert.equal(e.code, 'act_not_found')
+          assert.equal(e.code, 'act_default_bad')
           try {
-            si.act(function () {
-              assert.fail()
-            })
+            si.act()
             assert.fail()
           }
           catch (e) {
             assert.equal(e.code, 'act_not_found')
-            done()
+            try {
+              si.act(function () {
+                assert.fail()
+              })
+              assert.fail()
+            }
+            catch (e) {
+              assert.equal(e.code, 'act_not_found')
+              done()
+            }
           }
         }
       }
-    }
+    })
   })
 
   it('action-default', function (done) {
@@ -597,68 +579,6 @@ describe('seneca', function () {
     })
   })
 
-  it('prior-nocache', function (done) {
-    var si = Seneca({log: 'silent', errhandler: done, trace: {act: false}})
-    var count = 0
-    var called = ''
-
-    si.ready(function () {
-      si.add('foo:a', function (args, done) {
-        count++
-        count += args.x
-        done(null, {count: count})
-      })
-
-      si.add('foo:a', function (args, done) {
-        count += args.y
-        this.prior(args, done)
-      })
-
-      si
-        .gate()
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(11.1, count)
-          called += 'A'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(112.11, count)
-          called += 'B'
-        })
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(123.21, count)
-          called += 'C'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(224.22, count)
-          called += 'D'
-        })
-        .ready(function () {
-          assert.equal('ABCD', called)
-          assert.equal(224.22, count)
-
-          this
-            .add('foo:a', function (args, done) {
-              count += args.z
-              this.prior(args, done)
-            })
-            .gate()
-            .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
-              assert.equal(err, null)
-              assert.equal(1000235.32, count)
-              called += 'E'
-            })
-            .ready(function () {
-              assert.equal('ABCDE', called)
-              done()
-            })
-        })
-    })
-  })
-
   it('gating', function (done) {
     var si = Seneca({log: 'silent', errhandler: done})
     var count = 0
@@ -688,9 +608,11 @@ describe('seneca', function () {
         called += 'C'
       })
       .ready(function () {
-        assert.equal('ABC', called)
-        assert.equal(1113, count)
-        done()
+        setTimeout(function () {
+          assert.equal('ABC', called)
+          assert.equal(1113, count)
+          done()
+        }, 50)
       })
   })
 
@@ -1588,9 +1510,11 @@ describe('seneca', function () {
       done()
     }
 
-    delete process.versions.node
-    process.versions.node = '0.11.99'
-    si.cluster()
+    si.ready(function () {
+      delete process.versions.node
+      process.versions.node = '0.11.99'
+      si.cluster()
+    })
   })
 
   describe('#error', function () {

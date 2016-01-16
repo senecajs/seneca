@@ -331,7 +331,13 @@ function make_seneca (initial_options) {
 
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
-  root.on('error', root.die)
+  root.on('error', function (err) {
+    if (typeof so.errhandler === 'function') {
+      so.errhandler(err)
+    }
+    root.die(err)
+  })
+
 
   // TODO: support options
   private$.executor = Executor({
@@ -1827,6 +1833,9 @@ function make_seneca (initial_options) {
 
   // Expose the Entity object so third-parties can do interesting things with it
   private$.exports.Entity = MakeEntity.Entity
+
+  // need to have a listener for being ready to finish initialization
+  root.ready(_.noop)
 
   return root
 }
