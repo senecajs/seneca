@@ -284,7 +284,7 @@ function make_seneca (initial_options) {
 
   // Non-API methods.
   root.logroute = api_logroute
-  root.register = Plugins.register(so, callpoint)
+  root.register = Plugins.register(callpoint)
   root.depends = api_depends
   root.pin = api_pin
   root.actroutes = Actions.routes
@@ -374,6 +374,8 @@ function make_seneca (initial_options) {
   }
 
   private$.plugins = {}
+  private$.definitions = []
+  private$.actions = []
   private$.exports = { options: Common.deepextend({}, so) }
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = Makeuse({
@@ -815,6 +817,12 @@ function make_seneca (initial_options) {
     var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
+
+    // wait until seneca is ready before executing actions
+    if (!this.private$.execActions && (args.role !== 'seneca' && args.ready !== true) && !args.init) {
+      private$.actions.push({ args: args, done: actdone || _.noop })
+      return
+    }
 
     args = _.extend(args, self.fixedargs)
     var actmeta = self.find(args)
@@ -1680,18 +1688,41 @@ function make_seneca (initial_options) {
     var self = this
     private$.wait_for_ready = false
 
-    init_plugins(self, function (err) {
+    load_plugins(self, function (err) {
       if (err) {
         self.emit('error', err)
         return done()
       }
 
-      self.emit('ready')
-      done()
+      // safe to execute actions now that seneca is ready
+      private$.execActions = true
+      function execActions (options, next) {
+        self.act(options.args, function () {
+          options.done.apply(this, arguments)
+          next()
+        })
+      }
+
+      var series = Series({ results: false })
+      series({}, execActions, self.private$.actions, function (err) {
+        if (err) {
+          self.emit('error', err)
+          return done()
+        }
+
+        self.emit('ready')
+        done()
+      })
     })
   }
 
-  function init_plugins (seneca, done) {
+  function load_plugins (seneca, done) {
+    var load = function (definition, next) {
+      definition(so,  function (err, plugin) {
+        init(plugin, next)
+      })
+    }
+
     var init = function (plugin, next) {
       seneca.act({
         init: plugin.name,
@@ -1730,7 +1761,10 @@ function make_seneca (initial_options) {
     }
 
     var series = Series({ results: false })
-    series({}, init, _.values(seneca.private$.plugins), done)
+    series({}, load, seneca.private$.definitions, function (err) {
+      seneca.private$.definitions.length = 0
+      return done(err)
+    })
   }
 
   function action_seneca_stats (args, done) {

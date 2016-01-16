@@ -351,7 +351,7 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin options can be modified by plugins during load sequence', function (done) {
+  it('plugin options can be modified by plugins during init sequence', function (done) {
     var seneca = Seneca({
       log: 'silent',
       plugin: {
@@ -419,4 +419,40 @@ describe('plugin', function () {
       done()
     })
   })
+
+  it('plugin options can be modified by plugins during load sequence', function (done) {
+    var seneca = Seneca({
+      log: 'silent',
+      plugin: {
+        foo: {
+          x: 1
+        },
+        bar: {
+          x: 2
+        }
+      }
+    })
+
+
+    seneca.use(function foo ( opts ) {
+      expect( opts.x ).to.equal(1)
+      this.add('init:foo', function (msg, cb) {
+        this.options( { plugin: {bar: {y: 3}} } )
+        cb()
+      })
+    })
+    .use(function bar ( opts ) {
+      expect( opts.x ).to.equal(2)
+      expect( opts.y ).to.equal(3)
+      this.add('init:bar', function (msg, cb) {
+        cb()
+      })
+    })
+    .ready(function () {
+      expect( seneca.options().plugin.foo ).to.deep.equal( {x: 1} )
+      expect( seneca.options().plugin.bar ).to.deep.equal( {x: 2, y: 3} )
+      done()
+    })
+  })
+
 })
