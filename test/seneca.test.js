@@ -48,6 +48,25 @@ describe('seneca', function () {
         cb(null, { b: 2 })
       })
     })
+    si.ready(function () {
+      si.act({ a: 1 }, function (err, out) {
+        assert.ok(!err)
+        assert.equal(out.b, 2)
+
+        si.act('a:1', function (err, out) {
+          assert.ok(!err)
+          assert.equal(out.b, 2)
+          done()
+        })
+      })
+    })
+  })
+
+  it('doesn\'t require ready event when simple add act', function (done) {
+    var si = Seneca(testopts)
+    si.add({ a: 1 }, function (args, cb) {
+      cb(null, { b: 2 })
+    })
     si.act({ a: 1 }, function (err, out) {
       assert.ok(!err)
       assert.equal(out.b, 2)

@@ -375,7 +375,6 @@ function make_seneca (initial_options) {
 
   private$.plugins = {}
   private$.definitions = []
-  private$.actions = []
   private$.exports = { options: Common.deepextend({}, so) }
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = Makeuse({
@@ -814,18 +813,21 @@ function make_seneca (initial_options) {
   function api_act () {
     var self = this
 
-    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var rawArgs = arguments
+    var spec = Common.parsePattern(this, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
 
-    // wait until seneca is ready before executing actions
-    if (!this.private$.execActions && (args.role !== 'seneca' && args.ready !== true) && !args.init) {
-      private$.actions.push({ args: args, done: actdone || _.noop })
-      return
-    }
+    args = _.extend(args, this.fixedargs)
+    var actmeta = this.find(args)
 
-    args = _.extend(args, self.fixedargs)
-    var actmeta = self.find(args)
+    // wait until seneca is ready before executing actions that can't be found
+    if (!this.private$.ready && !actmeta && !args.init) {
+      this.ready(function () {
+        api_act.apply(self, rawArgs)
+      })
+      return this
+    }
 
     if (so.debug.act_caller) {
       args.caller$ = '\n    Action call arguments and location: ' +
@@ -836,16 +838,18 @@ function make_seneca (initial_options) {
 
     // action pattern found
     if (actmeta) {
-      do_act(self, actmeta, false, args, actdone)
-      return self
+      do_act(this, actmeta, false, args, actdone)
+      return this
     }
 
     // action pattern not found
 
     if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-      self.log.debug('act', '-', '-', 'DEFAULT', self.util.clean(args), callpoint())
-      if (actdone) actdone.call(self, null, _.clone(args.default$))
-      return self
+      this.log.debug('act', '-', '-', 'DEFAULT', this.util.clean(args), callpoint())
+      if (actdone) {
+        actdone.call(this, null, _.clone(args.default$))
+      }
+      return this
     }
 
     var errcode = 'act_not_found'
@@ -859,8 +863,8 @@ function make_seneca (initial_options) {
     var err = internals.error(errcode, errinfo)
 
     if (args.fatal$) {
-      self.die(err)
-      return self
+      this.die(err)
+      return this
     }
 
     Logging.log_act_bad(root, err, so.trace.unknown)
@@ -870,9 +874,9 @@ function make_seneca (initial_options) {
     }
 
     if (actdone) {
-      actdone.call(self, err)
+      actdone.call(this, err)
     }
-    return self
+    return this
   }
 
 
@@ -1688,6 +1692,11 @@ function make_seneca (initial_options) {
     var self = this
     private$.wait_for_ready = false
 
+    // only execute once
+    if (private$.ready) {
+      return done()
+    }
+
     load_plugins(self, function (err) {
       if (err) {
         self.emit('error', err)
@@ -1695,30 +1704,15 @@ function make_seneca (initial_options) {
       }
 
       // safe to execute actions now that seneca is ready
-      private$.execActions = true
-      function execActions (options, next) {
-        self.act(options.args, function () {
-          options.done.apply(this, arguments)
-          next()
-        })
-      }
-
-      var series = Series({ results: false })
-      series({}, execActions, self.private$.actions, function (err) {
-        if (err) {
-          self.emit('error', err)
-          return done()
-        }
-
-        self.emit('ready')
-        done()
-      })
+      private$.ready = true
+      self.emit('ready')
+      done()
     })
   }
 
   function load_plugins (seneca, done) {
     var load = function (definition, next) {
-      definition(so,  function (err, plugin) {
+      definition(so, function (err, plugin) {
         init(plugin, next)
       })
     }
