@@ -18,17 +18,6 @@ var it = lab.it
 var expect = Code.expect
 var assert = Assert
 
-// timerstub broken on node 0.11
-// var timerstub = require('timerstub')
-var timerstub = {
-  setTimeout: setTimeout,
-  setInterval: setInterval,
-  Date: Date,
-  wait: function (dur, fn) {
-    setTimeout(fn, dur)
-  }
-}
-
 var testopts = { log: 'silent' }
 
 describe('seneca', function () {
@@ -59,6 +48,25 @@ describe('seneca', function () {
         cb(null, { b: 2 })
       })
     })
+    si.ready(function () {
+      si.act({ a: 1 }, function (err, out) {
+        assert.ok(!err)
+        assert.equal(out.b, 2)
+
+        si.act('a:1', function (err, out) {
+          assert.ok(!err)
+          assert.equal(out.b, 2)
+          done()
+        })
+      })
+    })
+  })
+
+  it('doesn\'t require ready event when simple add act', function (done) {
+    var si = Seneca(testopts)
+    si.add({ a: 1 }, function (args, cb) {
+      cb(null, { b: 2 })
+    })
     si.act({ a: 1 }, function (err, out) {
       assert.ok(!err)
       assert.equal(out.b, 2)
@@ -82,9 +90,9 @@ describe('seneca', function () {
   })
 
   it('ready-complex', function (done) {
-    var mark = {ec: 0}
+    var mark = { ec: 0 }
 
-    timerstub.setTimeout(function () {
+    setTimeout(function () {
       assert.ok(mark.r0, 'r0')
       assert.ok(mark.r1, 'r1')
       assert.ok(mark.p1, 'p1')
@@ -92,37 +100,36 @@ describe('seneca', function () {
       assert.equal(mark.ec, 1, 'ec')
 
       done()
-    }, 300)
+    }, 100)
 
     var si = Seneca(testopts)
-    si.ready(function () {
-      mark.r0 = true
 
-      si.use(function p1 (opts) {
-        si.add({init: 'p1'}, function (args, done) {
-          timerstub.setTimeout(function () { mark.p1 = true; done() }, 40)
-        })
-      })
-
-      si.on('ready', function () {
-        mark.ec++
-      })
-
-      si.ready(function () {
-        mark.r1 = true
-
-        si.use(function p2 (opts) {
-          si.add({ init: 'p2' }, function (args, done) {
-            timerstub.setTimeout(function () {
-              mark.p2 = true
-              done()
-            }, 40)
-          })
-        })
+    si.use(function p1 (opts) {
+      si.add({ init: 'p1' }, function (args, cb) {
+        setTimeout(function () {
+          mark.p1 = true
+          cb()
+        }, 10)
       })
     })
 
-    timerstub.wait(400)
+    si.on('ready', function () {
+      mark.r0 = true
+      mark.ec++
+    })
+
+    si.use(function p2 (opts) {
+      si.add({ init: 'p2' }, function (args, cb) {
+        setTimeout(function () {
+          mark.p2 = true
+          cb()
+        }, 10)
+      })
+    })
+
+    si.ready(function () {
+      mark.r1 = true
+    })
   })
 
   it('ready-func', function (done) {
@@ -249,6 +256,115 @@ describe('seneca', function () {
     done()
   })
 
+  it('seneca-cluster plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { cluster: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-mem-store plugin can be disabled', function (done) {
+    var options = { log: 'silent', default_plugins: { } }
+    options.default_plugins['mem-store'] = false
+    var si = Seneca(options).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-repl plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { repl: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-transport plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { transport: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('seneca-web plugin can be disabled', function (done) {
+    var si = Seneca({ log: 'silent', default_plugins: { web: false } }).error(done)
+    si.options({debug: {fragile: true}})
+
+    var a1 = 0
+
+    si.add({op: 'foo'}, function (args, cb) {
+      a1 = args.a1
+      cb(null, {s: '+' + a1})
+    })
+
+    si.act({op: 'foo', a1: 100}, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+
+      done()
+    })
+  })
+
+  it('use() can be invoked without seneca instance', function (done) {
+    var si = Seneca.use('transport')
+    expect(si).to.exist()
+    expect(si instanceof Error).to.be.false()
+    done()
+  })
+
   it('action-basic', function (done) {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
@@ -291,43 +407,45 @@ describe('seneca', function () {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})
 
-    try {
-      si.act({op: 'bad', a1: 100}, function () {
-        assert.fail()
-      })
-      assert.fail()
-    }
-    catch (e) {
-      assert.equal(e.code, 'act_not_found')
-
+    si.ready(function () {
       try {
-      // default is not an object
-        si.act({op: 'bad', a1: 100, default$: 'qaz'}, function () {
+        si.act({op: 'bad', a1: 100}, function () {
           assert.fail()
         })
         assert.fail()
       }
       catch (e) {
-        assert.equal(e.code, 'act_default_bad')
+        assert.equal(e.code, 'act_not_found')
+
         try {
-          si.act()
+        // default is not an object
+          si.act({op: 'bad', a1: 100, default$: 'qaz'}, function () {
+            assert.fail()
+          })
           assert.fail()
         }
         catch (e) {
-          assert.equal(e.code, 'act_not_found')
+          assert.equal(e.code, 'act_default_bad')
           try {
-            si.act(function () {
-              assert.fail()
-            })
+            si.act()
             assert.fail()
           }
           catch (e) {
             assert.equal(e.code, 'act_not_found')
-            done()
+            try {
+              si.act(function () {
+                assert.fail()
+              })
+              assert.fail()
+            }
+            catch (e) {
+              assert.equal(e.code, 'act_not_found')
+              done()
+            }
           }
         }
       }
-    }
+    })
   })
 
   it('action-default', function (done) {
@@ -461,68 +579,6 @@ describe('seneca', function () {
     })
   })
 
-  it('prior-nocache', function (done) {
-    var si = Seneca({log: 'silent', errhandler: done, trace: {act: false}})
-    var count = 0
-    var called = ''
-
-    si.ready(function () {
-      si.add('foo:a', function (args, done) {
-        count++
-        count += args.x
-        done(null, {count: count})
-      })
-
-      si.add('foo:a', function (args, done) {
-        count += args.y
-        this.prior(args, done)
-      })
-
-      si
-        .gate()
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(11.1, count)
-          called += 'A'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(112.11, count)
-          called += 'B'
-        })
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(123.21, count)
-          called += 'C'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(224.22, count)
-          called += 'D'
-        })
-        .ready(function () {
-          assert.equal('ABCD', called)
-          assert.equal(224.22, count)
-
-          this
-            .add('foo:a', function (args, done) {
-              count += args.z
-              this.prior(args, done)
-            })
-            .gate()
-            .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
-              assert.equal(err, null)
-              assert.equal(1000235.32, count)
-              called += 'E'
-            })
-            .ready(function () {
-              assert.equal('ABCDE', called)
-              done()
-            })
-        })
-    })
-  })
-
   it('gating', function (done) {
     var si = Seneca({log: 'silent', errhandler: done})
     var count = 0
@@ -552,9 +608,11 @@ describe('seneca', function () {
         called += 'C'
       })
       .ready(function () {
-        assert.equal('ABC', called)
-        assert.equal(1113, count)
-        done()
+        setTimeout(function () {
+          assert.equal('ABC', called)
+          assert.equal(1113, count)
+          done()
+        }, 50)
       })
   })
 
@@ -1144,31 +1202,33 @@ describe('seneca', function () {
       this.good({x: x})
     })
 
-    si.act({a: 1}, function (err, out) {
-      assert.ok(!err)
-      assert.equal(1, out.x)
-    })
-
-    si.act({id$: 'a/B', a: 1}, function (err, out) {
-      assert.ok(!err)
-      assert.equal(2, out.x)
-
+    si.ready(function () {
       si.act({a: 1}, function (err, out) {
         assert.ok(!err)
-        assert.equal(3, out.x)
+        assert.equal(1, out.x)
+      })
 
-        si.act({id$: 'a/B', a: 1}, function (err, out) {
+      si.act({id$: 'a/B', a: 1}, function (err, out) {
+        assert.ok(!err)
+        assert.equal(2, out.x)
+
+        si.act({a: 1}, function (err, out) {
           assert.ok(!err)
-          assert.equal(2, out.x)
+          assert.equal(3, out.x)
 
-          si.act('role:seneca,stats:true', function (err, stats) {
+          si.act({id$: 'a/B', a: 1}, function (err, out) {
             assert.ok(!err)
-            // --seneca.log.all and count INs
-            // ... | grep act | grep IN | wc -l
-            // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 8, done: 8, fails: 0, cache: 1 }',
-              Util.inspect(stats.act))
-            done()
+            assert.equal(2, out.x)
+
+            si.act('role:seneca,stats:true', function (err, stats) {
+              assert.ok(!err)
+              // --seneca.log.all and count INs
+              // ... | grep act | grep IN | wc -l
+              // sensitive to changes in plugin init and internal action calls
+              assert.equal('{ calls: 9, done: 9, fails: 0, cache: 1 }',
+                Util.inspect(stats.act))
+              done()
+            })
           })
         })
       })
@@ -1450,9 +1510,11 @@ describe('seneca', function () {
       done()
     }
 
-    delete process.versions.node
-    process.versions.node = '0.11.99'
-    si.cluster()
+    si.ready(function () {
+      delete process.versions.node
+      process.versions.node = '0.11.99'
+      si.cluster()
+    })
   })
 
   describe('#error', function () {

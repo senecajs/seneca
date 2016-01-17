@@ -67,7 +67,7 @@ describe('plugin', function () {
       }
     })
 
-    si.use(function () {
+    si.use(function error () {
       throw new Error('plugin-def')
     })
   })
@@ -205,42 +205,44 @@ describe('plugin', function () {
 
     expect(si.hasact({ z: 1 })).to.be.true()
 
-    si.act({a: 1}, function (err, out) {
-      expect(err).to.not.exist()
-      expect(1).to.equal(out.a)
-      expect(1).to.equal(out.z)
-      expect(out.t).to.exist()
-      expect(si.hasact({ a: 1 })).to.be.true()
-
-      si
-        .fix({q: 1})
-        .use(function (opts) {
-          this.add({a: 1}, function (args, done) {
-            this.act('z:1', function (err, out) {
-              expect(err).to.not.exist()
-              done(null, _.extend({a: 1, w: 1}, out))
-            })
-          })
-          return 'bbb'
-        })
-
-      expect(si.hasact({ a: 1 })).to.be.true()
-      expect(si.hasact({ a: 1, q: 1 })).to.be.true()
-
+    si.ready(function () {
       si.act({a: 1}, function (err, out) {
         expect(err).to.not.exist()
         expect(1).to.equal(out.a)
         expect(1).to.equal(out.z)
         expect(out.t).to.exist()
+        expect(si.hasact({ a: 1 })).to.be.true()
 
-        si.act({a: 1, q: 1}, function (err, out) {
+        si
+          .fix({q: 1})
+          .use(function (opts) {
+            this.add({a: 1}, function (args, done) {
+              this.act('z:1', function (err, out) {
+                expect(err).to.not.exist()
+                done(null, _.extend({a: 1, w: 1}, out))
+              })
+            })
+            return 'bbb'
+          })
+
+        expect(si.hasact({ a: 1 })).to.be.true()
+        expect(si.hasact({ a: 1, q: 1 })).to.be.true()
+
+        si.act({a: 1}, function (err, out) {
           expect(err).to.not.exist()
           expect(1).to.equal(out.a)
           expect(1).to.equal(out.z)
-          expect(1).to.equal(out.w)
           expect(out.t).to.exist()
 
-          si.close(done)
+          si.act({a: 1, q: 1}, function (err, out) {
+            expect(err).to.not.exist()
+            expect(1).to.equal(out.a)
+            expect(1).to.equal(out.z)
+            expect(1).to.equal(out.w)
+            expect(out.t).to.exist()
+
+            si.close(done)
+          })
         })
       })
     })
@@ -271,16 +273,18 @@ describe('plugin', function () {
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
 
-    expect(si.hasplugin('foo')).to.be.true()
-    expect(si.hasplugin('foo', '')).to.be.true()
-    expect(si.hasplugin('foo', '-')).to.be.true()
+    si.ready(function () {
+      expect(si.hasplugin('foo')).to.be.true()
+      expect(si.hasplugin('foo', '')).to.be.true()
+      expect(si.hasplugin('foo', '-')).to.be.true()
 
-    expect(si.hasplugin('bar')).to.be.false()
-    expect(si.hasplugin('bar', '')).to.be.false()
-    expect(si.hasplugin('bar', '-')).to.be.false()
-    expect(si.hasplugin('bar', 'bbb')).to.be.false()
-    expect(si.hasplugin('bar', 'aaa')).to.be.true()
-    si.close(done)
+      expect(si.hasplugin('bar')).to.be.false()
+      expect(si.hasplugin('bar', '')).to.be.false()
+      expect(si.hasplugin('bar', '-')).to.be.false()
+      expect(si.hasplugin('bar', 'bbb')).to.be.false()
+      expect(si.hasplugin('bar', 'aaa')).to.be.true()
+      si.close(done)
+    })
   })
 
   it('handles plugin with action that timesout', function (done) {
@@ -348,6 +352,110 @@ describe('plugin', function () {
           done()
         })
       })
+    })
+  })
+
+  it('plugin options can be modified by plugins during init sequence', function (done) {
+    var seneca = Seneca({
+      log: 'silent',
+      plugin: {
+        foo: {
+          x: 1
+        },
+        bar: {
+          x: 2
+        },
+        foobar: {}
+      }
+    })
+
+    seneca.use(function foo (options) {
+      expect(options.x).to.equal(1)
+      this.add('init:foo', function (msg, cb) {
+        this.options({ plugin: { foo: { y: 3 } } })
+        cb()
+      })
+    })
+    .use(function bar (options) {
+      this.add('init:bar', function (msg, cb) {
+        expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
+        this.options({ plugin: { bar: { y: 4 } } })
+        cb()
+      })
+    })
+    .use(function foobar (options) {
+      this.add('init:foobar', function (msg, cb) {
+        this.options({ plugin: { foobar: { foo: seneca.options().plugin.foo, bar: seneca.options().plugin.bar } } })
+        cb()
+      })
+    })
+    .ready(function () {
+      expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
+      expect(seneca.options().plugin.bar).to.deep.equal({ x: 2, y: 4 })
+      expect(seneca.options().plugin.foobar).to.deep.equal({ foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
+      done()
+    })
+  })
+
+  it('plugin init can add actions for future init actions to call', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    seneca.use(function foo (options) {
+      this.add('init:foo', function (msg, cb) {
+        this.add({ role: 'test', cmd: 'foo' }, function (args, cb) {
+          cb(null, { success: true })
+        })
+        cb()
+      })
+    })
+    .use(function bar (options) {
+      this.add('init:bar', function (msg, cb) {
+        this.act({ role: 'test', cmd: 'foo' }, function (err, result) {
+          expect(err).to.not.exist()
+          expect(result.success).to.be.true()
+          seneca.success = true
+          cb()
+        })
+      })
+    })
+    .ready(function () {
+      expect(seneca.success).to.be.true()
+      done()
+    })
+  })
+
+  it('plugin options can be modified by plugins during load sequence', function (done) {
+    var seneca = Seneca({
+      log: 'silent',
+      plugin: {
+        foo: {
+          x: 1
+        },
+        bar: {
+          x: 2
+        }
+      }
+    })
+
+
+    seneca.use(function foo (opts) {
+      expect(opts.x).to.equal(1)
+      this.add('init:foo', function (msg, cb) {
+        this.options({ plugin: {bar: {y: 3}} })
+        cb()
+      })
+    })
+    .use(function bar (opts) {
+      expect(opts.x).to.equal(2)
+      expect(opts.y).to.equal(3)
+      this.add('init:bar', function (msg, cb) {
+        cb()
+      })
+    })
+    .ready(function () {
+      expect(seneca.options().plugin.foo).to.deep.equal({x: 1})
+      expect(seneca.options().plugin.bar).to.deep.equal({x: 2, y: 3})
+      done()
     })
   })
 })

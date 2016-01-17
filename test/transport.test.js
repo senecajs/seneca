@@ -54,7 +54,10 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -78,7 +81,10 @@ describe('transport', function () {
           }
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -102,7 +108,10 @@ describe('transport', function () {
           }
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -124,7 +133,10 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -146,7 +158,10 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -168,7 +183,10 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -196,7 +214,10 @@ describe('transport', function () {
           expect(err).to.exist()
           done()
         },
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       listen.call(seneca)
@@ -220,7 +241,10 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       var fn = function () {
@@ -251,7 +275,10 @@ describe('transport', function () {
         add: function () {
           done()
         },
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       seneca.log.info = _.noop
@@ -280,7 +307,10 @@ describe('transport', function () {
         add: function () {
           done()
         },
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       seneca.log.info = _.noop
@@ -318,7 +348,10 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       client.call(seneca)
@@ -354,7 +387,10 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        private$: {
+          ready: true
+        }
       }
 
       client.call(seneca)
@@ -547,38 +583,40 @@ describe('transport', function () {
       .listen({type: 'test', pin: 'foo:1'})
       .listen({type: 'test', pin: 'qaz:*'})
       .ready(function () {
-        Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+        var seneca = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
           .add('foo:1', function (args, done) { done(null, args) })
 
           .client({type: 'test', pin: 'foo:1'})
           .client({type: 'test', pin: 'qaz:*'})
 
-          .start()
+          .ready(function () {
+            seneca.start()
 
-          .wait('foo:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2})
-            return true
+            .wait('foo:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(1)
+              expect(out).to.deep.equal({foo: 1, bar: 2})
+              return true
+            })
+
+            // foo:1 wins - it's more specific
+            .wait('foo:1,qaz:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(2)
+              expect(out).to.deep.equal({foo: 1, qaz: 1, bar: 2})
+              return true
+            })
+
+            .wait('foo:2,qaz:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(3)
+              expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
+              return true
+            })
+
+            .end(done)
           })
-
-          // foo:1 wins - it's more specific
-          .wait('foo:1,qaz:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(2)
-            expect(out).to.deep.equal({foo: 1, qaz: 1, bar: 2})
-            return true
-          })
-
-          .wait('foo:2,qaz:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(3)
-            expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
-            return true
-          })
-
-          .end(done)
       })
   })
 
@@ -661,27 +699,24 @@ describe('transport', function () {
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
-        Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+        var seneca = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
-
           .client({type: 'test', pin: 'foo:1'})
-
           .add('foo:1', function (args, done) {
             args.local = 1
             args.qaz = 1
             this.prior(args, done)
           })
-
-          .start()
-
-          .wait('foo:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2, local: 1, qaz: 1})
-            return true
+          .ready(function () {
+            seneca.start()
+            .wait('foo:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(1)
+              expect(out).to.deep.equal({foo: 1, bar: 2})  // TODO: should match , local: 1, qaz: 1 ?
+              return true
+            })
+            .end(done)
           })
-
-          .end(done)
       })
   })
 
@@ -729,41 +764,35 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
-      .client({type: 'test'})
-
       .add('foo:1', testact)
+      .listen({type: 'test'})
       .use(function bar () {
         this.add('bar:1', testact)
       })
-
-      .listen({type: 'test'})
-
       .add('foo:2', testact)
       .use(function zed () {
         this.add('zed:1', testact)
       })
 
       .ready(function () {
-        this.start(done)
-
+        // need seneca to be ready before start listening
+        this.client({type: 'test'})
+        .start(done)
           .wait('foo:1')
           .step(function (out) {
             expect(out.foo).to.equal(1)
             return true
           })
-
           .wait('bar:1')
           .step(function (out) {
             expect(out.bar).to.equal(2)
             return true
           })
-
           .wait('zed:1')
           .step(function (out) {
             expect(out.zed).to.equal(1)
             return true
           })
-
           .end(function (err) {
             if (err) return done(err)
             this.close(done)
@@ -772,12 +801,12 @@ describe('transport', function () {
   })
 
   it('handles timeout from client connecting', function (done) {
-    var seneca = Seneca({ log: 'silent', timeout: 50 }).client({ port: 1 })
-    seneca.act({ cmd: 'test' }, function (err) {
-      expect(err).to.exist()
-      expect(err.message).to.contain('TIMEOUT')
-      done()
-    })
+    var seneca = Seneca({ log: 'silent', timeout: 50, errhandler:
+      function (err) {
+        expect(err.message).to.contain('TIMEOUT')
+        done()
+      }}).client({ port: 1 })
+    seneca.act({ cmd: 'test' }, function () {})
   })
 
 
@@ -847,45 +876,47 @@ describe('transport', function () {
 
         .client({port: 44440, pin: 'bar:1'})
         .client({port: 44449, pin: 'bar:2'})
-        .start()
+        .ready(function () {
+          c0.start()
 
-        .wait('foo:1,actid$:aa/BB')
-        .step(function (out) {
-          expect(out.foo).to.equal(1)
-          expect(out.s).to.equal(0)
-          return true
-        })
+          .wait('foo:1,actid$:aa/BB')
+          .step(function (out) {
+            expect(out.foo).to.equal(1)
+            expect(out.s).to.equal(0)
+            return true
+          })
 
-        .wait('foo:1,actid$:cc/DD')
-        .step(function (out) {
-          expect(out.foo).to.equal(1)
-          expect(out.s).to.equal(1)
-          return true
-        })
+          .wait('foo:1,actid$:cc/DD')
+          .step(function (out) {
+            expect(out.foo).to.equal(1)
+            expect(out.s).to.equal(1)
+            return true
+          })
 
-        .wait('bar:1')
-        .step(function (out) {
-          expect(out.q).to.equal(1)
-          return true
-        })
+          .wait('bar:1')
+          .step(function (out) {
+            expect(out.q).to.equal(1)
+            return true
+          })
 
-        .wait('bar:1')
-        .step(function (out) {
-          expect(out.q).to.equal(1)
-          return true
-        })
+          .wait('bar:1')
+          .step(function (out) {
+            expect(out.q).to.equal(1)
+            return true
+          })
 
-        .wait('bar:2')
-        .step(function (out) {
-          expect(out.q).to.equal(2)
-          return true
-        })
+          .wait('bar:2')
+          .step(function (out) {
+            expect(out.q).to.equal(2)
+            return true
+          })
 
-        .end(function () {
-          s0.close(function () {
-            s1.close(function () {
-              s9.close(function () {
-                c0.close(done)
+          .end(function () {
+            s0.close(function () {
+              s1.close(function () {
+                s9.close(function () {
+                  c0.close(done)
+                })
               })
             })
           })

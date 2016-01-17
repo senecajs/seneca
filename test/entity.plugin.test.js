@@ -43,55 +43,57 @@ describe('entity.plugin', function () {
         errhandler: done
       })
 
-    // mem/foo
-    var foo = si.make('foo')
-    foo.a = 1
+    si.ready(function () {
+      // mem/foo
+      var foo = si.make('foo')
+      foo.a = 1
 
-    // mem/bar
-    var bar = si.make('bar')
-    bar.b = 2
+      // mem/bar
+      var bar = si.make('bar')
+      bar.b = 2
 
-    // also mem/foo instance
-    var faa = si.make('faa')
-    faa.c = 3
+      // also mem/foo instance
+      var faa = si.make('faa')
+      faa.c = 3
 
-    // handled by default mem instance
-    var zen = si.make('zen')
-    zen.d = 4
+      // handled by default mem instance
+      var zen = si.make('zen')
+      zen.d = 4
 
-    foo.save$(function (err, foo) {
-      assert.equal(err, null)
-      assert.ok(Gex('$-/-/foo;id=*;{a:1}').on('' + foo), '' + foo)
-
-      foo.load$({id: foo.id}, function (err, fooR) {
+      foo.save$(function (err, foo) {
         assert.equal(err, null)
-        assert.ok(Gex('$-/-/foo;id=*;{a:1}').on('' + fooR))
+        assert.ok(Gex('$-/-/foo;id=*;{a:1}').on('' + foo), '' + foo)
 
-        bar.save$(function (err, bar) {
+        foo.load$({id: foo.id}, function (err, fooR) {
           assert.equal(err, null)
-          assert.ok(Gex('$-/-/bar;id=*;{b:2}').on('' + bar), '' + bar)
+          assert.ok(Gex('$-/-/foo;id=*;{a:1}').on('' + fooR))
 
-          bar.load$({id: bar.id}, function (err, barR) {
+          bar.save$(function (err, bar) {
             assert.equal(err, null)
-            assert.ok(Gex('$-/-/bar;id=*;{b:2}').on('' + barR))
+            assert.ok(Gex('$-/-/bar;id=*;{b:2}').on('' + bar), '' + bar)
 
-            faa.save$(function (err, faa) {
+            bar.load$({id: bar.id}, function (err, barR) {
               assert.equal(err, null)
-              assert.ok(Gex('$-/-/faa;id=*;{c:3}').on('' + faa), '' + faa)
+              assert.ok(Gex('$-/-/bar;id=*;{b:2}').on('' + barR))
 
-              faa.load$({id: faa.id}, function (err, faaR) {
+              faa.save$(function (err, faa) {
                 assert.equal(err, null)
-                assert.ok(Gex('$-/-/faa;id=*;{c:3}').on('' + faaR))
+                assert.ok(Gex('$-/-/faa;id=*;{c:3}').on('' + faa), '' + faa)
 
-                zen.save$(function (err, zen) {
+                faa.load$({id: faa.id}, function (err, faaR) {
                   assert.equal(err, null)
-                  assert.ok(Gex('$-/-/zen;id=*;{d:4}').on('' + zen), '' + zen)
+                  assert.ok(Gex('$-/-/faa;id=*;{c:3}').on('' + faaR))
 
-                  zen.load$({id: zen.id}, function (err, zenR) {
+                  zen.save$(function (err, zen) {
                     assert.equal(err, null)
-                    assert.ok(Gex('$-/-/zen;id=*;{d:4}').on('' + zenR))
+                    assert.ok(Gex('$-/-/zen;id=*;{d:4}').on('' + zen), '' + zen)
 
-                    si.close(done)
+                    zen.load$({id: zen.id}, function (err, zenR) {
+                      assert.equal(err, null)
+                      assert.ok(Gex('$-/-/zen;id=*;{d:4}').on('' + zenR))
+
+                      si.close(done)
+                    })
                   })
                 })
               })

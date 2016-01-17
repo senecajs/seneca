@@ -42,55 +42,57 @@ describe('seneca', function () {
     var ctxt = {errlog: null}
     var si = make_seneca(ctxt)
 
-    // ~~ CASE: fire-and-forget; err-logged
-    si.act('a:1')
-    assert.equal('act_not_found', ctxt.errlog[8])
-
-    // ~~ CASE: callback; default
-    ctxt.errlog = null
-    si.act('a:1,default$:{x:1}', function (err, out) {
-      assert.equal(err, null)
-      assert.equal(ctxt.errlog, null)
-      assert.ok(out.x)
-    })
-
-    // ~~ CASE: callback; default Array
-    ctxt.errlog = null
-    si.act('a:1,default$:[1,"foo"]', function (err, out) {
-      assert.ok(err === null)
-      assert.ok(ctxt.errlog === null)
-      assert.equal(out[0], 1)
-      assert.ok(out[1], 'foo')
-    })
-
-    // ~~ CASE: callback; no-default; err-result; err-logged
-    si.act('a:1', function (err, out) {
-      assert.equal(out, null)
-      assert.equal('act_not_found', err.code)
+    si.ready(function () {
+      // ~~ CASE: fire-and-forget; err-logged
+      si.act('a:1')
       assert.equal('act_not_found', ctxt.errlog[8])
 
-      // ~~ CASE: callback; bad-default; err-result; err-logged
-      si.act('a:1,default$:"foo"', function (err, out) {
+      // ~~ CASE: callback; default
+      ctxt.errlog = null
+      si.act('a:1,default$:{x:1}', function (err, out) {
+        assert.equal(err, null)
+        assert.equal(ctxt.errlog, null)
+        assert.ok(out.x)
+      })
+
+      // ~~ CASE: callback; default Array
+      ctxt.errlog = null
+      si.act('a:1,default$:[1,"foo"]', function (err, out) {
+        assert.ok(err === null)
+        assert.ok(ctxt.errlog === null)
+        assert.equal(out[0], 1)
+        assert.ok(out[1], 'foo')
+      })
+
+      // ~~ CASE: callback; no-default; err-result; err-logged
+      si.act('a:1', function (err, out) {
         assert.equal(out, null)
-        assert.equal('act_default_bad', err.code)
-        assert.equal('act_default_bad', ctxt.errlog[8])
+        assert.equal('act_not_found', err.code)
+        assert.equal('act_not_found', ctxt.errlog[8])
 
-        // ~~ CASE: fragile; throws; err-logged
-        si.options({debug: {fragile: true}})
-        ctxt.errlog = null
+        // ~~ CASE: callback; bad-default; err-result; err-logged
+        si.act('a:1,default$:"foo"', function (err, out) {
+          assert.equal(out, null)
+          assert.equal('act_default_bad', err.code)
+          assert.equal('act_default_bad', ctxt.errlog[8])
 
-        try {
-          si.act('a:1', function () {
+          // ~~ CASE: fragile; throws; err-logged
+          si.options({debug: {fragile: true}})
+          ctxt.errlog = null
+
+          try {
+            si.act('a:1', function () {
+              assert.fail()
+            })
             assert.fail()
-          })
-          assert.fail()
-        }
-        catch (ex) {
-          assert.equal('act_not_found', ex.code)
-          assert.equal('act_not_found', ctxt.errlog[8])
-        }
+          }
+          catch (ex) {
+            assert.equal('act_not_found', ex.code)
+            assert.equal('act_not_found', ctxt.errlog[8])
+          }
 
-        return done()
+          return done()
+        })
       })
     })
   }

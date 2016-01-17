@@ -18,6 +18,7 @@ var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
 var Parambulator = require('parambulator')
+var Series = require('fastseries')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
 
@@ -330,7 +331,13 @@ function make_seneca (initial_options) {
 
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
-  root.on('error', root.die)
+  root.on('error', function (err) {
+    if (typeof so.errhandler === 'function') {
+      so.errhandler(err)
+    }
+    root.die(err)
+  })
+
 
   // TODO: support options
   private$.executor = Executor({
@@ -373,6 +380,7 @@ function make_seneca (initial_options) {
   }
 
   private$.plugins = {}
+  private$.definitions = []
   private$.exports = { options: Common.deepextend({}, so) }
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = Makeuse({
@@ -811,12 +819,21 @@ function make_seneca (initial_options) {
   function api_act () {
     var self = this
 
-    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var rawArgs = arguments
+    var spec = Common.parsePattern(this, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
 
-    args = _.extend(args, self.fixedargs)
-    var actmeta = self.find(args)
+    args = _.extend(args, this.fixedargs)
+    var actmeta = this.find(args)
+
+    // wait until seneca is ready before executing actions that can't be found
+    if (!this.private$.ready && !actmeta && !args.init) {
+      this.ready(function () {
+        api_act.apply(self, rawArgs)
+      })
+      return this
+    }
 
     if (so.debug.act_caller) {
       args.caller$ = '\n    Action call arguments and location: ' +
@@ -827,16 +844,18 @@ function make_seneca (initial_options) {
 
     // action pattern found
     if (actmeta) {
-      do_act(self, actmeta, false, args, actdone)
-      return self
+      do_act(this, actmeta, false, args, actdone)
+      return this
     }
 
     // action pattern not found
 
     if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-      self.log.debug('act', '-', '-', 'DEFAULT', self.util.clean(args), callpoint())
-      if (actdone) actdone.call(self, null, _.clone(args.default$))
-      return self
+      this.log.debug('act', '-', '-', 'DEFAULT', this.util.clean(args), callpoint())
+      if (actdone) {
+        actdone.call(this, null, _.clone(args.default$))
+      }
+      return this
     }
 
     var errcode = 'act_not_found'
@@ -850,8 +869,8 @@ function make_seneca (initial_options) {
     var err = internals.error(errcode, errinfo)
 
     if (args.fatal$) {
-      self.die(err)
-      return self
+      this.die(err)
+      return this
     }
 
     Logging.log_act_bad(root, err, so.trace.unknown)
@@ -861,9 +880,9 @@ function make_seneca (initial_options) {
     }
 
     if (actdone) {
-      actdone.call(self, err)
+      actdone.call(this, err)
     }
-    return self
+    return this
   }
 
 
@@ -1216,6 +1235,7 @@ function make_seneca (initial_options) {
       err = internals.error(err, 'act_execute', _.extend(
         {},
         err.details,
+        prior_ctxt,
         {
           message: (err.eraro && err.orig) ? err.orig.message : err.message,
           pattern: actmeta.pattern,
@@ -1676,9 +1696,44 @@ function make_seneca (initial_options) {
   }
 
   function action_seneca_ready (args, done) {
+    var self = this
     private$.wait_for_ready = false
-    this.emit('ready')
-    done()
+
+    // only execute once
+    if (private$.ready) {
+      return done()
+    }
+
+    load_plugins(self, function (err) {
+      if (err) {
+        return done()
+      }
+
+      // safe to execute actions now that seneca is ready
+      private$.ready = true
+
+      // execute anything that needs to run before being ready
+      self.emit('pluginsLoaded')
+      self.emit('ready')
+      done()
+    })
+  }
+
+  function load_plugins (seneca, done) {
+    var load = function (definition, next) {
+      definition(so, function (err, plugin) {
+        if (err) {
+          return done(err)
+        }
+        Plugins.init(seneca, so, plugin, next)
+      })
+    }
+
+    var series = Series({ results: false })
+    series({}, load, seneca.private$.definitions, function (err) {
+      seneca.private$.definitions.length = 0
+      return done(err)
+    })
   }
 
   function action_seneca_stats (args, done) {
@@ -1747,6 +1802,9 @@ function make_seneca (initial_options) {
 
   // Expose the Entity object so third-parties can do interesting things with it
   private$.exports.Entity = MakeEntity.Entity
+
+  // need to have a listener for being ready to finish initialization
+  root.ready(_.noop)
 
   return root
 }
