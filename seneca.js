@@ -284,7 +284,7 @@ function make_seneca (initial_options) {
 
   // Non-API methods.
   root.logroute = api_logroute
-  root.register = Plugins.register(callpoint)
+  root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
   root.pin = api_pin
   root.actroutes = Actions.routes
@@ -1725,44 +1725,7 @@ function make_seneca (initial_options) {
         if (err) {
           return done(err)
         }
-        init(plugin, next)
-      })
-    }
-
-    var init = function (plugin, next) {
-      seneca.act({
-        init: plugin.name,
-        tag: plugin.tag,
-        default$: {},
-        fatal$: true,
-        local$: true
-      },
-      function (err, out) {
-        if (err) {
-          var plugin_err_code = 'plugin_init'
-
-          plugin.plugin_error = err.message
-
-          if (err.code === 'action-timeout') {
-            plugin_err_code = 'plugin_init_timeout'
-            plugin.timeout = so.timeout
-          }
-
-          seneca.die(internals.error(err, plugin_err_code, plugin))
-          return next(err)
-        }
-
-        if (so.debug.print && so.debug.print.options) {
-          console.log('\nSeneca Options (' + seneca.id + '): plugin: ' + plugin.name +
-            (plugin.tag ? '$' + plugin.tag : '') + '\n' +
-            '===\n')
-          console.log(Util.inspect(plugin.plugin_options, { depth: null }))
-          console.log('')
-        }
-
-        var pluginref = plugin.name + (plugin.tag ? '/' + plugin.tag : '')
-        seneca.log.debug('register', 'ready', pluginref, out)
-        return next()
+        Plugins.init(seneca, so, plugin, next)
       })
     }
 
