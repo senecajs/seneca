@@ -1235,6 +1235,7 @@ function make_seneca (initial_options) {
       err = internals.error(err, 'act_execute', _.extend(
         {},
         err.details,
+        prior_ctxt,
         {
           message: (err.eraro && err.orig) ? err.orig.message : err.message,
           pattern: actmeta.pattern,
@@ -1705,12 +1706,14 @@ function make_seneca (initial_options) {
 
     load_plugins(self, function (err) {
       if (err) {
-        self.emit('error', err)
         return done()
       }
 
       // safe to execute actions now that seneca is ready
       private$.ready = true
+
+      // execute anything that needs to run before being ready
+      self.emit('pluginsLoaded')
       self.emit('ready')
       done()
     })
@@ -1719,6 +1722,9 @@ function make_seneca (initial_options) {
   function load_plugins (seneca, done) {
     var load = function (definition, next) {
       definition(so, function (err, plugin) {
+        if (err) {
+          return done(err)
+        }
         init(plugin, next)
       })
     }
@@ -1743,7 +1749,7 @@ function make_seneca (initial_options) {
           }
 
           seneca.die(internals.error(err, plugin_err_code, plugin))
-          return next()
+          return next(err)
         }
 
         if (so.debug.print && so.debug.print.options) {

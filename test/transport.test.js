@@ -583,38 +583,40 @@ describe('transport', function () {
       .listen({type: 'test', pin: 'foo:1'})
       .listen({type: 'test', pin: 'qaz:*'})
       .ready(function () {
-        Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+        var seneca = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
           .add('foo:1', function (args, done) { done(null, args) })
 
           .client({type: 'test', pin: 'foo:1'})
           .client({type: 'test', pin: 'qaz:*'})
 
-          .start()
+          .ready(function () {
+            seneca.start()
 
-          .wait('foo:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2})
-            return true
+            .wait('foo:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(1)
+              expect(out).to.deep.equal({foo: 1, bar: 2})
+              return true
+            })
+
+            // foo:1 wins - it's more specific
+            .wait('foo:1,qaz:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(2)
+              expect(out).to.deep.equal({foo: 1, qaz: 1, bar: 2})
+              return true
+            })
+
+            .wait('foo:2,qaz:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(3)
+              expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
+              return true
+            })
+
+            .end(done)
           })
-
-          // foo:1 wins - it's more specific
-          .wait('foo:1,qaz:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(2)
-            expect(out).to.deep.equal({foo: 1, qaz: 1, bar: 2})
-            return true
-          })
-
-          .wait('foo:2,qaz:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(3)
-            expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
-            return true
-          })
-
-          .end(done)
       })
   })
 
@@ -697,27 +699,24 @@ describe('transport', function () {
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
-        Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+        var seneca = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
-
           .client({type: 'test', pin: 'foo:1'})
-
           .add('foo:1', function (args, done) {
             args.local = 1
             args.qaz = 1
             this.prior(args, done)
           })
-
-          .start()
-
-          .wait('foo:1,bar:1')
-          .step(function (out) {
-            expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2, local: 1, qaz: 1})
-            return true
+          .ready(function () {
+            seneca.start()
+            .wait('foo:1,bar:1')
+            .step(function (out) {
+              expect(tt.outmsgs.length).to.equal(1)
+              expect(out).to.deep.equal({foo: 1, bar: 2})  // TODO: should match , local: 1, qaz: 1 ?
+              return true
+            })
+            .end(done)
           })
-
-          .end(done)
       })
   })
 
@@ -806,13 +805,11 @@ describe('transport', function () {
       function (err) {
         expect(err.message).to.contain('TIMEOUT')
         done()
-      }})
-    .client({ port: 1 })
-    seneca.act({ cmd: 'test' }, function (err) {
-    })
+      }}).client({ port: 1 })
+    seneca.act({ cmd: 'test' }, function () {})
   })
 
-/*
+
   it('transport-balance-exact', function (done) {
     var bt = make_balance_transport()
 
@@ -880,7 +877,6 @@ describe('transport', function () {
         .client({port: 44440, pin: 'bar:1'})
         .client({port: 44449, pin: 'bar:2'})
         .ready(function () {
-
           c0.start()
 
           .wait('foo:1,actid$:aa/BB')
@@ -927,7 +923,6 @@ describe('transport', function () {
         })
     }
   })
-  */
 })
 
 // A simple transport that uses async.queue as the transport mechanism

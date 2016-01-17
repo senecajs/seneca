@@ -238,7 +238,7 @@ describe('plugin', function () {
             expect(err).to.not.exist()
             expect(1).to.equal(out.a)
             expect(1).to.equal(out.z)
-            //expect(1).to.equal(out.w)
+            expect(1).to.equal(out.w)
             expect(out.t).to.exist()
 
             si.close(done)
@@ -438,25 +438,24 @@ describe('plugin', function () {
     })
 
 
-    seneca.use(function foo ( opts ) {
-      expect( opts.x ).to.equal(1)
+    seneca.use(function foo (opts) {
+      expect(opts.x).to.equal(1)
       this.add('init:foo', function (msg, cb) {
-        this.options( { plugin: {bar: {y: 3}} } )
+        this.options({ plugin: {bar: {y: 3}} })
         cb()
       })
     })
-    .use(function bar ( opts ) {
-      expect( opts.x ).to.equal(2)
-      expect( opts.y ).to.equal(3)
+    .use(function bar (opts) {
+      expect(opts.x).to.equal(2)
+      expect(opts.y).to.equal(3)
       this.add('init:bar', function (msg, cb) {
         cb()
       })
     })
     .ready(function () {
-      expect( seneca.options().plugin.foo ).to.deep.equal( {x: 1} )
-      expect( seneca.options().plugin.bar ).to.deep.equal( {x: 2, y: 3} )
+      expect(seneca.options().plugin.foo).to.deep.equal({x: 1})
+      expect(seneca.options().plugin.bar).to.deep.equal({x: 2, y: 3})
       done()
     })
   })
-
 })

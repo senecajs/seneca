@@ -387,7 +387,7 @@ describe('entity', function () {
         done(err)
       }
      )
-   })
+    })
   })
 
   it('close', function (done) {

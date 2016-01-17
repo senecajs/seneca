@@ -203,7 +203,6 @@ describe('delegation', function () {
     })
 
     si.ready(function () {
-
       si.act({a: 'A'}, function (err, out) {
         assert.ok(!err)
         assert.ok(out.a === 'A')

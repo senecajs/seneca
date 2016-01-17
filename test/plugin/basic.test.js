@@ -36,7 +36,7 @@ describe('util', function () {
   it('ensure_entity', function (fin) {
     var si = Seneca({log: 'silent'})
     si.once('ready', function () {
-      var util = si.pin({role: 'util', cmd: '*'})
+      si.pin({role: 'util', cmd: '*'})
       si.options({errhandler: fin})
       var foo_ent = si.make$('util_foo')
       var fooid = {}
