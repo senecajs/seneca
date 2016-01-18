@@ -425,18 +425,18 @@ describe('entity', function () {
       })
     })
 
-    si.close(function (err) {
-      if (err) return done(err)
+    si.ready(function () {
+      si.close(function (err) {
+        if (err) return done(err)
 
-      // console.log(tmp)
+        // close gets called on all of them
+        // any store may have open db connections
+        assert.equal(1, tmp.s0)
+        assert.equal(1, tmp.s1)
+        assert.equal(1, tmp.s2)
 
-      // close gets called on all of them
-      // any store may have open db connections
-      assert.equal(1, tmp.s0)
-      assert.equal(1, tmp.s1)
-      assert.equal(1, tmp.s2)
-
-      done()
+        done()
+      })
     })
   })
 
@@ -447,16 +447,18 @@ describe('entity', function () {
     si.use('mem-store', {map: {'-/-/foo': '*'}})
     si.use('mem-store', {map: {'-/-/bar': '*'}})
 
-    var plugins = si.plugins()
+    si.ready(function () {
+      var plugins = si.plugins()
 
-    assert.ok(!plugins['mem-store/4'])
-    assert.ok(plugins['mem-store/3'])
-    assert.ok(plugins['mem-store/2'])
-    assert.ok(plugins['mem-store/1'])
-    assert.ok(!plugins['mem-store/0'])
+      assert.ok(!plugins['mem-store/4'])
+      assert.ok(plugins['mem-store/3'])
+      assert.ok(plugins['mem-store/2'])
+      assert.ok(plugins['mem-store/1'])
+      assert.ok(!plugins['mem-store/0'])
 
-    // TODO: need to be able to introspect store map
+      // TODO: need to be able to introspect store map
 
-    done()
+      done()
+    })
   })
 })

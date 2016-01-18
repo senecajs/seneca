@@ -62,7 +62,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        expect('plugin-def').to.equal(err.message)
+        expect('plugin-def').to.equal(err.details.message)
         done()
       }
     })
@@ -96,7 +96,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        expect('invalid_arguments').to.equal(err.code)
+        expect('invalid_arguments').to.equal(err.orig.code)
         done()
       }
     })
@@ -271,16 +271,18 @@ describe('plugin', function () {
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
 
-    expect(si.hasplugin('foo')).to.be.true()
-    expect(si.hasplugin('foo', '')).to.be.true()
-    expect(si.hasplugin('foo', '-')).to.be.true()
+    si.ready(function () {
+      expect(si.hasplugin('foo')).to.be.true()
+      expect(si.hasplugin('foo', '')).to.be.true()
+      expect(si.hasplugin('foo', '-')).to.be.true()
 
-    expect(si.hasplugin('bar')).to.be.false()
-    expect(si.hasplugin('bar', '')).to.be.false()
-    expect(si.hasplugin('bar', '-')).to.be.false()
-    expect(si.hasplugin('bar', 'bbb')).to.be.false()
-    expect(si.hasplugin('bar', 'aaa')).to.be.true()
-    si.close(done)
+      expect(si.hasplugin('bar')).to.be.false()
+      expect(si.hasplugin('bar', '')).to.be.false()
+      expect(si.hasplugin('bar', '-')).to.be.false()
+      expect(si.hasplugin('bar', 'bbb')).to.be.false()
+      expect(si.hasplugin('bar', 'aaa')).to.be.true()
+      si.close(done)
+    })
   })
 
   it('handles plugin with action that timesout', function (done) {
@@ -349,5 +351,106 @@ describe('plugin', function () {
         })
       })
     })
+  })
+
+
+  it('dynamic-load-sequence', function (done) {
+    var a = []
+    Seneca({ log: 'test' })
+      .error(done)
+
+      .use(function first () {
+        this.add('init:first', function (m, d) {
+          a.push(1)
+          d()
+        })
+      })
+
+      .ready(function () {
+        this
+          .use(function second () {
+            this.add('init:second', function (m, d) {
+              a.push(2)
+              d()
+            })
+          })
+
+          .ready(function () {
+            this
+              .use(function third () {
+                this.add('init:third', function (m, d) {
+                  a.push(3)
+                  d()
+                })
+              })
+
+              .ready(function () {
+                expect(a).to.deep.equal([1, 2, 3])
+                done()
+              })
+          })
+      })
+  })
+
+  it('serial-load-sequence', function (done) {
+    var log = []
+
+    Seneca({ log: 'test' })
+      .error(done)
+
+      .use(function foo () {
+        log.push('a')
+        this.add('init:foo', function (msg, done) {
+          log.push('b')
+          done()
+        })
+      })
+      .use(function bar () {
+        log.push('c')
+        this.add('init:bar', function (msg, done) {
+          log.push('d')
+          done()
+        })
+      })
+      .ready(function () {
+        expect(log.join('')).to.equal('abcd')
+        done()
+      })
+  })
+
+
+  it('plugin options can be modified by plugins during load sequence', function (done) {
+    var seneca = Seneca({
+      log: 'test',
+      plugin: {
+        foo: {
+          x: 1
+        },
+        bar: {
+          x: 2
+        }
+      }
+    })
+
+    seneca
+      .use(function foo (opts) {
+        expect(opts.x).to.equal(1)
+        this.add('init:foo', function (msg, done) {
+          this.options({ plugin: {bar: {y: 3}} })
+          done()
+        })
+      })
+      .use(function bar (opts) {
+        expect(opts.x).to.equal(2)
+        expect(opts.y).to.equal(3)
+        this.add('init:bar', function (msg, done) {
+          done()
+        })
+      })
+      .ready(function () {
+        expect(seneca.options().plugin.foo).to.deep.equal({x: 1})
+        expect(seneca.options().plugin.bar).to.deep.equal({x: 2, y: 3})
+        done()
+      })
   })
 })

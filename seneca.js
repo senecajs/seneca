@@ -180,13 +180,26 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  seneca.use(Plugins)
+  // FIX: plugin decorations do need to be sync
+  // needs thinking
+
+  seneca.decorate('hasplugin', Plugins.api_decorations.hasplugin)
+  seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
+  seneca.decorate('plugins', Plugins.api_decorations.plugins)
+
+  // HACK: makes this sync
+  if (options.default_plugins.cluster) {
+    require('seneca-cluster').call(seneca, {})
+  }
+
+  // HACK: makes this sync
+  if (options.default_plugins.repl) {
+    require('seneca-repl').call(seneca, options.repl)
+  }
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.cluster) { seneca.use(require('seneca-cluster')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
-  if (options.default_plugins.repl) { seneca.use(require('seneca-repl'), options.repl) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
 
@@ -487,6 +500,7 @@ function make_seneca (initial_options) {
   }
   root.make$ = root.make
 
+  // TODO: DEPRECATE
   function api_pin (pattern, pinopts) {
     var thispin = this
 
@@ -499,43 +513,46 @@ function make_seneca (initial_options) {
       }
     }
 
-    var methods = private$.actrouter.list(pattern)
-
     var api = {
       toString: function () {
         return 'pin:' + Common.argpattern(pattern) + '/' + thispin
       }
     }
 
-    methods.forEach(function (method) {
-      var mpat = method.match
+    // TODO: perhaps gate execute instead?
+    this.ready(function () {
+      var methods = private$.actrouter.list(pattern)
 
-      var methodname = ''
-      for (var mkI = 0; mkI < methodkeys.length; mkI++) {
-        methodname += ((0 < mkI ? '_' : '')) + mpat[methodkeys[mkI]]
-      }
+      methods.forEach(function (method) {
+        var mpat = method.match
 
-      api[methodname] = function (args, cb) {
-        var si = this && this.seneca ? this : thispin
+        var methodname = ''
+        for (var mkI = 0; mkI < methodkeys.length; mkI++) {
+          methodname += ((0 < mkI ? '_' : '')) + mpat[methodkeys[mkI]]
+        }
 
-        var fullargs = _.extend({}, args, mpat)
-        si.act(fullargs, cb)
-      }
+        api[methodname] = function (args, cb) {
+          var si = this && this.seneca ? this : thispin
 
-      api[methodname].pattern$ = method.match
-      api[methodname].name$ = methodname
-    })
+          var fullargs = _.extend({}, args, mpat)
+          si.act(fullargs, cb)
+        }
 
-    if (pinopts) {
-      if (pinopts.include) {
-        for (var i = 0; i < pinopts.include.length; i++) {
-          var methodname = pinopts.include[i]
-          if (thispin[methodname]) {
-            api[methodname] = Common.delegate(thispin, thispin[methodname])
+        api[methodname].pattern$ = method.match
+        api[methodname].name$ = methodname
+      })
+
+      if (pinopts) {
+        if (pinopts.include) {
+          for (var i = 0; i < pinopts.include.length; i++) {
+            var methodname = pinopts.include[i]
+            if (thispin[methodname]) {
+              api[methodname] = Common.delegate(thispin, thispin[methodname])
+            }
           }
         }
       }
-    }
+    })
 
     return api
   }
@@ -575,6 +592,8 @@ function make_seneca (initial_options) {
 
     if (!private$.handle_sub) {
       private$.handle_sub = function (args, result) {
+        args.meta$ = args.meta$ || {}
+
         if (args.meta$.entry !== true) {
           return
         }
@@ -810,13 +829,10 @@ function make_seneca (initial_options) {
   // known patterns, and the most specific one wins.
   function api_act () {
     var self = this
-
     var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
-
     args = _.extend(args, self.fixedargs)
-    var actmeta = self.find(args)
 
     if (so.debug.act_caller) {
       args.caller$ = '\n    Action call arguments and location: ' +
@@ -825,44 +841,8 @@ function make_seneca (initial_options) {
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
 
-    // action pattern found
-    if (actmeta) {
-      do_act(self, actmeta, false, args, actdone)
-      return self
-    }
+    do_act(self, null, null, args, actdone)
 
-    // action pattern not found
-
-    if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-      self.log.debug('act', '-', '-', 'DEFAULT', self.util.clean(args), callpoint())
-      if (actdone) actdone.call(self, null, _.clone(args.default$))
-      return self
-    }
-
-    var errcode = 'act_not_found'
-    var errinfo = { args: Util.inspect(Common.clean(args)).replace(/\n/g, '') }
-
-    if (!_.isUndefined(args.default$)) {
-      errcode = 'act_default_bad'
-      errinfo.xdefault = Util.inspect(args.default$)
-    }
-
-    var err = internals.error(errcode, errinfo)
-
-    if (args.fatal$) {
-      self.die(err)
-      return self
-    }
-
-    Logging.log_act_bad(root, err, so.trace.unknown)
-
-    if (so.debug.fragile) {
-      throw err
-    }
-
-    if (actdone) {
-      actdone.call(self, err)
-    }
     return self
   }
 
@@ -997,11 +977,16 @@ function make_seneca (initial_options) {
     return this.name
   }
 
-  function do_act (instance, actmeta, prior_ctxt, origargs, cb) {
+  function do_act (instance, actmeta, prior_ctxt, origargs, actdone) {
+    var delegate = instance
     var args = _.clone(origargs)
+    var callargs = args
+    var actstats
+    var act_callpoint = callpoint()
+
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
 
-    var act_callpoint = callpoint()
+    var listen_origin = origargs.transport$ && origargs.transport$.origin
 
     var id_tx = (args.id$ || args.actid$ || instance.idgen()).split('/')
 
@@ -1015,54 +1000,116 @@ function make_seneca (initial_options) {
 
     var actstart = Date.now()
 
-    cb = cb || _.noop
+    actdone = actdone || _.noop
 
-    if (act_cache_check(instance, args, prior_ctxt, cb, act_callpoint)) return
+    var cached_actmeta =
+          act_cache_check(instance, args, prior_ctxt, actdone, act_callpoint)
 
-    var actstats = act_stats_call(actmeta.pattern)
-
-    // build callargs
-    var callargs = args
-
-    // remove actid so that user manipulation of args for subsequent use does
-    // not cause inadvertent hit on existing action
-    delete callargs.id$
-    delete callargs.actid$ // legacy alias
-
-    callargs.meta$ = {
-      id: actid,
-      tx: tx,
-      start: actstart,
-      pattern: actmeta.pattern,
-      action: actmeta.id,
-      entry: prior_ctxt.entry,
-      chain: prior_ctxt.chain
+    if (cached_actmeta) {
+      actmeta = cached_actmeta
+      return
     }
 
-    if (actmeta.deprecate) {
-      instance.log.warn('DEPRECATED', actmeta.pattern, actmeta.deprecate,
-        act_callpoint)
+    var execute_action = function execute_action (action_done) {
+      actmeta = actmeta || delegate.find(args)
+
+      // action pattern not found
+      if (!actmeta) {
+        if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
+          delegate.log.debug('act', '-', '-', 'DEFAULT',
+                             delegate.util.clean(args), callpoint())
+          return action_done(null, args.default$)
+        }
+
+        var errcode = 'act_not_found'
+        var errinfo = { args: Util.inspect(Common.clean(args)).replace(/\n/g, '') }
+
+        if (!_.isUndefined(args.default$)) {
+          errcode = 'act_default_bad'
+          errinfo.xdefault = Util.inspect(args.default$)
+        }
+
+        var err = internals.error(errcode, errinfo)
+
+        // TODO: wrong approach - should always call action_done to complete
+        // error would then include a fatal flag
+        if (args.fatal$) {
+          return delegate.die(err)
+        }
+
+        Logging.log_act_bad(root, err, so.trace.unknown)
+
+        return action_done(err)
+      }
+
+      act_param_check(origargs, actmeta, function (err) {
+        if (err) {
+          return action_done(err)
+        }
+
+        actstats = act_stats_call(actmeta.pattern)
+
+        // build callargs
+        // remove actid so that user manipulation of args for subsequent use does
+        // not cause inadvertent hit on existing action
+        delete callargs.id$
+        delete callargs.actid$ // legacy alias
+
+        callargs.meta$ = {
+          id: actid,
+          tx: tx,
+          start: actstart,
+          pattern: actmeta.pattern,
+          action: actmeta.id,
+          entry: prior_ctxt.entry,
+          chain: prior_ctxt.chain
+        }
+
+        if (actmeta.deprecate) {
+          instance.log.warn('DEPRECATED', actmeta.pattern, actmeta.deprecate,
+                            act_callpoint)
+        }
+
+        Logging.log_act_in(root, { actid: actid, info: origargs.transport$ },
+                           actmeta, callargs, prior_ctxt, act_callpoint)
+
+        instance.emit('act-in', callargs)
+
+        delegate = act_make_delegate(instance, tx, callargs, actmeta, prior_ctxt)
+        callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
+
+        action_done.seneca = delegate
+
+        if (root.closed && !callargs.closing$) {
+          return action_done(
+            internals.error('instance-closed',
+                            {args: Common.clean(callargs)}))
+        }
+
+        delegate.good = function (out) {
+          action_done(null, out)
+        }
+
+        delegate.bad = function (err) {
+          action_done(err)
+        }
+
+        if (_.isFunction(delegate.on_act_in)) {
+          delegate.on_act_in(actmeta, callargs)
+        }
+
+        actmeta.func.call(delegate, callargs, action_done)
+      })
     }
 
-    Logging.log_act_in(root, { actid: actid, info: origargs.transport$ },
-      actmeta, callargs, prior_ctxt, act_callpoint)
-
-    instance.emit('act-in', callargs)
-
-    var delegate = act_make_delegate(instance, tx, callargs, actmeta, prior_ctxt)
-
-    callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
-
-    var listen_origin = origargs.transport$ && origargs.transport$.origin
-
-    var act_done = function (err) {
+    var act_done = function act_done (err) {
       try {
         var actend = Date.now()
 
         prior_ctxt.depth--
         prior_ctxt.entry = prior_ctxt.depth <= 0
 
-        if (prior_ctxt.entry === true) {
+        if (prior_ctxt.entry === true && actmeta) {
           private$.timestats.point(actend - actstart, actmeta.argpattern)
         }
 
@@ -1102,10 +1149,14 @@ function make_seneca (initial_options) {
         })
 
         if (err) {
+          // TODO: is act_not_found an error for purposes of stats? probably not
           private$.stats.act.fails++
-          actstats.fails++
 
-          var out = act_error(instance, err, actmeta, result, cb,
+          if (actstats) {
+            actstats.fails++
+          }
+
+          var out = act_error(instance, err, actmeta, result, actdone,
             actend - actstart, callargs, prior_ctxt, act_callpoint)
 
           if (args.fatal$) {
@@ -1115,7 +1166,7 @@ function make_seneca (initial_options) {
           call_cb = out.call_cb
           result[0] = out.err
 
-          if (_.isFunction(delegate.on_act_err)) {
+          if (delegate && _.isFunction(delegate.on_act_err)) {
             delegate.on_act_err(actmeta, result[0])
           }
         }
@@ -1136,13 +1187,15 @@ function make_seneca (initial_options) {
             delegate.on_act_out(actmeta, result[1])
           }
 
-          private$.stats.act.done++
-          actstats.done++
+          if (actstats) {
+            private$.stats.act.done++
+            actstats.done++
+          }
         }
 
         try {
           if (call_cb) {
-            cb.apply(delegate, result.slice(0, 2)) // note: err == result[0]
+            actdone.apply(delegate, result.slice(0, 2)) // note: err == result[0]
           }
         }
 
@@ -1156,7 +1209,7 @@ function make_seneca (initial_options) {
               : new Error('' + ex)
           }
 
-          callback_error(instance, formattedErr, actmeta, result, cb,
+          callback_error(instance, formattedErr, actmeta, result, actdone,
             actend - actstart, callargs, prior_ctxt, act_callpoint)
         }
       }
@@ -1165,52 +1218,23 @@ function make_seneca (initial_options) {
       }
     }
 
-    act_param_check(origargs, actmeta, function (err) {
-      if (err) {
-        return act_done(err)
-      }
+    var execspec = {
+      id: actid,
+      gate: prior_ctxt.entry && !!callargs.gate$,
+      ungate: !!callargs.ungate$,
+      desc: actid,
+      cb: act_done,
+      fn: execute_action
+    }
 
-      var execspec = {
-        id: actid,
-        gate: prior_ctxt.entry && !!callargs.gate$,
-        ungate: !!callargs.ungate$,
-        desc: actmeta.argpattern,
-        cb: act_done,
-
-        plugin: {
-          name: actmeta.plugin_name,
-          tag: actmeta.plugin_tag
-        },
-
-        fn: function (cb) {
-          cb.seneca = delegate
-
-          if (root.closed && !callargs.closing$) {
-            return cb(internals.error('instance-closed', {args: Common.clean(callargs)}))
-          }
-
-          delegate.good = function (out) {
-            cb(null, out)
-          }
-
-          delegate.bad = function (err) {
-            cb(err)
-          }
-
-          if (_.isFunction(delegate.on_act_in)) {
-            delegate.on_act_in(actmeta, callargs)
-          }
-          actmeta.func.call(delegate, callargs, cb)
-        }
-      }
-
-      private$.executor.execute(execspec)
-    })
+    private$.executor.execute(execspec)
   }
+
 
   function act_error (instance, err, actmeta, result, cb,
     duration, callargs, prior_ctxt, act_callpoint) {
     var call_cb = true
+    actmeta = actmeta || {}
 
     if (!err.seneca) {
       err = internals.error(err, 'act_execute', _.extend(
@@ -1258,6 +1282,8 @@ function make_seneca (initial_options) {
 
   function callback_error (instance, err, actmeta, result, cb,
     duration, callargs, prior_ctxt, act_callpoint) {
+    actmeta = actmeta || {}
+
     if (!err.seneca) {
       err = internals.error(err, 'act_callback', _.extend(
         {},
@@ -1317,7 +1343,7 @@ function make_seneca (initial_options) {
           args, prior_ctxt, act_callpoint)
 
         if (actcb) actcb.apply(instance, actdetails.result)
-        return true
+        return actmeta
       }
     }
 
@@ -1481,7 +1507,7 @@ function make_seneca (initial_options) {
     return delegate
   }
 
-  function api_options (options) {
+  function api_options (options, mark) {
     var self = this
 
     if (null != options) {

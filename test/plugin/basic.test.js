@@ -16,17 +16,19 @@ var util = si.pin({role: 'util', cmd: '*'})
 describe('util', function () {
   it('generate_id', function (fin) {
     si.options({errhandler: fin})
-    util.generate_id({}, function (err, code) {
-      assert.equal(err, null)
-      assert.equal(6, code.length)
-      assert.ok(/^[0-9a-z]{6,6}$/.exec(code))
-
-      util.generate_id({length: 4}, function (err, code) {
+    si.ready(function () {
+      util.generate_id({}, function (err, code) {
         assert.equal(err, null)
-        assert.equal(4, code.length)
-        assert.ok(/^[0-9a-z]{4,4}$/.exec(code))
+        assert.equal(6, code.length)
+        assert.ok(/^[0-9a-z]{6,6}$/.exec(code))
 
-        fin()
+        util.generate_id({length: 4}, function (err, code) {
+          assert.equal(err, null)
+          assert.equal(4, code.length)
+          assert.ok(/^[0-9a-z]{4,4}$/.exec(code))
+
+          fin()
+        })
       })
     })
   })

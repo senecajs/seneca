@@ -288,46 +288,21 @@ describe('seneca', function () {
   })
 
   it('action-act-invalid-args', function (done) {
-    var si = Seneca(testopts).error(done)
-    si.options({debug: {fragile: true}})
+    var si = Seneca(testopts)
 
-    try {
-      si.act({op: 'bad', a1: 100}, function () {
-        assert.fail()
-      })
-      assert.fail()
-    }
-    catch (e) {
+    si.act({op: 'bad', a1: 100}, function (e) {
       assert.equal(e.code, 'act_not_found')
 
-      try {
       // default is not an object
-        si.act({op: 'bad', a1: 100, default$: 'qaz'}, function () {
-          assert.fail()
-        })
-        assert.fail()
-      }
-      catch (e) {
+      si.act({op: 'bad', a1: 100, default$: 'qaz'}, function (e) {
         assert.equal(e.code, 'act_default_bad')
-        try {
-          si.act()
-          assert.fail()
-        }
-        catch (e) {
+
+        si.act(null, function (e) {
           assert.equal(e.code, 'act_not_found')
-          try {
-            si.act(function () {
-              assert.fail()
-            })
-            assert.fail()
-          }
-          catch (e) {
-            assert.equal(e.code, 'act_not_found')
-            done()
-          }
-        }
-      }
-    }
+          done()
+        })
+      })
+    })
   })
 
   it('action-default', function (done) {
@@ -712,20 +687,22 @@ describe('seneca', function () {
 
     var api = si.pin({p1: 'v1', p2: '*'})
 
-    api.v2a({p3: 'A'}, function (err, r) {
-      assert.equal(err, null)
-      assert.equal(r.p3, 'A')
-    })
-    api.v2b({p3: 'B'}, function (err, r) {
-      assert.equal(err, null)
-      assert.equal(r.p3, 'B')
-    })
+    si.ready(function () {
+      api.v2a({p3: 'A'}, function (err, r) {
+        assert.equal(err, null)
+        assert.equal(r.p3, 'A')
+      })
+      api.v2b({p3: 'B'}, function (err, r) {
+        assert.equal(err, null)
+        assert.equal(r.p3, 'B')
+      })
 
-    var acts = si.pinact({p1: 'v1', p2: '*'})
-    assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",
-      Util.inspect(acts))
+      var acts = si.pinact({p1: 'v1', p2: '*'})
+      assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",
+                   Util.inspect(acts))
 
-    done()
+      done()
+    })
   })
 
   it('pin-star', function (done) {
@@ -733,25 +710,26 @@ describe('seneca', function () {
 
     si.add('a:1,b:x', function () {})
     si.add('a:1,c:y', function () {})
-
     var pin_b = si.pin('a:1,b:*')
-    assert.ok(_.isFunction(pin_b.x))
-    assert.equal(pin_b.y, null)
-
     var pin_c = si.pin('a:1,c:*')
-    assert.ok(_.isFunction(pin_c.y))
-    assert.equal(pin_c.x, null)
 
-    assert.deepEqual([ { a: '1', b: 'x' }, { a: '1', c: 'y' } ],
-      si.findpins('a:1'))
+    si.ready(function () {
+      assert.ok(_.isFunction(pin_b.x))
+      assert.equal(pin_b.y, null)
+      assert.ok(_.isFunction(pin_c.y))
+      assert.equal(pin_c.x, null)
 
-    assert.deepEqual([ { a: '1', b: 'x' } ],
-      si.findpins('a:1,b:*'))
+      assert.deepEqual([ { a: '1', b: 'x' }, { a: '1', c: 'y' } ],
+                       si.findpins('a:1'))
 
-    assert.deepEqual([ { a: '1', c: 'y' } ],
-      si.findpins('a:1,c:*'))
+      assert.deepEqual([ { a: '1', b: 'x' } ],
+                       si.findpins('a:1,b:*'))
 
-    done()
+      assert.deepEqual([ { a: '1', c: 'y' } ],
+                       si.findpins('a:1,c:*'))
+
+      done()
+    })
   })
 
   it('fire-and-forget', function (done) {
@@ -1128,6 +1106,7 @@ describe('seneca', function () {
       throw Error('Sub failed')
     })
 
+    si.add({fail: 1}, function (msg, done) { done() })
     si.act({fail: 1}, function () {
       done()
     })
@@ -1166,7 +1145,7 @@ describe('seneca', function () {
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 8, done: 8, fails: 0, cache: 1 }',
+            assert.equal('{ calls: 12, done: 12, fails: 0, cache: 1 }',
               Util.inspect(stats.act))
             done()
           })
