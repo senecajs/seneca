@@ -1241,7 +1241,24 @@ function make_seneca (initial_options) {
     var call_cb = true
     actmeta = actmeta || {}
 
-    if (!err.seneca) {
+
+    if (err.eraro && !err.seneca) {
+    // Handling of user eraro errors
+      // FIXME -> Decide if
+      // just pass around, or enrich?:  add seneca context here
+      err = _.extend(
+          {},
+          err /*, // ?
+           {
+           // MAYBE: inner field
+           pattern: actmeta.pattern,
+           fn: actmeta.func,
+           cb: cb,
+           instance: instance.toString()
+           }*/)
+      result[0] = err
+    }
+    else if (!err.seneca) {
       err = internals.error(err, 'act_execute', _.extend(
         {},
         err.details,
@@ -1256,24 +1273,6 @@ function make_seneca (initial_options) {
       result[0] = err
     }
 
-    // Handling of eraro errors
-    else if (err.eraro) {
-      //FIXME -> Error Handling here
-      // just pass around, or enrich?
-      err = _.extend(
-          {},
-          err /*, // Maybe add seneca context here?
-          {
-            // MAYBE: inner field
-            pattern: actmeta.pattern,
-            fn: actmeta.func,
-            cb: cb,
-            instance: instance.toString()
-          }*/)
-
-      result[0] = err
-
-    }
     // Special legacy case for seneca-perm
     else if (err.orig &&
       _.isString(err.orig.code) &&
