@@ -988,6 +988,7 @@ function make_seneca (initial_options) {
 
     var listen_origin = origargs.transport$ && origargs.transport$.origin
 
+
     var id_tx = (args.id$ || args.actid$ || instance.idgen()).split('/')
 
     var tx =
@@ -1148,7 +1149,10 @@ function make_seneca (initial_options) {
           when: Date.now()
         })
 
+
         if (err) {
+          // Handling of error for the action
+
           // TODO: is act_not_found an error for purposes of stats? probably not
           private$.stats.act.fails++
 
@@ -1159,6 +1163,7 @@ function make_seneca (initial_options) {
           var out = act_error(instance, err, actmeta, result, actdone,
             actend - actstart, callargs, prior_ctxt, act_callpoint)
 
+          // In fatal mode we terminate the seneca instance
           if (args.fatal$) {
             return instance.die(out.err)
           }
@@ -1251,6 +1256,24 @@ function make_seneca (initial_options) {
       result[0] = err
     }
 
+    // Handling of eraro errors
+    else if (err.eraro) {
+      //FIXME -> Error Handling here
+      // just pass around, or enrich?
+      err = _.extend(
+          {},
+          err /*, // Maybe add seneca context here?
+          {
+            // MAYBE: inner field
+            pattern: actmeta.pattern,
+            fn: actmeta.func,
+            cb: cb,
+            instance: instance.toString()
+          }*/)
+
+      result[0] = err
+
+    }
     // Special legacy case for seneca-perm
     else if (err.orig &&
       _.isString(err.orig.code) &&
