@@ -399,17 +399,20 @@ function make_seneca (initial_options) {
     ? Lrucache({ max: so.actcache.size })
     : { set: _.noop })
 
-  private$.wait_for_ready = false
-
   private$.actrouter = so.internal.actrouter
   private$.subrouter = so.internal.subrouter
 
-  root.on('newListener', function (eventname) {
+  root.on('newListener', function (eventname, eventfunc) {
     if (eventname === 'ready') {
+      root.private$.executor.on('clear', eventfunc)
+      return
+
+      /*
       if (!private$.wait_for_ready) {
         private$.wait_for_ready = true
         root.act('role:seneca,ready:true,gate$:true')
       }
+       */
     }
   })
 
@@ -513,14 +516,14 @@ function make_seneca (initial_options) {
       }
     }
 
-    var api = {
-      toString: function () {
-        return 'pin:' + Common.argpattern(pattern) + '/' + thispin
-      }
-    }
 
-    // TODO: perhaps gate execute instead?
-    this.ready(function () {
+    function make_pin (pattern) {
+      var api = {
+        toString: function () {
+          return 'pin:' + Common.argpattern(pattern) + '/' + thispin
+        }
+      }
+
       var methods = private$.actrouter.list(pattern)
 
       methods.forEach(function (method) {
@@ -552,9 +555,11 @@ function make_seneca (initial_options) {
           }
         }
       }
-    })
 
-    return api
+      return api
+    }
+
+    return make_pin(pattern)
   }
 
   var pm_custom_args = {
@@ -779,17 +784,7 @@ function make_seneca (initial_options) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
         actmeta.id, Common.argpattern(pattern), action.name,
         callpoint() ]
-      var isplugin = self.context.isplugin
       var logger = self.log.log || self.log
-
-      if (!isplugin) {
-        // addlog.unshift('-')
-        // addlog.unshift('-')
-        // addlog.unshift('-')
-        addlog.unshift(actmeta.plugin_tag)
-        addlog.unshift(actmeta.plugin_name)
-        addlog.unshift('plugin')
-      }
 
       logger.debug.apply(self, addlog)
       private$.actrouter.add(pattern, actmeta)
@@ -861,6 +856,7 @@ function make_seneca (initial_options) {
     })
   }
 
+
   // close seneca instance
   // sets public seneca.closed property
   function api_close (done) {
@@ -900,7 +896,7 @@ function make_seneca (initial_options) {
     }
 
     if (_.isFunction(ready)) {
-      self.once('ready', function () {
+      self.private$.executor.once('clear', function () {
         try {
           ready.call(self)
         }
@@ -914,11 +910,6 @@ function make_seneca (initial_options) {
           self.die(re)
         }
       })
-
-      if (!private$.wait_for_ready) {
-        private$.wait_for_ready = true
-        self.act('role:seneca,ready:true,gate$:true')
-      }
     }
 
     return self
@@ -1679,13 +1670,11 @@ function make_seneca (initial_options) {
   // Add builtin actions.
   root.add({role: 'seneca', cmd: 'stats'}, action_seneca_stats)
   root.add({role: 'seneca', cmd: 'close'}, action_seneca_close)
-  root.add({role: 'seneca', info: 'ready'}, action_seneca_ready)
   root.add({role: 'seneca', info: 'fatal'}, action_seneca_fatal)
   root.add({role: 'seneca', get: 'options'}, action_options_get)
 
   // Legacy builtin actions.
   root.add({role: 'seneca', stats: true}, action_seneca_stats)
-  root.add({role: 'seneca', ready: true}, action_seneca_ready)
   root.add({role: 'options', cmd: 'get'}, action_options_get)
 
   Print(root)
@@ -1698,12 +1687,6 @@ function make_seneca (initial_options) {
 
   function action_seneca_close (args, done) {
     this.emit('close')
-    done()
-  }
-
-  function action_seneca_ready (args, done) {
-    private$.wait_for_ready = false
-    this.emit('ready')
     done()
   }
 

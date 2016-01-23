@@ -136,22 +136,25 @@ describe('delegation', function () {
     })
   })
 
-  it('parent', function (done) {
+  it('prior.basic', function (done) {
     var si = Seneca(testopts)
-    si.add({c: 'C'}, function (args, cb) {
+    si.add({c: 'C'}, function c0 (args, cb) {
       // console.log('C='+this)
       args.a = 1
       cb(null, args)
     })
-    si.add({c: 'C'}, function (args, cb) {
-      this.parent(args, function (err, out) {
-        out.p = 1
+
+    si.add({c: 'C'}, function c1 (args, cb) {
+      this.prior(args, function (err, out) {
+        out.p = 2
         cb(err, out)
       })
     })
 
     si.act({c: 'C'}, function (err, out) {
       assert.equal(err, null)
+      assert.equal(out.a, 1)
+      assert.equal(out.p, 2)
       si.close(done)
     })
   })

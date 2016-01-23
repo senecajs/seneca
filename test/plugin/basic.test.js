@@ -9,20 +9,20 @@ var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
-var si = Seneca({log: 'silent'})
-var util = si.pin({role: 'util', cmd: '*'})
 
-
-describe('util', function () {
-  it('generate_id', function (fin) {
+describe('basic', function () {
+  it('action.generate_id', function (fin) {
+    var si = Seneca({log: 'silent'})
     si.options({errhandler: fin})
     si.ready(function () {
-      util.generate_id({}, function (err, code) {
+      var basic = si.pin({role: 'basic', cmd: '*'})
+
+      basic.generate_id({}, function (err, code) {
         assert.equal(err, null)
         assert.equal(6, code.length)
         assert.ok(/^[0-9a-z]{6,6}$/.exec(code))
 
-        util.generate_id({length: 4}, function (err, code) {
+        basic.generate_id({length: 4}, function (err, code) {
           assert.equal(err, null)
           assert.equal(4, code.length)
           assert.ok(/^[0-9a-z]{4,4}$/.exec(code))
@@ -34,6 +34,7 @@ describe('util', function () {
   })
 
   it('ensure_entity', function (fin) {
+    var si = Seneca({log: 'silent'})
     si.options({errhandler: fin})
 
     var foo_ent = si.make$('util_foo')
@@ -78,6 +79,7 @@ describe('util', function () {
   })
 
   it('note', function (fin) {
+    var si = Seneca({log: 'silent'})
     si
       .start(fin)
       .wait('role:util,note:true,cmd:set,key:foo,value:red')

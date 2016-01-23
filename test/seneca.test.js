@@ -89,7 +89,7 @@ describe('seneca', function () {
       assert.ok(mark.r1, 'r1')
       assert.ok(mark.p1, 'p1')
       assert.ok(mark.p2, 'p2')
-      assert.equal(mark.ec, 1, 'ec')
+      assert.equal(mark.ec, 2, 'ec')
 
       done()
     }, 300)
