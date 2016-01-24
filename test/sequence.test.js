@@ -13,6 +13,14 @@ var expect = Code.expect
 var test_opts = {log: 'test'}
 
 describe('sequence', function () {
+  it('ready-always-called', function (fin) {
+    Seneca(test_opts)
+      .error(fin)
+      .ready(function () {
+        this.ready(fin)
+      })
+  })
+
   it('single-add-act', function (fin) {
     Seneca(test_opts)
       .error(fin)

@@ -281,6 +281,7 @@ describe('plugin', function () {
       expect(si.hasplugin('bar', '-')).to.be.false()
       expect(si.hasplugin('bar', 'bbb')).to.be.false()
       expect(si.hasplugin('bar', 'aaa')).to.be.true()
+
       si.close(done)
     })
   })

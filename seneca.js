@@ -862,27 +862,31 @@ function make_seneca (initial_options) {
   function api_close (done) {
     var seneca = this
 
-    seneca.closed = true
+    seneca.ready(do_close)
 
-    // cleanup process event listeners
-    _.each(so.internal.close_signals, function (active, signal) {
-      if (active) {
-        process.removeListener(signal, handleClose)
-      }
-    })
+    function do_close () {
+      seneca.closed = true
 
-    seneca.log.debug('close', 'start', callpoint())
-    seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
-      seneca.log.debug('close', 'end', err)
-      if (_.isFunction(done)) {
-        return done.call(seneca, err)
-      }
-    })
+      // cleanup process event listeners
+      _.each(so.internal.close_signals, function (active, signal) {
+        if (active) {
+          process.removeListener(signal, handleClose)
+        }
+      })
 
-    seneca.removeAllListeners('act-in')
-    seneca.removeAllListeners('act-out')
-    seneca.removeAllListeners('act-err')
-    seneca.removeAllListeners('ready')
+      seneca.log.debug('close', 'start', callpoint())
+      seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
+        seneca.log.debug('close', 'end', err)
+        if (_.isFunction(done)) {
+          return done.call(seneca, err)
+        }
+      })
+
+      seneca.removeAllListeners('act-in')
+      seneca.removeAllListeners('act-out')
+      seneca.removeAllListeners('act-err')
+      seneca.removeAllListeners('ready')
+    }
   }
 
   // useful when defining services!
@@ -895,21 +899,32 @@ function make_seneca (initial_options) {
       self.log.debug('ready', 'register', callpoint())
     }
 
-    if (_.isFunction(ready)) {
-      self.private$.executor.once('clear', function () {
-        try {
-          ready.call(self)
-        }
-        catch (ex) {
-          var re = ex
+    if (!_.isFunction(ready)) {
+      // TODO: throw error
+      return
+    }
 
-          if (!re.seneca) {
-            re = internals.error(re, 'ready_failed', { message: ex.message, ready: ready })
-          }
+    if (self.private$.executor.clear()) {
+      do_ready()
+    }
+    else {
+      self.private$.executor.once('clear', do_ready)
+    }
 
-          self.die(re)
+    function do_ready () {
+      try {
+        ready.call(self)
+      }
+      catch (ex) {
+        var re = ex
+
+        if (!re.seneca) {
+          re = internals.error(re, 'ready_failed',
+                               { message: ex.message, ready: ready })
         }
-      })
+
+        self.die(re)
+      }
     }
 
     return self

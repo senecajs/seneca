@@ -389,7 +389,7 @@ describe('entity', function () {
   })
 
   it('close', function (done) {
-    var si = Seneca(testopts)
+    var si = Seneca(testopts).error(done)
 
     var tmp = {s0: 0, s1: 0, s2: 0}
 
@@ -425,18 +425,16 @@ describe('entity', function () {
       })
     })
 
-    si.ready(function () {
-      si.close(function (err) {
-        if (err) return done(err)
+    si.close(function (err) {
+      if (err) return done(err)
 
-        // close gets called on all of them
-        // any store may have open db connections
-        assert.equal(1, tmp.s0)
-        assert.equal(1, tmp.s1)
-        assert.equal(1, tmp.s2)
+      // close gets called on all of them
+      // any store may have open db connections
+      assert.equal(1, tmp.s0)
+      assert.equal(1, tmp.s1)
+      assert.equal(1, tmp.s2)
 
-        done()
-      })
+      done()
     })
   })
 
