@@ -842,59 +842,56 @@ describe('transport', function () {
         .use(bt)
 
       // TODO: fix the options hack in balance-client
-        .ready(function () {
-          this
-            .client({type: 'balance', pin: 'foo:1'})
+        .client({type: 'balance', pin: 'foo:1'})
 
-            .client({port: 44440, pin: 'foo:1'})
-            .client({port: 44441, pin: 'foo:1'})
+        .client({port: 44440, pin: 'foo:1'})
+        .client({port: 44441, pin: 'foo:1'})
 
-            .client({port: 44440, pin: 'bar:1'})
-            .client({port: 44449, pin: 'bar:2'})
+        .client({port: 44440, pin: 'bar:1'})
+        .client({port: 44449, pin: 'bar:2'})
 
-            .start()
+        .start()
 
-            .wait('foo:1,actid$:aa/BB')
-            .step(function (out) {
-              expect(out.foo).to.equal(1)
-              expect(out.s).to.equal(0)
-              return true
-            })
+        .wait('foo:1,actid$:aa/BB')
+        .step(function (out) {
+          expect(out.foo).to.equal(1)
+          expect(out.s).to.equal(0)
+          return true
+        })
 
-            .wait('foo:1,actid$:cc/DD')
-            .step(function (out) {
-              expect(out.foo).to.equal(1)
-              expect(out.s).to.equal(1)
-              return true
-            })
+        .wait('foo:1,actid$:cc/DD')
+        .step(function (out) {
+          expect(out.foo).to.equal(1)
+          expect(out.s).to.equal(1)
+          return true
+        })
 
-            .wait('bar:1')
-            .step(function (out) {
-              expect(out.q).to.equal(1)
-              return true
-            })
+        .wait('bar:1')
+        .step(function (out) {
+          expect(out.q).to.equal(1)
+          return true
+        })
 
-            .wait('bar:1')
-            .step(function (out) {
-              expect(out.q).to.equal(1)
-              return true
-            })
+        .wait('bar:1')
+        .step(function (out) {
+          expect(out.q).to.equal(1)
+          return true
+        })
 
-            .wait('bar:2')
-            .step(function (out) {
-              expect(out.q).to.equal(2)
-              return true
-            })
+        .wait('bar:2')
+        .step(function (out) {
+          expect(out.q).to.equal(2)
+          return true
+        })
 
-            .end(function () {
-              s0.close(function () {
-                s1.close(function () {
-                  s9.close(function () {
-                    c0.close(done)
-                  })
-                })
+        .end(function () {
+          s0.close(function () {
+            s1.close(function () {
+              s9.close(function () {
+                c0.close(done)
               })
             })
+          })
         })
     }
   })
@@ -982,13 +979,26 @@ function make_test_transport () {
 
 // A simple load balancing transport
 function make_balance_transport () {
+  var targets = []
+
+  test_transport.preload = function () {
+    this.options({
+      transport: {
+        balance: {
+          handle: function (pat, action) {
+            targets.push(action)
+          }
+        }
+      }
+    })
+  }
+
   return test_transport
 
   function test_transport (options) {
     var seneca = this
 
-    var targets = []
-
+    /*
     seneca.options({
       transport: {
         balance: {
@@ -998,6 +1008,7 @@ function make_balance_transport () {
         }
       }
     })
+     */
 
     var tu = seneca.export('transport/utils')
 
