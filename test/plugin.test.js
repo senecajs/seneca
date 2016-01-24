@@ -287,7 +287,7 @@ describe('plugin', function () {
   })
 
   it('handles plugin with action that timesout', function (done) {
-    var seneca = Seneca({ log: 'silent', timeout: 10 })
+    var seneca = Seneca({log: 'silent', timeout: 10, debug: {undead: true}})
 
     seneca.use(function foo () {
       this.add({ role: 'plugin', cmd: 'timeout' }, function () { })

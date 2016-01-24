@@ -1228,7 +1228,7 @@ function make_seneca (initial_options) {
       id: actid,
       gate: prior_ctxt.entry && !!callargs.gate$,
       ungate: !!callargs.ungate$,
-      desc: actid,
+      desc: act_callpoint,
       cb: act_done,
       fn: execute_action
     }
