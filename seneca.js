@@ -524,38 +524,39 @@ function make_seneca (initial_options) {
         }
       }
 
-      var methods = private$.actrouter.list(pattern)
+      thispin.ready(function () {
+        var methods = private$.actrouter.list(pattern)
 
-      methods.forEach(function (method) {
-        var mpat = method.match
+        methods.forEach(function (method) {
+          var mpat = method.match
 
-        var methodname = ''
-        for (var mkI = 0; mkI < methodkeys.length; mkI++) {
-          methodname += ((0 < mkI ? '_' : '')) + mpat[methodkeys[mkI]]
-        }
+          var methodname = ''
+          for (var mkI = 0; mkI < methodkeys.length; mkI++) {
+            methodname += ((0 < mkI ? '_' : '')) + mpat[methodkeys[mkI]]
+          }
 
-        api[methodname] = function (args, cb) {
-          var si = this && this.seneca ? this : thispin
+          api[methodname] = function (args, cb) {
+            var si = this && this.seneca ? this : thispin
 
-          var fullargs = _.extend({}, args, mpat)
-          si.act(fullargs, cb)
-        }
+            var fullargs = _.extend({}, args, mpat)
+            si.act(fullargs, cb)
+          }
 
-        api[methodname].pattern$ = method.match
-        api[methodname].name$ = methodname
-      })
+          api[methodname].pattern$ = method.match
+          api[methodname].name$ = methodname
+        })
 
-      if (pinopts) {
-        if (pinopts.include) {
-          for (var i = 0; i < pinopts.include.length; i++) {
-            var methodname = pinopts.include[i]
-            if (thispin[methodname]) {
-              api[methodname] = Common.delegate(thispin, thispin[methodname])
+        if (pinopts) {
+          if (pinopts.include) {
+            for (var i = 0; i < pinopts.include.length; i++) {
+              var methodname = pinopts.include[i]
+              if (thispin[methodname]) {
+                api[methodname] = Common.delegate(thispin, thispin[methodname])
+              }
             }
           }
         }
-      }
-
+      })
       return api
     }
 

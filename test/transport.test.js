@@ -638,21 +638,18 @@ describe('transport', function () {
 
           .client({type: 'test', pin: 'foo:1'})
 
-          .ready(function () {
-            this
-              .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
+          .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
 
-              .start()
+          .start()
 
-              .wait('foo:1,bar:1')
-              .step(function (out) {
-                expect(tt.outmsgs.length).to.equal(0)
-                expect(out).to.deep.equal({foo: 1, local: 1})
-                return true
-              })
-
-              .end(done)
+          .wait('foo:1,bar:1')
+          .step(function (out) {
+            expect(tt.outmsgs.length).to.equal(0)
+            expect(out).to.deep.equal({foo: 1, local: 1})
+            return true
           })
+
+          .end(done)
       })
   })
 
@@ -669,26 +666,22 @@ describe('transport', function () {
 
           .client({type: 'test', pin: 'foo:1'})
 
-
-          .ready(function () {
-            this
-              .add('foo:1', function (args, done) {
-                args.local = 1
-                args.qaz = 1
-                this.prior(args, done)
-              })
-
-              .start()
-
-              .wait('foo:1,bar:1')
-              .step(function (out) {
-                expect(tt.outmsgs.length).to.equal(1)
-                expect(out).to.deep.equal({foo: 1, bar: 2, local: 1, qaz: 1})
-                return true
-              })
-
-              .end(done)
+          .add('foo:1', function (args, done) {
+            args.local = 1
+            args.qaz = 1
+            this.prior(args, done)
           })
+
+          .start()
+
+          .wait('foo:1,bar:1')
+          .step(function (out) {
+            expect(tt.outmsgs.length).to.equal(1)
+            expect(out).to.deep.equal({foo: 1, bar: 2, local: 1, qaz: 1})
+            return true
+          })
+
+          .end(done)
       })
   })
 
