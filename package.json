@@ -54,7 +54,7 @@
     "gate-executor": "0.3.2",
     "gex": "0.2.2",
     "jsonic": "0.2.2",
-    "lodash": "3.10.1",
+    "lodash": "4.0.0",
     "lru-cache": "4.0.0",
     "minimist": "1.2.0",
     "nid": "0.3.2",

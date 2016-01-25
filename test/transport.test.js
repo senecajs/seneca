@@ -841,7 +841,6 @@ describe('transport', function () {
         .error(done)
         .use(bt)
 
-      // TODO: fix the options hack in balance-client
         .client({type: 'balance', pin: 'foo:1'})
 
         .client({port: 44440, pin: 'foo:1'})

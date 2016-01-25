@@ -469,8 +469,8 @@ function make_seneca (initial_options) {
     var deps = args.deps || args.moredeps
 
     _.every(deps, function (depname) {
-      if (!_.contains(private$.plugin_order.byname, depname) &&
-        !_.contains(private$.plugin_order.byname, 'seneca-' + depname)) {
+      if (!_.includes(private$.plugin_order.byname, depname) &&
+        !_.includes(private$.plugin_order.byname, 'seneca-' + depname)) {
         self.die(internals.error('plugin_required', { name: args.pluginname, dependency: depname }))
         return false
       }
