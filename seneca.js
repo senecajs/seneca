@@ -198,6 +198,9 @@ module.exports = function init (seneca_options, more_options) {
   return seneca
 }
 
+// Expose Seneca prototype for easier monkey-patching
+module.exports.Seneca = Seneca
+
 // To reference builtin loggers when defining logging options.
 module.exports.loghandler = Logging.handlers
 
