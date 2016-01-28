@@ -163,6 +163,7 @@ describe('seneca-error', function () {
   function exec_action_errhandler_throw (done) {
     var ctxt = {errlog: null}
     var si = make_seneca(ctxt)
+    var aI = 0
 
     si.options({
       errhandler: function (err) {
@@ -186,7 +187,6 @@ describe('seneca-error', function () {
       }
     })
 
-    var aI = 0
     si.add('a:1', function (args, done) {
       throw new Error('AAA' + aI)
     })
@@ -237,6 +237,7 @@ describe('seneca-error', function () {
   function exec_action_errhandler_result (done) {
     var ctxt = {errlog: null}
     var si = make_seneca(ctxt)
+    var aI = 0
 
     si.options({
       errhandler: function (err) {
@@ -260,7 +261,6 @@ describe('seneca-error', function () {
       }
     })
 
-    var aI = 0
     si.add('a:1', function (args, done) {
       done(new Error('AAA' + aI))
     })

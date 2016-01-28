@@ -1,3 +1,5 @@
+'use strict'
+
 require('../..')()
   .client()
   .act({ generate: 'id' },

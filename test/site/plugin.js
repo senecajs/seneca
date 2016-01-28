@@ -1,3 +1,5 @@
+'use strict'
+
 var Connect = require('connect')
 var Seneca = require('../..')
 

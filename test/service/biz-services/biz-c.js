@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = function (args, done) {
   done(null, {d: 'c-' + args.d})
 }

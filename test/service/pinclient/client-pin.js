@@ -1,3 +1,5 @@
+'use strict'
+
 var seneca =
 require('../../..')()
   .use('./foo')

@@ -532,7 +532,7 @@ function make_seneca (initial_options) {
 
           var methodname = ''
           for (var mkI = 0; mkI < methodkeys.length; mkI++) {
-            methodname += ((0 < mkI ? '_' : '')) + mpat[methodkeys[mkI]]
+            methodname += ((mkI > 0 ? '_' : '')) + mpat[methodkeys[mkI]]
           }
 
           api[methodname] = function (args, cb) {
@@ -587,12 +587,12 @@ function make_seneca (initial_options) {
 
     var subargs = Common.parsePattern(self, arguments, 'action:f actmeta:o?')
     var pattern = subargs.pattern
-    if (null == pattern.in$ &&
-      null == pattern.out$ &&
-      null == pattern.error$ &&
-      null == pattern.cache$ &&
-      null == pattern.default$ &&
-      null == pattern.client$) {
+    if (pattern.in$ == null &&
+      pattern.out$ == null &&
+      pattern.error$ == null &&
+      pattern.cache$ == null &&
+      pattern.default$ == null &&
+      pattern.client$ == null) {
       pattern.in$ = true
     }
 
@@ -688,7 +688,7 @@ function make_seneca (initial_options) {
     actmeta.plugin_name = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname ||
       actmeta.plugin_name +
-      (('-' === actmeta.plugin_tag ? void 0 : actmeta.plugin_tag)
+      ((actmeta.plugin_tag === '-' ? void 0 : actmeta.plugin_tag)
        ? '/' + actmeta.plugin_tag : '')
 
     var add_callpoint = callpoint()
@@ -707,7 +707,7 @@ function make_seneca (initial_options) {
 
     var pattern = self.util.clean(raw_pattern)
 
-    if (0 === _.keys(pattern)) {
+    if (!_.keys(pattern)) {
       throw internals.error('add_empty_pattern', {args: Common.clean(args)})
     }
 
@@ -719,7 +719,7 @@ function make_seneca (initial_options) {
       }
     })
 
-    if (0 < _.keys(pattern_rules).length) {
+    if (_.keys(pattern_rules).length) {
       actmeta.parambulator = Parambulator(pattern_rules, pm_custom_args)
     }
 
@@ -857,6 +857,15 @@ function make_seneca (initial_options) {
     })
   }
 
+  var handleClose = function () {
+    root.close(function (err) {
+      if (err) {
+        Common.console_error(err)
+      }
+
+      process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
+    })
+  }
 
   // close seneca instance
   // sets public seneca.closed property
@@ -1126,8 +1135,8 @@ function make_seneca (initial_options) {
         var resdata = result[1]
         var info = result[2]
 
-        if (null == err &&
-          null != resdata &&
+        if (err == null &&
+          resdata != null &&
           !(_.isPlainObject(resdata) ||
           _.isArray(resdata) ||
           !!resdata.entity$ ||
@@ -1135,10 +1144,10 @@ function make_seneca (initial_options) {
          ) &&
           so.strict.result) {
           // allow legacy patterns
-          if (!('generate_id' === callargs.cmd ||
-            true === callargs.note ||
-            'native' === callargs.cmd ||
-            'quickcode' === callargs.cmd
+          if (!(callargs.cmd === 'generate_id' ||
+            callargs.note === true ||
+            callargs.cmd === 'native' ||
+            callargs.cmd === 'quickcode'
            )) {
             err = internals.error(
               'result_not_objarr', {
@@ -1261,7 +1270,7 @@ function make_seneca (initial_options) {
     // Special legacy case for seneca-perm
     else if (err.orig &&
       _.isString(err.orig.code) &&
-      0 === err.orig.code.indexOf('perm/')) {
+      err.orig.code.indexOf('perm/') === 0) {
       err = err.orig
       result[0] = err
     }
@@ -1339,7 +1348,7 @@ function make_seneca (initial_options) {
 
     var actid = args.id$ || args.actid$
 
-    if (null != actid && so.actcache.active) {
+    if (actid != null && so.actcache.active) {
       var actdetails = private$.actcache.get(actid)
 
       if (actdetails) {
@@ -1372,7 +1381,7 @@ function make_seneca (initial_options) {
 
   function act_make_delegate (instance, tx, callargs, actmeta, prior_ctxt) {
     var delegate_args = {}
-    if (null != callargs.gate$) {
+    if (callargs.gate$ != null) {
       delegate_args.ungate$ = !!callargs.gate$
     }
 
@@ -1517,11 +1526,11 @@ function make_seneca (initial_options) {
   function api_options (options, mark) {
     var self = this
 
-    if (null != options) {
+    if (options != null) {
       self.log.debug('options', 'set', options, callpoint())
     }
 
-    so = private$.exports.options = ((null == options)
+    so = private$.exports.options = ((options == null)
       ? private$.optioner.get()
       : private$.optioner.set(options))
 
@@ -1723,7 +1732,7 @@ function make_seneca (initial_options) {
       stats.start = new Date(stats.start).toISOString()
 
       var summary =
-      (null == args.summary && false) ||
+      (args.summary == null) ||
         (/^false$/i.exec(args.summary) ? false : !!(args.summary))
 
       if (summary) {
@@ -1752,16 +1761,6 @@ function make_seneca (initial_options) {
     var val = args.key ? root[args.key] : root
 
     done(null, Common.copydata(val))
-  }
-
-  var handleClose = function () {
-    root.close(function (err) {
-      if (err) {
-        Common.console_error(err)
-      }
-
-      process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
-    })
   }
 
   _.each(so.internal.close_signals, function (active, signal) {
@@ -1812,10 +1811,10 @@ function pin_patrun_customizer (pat, data) {
     var out = data
     _.each(gexers, function (g, k) {
       var v = args[k]
-      if (null == g.on(v)) { out = null }
+      if (g.on(v) == null) { out = null }
     })
 
-    if (prevfind && null == out) {
+    if (prevfind && out == null) {
       out = prevfind.call(pi, args, prevdata)
     }
 

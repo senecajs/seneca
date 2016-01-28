@@ -1,3 +1,6 @@
 {
-  "extends": "seneca"
+  "extends": "seneca",
+  "rules": {
+    "yoda": 2  
+  }
 }

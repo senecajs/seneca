@@ -1553,6 +1553,7 @@ describe('seneca', function () {
   describe('#intercept', function () {
     it('intercept', function (done) {
       var si = Seneca({ log: 'silent' }).error(done)
+      var fm = {}
 
       var i0 = function i0 (msg, done) {
         msg.z = 1
@@ -1560,8 +1561,6 @@ describe('seneca', function () {
 
         f.call(this, msg, done)
       }
-
-      var fm = {}
 
       i0.handle = function (a, t) {
         fm[a.b$] = t

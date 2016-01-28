@@ -1,3 +1,5 @@
+'use strict'
+
 var Id = require('./id-module')
 
 require('../..')()

@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 seneca.use('transport', {
   pins: [{role: 'math', cmd: 'product'}]

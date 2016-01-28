@@ -1,3 +1,5 @@
+'use strict'
+
 require('../..')()
   .use('biz')
   .act('s:a,d:1', console.log)

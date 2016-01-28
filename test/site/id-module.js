@@ -1,3 +1,5 @@
+'use strict'
+
 var Nid = require('nid')
 
 exports.random = function (args, done) {

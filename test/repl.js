@@ -1,3 +1,5 @@
+'use strict'
+
 require('..')()
   .add('a:1', function a (args) { this.good({x: args.x}) })
   .add('b:1', function b (args, done) {

@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 seneca
   .add('a:1', function (msg, respond) {
