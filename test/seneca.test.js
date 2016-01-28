@@ -1587,4 +1587,32 @@ describe('seneca', function () {
       })
     })
   })
+
+  it('supports a function to trace actions', function (done) {
+    var seneca = Seneca({ log: 'silent', trace: { act: _.noop } })
+    seneca.add({ a: 1 }, function (args, cb) {
+      cb(null, { b: 2 })
+    })
+    seneca.act({ a: 1 }, function (err, out) {
+      expect(err).to.not.exist()
+      assert.equal(out.b, 2)
+      done()
+    })
+  })
+
+  it('supports true to be passed as trace action option', function (done) {
+    var stdout = process.stdout.write
+    process.stdout.write = _.noop
+
+    var seneca = Seneca({ log: 'silent', trace: { act: true } })
+    seneca.add({ a: 1 }, function (args, cb) {
+      cb(null, { b: 2 })
+    })
+    seneca.act({ a: 1 }, function (err, out) {
+      expect(err).to.not.exist()
+      assert.equal(out.b, 2)
+      process.stdout.write = stdout
+      done()
+    })
+  })
 })

@@ -351,7 +351,6 @@ function make_seneca (initial_options) {
       : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
     timeout: so.timeout,
     error: function (err) {
-      if (!err) return
       Logging.log_exec_err(root, err)
     },
     msg_codes: {
