@@ -1,3 +1,5 @@
+'use strict'
+
 require('../..')()
   .use('transport')
   .use('biz')

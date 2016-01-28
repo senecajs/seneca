@@ -90,6 +90,7 @@
   "scripts": {
     "cov": "lab -s -P test -r lcov | coveralls",
     "test": "lab -v -P test -L -t 80",
+    "test-html": "lab -v -P test -L -t 80 -r html > testcov.html",
     "lint": "lab -P test -dL",
     "annotate": "docco seneca.js -o doc"
   },

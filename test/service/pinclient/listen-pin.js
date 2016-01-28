@@ -1,3 +1,5 @@
+'use strict'
+
 require('../../..')()
   .use('./foo')
   .listen(3000)

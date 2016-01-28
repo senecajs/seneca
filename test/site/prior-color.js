@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 seneca.use(function color () {
   var map_name_hex = {

@@ -1,3 +1,5 @@
+'use strict'
+
 require('../..')()
   .add({generate: 'id'},
     function (args, done) {

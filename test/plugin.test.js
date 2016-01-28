@@ -454,4 +454,73 @@ describe('plugin', function () {
         done()
       })
   })
+
+  it('plugin options can be modified by plugins during init sequence', function (done) {
+    var seneca = Seneca({
+      log: 'silent',
+      plugin: {
+        foo: {
+          x: 1
+        },
+        bar: {
+          x: 2
+        },
+        foobar: {}
+      }
+    })
+
+    seneca.use(function foo (options) {
+      expect(options.x).to.equal(1)
+      this.add('init:foo', function (msg, cb) {
+        this.options({ plugin: { foo: { y: 3 } } })
+        cb()
+      })
+    })
+    .use(function bar (options) {
+      this.add('init:bar', function (msg, cb) {
+        expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
+        this.options({ plugin: { bar: { y: 4 } } })
+        cb()
+      })
+    })
+    .use(function foobar (options) {
+      this.add('init:foobar', function (msg, cb) {
+        this.options({ plugin: { foobar: { foo: seneca.options().plugin.foo, bar: seneca.options().plugin.bar } } })
+        cb()
+      })
+    })
+    .ready(function () {
+      expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
+      expect(seneca.options().plugin.bar).to.deep.equal({ x: 2, y: 4 })
+      expect(seneca.options().plugin.foobar).to.deep.equal({ foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
+      done()
+    })
+  })
+
+  it('plugin init can add actions for future init actions to call', function (done) {
+    var seneca = Seneca({ log: 'silent' })
+
+    seneca.use(function foo (options) {
+      this.add('init:foo', function (msg, cb) {
+        this.add({ role: 'test', cmd: 'foo' }, function (args, cb) {
+          cb(null, { success: true })
+        })
+        cb()
+      })
+    })
+    .use(function bar (options) {
+      this.add('init:bar', function (msg, cb) {
+        this.act({ role: 'test', cmd: 'foo' }, function (err, result) {
+          expect(err).to.not.exist()
+          expect(result.success).to.be.true()
+          seneca.success = true
+          cb()
+        })
+      })
+    })
+    .ready(function () {
+      expect(seneca.success).to.be.true()
+      done()
+    })
+  })
 })

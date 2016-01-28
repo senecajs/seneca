@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 function saveload (seneca) {
   var product = seneca.make('product')

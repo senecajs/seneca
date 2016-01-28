@@ -19,9 +19,12 @@ var internals = {
 
 describe('logging', function () {
   describe('makelogrouter()', function () {
-    function A () {}; A.toString = function () { return 'A' }
-    function B () {}; B.toString = function () { return 'B' }
-    function C () {}; C.toString = function () { return 'C' }
+    function A () {}
+    A.toString = function () { return 'A' }
+    function B () {}
+    B.toString = function () { return 'B' }
+    function C () {}
+    C.toString = function () { return 'C' }
 
     it('happy', function (done) {
       var router = Logging.makelogrouter({map: [

@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 seneca.add({role: 'math', cmd: 'sum'}, function (args, callback) {
   var sum = args.left + args.right

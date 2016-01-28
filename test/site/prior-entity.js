@@ -1,4 +1,7 @@
-var seneca = require('../..')()
+'use strict'
+
+var Seneca = require('../..')
+var seneca = Seneca()
 
 seneca.add('role:entity,cmd:save', function (msg, respond) {
   msg.ent.last_updated = Date.now()

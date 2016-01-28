@@ -1,3 +1,5 @@
+'use strict'
+
 function xy (tag) {
   return function xy (args, done) {
     args.y = '' + args.x + '-' + tag
