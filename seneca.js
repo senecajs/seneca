@@ -299,7 +299,6 @@ function make_seneca (initial_options) {
   root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
   root.pin = api_pin
-  root.actroutes = Actions.routes
   root.act_if = api_act_if
   root.wrap = api_wrap
   root.seneca = api_seneca
