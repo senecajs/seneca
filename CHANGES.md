@@ -1,3 +1,12 @@
+## 1.1.0: 2016-01-28
+
+* Plugin options can now be loaded and provided asynchronously to future plugins.
+See Issue #293 for further details.
+* `Seneca` is now exposed as a property on the main exports. PR #320
+* `seneca-web` is now at version 0.6.0, which includes support for hapi.  PR #323
+All issues for v1.1.0 are contained in the [1.1.0 milestone](https://github.com/senecajs/seneca/milestones/1.1.0) 
+
+
 ## 1.0.0: 2016-01-11
 
 * Fixed API wrapper so that original function name preserved. Issue #296
