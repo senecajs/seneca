@@ -1,6 +1,8 @@
 {
   "extends": "seneca",
   "rules": {
-    "yoda": 2  
+    "new-cap": 2,
+    "no-return-assign": 2,
+    "yoda": 2
   }
 }
