@@ -11,10 +11,12 @@ seneca.add({cmd: 'salestax'}, function (args, callback) {
 
 seneca.client()
 
-var shop = seneca.pin({cmd: '*'})
+seneca.ready(function () {
+  var shop = seneca.pin({cmd: '*'})
 
-shop.salestax({net: 100}, function (err, result) {
-  if (err) return console.error(err)
-  console.log(result.total)
-  seneca.close()
+  shop.salestax({net: 100}, function (err, result) {
+    if (err) return console.error(err)
+    console.log(result.total)
+    seneca.close()
+  })
 })
