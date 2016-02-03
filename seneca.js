@@ -517,7 +517,6 @@ function make_seneca (initial_options) {
       }
     }
 
-
     function make_pin (pattern) {
       var api = {
         toString: function () {
@@ -525,7 +524,7 @@ function make_seneca (initial_options) {
         }
       }
 
-      thispin.ready(function () {
+      var calcPin = function () {
         var methods = private$.actrouter.list(pattern)
 
         methods.forEach(function (method) {
@@ -557,7 +556,15 @@ function make_seneca (initial_options) {
             }
           }
         }
-      })
+      }
+
+      if (private$._isReady) {
+        calcPin()
+      }
+      else {
+        root.once('pin', calcPin)
+      }
+
       return api
     }
 
@@ -896,6 +903,8 @@ function make_seneca (initial_options) {
       seneca.removeAllListeners('act-in')
       seneca.removeAllListeners('act-out')
       seneca.removeAllListeners('act-err')
+      seneca.removeAllListeners('pin')
+      seneca.removeAllListeners('after-pin')
       seneca.removeAllListeners('ready')
     }
   }
@@ -923,6 +932,9 @@ function make_seneca (initial_options) {
     }
 
     function do_ready () {
+      private$._isReady = true
+      root.emit('pin')
+      root.emit('after-pin')
       try {
         ready.call(self)
       }
