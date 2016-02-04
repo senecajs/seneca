@@ -107,7 +107,10 @@ var internals = {
       fixedargs: true,
 
       // Adding a pattern overrides existing pattern only if matches exactly.
-      add: false
+      add: false,
+
+      // If an action found and strict.find is false, then no error returned with empty result
+      find: true
     },
 
     // Action cache. Makes inbound messages idempotent.
@@ -1012,6 +1015,7 @@ function make_seneca (initial_options) {
     var callargs = args
     var actstats
     var act_callpoint = callpoint()
+    args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
 
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
 
