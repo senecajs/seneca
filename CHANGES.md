@@ -3,8 +3,11 @@
 * Plugin options can now be loaded and provided asynchronously to future plugins.
 See Issue #293 for further details.
 * `Seneca` is now exposed as a property on the main exports. PR #320
-* `seneca-web` is now at version 0.6.0, which includes support for hapi.  PR #323
-All issues for v1.1.0 are contained in the [1.1.0 milestone](https://github.com/senecajs/seneca/milestones/1.1.0) 
+* `strict.find` is a new option.  It allows not-found actions to default to returning
+an empty object as the result, instead of erroring.  PR #333
+* `seneca-web` is now at version 0.7.0, which includes support for hapi.  PR #331
+* `seneca-mem-store` and `seneca-basic` are updated to the latest versions. PR #332
+All issues for v1.1.0 are contained in the [1.1.0 milestone](https://github.com/senecajs/seneca/milestones/1.1.0)
 
 
 ## 1.0.0: 2016-01-11
