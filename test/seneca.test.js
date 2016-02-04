@@ -1615,4 +1615,31 @@ describe('seneca', function () {
       done()
     })
   })
+
+  it('supports strict.find for allowing not found actions', function (done) {
+    var seneca = Seneca({ log: 'silent', strict: { find: false } })
+    seneca.act({ a: 1 }, function (err, out) {
+      expect(err).to.not.exist()
+      expect(Object.keys(out).length).to.equal(0)
+      done()
+    })
+  })
+
+  it('supports strict.find for disabling not found actions', function (done) {
+    var seneca = Seneca({ log: 'silent', strict: { find: true } })
+    seneca.act({ a: 1 }, function (err, out) {
+      expect(err).to.exist()
+      expect(out).to.not.exist()
+      done()
+    })
+  })
+
+  it('supports strict.find not overriding existing default$', function (done) {
+    var seneca = Seneca({ log: 'silent', strict: { find: false } })
+    seneca.act({ a: 1, default$: { foo: 'bar' } }, function (err, out) {
+      expect(err).to.not.exist()
+      expect(Object.keys(out).length).to.equal(1)
+      done()
+    })
+  })
 })
