@@ -109,7 +109,7 @@ var internals = {
       // Adding a pattern overrides existing pattern only if matches exactly.
       add: false,
 
-      // If an action found and strict.find is false, then no error returned with empty result
+      // If no action is found and find is false, then no error returned along with empty object
       find: true
     },
 
