@@ -386,6 +386,21 @@ describe('seneca', function () {
     })
   })
 
+  it('action-callback-args', function (done) {
+    var si = Seneca(testopts).error(done)
+
+    function foo (args, next) {
+      next.apply(null, args.items)
+    }
+    si.add({ op: 'foo' }, foo)
+
+    var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
+    si.act('op:foo', { items: items }, function () {
+      assert.equal(arguments.length, items.length)
+      done()
+    })
+  })
+
   it('action-extend', function (done) {
     var si = Seneca(testopts).error(done)
 

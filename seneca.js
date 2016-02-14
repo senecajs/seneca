@@ -1228,7 +1228,7 @@ function make_seneca (initial_options) {
 
         try {
           if (call_cb) {
-            actdone.apply(delegate, result.slice(0, 2)) // note: err == result[0]
+            actdone.apply(delegate, result) // note: err == result[0]
           }
         }
 
