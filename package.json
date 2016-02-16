@@ -65,6 +65,7 @@
     "semver": "5.1.0",
     "seneca-basic": "0.4.0",
     "seneca-cluster": "0.0.1",
+    "seneca-entity": "0.0.1",
     "seneca-mem-store": "0.5.0",
     "seneca-repl": "0.0.1",
     "seneca-transport": "0.10.0",

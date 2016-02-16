@@ -1160,7 +1160,7 @@ describe('seneca', function () {
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 12, done: 12, fails: 0, cache: 1 }',
+            assert.equal('{ calls: 13, done: 13, fails: 0, cache: 1 }',
               Util.inspect(stats.act))
             done()
           })
