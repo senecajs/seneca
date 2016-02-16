@@ -27,7 +27,6 @@ var Common = require('./lib/common')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
 var Logging = require('./lib/logging')
-var MakeEntity = require('./lib/entity')
 var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
@@ -68,6 +67,7 @@ var internals = {
     default_plugins: {
       basic: true,
       cluster: true,
+      entity: true,
       'mem-store': true,
       repl: true,
       transport: true,
@@ -202,6 +202,7 @@ module.exports = function init (seneca_options, more_options) {
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
+  if (options.default_plugins.entity) { seneca.use(require('seneca-entity')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
@@ -282,7 +283,6 @@ function make_seneca (initial_options) {
   root.act = api_act // Perform action that matches pattern.
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
-  root.make = api_make // Make a new entity object.
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
   root.client = Transport.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
@@ -297,7 +297,6 @@ function make_seneca (initial_options) {
   root.decorate = api_decorate // Decorate seneca object with functions
 
   // Method aliases.
-  root.make$ = api_make
   root.hasact = root.has
 
   // Non-API methods.
@@ -431,7 +430,6 @@ function make_seneca (initial_options) {
     pattern: Common.argpattern,
     print: Common.print,
     router: function () { return Patrun() },
-    parsecanon: MakeEntity.parsecanon,
 
     // TODO: deprecate?
     argprops: Common.argprops
@@ -497,15 +495,6 @@ function make_seneca (initial_options) {
 
     return exportval
   }
-
-  // all optional
-  function api_make () {
-    var self = this
-    var args = arrayify(arguments)
-    args.unshift(self)
-    return private$.entity.make$.apply(private$.entity, args)
-  }
-  root.make$ = root.make
 
   // TODO: DEPRECATE
   function api_pin (pattern, pinopts) {
@@ -1537,6 +1526,10 @@ function make_seneca (initial_options) {
       return self.listen.apply(this, arguments)
     }
 
+    delegate.makelogfuncs = function () {
+      Logging.makelogfuncs(delegate)
+    }
+
     return delegate
   }
 
@@ -1674,19 +1667,6 @@ function make_seneca (initial_options) {
     root[property] = method
   }
 
-  // Create entity delegate.
-  var sd = root.delegate()
-  sd.log = function () {
-    var args = ['entity']
-    root.log.apply(this, args.concat(arrayify(arguments)))
-  }
-  Logging.makelogfuncs(sd)
-
-  // Template entity that makes all others.
-  private$.entity = MakeEntity({}, sd)
-
-  private$.exports.Entity = MakeEntity.Entity
-
   // DEPRECATED
   // for use with async
   root.next_act = function () {
@@ -1785,9 +1765,6 @@ function make_seneca (initial_options) {
       process.once(signal, handleClose)
     }
   })
-
-  // Expose the Entity object so third-parties can do interesting things with it
-  private$.exports.Entity = MakeEntity.Entity
 
   return root
 }
