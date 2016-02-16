@@ -2,9 +2,6 @@
   "extends": "seneca",
   "rules": {
     "no-return-assign": 2,
-    "yoda": 2,
-    "no-empty-pattern": 0,
-    "no-arrow-condition": 0,
-    "arrow-body-style": 0
+    "yoda": 2
   }
 }
