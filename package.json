@@ -54,7 +54,7 @@
     "gate-executor": "0.3.2",
     "gex": "0.2.2",
     "jsonic": "0.2.2",
-    "lodash": "4.0.1",
+    "lodash": "4.5.0",
     "lru-cache": "4.0.0",
     "minimist": "1.2.0",
     "nid": "0.3.2",
@@ -98,7 +98,7 @@
   "devDependencies": {
     "async": "1.5.2",
     "bench": "0.3.x",
-    "body-parser": "1.14.2",
+    "body-parser": "1.15.0",
     "code": "1.5.0",
     "connect": "3.4.1",
     "connect-query": "0.2.0",
