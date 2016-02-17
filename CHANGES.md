@@ -1,3 +1,9 @@
+## 1.2.0: 2016-02-17
+
+* Entity is now loaded as a plugin from the seneca-entity module. PR #343
+* `act` now can receive more than two arguments in the callback. PR #341
+
+
 ## 1.1.0: 2016-01-28
 
 * Plugin options can now be loaded and provided asynchronously to future plugins.
