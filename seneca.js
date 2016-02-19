@@ -317,6 +317,8 @@ function make_seneca (initial_options) {
 
   // Identifier generator.
   root.idgen = Nid({length: so.idlen})
+  so.tag = so.tag || internals.defaults.tag
+  so.tag = so.tag === 'undefined' ? internals.defaults.tag : so.tag
 
   // Create a unique identifer for this instance.
   root.id = root.idgen() + '/' + root.start_time + '/' + process.pid + '/' + so.tag
@@ -1410,7 +1412,7 @@ function make_seneca (initial_options) {
         sub_prior_ctxt.entry = false
         sub_prior_ctxt.depth++
 
-        ;delete prior_args.id$
+        delete prior_args.id$
         delete prior_args.actid$
         delete prior_args.meta$
         delete prior_args.transport$

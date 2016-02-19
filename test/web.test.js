@@ -83,4 +83,52 @@ describe('connect', function () {
     })
     server.listen(0)
   })
+
+  it('generates the correct message id with passed in tag', function (done) {
+    var plugin = function (options) {
+      var seneca = this
+
+      seneca.add({role: 'api', cmd: 'calculate'}, function (msg, cb) {
+        cb(null, {right: msg.right, id: msg.id})
+      })
+      seneca.add({init: 'api'}, function (msg, cb) {
+        seneca.act({role: 'web', use: {
+          prefix: '/api',
+          pin: {role: 'api', cmd: '*'},
+          map: {
+            calculate: {GET: true, suffix: '/:operation'}
+          }
+        }}, cb)
+      })
+
+      return { name: 'api' }
+    }
+
+    var seneca = Seneca({ log: 'silent' })
+    seneca.use(plugin)
+    var app = Connect()
+    app.use(seneca.export('web'))
+
+    seneca.ready(function () {
+      var server = Http.createServer(app)
+      server.once('listening', function () {
+        var port = server.address().port
+
+        Http.get('http://localhost:' + port + '/api/calculate/sum?right=5&id=111', function (res) {
+          expect(res.statusCode).to.equal(200)
+          var payload = ''
+          res.on('data', function (data) {
+            payload += data.toString()
+          })
+          res.once('end', function () {
+            var parts = payload.split('/')
+            expect(parts.length).to.equal(4)
+            expect(parts[3]).to.contain('-')
+            done()
+          })
+        })
+      })
+      server.listen(0)
+    })
+  })
 })
