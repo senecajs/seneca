@@ -1769,6 +1769,7 @@ function make_seneca (initial_options) {
   return root
 }
 
+
 // Utilities
 
 function make_trace_act (opts) {
@@ -1783,40 +1784,9 @@ function make_trace_act (opts) {
     console.log(args.join('\t'))
   }
 }
-/*
-function pin_patrun_customizer (pat, data) {
-  var pi = this
 
-  var gexers = {}
-  _.each(pat, function (v, k) {
-    if (_.isString(v) && ~v.indexOf('*')) {
-      delete pat[k]
-      gexers[k] = Gex(v)
-    }
-  })
 
-  // handle previous patterns that match this pattern
-  var prev = pi.list(pat)
-  var prevfind = prev[0] && prev[0].find
-  var prevdata = prev[0] && pi.findexact(prev[0].match)
-
-  return function (args, data) {
-    var pi = this
-    var out = data
-    _.each(gexers, function (g, k) {
-      var v = args[k]
-      if (g.on(v) == null) { out = null }
-    })
-
-    if (prevfind && out == null) {
-      out = prevfind.call(pi, args, prevdata)
-    }
-
-    return out
-  }
-}
-*/
-// ### Declarations
+// Declarations
 
 // Private member variables of Seneca object.
 function make_private () {
