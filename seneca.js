@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2016 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 // Node API modules
@@ -10,7 +10,6 @@ var Util = require('util')
 var _ = require('lodash')
 var Eraro = require('eraro')
 var Executor = require('gate-executor')
-var Gex = require('gex')
 var Jsonic = require('jsonic')
 var Lrucache = require('lru-cache')
 var Makeuse = require('use-plugin')
@@ -35,7 +34,7 @@ var Store = require('./lib/store')
 var Transport = require('./lib/transport')
 
 // Shortcuts
-var arrayify = Common.arrayify
+var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 
 var internals = {
   error: Eraro({
@@ -267,7 +266,7 @@ function make_seneca (initial_options) {
 
   // These need to come from options as required during construction.
   so.internal.actrouter = so.internal.actrouter || Patrun({ gex: true })
-  so.internal.subrouter = so.internal.subrouter || Patrun(pin_patrun_customizer)
+  so.internal.subrouter = so.internal.subrouter || Patrun({ gex: true })
 
   var callpoint = make_callpoint(so.debug.callpoint)
 
@@ -887,17 +886,18 @@ function make_seneca (initial_options) {
       seneca.log.debug('close', 'start', callpoint())
       seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
         seneca.log.debug('close', 'end', err)
+
+        seneca.removeAllListeners('act-in')
+        seneca.removeAllListeners('act-out')
+        seneca.removeAllListeners('act-err')
+        seneca.removeAllListeners('pin')
+        seneca.removeAllListeners('after-pin')
+        seneca.removeAllListeners('ready')
+
         if (_.isFunction(done)) {
           return done.call(seneca, err)
         }
       })
-
-      seneca.removeAllListeners('act-in')
-      seneca.removeAllListeners('act-out')
-      seneca.removeAllListeners('act-err')
-      seneca.removeAllListeners('pin')
-      seneca.removeAllListeners('after-pin')
-      seneca.removeAllListeners('ready')
     }
   }
 
@@ -982,9 +982,9 @@ function make_seneca (initial_options) {
     })
 
     self.on('error', function () {
-      var args = arrayify(arguments).slice()
+      var args = arrayify(arguments)
       args.unshift('ERROR: ')
-      Logging.handlers.print.apply(null, arrayify(args))
+      Logging.handlers.print.apply(null, args)
     })
   }
 
@@ -1783,7 +1783,7 @@ function make_trace_act (opts) {
     console.log(args.join('\t'))
   }
 }
-
+/*
 function pin_patrun_customizer (pat, data) {
   var pi = this
 
@@ -1815,7 +1815,7 @@ function pin_patrun_customizer (pat, data) {
     return out
   }
 }
-
+*/
 // ### Declarations
 
 // Private member variables of Seneca object.
