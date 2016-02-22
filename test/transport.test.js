@@ -895,12 +895,13 @@ describe('transport', function () {
     }
   })
 
-  it('fatal$ false with transport timeouts won\'t kill process', function (done) {
+  it('fatal$ false with transport not-found kill process', function (done) {
     Seneca({ log: 'silent' })
       .listen()
       .ready(function () {
-        var client = Seneca({ timeout: 10, log: 'silent' })
+        var client = Seneca({ timeout: 30, log: 'silent' })
         client.client()
+
 
         client.ready(function () {
           client.act({ foo: 1, fatal$: false }, function (err, result) {
