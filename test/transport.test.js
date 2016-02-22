@@ -899,7 +899,7 @@ describe('transport', function () {
     Seneca({ log: 'silent' })
       .listen()
       .ready(function () {
-        var client = Seneca({ timeout: 5, log: 'silent' })
+        var client = Seneca({ timeout: 10, log: 'silent' })
         client.client()
 
         client.ready(function () {
