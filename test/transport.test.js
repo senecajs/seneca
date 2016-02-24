@@ -911,6 +911,41 @@ describe('transport', function () {
         })
       })
   })
+
+  it('server can be restarted without issues to clients', function (done) {
+    var execCount = 0
+    var server = Seneca({ log: 'silent' })
+    server.add({ cmd: 'foo' }, function (message, cb) {
+      execCount++
+      cb(null, { result: 'bar' })
+    })
+    server.listen({ port: 0 }, function (err, address) {
+      expect(err).to.not.exist()
+      var client = Seneca({ log: 'silent' })
+      client.client({ port: address.port })
+      client.ready(function () {
+        client.act({ cmd: 'foo' }, function (err, message) {
+          expect(err).to.not.exist()
+          expect(message.result).to.equal('bar')
+          server.close(function () {
+            var server2 = Seneca({ log: 'silent' })
+            server2.add({ cmd: 'foo' }, function (message, cb) {
+              cb(null, { result: 'bar' })
+            })
+            server2.listen({ port: address.port })
+            server2.ready(function () {
+              client.act({ cmd: 'foo' }, function (err, message) {
+                expect(err).to.not.exist()
+                expect(message.result).to.equal('bar')
+                expect(execCount).to.equal(1)
+                server2.close(done)
+              })
+            })
+          })
+        })
+      })
+    })
+  })
 })
 
 // A simple transport that uses async.queue as the transport mechanism
