@@ -539,13 +539,11 @@ function make_seneca (initial_options) {
           api[methodname].name$ = methodname
         })
 
-        if (pinopts) {
-          if (pinopts.include) {
-            for (var i = 0; i < pinopts.include.length; i++) {
-              var methodname = pinopts.include[i]
-              if (thispin[methodname]) {
-                api[methodname] = Common.delegate(thispin, thispin[methodname])
-              }
+        if (pinopts && pinopts.include) {
+          for (var i = 0; i < pinopts.include.length; i++) {
+            var methodname = pinopts.include[i]
+            if (thispin[methodname]) {
+              api[methodname] = Common.delegate(thispin, thispin[methodname])
             }
           }
         }
