@@ -1,3 +1,12 @@
+## 1.3.0: 2016-03-01
+
+* Default tag when undefined. PR #349
+* Update transport dependency. PR #351
+* Update transport dependency #352
+* Add test and return listener address info #353
+* Add test for pinning #357
+
+
 ## 1.2.0: 2016-02-17
 
 * Entity is now loaded as a plugin from the seneca-entity module. PR #343
