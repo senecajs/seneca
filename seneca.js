@@ -165,7 +165,11 @@ var internals = {
     },
 
     // zig module settings for seneca.start() chaining.
-    zig: {}
+    zig: {},
+
+    pin: {
+      immediate: false    // run pin function without waiting for pin event
+    }
   }
 }
 
@@ -549,7 +553,10 @@ function make_seneca (initial_options) {
         }
       }
 
-      if (private$._isReady) {
+      var opts = {}
+      _.defaults(opts, pinopts, so.pin)
+
+      if (private$._isReady || opts.immediate) {
         calcPin()
       }
       else {
