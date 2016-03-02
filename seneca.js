@@ -168,7 +168,7 @@ var internals = {
     zig: {},
 
     pin: {
-      synchronous: false    // run pin function without waiting for pin event
+      immediate: false    // run pin function without waiting for pin event
     }
   }
 }
@@ -556,7 +556,7 @@ function make_seneca (initial_options) {
       var opts = {}
       _.defaults(opts, pinopts, so.pin)
 
-      if (private$._isReady || opts.synchronous) {
+      if (private$._isReady || opts.immediate) {
         calcPin()
       }
       else {

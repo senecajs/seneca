@@ -524,7 +524,7 @@ describe('plugin', function () {
     })
   })
 
-  it('will be able to pin with multiple plugins and local synchronous setting', function (done) {
+  it('will be able to pin with multiple plugins and local immediate setting', function (done) {
     var seneca = Seneca({ log: 'silent' })
 
     var pluginA = function () {
@@ -547,7 +547,7 @@ describe('plugin', function () {
 
     var pluginB = function () {
       this.add({ init: 'pluginB' }, function (msg, cb) {
-        var api = this.pin({ role: 'pluginA', cmd: '*' }, { synchronous: true })
+        var api = this.pin({ role: 'pluginA', cmd: '*' }, { immediate: true })
         api.msA1({ msg: 'hi' }, function (err, message) {
           expect(err).to.not.exist()
           expect(message.result).to.equal('msa1')
@@ -586,8 +586,8 @@ describe('plugin', function () {
     })
   })
 
-  it('will be able to pin with multiple plugins and seneca synchronous setting', function (done) {
-    var seneca = Seneca({ log: 'silent', pin: { synchronous: true } })
+  it('will be able to pin with multiple plugins and seneca pin immediate setting', function (done) {
+    var seneca = Seneca({ log: 'silent', pin: { immediate: true } })
 
     var pluginA = function () {
       this.add({ init: 'pluginA' }, function (msg, cb) {
