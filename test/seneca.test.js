@@ -273,6 +273,21 @@ describe('seneca', function () {
         done()
       })
     })
+
+    it('action timeouts override the seneca instance timeout', function (done) {
+      var seneca = Seneca({ log: 'silent', timeout: 2 }).error(done)
+      seneca.add({ cmd: 'foo' }, function (args, cb) {
+        root.setTimout(function () {
+          cb({ result: 'bar' })
+        }, 10)
+      })
+
+      seneca.act({ cmd: 'foo', timeout$: 20 }, function (err, message) {
+        expect(err).to.not.exist()
+        expect(message.result).to.equal('bar')
+        done()
+      })
+    })
   })
 
   it('passes seneca instance on callback function property', function (done) {

@@ -1256,6 +1256,10 @@ function make_seneca (initial_options) {
       fn: execute_action
     }
 
+    if (typeof args.timeout$ === 'number') {
+      execspec.timeout = args.timeout$
+    }
+
     private$.executor.execute(execspec)
   }
 
