@@ -29,7 +29,7 @@ var timerstub = {
   }
 }
 
-var testopts = { log: 'silent' }
+var testopts = { log: 'test' }
 
 describe('seneca', function () {
   lab.beforeEach(function (done) {
@@ -39,6 +39,7 @@ describe('seneca', function () {
     process.removeAllListeners('SIGBREAK')
     done()
   })
+
   it('version', function (done) {
     var start = Date.now()
     var si = Seneca(testopts)
@@ -49,6 +50,12 @@ describe('seneca', function () {
     expect(end - start).to.be.below(333)
 
     expect(si).to.equal(si.seneca())
+    done()
+  })
+
+  it('tag', function (done) {
+    var si = Seneca({tag: 'foo'}, testopts)
+    expect(si.id).to.endWith('/foo')
     done()
   })
 
@@ -303,7 +310,7 @@ describe('seneca', function () {
   })
 
   it('action-act-invalid-args', function (done) {
-    var si = Seneca(testopts)
+    var si = Seneca(testopts, {log: 'silent'})
 
     si.act({op: 'bad', a1: 100}, function (e) {
       assert.equal(e.code, 'act_not_found')
@@ -1068,7 +1075,7 @@ describe('seneca', function () {
   })
 
   it('sub', function (done) {
-    var si = Seneca(testopts, { errhandler: done })
+    var si = Seneca(testopts, { log: 'silent', errhandler: done })
 
     var tmp = {a: 0, as1: 0, as2: 0, as1_in: 0, as1_out: 0, all: 0}
 

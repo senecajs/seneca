@@ -2,6 +2,6 @@
   "extends": "seneca",
   "rules": {
     "no-return-assign": 2,
-    "yoda": 2
+    "yoda": 0
   }
 }
