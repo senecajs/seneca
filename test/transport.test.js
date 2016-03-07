@@ -946,6 +946,53 @@ describe('transport', function () {
       })
     })
   })
+
+/*
+  it('transport-loop', function (done) {
+    var tt = make_test_transport()
+
+    var n0 = Seneca({tag: 'n0', log: 'all', debug: { short_logs: true }})
+    var n1 = Seneca({tag: 'n1', log: 'all', debug: { short_logs: true }})
+
+    var n0adr, n1adr
+
+    n0
+      .use(tt)
+      .add('foo:1', function (msg, done) {
+        this.act('bar:1',done)
+      })
+      .listen({ type: 'test', pin: 'foo:1' }, function (e, adr) {
+        if (e) return done(e)
+        n0adr = adr
+      })
+
+    n1
+      .use(tt)
+      .add('bar:1', function (msg, done) {
+        this.act('foo:1',done)
+      })
+      .listen({ type: 'test', pin: 'bar:1' }, function (e, adr) {
+        if (e) return done(e)
+        n1adr = adr
+      })
+
+
+    n0.ready(n1.ready.bind(n1,do_clients))
+
+    function do_clients () {
+      n0.client({pin: 'bar:1', port:n1adr.port})
+      n1.client({pin: 'foo:1', port:n0adr.port})
+      n0.ready(n1.ready.bind(n1,do_test))
+    }
+
+    function do_test () {
+      n0.act('foo:1', function (e,o) {
+        console.log(e,o)
+        done()
+      })
+    }
+  })
+*/
 })
 
 // A simple transport that uses async.queue as the transport mechanism
@@ -1048,18 +1095,6 @@ function make_balance_transport () {
 
   function test_transport (options) {
     var seneca = this
-
-    /*
-    seneca.options({
-      transport: {
-        balance: {
-          handle: function (pat, action) {
-            targets.push(action)
-          }
-        }
-      }
-    })
-     */
 
     var tu = seneca.export('transport/utils')
 

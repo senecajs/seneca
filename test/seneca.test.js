@@ -1027,7 +1027,7 @@ describe('seneca', function () {
   })
 
   it('act-param', function (done) {
-    Seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
 
       .add({a: 1, b: {integer$: true}}, function (args, cb) {
         if (!_.isNumber(args.b)) return assert.fail()
@@ -1043,7 +1043,8 @@ describe('seneca', function () {
           return done(e)
         }
 
-        this.act({a: 1, b: 'b'}, function (err, out) {
+        // use si to avoid act_loop error
+        si.act({a: 1, b: 'b'}, function (err, out) {
           try {
             assert.equal('act_invalid_args', err.code)
             assert.equal('seneca: Action a:1 has invalid arguments; ' +
@@ -1056,7 +1057,7 @@ describe('seneca', function () {
           }
 
           try {
-            this.add({a: 1, b: {notatypeatallatall$: true}}, function (args, cb) {
+            si.add({a: 1, b: {notatypeatallatall$: true}}, function (args, cb) {
               assert.fail()
             })
           }
@@ -1442,14 +1443,15 @@ describe('seneca', function () {
   })
 
   it('add-noop', function (done) {
-    Seneca({log: 'silent'})
+    var si = Seneca({log: 'silent'})
       .error(done)
       .add('a:1')
 
       .act('a:1', function (e, o) {
         assert.equal(null, o)
 
-        this.act('a:1,default$:{x:1}', function (e, o) {
+        // use si to avoid act_loop error
+        si.act('a:1,default$:{x:1}', function (e, o) {
           assert.equal(1, o.x)
           done()
         })
@@ -1663,7 +1665,7 @@ describe('seneca', function () {
   })
 
   it('supports strict.find for disabling not found actions', function (done) {
-    var seneca = Seneca({ log: 'silent', strict: { find: true } })
+    var seneca = Seneca({ log: 'test', strict: { find: true } })
     seneca.act({ a: 1 }, function (err, out) {
       expect(err).to.exist()
       expect(out).to.not.exist()
@@ -1672,11 +1674,42 @@ describe('seneca', function () {
   })
 
   it('supports strict.find not overriding existing default$', function (done) {
-    var seneca = Seneca({ log: 'silent', strict: { find: false } })
+    var seneca = Seneca({ log: 'test', strict: { find: false } })
     seneca.act({ a: 1, default$: { foo: 'bar' } }, function (err, out) {
       expect(err).to.not.exist()
       expect(Object.keys(out).length).to.equal(1)
       done()
     })
+  })
+
+  it('depth0-loop', function (done) {
+    Seneca({ log: 'silent', strict: { maxloop: 0 } })
+      .add('a:1', function (msg, done) {
+        this.act('a:1', function (err, out) {
+          done(err, out)
+        })
+      })
+      .act('a:1', function (err) {
+        expect(err).to.exist()
+        expect(err.code).to.equal('act_loop')
+        done()
+      })
+  })
+
+  it('depth3-loop', function (done) {
+    var count = 0
+    Seneca({ log: 'silent', strict: { maxloop: 3 } })
+      .add('a:1', function (msg, done) {
+        ++count
+        this.act('a:1', function (err, out) {
+          done(err, out)
+        })
+      })
+      .act('a:1', function (err) {
+        expect(err).to.exist()
+        expect(err.code).to.equal('act_loop')
+        expect(count).to.equal(4)
+        done()
+      })
   })
 })

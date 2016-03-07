@@ -99,10 +99,11 @@ describe('common', function () {
     done()
   })
 
-  it('argpattern', function (done) {
-    assert.equal('a:1', Common.argpattern({a: 1}))
-    assert.equal('a:1,b:2', Common.argpattern({a: 1, b: 2}))
-    assert.equal('a:1,b:2', Common.argpattern({a: 1, b: 2, c$: 3}))
+  it('pattern', function (done) {
+    assert.equal('a:1', Common.pattern({a: 1}))
+    assert.equal('a:1,b:2', Common.pattern({a: 1, b: 2}))
+    assert.equal('a:1,b:2', Common.pattern({a: 1, b: 2, c$: 3}))
+    assert.equal('a:1,b:2', Common.pattern({b: 2, c$: 3, a: 1}))
     done()
   })
 })

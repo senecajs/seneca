@@ -109,7 +109,10 @@ var internals = {
       add: false,
 
       // If no action is found and find is false, then no error returned along with empty object
-      find: true
+      find: true,
+
+      // Maximum number of times an action can call itself
+      maxloop: 11
     },
 
     // Action cache. Makes inbound messages idempotent.
@@ -257,9 +260,6 @@ function make_seneca (initial_options) {
   // Not needed after this point, and screws up debug printing.
   delete initial_options.module
 
-  // Create internal tools.
-  var actnid = Nid({length: 5})
-  var refnid = function () { return '(' + actnid() + ')' }
   // Define options
   var so = private$.optioner.set(initial_options)
   internals.schema.validate(so, function (err) {
@@ -267,6 +267,10 @@ function make_seneca (initial_options) {
       throw err
     }
   })
+
+  // Create internal tools.
+  var actnid = Nid({length: so.idlen})
+  var refnid = function () { return '(' + actnid() + ')' }
 
   // These need to come from options as required during construction.
   so.internal.actrouter = so.internal.actrouter || Patrun({ gex: true })
@@ -432,7 +436,7 @@ function make_seneca (initial_options) {
     clean: Common.clean,
     copydata: Common.copydata,
     nil: Common.nil,
-    pattern: Common.argpattern,
+    pattern: Common.pattern,
     print: Common.print,
     router: function () { return Patrun() },
 
@@ -517,7 +521,7 @@ function make_seneca (initial_options) {
     function make_pin (pattern) {
       var api = {
         toString: function () {
-          return 'pin:' + Common.argpattern(pattern) + '/' + thispin
+          return 'pin:' + Common.pattern(pattern) + '/' + thispin
         }
       }
 
@@ -648,7 +652,7 @@ function make_seneca (initial_options) {
     var subs = private$.subrouter.find(pattern)
     if (!subs) {
       private$.subrouter.add(pattern, subs = [])
-      subs.pattern = Common.argpattern(pattern)
+      subs.pattern = Common.pattern(pattern)
     }
     subs.push(subargs.action)
 
@@ -732,10 +736,10 @@ function make_seneca (initial_options) {
     var addroute = true
 
     actmeta.args = _.clone(pattern)
-    actmeta.pattern = Common.argpattern(pattern)
+    actmeta.pattern = Common.pattern(pattern)
 
     // deprecated
-    actmeta.argpattern = actmeta.pattern
+    // actmeta.argpattern = actmeta.pattern
 
     // actmeta.id = self.idgen()
     actmeta.id = refnid()
@@ -784,12 +788,12 @@ function make_seneca (initial_options) {
       time: {}
     }
 
-    private$.stats.actmap[actmeta.argpattern] =
-      private$.stats.actmap[actmeta.argpattern] || stats
+    private$.stats.actmap[actmeta.pattern] =
+      private$.stats.actmap[actmeta.pattern] || stats
 
     if (addroute) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
-        actmeta.id, Common.argpattern(pattern), action.name,
+        actmeta.id, Common.pattern(pattern), action.name,
         callpoint() ]
       var logger = self.log.log || self.log
 
@@ -1011,39 +1015,53 @@ function make_seneca (initial_options) {
     var callargs = args
     var actstats
     var act_callpoint = callpoint()
-    args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
-
-    prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
-
+    var is_sync = _.isFunction(actdone)
     var listen_origin = origargs.transport$ && origargs.transport$.origin
-
     var id_tx = (args.id$ || args.actid$ || instance.idgen()).split('/')
-
     var tx =
-    id_tx[1] ||
-      origargs.tx$ ||
-      instance.fixedargs.tx$ ||
-      instance.idgen()
-
+          id_tx[1] ||
+          origargs.tx$ ||
+          instance.fixedargs.tx$ ||
+          instance.idgen()
     var actid = (id_tx[0] || instance.idgen()) + '/' + tx
-
     var actstart = Date.now()
 
+    args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
+    prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
     actdone = actdone || _.noop
 
-    var cached_actmeta =
-          act_cache_check(instance, args, prior_ctxt, actdone, act_callpoint)
 
-    if (cached_actmeta) {
-      actmeta = cached_actmeta
+    // if previously seen message, provide previous result, and don't process again
+    if (apply_actcache(instance, args, prior_ctxt, actdone, act_callpoint)) {
       return
     }
 
     var execute_action = function execute_action (action_done) {
+      var err
       actmeta = actmeta || delegate.find(args)
 
+      if (actmeta) {
+        if (_.isArray(args.history$) && 0 < args.history$.length) {
+          var repeat_count = 0
+          for (var hI = 0; hI < args.history$.length; ++hI) {
+            if (actmeta.id === args.history$[hI].action) {
+              ++repeat_count
+            }
+          }
+
+          if (so.strict.maxloop < repeat_count) {
+            err = internals.error('act_loop', {
+              pattern: actmeta.pattern,
+              actmeta: actmeta,
+              history: args.history$
+            })
+            return action_done(err)
+          }
+        }
+      }
+
       // action pattern not found
-      if (!actmeta) {
+      else {
         if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
           delegate.log.debug('act', '-', '-', 'DEFAULT',
                              delegate.util.clean(args), callpoint())
@@ -1058,7 +1076,7 @@ function make_seneca (initial_options) {
           errinfo.xdefault = Util.inspect(args.default$)
         }
 
-        var err = internals.error(errcode, errinfo)
+        err = internals.error(errcode, errinfo)
 
         // TODO: wrong approach - should always call action_done to complete
         // error would then include a fatal flag
@@ -1091,7 +1109,8 @@ function make_seneca (initial_options) {
           pattern: actmeta.pattern,
           action: actmeta.id,
           entry: prior_ctxt.entry,
-          chain: prior_ctxt.chain
+          chain: prior_ctxt.chain,
+          sync: is_sync
         }
 
         if (actmeta.deprecate) {
@@ -1139,7 +1158,7 @@ function make_seneca (initial_options) {
         prior_ctxt.entry = prior_ctxt.depth <= 0
 
         if (prior_ctxt.entry === true && actmeta) {
-          private$.timestats.point(actend - actstart, actmeta.argpattern)
+          private$.timestats.point(actend - actstart, actmeta.pattern)
         }
 
         var result = arrayify(arguments)
@@ -1349,20 +1368,7 @@ function make_seneca (initial_options) {
 
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
-  //
-  //    * _instance_      (object)    &rarr;  seneca instance
-  //    * _args_          (object)    &rarr;  action arguments
-  //    * _prior_ctxt_    (object?)   &rarr;  prior action context, if any
-  //    * _actcb_         (function)  &rarr;  action callback
-  //    * _act_callpoint_ (function)  &rarr;  action call point
-  function act_cache_check (instance, args, prior_ctxt, actcb, act_callpoint) {
-    Assert.ok(_.isObject(instance), 'act_cache_check; instance; isObject')
-    Assert.ok(_.isObject(args), 'act_cache_check; args; isObject')
-    Assert.ok(!prior_ctxt || _.isObject(prior_ctxt),
-      'act_cache_check; prior_ctxt; isObject')
-    Assert.ok(!actcb || _.isFunction(actcb),
-      'act_cache_check; actcb; isFunction')
-
+  function apply_actcache (instance, args, prior_ctxt, actcb, act_callpoint) {
     var actid = args.id$ || args.actid$
 
     if (actid != null && so.actcache.active) {
@@ -1375,7 +1381,12 @@ function make_seneca (initial_options) {
         Logging.log_act_cache(root, {actid: actid}, actmeta,
           args, prior_ctxt, act_callpoint)
 
-        if (actcb) actcb.apply(instance, actdetails.result)
+        if (actcb) {
+          setImmediate(function () {
+            actcb.apply(instance, actdetails.result)
+          })
+        }
+
         return actmeta
       }
     }
@@ -1402,10 +1413,16 @@ function make_seneca (initial_options) {
       delegate_args.ungate$ = !!callargs.gate$
     }
 
+    var history_entry = _.clone(callargs.meta$)
+    history_entry.instance = instance.id
+
     var delegate = instance.delegate(delegate_args)
 
     // special overrides
     if (tx) { delegate.fixedargs.tx$ = tx }
+
+    delegate.fixedargs.history$ = _.clone(callargs.history$ || [])
+    delegate.fixedargs.history$.push(history_entry)
 
     // automate actid log insertion
     delegate.log = Logging.make_delegate_log(callargs.meta$.id, actmeta, instance)
