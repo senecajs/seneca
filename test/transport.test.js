@@ -1083,8 +1083,10 @@ function make_balance_transport () {
     this.options({
       transport: {
         balance: {
-          handle: function (pat, action) {
-            targets.push(action)
+          makehandle: function () {
+            return function (pat, action) {
+              targets.push(action)
+            }
           }
         }
       }

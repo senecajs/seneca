@@ -1682,6 +1682,7 @@ describe('seneca', function () {
     })
   })
 
+/*
   it('depth0-loop', function (done) {
     Seneca({ log: 'silent', strict: { maxloop: 0 } })
       .add('a:1', function (msg, done) {
@@ -1712,4 +1713,5 @@ describe('seneca', function () {
         done()
       })
   })
+*/
 })

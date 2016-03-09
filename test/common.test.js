@@ -106,4 +106,22 @@ describe('common', function () {
     assert.equal('a:1,b:2', Common.pattern({b: 2, c$: 3, a: 1}))
     done()
   })
+
+  it('pincanon', function (done) {
+    assert.equal('a:1', Common.pincanon({a: 1}))
+    assert.equal('a:1', Common.pincanon([{a: 1}]))
+    assert.equal('a:1', Common.pincanon('a:1'))
+    assert.equal('a:1', Common.pincanon(['a:1']))
+
+    assert.equal('a:1,b:2', Common.pincanon({b: 2, a: 1}))
+    assert.equal('a:1,b:2', Common.pincanon([{b: 2, a: 1}]))
+    assert.equal('a:1,b:2', Common.pincanon('b:2,a:1'))
+    assert.equal('a:1,b:2', Common.pincanon(['b:2,a:1']))
+
+    assert.equal('a:1;b:2', Common.pincanon([{b: 2}, {a: 1}]))
+    assert.equal('a:1;b:2', Common.pincanon(['b:2', 'a:1']))
+    assert.equal('a:1;b:2', Common.pincanon(['b:2', {a: 1}]))
+    assert.equal('a:1;b:2', Common.pincanon([{b: 2}, 'a:1']))
+    done()
+  })
 })

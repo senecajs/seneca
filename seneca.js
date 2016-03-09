@@ -438,6 +438,7 @@ function make_seneca (initial_options) {
     nil: Common.nil,
     pattern: Common.pattern,
     print: Common.print,
+    pincanon: Common.pincanon,
     router: function () { return Patrun() },
 
     // TODO: deprecate?
@@ -737,9 +738,6 @@ function make_seneca (initial_options) {
 
     actmeta.args = _.clone(pattern)
     actmeta.pattern = Common.pattern(pattern)
-
-    // deprecated
-    // actmeta.argpattern = actmeta.pattern
 
     // actmeta.id = self.idgen()
     actmeta.id = refnid()
@@ -1421,8 +1419,8 @@ function make_seneca (initial_options) {
     // special overrides
     if (tx) { delegate.fixedargs.tx$ = tx }
 
-    delegate.fixedargs.history$ = _.clone(callargs.history$ || [])
-    delegate.fixedargs.history$.push(history_entry)
+    // delegate.fixedargs.history$ = _.clone(callargs.history$ || [])
+    // delegate.fixedargs.history$.push(history_entry)
 
     // automate actid log insertion
     delegate.log = Logging.make_delegate_log(callargs.meta$.id, actmeta, instance)
