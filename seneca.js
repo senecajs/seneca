@@ -156,7 +156,10 @@ var internals = {
         SIGTERM: true,
         SIGINT: true,
         SIGBREAK: true
-      }
+      },
+
+      // seneca.add uses catchall (pattern='') prior
+      catchall: false
     },
 
     // Log status at periodic intervals.
@@ -171,7 +174,8 @@ var internals = {
     zig: {},
 
     pin: {
-      immediate: false    // run pin function without waiting for pin event
+      // run pin function without waiting for pin event
+      immediate: false
     }
   }
 }
@@ -716,6 +720,9 @@ function make_seneca (initial_options) {
     var strict_add = (raw_pattern.strict$ && raw_pattern.strict$.add !== null)
       ? !!raw_pattern.strict$.add : !!so.strict.add
 
+    var internal_catchall = (raw_pattern.internal$ && raw_pattern.internal$.catchall !== null)
+      ? !!raw_pattern.internal$.catchall : !!so.internal.catchall
+
     var pattern = self.util.clean(raw_pattern)
 
     if (!_.keys(pattern)) {
@@ -746,10 +753,16 @@ function make_seneca (initial_options) {
 
     var priormeta = self.find(pattern)
 
-    // only exact action patterns are overridden
-    // use .wrap for pin-based patterns
-    if (strict_add && priormeta && priormeta.pattern !== actmeta.pattern) {
-      priormeta = null
+    if (priormeta) {
+      if (!internal_catchall && '' === priormeta.pattern) {
+        priormeta = null
+      }
+
+      // only exact action patterns are overridden
+      // use .wrap for pin-based patterns
+      else if (strict_add && priormeta.pattern !== actmeta.pattern) {
+        priormeta = null
+      }
     }
 
     if (priormeta) {
@@ -1036,7 +1049,7 @@ function make_seneca (initial_options) {
 
     var execute_action = function execute_action (action_done) {
       var err
-      actmeta = actmeta || delegate.find(args)
+      actmeta = actmeta || delegate.find(args, {catchall: so.internal.catchall})
 
       if (actmeta) {
         if (_.isArray(args.history$) && 0 < args.history$.length) {
