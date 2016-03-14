@@ -64,7 +64,7 @@ describe('repl', function () {
           }
 
           state++
-        }, 100)
+        }, 200)
       })
     })
   })
