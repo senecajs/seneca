@@ -1,10 +1,17 @@
+## 1.4.0: 2016-03-16
+
+* Add setting for immediate pinning. PR #358
+* Allow overriding action timeout. PR #359
+* Use lodash defaultsDeep to implement util.deepextend. PR #364
+* Update transport dependency. PR #372
+
 ## 1.3.0: 2016-03-01
 
 * Default tag when undefined. PR #349
 * Update transport dependency. PR #351
-* Update transport dependency #352
-* Add test and return listener address info #353
-* Add test for pinning #357
+* Update transport dependency. PR #352
+* Add test and return listener address info. PR #353
+* Add test for pinning. PR #357
 
 
 ## 1.2.0: 2016-02-17
