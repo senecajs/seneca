@@ -109,7 +109,6 @@
     "joi": "6.10.x",
     "lab": "6.2.x",
     "no-shadow-relaxed": "1.0.1",
-    "seneca": "latest",
     "seneca-echo": "0.3.0",
     "seneca-error-test": "0.2.2"
   }
