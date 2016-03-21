@@ -68,7 +68,7 @@
     "seneca-entity": "0.0.1",
     "seneca-mem-store": "0.5.0",
     "seneca-repl": "0.2.0",
-    "seneca-transport": "1.1.1",
+    "seneca-transport": "1.2.0",
     "seneca-web": "0.7.1",
     "use-plugin": "0.3.1",
     "zig": "0.1.1"
