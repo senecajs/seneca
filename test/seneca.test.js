@@ -1154,6 +1154,8 @@ describe('seneca', function () {
     var si = Seneca(testopts)
     si.options({errhandler: done})
 
+    si.use('entity')
+
     var x = 0
 
     si.add({a: 1}, function (args, cb) {

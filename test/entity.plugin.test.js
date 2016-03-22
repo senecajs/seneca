@@ -43,6 +43,8 @@ describe('entity.plugin', function () {
         errhandler: done
       })
 
+    si.use('entity')
+
     // mem/foo
     var foo = si.make('foo')
     foo.a = 1

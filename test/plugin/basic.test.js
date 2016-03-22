@@ -37,6 +37,7 @@ describe('basic', function () {
   it('ensure_entity', function (fin) {
     var si = Seneca({log: 'test'})
     si.options({errhandler: fin})
+    si.use('entity')
 
     var foo_ent = si.make$('util_foo')
     var fooid = {}
