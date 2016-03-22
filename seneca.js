@@ -66,7 +66,6 @@ var internals = {
     default_plugins: {
       basic: true,
       cluster: true,
-      entity: true,
       'mem-store': true,
       repl: true,
       transport: true,
@@ -212,7 +211,6 @@ module.exports = function init (seneca_options, more_options) {
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.entity) { seneca.use(require('seneca-entity')) }
   if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }

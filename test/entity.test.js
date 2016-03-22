@@ -21,6 +21,7 @@ var testopts = { log: 'silent' }
 describe('entity', function () {
   it('happy-mem', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
     si.options({errhandler: done})
 
     var fooent = si.make$('foo')
@@ -39,6 +40,7 @@ describe('entity', function () {
 
   it('setid-mem', function (done) {
     var si = Seneca(testopts).error(done)
+    si.use('entity')
 
     var z0 = si.make('zed')
     z0.id$ = 0
@@ -63,6 +65,7 @@ describe('entity', function () {
 
   it('mem-ops', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
     si.options({
       errhandler: function (err) { err && done(err); return true }
     })
@@ -164,6 +167,7 @@ describe('entity', function () {
 
   it('parsecanon', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
     function def (v, d) { return v == null ? d : v }
     function fmt (cn) { return def(cn.zone, '-') + '/' + def(cn.base, '-') + '/' + def(cn.name, '-') }
 
@@ -204,6 +208,7 @@ describe('entity', function () {
 
   it('make', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
 
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
@@ -256,6 +261,7 @@ describe('entity', function () {
 
   it('toString', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
 
     var f1 = si.make$('foo')
     f1.a = 1
@@ -276,6 +282,8 @@ describe('entity', function () {
       'bar': ['c', 'd']
     }}}))
 
+    si.use('entity')
+
     assert.equal('$-/-/foo;id=;{c:3,d:4}',
       si.make('foo', {a: 1, b: 2, c: 3, d: 4}).toString())
 
@@ -285,6 +293,7 @@ describe('entity', function () {
 
   it('isa', function (done) {
     var si = Seneca(testopts)
+    si.use('entity')
 
     var f1 = si.make$('foo')
 
@@ -321,6 +330,7 @@ describe('entity', function () {
 
   it('mem-store-import-export', function (done) {
     var si = Seneca(testopts).error(done)
+    si.use('entity')
 
     // NOTE: zone is NOT saved! by design!
 
@@ -346,6 +356,7 @@ describe('entity', function () {
           assert.equal(err, null)
 
           var si2 = Seneca(testopts)
+          si2.use('entity')
 
           si2.act('role:mem-store,cmd:import', {json: out.json}, function (err) {
             assert.equal(err, null)
@@ -390,6 +401,7 @@ describe('entity', function () {
 
   it('close', function (done) {
     var si = Seneca(testopts).error(done)
+    si.use('entity')
 
     var tmp = {s0: 0, s1: 0, s2: 0}
 
