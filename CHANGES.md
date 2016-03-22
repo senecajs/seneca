@@ -1,3 +1,9 @@
+## 2.0.0: 2016-03-22
+
+* Update transport version to 1.2.0. PR #377
+* Remove Seneca as a dependency. PR #378
+* Remove entities as a default plugin. PR #379
+
 ## 1.4.0: 2016-03-16
 
 * Add setting for immediate pinning. PR #358
