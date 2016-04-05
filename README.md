@@ -94,7 +94,9 @@ seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
 
 In this code, whenever seneca sees the pattern
 `{cmd:'salestax'}`, it executes the function associated
-with this pattern, which calculates sales tax. Yah!
+with this pattern, which calculates sales tax. There is nothing special about the property `cmd` . 
+It is simply the property we want to pattern match. You could look for `foo` for all seneca cares! 
+ Yah!
 
 The `seneca.add` method adds a new pattern, and the function to execute whenever that pattern occurs.
 
@@ -171,7 +173,7 @@ seneca.add({ cmd: 'config' }, function (args, callback) {
 seneca.listen()
 ```
 
-The `listen`` method starts a web server that listens for JSON
+The `listen` method starts a web server that listens for JSON
 messages. When these arrive, they are submitted to the local Seneca
 instance, and executed as actions in the normal way.  The result is
 then returned to the client as the response to the HTTP
@@ -201,7 +203,7 @@ seneca.act('cmd:salestax,net:100', function (err, result) {
 On the client-side, calling `seneca.client()` means that Seneca will
 send any actions it cannot match locally out over the network. In this
 case, the configuration server will match the `cmd:config` pattern and
-return the configuratin data.
+return the configuration data.
 
 Again, notice that your sales tax code _does not change_. It does not
 need to know where the configuration comes from, who provides it, or
@@ -277,7 +279,7 @@ places. It also means you can deal with special cases very easily.
 
 For more examples of Seneca in action, take a look at:
 
-   * [seneca-examples](//github.com/senecajs/seneca-examples)
+   * [seneca-examples](//github.com/senecajs/getting-started)
    * [nodezoo.com](//nodezoo.com/#q=seneca)
    * [Well!](//github.com/nearform/well)
 
