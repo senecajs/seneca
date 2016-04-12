@@ -1033,6 +1033,12 @@ function make_seneca (initial_options) {
           instance.fixedargs.tx$ ||
           instance.idgen()
     var actid = (id_tx[0] || instance.idgen()) + '/' + tx
+
+    try {
+      actid = JSON.stringify(Common.clean(args))
+    } catch(e) {
+      console.log('error circular',args.role, args.cmd)
+    }
     var actstart = Date.now()
 
     args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
@@ -1041,7 +1047,7 @@ function make_seneca (initial_options) {
 
 
     // if previously seen message, provide previous result, and don't process again
-    if (apply_actcache(instance, args, prior_ctxt, actdone, act_callpoint)) {
+    if (apply_actcache(instance, args, prior_ctxt, actdone, act_callpoint, actid)) {
       return
     }
 
@@ -1377,8 +1383,7 @@ function make_seneca (initial_options) {
 
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
-  function apply_actcache (instance, args, prior_ctxt, actcb, act_callpoint) {
-    var actid = args.id$ || args.actid$
+  function apply_actcache (instance, args, prior_ctxt, actcb, act_callpoint, actid) {
 
     if (actid != null && so.actcache.active) {
       var actdetails = private$.actcache.get(actid)
