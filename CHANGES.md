@@ -1,3 +1,8 @@
+## 2.0.1: 2016-04-13
+
+* Filter undefined options. PR #386
+* Enhancement to README. PR #391
+
 ## 2.0.0: 2016-03-22
 
 * Update transport version to 1.2.0. PR #377
