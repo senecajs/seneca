@@ -815,31 +815,11 @@ describe('seneca', function () {
       },
       function (next) {
         try {
-          si.add('a:,b:2', function (args, cb) {
-            cb()
-          })
-        }
-        catch (e) {
-          assert.equal(e.code, 'add_string_pattern_syntax')
-          next()
-        }
-      },
-      function (next) {
-        try {
-          si.act('a:,b:2', {c: 3}, function () {
-            assert.fail()
-          })
-        }
-        catch (e) {
-          assert.equal(e.code, 'add_string_pattern_syntax')
-          next()
-        }
-      },
-      function (next) {
-        try {
           si.add('a:1,b:2', 'bad-arg', function (args, cb) {
             cb()
           })
+          assert.fail()
+          next()
         }
         catch (e) {
           assert.ok(e.message.match(/norma:/))
@@ -849,6 +829,7 @@ describe('seneca', function () {
       function (next) {
         try {
           si.add(123, function (args, cb) { cb() })
+          assert.fail()
         }
         catch (e) {
           assert.ok(e.message.match(/norma:/))
