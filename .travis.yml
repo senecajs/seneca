@@ -1,5 +1,7 @@
 language: node_js
 sudo: false
+env:
+  - SENECA_VER=@1.4.0
 node_js:
   - 0.10
   - 0.12
