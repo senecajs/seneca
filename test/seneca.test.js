@@ -1056,7 +1056,7 @@ describe('seneca', function () {
       })
   })
 
-  it('sub', function (done) {
+  it.only('sub', function (done) {
     var si = Seneca(testopts, { log: 'silent', errhandler: done })
 
     var tmp = {a: 0, as1: 0, as2: 0, as1_in: 0, as1_out: 0, all: 0}
@@ -1118,16 +1118,6 @@ describe('seneca', function () {
           assert.ok(tmp.all > 0)
         })
       })
-    })
-
-    // we should not panic when sub handler throws
-    si.sub({fail: 1}, function () {
-      throw Error('Sub failed')
-    })
-
-    si.add({fail: 1}, function (msg, done) { done() })
-    si.act({fail: 1}, function () {
-      done()
     })
   })
 

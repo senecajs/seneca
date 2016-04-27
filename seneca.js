@@ -623,15 +623,7 @@ function make_seneca (initial_options) {
           args.meta$.sub = subfuncs.pattern
 
           _.each(subfuncs, function (subfunc) {
-            try {
-              subfunc.call(self, args, result)
-            }
-            catch (ex) {
-              // TODO: not really satisfactory
-              var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
-              self.log.error(
-                'sub', 'err', args.meta$.id, err.message, args, err.stack)
-            }
+            subfunc.call(self, args, result)
           })
         }
       }
@@ -947,19 +939,7 @@ function make_seneca (initial_options) {
       private$._isReady = true
       root.emit('pin')
       root.emit('after-pin')
-      try {
-        ready.call(self)
-      }
-      catch (ex) {
-        var re = ex
-
-        if (!re.seneca) {
-          re = internals.error(re, 'ready_failed',
-                               { message: ex.message, ready: ready })
-        }
-
-        self.die(re)
-      }
+      ready.call(self)
     }
 
     return self
@@ -979,13 +959,7 @@ function make_seneca (initial_options) {
       return self
     }
 
-    try {
-      plugindesc = private$.use(arg0, arg1, arg2)
-    }
-    catch (e) {
-      self.die(internals.error(e, 'plugin_' + e.code))
-      return self
-    }
+    plugindesc = private$.use(arg0, arg1, arg2)
 
     self.register(plugindesc)
 
@@ -1160,118 +1134,97 @@ function make_seneca (initial_options) {
     }
 
     var act_done = function act_done (err) {
-      try {
-        var actend = Date.now()
+      var actend = Date.now()
 
-        prior_ctxt.depth--
-        prior_ctxt.entry = prior_ctxt.depth <= 0
+      prior_ctxt.depth--
+      prior_ctxt.entry = prior_ctxt.depth <= 0
 
-        if (prior_ctxt.entry === true && actmeta) {
-          private$.timestats.point(actend - actstart, actmeta.pattern)
-        }
+      if (prior_ctxt.entry === true && actmeta) {
+        private$.timestats.point(actend - actstart, actmeta.pattern)
+      }
 
-        var result = arrayify(arguments)
-        var call_cb = true
+      var result = arrayify(arguments)
+      var call_cb = true
 
-        var resdata = result[1]
-        var info = result[2]
+      var resdata = result[1]
+      var info = result[2]
 
-        if (err == null &&
-          resdata != null &&
-          !(_.isPlainObject(resdata) ||
-          _.isArray(resdata) ||
-          !!resdata.entity$ ||
-          !!resdata.force$
-         ) &&
-          so.strict.result) {
-          // allow legacy patterns
-          if (!(callargs.cmd === 'generate_id' ||
-            callargs.note === true ||
-            callargs.cmd === 'native' ||
-            callargs.cmd === 'quickcode'
-           )) {
-            err = internals.error(
-              'result_not_objarr', {
-                pattern: actmeta.pattern,
-                args: Util.inspect(Common.clean(callargs)).replace(/\n/g, ''),
-                result: resdata
-              })
-          }
-        }
-
-        private$.actcache.set(actid, {
-          result: result,
-          actmeta: actmeta,
-          when: Date.now()
-        })
-
-        if (err) {
-          // TODO: is act_not_found an error for purposes of stats? probably not
-          private$.stats.act.fails++
-
-          if (actstats) {
-            actstats.fails++
-          }
-
-          var out = act_error(instance, err, actmeta, result, actdone,
-            actend - actstart, callargs, prior_ctxt, act_callpoint)
-
-          if (args.fatal$) {
-            return instance.die(out.err)
-          }
-
-          call_cb = out.call_cb
-          result[0] = out.err
-
-          if (delegate && _.isFunction(delegate.on_act_err)) {
-            delegate.on_act_err(actmeta, result[0])
-          }
-        }
-        else {
-          instance.emit('act-out', callargs, result[1])
-          result[0] = null
-
-          Logging.log_act_out(
-            root, {
-              actid: actid,
-              duration: actend - actstart,
-              info: info,
-              listen: listen_origin
-            },
-            actmeta, callargs, result, prior_ctxt, act_callpoint)
-
-          if (_.isFunction(delegate.on_act_out)) {
-            delegate.on_act_out(actmeta, result[1])
-          }
-
-          if (actstats) {
-            private$.stats.act.done++
-            actstats.done++
-          }
-        }
-
-        try {
-          if (call_cb) {
-            actdone.apply(delegate, result) // note: err == result[0]
-          }
-        }
-
-        // for exceptions thrown inside the callback
-        catch (ex) {
-          var formattedErr = ex
-          // handle throws of non-Error values
-          if (!Util.isError(ex)) {
-            formattedErr = _.isObject(ex)
-              ? new Error(Jsonic.stringify(ex))
-              : new Error('' + ex)
-          }
-
-          callback_error(instance, formattedErr, actmeta, result, actdone,
-            actend - actstart, callargs, prior_ctxt, act_callpoint)
+      if (err == null &&
+        resdata != null &&
+        !(_.isPlainObject(resdata) ||
+        _.isArray(resdata) ||
+        !!resdata.entity$ ||
+        !!resdata.force$
+       ) &&
+        so.strict.result) {
+        // allow legacy patterns
+        if (!(callargs.cmd === 'generate_id' ||
+          callargs.note === true ||
+          callargs.cmd === 'native' ||
+          callargs.cmd === 'quickcode'
+         )) {
+          err = internals.error(
+            'result_not_objarr', {
+              pattern: actmeta.pattern,
+              args: Util.inspect(Common.clean(callargs)).replace(/\n/g, ''),
+              result: resdata
+            })
         }
       }
-      catch (ex) {
-        instance.emit('error', ex)
+
+      private$.actcache.set(actid, {
+        result: result,
+        actmeta: actmeta,
+        when: Date.now()
+      })
+
+      if (err) {
+        // TODO: is act_not_found an error for purposes of stats? probably not
+        private$.stats.act.fails++
+
+        if (actstats) {
+          actstats.fails++
+        }
+
+        var out = act_error(instance, err, actmeta, result, actdone,
+          actend - actstart, callargs, prior_ctxt, act_callpoint)
+
+        if (args.fatal$) {
+          return instance.die(out.err)
+        }
+
+        call_cb = out.call_cb
+        result[0] = out.err
+
+        if (delegate && _.isFunction(delegate.on_act_err)) {
+          delegate.on_act_err(actmeta, result[0])
+        }
+      }
+      else {
+        instance.emit('act-out', callargs, result[1])
+        result[0] = null
+
+        Logging.log_act_out(
+          root, {
+            actid: actid,
+            duration: actend - actstart,
+            info: info,
+            listen: listen_origin
+          },
+          actmeta, callargs, result, prior_ctxt, act_callpoint)
+
+        if (_.isFunction(delegate.on_act_out)) {
+          delegate.on_act_out(actmeta, result[1])
+        }
+
+        if (actstats) {
+          private$.stats.act.done++
+          actstats.done++
+        }
+      }
+
+      if (call_cb) {
+        actdone.apply(delegate, result) // note: err == result[0]
       }
     }
 
