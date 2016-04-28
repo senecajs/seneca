@@ -40,21 +40,6 @@ describe('plugin', function () {
     si.close(done)
   })
 
-  it('plugin-error-def', function (done) {
-    var si = Seneca({
-      log: 'silent',
-    })
-
-    si.on('error', function (err) {
-      expect(err).to.exist()
-      done()
-    })
-
-    si.use(function () {
-      throw new Error('plugin-def')
-    })
-  })
-
   it('plugin-error-add', function (done) {
     var si = Seneca({
       log: 'silent'
