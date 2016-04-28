@@ -9,7 +9,6 @@ var Util = require('util')
 // External modules.
 var _ = require('lodash')
 var Eraro = require('eraro')
-var Executor = require('gate-executor')
 var Jsonic = require('jsonic')
 var Lrucache = require('lru-cache')
 var Makeuse = require('use-plugin')
@@ -19,6 +18,7 @@ var Patrun = require('patrun')
 var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
+var Fastq = require('fastq')
 
 // Internal modules.
 var Actions = require('./lib/actions')
@@ -91,9 +91,6 @@ var internals = {
 
       // Shorten all identifiers to 2 characters.
       short_logs: false,
-
-      // Record and log callpoints (calling code locations).
-      callpoint: false
     },
 
     // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -278,8 +275,6 @@ function make_seneca (initial_options) {
   so.internal.actrouter = so.internal.actrouter || Patrun({ gex: true })
   so.internal.subrouter = so.internal.subrouter || Patrun({ gex: true })
 
-  var callpoint = make_callpoint(so.debug.callpoint)
-
   // Define public member variables.
   root.root = root
   root.start_time = Date.now()
@@ -292,8 +287,9 @@ function make_seneca (initial_options) {
   root.act = api_act // Perform action that matches pattern.
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
-  root.listen = Transport.listen(callpoint) // Listen for inbound messages.
-  root.client = Transport.client(callpoint) // Send outbound messages.
+  // FIXME _.noop is there in place of callpoint
+  root.listen = Transport.listen(_.noop) // Listen for inbound messages.
+  root.client = Transport.client(_.noop) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = Actions.has // True if action pattern defined.
   root.find = Actions.find // Find action by pattern
@@ -310,7 +306,7 @@ function make_seneca (initial_options) {
 
   // Non-API methods.
   root.logroute = api_logroute
-  root.register = Plugins.register(so, callpoint)
+  root.register = Plugins.register(so)
   root.depends = api_depends
   root.pin = api_pin
   root.act_if = api_act_if
@@ -345,8 +341,7 @@ function make_seneca (initial_options) {
     type: 'sys',
     plugin: 'seneca',
     tag: root.version,
-    id: root.id,
-    callpoint: callpoint
+    id: root.id
   })
 
   // Configure logging
@@ -359,23 +354,6 @@ function make_seneca (initial_options) {
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
   root.on('error', root.die)
-
-  // TODO: support options
-  private$.executor = Executor({
-    trace: _.isFunction(so.trace.act) ? so.trace.act
-      : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
-    timeout: so.timeout,
-    error: function (err) {
-      Logging.log_exec_err(root, err)
-    },
-    msg_codes: {
-      timeout: 'action-timeout',
-      error: 'action-error',
-      callback: 'action-callback',
-      execute: 'action-execute',
-      abandoned: 'action-abandoned'
-    }
-  })
 
   // setup status log
   if (so.status.interval > 0 && so.status.running) {
@@ -416,20 +394,6 @@ function make_seneca (initial_options) {
   private$.actrouter = so.internal.actrouter
   private$.subrouter = so.internal.subrouter
 
-  root.on('newListener', function (eventname, eventfunc) {
-    if (eventname === 'ready') {
-      root.private$.executor.on('clear', eventfunc)
-      return
-
-      /*
-      if (!private$.wait_for_ready) {
-        private$.wait_for_ready = true
-        root.act('role:seneca,ready:true,gate$:true')
-      }
-       */
-    }
-  })
-
   root.toString = api_toString
 
   root.util = {
@@ -453,7 +417,7 @@ function make_seneca (initial_options) {
   root._decorations = {}
 
   // say hello, printing identifier to log
-  root.log.info('hello', root.toString(), callpoint())
+  root.log.info('hello')
 
   // dump options if debugging
   root.log.debug('options', function () {
@@ -696,11 +660,6 @@ function make_seneca (initial_options) {
       ((actmeta.plugin_tag === '-' ? void 0 : actmeta.plugin_tag)
        ? '/' + actmeta.plugin_tag : '')
 
-    var add_callpoint = callpoint()
-    if (add_callpoint) {
-      actmeta.callpoint = add_callpoint
-    }
-
     actmeta.sub = !!raw_pattern.sub$
     actmeta.client = !!raw_pattern.client$
 
@@ -794,8 +753,7 @@ function make_seneca (initial_options) {
 
     if (addroute) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
-        actmeta.id, Common.pattern(pattern), action.name,
-        callpoint() ]
+        actmeta.id, Common.pattern(pattern), action.name]
       var logger = self.log.log || self.log
 
       logger.debug.apply(self, addlog)
@@ -895,7 +853,7 @@ function make_seneca (initial_options) {
         }
       })
 
-      seneca.log.debug('close', 'start', callpoint())
+      seneca.log.debug('close', 'start')
       seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
         seneca.log.debug('close', 'end', err)
 
@@ -913,36 +871,40 @@ function make_seneca (initial_options) {
     }
   }
 
+  var loadingStarted = false
+  var loadingQueue = Fastq(function (arg, cb) {
+    // all plugins needs to load after a full I/O as completed
+    setImmediate(arg, cb)
+  }, 1)
+
+  // we start accepting act after the current tick has finished
+  // queiuing all acts before loading as started
+  process.nextTick(function () {
+    loadingStarted = true
+  })
+
   // useful when defining services!
   // note: has EventEmitter.once semantics
   // if using .on('ready',fn) it will be be called for each ready event
   function api_ready (ready) {
     var self = this
 
-    if (so.debug.callpoint) {
-      self.log.debug('ready', 'register', callpoint())
-    }
-
     if (!_.isFunction(ready)) {
       // TODO: throw error
       return
     }
 
-    if (self.private$.executor.clear()) {
-      do_ready()
-    }
-    else {
-      self.private$.executor.once('clear', do_ready)
-    }
+    loadingQueue.push(do_ready, _.noop)
 
-    function do_ready () {
+    return self
+
+    function do_ready (cb) {
       private$._isReady = true
       root.emit('pin')
       root.emit('after-pin')
       ready.call(self)
+      process.nextTick(cb)
     }
-
-    return self
   }
 
   // use('pluginname') - built-in, or provide calling code 'require' as seneca opt
@@ -961,7 +923,15 @@ function make_seneca (initial_options) {
 
     plugindesc = private$.use(arg0, arg1, arg2)
 
-    self.register(plugindesc)
+    loadingQueue.push(function (cb) {
+      root.register(plugindesc, cb)
+    }, function (err) {
+      if (err) {
+        self.emit('error', err)
+        return
+      }
+      self.emit('ready')
+    })
 
     return self
   }
@@ -997,7 +967,6 @@ function make_seneca (initial_options) {
     var args = _.clone(origargs)
     var callargs = args
     var actstats
-    var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
     var listen_origin = origargs.transport$ && origargs.transport$.origin
     var id_tx = (args.id$ || args.actid$ || instance.idgen()).split('/')
@@ -1015,7 +984,7 @@ function make_seneca (initial_options) {
 
 
     // if previously seen message, provide previous result, and don't process again
-    if (apply_actcache(instance, args, prior_ctxt, actdone, act_callpoint)) {
+    if (apply_actcache(instance, args, prior_ctxt, actdone)) {
       return
     }
 
@@ -1047,7 +1016,7 @@ function make_seneca (initial_options) {
       else {
         if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
           delegate.log.debug('act', '-', '-', 'DEFAULT',
-                             delegate.util.clean(args), callpoint())
+                             delegate.util.clean(args))
           return action_done(null, args.default$)
         }
 
@@ -1097,12 +1066,11 @@ function make_seneca (initial_options) {
         }
 
         if (actmeta.deprecate) {
-          instance.log.warn('DEPRECATED', actmeta.pattern, actmeta.deprecate,
-                            act_callpoint)
+          instance.log.warn('DEPRECATED', actmeta.pattern, actmeta.deprecate)
         }
 
         Logging.log_act_in(root, { actid: actid, info: origargs.transport$ },
-                           actmeta, callargs, prior_ctxt, act_callpoint)
+                           actmeta, callargs, prior_ctxt)
 
         instance.emit('act-in', callargs)
 
@@ -1187,7 +1155,7 @@ function make_seneca (initial_options) {
         }
 
         var out = act_error(instance, err, actmeta, result, actdone,
-          actend - actstart, callargs, prior_ctxt, act_callpoint)
+          actend - actstart, callargs, prior_ctxt)
 
         if (args.fatal$) {
           return instance.die(out.err)
@@ -1211,7 +1179,7 @@ function make_seneca (initial_options) {
             info: info,
             listen: listen_origin
           },
-          actmeta, callargs, result, prior_ctxt, act_callpoint)
+          actmeta, callargs, result, prior_ctxt)
 
         if (_.isFunction(delegate.on_act_out)) {
           delegate.on_act_out(actmeta, result[1])
@@ -1228,25 +1196,15 @@ function make_seneca (initial_options) {
       }
     }
 
-    var execspec = {
-      id: actid,
-      gate: prior_ctxt.entry && !!callargs.gate$,
-      ungate: !!callargs.ungate$,
-      desc: act_callpoint,
-      cb: act_done,
-      fn: execute_action
+    if (!loadingStarted) {
+      loadingQueue.push(execute_action, act_done)
+    } else {
+      execute_action(act_done)
     }
-
-    if (typeof args.timeout$ === 'number') {
-      execspec.timeout = args.timeout$
-    }
-
-    private$.executor.execute(execspec)
   }
 
-
   function act_error (instance, err, actmeta, result, cb,
-    duration, callargs, prior_ctxt, act_callpoint) {
+    duration, callargs, prior_ctxt) {
     var call_cb = true
     actmeta = actmeta || {}
 
@@ -1279,7 +1237,7 @@ function make_seneca (initial_options) {
     Logging.log_act_err(root, {
       actid: callargs.id$ || callargs.actid$,
       duration: duration
-    }, actmeta, callargs, prior_ctxt, err, act_callpoint)
+    }, actmeta, callargs, prior_ctxt, err)
 
     instance.emit('act-err', callargs, err)
 
@@ -1295,7 +1253,7 @@ function make_seneca (initial_options) {
   }
 
   function callback_error (instance, err, actmeta, result, cb,
-    duration, callargs, prior_ctxt, act_callpoint) {
+    duration, callargs, prior_ctxt) {
     actmeta = actmeta || {}
 
     if (!err.seneca) {
@@ -1319,7 +1277,7 @@ function make_seneca (initial_options) {
     Logging.log_act_err(root, {
       actid: callargs.id$ || callargs.actid$,
       duration: duration
-    }, actmeta, callargs, prior_ctxt, err, act_callpoint)
+    }, actmeta, callargs, prior_ctxt, err)
 
     instance.emit('act-err', callargs, err, result[1])
 
@@ -1330,7 +1288,7 @@ function make_seneca (initial_options) {
 
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
-  function apply_actcache (instance, args, prior_ctxt, actcb, act_callpoint) {
+  function apply_actcache (instance, args, prior_ctxt, actcb) {
     var actid = args.id$ || args.actid$
 
     if (actid != null && so.actcache.active) {
@@ -1341,7 +1299,7 @@ function make_seneca (initial_options) {
         private$.stats.act.cache++
 
         Logging.log_act_cache(root, {actid: actid}, actmeta,
-          args, prior_ctxt, act_callpoint)
+          args, prior_ctxt)
 
         if (actcb) {
           setImmediate(function () {
@@ -1527,7 +1485,7 @@ function make_seneca (initial_options) {
     var self = this
 
     if (options != null) {
-      self.log.debug('options', 'set', options, callpoint())
+      self.log.debug('options', 'set', options)
     }
 
     so = private$.exports.options = ((options == null)
@@ -1577,7 +1535,11 @@ function make_seneca (initial_options) {
             })
           }
 
-          self.act(actargs, done)
+          // FIXME
+          // zig does not like synchronous acts
+          setImmediate(function () {
+            self.act(actargs, done)
+          })
           return true
         }
         fn.nm = args.strargs
@@ -1593,16 +1555,13 @@ function make_seneca (initial_options) {
 
     dzig.start(function () {
       var self = this
-      dzig.end(function () {
-        if (errhandler) errhandler.apply(self, arguments)
-      })
+      dzig.end()
     })
 
     sd.end = function (cb) {
       var self = this
       dzig.end(function () {
         if (cb) return cb.apply(self, arguments)
-        if (errhandler) return errhandler.apply(self, arguments)
       })
       return self
     }
@@ -1792,17 +1751,4 @@ function make_private () {
       actmap: {}
     }
   }
-}
-
-// Callpoint resolver. Indicates location in calling code.
-function make_callpoint (active) {
-  if (active) {
-    return function () {
-      return internals.error.callpoint(
-        new Error(),
-        ['/seneca/seneca.js', '/seneca/lib/', '/lodash.js'])
-    }
-  }
-
-  return _.noop
 }
