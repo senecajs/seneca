@@ -24,7 +24,6 @@ var Fastq = require('fastq')
 var Actions = require('./lib/actions')
 var Common = require('./lib/common')
 var Errors = require('./lib/errors')
-var Legacy = require('./lib/legacy')
 var Logging = require('./lib/logging')
 var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
@@ -317,9 +316,6 @@ function make_seneca (initial_options) {
 
   // Legacy API; Deprecated.
   root.findact = root.find
-
-  // DEPRECATED
-  root.fail = Legacy.fail(so)
 
   // Identifier generator.
   root.idgen = Nid({length: so.idlen})
