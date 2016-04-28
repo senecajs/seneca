@@ -985,31 +985,6 @@ describe('seneca', function () {
       .end(done)
   })
 
-  it('fix', function (done) {
-    var si = Seneca(testopts)
-
-    function ab (args, cb) {
-      cb(null, {r: '' + args.a + (args.b || '-') + (args.c || '-') + args.z})
-    }
-
-    si
-      .fix('a:1')
-      .add('b:2', ab)
-      .add('c:3', ab)
-      .act('b:2,z:8',
-        function (err, out) { assert.equal(err, null); assert.equal('12-8', out.r) })
-      .act('c:3,z:9',
-        function (err, out) { assert.equal(err, null); assert.equal('1-39', out.r) })
-
-    si
-      .act('a:1,b:2,z:8',
-        function (err, out) { assert.equal(err, null); assert.equal('12-8', out.r) })
-      .act('a:1,c:3,z:9',
-        function (err, out) { assert.equal(err, null); assert.equal('1-39', out.r) })
-
-    done()
-  })
-
   it('parambulator', function (done) {
     var si = Seneca({log: 'silent'})
 
@@ -1718,7 +1693,7 @@ describe('seneca', function () {
   })
 
   it('supports strict.find for disabling not found actions', function (done) {
-    var seneca = Seneca({ log: 'test', strict: { find: true } })
+    var seneca = Seneca({ log: 'silent', strict: { find: true } })
     seneca.act({ a: 1 }, function (err, out) {
       expect(err).to.exist()
       expect(out).to.not.exist()

@@ -76,9 +76,6 @@ var internals = {
       // Throw (some) errors from seneca.act.
       fragile: false,
 
-      // Fatal errors ... aren't fatal. Not for production!
-      undead: false,
-
       // Print debug info to console
       print: {
         // Print options. Best used via --seneca.print.options.
@@ -145,14 +142,6 @@ var internals = {
 
     // Internal settings.
     internal: {
-      // Close instance on these signals, if true.
-      close_signals: {
-        SIGHUP: true,
-        SIGTERM: true,
-        SIGINT: true,
-        SIGBREAK: true
-      },
-
       // seneca.add uses catchall (pattern='') prior
       catchall: false
     },
@@ -311,7 +300,6 @@ function make_seneca (initial_options) {
   root.act_if = api_act_if
   root.wrap = api_wrap
   root.seneca = api_seneca
-  root.fix = api_fix
   root.delegate = api_delegate
 
   // Legacy API; Deprecated.
@@ -346,10 +334,6 @@ function make_seneca (initial_options) {
     start: root.start_time,
     short: !!so.debug.short_logs
   })
-
-  // Error events are fatal, unless you're undead.  These are not the
-  // same as action errors, these are unexpected internal issues.
-  root.on('error', root.die)
 
   // setup status log
   if (so.status.interval > 0 && so.status.running) {
@@ -841,13 +825,6 @@ function make_seneca (initial_options) {
 
     function do_close () {
       seneca.closed = true
-
-      // cleanup process event listeners
-      _.each(so.internal.close_signals, function (active, signal) {
-        if (active) {
-          process.removeListener(signal, handleClose)
-        }
-      })
 
       seneca.log.debug('close', 'start')
       seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
@@ -1411,22 +1388,6 @@ function make_seneca (initial_options) {
     else return done()
   }
 
-  function api_fix () {
-    var self = this
-
-    var defargs = Common.parsePattern(self, arguments)
-
-    var fix = self.delegate(defargs.pattern)
-
-    fix.add = function () {
-      var args = Common.parsePattern(fix, arguments, 'rest:.*', defargs.pattern)
-      var addargs = [args.pattern].concat(args.rest)
-      return self.add.apply(fix, addargs)
-    }
-
-    return fix
-  }
-
   function api_delegate (fixedargs) {
     var self = this
 
@@ -1704,12 +1665,6 @@ function make_seneca (initial_options) {
 
     done(null, Common.copydata(val))
   }
-
-  _.each(so.internal.close_signals, function (active, signal) {
-    if (active) {
-      process.once(signal, handleClose)
-    }
-  })
 
   return root
 }

@@ -12,20 +12,8 @@ var it = lab.it
 var expect = Code.expect
 
 describe('plugin', function () {
-  lab.beforeEach(function (done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
   it('bad', function (done) {
     var si = Seneca({
-      // this lets you change undead per test
-      debug: {
-        undead: true
-      },
       log: 'silent'
     })
 
@@ -33,38 +21,33 @@ describe('plugin', function () {
       si.use({ foo: 1 })
     }
     catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_no_name').to.equal(e.code)
+      expect('no_name').to.equal(e.code)
     }
 
     try {
       si.use({ foo: 1 })
     }
     catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_no_name').to.equal(e.code)
+      expect('no_name').to.equal(e.code)
     }
 
     try {
       si.use('not-a-plugin-at-all-at-all')
     }
     catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_not_found').to.equal(e.code)
+      expect('not_found').to.equal(e.code)
     }
     si.close(done)
   })
 
   it('plugin-error-def', function (done) {
     var si = Seneca({
-      debug: {
-        undead: true
-      },
       log: 'silent',
-      errhandler: function (err) {
-        expect('plugin-def').to.equal(err.details.message)
-        done()
-      }
+    })
+
+    si.on('error', function (err) {
+      expect(err).to.exist()
+      done()
     })
 
     si.use(function () {
@@ -72,37 +55,20 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin-error-deprecated', function (done) {
-    var si = Seneca({
-      debug: {
-        undead: true
-      },
-      log: 'silent',
-      errhandler: function (err) {
-        expect('unsupported_legacy_plugin').to.equal(err.code)
-        done()
-      }
-    })
-
-    si.use(function (options, register) {
-      return { name: 'OldPlugin' }
-    })
-  })
-
   it('plugin-error-add', function (done) {
     var si = Seneca({
-      debug: {
-        undead: true
-      },
-      log: 'silent',
-      errhandler: function (err) {
-        expect('invalid_arguments').to.equal(err.orig.code)
-        done()
-      }
+      log: 'silent'
     })
 
     si.use(function () {
-      this.add(new Error())
+      var e
+      try {
+        this.add(new Error())
+      } catch (err) {
+        e = err
+      }
+      expect(e).to.exists
+      done()
     })
   })
 
@@ -183,69 +149,6 @@ describe('plugin', function () {
     done()
   })
 
-  it('fix', function (done) {
-    var si = Seneca({log: 'silent', errhandler: done})
-
-    function echo (args, cb) {
-      cb(null, _.extend({ t: Date.now() }, args))
-    }
-
-    var plugin_aaa = function (opts) {
-      this.add({a: 1}, function (args, cb) {
-        this.act('z:1', function (err, out) {
-          expect(err).to.not.exist()
-          cb(null, _.extend({ a: 1 }, out))
-        })
-      })
-      return 'aaa'
-    }
-
-    si.add({z: 1}, echo)
-    si.use(plugin_aaa)
-
-    expect(si.hasact({ z: 1 })).to.be.true()
-
-    si.act({a: 1}, function (err, out) {
-      expect(err).to.not.exist()
-      expect(1).to.equal(out.a)
-      expect(1).to.equal(out.z)
-      expect(out.t).to.exist()
-      expect(si.hasact({ a: 1 })).to.be.true()
-
-      si
-        .fix({q: 1})
-        .use(function (opts) {
-          this.add({a: 1}, function (args, done) {
-            this.act('z:1', function (err, out) {
-              expect(err).to.not.exist()
-              done(null, _.extend({a: 1, w: 1}, out))
-            })
-          })
-          return 'bbb'
-        })
-
-      expect(si.hasact({ a: 1 })).to.be.true()
-      expect(si.hasact({ a: 1, q: 1 })).to.be.true()
-
-      si.act({a: 1}, function (err, out) {
-        expect(err).to.not.exist()
-        expect(1).to.equal(out.a)
-        expect(1).to.equal(out.z)
-        expect(out.t).to.exist()
-
-        si.act({a: 1, q: 1}, function (err, out) {
-          expect(err).to.not.exist()
-          expect(1).to.equal(out.a)
-          expect(1).to.equal(out.z)
-          expect(1).to.equal(out.w)
-          expect(out.t).to.exist()
-
-          si.close(done)
-        })
-      })
-    })
-  })
-
   it('export', function (done) {
     var si = Seneca({
       // this lets you change undead per test
@@ -286,7 +189,7 @@ describe('plugin', function () {
     })
   })
 
-  it('handles plugin with action that timesout', function (done) {
+  it.skip('handles plugin with action that timesout', function (done) {
     var seneca = Seneca({log: 'silent', timeout: 10, debug: {undead: true}})
 
     seneca.use(function foo () {
@@ -294,21 +197,6 @@ describe('plugin', function () {
     })
 
     seneca.act({ role: 'plugin', cmd: 'timeout' }, function (err) {
-      expect(err).to.exist()
-      seneca.close(done)
-    })
-  })
-
-  it('handles plugin action that throws an error', function (done) {
-    var seneca = Seneca({ log: 'silent' })
-
-    seneca.use(function foo () {
-      this.add({ role: 'plugin', cmd: 'throw' }, function () {
-        throw new Error()
-      })
-    })
-
-    seneca.act({ role: 'plugin', cmd: 'throw' }, function (err) {
       expect(err).to.exist()
       seneca.close(done)
     })
@@ -550,7 +438,7 @@ describe('plugin', function () {
         var api = this.pin({ role: 'pluginA', cmd: '*' }, { immediate: true })
         api.msA1({ msg: 'hi' }, function (err, message) {
           expect(err).to.not.exist()
-          expect(message.result).to.equal('msa1')
+          expect(message.result).to.equal('msA1')
         })
         cb()
       })
@@ -612,7 +500,7 @@ describe('plugin', function () {
         var api = this.pin({ role: 'pluginA', cmd: '*' })
         api.msA1({ msg: 'hi' }, function (err, message) {
           expect(err).to.not.exist()
-          expect(message.result).to.equal('msa1')
+          expect(message.result).to.equal('msA1')
         })
         cb()
       })
