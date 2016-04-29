@@ -19,10 +19,11 @@ describe('connect', function () {
       cb(null, { foo: 'bar' })
     })
 
-    var app = Connect()
-    app.use(seneca.export('web'))
-
     seneca.ready(function () {
+
+      var app = Connect()
+      app.use(seneca.export('web'))
+
       seneca.act({
         role: 'web',
         use: {
@@ -69,7 +70,10 @@ describe('connect', function () {
     })
 
     var app = Connect()
-    app.use(seneca.export('web'))
+
+    seneca.ready(function () {
+      app.use(seneca.export('web'))
+    })
 
     var server = Http.createServer(app)
     server.once('listening', function () {
@@ -106,10 +110,11 @@ describe('connect', function () {
 
     var seneca = Seneca({ log: 'silent' })
     seneca.use(plugin)
-    var app = Connect()
-    app.use(seneca.export('web'))
 
     seneca.ready(function () {
+      var app = Connect()
+      app.use(seneca.export('web'))
+
       var server = Http.createServer(app)
       server.once('listening', function () {
         var port = server.address().port
