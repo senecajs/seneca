@@ -286,7 +286,6 @@ describe('entity', function () {
 
       si.use('entity')
       si.ready(function () {
-
         assert.equal('$-/-/foo;id=;{c:3,d:4}',
           si.make('foo', {a: 1, b: 2, c: 3, d: 4}).toString())
 
@@ -341,7 +340,6 @@ describe('entity', function () {
     // NOTE: zone is NOT saved! by design!
 
     si.ready(function () {
-
       var x1, x2, x3
 
       Async.series([

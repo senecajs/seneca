@@ -20,7 +20,6 @@ describe('connect', function () {
     })
 
     seneca.ready(function () {
-
       var app = Connect()
       app.use(seneca.export('web'))
 

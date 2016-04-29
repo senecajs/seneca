@@ -86,7 +86,7 @@ var internals = {
       act_caller: false,
 
       // Shorten all identifiers to 2 characters.
-      short_logs: false,
+      short_logs: false
     },
 
     // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -428,8 +428,6 @@ function make_seneca (initial_options) {
   }
 
   function api_export (key) {
-    var self = this
-
     // Legacy aliases
     if (key === 'util') {
       key = 'basic'
@@ -818,16 +816,6 @@ function make_seneca (initial_options) {
     return this
   }
 
-  var handleClose = function () {
-    root.close(function (err) {
-      if (err) {
-        Common.console_error(err)
-      }
-
-      process.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
-    })
-  }
-
   // close seneca instance
   // sets public seneca.closed property
   function api_close (done) {
@@ -1173,7 +1161,8 @@ function make_seneca (initial_options) {
 
     if (!loadingStarted) {
       loadingQueue.push(execute_action, act_done)
-    } else {
+    }
+    else {
       execute_action(act_done)
     }
   }
@@ -1222,40 +1211,6 @@ function make_seneca (initial_options) {
     }
   }
 
-  function callback_error (instance, err, actmeta, result, cb,
-    duration, callargs, prior_ctxt) {
-    actmeta = actmeta || {}
-
-    if (!err.seneca) {
-      err = internals.error(err, 'act_callback', _.extend(
-        {},
-        err.details,
-        {
-          message: err.message,
-          pattern: actmeta.pattern,
-          fn: actmeta.func,
-          cb: cb,
-          instance: instance.toString()
-        }))
-
-      result[0] = err
-    }
-
-    err.details = err.details || {}
-    err.details.plugin = err.details.plugin || {}
-
-    Logging.log_act_err(root, {
-      actid: callargs.id$ || callargs.actid$,
-      duration: duration
-    }, actmeta, callargs, prior_ctxt, err)
-
-    instance.emit('act-err', callargs, err, result[1])
-
-    if (so.errhandler) {
-      so.errhandler.call(instance, err)
-    }
-  }
-
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
   function apply_actcache (instance, args, prior_ctxt, actcb) {
@@ -1299,9 +1254,6 @@ function make_seneca (initial_options) {
 
   function act_make_delegate (instance, tx, callargs, actmeta, prior_ctxt) {
     var delegate_args = {}
-    if (callargs.gate$ != null) {
-      delegate_args.ungate$ = !!callargs.gate$
-    }
 
     var history_entry = _.clone(callargs.meta$)
     history_entry.instance = instance.id
@@ -1493,10 +1445,15 @@ function make_seneca (initial_options) {
           // as zig does not like sync
           var sync = true
           self.act(actargs, function (err, out) {
+            if (!done) {
+              return
+            }
+
             if (sync) {
               // TODO use process.nextTick?
               setImmediate(done, err, out)
-            } else {
+            }
+            else {
               done(err, out)
             }
           })
@@ -1515,10 +1472,7 @@ function make_seneca (initial_options) {
       trace: options.zig.trace
     })
 
-    dzig.start(function () {
-      var self = this
-      dzig.end()
-    })
+    dzig.start()
 
     sd.end = function (cb) {
       var self = this
@@ -1526,7 +1480,8 @@ function make_seneca (initial_options) {
         dzig.end(function () {
           if (cb) return cb.apply(self, arguments)
         })
-      } else {
+      }
+      else {
         loadingQueue.push(function (done) {
           dzig.end(function () {
             if (cb) return cb.apply(self, arguments)
@@ -1536,6 +1491,7 @@ function make_seneca (initial_options) {
           done()
         })
       }
+
       return self
     }
 
@@ -1582,18 +1538,6 @@ function make_seneca (initial_options) {
 
     root._decorations[property] = method
     root[property] = method
-  }
-
-  // DEPRECATED
-  // for use with async
-  root.next_act = function () {
-    var si = this || root
-    var args = arrayify(arguments)
-
-    return function (next) {
-      args.push(next)
-      si.act.apply(si, args)
-    }
   }
 
   // Add builtin actions.
@@ -1664,25 +1608,6 @@ function make_seneca (initial_options) {
 
   return root
 }
-
-
-// Utilities
-
-function make_trace_act (opts) {
-  return function () {
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.unshift(new Date().toISOString())
-
-    if (opts.stack) {
-      args.push(new Error('trace...').stack)
-    }
-
-    console.log(args.join('\t'))
-  }
-}
-
-
-// Declarations
 
 // Private member variables of Seneca object.
 function make_private () {

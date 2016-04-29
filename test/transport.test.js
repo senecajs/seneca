@@ -6,7 +6,6 @@ var _ = require('lodash')
 var Async = require('async')
 var Code = require('code')
 var Seneca = require('..')
-var Common = require('../lib/common')
 var Transport = require('../lib/transport')
 var Lab = require('lab')
 
@@ -32,7 +31,6 @@ function testact (args, done) {
 }
 
 describe('transport', function () {
-
   describe('listen()', function () {
     it('supports null options', function (done) {
       var listen = Transport.listen(_.noop)
@@ -362,7 +360,7 @@ describe('transport', function () {
       })
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function () {
-        var si =  Seneca({tag: 'cln', timeout: 5555, log: 'silent',
+        Seneca({tag: 'cln', timeout: 5555, log: 'silent',
                 debug: {short_logs: true}})
           .use(tt)
 
@@ -825,8 +823,6 @@ describe('transport', function () {
       })
         .use(bt)
 
-        //.ready(function () {
-
         .client({type: 'balance', pin: 'foo:1'})
         .client({port: 44440, pin: 'foo:1'})
         .client({port: 44441, pin: 'foo:1'})
@@ -834,7 +830,7 @@ describe('transport', function () {
         .client({port: 44440, pin: 'bar:1'})
         .client({port: 44449, pin: 'bar:2'})
 
-        c0.start()
+        .start()
 
         .wait('foo:1,actid$:aa/BB')
         .step(function (out) {
@@ -879,7 +875,6 @@ describe('transport', function () {
             })
           })
         })
-        //})
     }
   })
 

@@ -622,7 +622,7 @@ describe('seneca', function () {
       }
       self.init = function (options) {
         this.add({ role: self.name, cmd: 'foo' }, function (args, cb) {
-          cb(null, { 'foo' : args.foo })
+          cb(null, { foo: args.foo })
         })
       }
     }
@@ -1240,29 +1240,38 @@ describe('seneca', function () {
           done()
         })
     }
+  })
 
-    function do_zig3 () {
-      si.options({ xzig: { trace: true } })
+  it('zig3', function (done) {
+    var si = Seneca(testopts)
+    var tmp = {bb: []}
 
-      var tmp = {bb: []}
+    si
+      .add('a:1', function (a, d) { d(0, {aa: a.aa}) })
+      .add('b:1', function (a, cb) {
+        tmp.bb.push(a.bb)
+        cb()
+      })
+      .start()
+      .fire('b:1,bb:1')
+      .fire('b:1,bb:2')
+      .end(function () {
+        setTimeout(function () {
+          assert.deepEqual({ bb: [ 1, 2 ] }, tmp)
+          done()
+        }, 100)
+      })
+  })
 
-      si
-        .add('b:1', function (a, cb) {
-          tmp.bb.push(a.bb)
-          cb()
-        })
+  it('zig4', function (done) {
+    var si = Seneca(testopts)
 
-      si
-        .start()
-        .fire('b:1,bb:1')
-        .fire('b:1,bb:2')
-        .end(function () {
-          setTimeout(function () {
-            assert.deepEqual({ bb: [ 1, 2 ] }, tmp)
-            do_zig4()
-          }, 10)
-        })
-    }
+    si
+      .add('a:1', function (a, d) { d(0, {aa: a.aa}) })
+      .act('a:1,aa:1', function (e, o) {
+        assert.equal(1, o.aa)
+        do_zig4()
+      })
 
     function do_zig4 () {
       si.options({xzig: {trace: true}})

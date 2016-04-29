@@ -27,7 +27,6 @@ describe('seneca-error', function () {
     var si = make_seneca(ctxt)
 
     si.ready(function () {
-
       // ~~ CASE: fire-and-forget; err-logged
       si.act('a:1')
       // FIX: validate using act events

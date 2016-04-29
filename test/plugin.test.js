@@ -1,7 +1,6 @@
 /* Copyright (c) 2013-2015 Richard Rodger, MIT License */
 'use strict'
 
-var _ = require('lodash')
 var Code = require('code')
 var Lab = require('lab')
 var Seneca = require('..')
@@ -49,7 +48,8 @@ describe('plugin', function () {
       var e
       try {
         this.add(new Error())
-      } catch (err) {
+      }
+      catch (err) {
         e = err
       }
       expect(e).to.exists()
@@ -59,7 +59,7 @@ describe('plugin', function () {
 
   it('plugin-error-act', function (done) {
     var si = Seneca({
-      log: 'silent',
+      log: 'silent'
     })
 
     si.on('error', done)
@@ -143,7 +143,8 @@ describe('plugin', function () {
     var err
     try {
       si.export('not-an-export')
-    } catch (e) {
+    }
+    catch (e) {
       err = e
     }
     expect('export_not_found').to.equal(err.code)
