@@ -51,7 +51,7 @@
   "dependencies": {
     "archy": "1.0.0",
     "eraro": "0.4.1",
-    "fastq": "^1.3.0",
+    "fastq": "1.4.0",
     "gex": "0.2.2",
     "jsonic": "0.2.2",
     "lodash": "4.5.0",
