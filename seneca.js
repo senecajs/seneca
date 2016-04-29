@@ -1015,12 +1015,6 @@ function make_seneca (initial_options) {
 
         err = internals.error(errcode, errinfo)
 
-        // TODO: wrong approach - should always call action_done to complete
-        // error would then include a fatal flag
-        if (args.fatal$) {
-          return delegate.emit('error', err)
-        }
-
         Logging.log_act_bad(root, err, so.trace.unknown)
 
         return action_done(err)
@@ -1142,10 +1136,6 @@ function make_seneca (initial_options) {
         var out = act_error(instance, err, actmeta, result, actdone,
           actend - actstart, callargs, prior_ctxt)
 
-        if (args.fatal$) {
-          return instance.emit('error', out.err)
-        }
-
         call_cb = out.call_cb
         result[0] = out.err
 
@@ -1225,11 +1215,6 @@ function make_seneca (initial_options) {
     }, actmeta, callargs, prior_ctxt, err)
 
     instance.emit('act-err', callargs, err)
-
-    // when fatal$ is set, prefer to die instead
-    if (so.errhandler && (!callargs || !callargs.fatal$)) {
-      call_cb = !so.errhandler.call(instance, err)
-    }
 
     return {
       call_cb: call_cb,
@@ -1614,7 +1599,6 @@ function make_seneca (initial_options) {
   // Add builtin actions.
   root.add({role: 'seneca', cmd: 'stats'}, action_seneca_stats)
   root.add({role: 'seneca', cmd: 'close'}, action_seneca_close)
-  root.add({role: 'seneca', info: 'fatal'}, action_seneca_fatal)
   root.add({role: 'seneca', get: 'options'}, action_options_get)
 
   // Legacy builtin actions.
@@ -1624,10 +1608,6 @@ function make_seneca (initial_options) {
   Print(root)
 
   // Define builtin actions.
-
-  function action_seneca_fatal (args, done) {
-    done()
-  }
 
   function action_seneca_close (args, done) {
     this.emit('close')

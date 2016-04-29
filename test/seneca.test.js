@@ -182,45 +182,6 @@ describe('seneca', function () {
       })
   })
 
-  it('errhandler', function (done) {
-    var tmp = {}
-
-    function grab_all (err) {
-      tmp.grab = err
-      return true
-    }
-
-    function pass_on (err) {
-      tmp.pass = err
-    }
-
-    var si = Seneca({log: 'silent'})
-    si.add('cmd:grab', function (args, done) {
-      done(new Error('grab'))
-    })
-    si.add('cmd:pass', function (args, done) {
-      done(new Error('pass'))
-    })
-
-    si.options({errhandler: grab_all})
-
-    si.act('cmd:grab', function () {
-      assert.fail()
-    })
-
-    setTimeout(function () {
-      assert.ok(tmp.grab)
-
-      si.options({errhandler: pass_on})
-
-      si.act('cmd:pass', function (err) {
-        assert.ok(err)
-        assert.ok(tmp.pass)
-        done()
-      })
-    }, 100)
-  })
-
   it('register', function (done) {
     var si = Seneca(testopts)
 
@@ -898,7 +859,7 @@ describe('seneca', function () {
   it('moreobjargs', function (done) {
     var p0 = {c: 6}
 
-    Seneca({log: 'silent', errhandler: done})
+    Seneca({log: 'silent'})
 
       .add({a: 1}, {b: 2},
         function (args, done) { done(null, {c: args.c}) })
@@ -941,15 +902,12 @@ describe('seneca', function () {
       })
 
       .ready(function () {
-        // using root as ready seneca is fatal$
-        this.root.options({errhandler: function (err) {
-          if (err.code !== 'act_invalid_args') {
+        this.root.act('A:1,B:true,C:44', function (err) {
+          if (err && err.code !== 'act_invalid_args') {
             return done(err)
           }
           done()
-        }})
-
-        this.root.act('A:1,B:true,C:44')
+        })
       })
   })
 

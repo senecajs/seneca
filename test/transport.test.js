@@ -883,23 +883,6 @@ describe('transport', function () {
     }
   })
 
-  it('fatal$ false with transport not-found kill process', function (done) {
-    Seneca({ log: 'silent' })
-      .listen()
-      .ready(function () {
-        var client = Seneca({ timeout: 30, log: 'silent' })
-        client.client()
-
-
-        client.ready(function () {
-          client.act({ foo: 1, fatal$: false }, function (err, result) {
-            expect(err).to.exist()
-            done()
-          })
-        })
-      })
-  })
-
   it('server can be restarted without issues to clients', function (done) {
     var execCount = 0
     var server = Seneca({ log: 'silent' })

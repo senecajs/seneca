@@ -52,7 +52,7 @@ describe('plugin', function () {
       } catch (err) {
         e = err
       }
-      expect(e).to.exists
+      expect(e).to.exists()
       done()
     })
   })
@@ -62,17 +62,21 @@ describe('plugin', function () {
       log: 'silent',
     })
 
-    si.on('error', function (err) {
-      expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
-      done()
-    })
+    si.on('error', done)
 
     si.add('foo:1', function (args, cb) {
       cb(new Error('act-cb'))
     })
 
     si.use(function () {
+      // this should cause no issues
+      // as it's fire and forget
       this.act('foo:1')
+
+      this.act('foo:1', function (err) {
+        expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
+        done()
+      })
     })
   })
 
