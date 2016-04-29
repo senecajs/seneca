@@ -261,7 +261,7 @@ describe('seneca', function () {
   })
 
   it('action-basic', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
     si.options({debug: {fragile: true}})
 
     var a1 = 0
@@ -302,7 +302,7 @@ describe('seneca', function () {
   })
 
   it('passes seneca instance on callback function property', function (done) {
-    var si = Seneca({ log: 'silent' }).error(done)
+    var si = Seneca({ log: 'silent' })
     si.add({ cmd: 'foo' }, function (args, reply) {
       reply(null, { did: reply.seneca.did })
     })
@@ -332,7 +332,7 @@ describe('seneca', function () {
   })
 
   it('action-default', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
 
     si.act({op: 'bad', a1: 100, default$: {a: 1}}, function (err, out) {
       assert.equal(err, null)
@@ -361,7 +361,7 @@ describe('seneca', function () {
   })
 
   it('action-override', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
 
     function foo (args, done) {
       done(null, { a: args.a, s: this.toString(), foo: args.meta$ })
@@ -413,7 +413,7 @@ describe('seneca', function () {
   })
 
   it('action-extend', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
 
     si.options({strict: {add: false}})
 
@@ -964,8 +964,6 @@ describe('seneca', function () {
     }
 
     Seneca(testopts)
-      .error(done)
-
       .start()
 
       .add('i:0,a:1,b:2', addFunction)
@@ -1468,7 +1466,6 @@ describe('seneca', function () {
 
   it('add-noop', function (done) {
     var si = Seneca({log: 'silent'})
-      .error(done)
       .add('a:1')
 
       .act('a:1', function (e, o) {
@@ -1495,52 +1492,6 @@ describe('seneca', function () {
     delete process.versions.node
     process.versions.node = '0.11.99'
     si.cluster()
-  })
-
-  describe('#error', function () {
-    it('isn\'t called twice on fatal errors when falta$: true', function (done) {
-      var si = Seneca({ log: 'silent', debug: { undead: true } })
-
-      var count = 0
-      si.error(function () {
-        assert(++count === 1)
-      })
-
-      si.add({ role: 'foo', cmd: 'bar' }, function (args, cb) {
-        cb(new Error('test error'))
-      })
-
-      si.act({ role: 'foo', cmd: 'bar', fatal$: true }, function (err) {
-        assert(!err)
-      })
-
-      setTimeout(function () {
-        assert(count === 1)
-        done()
-      }, 200)
-    })
-
-    it('isn\'t called twice when fatal$: false', function (done) {
-      var si = Seneca({ log: 'silent', debug: { undead: true } })
-
-      var count = 0
-      si.error(function () {
-        ++count
-      })
-
-      si.add({ role: 'foo', cmd: 'bar' }, function (args, cb) {
-        cb(new Error('test error'))
-      })
-
-      si.act({ role: 'foo', cmd: 'bar', fatal$: false }, function (err) {
-        assert(err)
-      })
-
-      setTimeout(function () {
-        assert(count === 1)
-        done()
-      }, 200)
-    })
   })
 
   describe('#decorate', function () {
@@ -1617,7 +1568,7 @@ describe('seneca', function () {
 
   describe('#intercept', function () {
     it('intercept', function (done) {
-      var si = Seneca({ log: 'silent' }).error(done)
+      var si = Seneca({ log: 'silent' })
       var fm = {}
 
       var i0 = function i0 (msg, done) {

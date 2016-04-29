@@ -12,7 +12,7 @@ var assert = Assert
 
 describe('basic', function () {
   it('action.generate_id', function (fin) {
-    var si = Seneca({log: 'test'}).error(fin)
+    var si = Seneca({log: 'test'})
 
     // .pin call can happen before ready, but will only be usable after ready
     var basic = si.pin({role: 'basic', cmd: '*'})
@@ -36,7 +36,6 @@ describe('basic', function () {
 
   it('ensure_entity', function (fin) {
     var si = Seneca({log: 'test'})
-    si.options({errhandler: fin})
     si.use('entity')
 
     var foo_ent = si.make$('util_foo')
@@ -83,7 +82,7 @@ describe('basic', function () {
   it('note', function (fin) {
     var si = Seneca({log: 'test'})
     si
-      .start(fin)
+      .start()
       .wait('role:util,note:true,cmd:set,key:foo,value:red')
 
       .wait('role:util,note:true,cmd:get,key:foo')
@@ -136,6 +135,6 @@ describe('basic', function () {
         assert.equal(0, o.length)
       })
 
-      .end()
+      .end(fin)
   })
 })

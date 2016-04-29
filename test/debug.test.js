@@ -12,7 +12,7 @@ var assert = Assert
 
 describe('debug', function () {
   it('logroute', function (done) {
-    var si = Seneca({log: 'test'}).error(done)
+    var si = Seneca({log: 'test'})
     var lr0 = si.logroute()
     assert.equal(lr0, 'level=error -> <print>\nlevel=fatal -> <print>')
 

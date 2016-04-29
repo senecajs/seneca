@@ -285,7 +285,6 @@ function make_seneca (initial_options) {
   root.close = api_close // Close and shutdown plugins.
   root.options = api_options // Get and set options.
   root.start = api_start // Start an action chain.
-  root.error = api_error // Set global error handler.
   root.decorate = api_decorate // Decorate seneca object with functions
 
   // Method aliases.
@@ -822,6 +821,8 @@ function make_seneca (initial_options) {
         pinthis.add(actpattern, meta, wrapper)
       })
     })
+
+    return this
   }
 
   var handleClose = function () {
@@ -1591,11 +1592,6 @@ function make_seneca (initial_options) {
     }
 
     return sd
-  }
-
-  function api_error (errhandler) {
-    this.options({ errhandler: errhandler })
-    return this
   }
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate

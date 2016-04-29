@@ -23,7 +23,6 @@ describe('prior', function () {
   })
   it('add-general-to-specific', function (done) {
     Seneca(testopts)
-      .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
@@ -37,7 +36,6 @@ describe('prior', function () {
 
   it('add-strict-general-to-specific', function (done) {
     Seneca(_.extend({ strict: { add: true } }, testopts))
-      .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
@@ -51,7 +49,6 @@ describe('prior', function () {
 
   it('add-specific-to-general', function (done) {
     Seneca(testopts)
-      .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
       .add('a:1', order_called(3))
@@ -65,7 +62,6 @@ describe('prior', function () {
 
   it('add-strict-specific-to-general', function (done) {
     Seneca(_.extend({strict: {add: true}}, testopts))
-      .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
       .add('a:1', order_called(3))
@@ -79,7 +75,6 @@ describe('prior', function () {
 
   it('add-general-to-specific-alpha', function (done) {
     Seneca(testopts)
-      .error(done)
       .add('a:1', order_called(4))
       .add('a:1,c:1', order_called(3))
       .add('a:1,b:1', order_called(2))
@@ -94,7 +89,6 @@ describe('prior', function () {
 
   it('add-general-to-specific-reverse-alpha', function (done) {
     Seneca(testopts)
-      .error(done)
       .add('a:1', order_called(4))
       .add('a:1,b:1', order_called(3))
       .add('a:1,c:1', order_called(2))
@@ -109,8 +103,6 @@ describe('prior', function () {
 
   it('add-strict-default', function (done) {
     Seneca(testopts)
-      .error(done)
-
       .add('a:1', order_called(2))
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {
@@ -130,8 +122,6 @@ describe('prior', function () {
 
   it('add-strict-true', function (done) {
     Seneca(_.extend({strict: {add: true}}, testopts))
-      .error(done)
-
       .add('a:1', order_called(2))
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {

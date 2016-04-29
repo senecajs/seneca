@@ -39,7 +39,7 @@ describe('entity', function () {
   })
 
   it('setid-mem', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
     si.use('entity')
 
     var z0 = si.make('zed')
@@ -329,7 +329,7 @@ describe('entity', function () {
   })
 
   it('mem-store-import-export', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
     si.use('entity')
 
     // NOTE: zone is NOT saved! by design!
@@ -400,7 +400,7 @@ describe('entity', function () {
   })
 
   it('close', function (done) {
-    var si = Seneca(testopts).error(done)
+    var si = Seneca(testopts)
     si.use('entity')
 
     var tmp = {s0: 0, s1: 0, s2: 0}

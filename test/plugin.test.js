@@ -231,7 +231,6 @@ describe('plugin', function () {
   it('dynamic-load-sequence', function (done) {
     var a = []
     Seneca({ log: 'test' })
-      .error(done)
 
       .use(function first () {
         this.add('init:first', function (m, d) {
@@ -270,8 +269,6 @@ describe('plugin', function () {
     var log = []
 
     Seneca({ log: 'test' })
-      .error(done)
-
       .use(function foo () {
         log.push('a')
         this.add('init:foo', function (msg, done) {
