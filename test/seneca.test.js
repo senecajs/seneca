@@ -480,7 +480,6 @@ describe('seneca', function () {
       })
 
       si
-        .gate()
         .act('foo:a,x:10,y:0.1', function (err, out) {
           assert.equal(err, null)
           assert.equal(11.1, count)
@@ -510,7 +509,6 @@ describe('seneca', function () {
               count += args.z
               this.prior(args, done)
             })
-            .gate()
             .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
               assert.equal(err, null)
               assert.equal(1000235.32, count)
@@ -536,7 +534,6 @@ describe('seneca', function () {
     })
 
     si
-      .gate()
       .act('foo:a,x:10', function (err, out) {
         assert.equal(err, null)
         assert.equal(11, count)
@@ -911,8 +908,6 @@ describe('seneca', function () {
 
       .add('x:1', {x: 2, y: 3}, {x: 4, y: 5, z: 6},
         function (args, done) { done(null, {k: args.k}) })
-
-      .gate()
 
       .act('a:1,b:2,c:3', function (err, out) {
         assert.equal(err, null)
@@ -1338,7 +1333,6 @@ describe('seneca', function () {
 
   it('wrap', function (done) {
     var si = Seneca(testopts)
-    si.options({ errhandler: done })
 
     si.add('a:1', function (args, cb) { cb(null, {aa: args.aa}) })
     si.add('b:2', function (args, cb) { cb(null, {bb: args.bb}) })
@@ -1353,8 +1347,10 @@ describe('seneca', function () {
     })
 
     function assertMetaName (name, pattern) {
-      var meta = si.find(pattern)
-      assert.equal(name, meta.func.name)
+      si.ready(function () {
+        var meta = si.find(pattern)
+        assert.equal(name, meta.func.name)
+      })
     }
 
     assertMetaName('first', 'a:1')
@@ -1611,10 +1607,12 @@ describe('seneca', function () {
       done(null, {})
     })
 
-    assert(si.has({cmd: 'a'}))
-    assert(si.has('cmd:a'))
+    si.ready(function () {
+      assert(si.has({cmd: 'a'}))
+      assert(si.has('cmd:a'))
 
-    done()
+      done()
+    })
   })
 
   describe('#intercept', function () {

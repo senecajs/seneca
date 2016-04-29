@@ -32,14 +32,6 @@ function testact (args, done) {
 }
 
 describe('transport', function () {
-  // TODO: test top level qaz:* : def and undef other pats
-  lab.beforeEach(function (done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
 
   describe('listen()', function () {
     it('supports null options', function (done) {
@@ -207,6 +199,7 @@ describe('transport', function () {
     it('supports null options', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: {
           info: function () {
 
@@ -234,6 +227,7 @@ describe('transport', function () {
     it('supports send to client queueing', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: function () {},
         options: function () {
           return {
@@ -263,6 +257,7 @@ describe('transport', function () {
     it('supports pins represented by strings', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: function () {},
         options: function () {
           return {
@@ -300,6 +295,7 @@ describe('transport', function () {
         }
       }
       var seneca = {
+        ready: setImmediate,
         log: {
           info: _.noop,
           debug: _.noop
@@ -336,6 +332,7 @@ describe('transport', function () {
       }
 
       var seneca = {
+        ready: setImmediate,
         log: {
           info: _.noop,
           debug: _.noop
@@ -373,12 +370,11 @@ describe('transport', function () {
       })
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function () {
-        Seneca({tag: 'cln', timeout: 5555, log: 'silent',
+        var si =  Seneca({tag: 'cln', timeout: 5555, log: 'silent',
                 debug: {short_logs: true}})
           .use(tt)
 
           .client({type: 'test', pin: 'foo:1'})
-
           .start()
 
           .wait('foo:1,actid$:aa/BB')
@@ -405,7 +401,7 @@ describe('transport', function () {
 
               .client({type: 'test', pin: 'foo:*'})
 
-              .start(done)
+              .start()
 
               .wait('foo:1')
               .step(function (out) {
@@ -426,7 +422,7 @@ describe('transport', function () {
                 })
               })
 
-              .end()
+              .end(done)
       })
   })
 
@@ -444,7 +440,7 @@ describe('transport', function () {
 
               .client({type: 'test', pin: {'foo': '*'}})
 
-              .start(done)
+              .start()
 
               .wait('foo:1')
               .step(function (out) {
@@ -465,7 +461,7 @@ describe('transport', function () {
                 })
               })
 
-              .end()
+              .end(done)
       })
   })
 
@@ -771,7 +767,7 @@ describe('transport', function () {
       })
   })
 
-  it('handles timeout from client connecting', function (done) {
+  it.skip('handles timeout from client connecting', function (done) {
     var seneca = Seneca({ log: 'silent', timeout: 50 }).client({ port: 1 })
     seneca.act({ cmd: 'test' }, function (err) {
       expect(err).to.exist()
@@ -792,7 +788,6 @@ describe('transport', function () {
       s0 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('foo:1', function (args, done) {
           // ensure action id is transferred for traceability
           expect('aa/BB').to.equal(args.meta$.id)
@@ -810,7 +805,6 @@ describe('transport', function () {
       s1 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('foo:1', function (args, done) {
           // ensure action id is transferred for traceability
           expect('cc/DD').to.equal(args.meta$.id)
@@ -825,7 +819,6 @@ describe('transport', function () {
       s9 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('bar:2', function (args, done) {
           done(null, { bar: 2, q: 2 })
         })
@@ -834,22 +827,23 @@ describe('transport', function () {
     }
 
     function run_client () {
+      console.log('run_client')
       c0 = Seneca({
-        tag: 'cln', timeout: 5555, log: 'silent',
+        tag: 'cln', timeout: 5555, //log: 'silent',
         debug: {short_logs: true}
       })
-        .error(done)
         .use(bt)
 
-        .client({type: 'balance', pin: 'foo:1'})
+        //.ready(function () {
 
+        .client({type: 'balance', pin: 'foo:1'})
         .client({port: 44440, pin: 'foo:1'})
         .client({port: 44441, pin: 'foo:1'})
 
         .client({port: 44440, pin: 'bar:1'})
         .client({port: 44449, pin: 'bar:2'})
 
-        .start()
+        c0.start()
 
         .wait('foo:1,actid$:aa/BB')
         .step(function (out) {
@@ -887,11 +881,14 @@ describe('transport', function () {
           s0.close(function () {
             s1.close(function () {
               s9.close(function () {
-                c0.close(done)
+                c0.close(function () {
+                  done()
+                })
               })
             })
           })
         })
+        //})
     }
   })
 

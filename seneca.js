@@ -275,9 +275,8 @@ function make_seneca (initial_options) {
   root.act = api_act // Perform action that matches pattern.
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
-  // FIXME _.noop is there in place of callpoint
-  root.listen = Transport.listen(_.noop) // Listen for inbound messages.
-  root.client = Transport.client(_.noop) // Send outbound messages.
+  root.listen = Transport.listen() // Listen for inbound messages.
+  root.client = Transport.client() // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
   root.has = Actions.has // True if action pattern defined.
   root.find = Actions.find // Find action by pattern
@@ -623,6 +622,17 @@ function make_seneca (initial_options) {
   // _seneca.act_ is called.
   function api_add () {
     var self = this
+    var re
+
+    if (!loadingStarted) {
+      re = arrayify(arguments)
+      loadingQueue.push(function (cb) {
+        api_add.apply(self, re)
+        process.nextTick(cb)
+      })
+      return self
+    }
+
     var args = Common.parsePattern(self, arguments, 'action:f? actmeta:o?')
 
     var raw_pattern = args.pattern
@@ -794,6 +804,14 @@ function make_seneca (initial_options) {
 
   function api_wrap (pin, meta, wrapper) {
     var pinthis = this
+
+    if (!loadingStarted) {
+      loadingQueue.push(function (cb) {
+        api_wrap.call(pinthis, pin, meta, wrapper)
+        process.nextTick(cb)
+      })
+      return this
+    }
 
     wrapper = _.isFunction(meta) ? meta : wrapper
     meta = _.isFunction(meta) ? {} : meta
@@ -1456,7 +1474,7 @@ function make_seneca (initial_options) {
     return so
   }
 
-  function api_start (errhandler) {
+  function api_start () {
     var sd = this.delegate()
     var options = sd.options()
     options.zig = options.zig || {}
@@ -1492,11 +1510,19 @@ function make_seneca (initial_options) {
             })
           }
 
-          // FIXME
-          // zig does not like synchronous acts
-          setImmediate(function () {
-            self.act(actargs, done)
+          // always call done in an async way
+          // as zig does not like sync
+          var sync = true
+          self.act(actargs, function (err, out) {
+            if (sync) {
+              // TODO use process.nextTick?
+              setImmediate(done, err, out)
+            } else {
+              done(err, out)
+            }
           })
+          sync = false
+
           return true
         }
         fn.nm = args.strargs
@@ -1517,9 +1543,20 @@ function make_seneca (initial_options) {
 
     sd.end = function (cb) {
       var self = this
-      dzig.end(function () {
-        if (cb) return cb.apply(self, arguments)
-      })
+      if (loadingStarted) {
+        dzig.end(function () {
+          if (cb) return cb.apply(self, arguments)
+        })
+      } else {
+        loadingQueue.push(function (done) {
+          dzig.end(function () {
+            if (cb) return cb.apply(self, arguments)
+          })
+          // we just need to queue the execution of the zig
+          // we don't need to wait the zig to finish
+          done()
+        })
+      }
       return self
     }
 
@@ -1583,16 +1620,6 @@ function make_seneca (initial_options) {
       args.push(next)
       si.act.apply(si, args)
     }
-  }
-
-  root.gate = function () {
-    var gated = this.delegate({gate$: true})
-    return gated
-  }
-
-  root.ungate = function () {
-    var ungated = this.delegate({gate$: false})
-    return ungated
   }
 
   // Add builtin actions.
