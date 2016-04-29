@@ -285,15 +285,7 @@ describe('transport', function () {
     })
 
     it('handles errors from act', function (done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function () {
-        return function (err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
+      var client = Transport.client()
       var seneca = {
         ready: setImmediate,
         log: {
@@ -306,6 +298,10 @@ describe('transport', function () {
               pins: [{ test: true }]
             }
           }
+        },
+        emit: function (event, err) {
+          expect(err).to.exist()
+          done()
         },
         act: function (pattern, options, callback) {
           callback(new Error(), {})
@@ -321,15 +317,7 @@ describe('transport', function () {
     })
 
     it('handles a null liveclient', function (done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function () {
-        return function (err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
+      var client = Transport.client()
 
       var seneca = {
         ready: setImmediate,
@@ -351,6 +339,10 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
+        emit: function (event, err) {
+          expect(err).to.exist()
+          done()
+        },
         context: {}
       }
 
@@ -827,9 +819,8 @@ describe('transport', function () {
     }
 
     function run_client () {
-      console.log('run_client')
       c0 = Seneca({
-        tag: 'cln', timeout: 5555, //log: 'silent',
+        tag: 'cln', timeout: 5555, log: 'silent',
         debug: {short_logs: true}
       })
         .use(bt)

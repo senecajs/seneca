@@ -58,18 +58,13 @@ describe('plugin', function () {
   })
 
   it('plugin-error-act', function (done) {
-    var cc = 0
-
     var si = Seneca({
-      debug: {
-        undead: true
-      },
       log: 'silent',
-      errhandler: function (err) {
-        expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
-        cc++
-        done()
-      }
+    })
+
+    si.on('error', function (err) {
+      expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
+      done()
     })
 
     si.add('foo:1', function (args, cb) {
@@ -83,10 +78,6 @@ describe('plugin', function () {
 
   it('depends', function (done) {
     var si = Seneca({
-      // this lets you change undead per test
-      debug: {
-        undead: true
-      },
       log: 'silent'
     })
 
@@ -99,9 +90,9 @@ describe('plugin', function () {
       return { name: 'bbb' }
     })
 
-    si.options({ errhandler: function (err) {
+    si.on('error', function (err) {
       expect('plugin_required').to.equal(err.code)
-    }})
+    })
 
     si.use(function (opts) {
       this.depends('ccc', ['zzz'])
@@ -145,12 +136,14 @@ describe('plugin', function () {
 
     si.use(function badexport () {})
 
-    si.options({ errhandler: function (err) {
-      expect('export_not_found').to.equal(err.code)
-      done()
-    }})
-
-    si.export('not-an-export')
+    var err
+    try {
+      si.export('not-an-export')
+    } catch (e) {
+      err = e
+    }
+    expect('export_not_found').to.equal(err.code)
+    done()
   })
 
   it('hasplugin', function (done) {

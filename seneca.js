@@ -319,13 +319,6 @@ function make_seneca (initial_options) {
 
   root.name = 'Seneca/' + root.version + '/' + root.id
 
-  root.die = Common.makedie(root, {
-    type: 'sys',
-    plugin: 'seneca',
-    tag: root.version,
-    id: root.id
-  })
-
   // Configure logging
   root.log = Logging.makelog(so.log, {
     id: root.id,
@@ -427,7 +420,7 @@ function make_seneca (initial_options) {
     _.every(deps, function (depname) {
       if (!_.includes(private$.plugin_order.byname, depname) &&
         !_.includes(private$.plugin_order.byname, 'seneca-' + depname)) {
-        self.die(internals.error('plugin_required', { name: args.pluginname, dependency: depname }))
+        self.emit('error', internals.error('plugin_required', { name: args.pluginname, dependency: depname }))
         return false
       }
       else return true
@@ -444,7 +437,7 @@ function make_seneca (initial_options) {
 
     var exportval = private$.exports[key]
     if (!exportval) {
-      return self.die(internals.error('export_not_found', {key: key}))
+      throw internals.error('export_not_found', {key: key})
     }
 
     return exportval
@@ -1025,7 +1018,7 @@ function make_seneca (initial_options) {
         // TODO: wrong approach - should always call action_done to complete
         // error would then include a fatal flag
         if (args.fatal$) {
-          return delegate.die(err)
+          return delegate.emit('error', err)
         }
 
         Logging.log_act_bad(root, err, so.trace.unknown)
@@ -1150,7 +1143,7 @@ function make_seneca (initial_options) {
           actend - actstart, callargs, prior_ctxt)
 
         if (args.fatal$) {
-          return instance.die(out.err)
+          return instance.emit('error', out.err)
         }
 
         call_cb = out.call_cb
