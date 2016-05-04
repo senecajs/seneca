@@ -236,6 +236,11 @@ function make_seneca (initial_options) {
   // Create a new root Seneca instance.
   var root = new Seneca()
 
+  // Create a loading queue to bootstrap safely
+  // every use, add and act done in the starting
+  // tick will be queued and executed one at a time
+  var loadingQueue = DelayedOpenQueue()
+
   // expose private for plugins
   root.private$ = private$
 
@@ -843,8 +848,6 @@ function make_seneca (initial_options) {
       })
     }
   }
-
-  var loadingQueue = DelayedOpenQueue()
 
   // useful when defining services!
   // note: has EventEmitter.once semantics
