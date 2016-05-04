@@ -18,7 +18,7 @@ var Patrun = require('patrun')
 var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
-var Fastq = require('fastq')
+var DelayedOpenQueue = require('delayed-open-queue')
 
 // Internal modules.
 var Actions = require('./lib/actions')
@@ -614,7 +614,7 @@ function make_seneca (initial_options) {
     var self = this
     var re
 
-    if (!loadingStarted) {
+    if (!loadingQueue.started) {
       re = arrayify(arguments)
       loadingQueue.push(function (cb) {
         api_add.apply(self, re)
@@ -795,7 +795,7 @@ function make_seneca (initial_options) {
   function api_wrap (pin, meta, wrapper) {
     var pinthis = this
 
-    if (!loadingStarted) {
+    if (!loadingQueue.started) {
       loadingQueue.push(function (cb) {
         api_wrap.call(pinthis, pin, meta, wrapper)
         process.nextTick(cb)
@@ -844,17 +844,7 @@ function make_seneca (initial_options) {
     }
   }
 
-  var loadingStarted = false
-  var loadingQueue = Fastq(function (arg, cb) {
-    // all plugins needs to load after a full I/O as completed
-    setImmediate(arg, cb)
-  }, 1)
-
-  // we start accepting act after the current tick has finished
-  // queiuing all acts before loading as started
-  process.nextTick(function () {
-    loadingStarted = true
-  })
+  var loadingQueue = DelayedOpenQueue()
 
   // useful when defining services!
   // note: has EventEmitter.once semantics
@@ -867,7 +857,7 @@ function make_seneca (initial_options) {
       return
     }
 
-    loadingQueue.push(do_ready, _.noop)
+    loadingQueue.push(do_ready)
 
     return self
 
@@ -903,6 +893,12 @@ function make_seneca (initial_options) {
         self.emit('error', err)
         return
       }
+
+      // TODO remove, we probably do not need
+      // to emit this event for every use
+      // but it was done in the previous release
+      // put it behind and option for backward
+      // compat? - MC
       self.emit('ready')
     })
 
@@ -1159,7 +1155,7 @@ function make_seneca (initial_options) {
       }
     }
 
-    if (!loadingStarted) {
+    if (!loadingQueue.started) {
       loadingQueue.push(execute_action, act_done)
     }
     else {
@@ -1476,7 +1472,7 @@ function make_seneca (initial_options) {
 
     sd.end = function (cb) {
       var self = this
-      if (loadingStarted) {
+      if (loadingQueue.started) {
         dzig.end(function () {
           if (cb) return cb.apply(self, arguments)
         })
