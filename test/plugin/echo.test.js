@@ -19,10 +19,10 @@ describe('plugin.echo', function () {
     si.use('echo')
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
-      assert.isNull(err)
+      assert.ok(!err)
       assert.equal('' + {baz: 'bax'}, '' + out)
+      done()
     })
-    done()
   })
 
   it('options', function (done) {
@@ -34,9 +34,9 @@ describe('plugin.echo', function () {
     si.use('echo', {inject: {foo: 'bar'}})
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
-      assert.isNull(err)
+      assert.ok(!err)
       assert.equal('' + {baz: 'bax', foo: 'bar'}, '' + out)
+      done()
     })
-    done()
   })
 })

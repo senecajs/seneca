@@ -162,71 +162,62 @@ describe('delegation', function () {
   it('parent.plugin', function (done) {
     var si = Seneca(testopts)
 
-    Async.series([
-      function (next) {
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
-            this.log.debug('P', '1')
-            args.p1 = 1
-            cb(null, args)
-          })
-          return {name: 'p1'}
-        })
-
-        si.act({ a: 'A' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a === 'A')
-          assert.ok(out.p1 === 1)
-          next()
-        })
-      },
-      function (next) {
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
-            this.log.debug('P', '2a')
-
-            this.parent(args, function (err, out) {
-              this.log.debug('P', '2b')
-              out.p2 = 1
-              cb(err, out)
-            })
-          })
-          return {name: 'p2'}
-        })
-
-        si.act({ a: 'A' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a === 'A')
-          assert.ok(out.p1 === 1)
-          assert.ok(out.p2 === 1)
-          next()
-        })
-      },
-      function (next) {
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
-            this.log.debug('P', '3a')
-
-            this.parent(args, function (err, out) {
-              this.log.debug('P', '3b')
-              out.p3 = 1
-              cb(err, out)
-            })
-          })
-          return {name: 'p3'}
-        })
-
-        si.act({a: 'A'}, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a === 'A')
-          assert.ok(out.p1 === 1)
-          assert.ok(out.p2 === 1)
-          assert.ok(out.p3 === 1)
-          next()
-        })
-      }
-    ], function () {
-      si.close(done)
+    si.use(function (opts) {
+      this.add({a: 'A'}, function (args, cb) {
+        this.log.debug('P', '1')
+        args.p1 = 1
+        cb(null, args)
+      })
+      return {name: 'p1'}
     })
+
+    si.act({ a: 'A' }, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.a === 'A')
+      assert.ok(out.p1 === 1)
+    })
+
+    si.use(function (opts) {
+      this.add({a: 'A'}, function (args, cb) {
+        this.log.debug('P', '2a')
+
+        this.parent(args, function (err, out) {
+          this.log.debug('P', '2b')
+          out.p2 = 1
+          cb(err, out)
+        })
+      })
+      return {name: 'p2'}
+    })
+
+    si.act({ a: 'A' }, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.a === 'A')
+      assert.ok(out.p1 === 1)
+      assert.ok(out.p2 === 1)
+    })
+
+    si.use(function (opts) {
+      this.add({a: 'A'}, function (args, cb) {
+        this.log.debug('P', '3a')
+
+        this.parent(args, function (err, out) {
+          this.log.debug('P', '3b')
+          out.p3 = 1
+          cb(err, out)
+        })
+      })
+      return {name: 'p3'}
+    })
+
+    si.act({a: 'A'}, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.a === 'A')
+      assert.ok(out.p1 === 1)
+      assert.ok(out.p2 === 1)
+      assert.ok(out.p3 === 1)
+    })
+
+    si.close(done)
   })
 })

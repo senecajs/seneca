@@ -14,18 +14,9 @@ var testopts = { log: 'test', debug: { short_logs: true } }
 
 
 describe('seneca', function () {
-  lab.beforeEach(function (done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
   it('add-close', function (done) {
     var tmp = {}
     Seneca(testopts)
-      .error(done)
       .add('role:seneca,cmd:close', function (msg, done) {
         tmp.sc = 1
         this.prior(msg, done)
@@ -39,7 +30,6 @@ describe('seneca', function () {
   it('sub-close', function (done) {
     var tmp = {}
     Seneca(testopts)
-      .error(done)
       .sub('role:seneca,cmd:close', function (msg) {
         tmp.sc = 1
       })

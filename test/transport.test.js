@@ -6,7 +6,6 @@ var _ = require('lodash')
 var Async = require('async')
 var Code = require('code')
 var Seneca = require('..')
-var Common = require('../lib/common')
 var Transport = require('../lib/transport')
 var Lab = require('lab')
 
@@ -32,15 +31,6 @@ function testact (args, done) {
 }
 
 describe('transport', function () {
-  // TODO: test top level qaz:* : def and undef other pats
-  lab.beforeEach(function (done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
   describe('listen()', function () {
     it('supports null options', function (done) {
       var listen = Transport.listen(_.noop)
@@ -207,6 +197,7 @@ describe('transport', function () {
     it('supports null options', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: {
           info: function () {
 
@@ -234,6 +225,7 @@ describe('transport', function () {
     it('supports send to client queueing', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: function () {},
         options: function () {
           return {
@@ -263,6 +255,7 @@ describe('transport', function () {
     it('supports pins represented by strings', function (done) {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
+        ready: setImmediate,
         log: function () {},
         options: function () {
           return {
@@ -290,16 +283,9 @@ describe('transport', function () {
     })
 
     it('handles errors from act', function (done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function () {
-        return function (err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
+      var client = Transport.client()
       var seneca = {
+        ready: setImmediate,
         log: {
           info: _.noop,
           debug: _.noop
@@ -310,6 +296,10 @@ describe('transport', function () {
               pins: [{ test: true }]
             }
           }
+        },
+        emit: function (event, err) {
+          expect(err).to.exist()
+          done()
         },
         act: function (pattern, options, callback) {
           callback(new Error(), {})
@@ -325,17 +315,10 @@ describe('transport', function () {
     })
 
     it('handles a null liveclient', function (done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function () {
-        return function (err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
+      var client = Transport.client()
 
       var seneca = {
+        ready: setImmediate,
         log: {
           info: _.noop,
           debug: _.noop
@@ -354,6 +337,10 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
+        emit: function (event, err) {
+          expect(err).to.exist()
+          done()
+        },
         context: {}
       }
 
@@ -378,7 +365,6 @@ describe('transport', function () {
           .use(tt)
 
           .client({type: 'test', pin: 'foo:1'})
-
           .start()
 
           .wait('foo:1,actid$:aa/BB')
@@ -405,7 +391,7 @@ describe('transport', function () {
 
               .client({type: 'test', pin: 'foo:*'})
 
-              .start(done)
+              .start()
 
               .wait('foo:1')
               .step(function (out) {
@@ -426,7 +412,7 @@ describe('transport', function () {
                 })
               })
 
-              .end()
+              .end(done)
       })
   })
 
@@ -444,7 +430,7 @@ describe('transport', function () {
 
               .client({type: 'test', pin: {'foo': '*'}})
 
-              .start(done)
+              .start()
 
               .wait('foo:1')
               .step(function (out) {
@@ -465,7 +451,7 @@ describe('transport', function () {
                 })
               })
 
-              .end()
+              .end(done)
       })
   })
 
@@ -771,7 +757,7 @@ describe('transport', function () {
       })
   })
 
-  it('handles timeout from client connecting', function (done) {
+  it.skip('handles timeout from client connecting', function (done) {
     var seneca = Seneca({ log: 'silent', timeout: 50 }).client({ port: 1 })
     seneca.act({ cmd: 'test' }, function (err) {
       expect(err).to.exist()
@@ -792,7 +778,6 @@ describe('transport', function () {
       s0 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('foo:1', function (args, done) {
           // ensure action id is transferred for traceability
           expect('aa/BB').to.equal(args.meta$.id)
@@ -810,7 +795,6 @@ describe('transport', function () {
       s1 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('foo:1', function (args, done) {
           // ensure action id is transferred for traceability
           expect('cc/DD').to.equal(args.meta$.id)
@@ -825,7 +809,6 @@ describe('transport', function () {
       s9 = Seneca({
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
-        .error(done)
         .add('bar:2', function (args, done) {
           done(null, { bar: 2, q: 2 })
         })
@@ -838,11 +821,9 @@ describe('transport', function () {
         tag: 'cln', timeout: 5555, log: 'silent',
         debug: {short_logs: true}
       })
-        .error(done)
         .use(bt)
 
         .client({type: 'balance', pin: 'foo:1'})
-
         .client({port: 44440, pin: 'foo:1'})
         .client({port: 44441, pin: 'foo:1'})
 
@@ -887,29 +868,14 @@ describe('transport', function () {
           s0.close(function () {
             s1.close(function () {
               s9.close(function () {
-                c0.close(done)
+                c0.close(function () {
+                  done()
+                })
               })
             })
           })
         })
     }
-  })
-
-  it('fatal$ false with transport not-found kill process', function (done) {
-    Seneca({ log: 'silent' })
-      .listen()
-      .ready(function () {
-        var client = Seneca({ timeout: 30, log: 'silent' })
-        client.client()
-
-
-        client.ready(function () {
-          client.act({ foo: 1, fatal$: false }, function (err, result) {
-            expect(err).to.exist()
-            done()
-          })
-        })
-      })
   })
 
   it('server can be restarted without issues to clients', function (done) {
