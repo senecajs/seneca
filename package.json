@@ -51,6 +51,7 @@
   "dependencies": {
     "archy": "1.0.0",
     "delayed-open-queue": "^0.1.0",
+    "dezalgo": "^1.0.3",
     "eraro": "0.4.1",
     "gex": "0.2.2",
     "jsonic": "0.2.2",

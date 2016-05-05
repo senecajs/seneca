@@ -19,6 +19,7 @@ var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
 var Zig = require('zig')
 var DelayedOpenQueue = require('delayed-open-queue')
+var Dezalgo = require('dezalgo')
 
 // Internal modules.
 var Actions = require('./lib/actions')
@@ -952,7 +953,7 @@ function make_seneca (initial_options) {
 
     args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
-    actdone = actdone || _.noop
+    actdone = actdone && Dezalgo(actdone) || _.noop
 
 
     // if previously seen message, provide previous result, and don't process again

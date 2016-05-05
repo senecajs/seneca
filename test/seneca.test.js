@@ -428,59 +428,57 @@ describe('seneca', function () {
     var count = 0
     var called = ''
 
-    si.ready(function () {
-      si.add('foo:a', function (args, done) {
-        count++
-        count += args.x
-        done(null, {count: count})
-      })
-
-      si.add('foo:a', function (args, done) {
-        count += args.y
-        this.prior(args, done)
-      })
-
-      si
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(11.1, count)
-          called += 'A'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(112.11, count)
-          called += 'B'
-        })
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(123.21, count)
-          called += 'C'
-        })
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(224.22, count)
-          called += 'D'
-        })
-        .ready(function () {
-          assert.equal('ABCD', called)
-          assert.equal(224.22, count)
-
-          this
-            .add('foo:a', function (args, done) {
-              count += args.z
-              this.prior(args, done)
-            })
-            .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
-              assert.equal(err, null)
-              assert.equal(1000235.32, count)
-              called += 'E'
-            })
-            .ready(function () {
-              assert.equal('ABCDE', called)
-              done()
-            })
-        })
+    si.add('foo:a', function (args, done) {
+      count++
+      count += args.x
+      done(null, {count: count})
     })
+
+    si.add('foo:a', function (args, done) {
+      count += args.y
+      this.prior(args, done)
+    })
+
+    si
+      .act('foo:a,x:10,y:0.1', function (err, out) {
+        assert.equal(err, null)
+        assert.equal(11.1, count)
+        called += 'A'
+      })
+      .act('foo:a,x:100,y:0.01', function (err, out) {
+        assert.equal(err, null)
+        assert.equal(112.11, count)
+        called += 'B'
+      })
+      .act('foo:a,x:10,y:0.1', function (err, out) {
+        assert.equal(err, null)
+        assert.equal(123.21, count)
+        called += 'C'
+      })
+      .act('foo:a,x:100,y:0.01', function (err, out) {
+        assert.equal(err, null)
+        assert.equal(224.22, count)
+        called += 'D'
+      })
+      .ready(function () {
+        assert.equal('ABCD', called)
+        assert.equal(224.22, count)
+
+        this
+          .add('foo:a', function (args, done) {
+            count += args.z
+            this.prior(args, done)
+          })
+          .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
+            assert.equal(err, null)
+            assert.equal(1000235.32, count)
+            called += 'E'
+          })
+          .ready(function () {
+            assert.equal('ABCDE', called)
+            done()
+          })
+      })
   })
 
   it('gating', function (done) {

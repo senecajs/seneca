@@ -47,28 +47,28 @@ describe('seneca-error', function () {
         assert.ok(ctxt.errlog === null)
         assert.equal(out[0], 1)
         assert.ok(out[1], 'foo')
-      })
 
-      // ~~ CASE: callback; no-default; err-result; err-logged
-      si.act('a:1', function (err, out) {
-        assert.equal(out, null)
-        assert.equal('act_not_found', err.code)
-        // assert.equal('act_not_found', ctxt.errlog[8])
-
-        // ~~ CASE: callback; bad-default; err-result; err-logged
-        si.act('a:1,default$:"foo"', function (err, out) {
+        // ~~ CASE: callback; no-default; err-result; err-logged
+        si.act('a:1', function (err, out) {
           assert.equal(out, null)
-          assert.equal('act_default_bad', err.code)
-          // assert.equal('act_default_bad', ctxt.errlog[8])
+          assert.equal('act_not_found', err.code)
+          // assert.equal('act_not_found', ctxt.errlog[8])
 
-          // ~~ CASE: fragile; throws; err-logged
-          si.options({debug: {fragile: true}})
-          ctxt.errlog = null
+          // ~~ CASE: callback; bad-default; err-result; err-logged
+          si.act('a:1,default$:"foo"', function (err, out) {
+            assert.equal(out, null)
+            assert.equal('act_default_bad', err.code)
+            // assert.equal('act_default_bad', ctxt.errlog[8])
 
-          si.act('a:1', function (ex) {
-            assert.equal('act_not_found', ex.code)
-            // assert.equal('act_not_found', ctxt.errlog[8])
-            return done()
+            // ~~ CASE: fragile; throws; err-logged
+            si.options({debug: {fragile: true}})
+            ctxt.errlog = null
+
+            si.act('a:1', function (ex) {
+              assert.equal('act_not_found', ex.code)
+              // assert.equal('act_not_found', ctxt.errlog[8])
+              return done()
+            })
           })
         })
       })
