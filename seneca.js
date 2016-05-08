@@ -181,7 +181,10 @@ var internals = {
     legacy: {
 
       // use old error codes, until version 3.x
-      error_codes: true
+      error_codes: true,
+
+      // use parambulator for message validation, until version 3.x
+      validate: true
     }
   }
 }
@@ -206,7 +209,9 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
-  seneca.use(require('./lib/parambulator'))
+  if (options.legacy.validate) {
+    seneca.use(require('seneca-parambulator'))
+  }
 
   // HACK: makes this sync
   if (options.default_plugins.cluster) {
@@ -721,7 +726,7 @@ function make_seneca (initial_options) {
     var pattern_rules = _.clone(action.validate || {})
     _.each(pattern, function (v, k) {
       if (_.isObject(v)) {
-        pattern_rules[k] = v
+        pattern_rules[k] = _.clone(v)
         delete pattern[k]
       }
     })
