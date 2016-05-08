@@ -908,6 +908,7 @@ describe('seneca', function () {
       .ready(function () {
         // using root as ready seneca is fatal$
         this.root.options({errhandler: function (err) {
+          // TODO: change to act_invalid_msg on version 3.x
           if (err.code !== 'act_invalid_args') {
             return done(err)
           }
@@ -971,7 +972,7 @@ describe('seneca', function () {
   })
 
   it('parambulator', function (done) {
-    var si = Seneca({log: 'silent'})
+    var si = Seneca({log: 'silent', legacy: {error_codes: false}})
 
     si.add({a: 1, b: 'q', c: {required$: true, string$: true}},
       function (args, cb) { cb(null, {}) })
@@ -986,13 +987,13 @@ describe('seneca', function () {
     si.act({a: 2, b: 'q'}, function (err) { err && done(err) })
 
     si.act({a: 1, b: 'q', c: 1}, function (err) {
-      assert.equal('act_invalid_args', err.code)
+      assert.equal('act_invalid_msg', err.code)
 
       si.act({a: 1, b: 'q'}, function (err) {
-        assert.equal('act_invalid_args', err.code)
+        assert.equal('act_invalid_msg', err.code)
 
         si.act({a: 2}, function (err) {
-          assert.equal('act_invalid_args', err.code)
+          assert.equal('act_invalid_msg', err.code)
 
           done()
         })
@@ -1013,11 +1014,11 @@ describe('seneca', function () {
     }, { parambulator: schema })
 
     si.act({ cmd: 'joi', c: 'c' }, function (err) {
-      assert(err.code === 'act_invalid_args')
+      assert(err.code === 'act_invalid_msg')
     })
 
     si.act({ cmd: 'joi' }, function (err) {
-      assert(err.code === 'act_invalid_args')
+      assert(err.code === 'act_invalid_msg')
     })
 
     si.act({ cmd: 'joi', c: { test: true } }, function (err) {
@@ -1027,7 +1028,7 @@ describe('seneca', function () {
   })
 
   it('act-param', function (done) {
-    var si = Seneca({log: 'silent'})
+    var si = Seneca({log: 'silent', legacy: {error_codes: false}})
 
       .add({a: 1, b: {integer$: true}}, function (args, cb) {
         if (!_.isNumber(args.b)) return assert.fail()
@@ -1046,11 +1047,11 @@ describe('seneca', function () {
         // use si to avoid act_loop error
         si.act({a: 1, b: 'b'}, function (err, out) {
           try {
-            assert.equal('act_invalid_args', err.code)
-            assert.equal('seneca: Action a:1 has invalid arguments; ' +
-              "The property 'b', with current value: 'b', " +
-              'must be a integer (parent: top level).; arguments ' +
-              "were: { a: 1, b: 'b' }.", err.message)
+            assert.equal('act_invalid_msg', err.code)
+            assert.equal('seneca: Action a:1 received an invalid message; ' +
+                         'The property \'b\', with current value: \'b\', ' +
+                         'must be a integer (parent: top level).; message content ' +
+                         'was: { a: 1, b: \'b\' }.', err.message)
           }
           catch (e) {
             return done(e)

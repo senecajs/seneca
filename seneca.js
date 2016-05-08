@@ -175,6 +175,13 @@ var internals = {
     pin: {
       // run pin function without waiting for pin event
       immediate: false
+    },
+
+    // backwards compatibility settings
+    legacy: {
+
+      // use old error codes, until version 3.x
+      error_codes: true
     }
   }
 }
@@ -576,24 +583,6 @@ function make_seneca (initial_options) {
     return make_pin(pattern)
   }
 
-  var pm_custom_args = {
-    rules: {
-      entity$: function (ctxt, cb) {
-        var val = ctxt.point
-        if (val.entity$) {
-          if (val.canon$({isa: ctxt.rule.spec})) {
-            return cb()
-          }
-          else return ctxt.util.fail(ctxt, cb)
-        }
-        else return ctxt.util.fail(ctxt, cb)
-      }
-    },
-    msgs: {
-      entity$: 'The value <%=value%> is not a data entity of kind <%=rule.spec%>' +
-        ' (property <%=parentpath%>).'
-    }
-  }
 
   function api_sub () {
     var self = this
@@ -735,9 +724,7 @@ function make_seneca (initial_options) {
       }
     })
 
-    if (_.keys(pattern_rules).length) {
-      actmeta.parambulator = Parambulator(pattern_rules, pm_custom_args)
-    }
+    actmeta.rules = pattern_rules
 
     var addroute = true
 
@@ -800,6 +787,8 @@ function make_seneca (initial_options) {
     private$.stats.actmap[actmeta.pattern] =
       private$.stats.actmap[actmeta.pattern] || stats
 
+    actmeta = modify_action(actmeta)
+
     if (addroute) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
         actmeta.id, Common.pattern(pattern), action.name,
@@ -812,6 +801,38 @@ function make_seneca (initial_options) {
 
     return self
   }
+
+
+  function modify_action (actmeta) {
+    var pm_custom_args = {
+      rules: {
+        entity$: function (ctxt, cb) {
+          var val = ctxt.point
+          if (val.entity$) {
+            if (val.canon$({isa: ctxt.rule.spec})) {
+              return cb()
+            }
+            else return ctxt.util.fail(ctxt, cb)
+          }
+          else return ctxt.util.fail(ctxt, cb)
+        }
+      },
+      msgs: {
+        entity$: 'The value <%=value%> is not a data entity of kind <%=rule.spec%>' +
+          ' (property <%=parentpath%>).'
+      }
+    }
+
+    if (_.keys(actmeta.rules).length) {
+      var pm = Parambulator(actmeta.rules, pm_custom_args)
+      actmeta.validate = function (msg, done) {
+        pm.validate(msg, done)
+      }
+    }
+
+    return actmeta
+  }
+
 
   // TODO: deprecate
   root.findpins = root.pinact = function () {
@@ -1098,7 +1119,7 @@ function make_seneca (initial_options) {
         return action_done(err)
       }
 
-      act_param_check(origargs, actmeta, function (err) {
+      validate_action_message(origargs, actmeta, function (err) {
         if (err) {
           return action_done(err)
         }
@@ -1477,32 +1498,36 @@ function make_seneca (initial_options) {
     return delegate
   }
 
-  // Check if action parameters pass parambulator spec, if any.
+
+  // Validate action message contents, if validator function defined.
   //
-  //    * _args_     (object)    &rarr;  action arguments
+  //    * _msg_     (object)    &rarr;  action arguments
   //    * _actmeta_  (object)    &rarr;  action meta data
   //    * _done_     (function)  &rarr;  callback function
-  function act_param_check (args, actmeta, done) {
-    Assert.ok(_.isObject(args), 'act_param_check; args; isObject')
-    Assert.ok(_.isObject(actmeta), 'act_param_check; actmeta; isObject')
-    Assert.ok(_.isFunction(done), 'act_param_check; done; isFunction')
+  function validate_action_message () {
+    var args = Norma('msg:o actmeta:o done:f', arguments)
 
-    if (actmeta.parambulator) {
-      actmeta.parambulator.validate(args, function (err) {
-        if (err) {
-          return done(
-            internals.error('act_invalid_args', {
-              pattern: actmeta.pattern,
-              message: err.message,
-              args: Common.clean(args)
-            })
-          )
-        }
-        return done()
-      })
+    if (!_.isFunction(args.actmeta.validate)) {
+      return args.done()
     }
-    else return done()
+
+    args.actmeta.validate(args.msg, function (err) {
+      if (!err) {
+        return args.done()
+      }
+
+      return args.done(
+        internals.error(
+          so.legacy.error_codes ? 'act_invalid_args' : 'act_invalid_msg',
+          {
+            pattern: args.actmeta.pattern,
+            message: err.message,
+            msg: Common.clean(args.msg)
+          })
+      )
+    })
   }
+
 
   function api_fix () {
     var self = this

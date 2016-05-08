@@ -101,8 +101,8 @@ describe('seneca-error', function () {
 
       // ~~ CASE: callback; args-invalid; err-result; err-logged
       si.act('a:1', function (err) {
-        assert.equal('act_invalid_args', err.code)
-        assert.equal('act_invalid_args', ctxt.errlog[14])
+        assert.equal('act_invalid_msg', err.code)
+        assert.equal('act_invalid_msg', ctxt.errlog[14])
 
         // ~~ CASE: callback; args-valid
         si.act('a:1,b:1', function (err, out) {
@@ -318,7 +318,8 @@ describe('seneca-error', function () {
       log: {map: [{level: 'error+', handler: function () {
         ctxt.errlog = arrayify(arguments)
       }}]},
-      trace: { unknown: 'error' }
+      trace: { unknown: 'error' },
+      legacy: { error_codes: false }
     })
     return si
   }
