@@ -473,6 +473,43 @@ function make_seneca (initial_options) {
     console.log('')
   }
 
+
+  private$.action_modifiers = []
+
+  private$.action_modifiers.push(
+    function parambulator_validator (actmeta) {
+      var pm_custom_args = {
+        rules: {
+          entity$: function (ctxt, cb) {
+            var val = ctxt.point
+            if (val.entity$) {
+              if (val.canon$({isa: ctxt.rule.spec})) {
+                return cb()
+              }
+              else return ctxt.util.fail(ctxt, cb)
+            }
+            else return ctxt.util.fail(ctxt, cb)
+          }
+        },
+        msgs: {
+          entity$:
+          'The value <%=value%> is not a data entity of kind <%=rule.spec%>' +
+            ' (property <%=parentpath%>).'
+        }
+      }
+
+      if (_.keys(actmeta.rules).length) {
+        var pm = Parambulator(actmeta.rules, pm_custom_args)
+        actmeta.validate = function (msg, done) {
+          pm.validate(msg, done)
+        }
+      }
+
+      return actmeta
+    }
+  )
+
+
   function api_logroute (entry, handler) {
     if (arguments.length === 0) {
       return root.log.router.toString()
@@ -481,6 +518,7 @@ function make_seneca (initial_options) {
     entry.handler = handler || entry.handler
     Logging.makelogroute(entry, root.log.router)
   }
+
 
   function api_depends () {
     var self = this
@@ -804,32 +842,9 @@ function make_seneca (initial_options) {
 
 
   function modify_action (actmeta) {
-    var pm_custom_args = {
-      rules: {
-        entity$: function (ctxt, cb) {
-          var val = ctxt.point
-          if (val.entity$) {
-            if (val.canon$({isa: ctxt.rule.spec})) {
-              return cb()
-            }
-            else return ctxt.util.fail(ctxt, cb)
-          }
-          else return ctxt.util.fail(ctxt, cb)
-        }
-      },
-      msgs: {
-        entity$: 'The value <%=value%> is not a data entity of kind <%=rule.spec%>' +
-          ' (property <%=parentpath%>).'
-      }
-    }
-
-    if (_.keys(actmeta.rules).length) {
-      var pm = Parambulator(actmeta.rules, pm_custom_args)
-      actmeta.validate = function (msg, done) {
-        pm.validate(msg, done)
-      }
-    }
-
+    _.each(private$.action_modifiers, function (actmod) {
+      actmeta = actmod(actmeta)
+    })
     return actmeta
   }
 
