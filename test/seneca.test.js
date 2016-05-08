@@ -1001,6 +1001,7 @@ describe('seneca', function () {
     })
   })
 
+  // TODO: move to seneca-joi plugin
   it('joi', function (done) {
     var si = Seneca({ log: 'silent' })
 
@@ -1186,7 +1187,7 @@ describe('seneca', function () {
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 13, done: 13, fails: 0, cache: 1 }',
+            assert.equal('{ calls: 14, done: 14, fails: 0, cache: 1 }',
               Util.inspect(stats.act))
             done()
           })

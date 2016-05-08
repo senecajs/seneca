@@ -206,6 +206,8 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
+  seneca.use(require('./lib/parambulator'))
+
   // HACK: makes this sync
   if (options.default_plugins.cluster) {
     require('seneca-cluster').call(seneca, {})
@@ -271,6 +273,8 @@ function make_seneca (initial_options) {
 
   // Define options
   var so = private$.optioner.set(initial_options)
+
+  // TODO: remove parambulator dep from Seneca; do this another way
   internals.schema.validate(so, function (err) {
     if (err) {
       throw err
@@ -473,41 +477,7 @@ function make_seneca (initial_options) {
     console.log('')
   }
 
-
   private$.action_modifiers = []
-
-  private$.action_modifiers.push(
-    function parambulator_validator (actmeta) {
-      var pm_custom_args = {
-        rules: {
-          entity$: function (ctxt, cb) {
-            var val = ctxt.point
-            if (val.entity$) {
-              if (val.canon$({isa: ctxt.rule.spec})) {
-                return cb()
-              }
-              else return ctxt.util.fail(ctxt, cb)
-            }
-            else return ctxt.util.fail(ctxt, cb)
-          }
-        },
-        msgs: {
-          entity$:
-          'The value <%=value%> is not a data entity of kind <%=rule.spec%>' +
-            ' (property <%=parentpath%>).'
-        }
-      }
-
-      if (_.keys(actmeta.rules).length) {
-        var pm = Parambulator(actmeta.rules, pm_custom_args)
-        actmeta.validate = function (msg, done) {
-          pm.validate(msg, done)
-        }
-      }
-
-      return actmeta
-    }
-  )
 
 
   function api_logroute (entry, handler) {
@@ -706,12 +676,6 @@ function make_seneca (initial_options) {
   // it is first parsed by
   // [jsonic](https://github.com/rjrodger/jsonic)
   //
-  // If the value of a pattern property is a sub-object, this is
-  // interpreted as a
-  // [parambulator](https://github.com/rjrodger/parambulator)
-  // validation check. In this case, the property is not considered
-  // part of the pattern, but rather an argument to validate when
-  // _seneca.act_ is called.
   function api_add () {
     var self = this
     var args = Common.parsePattern(self, arguments, 'action:f? actmeta:o?')
@@ -825,7 +789,7 @@ function make_seneca (initial_options) {
     private$.stats.actmap[actmeta.pattern] =
       private$.stats.actmap[actmeta.pattern] || stats
 
-    actmeta = modify_action(actmeta)
+    actmeta = modify_action(self, actmeta)
 
     if (addroute) {
       var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
@@ -841,10 +805,11 @@ function make_seneca (initial_options) {
   }
 
 
-  function modify_action (actmeta) {
+  function modify_action (seneca, actmeta) {
     _.each(private$.action_modifiers, function (actmod) {
-      actmeta = actmod(actmeta)
+      actmeta = actmod.call(seneca, actmeta)
     })
+
     return actmeta
   }
 
