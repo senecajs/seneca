@@ -296,8 +296,8 @@ We have 2 main forms of documention for getting started with contributing:
 ## License
 Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 
-[travis-badge]: https://travis-ci.org/senecajs/seneca.svg
-[travis-url]: https://travis-ci.org/senecajs/seneca
+[travis-badge]: https://travis-ci.org/senecajs/seneca.svg?branch=master
+[travis-url]: https://travis-ci.org/senecajs/seneca.svg?branch=master
 [coveralls-badge]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/senecajs/seneca?branch=master
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
