@@ -1099,7 +1099,7 @@ function make_seneca (initial_options) {
         return action_done(err)
       }
 
-      validate_action_message(origargs, actmeta, function (err) {
+      validate_action_message(args, actmeta, function (err) {
         if (err) {
           return action_done(err)
         }
