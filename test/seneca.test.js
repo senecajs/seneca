@@ -1004,15 +1004,14 @@ describe('seneca', function () {
   it('parambulator argument manipulation', function (done) {
     var si = Seneca({log: 'silent', legacy: {error_codes: false}})
 
-    si.add({a: 1, b: 'q', c: {required$: true, string$: true, default$: 'test' }},
+    si.add({a: 1, b: 'q', c: {required$: true, string$: true, default$: 'test'}},
         function (args, cb) {
           assert.equal('test', args.c)
           cb()
           done()
         })
 
-    si.act({a: 1, b: 'q'}, function (err) {})
-
+    si.act({a: 1, b: 'q'}, function (err) { assert(!err) })
   })
 
   // TODO: move to seneca-joi plugin
