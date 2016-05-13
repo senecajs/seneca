@@ -181,7 +181,10 @@ var internals = {
     legacy: {
 
       // use old error codes, until version 3.x
-      error_codes: true
+      error_codes: true,
+
+      // use parambulator for message validation, until version 3.x
+      validate: true
     }
   }
 }
@@ -206,7 +209,9 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
-  seneca.use(require('./lib/parambulator'))
+  if (options.legacy.validate) {
+    seneca.use(require('seneca-parambulator'))
+  }
 
   // HACK: makes this sync
   if (options.default_plugins.cluster) {
@@ -688,6 +693,8 @@ function make_seneca (initial_options) {
 
     var actmeta = args.actmeta || {}
 
+    actmeta.raw = _.cloneDeep(raw_pattern)
+
     // TODO: refactor plugin name, tag and fullname handling.
     actmeta.plugin_name = actmeta.plugin_name || 'root$'
     actmeta.plugin_fullname = actmeta.plugin_fullname ||
@@ -721,22 +728,26 @@ function make_seneca (initial_options) {
     var pattern_rules = _.clone(action.validate || {})
     _.each(pattern, function (v, k) {
       if (_.isObject(v)) {
-        pattern_rules[k] = v
+        pattern_rules[k] = _.clone(v)
         delete pattern[k]
       }
     })
 
-    actmeta.rules = pattern_rules
-
     var addroute = true
 
+    // TODO: deprecate
     actmeta.args = _.clone(pattern)
+
+    actmeta.rules = pattern_rules
+
+    actmeta.id = refnid()
+    actmeta.func = action
+
+    // Canonical string form of the action pattern.
     actmeta.pattern = Common.pattern(pattern)
 
-    // actmeta.id = self.idgen()
-    actmeta.id = refnid()
-
-    actmeta.func = action
+    // Canonical object form of the action pattern.
+    actmeta.msgcanon = Jsonic(actmeta.pattern)
 
     var priormeta = self.find(pattern)
 
@@ -772,22 +783,8 @@ function make_seneca (initial_options) {
       actmeta.handle = action.handle
     }
 
-    var stats = {
-      id: actmeta.id,
-      plugin: {
-        full: actmeta.plugin_fullname,
-        name: actmeta.plugin_name,
-        tag: actmeta.plugin_tag
-      },
-      prior: actmeta.priorpath,
-      calls: 0,
-      done: 0,
-      fails: 0,
-      time: {}
-    }
-
     private$.stats.actmap[actmeta.pattern] =
-      private$.stats.actmap[actmeta.pattern] || stats
+      private$.stats.actmap[actmeta.pattern] || make_action_stats(actmeta)
 
     actmeta = modify_action(self, actmeta)
 
@@ -804,6 +801,22 @@ function make_seneca (initial_options) {
     return self
   }
 
+
+  function make_action_stats (actmeta) {
+    return {
+      id: actmeta.id,
+      plugin: {
+        full: actmeta.plugin_fullname,
+        name: actmeta.plugin_name,
+        tag: actmeta.plugin_tag
+      },
+      prior: actmeta.priorpath,
+      calls: 0,
+      done: 0,
+      fails: 0,
+      time: {}
+    }
+  }
 
   function modify_action (seneca, actmeta) {
     _.each(private$.action_modifiers, function (actmod) {
