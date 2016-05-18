@@ -90,7 +90,8 @@
   },
   "scripts": {
     "cov": "lab -s -P test -r lcov | coveralls",
-    "test": "lab -v -P test -L -t 80",
+    "test": "lab -v -P test -L -t 80 $LAB_FLAGS",
+    "test:node6": "LAB_FLAGS='--leaks' && npm t",
     "test-html": "lab -v -P test -L -t 80 -r html > testcov.html",
     "lint": "lab -P test -dL",
     "annotate": "docco seneca.js -o doc"

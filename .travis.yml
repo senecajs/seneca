@@ -1,15 +1,76 @@
 language: node_js
 sudo: false
+
 node_js:
   - 0.10
   - 0.12
   - 4
   - 5
+  - 6
+
+env:
+  global:
+    # get the latest seneca code from master
+    - SENECA_VER=
+    # to test a specific tagged version set the version like the following:
+    # - SENECA_VER=#v1.3.0
+
+  matrix:
+    - TEST_SUITE=senecajs/seneca
+
+    # Golden Circle plugins to test
+    # - TEST_SUITE=senecajs/seneca-postgres-store
+    - TEST_SUITE=Concorda/seneca-auth
+    # - TEST_SUITE=rjrodger/seneca-balance-client
+    # - TEST_SUITE=senecajs/seneca-basic
+    # - TEST_SUITE=senecajs/seneca-cache
+    - TEST_SUITE=senecajs/seneca-entity
+    # - TEST_SUITE=rjrodger/seneca-error-test
+    # - TEST_SUITE=rjrodger/seneca-jsonfile-store
+    # - TEST_SUITE=senecajs/seneca-level-store
+    # - TEST_SUITE=senecajs/seneca-mem-store
+    # - TEST_SUITE=rjrodger/seneca-mesh
+    # - TEST_SUITE=senecajs/seneca-mysql-store
+    # - TEST_SUITE=senecajs/seneca-quartz-scheduler
+    # - TEST_SUITE=senecajs/seneca-redis-cache
+    # - TEST_SUITE=senecajs/seneca-repl
+    # - TEST_SUITE=senecajs/seneca-store-test
+    - TEST_SUITE=senecajs/seneca-transport
+    # - TEST_SUITE=rjrodger/seneca-transport-test
+    - TEST_SUITE=senecajs/seneca-user
+    - TEST_SUITE=senecajs/seneca-web
+    # - TEST_SUITE=senecajs/seneca-redis-store
+    # - TEST_SUITE=senecajs/seneca-sqlite-store
+    # - TEST_SUITE=senecajs/seneca-mongo-store
+
+before_script:
+  - if [[ $TRAVIS_NODE_VERSION == "6" ]]; then export LAB_FLAGS="--leaks"; else export LAB_FLAGS=""; fi
+  - echo LAB_FLAGS:$LAB_FLAGS
+  - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
+  - echo TEST_SUITE:$TEST_SUITE
+  - echo TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER
+  - git clone https://github.com/$TEST_SUITE
+  # - if [ $TEST_SUITE_FOLDER = 'seneca-postgres-store' ]; then psql -U postgres -f seneca-postgres-store/docker/dbschema.sql ; fi
+  # - if [ $TEST_SUITE_FOLDER = 'seneca-mysql-store' ]; then mysql -h localhost -u root --password="" seneca-mysql-store/docker/schema.sql ; fi
+  - cd $TEST_SUITE_FOLDER
+  - npm i
+  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then echo "npm install seneca"; npm uninstall seneca; npm install https://github.com/senecajs/seneca$SENECA_VER ; fi
+
+# addons:
+#   postgresql: "9.4"
+
+# services:
+#   - postgresql
+#   - mysql
+#   - redis
+
 cache:
   directories:
       - node_modules
+
 after_script:
   - npm run cov
+
 notifications:
   webhooks:
     urls:
