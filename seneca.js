@@ -30,7 +30,6 @@ var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
-var Store = require('./lib/store')
 var Transport = require('./lib/transport')
 
 // Shortcuts
@@ -460,8 +459,6 @@ function make_seneca (initial_options) {
     // TODO: deprecate?
     argprops: Common.argprops
   }
-
-  root.store = Store()
 
   // Used for extending seneca with api_decorate
   root._decorations = {}
