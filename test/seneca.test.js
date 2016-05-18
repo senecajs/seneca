@@ -1170,6 +1170,7 @@ describe('seneca', function () {
     si.options({errhandler: done})
 
     si.use('entity')
+    si.use('mem-store')
 
     var x = 0
 
