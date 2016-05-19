@@ -6,7 +6,6 @@ node_js:
   - 0.12
   - 4
   - 5
-  - 6
 
 env:
   global:
@@ -45,24 +44,17 @@ env:
 
 before_script:
   - if [[ $TRAVIS_NODE_VERSION == "6" ]]; then export LAB_FLAGS="--leaks"; else export LAB_FLAGS=""; fi
-  - echo LAB_FLAGS:$LAB_FLAGS
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
+  - echo LAB_FLAGS:$LAB_FLAGS
   - echo TEST_SUITE:$TEST_SUITE
   - echo TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER
-  - git clone https://github.com/$TEST_SUITE
-  # - if [ $TEST_SUITE_FOLDER = 'seneca-postgres-store' ]; then psql -U postgres -f seneca-postgres-store/docker/dbschema.sql ; fi
-  # - if [ $TEST_SUITE_FOLDER = 'seneca-mysql-store' ]; then mysql -h localhost -u root --password="" seneca-mysql-store/docker/schema.sql ; fi
-  - cd $TEST_SUITE_FOLDER
-  - npm i
-  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then echo "npm install seneca"; npm uninstall seneca; npm install https://github.com/senecajs/seneca$SENECA_VER ; fi
-
-# addons:
-#   postgresql: "9.4"
-
-# services:
-#   - postgresql
-#   - mysql
-#   - redis
+  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
+      git clone https://github.com/$TEST_SUITE;
+      cd $TEST_SUITE_FOLDER;
+      npm i;
+      npm uninstall seneca;
+      npm install https://github.com/senecajs/seneca$SENECA_VER;
+    fi
 
 cache:
   directories:
