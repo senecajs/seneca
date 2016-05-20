@@ -1,3 +1,10 @@
+## 2.1.0: 2016-05-20
+
+* Fix for parambulator not correctly testing messages. PR #422
+* Parambulator validation logic moved to it's own plugn. PR #420
+* Allow validation provider to be swapped out (requires flag). PR #420
+* Improvements to the test rig. PR #427, #405
+
 ## 2.0.1: 2016-04-13
 
 * Filter undefined options. PR #386
