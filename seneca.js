@@ -67,8 +67,7 @@ var internals = {
       basic: true,
       cluster: true,
       repl: true,
-      transport: true,
-      web: true
+      transport: true
     },
 
     // Debug settings.
@@ -256,7 +255,6 @@ module.exports = function init (seneca_options, more_options) {
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
-  if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
 
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {
