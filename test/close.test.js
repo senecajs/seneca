@@ -13,7 +13,7 @@ var expect = Code.expect
 var testopts = { log: 'test', debug: { short_logs: true } }
 
 
-describe('seneca', function () {
+describe('close', function () {
   lab.beforeEach(function (done) {
     process.removeAllListeners('SIGHUP')
     process.removeAllListeners('SIGTERM')

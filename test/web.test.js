@@ -122,8 +122,8 @@ describe('connect', function () {
           })
           res.once('end', function () {
             var parts = payload.split('/')
-            expect(parts.length).to.equal(4)
-            expect(parts[3]).to.contain('-')
+            expect(parts.length).to.equal(5)
+            expect(parts[4]).to.contain('-')
             done()
           })
         })
