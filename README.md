@@ -2,7 +2,8 @@
 > A Node.js toolkit for Micro-Service Architectures
 
 # seneca
-[![npm version][npm-badge]][npm-url] 
+[![npm version][npm-badge]][npm-url]
+[![npm downloads][npm-downloads-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 [![Coverage Status][coveralls-badge]][coveralls-url]
 [![Gitter][gitter-badge]][gitter-url]
@@ -304,6 +305,7 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [gitter-url]: https://gitter.im/senecajs/seneca
 [npm-badge]: https://badge.fury.io/js/seneca.svg
 [npm-url]: https://badge.fury.io/js/seneca
+[npm-downloads-badge]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
 
 [MIT]: ./LICENSE
 [Senecajs org]: https://github.com/senecajs/
