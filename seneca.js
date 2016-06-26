@@ -184,10 +184,22 @@ var internals = {
       error_codes: true,
 
       // use parambulator for message validation, until version 3.x
-      validate: true
+      validate: true,
+
+      logging: true
     }
   }
 }
+
+// REFACTORING
+// These are temporary, used to validate logging init ordering
+var log_act_in
+var log_act_out
+var log_act_err
+var log_act_bad
+var log_act_cache
+var log_exec_err
+var make_delegate_log
 
 // Seneca is an EventEmitter.
 function Seneca () {
@@ -202,23 +214,49 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  // FIX: plugin decorations do need to be sync
-  // needs thinking
+  // say hello, printing identifier to log
+  seneca.log.info('hello', root.toString())
 
+  // dump options if debugging
+  seneca.log.debug('options', function () {
+    return Util.inspect(options, false, null).replace(/[\r\n]/g, ' ')
+  })
+
+  if (options.debug.print.options) {
+    console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
+    console.log(Util.inspect(options, { depth: null }))
+    console.log('')
+  }
+
+  // TODO: these are core API and should not be decorations
   seneca.decorate('hasplugin', Plugins.api_decorations.hasplugin)
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
+
+
+  if (options.legacy.logging) {
+    seneca.use(require('./lib/logging'), ({log: options.log}))
+
+    // REFACTORING: these functions are temporary
+    log_act_in = seneca.export('legacy_logging/log_act_in')
+    log_act_out = seneca.export('legacy_logging/log_act_out')
+    log_act_err = seneca.export('legacy_logging/log_act_err')
+    log_act_bad = seneca.export('legacy_logging/log_act_bad')
+    log_act_cache = seneca.export('legacy_logging/log_act_cache')
+    log_exec_err = seneca.export('legacy_logging/log_exec_err')
+    make_delegate_log = seneca.export('legacy_logging/make_delegate_log')
+  }
 
   if (options.legacy.validate) {
     seneca.use(require('seneca-parambulator'))
   }
 
-  // HACK: makes this sync
+  // HACK: makes this sync - FIX: use preload
   if (options.default_plugins.cluster) {
     require('seneca-cluster').call(seneca, {})
   }
 
-  // HACK: makes this sync
+  // HACK: makes this sync - FIX: use preload
   if (options.default_plugins.repl) {
     require('seneca-repl').call(seneca, options.repl)
   }
@@ -241,7 +279,7 @@ module.exports = function init (seneca_options, more_options) {
 module.exports.Seneca = Seneca
 
 // To reference builtin loggers when defining logging options.
-module.exports.loghandler = Logging.handlers
+module.exports.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
 module.exports.use = function () {
@@ -325,7 +363,6 @@ function make_seneca (initial_options) {
   root.hasact = root.has
 
   // Non-API methods.
-  root.logroute = api_logroute
   root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
   root.pin = api_pin
@@ -347,7 +384,15 @@ function make_seneca (initial_options) {
   so.tag = so.tag === 'undefined' ? internals.defaults.tag : so.tag
 
   // Create a unique identifer for this instance.
-  root.id = root.idgen() + '/' + root.start_time + '/' + process.pid + '/' + so.tag
+  root.id = root.idgen() +
+    '/' +
+    root.start_time +
+    '/' +
+    process.pid +
+    '/' +
+    root.version +
+    '/' +
+    so.tag
 
   if (so.debug.short_logs || so.log.short) {
     so.idlen = 2
@@ -355,7 +400,7 @@ function make_seneca (initial_options) {
     root.id = root.idgen() + '/' + so.tag
   }
 
-  root.name = 'Seneca/' + root.version + '/' + root.id
+  root.name = 'Seneca/' + root.id
 
   root.die = Common.makedie(root, {
     type: 'sys',
@@ -382,7 +427,7 @@ function make_seneca (initial_options) {
       : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
     timeout: so.timeout,
     error: function (err) {
-      Logging.log_exec_err(root, err)
+      log_exec_err(root, err)
     },
     msg_codes: {
       timeout: 'action-timeout',
@@ -466,33 +511,10 @@ function make_seneca (initial_options) {
   root.store = Store()
 
   // Used for extending seneca with api_decorate
+  // TODO: move to private$
   root._decorations = {}
 
-  // say hello, printing identifier to log
-  root.log.info('hello', root.toString(), callpoint())
-
-  // dump options if debugging
-  root.log.debug('options', function () {
-    return Util.inspect(so, false, null).replace(/[\r\n]/g, ' ')
-  })
-
-  if (so.debug.print.options) {
-    console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
-    console.log(Util.inspect(so, { depth: null }))
-    console.log('')
-  }
-
   private$.action_modifiers = []
-
-
-  function api_logroute (entry, handler) {
-    if (arguments.length === 0) {
-      return root.log.router.toString()
-    }
-
-    entry.handler = handler || entry.handler
-    Logging.makelogroute(entry, root.log.router)
-  }
 
 
   function api_depends () {
@@ -1012,13 +1034,13 @@ function make_seneca (initial_options) {
     var self = this
 
     self.on('act-out', function () {
-      Logging.handlers.print.apply(null, arrayify(arguments))
+      Legacy.loghandler.print.apply(null, arrayify(arguments))
     })
 
     self.on('error', function () {
       var args = arrayify(arguments)
       args.unshift('ERROR: ')
-      Logging.handlers.print.apply(null, args)
+      Legacy.loghandler.print.apply(null, args)
     })
   }
 
@@ -1107,7 +1129,7 @@ function make_seneca (initial_options) {
           return delegate.die(err)
         }
 
-        Logging.log_act_bad(root, err, so.trace.unknown)
+        log_act_bad(root, err, so.trace.unknown)
 
         return action_done(err)
       }
@@ -1141,8 +1163,8 @@ function make_seneca (initial_options) {
                             act_callpoint)
         }
 
-        Logging.log_act_in(root, { actid: actid, info: origargs.transport$ },
-                           actmeta, callargs, prior_ctxt, act_callpoint)
+        log_act_in(root, { actid: actid, info: origargs.transport$ },
+                   actmeta, callargs, prior_ctxt, act_callpoint)
 
         instance.emit('act-in', callargs)
 
@@ -1245,7 +1267,7 @@ function make_seneca (initial_options) {
           instance.emit('act-out', callargs, result[1])
           result[0] = null
 
-          Logging.log_act_out(
+          log_act_out(
             root, {
               actid: actid,
               duration: actend - actstart,
@@ -1337,7 +1359,7 @@ function make_seneca (initial_options) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    Logging.log_act_err(root, {
+    log_act_err(root, {
       actid: callargs.id$ || callargs.actid$,
       duration: duration
     }, actmeta, callargs, prior_ctxt, err, act_callpoint)
@@ -1377,7 +1399,7 @@ function make_seneca (initial_options) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    Logging.log_act_err(root, {
+    log_act_err(root, {
       actid: callargs.id$ || callargs.actid$,
       duration: duration
     }, actmeta, callargs, prior_ctxt, err, act_callpoint)
@@ -1401,7 +1423,7 @@ function make_seneca (initial_options) {
         var actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
 
-        Logging.log_act_cache(root, {actid: actid}, actmeta,
+        log_act_cache(root, {actid: actid}, actmeta,
           args, prior_ctxt, act_callpoint)
 
         if (actcb) {
@@ -1448,7 +1470,7 @@ function make_seneca (initial_options) {
     // delegate.fixedargs.history$.push(history_entry)
 
     // automate actid log insertion
-    delegate.log = Logging.make_delegate_log(callargs.meta$.id, actmeta, instance)
+    delegate.log = make_delegate_log(callargs.meta$.id, actmeta, instance)
     Logging.makelogfuncs(delegate)
 
     if (actmeta.priormeta) {
@@ -1871,3 +1893,34 @@ function make_callpoint (active) {
 
   return _.noop
 }
+
+/* REFACTOR: new makelog, in waiting...
+function makelog (seneca, logger) {
+
+  function entry (level) {
+    return function log () {
+      var data = arguments[0] || {}
+
+      if (1 < arguments.length) {
+        data = arrayify(arguments)
+      }
+
+      data.level = null == data.level ? level : data.level
+      data.seneca = null == data.seneca ? seneca.id : data.seneca
+      data.when = null == data.when ? Date.now() : data.when
+
+      logger(seneca, data)
+    }
+  }
+
+  var log = entry('debug')
+
+  log.debug = entry('debug')
+  log.info = entry('info')
+  log.warn = entry('warn')
+  log.error = entry('error')
+  log.fatal = entry('fatal')
+
+  return log
+}
+*/
