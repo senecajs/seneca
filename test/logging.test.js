@@ -2,7 +2,7 @@
 
 var Code = require('code')
 var Lab = require('lab')
-var Logging = require('../lib/logging')
+var Logging = require('../lib/legacy-logging')
 
 // Test shortcuts
 var lab = exports.lab = Lab.script()

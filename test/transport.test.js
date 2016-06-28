@@ -54,7 +54,8 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -78,7 +79,8 @@ describe('transport', function () {
           }
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -102,7 +104,8 @@ describe('transport', function () {
           }
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -124,7 +127,8 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -146,7 +150,8 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -168,7 +173,8 @@ describe('transport', function () {
           return {}
         },
         act: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -196,7 +202,8 @@ describe('transport', function () {
           expect(err).to.exist()
           done()
         },
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       listen.call(seneca)
@@ -220,7 +227,8 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       var fn = function () {
@@ -251,7 +259,8 @@ describe('transport', function () {
         add: function () {
           done()
         },
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       seneca.log.info = _.noop
@@ -280,7 +289,8 @@ describe('transport', function () {
         add: function () {
           done()
         },
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       seneca.log.info = _.noop
@@ -318,7 +328,8 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       client.call(seneca)
@@ -354,7 +365,8 @@ describe('transport', function () {
           return Object.create(this)
         },
         add: _.noop,
-        context: {}
+        context: {},
+        make_log: function() {}
       }
 
       client.call(seneca)
