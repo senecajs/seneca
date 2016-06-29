@@ -186,7 +186,8 @@ var internals = {
       // use parambulator for message validation, until version 3.x
       validate: true,
 
-      logging: true
+      // use old logging, until version 4.x
+      logging: false
     }
   }
 }
@@ -219,13 +220,8 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  // say hello, printing identifier to log
-  seneca.log.info({notice:'hello'})
-
-  // dump options if debugging
-  seneca.log.debug('options', function () {
-    return Util.inspect(options, false, null).replace(/[\r\n]/g, ' ')
-  })
+  seneca.log.info({notice: 'hello'})
+  seneca.log.debug({options: options})
 
   if (options.debug.print.options) {
     console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
@@ -237,8 +233,6 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('hasplugin', Plugins.api_decorations.hasplugin)
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
-
-
 
   if (options.legacy.validate) {
     seneca.use(require('seneca-parambulator'))
@@ -412,7 +406,7 @@ function make_seneca (initial_options) {
   private$.exports = { options: Common.deepextend({}, so) }
   private$.decorations = {}
 
-  private$.logger = so.internal.logger || load_logger(root)
+  private$.logger = load_logger(root, so.internal.logger)
   root.log = make_log(root, default_log_modifier)
 
 
@@ -441,11 +435,11 @@ function make_seneca (initial_options) {
   if (so.status.interval > 0 && so.status.running) {
     private$.stats = private$.stats || {}
     setInterval(function () {
-      var status = {
+      root.log.info({
+        kind: 'status',
         alive: (Date.now() - private$.stats.start),
-        act: private$.stats.act
-      }
-      root.log.info('status', status)
+        act: private$.stats.act        
+      })
     }, so.status.interval)
   }
 
@@ -634,8 +628,11 @@ function make_seneca (initial_options) {
             catch (ex) {
               // TODO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
-              self.log.error(
-                'sub', 'err', args.meta$.id, err.message, args, err.stack)
+              self.log.error(make_standard_err_log_entry(err,{
+                kind: 'sub',
+                msg: args,
+                actid: args.meta$.id
+              }))
             }
           })
         }
@@ -1117,7 +1114,7 @@ function make_seneca (initial_options) {
               // kind is act as this log entry relates to an action
               kind: 'act',
               case: 'ERR',
-              info: err.message,
+              notice: err.message,
               code: err.code,
               err: err,
             }))
@@ -1326,9 +1323,11 @@ function make_seneca (initial_options) {
   (actmeta, prior_ctxt, callargs, origargs, ctxt)
   {
     var transport = origargs.transport$ || {}
+    var callmeta = callargs.meta$ || {}
     actmeta = actmeta || {}
 
     return _.extend({
+      actid: callmeta.id,
       msg: callargs,
       entry: prior_ctxt.entry,
       prior: prior_ctxt.chain,
@@ -1340,6 +1339,17 @@ function make_seneca (initial_options) {
       client: actmeta.client,
       listen: !!transport.origin,
       transport: transport
+    }, ctxt)
+  }
+
+
+  function make_standard_err_log_entry 
+  (err, ctxt)
+  {
+    return _.extend({
+      notice: err.message,
+      code: err.code,
+      err: err
     }, ctxt)
   }
 
@@ -1375,17 +1385,17 @@ function make_seneca (initial_options) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    instance.log.error(make_standard_act_log_entry(
-      actmeta, prior_ctxt, callargs, origargs,
-      {
-        // kind is act as this log entry relates to an action
-        kind: 'act',
-        case: 'ERR',
-        info: err.message,
-        code: err.code,
-        err: err,
-        duration: duration
-      }))
+    instance.log.error(
+      make_standard_err_log_entry(
+        err,
+        make_standard_act_log_entry(
+          actmeta, prior_ctxt, callargs, origargs,
+          {
+            // kind is act as this log entry relates to an action
+            kind: 'act',
+            case: 'ERR',
+            duration: duration
+          })))
 
     instance.emit('act-err', callargs, err)
 
@@ -1932,9 +1942,11 @@ function make_seneca (initial_options) {
     data.when = null == data.when ? Date.now() : data.when
   }
 
-  function load_logger (instance) {
-    var log_plugin = require( 
+  function load_logger (instance, log_plugin) {
+    log_plugin = log_plugin || require( 
       so.legacy.logging ? './lib/legacy-logging' : './lib/logging' )
+
+    // TODO: check for preload
     return log_plugin.preload.call(instance).extend.logger
   }
 
