@@ -420,7 +420,7 @@ function make_seneca (initial_options) {
       : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
     timeout: so.timeout,
     error: function (err) {
-      log_exec_err(root, err)
+      root.log.error(make_standard_err_log_entry(err, {kind: 'EXEC'}))
     },
     msg_codes: {
       timeout: 'action-timeout',
@@ -438,7 +438,7 @@ function make_seneca (initial_options) {
       root.log.info({
         kind: 'status',
         alive: (Date.now() - private$.stats.start),
-        act: private$.stats.act        
+        act: private$.stats.act
       })
     }, so.status.interval)
   }
@@ -628,7 +628,7 @@ function make_seneca (initial_options) {
             catch (ex) {
               // TODO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
-              self.log.error(make_standard_err_log_entry(err,{
+              self.log.error(make_standard_err_log_entry(err, {
                 kind: 'sub',
                 msg: args,
                 actid: args.meta$.id
@@ -917,9 +917,10 @@ function make_seneca (initial_options) {
         }
       })
 
-      seneca.log.debug('close', 'start', callpoint())
+      seneca.log.debug({kind: 'close', notice: 'start', callpoint: callpoint()})
       seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
-        seneca.log.debug('close', 'end', err)
+        seneca.log.debug(make_standard_err_log_entry(
+          err, {kind: 'close', notice: 'end'}))
 
         seneca.removeAllListeners('act-in')
         seneca.removeAllListeners('act-out')
@@ -942,7 +943,7 @@ function make_seneca (initial_options) {
     var self = this
 
     if (so.debug.callpoint) {
-      self.log.debug('ready', 'register', callpoint())
+      self.log.debug({kind: 'ready', callpoint: callpoint()})
     }
 
     if (!_.isFunction(ready)) {
@@ -1039,7 +1040,6 @@ function make_seneca (initial_options) {
     var actstats
     var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
-    var listen_origin = origargs.transport$ && origargs.transport$.origin
     var id_tx = (args.id$ || args.actid$ || instance.idgen()).split('/')
     var tx =
           id_tx[1] ||
@@ -1086,8 +1086,13 @@ function make_seneca (initial_options) {
       // action pattern not found
       else {
         if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-          delegate.log.debug('act', '-', '-', 'DEFAULT',
-                             delegate.util.clean(args), callpoint())
+          delegate.log.warn(make_standard_act_log_entry(
+            actmeta, prior_ctxt, callargs, origargs,
+            {
+              kind: 'act',
+              case: 'DEFAULT'
+            }))
+
           return action_done(null, args.default$)
         }
 
@@ -1107,17 +1112,16 @@ function make_seneca (initial_options) {
           return delegate.die(err)
         }
 
-        if( so.trace.unknown ) {
-          delegate.log.warn(make_standard_act_log_entry(
-            actmeta, prior_ctxt, callargs, origargs,
-            {
-              // kind is act as this log entry relates to an action
-              kind: 'act',
-              case: 'ERR',
-              notice: err.message,
-              code: err.code,
-              err: err,
-            }))
+        if (so.trace.unknown) {
+          delegate.log.warn(
+            make_standard_err_log_entry(
+              err, make_standard_err_log_entry(
+                actmeta, prior_ctxt, callargs, origargs,
+                {
+                  // kind is act as this log entry relates to an action
+                  kind: 'act',
+                  case: 'UNKNOWN'
+                })))
         }
 
         return action_done(err)
@@ -1148,8 +1152,12 @@ function make_seneca (initial_options) {
         }
 
         if (actmeta.deprecate) {
-          instance.log.warn('DEPRECATED', actmeta.pattern, actmeta.deprecate,
-                            act_callpoint)
+          instance.log.warn({
+            kind: 'act',
+            case: 'DEPRECATED',
+            pattern: actmeta.pattern,
+            notice: actmeta.deprecate,
+            callpoint: act_callpoint})
         }
 
         delegate = act_make_delegate(instance, tx, callargs, actmeta, prior_ctxt)
@@ -1202,7 +1210,6 @@ function make_seneca (initial_options) {
         var call_cb = true
 
         var resdata = result[1]
-        var info = result[2]
 
         if (err == null &&
           resdata != null &&
@@ -1261,9 +1268,9 @@ function make_seneca (initial_options) {
 
           delegate.log.debug(make_standard_act_log_entry(
             actmeta, prior_ctxt, callargs, origargs,
-            { kind: 'act', 
-              case: 'OUT', 
-              duration: actend - actstart, 
+            { kind: 'act',
+              case: 'OUT',
+              duration: actend - actstart,
               result: result[1]
             }))
 
@@ -1319,9 +1326,8 @@ function make_seneca (initial_options) {
   }
 
 
-  function make_standard_act_log_entry 
-  (actmeta, prior_ctxt, callargs, origargs, ctxt)
-  {
+  function make_standard_act_log_entry
+  (actmeta, prior_ctxt, callargs, origargs, ctxt) {
     var transport = origargs.transport$ || {}
     var callmeta = callargs.meta$ || {}
     actmeta = actmeta || {}
@@ -1334,7 +1340,7 @@ function make_seneca (initial_options) {
       gate: origargs.gate$,
       caller: origargs.caller$,
 
-      // these are transitional as need to be updated 
+      // these are transitional as need to be updated
       // to standard transport metadata
       client: actmeta.client,
       listen: !!transport.origin,
@@ -1343,9 +1349,10 @@ function make_seneca (initial_options) {
   }
 
 
-  function make_standard_err_log_entry 
-  (err, ctxt)
-  {
+  function make_standard_err_log_entry
+  (err, ctxt) {
+    if (!err) return ctxt
+
     return _.extend({
       notice: err.message,
       code: err.code,
@@ -1453,9 +1460,8 @@ function make_seneca (initial_options) {
 
   // Check if actid has already been seen, and if action cache is active,
   // then provide cached result, if any. Return true in this case.
-  function apply_actcache 
-  (instance, callargs, origargs, prior_ctxt, actcb, act_callpoint) 
-  {
+  function apply_actcache
+  (instance, callargs, origargs, prior_ctxt, actcb, act_callpoint) {
     var actid = callargs.id$ || callargs.actid$
 
     if (actid != null && so.actcache.active) {
@@ -1501,24 +1507,16 @@ function make_seneca (initial_options) {
       delegate_args.ungate$ = !!callargs.gate$
     }
 
-    var history_entry = _.clone(callargs.meta$)
-    history_entry.instance = instance.id
-
     var delegate = instance.delegate(delegate_args)
 
     // special overrides
     if (tx) { delegate.fixedargs.tx$ = tx }
-
-    // delegate.fixedargs.history$ = _.clone(callargs.history$ || [])
-    // delegate.fixedargs.history$.push(history_entry)
 
     // automate actid log insertion
     delegate.log = make_log(delegate, function act_delegate_log_modifier (data) {
       data.actid = callargs.meta$.id
       data.pattern = actmeta.pattern
     })
-    //delegate.log = make_delegate_log(callargs.meta$.id, actmeta, instance)
-    //Logging.makelogfuncs(delegate)
 
     if (actmeta.priormeta) {
       delegate.prior = function (prior_args, prior_cb) {
@@ -1545,8 +1543,7 @@ function make_seneca (initial_options) {
       }
 
       delegate.parent = function (prior_args, prior_cb) {
-        delegate.log.warn('The method name seneca.parent is deprecated.' +
-          ' Please use seneca.prior instead.')
+        // FIX: log entry indicating deprecation of .parent
         delegate.prior(prior_args, prior_cb)
       }
     }
@@ -1663,16 +1660,23 @@ function make_seneca (initial_options) {
     var self = this
 
     if (options != null) {
-      self.log.debug('options', 'set', options, callpoint())
+      self.log.debug({
+        kind: 'options',
+        case: 'SET',
+        options: options,
+        callpoint: callpoint()})
     }
 
     so = private$.exports.options = ((options == null)
       ? private$.optioner.get()
       : private$.optioner.set(options))
 
+    // FIX: legacy logging can be changed here
+    /*
     if (options && options.log) {
-      //self.log = Logging.makelog(so.log, self.id, self.start_time)
+      self.log = Logging.makelog(so.log, self.id, self.start_time)
     }
+     */
 
     return so
   }
@@ -1897,7 +1901,7 @@ function make_seneca (initial_options) {
     var log = function (data) {
       private$.logger(this, data)
     }
-  
+
     log = prepare_log(instance, make_modified_log(log, modifier))
 
     make_log_levels(instance, log)
@@ -1922,8 +1926,9 @@ function make_seneca (initial_options) {
   function prepare_log (instance, log) {
     return function prepare_log_data () {
       var a0 = arguments[0]
-      var data = _.isArray(a0) ? a0 : 
-            _.isObject(a0) ? a0 : arrayify(arguments)
+      var data = _.isArray(a0) ? a0
+            : _.isObject(a0) ? a0
+            : arrayify(arguments)
 
       log.call(instance, data)
     }
@@ -1943,8 +1948,8 @@ function make_seneca (initial_options) {
   }
 
   function load_logger (instance, log_plugin) {
-    log_plugin = log_plugin || require( 
-      so.legacy.logging ? './lib/legacy-logging' : './lib/logging' )
+    log_plugin = log_plugin ||
+      require(so.legacy.logging ? './lib/legacy-logging' : './lib/logging')
 
     // TODO: check for preload
     return log_plugin.preload.call(instance).extend.logger
