@@ -34,6 +34,8 @@ var Transport = require('./lib/transport')
 
 // Shortcuts
 var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
+var errlog = Common.make_standard_err_log_entry
+var actlog = Common.make_standard_act_log_entry
 
 var internals = {
   error: Eraro({
@@ -147,9 +149,11 @@ var internals = {
     // Plugin settings
     plugin: {},
 
-    // Internal settings.
+    // Internal functionality. Reserved for objects and funtions only.
     internal: {
+
       // Close instance on these signals, if true.
+      // TODO: move to 'system' top level property
       close_signals: {
         SIGHUP: true,
         SIGTERM: true,
@@ -158,6 +162,7 @@ var internals = {
       },
 
       // seneca.add uses catchall (pattern='') prior
+      // TODO: move to 'system' top level property
       catchall: false
     },
 
@@ -221,7 +226,10 @@ module.exports = function init (seneca_options, more_options) {
   var options = seneca.options()
 
   seneca.log.info({notice: 'hello'})
-  seneca.log.debug({options: options})
+
+  // The 'internal' key of options is reserved for objects and functions
+  // that provide functionality, and are thus not really printable
+  seneca.log.debug({options: _.omit(options,['internal'])})
 
   if (options.debug.print.options) {
     console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
@@ -401,6 +409,8 @@ function make_seneca (initial_options) {
     callpoint: callpoint
   })
 
+  root.util = seneca_util
+
 
   // Configure logging
   private$.exports = { options: Common.deepextend({}, so) }
@@ -420,7 +430,7 @@ function make_seneca (initial_options) {
       : (so.trace.act) ? make_trace_act({stack: so.trace.stack}) : false,
     timeout: so.timeout,
     error: function (err) {
-      root.log.error(make_standard_err_log_entry(err, {kind: 'EXEC'}))
+      root.log.error(errlog(err, {kind: 'EXEC'}))
     },
     msg_codes: {
       timeout: 'action-timeout',
@@ -484,8 +494,6 @@ function make_seneca (initial_options) {
   })
 
   root.toString = api_toString
-
-  root.util = seneca_util
 
   root.store = Store()
 
@@ -628,7 +636,7 @@ function make_seneca (initial_options) {
             catch (ex) {
               // TODO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
-              self.log.error(make_standard_err_log_entry(err, {
+              self.log.error(errlog(err, {
                 kind: 'sub',
                 msg: args,
                 actid: args.meta$.id
@@ -789,12 +797,15 @@ function make_seneca (initial_options) {
     actmeta = modify_action(self, actmeta)
 
     if (addroute) {
-      var addlog = [ actmeta.sub ? 'SUB' : 'ADD',
-        actmeta.id, Common.pattern(pattern), action.name,
-        callpoint() ]
-      var logger = self.log.log || self.log
+      self.log.debug({
+        kind: 'add',
+        case: actmeta.sub ? 'SUB' : 'ADD',
+        id: actmeta.id,
+        pattern: Common.pattern(pattern),
+        name: action.name,
+        callpoint: callpoint
+      })
 
-      logger.debug.apply(self, addlog)
       private$.actrouter.add(pattern, actmeta)
     }
 
@@ -919,7 +930,7 @@ function make_seneca (initial_options) {
 
       seneca.log.debug({kind: 'close', notice: 'start', callpoint: callpoint()})
       seneca.act('role:seneca,cmd:close,closing$:true', function (err) {
-        seneca.log.debug(make_standard_err_log_entry(
+        seneca.log.debug(errlog(
           err, {kind: 'close', notice: 'end'}))
 
         seneca.removeAllListeners('act-in')
@@ -1086,7 +1097,7 @@ function make_seneca (initial_options) {
       // action pattern not found
       else {
         if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-          delegate.log.warn(make_standard_act_log_entry(
+          delegate.log.debug(actlog(
             actmeta, prior_ctxt, callargs, origargs,
             {
               kind: 'act',
@@ -1114,8 +1125,8 @@ function make_seneca (initial_options) {
 
         if (so.trace.unknown) {
           delegate.log.warn(
-            make_standard_err_log_entry(
-              err, make_standard_err_log_entry(
+            errlog(
+              err, errlog(
                 actmeta, prior_ctxt, callargs, origargs,
                 {
                   // kind is act as this log entry relates to an action
@@ -1164,7 +1175,7 @@ function make_seneca (initial_options) {
         callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
 
         if (!actmeta.sub) {
-          delegate.log.debug(make_standard_act_log_entry(
+          delegate.log.debug(actlog(
             actmeta, prior_ctxt, callargs, origargs,
             { kind: 'act', case: 'IN' }))
         }
@@ -1266,7 +1277,7 @@ function make_seneca (initial_options) {
           instance.emit('act-out', callargs, result[1])
           result[0] = null
 
-          delegate.log.debug(make_standard_act_log_entry(
+          delegate.log.debug(actlog(
             actmeta, prior_ctxt, callargs, origargs,
             { kind: 'act',
               case: 'OUT',
@@ -1325,42 +1336,6 @@ function make_seneca (initial_options) {
     private$.executor.execute(execspec)
   }
 
-
-  function make_standard_act_log_entry
-  (actmeta, prior_ctxt, callargs, origargs, ctxt) {
-    var transport = origargs.transport$ || {}
-    var callmeta = callargs.meta$ || {}
-    actmeta = actmeta || {}
-
-    return _.extend({
-      actid: callmeta.id,
-      msg: callargs,
-      entry: prior_ctxt.entry,
-      prior: prior_ctxt.chain,
-      gate: origargs.gate$,
-      caller: origargs.caller$,
-
-      // these are transitional as need to be updated
-      // to standard transport metadata
-      client: actmeta.client,
-      listen: !!transport.origin,
-      transport: transport
-    }, ctxt)
-  }
-
-
-  function make_standard_err_log_entry
-  (err, ctxt) {
-    if (!err) return ctxt
-
-    return _.extend({
-      notice: err.message,
-      code: err.code,
-      err: err
-    }, ctxt)
-  }
-
-
   function act_error (instance, err, actmeta, result, cb,
     duration, callargs, origargs, prior_ctxt, act_callpoint) {
     var call_cb = true
@@ -1393,9 +1368,9 @@ function make_seneca (initial_options) {
     err.details.plugin = err.details.plugin || {}
 
     instance.log.error(
-      make_standard_err_log_entry(
+      errlog(
         err,
-        make_standard_act_log_entry(
+        actlog(
           actmeta, prior_ctxt, callargs, origargs,
           {
             // kind is act as this log entry relates to an action
@@ -1439,7 +1414,7 @@ function make_seneca (initial_options) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    instance.log.error(make_standard_act_log_entry(
+    instance.log.error(actlog(
       actmeta, prior_ctxt, callargs, origargs,
       {
         // kind is act as this log entry relates to an action
@@ -1471,7 +1446,7 @@ function make_seneca (initial_options) {
         var actmeta = actdetails.actmeta || {}
         private$.stats.act.cache++
 
-        instance.log.debug(make_standard_act_log_entry(
+        instance.log.debug(actlog(
           {}, prior_ctxt, callargs, origargs,
           { kind: 'act', case: 'CACHE' }))
 
@@ -1898,7 +1873,7 @@ function make_seneca (initial_options) {
 
 
   function make_log (instance, modifier) {
-    var log = function (data) {
+    var log = instance.log || function (data) {
       private$.logger(this, data)
     }
 

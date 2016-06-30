@@ -46,9 +46,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
@@ -69,9 +68,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {
@@ -94,9 +92,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {
@@ -119,9 +116,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
@@ -142,9 +138,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
@@ -165,9 +160,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
@@ -188,9 +182,8 @@ describe('transport', function () {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
@@ -215,9 +208,8 @@ describe('transport', function () {
       var client = Transport.client(_.noop, function () { return _.noop })
       var seneca = {
         log: {
-          info: function () {
-
-          }
+          info: _.noop,
+          debug: _.noop
         },
         options: function () {
           return {}
