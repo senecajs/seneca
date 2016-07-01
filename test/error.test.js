@@ -102,7 +102,13 @@ describe('seneca-error', function () {
       // ~~ CASE: callback; args-invalid; err-result; err-logged
       si.act('a:1', function (err) {
         assert.equal('act_invalid_msg', err.code)
-        assert.equal('act_invalid_msg', ctxt.errlog[14])
+
+        if (si.options().legacy.logging) {
+          assert.equal('act_invalid_msg', ctxt.errlog[14])
+        }
+        else {
+          assert.equal('act_invalid_msg', ctxt.errlog.code)
+        }
 
         // ~~ CASE: callback; args-valid
         si.act('a:1,b:1', function (err, out) {
@@ -136,30 +142,44 @@ describe('seneca-error', function () {
     test_action(si, ctxt)
   }
 
+  // REMOVE after Seneca 3.x
+  // err.log = false is a feature of legacy logging
   function exec_action_throw_nolog (done) {
     var ctxt = {errlog: null, done: done, log: false, name: 'throw_nolog'}
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (args, done) {
-      var err = new Error('CCC')
-      err.log = false
-      throw err
-    })
+    if (si.options().legacy.logging) {
+      si.add('a:1', function (args, done) {
+        var err = new Error('CCC')
+        err.log = false
+        throw err
+      })
 
-    test_action(si, ctxt)
+      test_action(si, ctxt)
+    }
+    else {
+      done()
+    }
   }
 
+  // REMOVE after Seneca 3.x
+  // err.log = false is a feature of legacy logging
   function exec_action_result_nolog (done) {
     var ctxt = {errlog: null, done: done, log: false, name: 'result_nolog'}
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (args, done) {
-      var err = new Error('CCC')
-      err.log = false
-      done(err)
-    })
+    if (si.options().legacy.logging) {
+      si.add('a:1', function (args, done) {
+        var err = new Error('CCC')
+        err.log = false
+        done(err)
+      })
 
-    test_action(si, ctxt)
+      test_action(si, ctxt)
+    }
+    else {
+      done()
+    }
   }
 
   function exec_action_errhandler_throw (done) {
@@ -201,7 +221,13 @@ describe('seneca-error', function () {
         assert.equal(out, null)
         assert.equal('act_execute', err.code)
         assert.equal('a:1', err.details.pattern)
-        assert.equal('act_execute', ctxt.errlog[14])
+
+        if (si.options().legacy.logging) {
+          assert.equal('act_execute', ctxt.errlog[14])
+        }
+        else {
+          assert.equal('act_execute', ctxt.errlog.code)
+        }
 
         ctxt.errlog = null
 
@@ -212,7 +238,13 @@ describe('seneca-error', function () {
               assert.equal(1, args.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
-              assert.equal('act_execute', ctxt.errlog[14])
+              if (si.options().legacy.logging) {
+                assert.equal('act_execute', ctxt.errlog[14])
+              }
+              else {
+                assert.equal('act_execute', ctxt.errlog.code)
+              }
+
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
@@ -275,7 +307,12 @@ describe('seneca-error', function () {
         assert.equal(out, null)
         assert.equal('act_execute', err.code)
         assert.equal('a:1', err.details.pattern)
-        assert.equal('act_execute', ctxt.errlog[14])
+        if (si.options().legacy.logging) {
+          assert.equal('act_execute', ctxt.errlog[14])
+        }
+        else {
+          assert.equal('act_execute', ctxt.errlog.code)
+        }
 
         ctxt.errlog = null
 
@@ -286,7 +323,12 @@ describe('seneca-error', function () {
               assert.equal(1, args.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
-              assert.equal('act_execute', ctxt.errlog[14])
+              if (si.options().legacy.logging) {
+                assert.equal('act_execute', ctxt.errlog[14])
+              }
+              else {
+                assert.equal('act_execute', ctxt.errlog.code)
+              }
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
@@ -314,14 +356,35 @@ describe('seneca-error', function () {
 
   function make_seneca (ctxt) {
     var si = Seneca(testopts)
-    si.options({
-      log: {map: [{level: 'error+', handler: function () {
-        ctxt.errlog = arrayify(arguments)
-      }}]},
-      trace: { unknown: 'error' },
-      legacy: { error_codes: false }
-    })
-    return si
+    if (si.options().legacy.logging) {
+      si.options({
+        log: {map: [{level: 'error+', handler: function () {
+          ctxt.errlog = arrayify(arguments)
+        }}]},
+        trace: { unknown: 'error' },
+        legacy: { error_codes: false }
+      })
+      return si
+    }
+    else {
+      var logger = function () {}
+      logger.preload = function () {
+        return {
+          extend: {
+            logger: function (s, d) {
+              ctxt.errlog = d
+            }
+          }
+        }
+      }
+
+      return Seneca({
+        trace: { unknown: 'error' },
+        legacy: { error_codes: false },
+        internal: {
+          logger: logger
+        }})
+    }
   }
 
   function test_action (si, ctxt) {
@@ -335,7 +398,12 @@ describe('seneca-error', function () {
         assert.equal('a:1', err.details.pattern, ctxt.name + '-B')
 
         if (ctxt.log) {
-          assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-C')
+          if (si.options().legacy.logging) {
+            assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-C')
+          }
+          else {
+            assert.equal('act_execute', ctxt.errlog.code, ctxt.name + '-C')
+          }
         }
         else {
           assert.equal(ctxt.errlog, null)
@@ -351,7 +419,12 @@ describe('seneca-error', function () {
             assert.equal('a:1', err.details.pattern, ctxt.name + '-E')
 
             if (ctxt.log) {
-              assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-F')
+              if (si.options().legacy.logging) {
+                assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-F')
+              }
+              else {
+                assert.equal('act_execute', ctxt.errlog.code, ctxt.name + '-F')
+              }
             }
 
             ctxt.done()
@@ -379,10 +452,19 @@ describe('seneca-error', function () {
       assert.equal('seneca: Action a:1 callback threw: DDD.', err.message)
 
       if (log_it) {
-        assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
+        if (si.options().legacy.logging) {
+          assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
+        }
+        else {
+          assert.equal('act_callback', ctxt.errlog.code, 'callback-H')
+        }
       }
       else {
-        assert.equal(ctxt.errlog, null)
+        // REMOVE in Seneca 3.x
+        // e.log = false is a legacy logging feature
+        if (si.options().legacy.logging) {
+          assert.equal(ctxt.errlog, null)
+        }
         done()
       }
     }})

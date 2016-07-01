@@ -229,7 +229,7 @@ module.exports = function init (seneca_options, more_options) {
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
-  seneca.log.debug({options: _.omit(options,['internal'])})
+  seneca.log.debug({options: _.omit(options, ['internal'])})
 
   if (options.debug.print.options) {
     console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
