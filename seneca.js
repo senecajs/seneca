@@ -47,8 +47,7 @@ var internals = {
     tag: { string$: true },
     idlen: { integer$: true },
     timeout: { integer$: true },
-    errhandler: { function$: true },
-    logger: { function$: true }
+    errhandler: { function$: true }
   }, {
     topname: 'options',
     msgprefix: 'seneca({...}): '
@@ -191,7 +190,7 @@ var internals = {
       // use parambulator for message validation, until version 3.x
       validate: true,
 
-      // use old logging, until version 4.x
+      // use old logging, until version 3.x
       logging: false
     }
   }
@@ -1159,7 +1158,9 @@ function make_seneca (initial_options) {
           action: actmeta.id,
           entry: prior_ctxt.entry,
           chain: prior_ctxt.chain,
-          sync: is_sync
+          sync: is_sync,
+          plugin_name: actmeta.plugin_name,
+          plugin_tag: actmeta.plugin_tag
         }
 
         if (actmeta.deprecate) {
@@ -1172,6 +1173,7 @@ function make_seneca (initial_options) {
         }
 
         delegate = act_make_delegate(instance, tx, callargs, actmeta, prior_ctxt)
+
         callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
 
         if (!actmeta.sub) {
@@ -1477,7 +1479,13 @@ function make_seneca (initial_options) {
   }
 
   function act_make_delegate (instance, tx, callargs, actmeta, prior_ctxt) {
-    var delegate_args = {}
+    var delegate_args = {
+      plugin$: {
+        name: actmeta.plugin_name,
+        tag: actmeta.plugin_tag
+      }
+    }
+
     if (callargs.gate$ != null) {
       delegate_args.ungate$ = !!callargs.gate$
     }
@@ -1491,6 +1499,8 @@ function make_seneca (initial_options) {
     delegate.log = make_log(delegate, function act_delegate_log_modifier (data) {
       data.actid = callargs.meta$.id
       data.pattern = actmeta.pattern
+      data.plugin_name = actmeta.plugin_name
+      data.plugin_tag = actmeta.plugin_tag
     })
 
     if (actmeta.priormeta) {
