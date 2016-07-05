@@ -191,7 +191,7 @@ var internals = {
       validate: true,
 
       // use old logging, until version 3.x
-      logging: false
+      logging: true
     }
   }
 }
