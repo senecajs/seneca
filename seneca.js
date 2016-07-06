@@ -224,11 +224,11 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  seneca.log.info({notice: 'hello'})
+  seneca.log.info({kind: 'notice', notice: 'hello'})
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
-  seneca.log.debug({options: _.omit(options, ['internal'])})
+  seneca.log.debug({kind: 'notice', options: _.omit(options, ['internal'])})
 
   if (options.debug.print.options) {
     console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
@@ -800,7 +800,7 @@ function make_seneca (initial_options) {
         kind: 'add',
         case: actmeta.sub ? 'SUB' : 'ADD',
         id: actmeta.id,
-        pattern: Common.pattern(pattern),
+        pattern: actmeta.pattern,
         name: action.name,
         callpoint: callpoint
       })
@@ -1498,9 +1498,10 @@ function make_seneca (initial_options) {
     // automate actid log insertion
     delegate.log = make_log(delegate, function act_delegate_log_modifier (data) {
       data.actid = callargs.meta$.id
-      data.pattern = actmeta.pattern
-      data.plugin_name = actmeta.plugin_name
-      data.plugin_tag = actmeta.plugin_tag
+
+      data.plugin_name = data.plugin_name || actmeta.plugin_name
+      data.plugin_tag = data.plugin_tag || actmeta.plugin_tag
+      data.pattern = data.pattern || actmeta.pattern
     })
 
     if (actmeta.priormeta) {
