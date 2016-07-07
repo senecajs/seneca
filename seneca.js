@@ -1369,18 +1369,17 @@ function make_seneca (initial_options) {
     err.details = err.details || {}
     err.details.plugin = err.details.plugin || {}
 
-    instance.log.error(
-      errlog(
-        err,
-        actlog(
-          actmeta, prior_ctxt, callargs, origargs,
-          {
-            // kind is act as this log entry relates to an action
-            kind: 'act',
-            case: 'ERR',
-            duration: duration
-          })))
+    var entry = actlog(
+      actmeta, prior_ctxt, callargs, origargs,
+      {
+        // kind is act as this log entry relates to an action
+        kind: 'act',
+        case: 'ERR',
+        duration: duration
+      })
+    entry = errlog(err, entry)
 
+    instance.log.error(entry)
     instance.emit('act-err', callargs, err)
 
     // when fatal$ is set, prefer to die instead
@@ -1657,12 +1656,13 @@ function make_seneca (initial_options) {
       ? private$.optioner.get()
       : private$.optioner.set(options))
 
-    // FIX: legacy logging can be changed here
-    /*
-    if (options && options.log) {
-      self.log = Logging.makelog(so.log, self.id, self.start_time)
+    if (so.legacy.logging) {
+      if (options && options.log && _.isArray(options.log.map)) {
+        for (var i = 0; i < options.log.map.length; ++i) {
+          self.logroute(options.log.map[i])
+        }
+      }
     }
-     */
 
     return so
   }
