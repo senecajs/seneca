@@ -1935,7 +1935,7 @@ function make_seneca (initial_options) {
 
   function load_logger (instance, log_plugin) {
     log_plugin = log_plugin ||
-      require(so.legacy.logging ? './lib/legacy-logging' : './lib/logging')
+      require(so.legacy.logging ? 'seneca-legacy-logger' : './lib/logging')
 
     // TODO: check for preload
     return log_plugin.preload.call(instance).extend.logger

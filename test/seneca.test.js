@@ -42,7 +42,7 @@ describe('seneca', function () {
 
   it('version', function (done) {
     var start = Date.now()
-    var si = Seneca(testopts)
+    var si = Seneca({log: 'test', legacy: {logging: false}})
     expect(si.version).to.equal(Package.version)
     var end = Date.now()
 
