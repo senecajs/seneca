@@ -60,7 +60,7 @@ var internals = {
     idlen: 12,
 
     // Standard timeout for actions.
-    timeout: 11111,
+    timeout: 22222,
 
     // Register (true) default plugins. Set false to not register when
     // using custom versions.
