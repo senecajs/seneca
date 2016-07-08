@@ -30,7 +30,6 @@ var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
-var Store = require('./lib/store')
 var Transport = require('./lib/transport')
 
 // Shortcuts
@@ -66,7 +65,6 @@ var internals = {
     default_plugins: {
       basic: true,
       cluster: true,
-      'mem-store': true,
       repl: true,
       transport: true,
       web: true
@@ -263,7 +261,6 @@ module.exports = function init (seneca_options, more_options) {
 
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins['mem-store']) { seneca.use(require('seneca-mem-store')) }
   if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
   if (options.default_plugins.web) { seneca.use(require('seneca-web')) }
 
@@ -507,8 +504,6 @@ function make_seneca (initial_options) {
     // TODO: deprecate?
     argprops: Common.argprops
   }
-
-  root.store = Store()
 
   // Used for extending seneca with api_decorate
   // TODO: move to private$
