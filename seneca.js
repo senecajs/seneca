@@ -108,7 +108,8 @@ var internals = {
       // Adding a pattern overrides existing pattern only if matches exactly.
       add: false,
 
-      // If no action is found and find is false, then no error returned along with empty object
+      // If no action is found and find is false, 
+      // then no error returned along with empty object
       find: true,
 
       // Maximum number of times an action can call itself
@@ -139,7 +140,6 @@ var internals = {
     deathdelay: 11111,
 
     // Default seneca-admin settings.
-    // TODO: move to seneca-admin!
     admin: {
       local: false,
       prefix: '/admin'
@@ -207,7 +207,7 @@ var seneca_util = {
   pincanon: Common.pincanon,
   router: function () { return Patrun() },
 
-  // TODO: deprecate?
+  // DEPRECATED
   argprops: Common.argprops
 }
 
