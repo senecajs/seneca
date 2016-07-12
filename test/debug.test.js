@@ -11,8 +11,15 @@ var it = lab.it
 var assert = Assert
 
 describe('debug', function () {
+  // REMOVE after Seneca 4.x
   it('logroute', function (done) {
     var si = Seneca({log: 'test'}).error(done)
+
+    // test not applicable to new logging in Seneca 3.x
+    if (!si.options().legacy.logging) {
+      return done()
+    }
+
     var lr0 = si.logroute()
     assert.equal(lr0, 'level=error -> <print>\nlevel=fatal -> <print>')
 

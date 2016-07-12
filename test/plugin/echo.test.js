@@ -14,8 +14,10 @@ var assert = Assert
 
 describe('plugin.echo', function () {
   it('happy', function (done) {
-    var si = Seneca({log: {map: [{type: 'init',
-    handler: Seneca.loghandler.stream(process.stdout)}]}})
+    var si = Seneca({log: 'test'})
+    si.options(
+      {log: {map: [{type: 'init',
+                    handler: si.loghandler.stream(process.stdout)}]}})
     si.use('echo')
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
@@ -29,8 +31,10 @@ describe('plugin.echo', function () {
     var printevents = new Events.EventEmitter()
     printevents.on('log', function (data) { console.log(data) })
 
-    var si = Seneca({log: {map: [{type: 'init',
-    handler: Seneca.loghandler.emitter(printevents)}]}})
+    var si = Seneca({log: 'test'})
+    si.options(
+      {log: {map: [{type: 'init',
+                    handler: si.loghandler.emitter(printevents)}]}})
     si.use('echo', {inject: {foo: 'bar'}})
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
