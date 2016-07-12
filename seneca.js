@@ -479,13 +479,6 @@ function make_seneca (initial_options) {
     if (eventname === 'ready') {
       root.private$.executor.on('clear', eventfunc)
       return
-
-      /*
-      if (!private$.wait_for_ready) {
-        private$.wait_for_ready = true
-        root.act('role:seneca,ready:true,gate$:true')
-      }
-       */
     }
   })
 
@@ -1523,7 +1516,11 @@ function make_seneca (initial_options) {
       }
 
       delegate.parent = function (prior_args, prior_cb) {
-        // FIX: log entry indicating deprecation of .parent
+        delegate.log.warn({
+          kind: 'notice',
+          case: 'DEPRECATION',
+          notice: Errors.deprecation.seneca_parent
+        })
         delegate.prior(prior_args, prior_cb)
       }
     }
@@ -1626,12 +1623,6 @@ function make_seneca (initial_options) {
     delegate.listen = function () {
       return self.listen.apply(this, arguments)
     }
-
-/*
-    delegate.makelogfuncs = function () {
-      Logging.makelogfuncs(delegate)
-    }
-*/
 
     return delegate
   }
@@ -1767,15 +1758,17 @@ function make_seneca (initial_options) {
   }
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
-  function api_decorate (property, method) {
-    Assert(property, 'property must be specified')
-    Assert(typeof property === 'string', 'property must be a string')
+  function api_decorate () {
+    var args = Norma('property:s value:.', arguments)
+
+    // TODO: review; needs to be more universally applicable
+    // also messages should not be embedded directly
+    var property = args.property
     Assert(property[0] !== '_', 'property cannot start with _')
     Assert(private$.decorations[property] === undefined, 'seneca is already decorated with the property')
     Assert(root[property] === undefined, 'cannot override a core seneca property: ' + property)
 
-    private$.decorations[property] = method
-    root[property] = method
+    root[property] = private$.decorations[property] = args.value
   }
 
   // DEPRECATED
@@ -1783,6 +1776,13 @@ function make_seneca (initial_options) {
   root.next_act = function () {
     var si = this || root
     var args = arrayify(arguments)
+
+    si.log.warn({
+      kind: 'notice',
+      case: 'DEPRECATION',
+      notice: Errors.deprecation.seneca_next_act
+    })
+
 
     return function (next) {
       args.push(next)
@@ -1807,8 +1807,9 @@ function make_seneca (initial_options) {
   root.add({role: 'seneca', get: 'options'}, action_options_get)
 
   // Legacy builtin actions.
-  root.add({role: 'seneca', stats: true}, action_seneca_stats)
-  root.add({role: 'options', cmd: 'get'}, action_options_get)
+  // Remove in Seneca 4.x
+  root.add({role: 'seneca', stats: true, deprecate$: true}, action_seneca_stats)
+  root.add({role: 'options', cmd: 'get', deprecate$: true}, action_options_get)
 
   Print(root)
 
@@ -1986,22 +1987,3 @@ function make_callpoint (active) {
 
   return _.noop
 }
-
-/*
-function make_default_logger (private$) {
-  private$.loggers = []
-
-  var logger = function default_logger(seneca, data) {
-    data = _.isArray(data) ? _.extend({},data) : data
-    for (var i = 0; i < private$.loggers.length; ++i) {
-      private$.loggers[i](seneca, data)
-    }
-  }
-
-  logger.add = function (logger) {
-    private$.loggers.push(logger)
-  }
-
-  return logger
-}
-*/
