@@ -1061,12 +1061,7 @@ function make_seneca (initial_options) {
 
       if (actmeta) {
         if (_.isArray(args.history$) && 0 < args.history$.length) {
-          var repeat_count = 0
-          for (var hI = 0; hI < args.history$.length; ++hI) {
-            if (actmeta.id === args.history$[hI].action) {
-              ++repeat_count
-            }
-          }
+          var repeat_count = _.filter(args.history$, _.matches({action: actmeta.id})).length
 
           if (so.strict.maxloop < repeat_count) {
             err = internals.error('act_loop', {
@@ -1675,14 +1670,10 @@ function make_seneca (initial_options) {
       else {
         fn = function (data, done) {
           if (args.strargs) {
-            /*eslint-disable */
-            var $ = data
-            /*eslint-enable */
+            var $ = data // eslint-disable-line
             _.each(actargs, function (v, k) {
               if (_.isString(v) && v.indexOf('$.') === 0) {
-                /*eslint-disable */
-                actargs[k] = eval(v)
-                /*eslint-enable */
+                actargs[k] = eval(v) // eslint-disable-line
               }
             })
           }
