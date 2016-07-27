@@ -99,6 +99,25 @@ describe('common', function () {
     done()
   })
 
+  it('deepextend-objs with functions', function (done) {
+    function noop () {}
+    function f1 () {}
+
+    var defaults = {
+      a: noop,
+      b: noop
+    }
+    var options = {
+      a: f1
+    }
+
+    var out = Common.deepextend(defaults, options)
+
+    assert.strictEqual(out.a, f1)
+    assert.strictEqual(out.b, noop)
+    done()
+  })
+
   it('pattern', function (done) {
     assert.equal('a:1', Common.pattern({a: 1}))
     assert.equal('a:1,b:2', Common.pattern({a: 1, b: 2}))
