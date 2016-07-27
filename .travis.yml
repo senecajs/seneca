@@ -19,7 +19,7 @@ env:
 
     # Golden Circle plugins to test
     # - TEST_SUITE=senecajs/seneca-postgres-store
-    - TEST_SUITE=senecajs/seneca-auth
+    # - TEST_SUITE=senecajs/seneca-auth
     # - TEST_SUITE=rjrodger/seneca-balance-client
     # - TEST_SUITE=senecajs/seneca-basic
     # - TEST_SUITE=senecajs/seneca-cache
