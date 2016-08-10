@@ -142,7 +142,7 @@ var internals = {
     // System wide functionality.
     system: {
       // seneca.add uses catchall (pattern='') prior
-      catchall: false
+      catchall: false,
 
       // Close instance on these signals, if true.
       close_signals: {

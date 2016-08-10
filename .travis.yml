@@ -1,5 +1,5 @@
 language: node_js
-sudo: true
+sudo: false
 
 node_js:
   - 0.10
