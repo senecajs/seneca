@@ -139,22 +139,22 @@ var internals = {
     // Plugin settings
     plugin: {},
 
-    // Internal functionality. Reserved for objects and funtions only.
-    internal: {
+    // System wide functionality.
+    system: {
+      // seneca.add uses catchall (pattern='') prior
+      catchall: false
 
       // Close instance on these signals, if true.
-      // TODO: move to 'system' top level property
       close_signals: {
         SIGHUP: true,
         SIGTERM: true,
         SIGINT: true,
         SIGBREAK: true
       },
+    }
 
-      // seneca.add uses catchall (pattern='') prior
-      // TODO: move to 'system' top level property
-      catchall: false
-    },
+    // Internal functionality. Reserved for objects and funtions only.
+    internal: {},
 
     // Log status at periodic intervals.
     status: {
