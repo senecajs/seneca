@@ -136,12 +136,6 @@ var internals = {
     // Wait time for plugins to close gracefully.
     deathdelay: 11111,
 
-    // Default seneca-admin settings.
-    admin: {
-      local: false,
-      prefix: '/admin'
-    },
-
     // Plugin settings
     plugin: {},
 
