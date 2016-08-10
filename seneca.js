@@ -65,7 +65,6 @@ var internals = {
     // using custom versions.
     default_plugins: {
       basic: true,
-      cluster: true,
       repl: true,
       transport: true
     },
@@ -241,11 +240,6 @@ module.exports = function init (seneca_options, more_options) {
 
   if (options.legacy.validate) {
     seneca.use(require('seneca-parambulator'))
-  }
-
-  // HACK: makes this sync - FIX: use preload
-  if (options.default_plugins.cluster) {
-    require('seneca-cluster').call(seneca, {})
   }
 
   // HACK: makes this sync - FIX: use preload

@@ -1492,21 +1492,6 @@ describe('seneca', function () {
       })
   })
 
-  it('cluster errors when node version is less than 0.12.0', function (done) {
-    var version = process.versions.node
-    var si = Seneca(testopts)
-
-    si.die = function (err) {
-      process.versions.node = version
-      assert.strictEqual(err.code, 'bad_cluster_version')
-      done()
-    }
-
-    delete process.versions.node
-    process.versions.node = '0.11.99'
-    si.cluster()
-  })
-
   describe('#error', function () {
     it('isn\'t called twice on fatal errors when falta$: true', function (done) {
       var si = Seneca({ log: 'silent', debug: { undead: true } })
