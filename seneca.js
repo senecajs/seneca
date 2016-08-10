@@ -150,8 +150,8 @@ var internals = {
         SIGTERM: true,
         SIGINT: true,
         SIGBREAK: true
-      },
-    }
+      }
+    },
 
     // Internal functionality. Reserved for objects and funtions only.
     internal: {},
