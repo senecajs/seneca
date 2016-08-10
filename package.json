@@ -51,7 +51,7 @@
   "dependencies": {
     "archy": "1.0.0",
     "eraro": "0.4.1",
-    "gate-executor": "https://github.com/rjrodger/gate-executor/tree/tree",
+    "gate-executor": "1.0.0",
     "gex": "0.2.2",
     "jsonic": "0.2.2",
     "lodash": "4.6.0",
