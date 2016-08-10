@@ -220,7 +220,8 @@ describe('transport', function () {
         },
         add: _.noop,
         context: {},
-        make_log: function () {}
+        make_log: function () {},
+        private$: {ge: {gate: function () {}}}
       }
 
       var fn = function () {
@@ -252,7 +253,8 @@ describe('transport', function () {
           done()
         },
         context: {},
-        make_log: function () {}
+        make_log: function () {},
+        private$: {ge: {gate: function () {}}}
       }
 
       seneca.log.info = _.noop
@@ -282,7 +284,8 @@ describe('transport', function () {
           done()
         },
         context: {},
-        make_log: function () {}
+        make_log: function () {},
+        private$: {ge: {gate: function () {}}}
       }
 
       seneca.log.info = _.noop
@@ -321,7 +324,8 @@ describe('transport', function () {
         },
         add: _.noop,
         context: {},
-        make_log: function () {}
+        make_log: function () {},
+        private$: {ge: {gate: function () {}}}
       }
 
       client.call(seneca)
@@ -358,7 +362,8 @@ describe('transport', function () {
         },
         add: _.noop,
         context: {},
-        make_log: function () {}
+        make_log: function () {},
+        private$: {ge: {gate: function () {}}}
       }
 
       client.call(seneca)
