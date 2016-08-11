@@ -1,55 +1,51 @@
-![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
-> A Node.js toolkit for Micro-Service Architectures
+![Logo][]
+> A Node.js toolkit for Microservice architectures
 
 # seneca
-[![npm version][npm-badge]][npm-url]
-[![npm downloads][npm-downloads-badge]][npm-url]
-[![Build Status][travis-badge]][travis-url]
-[![Coverage Status][coveralls-badge]][coveralls-url]
-[![Gitter][gitter-badge]][gitter-url]
+[![Npm][BadgeNpm]][Npm]
+[![NpmFigs][BadgeNpmFigs]][Npm]
+[![Travis][BadgeTravis]][Travis]
+[![Coveralls][BadgeCoveralls]][Coveralls]
+[![Gitter][BadgeGitter]][Gitter]
 
-## About Seneca
-_Seneca_ is a toolkit for organizing the business logic of your app. You can break down your app into "stuff that happens", rather than focusing on data models or managing dependencies.
+- __Lead Maintainer:__ [Richard Rodger][Lead]
+- __Sponsor:__ [nearForm][Sponsor]
+- __Node:__ 4.x, 5.x
 
-_Seneca_ provides a toolkit for writing micro-services in Node.js.
+Seneca is a toolkit for writing microservices and organizing the business logic of your
+app. You can break down your app into "stuff that happens", rather than focusing on data
+models or managing dependencies.
 
-_Seneca_ provides:
+Seneca provides,
 
 - __pattern matching:__ a wonderfully flexible way to handle business requirements
 
-- __transport independence:__ how messages get to the right server is not something you should have to worry about
+- __transport independence:__ how messages get to the right server is not something you
+should have to worry about
 
-- __maturity:__ 5 years in production (before we called it _micro-services_), but was once taken out by [lightning][]
+- __maturity:__ 5 years in production (before we called it _microservices_), but was
+once taken out by [lightning][]
 
 - __plus:__ a deep and wide ecosystem of [plugins][]
 
-Use this module to define commands that work by taking in some JSON, and, optionally, returning some JSON.
-The command to run is selected by pattern-matching on the the input JSON.
-There are built-in and optional sets of commands that help you build Minimum Viable Products:
-data storage, user management, distributed logic, caching, logging, etc.
-And you can define your own product by breaking it into a set of commands - "stuff that happens".
-
-That's pretty much it. ;)
-
-## About Seneca Support
-
-- __Node:__ 0.10, 0.12, 4, 5
-
-Seneca's source can be read in an annotated fashion by,
-
-- viewing [online](http://senecajs.org/annotations/seneca.html).
-- running `npm run annotate`
-
-The annotated source can be found locally at [./doc/seneca.html]().
+Use this module to define commands that work by taking in some JSON, and, optionally,
+returning some JSON. The command to run is selected by pattern-matching on the the input
+JSON. There are built-in and optional sets of commands that help you build Minimum Viable
+Products: data storage, user management, distributed logic, caching, logging, etc. And you
+can define your own product by breaking it into a set of commands - "stuff that happens".
+That's pretty much it.
 
 If you're using this module, and need help, you can:
 
-- Post a [github issue][],
-- Tweet to [@senecajs][],
-- Ask on the [Gitter][gitter-url].
+- Post a [github issue][Issue],
+- Tweet to [@senecajs][Tweet],
+- Ask on the [Gitter][Gitter].
 
-If you are new to Seneca in general, please take a look at [senecajs.org][]. We have everything from
-tutorials to sample apps to help get you up and running quickly.
+If you are new to Seneca in general, please take a look at [senecajs.org][Org]. We have
+everything from tutorials to sample apps to help get you up and running quickly.
+
+Seneca's source can be read in an annotated fashion by running `npm run annotate`. An
+annotated version of each file will be generated in `./docs/`.
 
 ## Install
 To install, simply use npm.
@@ -63,6 +59,13 @@ To run tests, simply use npm:
 
 ```
 npm run test
+```
+
+### Coverage
+To obtain a coverage report run,
+
+```
+npm run coverage; open coverage.html
 ```
 
 
@@ -93,19 +96,19 @@ seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
 })
 ```
 
-In this code, whenever seneca sees the pattern
-`{cmd:'salestax'}`, it executes the function associated
-with this pattern, which calculates sales tax. There is nothing special about the property `cmd` . 
-It is simply the property we want to pattern match. You could look for `foo` for all seneca cares! 
- Yah!
+In this code, whenever seneca sees the pattern `{cmd:'salestax'}`, it executes the
+function associated with this pattern, which calculates sales tax. There is nothing
+special about the property `cmd` . It is simply the property we want to pattern match.
+You could look for `foo` for all seneca cares! Yah!
 
-The `seneca.add` method adds a new pattern, and the function to execute whenever that pattern occurs.
+The `seneca.add` method adds a new pattern, and the function to execute whenever that
+pattern occurs.
 
 The `seneca.act` method accepts an object, and runs the command, if any, that matches.
 
 Where does the sales tax rate come from? Let's try it again:
 
-```javascript
+```js
 seneca.add({ cmd: 'config' }, function (args, callback) {
   var config = {
     rate: 0.23
@@ -127,10 +130,10 @@ seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
 })
 ```
 
-The `config` command provides you with your configuration. This is
-cool because it doesn't matter _where_ it gets the configuration from
-- hard-coded, file system, database, network service, whatever. Did
-you have to define an abstraction API to make this work? Nope.
+The `config` command provides you with your configuration. This is cool because it
+doesn't matter _where_ it gets the configuration from - hard-coded, file system,
+database, network service, whatever. Did you have to define an abstraction API to make
+this work? Nope.
 
 There's a little but too much verbosity here, don't you think? Let's fix that:
 
@@ -142,7 +145,7 @@ seneca.act('cmd:salestax,net:100', function (err, result) {
 ```
 
 Instead of providing an object, you can provide a string using an
-[abbreviated form of JSON](//github.com/rjrodger/jsonic). In fact, you
+[abbreviated form] of JSON[Jsonic]. In fact, you
 can provide both:
 
 ```javascript
@@ -271,48 +274,44 @@ seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function (err, re
 
 ```
 
-In this case, you provide different implementations for different
-patterns. This lets you isolate complexity into well-defined
-places. It also means you can deal with special cases very easily.
-
-
-## Examples
-
-For more examples of Seneca in action, take a look at:
-
-   * [seneca-examples](//github.com/senecajs/getting-started)
-   * [nodezoo.com](//nodezoo.com/#q=seneca)
-   * [Well!](//github.com/nearform/well)
-
+In this case, you provide different implementations for different patterns. This lets you
+isolate complexity into well-defined places. It also means you can deal with special
+cases very easily.
 
 ## Contributing
-The [Senecajs org][] __encourages open participation__. If you feel you can help in any way, be it with
-bug reporting, documentation, examples, extra testing, or new features feel free to [create an issue][github issue],
-or better yet, [submit a pull request][github pull request].
-
-We have 2 main forms of documention for getting started with contributing:
-  - [Our very brief, and to the point, contributing.md](./CONTRIBUTING.md)
-  - [Our much more comprehensive contributing documentation.][contributing]
+The [Senecajs org][Org] encourages participation. If you feel you can help in any way, be
+it with bug reporting, documentation, examples, extra testing, or new features feel free
+to [create an issue][Issue], or better yet, [submit a [Pull Request][Pull]. For more
+information on contribution please see our [Contributing][Contrib] guide.
 
 ## License
-Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
+Copyright (c) 2015-2016 Richard Rodger and other contributors;
+Licensed under __[MIT][Lic]__.
 
-[travis-badge]: https://travis-ci.org/senecajs/seneca.svg?branch=master
-[travis-url]: https://travis-ci.org/senecajs/seneca?branch=master
-[coveralls-badge]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
-[coveralls-url]: https://coveralls.io/github/senecajs/seneca?branch=master
-[gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
-[gitter-url]: https://gitter.im/senecajs/seneca
-[npm-badge]: https://badge.fury.io/js/seneca.svg
-[npm-url]: https://badge.fury.io/js/seneca
-[npm-downloads-badge]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
 
-[MIT]: ./LICENSE
-[Senecajs org]: https://github.com/senecajs/
-[senecajs.org]: http://senecajs.org/
-[github issue]: https://github.com/senecajs/seneca/issues
-[github pull request]: https://github.com/senecajs/seneca/pulls
-[@senecajs]: http://twitter.com/senecajs
-[lightning]: http://aws.amazon.com/message/67457/
-[plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
-[contributing]: http://senecajs.org/contribute/
+
+[BadgeCoveralls]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
+[BadgeNpm]: https://badge.fury.io/js/seneca.svg
+[BadgeGitter]: https://badges.gitter.im/senecajs/seneca.svg
+[BadgeNpmFigs]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
+[BadgeTravis]: https://travis-ci.org/senecajs/seneca.svg?branch=master
+[CoC]: http://senecajs.org/code-of-conduct
+[Contrib]: http://senecajs.org/contribute
+[Coveralls]: https://coveralls.io/github/senecajs/seneca?branch=master
+[Gitter]: https://gitter.im/senecajs/seneca
+[Issue]: https://github.com/senecajs/seneca/issues/new
+[Lead]: https://github.com/rjrodger
+[Lic]: ./LICENSE
+[Logo]: http://senecajs.org/files/assets/seneca-logo.jpg
+[Npm]: https://www.npmjs.com/package/seneca
+[Org]: https://github.com/senecajs/issues
+[Pull]: https://github.com/senecajs/seneca/pulls
+[Sponsor]: http://nearform.com
+[Travis]: https://travis-ci.org/senecajs/seneca?branch=master
+[Tweet]: https://twitter.com/senecajs
+
+
+
+[Jsonic]: https//github.com/rjrodger/jsonic
+[Lightning]: http://aws.amazon.com/message/67457/
+[Plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults

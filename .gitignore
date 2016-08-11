@@ -1,5 +1,6 @@
 *~
 .DS_Store
+docs/annotated
 test/db
 *.old
 *.bak
@@ -9,10 +10,9 @@ node_modules*
 README.html
 *.off
 *-off
-.DS_Store
 npm-debug.log
 mem.json
 out
-testcov.html
+coverage.html
 .idea
 tmp

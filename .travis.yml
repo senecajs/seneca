@@ -27,7 +27,7 @@ env:
     # - TEST_SUITE=senecajs/seneca-transport
     # - TEST_SUITE=rjrodger/seneca-balance-client
     # - TEST_SUITE=rjrodger/seneca-mesh
-    
+
 before_script:
   - if [[ $TRAVIS_NODE_VERSION == "6" ]]; then export LAB_FLAGS="--leaks"; else export LAB_FLAGS=""; fi
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
@@ -47,7 +47,7 @@ cache:
       - node_modules
 
 after_script:
-  - npm run cov
+  - npm run coveralls
 
 notifications:
   webhooks:

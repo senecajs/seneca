@@ -14,7 +14,7 @@ seneca.client()
 seneca.ready(function () {
   var shop = seneca.pin({cmd: '*'})
 
-  shop.salestax({net: 100}, function (err, result) {
+  seneca.add({cmd:'sales-tax', net: 100}, function (err, result) {
     if (err) return console.error(err)
     console.log(result.total)
     seneca.close()

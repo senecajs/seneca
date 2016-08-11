@@ -76,7 +76,7 @@
     "node": ">=4.0.0"
   },
   "files": [
-    "LICENSE.txt",
+    "LICENSE",
     "README.md",
     "CHANGES.md",
     "lib",
@@ -87,30 +87,29 @@
     "url": "https://github.com/senecajs/seneca.git"
   },
   "scripts": {
-    "cov": "lab -s -P test -r lcov | coveralls",
     "test": "lab -v -P test -L -t 80 $LAB_FLAGS",
     "test:node6": "LAB_FLAGS='--leaks' && npm t",
-    "test-html": "lab -v -P test -L -t 80 -r html > testcov.html",
-    "lint": "lab -P test -dL",
-    "annotate": "docco seneca.js -o doc"
+    "coveralls": "lab -s -P test -r lcov | coveralls",
+    "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
+    "annotate": "docco seneca.js lib/*.js -o docs/annotated"
   },
   "devDependencies": {
-    "async": "2.0.1",
+    "async": "2.0.x",
     "bench": "0.3.x",
-    "body-parser": "1.15.2",
-    "code": "3.0.2",
-    "connect": "3.4.1",
-    "connect-query": "0.2.0",
-    "coveralls": "^2.11.6",
-    "docco": "0.7.0",
+    "body-parser": "1.15.x",
+    "code": "3.0.x",
+    "connect": "3.4.x",
+    "connect-query": "0.2.x",
+    "coveralls": "2.11.x",
+    "docco": "0.7.x",
     "eslint-config-seneca": "3.x.x",
     "eslint-plugin-hapi": "4.x.x",
     "eslint-plugin-standard": "2.x.x",
     "joi": "9.0.x",
     "lab": "10.9.x",
-    "no-shadow-relaxed": "1.0.1",
-    "seneca-echo": "0.3.0",
-    "seneca-entity": "1.2.0",
-    "seneca-error-test": "0.2.2"
+    "no-shadow-relaxed": "1.0.x",
+    "seneca-echo": "0.3.x",
+    "seneca-entity": "1.2.x",
+    "seneca-error-test": "0.2.x"
   }
 }

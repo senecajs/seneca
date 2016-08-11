@@ -10,4 +10,3 @@
 8.  npm tag seneca@VERSION next
 9.  npm tag seneca@VERSION plugin
 10. update and publish plugins
-11. update tumblr

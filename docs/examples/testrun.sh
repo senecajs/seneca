@@ -8,9 +8,6 @@ node sales-tax.js --seneca.log.quiet >> testrun.log
 echo sales-tax-config >> testrun.log
 node sales-tax-config.js --seneca.log.quiet >> testrun.log
 
-echo sales-tax-config-pin >> testrun.log
-node sales-tax-config-pin.js --seneca.log.quiet >> testrun.log
-
 echo sales-tax-client/server >> testrun.log
 node config-server.js --seneca.log.quiet >> testrun.log &
 CONFIG_SERVER_PID=$!
