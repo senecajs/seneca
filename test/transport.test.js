@@ -499,7 +499,7 @@ describe('transport', function () {
             .wait('foo:1,bar:1')
             .step(function (out) {
               expect(tt.outmsgs.length).to.equal(1)
-              expect(out).to.deep.equal({foo: 1, bar: 2})
+              expect(out).to.equal({foo: 1, bar: 2})
               return true
             })
 
@@ -530,14 +530,14 @@ describe('transport', function () {
             .wait('foo:1,bar:1')
             .step(function (out) {
               expect(tt.outmsgs.length).to.equal(1)
-              expect(out).to.deep.equal({foo: 1, bar: 2})
+              expect(out).to.equal({foo: 1, bar: 2})
               return true
             })
 
             .wait('baz:2,qoo:10')
             .step(function (out) {
               expect(tt.outmsgs.length).to.equal(2)
-              expect(out).to.deep.equal({baz: 2, qoo: 20})
+              expect(out).to.equal({baz: 2, qoo: 20})
               return true
             })
 
@@ -568,7 +568,7 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2})
+            expect(out).to.equal({foo: 1, bar: 2})
             return true
           })
 
@@ -576,14 +576,14 @@ describe('transport', function () {
           .wait('foo:1,qaz:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(2)
-            expect(out).to.deep.equal({foo: 1, qaz: 1, bar: 2})
+            expect(out).to.equal({foo: 1, qaz: 1, bar: 2})
             return true
           })
 
           .wait('foo:2,qaz:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(3)
-            expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
+            expect(out).to.equal({foo: 2, qaz: 1, bar: 2})
             return true
           })
 
@@ -612,21 +612,21 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(0)
-            expect(out).to.deep.equal({foo: 1, local: 1})
+            expect(out).to.equal({foo: 1, local: 1})
             return true
           })
 
           .wait('foo:2,qaz:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 2, qaz: 1, bar: 2})
+            expect(out).to.equal({foo: 2, qaz: 1, bar: 2})
             return true
           })
 
           .wait('foo:2,qaz:2,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(2)
-            expect(out).to.deep.equal({foo: 2, qaz: 2, bar: 2})
+            expect(out).to.equal({foo: 2, qaz: 2, bar: 2})
             return true
           })
 
@@ -654,7 +654,7 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(0)
-            expect(out).to.deep.equal({foo: 1, local: 1})
+            expect(out).to.equal({foo: 1, local: 1})
             return true
           })
 
@@ -686,7 +686,7 @@ describe('transport', function () {
           .wait('foo:1,bar:1')
           .step(function (out) {
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.deep.equal({foo: 1, bar: 2, local: 1, qaz: 1})
+            expect(out).to.equal({foo: 1, bar: 2, local: 1, qaz: 1})
             return true
           })
 

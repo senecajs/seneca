@@ -24,8 +24,8 @@ describe('seneca.util', function () {
   var si = Seneca(testopts)
 
   it('seneca.util.deepextend.happy', function (done) {
-    expect(si.util.deepextend({}, {a: 1}, {b: {c: 2}}, {b: {c: 3, d: 4}})).to.deep.include({ a: 1, b: { c: 3, d: 4 } })
-    expect(si.util.deepextend({}, {a: 1}, {b: [11, 22]}, {b: [undefined, 222, 333]})).to.deep.include({ a: 1, b: [ 11, 222, 333 ] })
+    expect(si.util.deepextend({}, {a: 1}, {b: {c: 2}}, {b: {c: 3, d: 4}})).to.include({ a: 1, b: { c: 3, d: 4 } })
+    expect(si.util.deepextend({}, {a: 1}, {b: [11, 22]}, {b: [undefined, 222, 333]})).to.include({ a: 1, b: [ 11, 222, 333 ] })
     done()
   })
 
@@ -90,7 +90,7 @@ describe('seneca.util', function () {
       {a: {aa: 1}, b: {bb: {bbb: 1}}, c: [1], d: {dd: 1}, e: {ee: 1}, f: [4, 5, 6]}
     )
 
-    expect(obj).to.deep.include({ a: { aa: 1 }, b: { bb: { bbb: 1 } }, c: [ 1 ], d: { dd: 1 }, e: { ee: 1 }, f: [ 4, 5, 6 ] })
+    expect(obj).to.include({ a: { aa: 1 }, b: { bb: { bbb: 1 } }, c: [ 1 ], d: { dd: 1 }, e: { ee: 1 }, f: [ 4, 5, 6 ] })
     done()
   })
 
@@ -100,13 +100,13 @@ describe('seneca.util', function () {
       {c: {z: 1}, b: {y: 2, entity$: 'a/b/c'}}
     )
 
-    expect(obj).to.deep.include({ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } })
+    expect(obj).to.include({ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } })
     done()
   })
 
   it('seneca.util.argprops', function (done) {
     var out = si.util.argprops({a: 1, b: 2, c: 3}, {b: 22, c: 33, d: 4}, {c: 333}, ['d'])
-    expect(out).to.deep.include({ a: 1, b: 22, c: 333 })
+    expect(out).to.include({ a: 1, b: 22, c: 333 })
 
     out = si.util.argprops({}, {d: 1}, {}, 'd')
     expect('{}').to.equal(Util.inspect(out))

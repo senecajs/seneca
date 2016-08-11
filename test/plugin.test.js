@@ -107,8 +107,6 @@ describe('plugin', function () {
   })
 
   it('plugin-error-act', function (done) {
-    var cc = 0
-
     var si = Seneca({
       debug: {
         undead: true
@@ -116,7 +114,6 @@ describe('plugin', function () {
       log: 'silent',
       errhandler: function (err) {
         expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
-        cc++
         done()
       }
     })
@@ -388,7 +385,7 @@ describe('plugin', function () {
               })
 
               .ready(function () {
-                expect(a).to.deep.equal([1, 2, 3])
+                expect(a).to.equal([1, 2, 3])
                 done()
               })
           })
@@ -451,8 +448,8 @@ describe('plugin', function () {
         })
       })
       .ready(function () {
-        expect(seneca.options().plugin.foo).to.deep.equal({x: 1})
-        expect(seneca.options().plugin.bar).to.deep.equal({x: 2, y: 3})
+        expect(seneca.options().plugin.foo).to.equal({x: 1})
+        expect(seneca.options().plugin.bar).to.equal({x: 2, y: 3})
         done()
       })
   })
@@ -480,7 +477,7 @@ describe('plugin', function () {
     })
     .use(function bar (options) {
       this.add('init:bar', function (msg, cb) {
-        expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
+        expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
         this.options({ plugin: { bar: { y: 4 } } })
         cb()
       })
@@ -492,9 +489,9 @@ describe('plugin', function () {
       })
     })
     .ready(function () {
-      expect(seneca.options().plugin.foo).to.deep.equal({ x: 1, y: 3 })
-      expect(seneca.options().plugin.bar).to.deep.equal({ x: 2, y: 4 })
-      expect(seneca.options().plugin.foobar).to.deep.equal({ foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
+      expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
+      expect(seneca.options().plugin.bar).to.equal({ x: 2, y: 4 })
+      expect(seneca.options().plugin.foobar).to.equal({ foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
       done()
     })
   })

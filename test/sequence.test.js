@@ -57,7 +57,7 @@ describe('sequence', function () {
       .act('a:2', function (err, out) {
         expect(out.a).to.equal(2)
         expect(out.y).to.equal(3)
-        expect(log).to.deep.equal(
+        expect(log).to.equal(
           [ 'a:1-call', 'a:1-check', 'a:2-call' ]
         )
         fin(err)
@@ -92,7 +92,7 @@ describe('sequence', function () {
         log.push('ready-2')
       })
       .ready(function () {
-        expect(log).to.deep.equal(
+        expect(log).to.equal(
           [ 'a:1-add', 'a:1-act', 'ready-0', 'ready-1', 'ready-2' ]
         )
         fin()
