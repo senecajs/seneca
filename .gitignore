@@ -1,6 +1,6 @@
 *~
 .DS_Store
-docs
+docs/annotated
 test/db
 *.old
 *.bak

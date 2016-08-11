@@ -76,7 +76,7 @@
     "node": ">=4.0.0"
   },
   "files": [
-    "LICENSE.txt",
+    "LICENSE",
     "README.md",
     "CHANGES.md",
     "lib",
@@ -91,7 +91,7 @@
     "test:node6": "LAB_FLAGS='--leaks' && npm t",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
-    "annotate": "docco seneca.js lib/*.js -o docs"
+    "annotate": "docco seneca.js lib/*.js -o docs/annotated"
   },
   "devDependencies": {
     "async": "2.0.x",
