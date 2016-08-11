@@ -2,8 +2,9 @@ language: node_js
 sudo: false
 
 node_js:
-  - 4
-  - 5
+  - '4'
+  - '5'
+  - '6'
 
 env:
   global:
@@ -27,11 +28,9 @@ env:
     # - TEST_SUITE=senecajs/seneca-transport
     # - TEST_SUITE=rjrodger/seneca-balance-client
     # - TEST_SUITE=rjrodger/seneca-mesh
-    
+
 before_script:
-  - if [[ $TRAVIS_NODE_VERSION == "6" ]]; then export LAB_FLAGS="--leaks"; else export LAB_FLAGS=""; fi
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
-  - echo LAB_FLAGS:$LAB_FLAGS
   - echo TEST_SUITE:$TEST_SUITE
   - echo TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
