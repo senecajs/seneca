@@ -1,6 +1,6 @@
 'use strict'
 
-// Using seneca's transport mechanisms enables you to split
+// Using seneca's transport mechanism enables you to split
 // business logic into discrete microservices. Features like
 // priors work over the network as does load behaviour. See
 // it in action below.
@@ -17,10 +17,9 @@ var tags = [
   'rejector'
 ]
 
-// Our little reusable business logic basically factory
-// returns a method with the same signature needed factory
-// seneca.add. Each business logic factory echos it's tag
-// when called.
+// Our little reusable business logic is basically a factory
+// that returns a method with the same signature as seneca.add.
+// Each business logic factory echos it's tag when called.
 function businessLogic (tag) {
   return function (msg, done) {
     return done(null, {tag: tag})
@@ -29,7 +28,7 @@ function businessLogic (tag) {
 
 
 // Our 'local' plugin will always handle the message first
-// because we load it last. Put it also uses a prior to see
+// because we load it last. But it also uses a prior to see
 // if anyone else before it handles the message.
 function local (msg, done) {
   this.prior(msg, (err, reply) => {
@@ -75,7 +74,7 @@ Seneca()
 // Our second tester runs the local plugin and makes two client
 // connections (defaulted to http). Clients follow load order,
 // as such local is first called which then uses prior to call
-// to the 'approver' service and print 'approver'.
+// to the 'approver' service which prints 'approver'.
 Seneca()
   .client({port: 8270, pin: 'cmd:run'})
   .client({port: 8260, pin: 'cmd:run'})
@@ -83,7 +82,7 @@ Seneca()
   .act('cmd:run', logger)
 
 // Out last tester runs the reverse of the one appove. This
-// changes the prior selected and prints 'rejector' instead.
+// changes the prior selected which prints 'rejector' instead.
 Seneca()
   .client({port: 8260, pin: 'cmd:run'})
   .client({port: 8270, pin: 'cmd:run'})
@@ -92,7 +91,7 @@ Seneca()
 
 
 // An important point to note. Why didn't prior fire a second time
-// in each instance. This is because prior only affects the first
+// in each instance? This is because prior only affects the first
 // client. Since the second call in each instance hits a server with
 // no local prior, the chain is satisfied.
 
