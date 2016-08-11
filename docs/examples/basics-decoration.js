@@ -8,8 +8,8 @@ var Seneca = require('../..')
 var Assert = require('assert')
 
 // Plugins are great way to add decorations to seneca. Below we have
-// create a simple plugin that adds the .stamp() method. This will allow
-// us to log objects we send with a timestamp. Simple stuff.
+// a simple plugin that adds the .stamp() method to our instance. This
+// will allow us to log objects with a timestamp. Simple stuff.
 
 function plugin (opts) {
   var seneca = this
@@ -24,7 +24,7 @@ function plugin (opts) {
   }
 }
 
-// We load our plugin like any other. Once ready has fired your new method
+// We load our plugin like any other. Once ready has fired your decoration
 // becomes available to use on any instance of seneca that loads the plugin.
 
 var instance = Seneca()

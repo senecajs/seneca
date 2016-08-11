@@ -2,8 +2,8 @@
 'use strict'
 
 
-// Plugin load order is important. What handler is called when two are
-// added for a single message is dependent on the order in which the
+// Plugin load order is important. What handler is called when two or more
+// are added for a single message is dependent on the order in which the
 // handler's parent plugin was loaded. This is demonstrated below.
 
 
@@ -27,7 +27,7 @@ function two () {
 }
 
 
-// Load order significance means the plugin
+// Load order significanc means the plugin
 // that loads last is the one that handles
 // the message.
 
