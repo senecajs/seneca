@@ -62,6 +62,7 @@ reversed.ready((err) => {
   })
 })
 
-// Prints
+
+// Output
 // { handler: 'two' }
 // { handler: 'one' }
