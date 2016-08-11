@@ -2,8 +2,6 @@ language: node_js
 sudo: false
 
 node_js:
-  - 0.10
-  - 0.12
   - 4
   - 5
 
@@ -18,20 +16,10 @@ env:
     - TEST_SUITE=senecajs/seneca
 
     # Golden Circle plugins to test
-    # - TEST_SUITE=senecajs/seneca-postgres-store
-    # - TEST_SUITE=senecajs/seneca-auth
     # - TEST_SUITE=rjrodger/seneca-balance-client
-    # - TEST_SUITE=senecajs/seneca-basic
-    # - TEST_SUITE=senecajs/seneca-cache
     - TEST_SUITE=senecajs/seneca-entity
-    # - TEST_SUITE=rjrodger/seneca-error-test
-    # - TEST_SUITE=rjrodger/seneca-jsonfile-store
-    # - TEST_SUITE=senecajs/seneca-level-store
     # - TEST_SUITE=senecajs/seneca-mem-store
     # - TEST_SUITE=rjrodger/seneca-mesh
-    # - TEST_SUITE=senecajs/seneca-mysql-store
-    # - TEST_SUITE=senecajs/seneca-quartz-scheduler
-    # - TEST_SUITE=senecajs/seneca-redis-cache
     # - TEST_SUITE=senecajs/seneca-repl
     # - TEST_SUITE=senecajs/seneca-store-test
     - TEST_SUITE=senecajs/seneca-transport
