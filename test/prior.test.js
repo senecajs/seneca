@@ -30,7 +30,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1, 2, 3])
+        expect(out.order).to.equal([1, 2, 3])
         done()
       })
   })
@@ -44,7 +44,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1])
+        expect(out.order).to.equal([1])
         done()
       })
   })
@@ -58,7 +58,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1])
+        expect(out.order).to.equal([1])
         done()
       })
   })
@@ -72,7 +72,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1])
+        expect(out.order).to.equal([1])
         done()
       })
   })
@@ -87,7 +87,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1, 2, 4])
+        expect(out.order).to.equal([1, 2, 4])
         done()
       })
   })
@@ -102,7 +102,7 @@ describe('prior', function () {
 
       .act('a:1,b:1,c:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1, 3, 4])
+        expect(out.order).to.equal([1, 3, 4])
         done()
       })
   })
@@ -115,14 +115,14 @@ describe('prior', function () {
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1, 2])
+        expect(out.order).to.equal([1, 2])
 
         this
           .add('c:1', order_called(2))
           .add('c:1,d:1,strict$:{add:true}', order_called(1))
           .act('c:1,d:1', function (err, out) {
             expect(err).to.not.exist()
-            expect(out.order).to.deep.equal([1])
+            expect(out.order).to.equal([1])
             done()
           })
       })
@@ -136,14 +136,14 @@ describe('prior', function () {
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {
         expect(err).to.not.exist()
-        expect(out.order).to.deep.equal([1])
+        expect(out.order).to.equal([1])
 
         this
           .add('c:1', order_called(2))
           .add('c:1,d:1,strict$:{add:false}', order_called(1))
           .act('c:1,d:1', function (err, out) {
             expect(err).to.not.exist()
-            expect(out.order).to.deep.equal([1, 2])
+            expect(out.order).to.equal([1, 2])
             done()
           })
       })
