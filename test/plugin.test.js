@@ -183,21 +183,20 @@ describe('plugin', function () {
     done()
   })
 
-  it('fix', function (done) {
-    var si = Seneca({log: 'silent', errhandler: done})
+  it('plugin-fix', function (done) {
+    var si = Seneca({log: 'test'}).error(done)
 
     function echo (args, cb) {
       cb(null, _.extend({ t: Date.now() }, args))
     }
 
-    var plugin_aaa = function (opts) {
+    var plugin_aaa = function aaa (opts) {
       this.add({a: 1}, function (args, cb) {
         this.act('z:1', function (err, out) {
           expect(err).to.not.exist()
           cb(null, _.extend({ a: 1 }, out))
         })
       })
-      return 'aaa'
     }
 
     si.add({z: 1}, echo)
@@ -214,20 +213,24 @@ describe('plugin', function () {
 
       si
         .fix({q: 1})
-        .use(function (opts) {
+        .use(function bbb (opts) {
           this.add({a: 1}, function (args, done) {
             this.act('z:1', function (err, out) {
               expect(err).to.not.exist()
               done(null, _.extend({a: 1, w: 1}, out))
             })
           })
-          return 'bbb'
         })
 
       expect(si.hasact({ a: 1 })).to.be.true()
       expect(si.hasact({ a: 1, q: 1 })).to.be.true()
 
+
+      // console.log('QQQ')
+
       si.act({a: 1}, function (err, out) {
+        // console.log('aaa',err,out)
+
         expect(err).to.not.exist()
         expect(1).to.equal(out.a)
         expect(1).to.equal(out.z)
@@ -266,7 +269,7 @@ describe('plugin', function () {
   })
 
   it('hasplugin', function (done) {
-    var si = Seneca({log: 'silent'})
+    var si = Seneca({log: 'test'})
 
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
@@ -287,16 +290,15 @@ describe('plugin', function () {
   })
 
   it('handles plugin with action that timesout', function (done) {
-    var seneca = Seneca({log: 'silent', timeout: 10, debug: {undead: true}})
-
-    seneca.use(function foo () {
-      this.add({ role: 'plugin', cmd: 'timeout' }, function () { })
-    })
-
-    seneca.act({ role: 'plugin', cmd: 'timeout' }, function (err) {
-      expect(err).to.exist()
-      seneca.close(done)
-    })
+    Seneca({log: 'silent', timeout: 10, debug: {undead: true}})
+      .use(function foo () {
+        this.add({ role: 'plugin', cmd: 'timeout' }, function () {
+        })
+      })
+      .act({ role: 'plugin', cmd: 'timeout' }, function (err) {
+        expect(err).to.exist()
+        this.close(done)
+      })
   })
 
   it('handles plugin action that throws an error', function (done) {
@@ -357,7 +359,7 @@ describe('plugin', function () {
 
   it('dynamic-load-sequence', function (done) {
     var a = []
-    Seneca({ log: 'test' })
+    Seneca({log: 'test', debug: {undead: true}})
       .error(done)
 
       .use(function first () {

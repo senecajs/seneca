@@ -64,7 +64,7 @@ describe('sequence', function () {
       })
   })
 
-  it('single-add-act-ready', function (fin) {
+  it('single-add-act-ready', {timeout: 3333}, function (fin) {
     var log = []
     Seneca(test_opts)
       .error(fin)

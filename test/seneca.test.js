@@ -60,12 +60,14 @@ describe('seneca', function () {
   })
 
   it('quick', function (done) {
-    var si = Seneca(testopts)
+    var si = Seneca({log: 'test'}).error(done)
+
     si.use(function quickplugin (opts) {
-      si.add({ a: 1 }, function (args, cb) {
+      this.add({ a: 1 }, function (args, cb) {
         cb(null, { b: 2 })
       })
     })
+
     si.act({ a: 1 }, function (err, out) {
       assert.ok(!err)
       assert.equal(out.b, 2)
@@ -80,7 +82,7 @@ describe('seneca', function () {
 
   it('require-use-safetynet', function (done) {
     require('..')(testopts)
-      .use('echo')
+      .use('echo', {web: false})
       .act('role:echo,foo:1', function (err, out) {
         assert.ok(!err)
         assert.equal(1, out.foo)
@@ -99,7 +101,7 @@ describe('seneca', function () {
       assert.equal(mark.ec, 2, 'ec')
 
       done()
-    }, 300)
+    }, 555)
 
     var si = Seneca(testopts)
     si.ready(function () {
@@ -128,8 +130,6 @@ describe('seneca', function () {
         })
       })
     })
-
-    timerstub.wait(400)
   })
 
   it('ready-func', function (done) {
@@ -156,6 +156,7 @@ describe('seneca', function () {
       tmp.a = 1
       complete()
     })
+
     si.ready(function () {
       tmp.b = 1
       complete()
@@ -297,16 +298,17 @@ describe('seneca', function () {
     })
   })
 
-  it('passes seneca instance on callback function property', function (done) {
-    var si = Seneca({ log: 'silent' }).error(done)
-    si.add({ cmd: 'foo' }, function (args, reply) {
-      reply(null, { did: reply.seneca.did })
-    })
-    si.act({ cmd: 'foo' }, function (err, result) {
-      expect(err).to.not.exist()
-      expect(result.did).to.equal(this.did)
-      done()
-    })
+  it('action-callback-instance', function (done) {
+    Seneca({ log: 'silent' })
+      .error(done)
+      .add({ cmd: 'foo' }, function (args, reply) {
+        reply(null, { did: reply.seneca.did })
+      })
+      .act({ cmd: 'foo' }, function (err, result) {
+        expect(err).to.not.exist()
+        expect(result.did).to.equal(this.did)
+        done()
+      })
   })
 
   it('action-act-invalid-args', function (done) {
@@ -474,7 +476,7 @@ describe('seneca', function () {
   })
 
   it('prior-nocache', function (done) {
-    var si = Seneca({log: 'silent', errhandler: done, trace: {act: false}})
+    var si = Seneca({log: 'test', errhandler: done, trace: {act: false}})
     var count = 0
     var called = ''
 
@@ -487,31 +489,41 @@ describe('seneca', function () {
 
       si.add('foo:a', function (args, done) {
         count += args.y
+        args.z = 1
         this.prior(args, done)
       })
 
       si
         .gate()
+
         .act('foo:a,x:10,y:0.1', function (err, out) {
+          // console.log('A',count,called)
           assert.equal(err, null)
           assert.equal(11.1, count)
           called += 'A'
         })
+
         .act('foo:a,x:100,y:0.01', function (err, out) {
+          // console.log('B',count,called)
           assert.equal(err, null)
           assert.equal(112.11, count)
           called += 'B'
         })
+
         .act('foo:a,x:10,y:0.1', function (err, out) {
+          // console.log('C',count,called)
           assert.equal(err, null)
           assert.equal(123.21, count)
           called += 'C'
         })
+
         .act('foo:a,x:100,y:0.01', function (err, out) {
+          // console.log('D',count,called)
           assert.equal(err, null)
           assert.equal(224.22, count)
           called += 'D'
         })
+
         .ready(function () {
           assert.equal('ABCD', called)
           assert.equal(224.22, count)
@@ -563,6 +575,7 @@ describe('seneca', function () {
         assert.equal(1113, count)
         called += 'C'
       })
+
       .ready(function () {
         assert.equal('ABC', called)
         assert.equal(1113, count)
@@ -616,8 +629,12 @@ describe('seneca', function () {
     })
   })
 
-  it('plugins', function (done) {
-    var si = Seneca({plugins: ['echo'], log: 'silent'})
+  it('loading-plugins', function (done) {
+    var si = Seneca({
+      plugins: ['echo'],
+      log: 'silent',
+      plugin: {echo: {web: false}}
+    })
 
     si.act({role: 'echo', baz: 'bax'}, function (err, out) {
       assert.equal(err, null)
@@ -698,7 +715,7 @@ describe('seneca', function () {
     })
 
     si = Seneca({log: 'silent'})
-    si.use('echo')
+    si.use('echo', {web: false})
     si.act({role: 'echo', cmd: 'foo', bar: 1}, function (err, out) {
       assert.equal(err, null)
       assert.ok(out.cmd === 'foo')
@@ -946,7 +963,7 @@ describe('seneca', function () {
       .end(done)
   })
 
-  it('fix', function (done) {
+  it('fix-basic', function (done) {
     var si = Seneca(testopts)
 
     function ab (args, cb) {
@@ -1667,7 +1684,7 @@ describe('seneca', function () {
   })
 
   it('supports strict.find for disabling not found actions', function (done) {
-    var seneca = Seneca({ log: 'test', strict: { find: true } })
+    var seneca = Seneca({ log: 'silent', strict: { find: true } })
     seneca.act({ a: 1 }, function (err, out) {
       expect(err).to.exist()
       expect(out).to.not.exist()
