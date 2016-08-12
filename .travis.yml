@@ -25,7 +25,7 @@ env:
     # - TEST_SUITE=senecajs/seneca-mem-store
     # - TEST_SUITE=senecajs/seneca-redis-store
     # - TEST_SUITE=rjrodger/seneca-transport-test
-    # - TEST_SUITE=senecajs/seneca-transport
+    - TEST_SUITE=senecajs/seneca-transport
     # - TEST_SUITE=rjrodger/seneca-balance-client
     # - TEST_SUITE=rjrodger/seneca-mesh
 
