@@ -7,19 +7,21 @@ function Logger () {}
 Logger.preload = function () {
   var seneca = this
 
-  function pad (str, length) {
-     while (str.length < length)
-         str = str + ' ';
-     return str;
+  function pad (content, length) {
+    while (content.length < length) {
+      content = content + ' '
+    }
+
+    return content;
  }
 
-  function adapter (context, payload) {
-    var when = payload.when.toString()
-    var kind = pad(payload.kind, 8)
-    var note = pad(payload.case, 8)
+ function adapter (context, payload) {
+  var when = payload.when.toString()
+  var kind = pad(payload.kind, 8)
+  var note = pad(payload.case, 8)
 
-    console.log(when, kind, note, payload.pattern)
-  }
+  console.log(when, kind, note, payload.pattern)
+}
 
   return {
     extend: {
