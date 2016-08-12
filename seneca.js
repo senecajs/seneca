@@ -18,7 +18,7 @@ var Norma = require('norma')
 var Patrun = require('patrun')
 var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
-var Zig = require('zig')
+
 
 // Internal modules.
 var Actions = require('./lib/actions')
@@ -162,9 +162,6 @@ var internals = {
       // By default, does not run.
       running: false
     },
-
-    // zig module settings for seneca.start() chaining.
-    zig: {},
 
     pin: {
       // run pin function without waiting for pin event
@@ -337,7 +334,6 @@ function make_seneca (initial_options) {
   root.ready = api_ready // Callback when plugins initialized.
   root.close = api_close // Close and shutdown plugins.
   root.options = api_options // Get and set options.
-  root.start = api_start // Start an action chain.
   root.error = api_error // Set global error handler.
   root.decorate = api_decorate // Decorate seneca object with functions
 
@@ -1637,101 +1633,6 @@ function make_seneca (initial_options) {
     }
 
     return so
-  }
-
-  function api_start (errhandler) {
-    var sd = this.delegate()
-    var options = sd.options()
-    options.zig = options.zig || {}
-
-    function make_fn (self, origargs) {
-      var args = Common.parsePattern(self, origargs, 'fn:f?')
-
-      var actargs = _.extend(
-        {},
-        args.moreobjargs ? args.moreobjargs : {},
-        args.objargs ? args.objargs : {},
-        args.strargs ? Jsonic(args.strargs) : {}
-     )
-
-      var fn
-      if (args.fn) {
-        fn = function (data, done) {
-          return args.fn.call(self, data, done)
-        }
-      }
-      else {
-        fn = function (data, done) {
-          if (args.strargs) {
-            var $ = data // eslint-disable-line
-            _.each(actargs, function (v, k) {
-              if (_.isString(v) && v.indexOf('$.') === 0) {
-                actargs[k] = eval(v) // eslint-disable-line
-              }
-            })
-          }
-
-          self.act(actargs, done)
-          return true
-        }
-        fn.nm = args.strargs
-      }
-
-      return fn
-    }
-
-    var dzig = Zig({
-      timeout: options.zig.timeout || options.timeout,
-      trace: options.zig.trace
-    })
-
-    dzig.start(function () {
-      var self = this
-      dzig.end(function () {
-        if (errhandler) errhandler.apply(self, arguments)
-      })
-    })
-
-    sd.end = function (cb) {
-      var self = this
-      dzig.end(function () {
-        if (cb) return cb.apply(self, arguments)
-        if (errhandler) return errhandler.apply(self, arguments)
-      })
-      return self
-    }
-
-    sd.wait = function () {
-      dzig.wait(make_fn(this, arguments))
-      return this
-    }
-
-    sd.step = function () {
-      dzig.step(make_fn(this, arguments))
-      return this
-    }
-
-    sd.run = function () {
-      dzig.run(make_fn(this, arguments))
-      return this
-    }
-
-    sd.if = function (cond) {
-      dzig.if(cond)
-      return this
-    }
-
-    sd.endif = function () {
-      dzig.endif()
-      return this
-    }
-
-    sd.fire = function () {
-      dzig.step(make_fn(this, arguments))
-      return this
-    }
-
-    return sd
   }
 
   function api_error (errhandler) {
