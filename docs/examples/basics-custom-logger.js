@@ -16,11 +16,11 @@ Logger.preload = function () {
  }
 
  function adapter (context, payload) {
-  var when = payload.when.toString()
-  var kind = pad(payload.kind, 8)
-  var note = pad(payload.case, 8)
+   var when = payload.when.toString()
+   var kind = pad(payload.kind, 8)
+   var note = pad(payload.case, 8)
 
-  console.log(when, kind, note, payload.pattern)
+   console.log(when, kind, note, payload.pattern)
 }
 
   return {
