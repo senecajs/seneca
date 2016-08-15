@@ -36,7 +36,7 @@ describe('basic', function () {
 
   it('note', function (fin) {
     var si = Seneca({log: 'test'})
-    si.use('../lib/chain')
+    si.use('seneca-chain')
 
     si
       .start(fin)

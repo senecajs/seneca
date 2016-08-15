@@ -68,8 +68,7 @@
     "seneca-basic": "0.4.0",
     "seneca-repl": "0.2.0",
     "seneca-transport": "2.0.0",
-    "use-plugin": "0.3.1",
-    "zig": "0.1.1"
+    "use-plugin": "0.3.1"
   },
   "main": "seneca.js",
   "engines": {
@@ -110,6 +109,7 @@
     "no-shadow-relaxed": "1.0.x",
     "seneca-echo": "0.3.x",
     "seneca-entity": "1.2.x",
-    "seneca-error-test": "0.2.x"
+    "seneca-error-test": "0.2.x",
+    "seneca-chain": "senecajs-labs/seneca-chain"
   }
 }
