@@ -189,6 +189,7 @@ var seneca_util = {
   clean: Common.clean,
   copydata: Common.copydata,
   nil: Common.nil,
+  parsepattern: Common.parsePattern,
   pattern: Common.pattern,
   print: Common.print,
   pincanon: Common.pincanon,
