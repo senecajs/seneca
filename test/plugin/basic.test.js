@@ -36,6 +36,8 @@ describe('basic', function () {
 
   it('note', function (fin) {
     var si = Seneca({log: 'test'})
+    si.use('seneca-chain')
+
     si
       .start(fin)
       .wait('role:util,note:true,cmd:set,key:foo,value:red')

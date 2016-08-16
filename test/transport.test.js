@@ -385,7 +385,7 @@ describe('transport', function () {
         Seneca({tag: 'cln', timeout: 5555, log: 'silent',
                 debug: {short_logs: true}})
           .use(tt)
-
+          .use('seneca-chain')
           .client({type: 'test', pin: 'foo:1'})
 
           .start()
@@ -411,6 +411,7 @@ describe('transport', function () {
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
               .use(tt)
+              .use('seneca-chain')
 
               .client({type: 'test', pin: 'foo:*'})
 
@@ -450,6 +451,7 @@ describe('transport', function () {
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
               .use(tt)
+              .use('seneca-chain')
 
               .client({type: 'test', pin: {'foo': '*'}})
 
@@ -482,12 +484,14 @@ describe('transport', function () {
     var tt = make_test_transport()
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+      .use('seneca-chain')
       .use(tt)
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:*'})
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
               .use(tt)
+              .use('seneca-chain')
               .client({type: 'test', pin: 'foo:1'})
 
         si.act('foo:2', function (err) {
@@ -512,12 +516,14 @@ describe('transport', function () {
     var tt = make_test_transport()
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+      .use('seneca-chain')
       .use(tt)
       .add('foo:1', testact)
       .add('baz:2', testact)
       .listen({type: 'test', pins: ['foo:1', 'baz:2']})
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+              .use('seneca-chain')
               .use(tt)
               .client({type: 'test', pins: ['foo:1', 'baz:2']})
 
@@ -550,6 +556,7 @@ describe('transport', function () {
     var tt = make_test_transport()
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
+      .use('seneca-chain')
       .use(tt)
       .add('foo:1', testact)
       .add('qaz:1', testact)
@@ -558,6 +565,7 @@ describe('transport', function () {
       .ready(function () {
         Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
+          .use('seneca-chain')
           .add('foo:1', function (args, done) { done(null, args) })
 
           .client({type: 'test', pin: 'foo:1'})
@@ -596,12 +604,14 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
+      .use('seneca-chain')
       .add('foo:2,qaz:1', testact)
       .add('foo:2,qaz:2', testact)
       .listen({type: 'test', pin: 'foo:2,qaz:*'})
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
               .use(tt)
+              .use('seneca-chain')
               .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
 
               .client({type: 'test', pin: 'foo:2,qaz:*'})
@@ -639,11 +649,13 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
+      .use('seneca-chain')
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
         Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
+          .use('seneca-chain')
 
           .client({type: 'test', pin: 'foo:1'})
 
@@ -667,11 +679,13 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
+      .use('seneca-chain')
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:1'})
       .ready(function () {
         Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
           .use(tt)
+          .use('seneca-chain')
 
           .client({type: 'test', pin: 'foo:1'})
 
@@ -738,6 +752,7 @@ describe('transport', function () {
 
     Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
       .use(tt)
+      .use('seneca-chain')
       .client({type: 'test'})
 
       .add('foo:1', testact)
@@ -849,6 +864,7 @@ describe('transport', function () {
       })
         .error(done)
         .use(bt)
+        .use('seneca-chain')
 
         .client({type: 'balance', pin: 'foo:1'})
 

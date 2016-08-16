@@ -947,6 +947,7 @@ describe('seneca', function () {
     }
 
     Seneca(testopts)
+      .use('seneca-chain')
       .error(done)
 
       .start()
@@ -1228,6 +1229,7 @@ describe('seneca', function () {
 
   it('zig', function (done) {
     var si = Seneca(testopts)
+    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     si
@@ -1344,6 +1346,7 @@ describe('seneca', function () {
 
   it('wrap', function (done) {
     var si = Seneca(testopts)
+    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     si.add('a:1', function (args, cb) { cb(null, {aa: args.aa}) })
@@ -1432,6 +1435,8 @@ describe('seneca', function () {
 
   it('meta', function (done) {
     var si = Seneca(testopts)
+
+    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     var meta = {}
