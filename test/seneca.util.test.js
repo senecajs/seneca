@@ -2,7 +2,6 @@
 
 'use strict'
 
-var Util = require('util')
 var Code = require('code')
 var Lab = require('lab')
 var Seneca = require('..')
@@ -101,18 +100,6 @@ describe('seneca.util', function () {
     )
 
     expect(obj).to.include({ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } })
-    done()
-  })
-
-  it('seneca.util.argprops', function (done) {
-    var out = si.util.argprops({a: 1, b: 2, c: 3}, {b: 22, c: 33, d: 4}, {c: 333}, ['d'])
-    expect(out).to.include({ a: 1, b: 22, c: 333 })
-
-    out = si.util.argprops({}, {d: 1}, {}, 'd')
-    expect('{}').to.equal(Util.inspect(out))
-
-    out = si.util.argprops({}, {d: 1, e: 2}, {}, 'd, e')
-    expect('{}').to.equal(Util.inspect(out))
     done()
   })
 })
