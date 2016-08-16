@@ -193,10 +193,7 @@ var seneca_util = {
   pattern: Common.pattern,
   print: Common.print,
   pincanon: Common.pincanon,
-  router: function () { return Patrun() },
-
-  // DEPRECATED
-  argprops: Common.argprops
+  router: function () { return Patrun() }
 }
 
 // Seneca is an EventEmitter.
