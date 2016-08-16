@@ -19,15 +19,15 @@ env:
     # Golden Circle plugins to test
     - TEST_SUITE=senecajs/seneca-entity
     - TEST_SUITE=senecajs/seneca-user
-    # - TEST_SUITE=senecajs/seneca-web
-    # - TEST_SUITE=senecajs/seneca-repl
-    # - TEST_SUITE=senecajs/seneca-store-test
-    # - TEST_SUITE=senecajs/seneca-mem-store
-    # - TEST_SUITE=senecajs/seneca-redis-store
-    # - TEST_SUITE=rjrodger/seneca-transport-test
+    - TEST_SUITE=senecajs/seneca-web
+    - TEST_SUITE=senecajs/seneca-repl
+    - TEST_SUITE=senecajs/seneca-store-test
+    - TEST_SUITE=senecajs/seneca-mem-store
+    - TEST_SUITE=senecajs/seneca-redis-store
+    - TEST_SUITE=rjrodger/seneca-transport-test
     - TEST_SUITE=senecajs/seneca-transport
-    # - TEST_SUITE=rjrodger/seneca-balance-client
-    # - TEST_SUITE=rjrodger/seneca-mesh
+    - TEST_SUITE=rjrodger/seneca-balance-client
+    - TEST_SUITE=rjrodger/seneca-mesh
 
 before_script:
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
