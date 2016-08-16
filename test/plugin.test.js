@@ -20,6 +20,32 @@ describe('plugin', function () {
     done()
   })
 
+  it('works with exportmap', function (done) {
+    var seneca = Seneca({
+      debug: {
+        undead: true
+      },
+      log: 'silent'
+    })
+
+    seneca.use(function () {
+      return {
+        name: 'foo',
+        exportmap: {
+          bar: function (num) {
+            expect(num).to.equal(42)
+            done()
+          }
+        }
+      }
+    })
+
+    seneca.ready(() => {
+      expect(typeof seneca.export('foo/bar')).to.equal('function')
+      seneca.export('foo/bar')(42)
+    })
+  })
+
   it('bad', function (done) {
     var si = Seneca({
       // this lets you change undead per test

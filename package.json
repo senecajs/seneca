@@ -106,7 +106,7 @@
     "eslint-plugin-hapi": "4.x.x",
     "eslint-plugin-standard": "2.x.x",
     "joi": "9.0.x",
-    "lab": "10.9.x",
+    "lab": "11.0.x",
     "no-shadow-relaxed": "1.0.x",
     "seneca-echo": "0.3.x",
     "seneca-entity": "1.2.x",
