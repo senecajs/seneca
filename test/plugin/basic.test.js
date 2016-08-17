@@ -4,6 +4,7 @@
 var Assert = require('assert')
 var Lab = require('lab')
 var Seneca = require('../..')
+var Async = require('async')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -36,62 +37,81 @@ describe('basic', function () {
 
   it('note', function (fin) {
     var si = Seneca({log: 'test'})
-    si.use('seneca-chain')
 
-    si
-      .start(fin)
-      .wait('role:util,note:true,cmd:set,key:foo,value:red')
+    Async.series([
+      function (done) {
+        si.act('role:util,note:true,cmd:set,key:foo,value:red', done)
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:get,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal('red', o.value)
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:list,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal(0, o.length)
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:push,key:foo,value:aaa', done)
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:list,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal(1, o.length)
+          assert.equal('aaa', o[0])
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:push,key:foo,value:bbb', done)
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:list,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal(2, o.length)
+          assert.equal('aaa', o[0])
+          assert.equal('bbb', o[1])
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:pop,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal('bbb', o.value)
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:list,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal(1, o.length)
+          assert.equal('aaa', o[0])
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:pop,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal('aaa', o.value)
+          done()
+        })
+      },
+      function (done) {
+        si.act('role:util,note:true,cmd:list,key:foo', function (err, o) {
+          assert.equal(err, null)
+          assert.equal(0, o.length)
+          done()
+        })
+      }],
+      function (err, results) {
+        assert.equal(err, null)
 
-      .wait('role:util,note:true,cmd:get,key:foo')
-      .step(function (o) {
-        assert.equal('red', o.value)
-        return true
+        fin()
       })
-
-      .wait('role:util,note:true,cmd:list,key:foo')
-      .step(function (o) {
-        assert.equal(0, o.length)
-        return true
-      })
-
-      .wait('role:util,note:true,cmd:push,key:foo,value:aaa')
-
-      .wait('role:util,note:true,cmd:list,key:foo')
-      .step(function (o) {
-        assert.equal(1, o.length)
-        assert.equal('aaa', o[0])
-      })
-
-      .wait('role:util,note:true,cmd:push,key:foo,value:bbb')
-
-      .wait('role:util,note:true,cmd:list,key:foo')
-      .step(function (o) {
-        assert.equal(2, o.length)
-        assert.equal('aaa', o[0])
-        assert.equal('bbb', o[1])
-      })
-
-      .wait('role:util,note:true,cmd:pop,key:foo')
-      .step(function (o) {
-        assert.equal('bbb', o.value)
-      })
-
-      .wait('role:util,note:true,cmd:list,key:foo')
-      .step(function (o) {
-        assert.equal(1, o.length)
-        assert.equal('aaa', o[0])
-      })
-
-      .wait('role:util,note:true,cmd:pop,key:foo')
-      .step(function (o) {
-        assert.equal('aaa', o.value)
-      })
-
-      .wait('role:util,note:true,cmd:list,key:foo')
-      .step(function (o) {
-        assert.equal(0, o.length)
-      })
-
-      .end()
   })
 })
