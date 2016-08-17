@@ -1,5 +1,6 @@
 language: node_js
 sudo: false
+cache: false
 
 node_js:
   - '4'
