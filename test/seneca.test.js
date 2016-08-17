@@ -941,27 +941,39 @@ describe('seneca', function () {
       done(null, {v: (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10)})
     }
 
-    var checkFunction = function (err, out) {
+    var checkFunction = function (err, out, done) {
       assert.equal(err, null)
       assert.equal(6, out.v)
+      done()
     }
 
-    Seneca(testopts)
-      .use('seneca-chain')
+    var si = Seneca(testopts)
       .error(done)
 
-      .start()
+    Async.series([
+      function (next) {
+        si.add('i:0,a:1,b:2', addFunction)
+        .act('i:0,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      },
+      function (next) {
+        si.add('i:1,a:1', {b: 2}, addFunction)
+        .act('i:1,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      },
+      function (next) {
+        si.add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
+        .act('i:2,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      }],
+      function (err, results) {
+        assert.equal(err, null)
 
-      .add('i:0,a:1,b:2', addFunction)
-      .act('i:0,a:1,b:2,c:3', checkFunction)
-
-      .add('i:1,a:1', {b: 2}, addFunction)
-      .act('i:1,a:1,b:2,c:3', checkFunction)
-
-      .add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
-      .act('i:2,a:1,b:2,c:3', checkFunction)
-
-      .end(done)
+        done()
+      })
   })
 
   it('fix-basic', function (done) {
