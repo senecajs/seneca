@@ -941,27 +941,39 @@ describe('seneca', function () {
       done(null, {v: (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10)})
     }
 
-    var checkFunction = function (err, out) {
+    var checkFunction = function (err, out, done) {
       assert.equal(err, null)
       assert.equal(6, out.v)
+      done()
     }
 
-    Seneca(testopts)
-      .use('seneca-chain')
+    var si = Seneca(testopts)
       .error(done)
 
-      .start()
+    Async.series([
+      function (next) {
+        si.add('i:0,a:1,b:2', addFunction)
+        .act('i:0,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      },
+      function (next) {
+        si.add('i:1,a:1', {b: 2}, addFunction)
+        .act('i:1,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      },
+      function (next) {
+        si.add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
+        .act('i:2,a:1,b:2,c:3', function (err, out) {
+          checkFunction(err, out, next)
+        })
+      }],
+      function (err, results) {
+        assert.equal(err, null)
 
-      .add('i:0,a:1,b:2', addFunction)
-      .act('i:0,a:1,b:2,c:3', checkFunction)
-
-      .add('i:1,a:1', {b: 2}, addFunction)
-      .act('i:1,a:1,b:2,c:3', checkFunction)
-
-      .add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
-      .act('i:2,a:1,b:2,c:3', checkFunction)
-
-      .end(done)
+        done()
+      })
   })
 
   it('fix-basic', function (done) {
@@ -1227,126 +1239,8 @@ describe('seneca', function () {
     })
   })
 
-  it('zig', function (done) {
-    var si = Seneca(testopts)
-    si.use('seneca-chain')
-    si.options({ errhandler: done })
-
-    si
-      .add('a:1', function (a, d) { d(0, {aa: a.aa}) })
-      .act('a:1,aa:1', function (e, o) {
-        assert.equal(1, o.aa)
-        do_zig0()
-      })
-
-    function do_zig0 () {
-      si
-        .start()
-        .wait('a:1,aa:1')
-        .end(function (err, out) {
-          assert.ok(!err)
-          assert.equal(1, out.aa)
-          do_zig1()
-        })
-    }
-
-    function do_zig1 () {
-      si.options({ xzig: { trace: true } })
-      si
-        .start()
-        .run('a:1,aa:1')
-        .run('a:1,aa:2')
-        .wait(function (r, cb) {
-          assert.deepEqual([{aa: 1}, {aa: 2}], r)
-          cb()
-        })
-        .end(function (err, o) {
-          assert.ok(!err)
-          do_zig2()
-        })
-    }
-
-    function do_zig2 () {
-      si.options({ xzig: { trace: true } })
-      var tmp = {}
-
-      si
-        .start()
-        .wait('a:1,aa:1')
-        .step(function A (r, cb) {
-          return (tmp.aaa = r)
-        })
-
-        .if(function (cb) { return !!tmp.aaa })
-        .step(function B (r, cb) {
-          return (tmp.aaaa = 2)
-        })
-        .endif()
-
-        .if(function (cb) { return !!tmp.aaa })
-        .if(false)
-        .step(function C (r, cb) {
-          return (tmp.aaaa = 3)
-        })
-        .endif()
-        .endif()
-
-        .end(function (err, out) {
-          assert.ok(!err)
-          assert.equal(2, tmp.aaaa)
-          do_zig3()
-        })
-    }
-
-    function do_zig3 () {
-      si.options({ xzig: { trace: true } })
-
-      var tmp = {bb: []}
-
-      si
-        .add('b:1', function (a, cb) {
-          tmp.bb.push(a.bb)
-          cb()
-        })
-
-      si
-        .start()
-        .fire('b:1,bb:1')
-        .fire('b:1,bb:2')
-        .end(function () {
-          setTimeout(function () {
-            assert.deepEqual({ bb: [ 1, 2 ] }, tmp)
-            do_zig4()
-          }, 10)
-        })
-    }
-
-    function do_zig4 () {
-      si.options({xzig: {trace: true}})
-
-      si
-        .add('b:1', function (a, cb) {
-          cb(0, { c: a.c })
-        })
-
-      si
-        .start()
-        .wait('b:1,c:2')
-        .step(function (d) {
-          d.d = d.c
-          return d
-        })
-        .wait('b:1,c:$.d')
-        .end(function (err, o) {
-          assert.equal(2, o.c)
-          done(err)
-        })
-    }
-  })
-
   it('wrap', function (done) {
     var si = Seneca(testopts)
-    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     si.add('a:1', function (args, cb) { cb(null, {aa: args.aa}) })
@@ -1378,65 +1272,78 @@ describe('seneca', function () {
 
     assertMetaName('second', 'a:1,d:4')
 
-    si
-      .start()
-
-      .wait('a:1,aa:1')
-      .step(function (out) {
-        assert.deepEqual({ aa: 1, X: 1 }, out)
-      })
-
-      .wait('a:1,c:3,cc:3')
-      .step(function (out) {
-        assert.deepEqual({ cc: 1, X: 1 }, out)
-      })
-
-      .wait('a:1,d:4,dd:4')
-      .step(function (out) {
-        assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
-      })
-
-      .wait('b:2,bb:2')
-      .step(function (out) {
-        assert.deepEqual({ bb: 2 }, out)
-      })
-
-      .step(function () {
+    Async.series([
+      function (next) {
+        si.act('a:1,aa:1', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ aa: 1, X: 1 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,c:3,cc:3', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ cc: 3, X: 1 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,d:4,dd:4', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('b:2,bb:2', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ bb: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
         si.wrap('', function (args, cb) {
           this.prior(args, function (err, out) {
             out.ALL = 2
             cb(err, out)
           })
         })
-      })
+        si.act('a:1,aa:1', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,c:3,cc:3', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ cc: 3, X: 1, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,d:4,dd:4', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('b:2,bb:2', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ bb: 2, ALL: 2 }, out)
+          next()
+        })
+      }],
+      function (err, results) {
+        assert.equal(err, null)
 
-      .wait('a:1,aa:1')
-      .step(function (out) {
-        assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+        done()
       })
-
-      .wait('a:1,c:3,cc:3')
-      .step(function (out) {
-        assert.deepEqual({ cc: 1, X: 1, ALL: 2 }, out)
-      })
-
-      .wait('a:1,d:4,dd:4')
-      .step(function (out) {
-        assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
-      })
-
-      .wait('b:2,bb:2')
-      .step(function (out) {
-        assert.deepEqual({ bb: 2, ALL: 2 }, out)
-      })
-
-      .end(done)
   })
 
   it('meta', function (done) {
     var si = Seneca(testopts)
-
-    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     var meta = {}
@@ -1451,15 +1358,16 @@ describe('seneca', function () {
       cb(null, { bb: args.bb })
     })
 
-    si.start()
-      .wait('a:1')
-      .wait('b:2')
-      .end(function (err) {
+    si.act('a:1', function (err) {
+      assert.ok(!err)
+      si.act('b:2', function (err) {
         assert.ok(!err)
         assert.equal('a:1', meta.a.pattern)
         assert.equal('b:2', meta.b.pattern)
+
         done()
       })
+    })
   })
 
   it('strict', function (done) {
