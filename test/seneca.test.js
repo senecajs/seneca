@@ -1283,7 +1283,7 @@ describe('seneca', function () {
       function (next) {
         si.act('a:1,c:3,cc:3', function (err, out) {
           assert.equal(err, null)
-          assert.deepEqual({ cc: 1, X: 1 }, out)
+          assert.deepEqual({ cc: 3, X: 1 }, out)
           next()
         })
       },
@@ -1317,7 +1317,7 @@ describe('seneca', function () {
       function (next) {
         si.act('a:1,c:3,cc:3', function (err, out) {
           assert.equal(err, null)
-          assert.deepEqual({ cc: 1, X: 1, ALL: 2 }, out)
+          assert.deepEqual({ cc: 3, X: 1, ALL: 2 }, out)
           next()
         })
       },
