@@ -1241,7 +1241,6 @@ describe('seneca', function () {
 
   it('wrap', function (done) {
     var si = Seneca(testopts)
-    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     si.add('a:1', function (args, cb) { cb(null, {aa: args.aa}) })
@@ -1273,59 +1272,74 @@ describe('seneca', function () {
 
     assertMetaName('second', 'a:1,d:4')
 
-    si
-      .start()
-
-      .wait('a:1,aa:1')
-      .step(function (out) {
-        assert.deepEqual({ aa: 1, X: 1 }, out)
-      })
-
-      .wait('a:1,c:3,cc:3')
-      .step(function (out) {
-        assert.deepEqual({ cc: 1, X: 1 }, out)
-      })
-
-      .wait('a:1,d:4,dd:4')
-      .step(function (out) {
-        assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
-      })
-
-      .wait('b:2,bb:2')
-      .step(function (out) {
-        assert.deepEqual({ bb: 2 }, out)
-      })
-
-      .step(function () {
+    Async.series([
+      function (next) {
+        si.act('a:1,aa:1', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ aa: 1, X: 1 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,c:3,cc:3', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ cc: 1, X: 1 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,d:4,dd:4', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('b:2,bb:2', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ bb: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
         si.wrap('', function (args, cb) {
           this.prior(args, function (err, out) {
             out.ALL = 2
             cb(err, out)
           })
         })
-      })
+        si.act('a:1,aa:1', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,c:3,cc:3', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ cc: 1, X: 1, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('a:1,d:4,dd:4', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
+          next()
+        })
+      },
+      function (next) {
+        si.act('b:2,bb:2', function (err, out) {
+          assert.equal(err, null)
+          assert.deepEqual({ bb: 2, ALL: 2 }, out)
+          next()
+        })
+      }],
+      function (err, results) {
+        assert.equal(err, null)
 
-      .wait('a:1,aa:1')
-      .step(function (out) {
-        assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+        done()
       })
-
-      .wait('a:1,c:3,cc:3')
-      .step(function (out) {
-        assert.deepEqual({ cc: 1, X: 1, ALL: 2 }, out)
-      })
-
-      .wait('a:1,d:4,dd:4')
-      .step(function (out) {
-        assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
-      })
-
-      .wait('b:2,bb:2')
-      .step(function (out) {
-        assert.deepEqual({ bb: 2, ALL: 2 }, out)
-      })
-
-      .end(done)
   })
 
   it('meta', function (done) {
