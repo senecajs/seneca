@@ -1344,8 +1344,6 @@ describe('seneca', function () {
 
   it('meta', function (done) {
     var si = Seneca(testopts)
-
-    si.use('seneca-chain')
     si.options({ errhandler: done })
 
     var meta = {}
@@ -1360,15 +1358,16 @@ describe('seneca', function () {
       cb(null, { bb: args.bb })
     })
 
-    si.start()
-      .wait('a:1')
-      .wait('b:2')
-      .end(function (err) {
+    si.act('a:1', function (err) {
+      assert.ok(!err)
+      si.act('b:2', function (err) {
         assert.ok(!err)
         assert.equal('a:1', meta.a.pattern)
         assert.equal('b:2', meta.b.pattern)
+
         done()
       })
+    })
   })
 
   it('strict', function (done) {
