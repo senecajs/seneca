@@ -88,7 +88,7 @@
   "scripts": {
     "test": "lab -v -P test -L -t 80",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
+    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated"
   },
   "devDependencies": {
