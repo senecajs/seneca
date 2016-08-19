@@ -8,6 +8,6 @@
 6.  Run `git push upstream master`
 7.  Run `git push upstream --tags`
 8.  Run `npm publish`
-9. Run `npm tag seneca@VERSION next`
+9.  Run `npm tag seneca@VERSION next`
 10. Run `npm tag seneca@VERSION plugin`
 11. Update and publish plugins
