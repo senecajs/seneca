@@ -47,8 +47,6 @@ everything from tutorials to sample apps to help get you up and running quickly.
 Seneca's source can be read in an annotated fashion by running `npm run annotate`. An
 annotated version of each file will be generated in `./docs/`.
 
-A coverage report can be generated in `./docs/` by running
-
 ## Install
 To install via npm,
 
