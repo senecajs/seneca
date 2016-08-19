@@ -134,12 +134,10 @@ describe('options', function () {
   })
 
   it('options-env', function (done) {
-    process.env.SENECA_LOG = 'silent'
     process.env.SENECA_OPTIONS = '{"foo":"bar","a":99}'
     var si = Seneca()
     var opts = si.options()
 
-    assert.equal(0, opts.log.map.length)
     assert.equal('bar', opts.foo)
     assert.equal(99, opts.a)
     si.close(done)
