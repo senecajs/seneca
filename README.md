@@ -47,25 +47,104 @@ everything from tutorials to sample apps to help get you up and running quickly.
 Seneca's source can be read in an annotated fashion by running `npm run annotate`. An
 annotated version of each file will be generated in `./docs/`.
 
+A coverage report can be generated in `./docs/` by running
+
 ## Install
-To install, simply use npm.
+To install via npm,
 
 ```
 npm install seneca
 ```
 
 ## Test
-To run tests, simply use npm:
+To run tests locally,
 
 ```
 npm run test
 ```
 
-### Coverage
-To obtain a coverage report run,
+To obtain a coverage report,
 
 ```
-npm run coverage; open coverage.html
+npm run coverage; open docs/coverage.html
+```
+
+## Quick Example
+
+```js
+'use strict'
+
+var Seneca = require('seneca')
+
+
+// Functionality in seneca is composed into simple
+// plugins that can be loaded into seneca instances.
+
+
+function rejector () {
+  this.add('cmd:run', (msg, done) => {
+    return done(null, {tag: 'rejector'})
+  })
+}
+
+function approver () {
+  this.add('cmd:run', (msg, done) => {
+    return done(null, {tag: 'approver'})
+  })
+}
+
+function local () {
+  this.add('cmd:run', function (msg, done) {
+    this.prior(msg, (err, reply) => {
+      return done(null, {tag: reply ? reply.tag : 'local'})
+    })
+  })
+}
+
+
+// Services can listen for messages using a variety of
+// transports. In process and http are included by default.
+
+
+Seneca()
+  .use(approver)
+  .listen({type: 'http', port: '8260', pin: 'cmd:*'})
+
+Seneca()
+  .use(rejector)
+  .listen(8270)
+
+
+// Load order is important, messages can be routed
+// to other services or handled locally. Pins are
+// basically filters over messages
+
+
+function handler (err, reply) {
+  console.log(err, reply)
+}
+
+Seneca()
+  .use(local)
+  .act('cmd:run', handler)
+
+Seneca()
+  .client({port: 8270, pin: 'cmd:run'})
+  .client({port: 8260, pin: 'cmd:run'})
+  .use(local)
+  .act('cmd:run', handler)
+
+Seneca()
+  .client({port: 8260, pin: 'cmd:run'})
+  .client({port: 8270, pin: 'cmd:run'})
+  .use(local)
+  .act('cmd:run', handler)
+
+
+// Output
+// null { tag: 'none' }
+// null { tag: 'approver' }
+// null { tag: 'rejector' }
 ```
 
 
@@ -85,13 +164,13 @@ Here's an example:
 ```javascript
 var seneca = require('seneca')()
 
-seneca.add({ cmd: 'salestax' }, function (args, callback) {
+seneca.add({cmd: 'salestax'}, function (msg, done) {
   var rate  = 0.23
-  var total = args.net * (1 + rate)
-  callback(null, { total: total })
+  var total = msg.net * (1 + rate)
+  done(null, {total: total})
 })
 
-seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
+seneca.act({cmd: 'salestax', net: 100}, function (err, result) {
   console.log(result.total)
 })
 ```
@@ -109,23 +188,21 @@ The `seneca.act` method accepts an object, and runs the command, if any, that ma
 Where does the sales tax rate come from? Let's try it again:
 
 ```js
-seneca.add({ cmd: 'config' }, function (args, callback) {
-  var config = {
-    rate: 0.23
-  }
-  var value = config[args.prop]
-  callback(null, { value: value })
+seneca.add({cmd: 'config'}, function (msg, done) {
+  var config = {rate: 0.23}
+  var value = config[msg.prop]
+  done(null, {value: value})
 })
 
-seneca.add({ cmd: 'salestax' }, function (args, callback) {
-  seneca.act({ cmd: 'config', prop: 'rate' }, function (err, result) {
+seneca.add({cmd: 'salestax'}, function (msg, done) {
+  seneca.act({cmd: 'config', prop: 'rate'}, function (err, result) {
     var rate  = parseFloat(result.value)
-    var total = args.net * (1 + rate)
-    callback(null, { total: total })
+    var total = msg.net * (1 + rate)
+    done(null, {total: total})
   })
 })
 
-seneca.act({ cmd: 'salestax', net: 100 }, function (err, result) {
+seneca.act({cmd: 'salestax', net: 100}, function (err, result) {
   console.log(result.total)
 })
 ```
@@ -145,11 +222,11 @@ seneca.act('cmd:salestax,net:100', function (err, result) {
 ```
 
 Instead of providing an object, you can provide a string using an
-[abbreviated form] of JSON[Jsonic]. In fact, you
+[abbreviated form][Jsonic] of JSON. In fact, you
 can provide both:
 
 ```javascript
-seneca.act('cmd:salestax', { net: 100 }, function (err, result) {
+seneca.act('cmd:salestax', {net: 100}, function (err, result) {
   console.log(result.total)
 })
 ```
@@ -166,12 +243,10 @@ Seneca makes this really easy. Let's put configuration out on the
 network into its own process:
 
 ```javascript
-seneca.add({ cmd: 'config' }, function (args, callback) {
-  var config = {
-    rate: 0.23
-  }
-  var value = config[args.prop]
-  callback(null, { value: value })
+seneca.add({cmd: 'config'}, function (msg, done) {
+  var config = {rate: 0.23}
+  var value = config[msg.prop]
+  done(null, { value: value })
 })
 
 seneca.listen()
@@ -189,11 +264,11 @@ The client code looks like this:
 
 
 ```javascript
-seneca.add({ cmd: 'salestax' }, function (args, callback) {
+seneca.add({cmd: 'salestax'}, function (msg, done) {
   seneca.act({cmd: 'config', prop: 'rate' }, function (err, result) {
     var rate  = parseFloat(result.value)
-    var total = args.net * (1 + rate)
-    callback(null, { total: total })
+    var total = msg.net * (1 + rate)
+    done(null, { total: total })
   })
 })
 
@@ -227,36 +302,36 @@ Here's the code. We'll rip out the configuration code for this example.
 
 ```javascript
 // fixed rate
-seneca.add({ cmd: 'salestax' }, function (args, callback) {
+seneca.add({cmd: 'salestax'}, function (msg, done) {
   var rate  = 0.23
-  var total = args.net * (1 + rate)
-  callback(null, { total: total })
+  var total = msg.net * (1 + rate)
+  done(null, { total: total })
 })
 
 
 // local rates
-seneca.add({ cmd: 'salestax', country: 'US' }, function (args, callback) {
+seneca.add({cmd: 'salestax', country: 'US'}, function (msg, done) {
   var state = {
     'NY': 0.04,
     'CA': 0.0625
     // ...
   }
-  var rate = state[args.state]
-  var total = args.net * (1 + rate)
-  callback(null, { total: total })
+  var rate = state[msg.state]
+  var total = msg.net * (1 + rate)
+  done(null, {total: total})
 })
 
 
 // categories
-seneca.add({ cmd: 'salestax', country: 'IE' }, function (args, callback) {
+seneca.add({ cmd: 'salestax', country: 'IE' }, function (msg, done) {
   var category = {
     'top': 0.23,
     'reduced': 0.135
     // ...
   }
-  var rate = category[args.category]
-  var total = args.net * (1 + rate)
-  callback(null, { total: total })
+  var rate = category[msg.category]
+  var total = msg.net * (1 + rate)
+  done(null, { total: total })
 })
 
 
