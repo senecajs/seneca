@@ -10,7 +10,7 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-describe('plugin-service-error', function () {
+describe('plugin.error', function () {
   var si
 
   lab.before(function (done) {

@@ -12,7 +12,7 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-describe('cli.test.js', function () {
+describe('cli', function () {
   var launchPath = Path.join(__dirname, '/stubs/launch.js')
 
   it('won\'t display action patterns message when they aren\'t provided', function (done) {
