@@ -3,7 +3,7 @@
 
 var Assert = require('assert')
 var Lab = require('lab')
-var Seneca = require('../..')
+var Seneca = require('..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -17,7 +17,7 @@ describe('plugin.options', function () {
     si.use('options', {a: 1})
     assert.equal(1, si.export('options').a)
 
-    si.use('options', require('./options.file.js'))
+    si.use('options', require('./stubs/plugin/options.file.js'))
     assert.equal(2, si.export('options').b)
     done()
   })

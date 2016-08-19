@@ -12,8 +12,8 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-describe('CLI', function () {
-  var launchPath = Path.join(__dirname, 'launch')
+describe('cli.test.js', function () {
+  var launchPath = Path.join(__dirname, '/stubs/launch.js')
 
   it('won\'t display action patterns message when they aren\'t provided', function (done) {
     ChildProcess.exec(process.argv[0] + ' ' + launchPath, function (err, stdout, stderr) {

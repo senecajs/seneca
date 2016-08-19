@@ -1,4 +1,4 @@
 'use strict'
 
-require('../..')()
+require('../../..')()
   .use('bad-load-plugin')

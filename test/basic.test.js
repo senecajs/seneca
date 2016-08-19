@@ -3,7 +3,7 @@
 
 var Assert = require('assert')
 var Lab = require('lab')
-var Seneca = require('../..')
+var Seneca = require('..')
 var Async = require('async')
 
 var lab = exports.lab = Lab.script()

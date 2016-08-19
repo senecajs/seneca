@@ -1,4 +1,4 @@
 'use strict'
 
-require('../..')()
+require('../../..')()
   .depends('foo', ['bar'])

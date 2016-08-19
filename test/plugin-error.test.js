@@ -15,14 +15,14 @@ describe('plugin-service-error', function () {
 
   lab.before(function (done) {
     si = Seneca({ log: 'silent' })
-      .use('./plugin-error/tmp.js')
+      .use('./stubs/plugin-error/tmp.js')
       .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
       .ready(done)
   })
 
   it('should return "no errors created." when passing test false', function (done) {
     var seneca = Seneca({ log: 'silent' })
-    seneca.use('./plugin-error/tmpApi')
+    seneca.use('./stubs/plugin-error/tmpApi')
     seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
     seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'false' }, function (err, res) {
@@ -34,7 +34,7 @@ describe('plugin-service-error', function () {
 
   it('should return "error caught!" when passing test true', function (done) {
     var seneca = Seneca({ log: 'silent' })
-    seneca.use('./plugin-error/tmpApi')
+    seneca.use('./stubs/plugin-error/tmpApi')
     seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
     seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'true' }, function (err, res) {

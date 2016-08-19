@@ -3,7 +3,7 @@
 
 var Assert = require('assert')
 var Lab = require('lab')
-var Seneca = require('../..')
+var Seneca = require('../../..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -90,7 +90,7 @@ describe('options', function () {
   it('options-file-js', function (done) {
     var si0 = Seneca({d: 4, foo: {dd: 4}, log: 'silent', module: module})
 
-    si0.options('./options.require.js')
+    si0.options(__dirname + '/options.require.js')
 
     var opts = si0.options()
     assert.equal(1, opts.a)
