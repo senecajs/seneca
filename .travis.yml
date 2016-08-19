@@ -8,29 +8,17 @@ node_js:
 
 env:
   global:
-    # get the latest seneca code from master
+    # get the latest seneca code from master,
+    # to test a specific tagged version set the version like below.
     - SENECA_VER=
-    # to test a specific tagged version set the version like the following:
-    # - SENECA_VER=#v1.3.0
+  # - SENECA_VER=#v1.3.0
 
   matrix:
     - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/gate-executor
-
-    # Golden Circle plugins to test
     - TEST_SUITE=senecajs/seneca-entity
     - TEST_SUITE=senecajs/seneca-user
-    - TEST_SUITE=senecajs/seneca-mem-store
-    - TEST_SUITE=senecajs/seneca-redis-store
-    - TEST_SUITE=senecajs/seneca-level-store
-    - TEST_SUITE=senecajs/seneca-mongo-store
-    - TEST_SUITE=senecajs/seneca-web
     - TEST_SUITE=senecajs/seneca-transport
-    - TEST_SUITE=senecajs/seneca-balance-client
-    - TEST_SUITE=senecajs/seneca-mesh
-    - TEST_SUITE=senecajs/seneca-logstash-logger
-    - TEST_SUITE=senecajs/seneca-logentries-logger
-    - TEST_SUITE=senecajs/seneca-pino-logger
 
 before_script:
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
