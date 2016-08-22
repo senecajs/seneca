@@ -17,14 +17,16 @@ before_script:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
-  - echo TEST_SUITE:$TEST_SUITE
-  - echo TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER
+  - echo "TEST_SUITE:$TEST_SUITE"
+  - echo "TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER"
+  - SENECA_INSTALL=https://github.com/senecajs/seneca#$BRANCH;
+  - echo "SENECA_INSTALL:$SENECA_INSTALL";
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
       git clone https://github.com/$TEST_SUITE;
       cd $TEST_SUITE_FOLDER;
       npm i;
       npm uninstall seneca;
-      npm install https://github.com/senecajs/seneca#$BRANCH;
+      npm install $SENECA_INSTALL;
     fi
 
 cache:
