@@ -54,8 +54,6 @@ var internals = {
     // Register (true) default plugins. Set false to not register when
     // using custom versions.
     default_plugins: {
-      basic: true,
-      repl: true,
       transport: true
     },
 
