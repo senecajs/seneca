@@ -10,7 +10,7 @@ var it = lab.it
 var expect = Code.expect
 
 
-describe('list()', function () {
+describe('actions', function () {
   it('returns a list of found actions matching a string pattern', function (done) {
     var seneca = {
       private$: {

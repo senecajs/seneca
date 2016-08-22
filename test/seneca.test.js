@@ -80,16 +80,6 @@ describe('seneca', function () {
     })
   })
 
-  it('require-use-safetynet', function (done) {
-    require('..')(testopts)
-      .use('echo', {web: false})
-      .act('role:echo,foo:1', function (err, out) {
-        assert.ok(!err)
-        assert.equal(1, out.foo)
-        done()
-      })
-  })
-
   it('ready-complex', function (done) {
     var mark = {ec: 0}
 
@@ -631,14 +621,7 @@ describe('seneca', function () {
 
   it('loading-plugins', function (done) {
     var si = Seneca({
-      plugins: ['echo'],
-      log: 'silent',
-      plugin: {echo: {web: false}}
-    })
-
-    si.act({role: 'echo', baz: 'bax'}, function (err, out) {
-      assert.equal(err, null)
-      assert.equal('' + {baz: 'bax'}, '' + out)
+      log: 'silent'
     })
 
     si = Seneca({plugins: ['basic'], log: 'silent'})
@@ -714,14 +697,7 @@ describe('seneca', function () {
       })
     })
 
-    si = Seneca({log: 'silent'})
-    si.use('echo', {web: false})
-    si.act({role: 'echo', cmd: 'foo', bar: 1}, function (err, out) {
-      assert.equal(err, null)
-      assert.ok(out.cmd === 'foo')
-      assert.ok(out.bar === 1)
-      done()
-    })
+    done()
   })
 
   it('pin', function (done) {

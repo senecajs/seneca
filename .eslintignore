@@ -1,4 +1,4 @@
 node_modules
 docs
 
-test/plugin/bad-syntax-plugin.js
+test/stubs/plugin/bad-syntax-plugin.js
