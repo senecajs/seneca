@@ -5,6 +5,7 @@ node_js:
   - '4'
   - '6'
 
+env:
   matrix:
     - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/gate-executor
@@ -15,11 +16,12 @@ node_js:
 before_script:
   - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
+  - if [ "null" == "$BRANCH" ]; then BRANCH=""; else BRANCH="#$BRANCH"; fi
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
   - echo "TEST_SUITE:$TEST_SUITE"
   - echo "TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER"
-  - SENECA_INSTALL=https://github.com/senecajs/seneca#$BRANCH;
+  - SENECA_INSTALL=https://github.com/senecajs/seneca$BRANCH;
   - echo "SENECA_INSTALL:$SENECA_INSTALL";
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
       git clone https://github.com/$TEST_SUITE;
