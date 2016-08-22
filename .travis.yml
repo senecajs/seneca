@@ -5,13 +5,6 @@ node_js:
   - '4'
   - '6'
 
-env:
-  global:
-    # get the latest seneca code from master,
-    # to test a specific tagged version set the version like below.
-    - SENECA_VER=
-  # - SENECA_VER=#v1.3.0
-
   matrix:
     - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/gate-executor
@@ -20,6 +13,9 @@ env:
     - TEST_SUITE=senecajs/seneca-transport
 
 before_script:
+  - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
   - echo TEST_SUITE:$TEST_SUITE
   - echo TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER
@@ -28,7 +24,7 @@ before_script:
       cd $TEST_SUITE_FOLDER;
       npm i;
       npm uninstall seneca;
-      npm install https://github.com/senecajs/seneca$SENECA_VER;
+      npm install https://github.com/senecajs/seneca#$BRANCH;
     fi
 
 cache:
