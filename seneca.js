@@ -227,19 +227,10 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
-
-  if (options.legacy.validate) {
-    seneca.use(require('seneca-parambulator'))
-  }
-
-  // HACK: makes this sync - FIX: use preload
-  if (options.default_plugins.repl) {
-    require('seneca-repl').call(seneca, options.repl)
-  }
-
   // Register default plugins, unless turned off by options.
-  if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
+  if (options.default_plugins.transport) {
+    seneca.use(require('seneca-transport'))
+  }
 
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {

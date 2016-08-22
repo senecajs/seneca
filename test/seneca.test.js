@@ -7,7 +7,6 @@ var Async = require('async')
 var Code = require('code')
 var Gex = require('gex')
 var _ = require('lodash')
-var Joi = require('joi')
 var Lab = require('lab')
 var Package = require('../package.json')
 var Seneca = require('..')
@@ -624,14 +623,6 @@ describe('seneca', function () {
       log: 'silent'
     })
 
-    si = Seneca({plugins: ['basic'], log: 'silent'})
-
-    si.act({role: 'util', cmd: 'quickcode'}, function (err, code) {
-      assert.equal(err, null)
-      assert.equal(8, code.length)
-      assert.equal(/[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.exec(code), null)
-    })
-
     function Mock1 () {
       var self = this
       self.name = 'mock1'
@@ -851,67 +842,6 @@ describe('seneca', function () {
     ], done)
   })
 
-  it('moreobjargs', function (done) {
-    var p0 = {c: 6}
-
-    Seneca({log: 'silent', errhandler: done})
-
-      .add({a: 1}, {b: 2},
-        function (args, done) { done(null, {c: args.c}) })
-
-      .add({A: 1}, {B: {integer$: true}},
-        function (args, done) { done(null, {C: args.C}) })
-
-      .add('x:1', {x: 2, y: 3}, {x: 4, y: 5, z: 6},
-        function (args, done) { done(null, {k: args.k}) })
-
-      .gate()
-
-      .act('a:1,b:2,c:3', function (err, out) {
-        assert.equal(err, null)
-        assert.equal(3, out.c)
-      })
-
-      .act({a: 1, b: 2}, {c: 4}, function (err, out) {
-        assert.equal(err, null)
-        assert.equal(4, out.c)
-      })
-
-      .act('a:1', {b: 2}, {c: 5}, function (err, out) {
-        assert.equal(err, null)
-        assert.equal(5, out.c)
-      })
-
-      .act({a: 1, b: 2}, p0, function (err, out) {
-        assert.equal(err, null)
-        assert.equal(6, out.c)
-        assert.equal('{ c: 6 }', Util.inspect(p0))
-      })
-
-      .act('A:1,B:2,C:33', function (err, out) {
-        assert.equal(err, null)
-        assert.equal(33, out.C)
-      })
-
-      .act('x:1,y:3,z:6,k:7', function (err, out) {
-        assert.equal(err, null)
-        assert.equal(7, out.k)
-      })
-
-      .ready(function () {
-        // using root as ready seneca is fatal$
-        this.root.options({errhandler: function (err) {
-          // TODO: change to act_invalid_msg on version 3.x
-          if (err.code !== 'act_invalid_args') {
-            return done(err)
-          }
-          done()
-        }})
-
-        this.root.act('A:1,B:true,C:44')
-      })
-  })
-
   it('string-add', function (done) {
     var addFunction = function (args, done) {
       done(null, {v: (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10)})
@@ -975,125 +905,6 @@ describe('seneca', function () {
         function (err, out) { assert.equal(err, null); assert.equal('1-39', out.r) })
 
     done()
-  })
-
-  it('parambulator', function (done) {
-    var si = Seneca({log: 'silent', legacy: {error_codes: false}})
-
-    si.add({a: 1, b: 'q', c: {required$: true, string$: true}},
-      function (args, cb) { cb(null, {}) })
-
-    function foo (args, cb) { cb(null, {}) }
-    foo.validate = {
-      b: { required$: true }
-    }
-    si.add('a:2', foo)
-
-    si.act({a: 1, b: 'q', c: 'c'}, function (err) { err && done(err) })
-    si.act({a: 2, b: 'q'}, function (err) { err && done(err) })
-
-    si.act({a: 1, b: 'q', c: 1}, function (err) {
-      assert.equal('act_invalid_msg', err.code)
-
-      si.act({a: 1, b: 'q'}, function (err) {
-        assert.equal('act_invalid_msg', err.code)
-
-        si.act({a: 2}, function (err) {
-          assert.equal('act_invalid_msg', err.code)
-
-          done()
-        })
-      })
-    })
-  })
-
-  it('parambulator argument manipulation', function (done) {
-    var si = Seneca({log: 'silent', legacy: {error_codes: false}})
-
-    si.add({a: 1, b: 'q', c: {required$: true, string$: true, default$: 'test'}},
-        function (args, cb) {
-          assert.equal('test', args.c)
-          cb()
-          done()
-        })
-
-    si.act({a: 1, b: 'q'}, function (err) { assert(!err) })
-  })
-
-  // TODO: move to seneca-joi plugin
-  it('joi', function (done) {
-    var si = Seneca({ log: 'silent' })
-
-    var schema = Joi.object().keys({
-      cmd: Joi.string(),
-      c: Joi.object().required()
-    })
-
-    si.add({ cmd: 'joi' }, function (args, cb) {
-      cb(null, {})
-    }, { parambulator: schema })
-
-    si.act({ cmd: 'joi', c: 'c' }, function (err) {
-      assert(err.code === 'act_invalid_msg')
-    })
-
-    si.act({ cmd: 'joi' }, function (err) {
-      assert(err.code === 'act_invalid_msg')
-    })
-
-    si.act({ cmd: 'joi', c: { test: true } }, function (err) {
-      assert(!err)
-      done()
-    })
-  })
-
-  it('act-param', function (done) {
-    var si = Seneca({log: 'silent', legacy: {error_codes: false}})
-
-      .add({a: 1, b: {integer$: true}}, function (args, cb) {
-        if (!_.isNumber(args.b)) return assert.fail()
-        cb(null, {a: 1 + args.b})
-      })
-
-      .act({a: 1, b: 1}, function (err, out) {
-        try {
-          assert.ok(!err)
-          assert.equal(2, out.a)
-        }
-        catch (e) {
-          return done(e)
-        }
-
-        // use si to avoid act_loop error
-        si.act({a: 1, b: 'b'}, function (err, out) {
-          try {
-            assert.equal('act_invalid_msg', err.code)
-            assert.equal('seneca: Action a:1 received an invalid message; ' +
-                         'The property \'b\', with current value: \'b\', ' +
-                         'must be a integer (parent: top level).; message content ' +
-                         'was: { a: 1, b: \'b\' }.', err.message)
-          }
-          catch (e) {
-            return done(e)
-          }
-
-          try {
-            si.add({a: 1, b: {notatypeatallatall$: true}}, function (args, cb) {
-              assert.fail()
-            })
-          }
-          catch (e) {
-            try {
-              assert.ok(e.message.match(/Parambulator: Unknown rule/))
-            }
-            catch (e) {
-              return done(e)
-            }
-
-            done()
-          }
-        })
-      })
   })
 
   it('sub', function (done) {
@@ -1206,7 +1017,7 @@ describe('seneca', function () {
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 10, done: 10, fails: 0, cache: 1 }',
+            assert.equal('{ calls: 8, done: 8, fails: 0, cache: 1 }',
               Util.inspect(stats.act))
             done()
           })
