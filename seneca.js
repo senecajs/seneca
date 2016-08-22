@@ -913,22 +913,6 @@ function make_seneca (initial_options) {
     return self
   }
 
-  // TODO: move repl functionality to seneca-repl
-
-  root.inrepl = function () {
-    var self = this
-
-    self.on('act-out', function () {
-      Legacy.loghandler.print.apply(null, arrayify(arguments))
-    })
-
-    self.on('error', function () {
-      var args = arrayify(arguments)
-      args.unshift('ERROR: ')
-      Legacy.loghandler.print.apply(null, args)
-    })
-  }
-
   // Return self. Mostly useful as a check that this is a Seneca instance.
   function api_seneca () {
     return this
