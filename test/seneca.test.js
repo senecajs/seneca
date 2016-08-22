@@ -207,45 +207,6 @@ describe('seneca', function () {
     }, 100)
   })
 
-  it('register', function (done) {
-    var si = Seneca(testopts)
-
-    var initfn = function () {}
-    var emptycb = function () {}
-
-    try {
-      si.register()
-    }
-    catch (e) {
-      assert.equal('no_input$', e.parambulator.code)
-    }
-
-    try {
-      si.register({})
-    }
-    catch (e) {
-      assert.equal('name', e.parambulator.property)
-      assert.equal('required$', e.parambulator.code)
-    }
-
-    try {
-      si.register({name: 1, init: initfn}, emptycb)
-    }
-    catch (e) {
-      assert.equal('name', e.parambulator.property)
-      assert.equal('string$', e.parambulator.code)
-    }
-
-    try {
-      si.register({name: 'a', init: 'b'}, emptycb)
-    }
-    catch (e) {
-      assert.equal('init', e.parambulator.property)
-      assert.equal('function$', e.parambulator.code)
-    }
-    done()
-  })
-
   it('action-basic', function (done) {
     var si = Seneca(testopts).error(done)
     si.options({debug: {fragile: true}})

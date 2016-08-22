@@ -161,17 +161,4 @@ describe('options', function () {
     assert.ok(ar)
     si.close(done)
   })
-
-  it('options-invalid', function (done) {
-    try {
-      Seneca({idlen: 'foo'})
-      assert.fail()
-    }
-    catch (e) {
-      assert.equal('integer$', e.parambulator.code)
-    }
-    done()
-  })
-
-// TODO: failure modes
 })

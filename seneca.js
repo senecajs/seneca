@@ -16,7 +16,6 @@ var Makeuse = require('use-plugin')
 var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
-var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
 
 
@@ -41,15 +40,6 @@ var internals = {
     package: 'seneca',
     msgmap: Errors,
     override: true
-  }),
-  schema: Parambulator({
-    tag: { string$: true },
-    idlen: { integer$: true },
-    timeout: { integer$: true },
-    errhandler: { function$: true }
-  }, {
-    topname: 'options',
-    msgprefix: 'seneca({...}): '
   }),
   defaults: {
     // Tag this Seneca instance, will be appended to instance identifier.
@@ -170,12 +160,8 @@ var internals = {
 
     // backwards compatibility settings
     legacy: {
-
       // use old error codes, until version 3.x
       error_codes: true,
-
-      // use parambulator for message validation, until version 3.x
-      validate: true,
 
       // use old logging, until version 3.x
       logging: true
@@ -285,13 +271,6 @@ function make_seneca (initial_options) {
 
   // Define options
   var so = private$.optioner.set(initial_options)
-
-  // TODO: remove parambulator dep from Seneca; do this another way
-  internals.schema.validate(so, function (err) {
-    if (err) {
-      throw err
-    }
-  })
 
   // Create internal tools.
   var actnid = Nid({length: so.idlen})
