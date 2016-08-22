@@ -140,7 +140,7 @@ Seneca()
 
 
 // Output
-// null { tag: 'none' }
+// null { tag: 'local' }
 // null { tag: 'approver' }
 // null { tag: 'rejector' }
 ```
