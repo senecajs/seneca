@@ -379,7 +379,6 @@ describe('plugin', function () {
     })
   })
 
-
   it('dynamic-load-sequence', function (done) {
     var a = []
     Seneca({log: 'test', debug: {undead: true}})
@@ -443,7 +442,6 @@ describe('plugin', function () {
         done()
       })
   })
-
 
   it('plugin options can be modified by plugins during load sequence', function (done) {
     var seneca = Seneca({
@@ -545,178 +543,6 @@ describe('plugin', function () {
     })
     .ready(function () {
       expect(seneca.success).to.be.true()
-      done()
-    })
-  })
-
-  it('will be able to pin with multiple plugins and local immediate setting', function (done) {
-    var seneca = Seneca({ log: 'silent' })
-
-    var pluginA = function () {
-      this.add({ init: 'pluginA' }, function (msg, cb) {
-        process.nextTick(cb)
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA1' }, function (msg, cb) {
-        cb(null, { result: 'msA1' })
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA2' }, function (msg, cb) {
-        cb(null, { result: 'msA2' })
-      })
-
-      return {
-        name: 'pluginA'
-      }
-    }
-
-    var pluginB = function () {
-      this.add({ init: 'pluginB' }, function (msg, cb) {
-        var api = this.pin({ role: 'pluginA', cmd: '*' }, { immediate: true })
-        api.msA1({ msg: 'hi' }, function (err, message) {
-          expect(err).to.not.exist()
-          expect(message.result).to.equal('msa1')
-        })
-        cb()
-      })
-
-      this.add({ cmd: 'msB1' }, function (msg, cb) {
-        cb(null, { result: 'msB1' })
-      })
-
-      return {
-        name: 'pluginB'
-      }
-    }
-
-    var pluginC = function () {
-      this.add({ init: 'pluginC' }, function (msg, cb) {
-        process.nextTick(cb)
-      })
-
-      this.add({ cmd: 'msC1' }, function (msg, cb) {
-        cb(null, { result: 'msC1' })
-      })
-
-      return {
-        name: 'pluginC'
-      }
-    }
-
-    seneca.use(pluginA)
-    seneca.use(pluginB)
-    seneca.use(pluginC)
-    seneca.ready(function () {
-      done()
-    })
-  })
-
-  it('will be able to pin with multiple plugins and seneca pin immediate setting', function (done) {
-    var seneca = Seneca({ log: 'silent', pin: { immediate: true } })
-
-    var pluginA = function () {
-      this.add({ init: 'pluginA' }, function (msg, cb) {
-        process.nextTick(cb)
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA1' }, function (msg, cb) {
-        cb(null, { result: 'msA1' })
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA2' }, function (msg, cb) {
-        cb(null, { result: 'msA2' })
-      })
-
-      return {
-        name: 'pluginA'
-      }
-    }
-
-    var pluginB = function () {
-      this.add({ init: 'pluginB' }, function (msg, cb) {
-        var api = this.pin({ role: 'pluginA', cmd: '*' })
-        api.msA1({ msg: 'hi' }, function (err, message) {
-          expect(err).to.not.exist()
-          expect(message.result).to.equal('msa1')
-        })
-        cb()
-      })
-
-      this.add({ cmd: 'msB1' }, function (msg, cb) {
-        cb(null, { result: 'msB1' })
-      })
-
-      return {
-        name: 'pluginB'
-      }
-    }
-
-    var pluginC = function () {
-      this.add({ init: 'pluginC' }, function (msg, cb) {
-        process.nextTick(cb)
-      })
-
-      this.add({ cmd: 'msC1' }, function (msg, cb) {
-        cb(null, { result: 'msC1' })
-      })
-
-      return {
-        name: 'pluginC'
-      }
-    }
-
-    seneca.use(pluginA)
-    seneca.use(pluginB)
-    seneca.use(pluginC)
-    seneca.ready(function () {
-      done()
-    })
-  })
-
-  it('pinning waits for ready by default', function (done) {
-    var seneca = Seneca({ log: 'silent' })
-
-    var pluginA = function () {
-      this.add({ init: 'pluginA' }, function (msg, cb) {
-        process.nextTick(cb)
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA1' }, function (msg, cb) {
-        cb(null, { result: 'msA1' })
-      })
-
-      this.add({ role: 'pluginA', cmd: 'msA2' }, function (msg, cb) {
-        cb(null, { result: 'msA2' })
-      })
-
-      return {
-        name: 'pluginA'
-      }
-    }
-
-    var pluginB = function () {
-      this.add({ init: 'pluginB' }, function (msg, cb) {
-        var api = this.pin({ role: 'pluginA', cmd: '*' })
-        expect(api.msA1).to.not.exist()
-        this.once('ping', function () {
-          api = this.pin({ role: 'pluginA', cmd: '*' })
-          expect(api.msA1).to.exist()
-        })
-        cb()
-      })
-
-      this.add({ cmd: 'msB1' }, function (msg, cb) {
-        cb(null, { result: 'msB1' })
-      })
-
-      return {
-        name: 'pluginB'
-      }
-    }
-
-    seneca.use(pluginA)
-    seneca.use(pluginB)
-    seneca.ready(function () {
       done()
     })
   })
