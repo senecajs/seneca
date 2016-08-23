@@ -16,7 +16,6 @@ var Makeuse = require('use-plugin')
 var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
-var Parambulator = require('parambulator')
 var Stats = require('rolling-stats')
 
 
@@ -42,15 +41,6 @@ var internals = {
     msgmap: Errors,
     override: true
   }),
-  schema: Parambulator({
-    tag: { string$: true },
-    idlen: { integer$: true },
-    timeout: { integer$: true },
-    errhandler: { function$: true }
-  }, {
-    topname: 'options',
-    msgprefix: 'seneca({...}): '
-  }),
   defaults: {
     // Tag this Seneca instance, will be appended to instance identifier.
     tag: '-',
@@ -64,8 +54,6 @@ var internals = {
     // Register (true) default plugins. Set false to not register when
     // using custom versions.
     default_plugins: {
-      basic: true,
-      repl: true,
       transport: true
     },
 
@@ -170,12 +158,8 @@ var internals = {
 
     // backwards compatibility settings
     legacy: {
-
       // use old error codes, until version 3.x
       error_codes: true,
-
-      // use parambulator for message validation, until version 3.x
-      validate: true,
 
       // use old logging, until version 3.x
       logging: true
@@ -227,19 +211,10 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('findplugin', Plugins.api_decorations.findplugin)
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
-
-  if (options.legacy.validate) {
-    seneca.use(require('seneca-parambulator'))
-  }
-
-  // HACK: makes this sync - FIX: use preload
-  if (options.default_plugins.repl) {
-    require('seneca-repl').call(seneca, options.repl)
-  }
-
   // Register default plugins, unless turned off by options.
-  if (options.default_plugins.basic) { seneca.use(require('seneca-basic')) }
-  if (options.default_plugins.transport) { seneca.use(require('seneca-transport')) }
+  if (options.default_plugins.transport) {
+    seneca.use(require('seneca-transport'))
+  }
 
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {
@@ -294,13 +269,6 @@ function make_seneca (initial_options) {
 
   // Define options
   var so = private$.optioner.set(initial_options)
-
-  // TODO: remove parambulator dep from Seneca; do this another way
-  internals.schema.validate(so, function (err) {
-    if (err) {
-      throw err
-    }
-  })
 
   // Create internal tools.
   var actnid = Nid({length: so.idlen})
@@ -943,22 +911,6 @@ function make_seneca (initial_options) {
     self.register(plugindesc)
 
     return self
-  }
-
-  // TODO: move repl functionality to seneca-repl
-
-  root.inrepl = function () {
-    var self = this
-
-    self.on('act-out', function () {
-      Legacy.loghandler.print.apply(null, arrayify(arguments))
-    })
-
-    self.on('error', function () {
-      var args = arrayify(arguments)
-      args.unshift('ERROR: ')
-      Legacy.loghandler.print.apply(null, args)
-    })
   }
 
   // Return self. Mostly useful as a check that this is a Seneca instance.

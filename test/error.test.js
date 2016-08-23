@@ -25,8 +25,6 @@ describe('error', function () {
 
   it('act_not_found', act_not_found)
 
-  it('param_caller', param_caller)
-
   it('exec_action_throw_basic', exec_action_throw_basic)
   it('exec_action_throw_nolog', exec_action_throw_nolog)
   it('exec_action_errhandler_throw', exec_action_errhandler_throw)
@@ -87,34 +85,6 @@ describe('error', function () {
           assert.equal('act_not_found', ex.code)
           // assert.equal('act_not_found', ctxt.errlog[8])
           return done()
-        })
-      })
-    })
-  }
-
-  function param_caller (done) {
-    var ctxt = {errlog: null}
-    var si = make_seneca(ctxt)
-
-    si.ready(function () {
-      si.add('a:1,b:{required$:true}', function (args, done) { this.good({x: 1}) })
-
-      // ~~ CASE: callback; args-invalid; err-result; err-logged
-      si.act('a:1', function (err) {
-        assert.equal('act_invalid_msg', err.code)
-
-        if (si.options().legacy.logging) {
-          assert.equal('act_invalid_msg', ctxt.errlog[14])
-        }
-        else {
-          assert.equal('act_invalid_msg', ctxt.errlog.code)
-        }
-
-        // ~~ CASE: callback; args-valid
-        si.act('a:1,b:1', function (err, out) {
-          assert.equal(err, null)
-          assert.equal(1, out.x)
-          done()
         })
       })
     })
