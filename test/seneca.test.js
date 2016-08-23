@@ -653,7 +653,7 @@ describe('seneca', function () {
   })
 
   it('pin', function (done) {
-    var si = Seneca({log: 'silent'})
+    var si = Seneca({log: 'silent', pin: {immediate: false}})
 
     var log = []
 

@@ -1702,10 +1702,6 @@ function make_seneca (initial_options) {
   function action_queue_clear () {
     root.emit('ready')
 
-    // DEPRECATED, removed in Seneca 3.0
-    root.emit('pin')
-    root.emit('after-pin')
-
     var ready = root.private$.ready_list.shift()
     if (ready) {
       ready()
