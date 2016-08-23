@@ -209,7 +209,6 @@ module.exports = function init (seneca_options, more_options) {
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.transport) {
     seneca.use(require('seneca-transport'))
-    seneca.use(require('seneca-pin'))
   }
 
   // Register plugins specified in options.

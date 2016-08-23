@@ -652,68 +652,6 @@ describe('seneca', function () {
     done()
   })
 
-  it('pin', function (done) {
-    var si = Seneca({log: 'silent', pin: {immediate: false}})
-
-    var log = []
-
-    si.add({p1: 'v1', p2: 'v2a'}, function (args, cb) {
-      log.push('a' + args.p3)
-      cb(null, {p3: args.p3})
-    })
-
-    si.add({p1: 'v1', p2: 'v2b'}, function (args, cb) {
-      log.push('b' + args.p3)
-      cb(null, {p3: args.p3})
-    })
-
-    var api = si.pin({p1: 'v1', p2: '*'})
-
-    si.ready(function () {
-      api.v2a({p3: 'A'}, function (err, r) {
-        assert.equal(err, null)
-        assert.equal(r.p3, 'A')
-      })
-      api.v2b({p3: 'B'}, function (err, r) {
-        assert.equal(err, null)
-        assert.equal(r.p3, 'B')
-      })
-
-      var acts = si.pinact({p1: 'v1', p2: '*'})
-      assert.equal("[ { p1: 'v1', p2: 'v2a' }, { p1: 'v1', p2: 'v2b' } ]",
-                   Util.inspect(acts))
-
-      done()
-    })
-  })
-
-  it('pin-star', function (done) {
-    var si = Seneca(testopts)
-
-    si.add('a:1,b:x', function () {})
-    si.add('a:1,c:y', function () {})
-    var pin_b = si.pin('a:1,b:*')
-    var pin_c = si.pin('a:1,c:*')
-
-    si.ready(function () {
-      assert.ok(_.isFunction(pin_b.x))
-      assert.equal(pin_b.y, null)
-      assert.ok(_.isFunction(pin_c.y))
-      assert.equal(pin_c.x, null)
-
-      assert.deepEqual([ { a: '1', b: 'x' }, { a: '1', c: 'y' } ],
-                       si.findpins('a:1'))
-
-      assert.deepEqual([ { a: '1', b: 'x' } ],
-                       si.findpins('a:1,b:*'))
-
-      assert.deepEqual([ { a: '1', c: 'y' } ],
-                       si.findpins('a:1,c:*'))
-
-      done()
-    })
-  })
-
   it('fire-and-forget', function (done) {
     var si = Seneca({log: 'silent'})
     si.add({a: 1}, function (args, cb) { cb(null, args.a + 1) })
@@ -978,7 +916,7 @@ describe('seneca', function () {
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
             // sensitive to changes in plugin init and internal action calls
-            assert.equal('{ calls: 9, done: 9, fails: 0, cache: 1 }',
+            assert.equal('{ calls: 8, done: 8, fails: 0, cache: 1 }',
               Util.inspect(stats.act))
             done()
           })
@@ -1361,37 +1299,4 @@ describe('seneca', function () {
       done()
     })
   })
-
-/*
-  it('depth0-loop', function (done) {
-    Seneca({ log: 'silent', strict: { maxloop: 0 } })
-      .add('a:1', function (msg, done) {
-        this.act('a:1', function (err, out) {
-          done(err, out)
-        })
-      })
-      .act('a:1', function (err) {
-        expect(err).to.exist()
-        expect(err.code).to.equal('act_loop')
-        done()
-      })
-  })
-
-  it('depth3-loop', function (done) {
-    var count = 0
-    Seneca({ log: 'silent', strict: { maxloop: 3 } })
-      .add('a:1', function (msg, done) {
-        ++count
-        this.act('a:1', function (err, out) {
-          done(err, out)
-        })
-      })
-      .act('a:1', function (err) {
-        expect(err).to.exist()
-        expect(err.code).to.equal('act_loop')
-        expect(count).to.equal(4)
-        done()
-      })
-  })
-*/
 })

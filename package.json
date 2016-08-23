@@ -101,7 +101,6 @@
     "eslint-plugin-standard": "2.x.x",
     "lab": "11.0.x",
     "seneca-entity": "1.2.x",
-    "seneca-error-test": "0.2.x",
-    "seneca-pin": "senecajs-labs/seneca-pin"
+    "seneca-error-test": "0.2.x"
   }
 }
