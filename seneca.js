@@ -153,11 +153,6 @@ var internals = {
 
     // backwards compatibility settings
     legacy: {
-      // use old error codes, until version 3.x
-      error_codes: true,
-
-      // use old logging, until version 3.x
-      logging: true
     }
   }
 }
@@ -1690,13 +1685,10 @@ function make_seneca (initial_options) {
   }
 
   function load_logger (instance, log_plugin) {
-    log_plugin = log_plugin ||
-      require(so.legacy.logging ? 'seneca-legacy-logger' : './lib/logging')
+    log_plugin = log_plugin || require('./lib/logging')
 
-    // TODO: check for preload
     return log_plugin.preload.call(instance).extend.logger
   }
-
 
   function action_queue_clear () {
     root.emit('ready')
