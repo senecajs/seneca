@@ -151,11 +151,6 @@ var internals = {
       running: false
     },
 
-    pin: {
-      // run pin function without waiting for pin event
-      immediate: false
-    },
-
     // backwards compatibility settings
     legacy: {
       // use old error codes, until version 3.x
