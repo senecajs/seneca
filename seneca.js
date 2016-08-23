@@ -214,6 +214,7 @@ module.exports = function init (seneca_options, more_options) {
   // Register default plugins, unless turned off by options.
   if (options.default_plugins.transport) {
     seneca.use(require('seneca-transport'))
+    seneca.use(require('seneca-pin'))
   }
 
   // Register plugins specified in options.
@@ -310,7 +311,6 @@ function make_seneca (initial_options) {
   // Non-API methods.
   root.register = Plugins.register(so, callpoint)
   root.depends = api_depends
-  root.pin = api_pin
   root.act_if = api_act_if
   root.wrap = api_wrap
   root.seneca = api_seneca
@@ -453,75 +453,6 @@ function make_seneca (initial_options) {
 
     return exportval
   }
-
-  // TODO: DEPRECATE
-  function api_pin (pattern, pinopts) {
-    var thispin = this
-
-    pattern = _.isString(pattern) ? Jsonic(pattern) : pattern
-
-    var methodkeys = []
-    for (var key in pattern) {
-      if (/[\*\?]/.exec(pattern[key])) {
-        methodkeys.push(key)
-      }
-    }
-
-    function make_pin (pattern) {
-      var api = {
-        toString: function () {
-          return 'pin:' + Common.pattern(pattern) + '/' + thispin
-        }
-      }
-
-      var calcPin = function () {
-        var methods = private$.actrouter.list(pattern)
-
-        methods.forEach(function (method) {
-          var mpat = method.match
-
-          var methodname = ''
-          for (var mkI = 0; mkI < methodkeys.length; mkI++) {
-            methodname += ((mkI > 0 ? '_' : '')) + mpat[methodkeys[mkI]]
-          }
-
-          api[methodname] = function (args, cb) {
-            var si = this && this.seneca ? this : thispin
-
-            var fullargs = _.extend({}, args, mpat)
-            si.act(fullargs, cb)
-          }
-
-          api[methodname].pattern$ = method.match
-          api[methodname].name$ = methodname
-        })
-
-        if (pinopts && pinopts.include) {
-          for (var i = 0; i < pinopts.include.length; i++) {
-            var methodname = pinopts.include[i]
-            if (thispin[methodname]) {
-              api[methodname] = Common.delegate(thispin, thispin[methodname])
-            }
-          }
-        }
-      }
-
-      var opts = {}
-      _.defaults(opts, pinopts, so.pin)
-
-      if (private$._isReady || opts.immediate) {
-        calcPin()
-      }
-      else {
-        root.once('pin', calcPin)
-      }
-
-      return api
-    }
-
-    return make_pin(pattern)
-  }
-
 
   function api_sub () {
     var self = this
