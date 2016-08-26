@@ -1,6 +1,9 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
+  "version": "3.0.0",
+  "license": "MIT",
+  "homepage": "http://senecajs.org",
   "keywords": [
     "micro",
     "service",
@@ -18,36 +21,59 @@
     "toolkit",
     "startup"
   ],
-  "version": "3.0.0",
-  "license": "MIT",
-  "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "contributors": [
-    "Richard Rodger (http://richardrodger.com)",
-    "Wyatt Preul (https://github.com/geek)",
-    "Dean McDonnell (https://github.com/mcdonnelldean)",
-    "Peter Elger",
-    "Cristian Ianto",
-    "Dominic Tarr",
-    "David Mark Clements",
-    "Nicolas Herment",
-    "Maciej Małecki (http://mmalecki.com)",
-    "Jake Pruitt",
-    "Marian Radulescu",
+    "Adrien Becchis (https://github.com/AdrieanKhisbe)",
     "Alexandru Mircea (https://github.com/mirceaalexandru)",
     "Adrian Rossouw (http://daemon.co.za)",
-    "Aleksandar Ostojić",
-    "Maxence Dalmais (https://github.com/maxired)",
+    "Colin Ihrig (https://github.com/cjihrig)",
+    "Cristian Ianto (https://github.com/iantocristian)",
+    "Cristian Kiss (https://github.com/ckiss)",
+    "David Mark Clements (https://github.com/davidmarkclements)",
+    "Dean McDonnell (https://github.com/mcdonnelldean)",
+    "Dominic Tarr (https://github.com/dominictarr)",
+    "Dustin Deus (https://github.com/StarpTech)",
+    "Glen Keane (https://github.com/thekemkid)",
+    "Gege Pincin (https://github.com/Georgette)",
+    "Jake Pruitt (https://github.com/jakepruitt)",
+    "Maciej Małecki (http://mmalecki.com)",
+    "Matteo Collina (https://github.com/mcollina)",
+    "Marian Radulescu (https://github.com/marianr)",
     "Marius Ursache (https://github.com/bamse16)",
     "Martin Betak (https://github.com/matobet)",
-    "Marian Radulescu (https://github.com/marianr)",
-    "Glen Keane (https://github.com/thekemkid)",
-    "Tane Piper (https://github.com/tanepiper)",
-    "Cristian Kiss (https://github.com/ckiss)",
+    "Maxence Dalmais (https://github.com/maxired)",
+    "Mihai Dima (https://github.com/mihaidma)",
+    "Naomi Feehan (https://github.com/naomifeehan)",
     "Paolo Chiodi (https://github.com/paolochiodi)",
-    "Matteo Collina (https://github.com/mcollina)",
-    "Adrien Becchis (https://github.com/AdrieanKhisbe)"
+    "Peter Elger (https://github.com/pelger)",
+    "Reto Inderbitzin (https://github.com/indr)",
+    "Reid Rankin (https://github.com/reidrankin)",
+    "Tane Piper (https://github.com/tanepiper)",
+    "Wyatt Preul (https://github.com/geek)",
+    "Vald Houbiev (https://github.com/vladgolubev)",
+    "Vito Tardia (https://github.com/vtardia)"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/senecajs/seneca.git"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "CHANGES.md",
+    "lib",
+    "seneca.js"
+  ],
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "main": "seneca.js",
+  "scripts": {
+    "test": "lab -v -P test -L -t 80",
+    "coveralls": "lab -s -P test -r lcov | coveralls",
+    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
+    "annotate": "docco seneca.js lib/*.js -o docs/annotated"
+  },
   "dependencies": {
     "archy": "1.0.0",
     "eraro": "0.4.1",
@@ -64,27 +90,6 @@
     "semver": "5.3.0",
     "seneca-transport": "2.1.0",
     "use-plugin": "0.3.1"
-  },
-  "main": "seneca.js",
-  "engines": {
-    "node": ">=4.0.0"
-  },
-  "files": [
-    "LICENSE",
-    "README.md",
-    "CHANGES.md",
-    "lib",
-    "seneca.js"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/senecajs/seneca.git"
-  },
-  "scripts": {
-    "test": "lab -v -P test -L -t 80",
-    "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
-    "annotate": "docco seneca.js lib/*.js -o docs/annotated"
   },
   "devDependencies": {
     "async": "2.0.x",
