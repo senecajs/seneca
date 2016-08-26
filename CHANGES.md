@@ -1,6 +1,5 @@
 ## 3.0: 2016-08-26
 
-
 * Refactored 'old' logging into it's own external plugin; seneca-legacy-logger.
 * Added new adaptor based JSON logging. External loggers can now be used with Seneca.
 * Created new 'built-in' logger which is used as the default logger if none are provided.
@@ -10,6 +9,7 @@
 * Exposed parsepattern function via seneca.util.parsepattern as required by seneca-chain to function.
 * Removed all 'dead' code marked legacy. Updated other parts of codebase with legacy comments for v.next.
 * Removed default settings for seneca-admin as it is not a default loaded plugin.
+* Set `options.actcache.active` to be false by default. Disables actcache feature by default.
 * Moved `close_signals` from `options.internal` to `options.system`.
 * Moved `catchall` from `options.internal` to `options.system`.
 * Removed `options.schema` as it was only partially checking and needs a rethink.

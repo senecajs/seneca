@@ -102,7 +102,7 @@ var internals = {
 
     // Action cache. Makes inbound messages idempotent.
     actcache: {
-      active: true,
+      active: false,
       size: 11111
     },
 

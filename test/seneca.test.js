@@ -882,7 +882,7 @@ describe('seneca', function () {
   })
 
   it('act-cache', function (done) {
-    var si = Seneca(testopts)
+    var si = Seneca(testopts, {actcache: {active: true}})
     si.options({errhandler: done})
 
     si.use('entity')
