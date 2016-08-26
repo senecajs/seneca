@@ -1,3 +1,46 @@
+## 3.0: 2016-08-26
+
+
+* Refactored 'old' logging into it's own external plugin; seneca-legacy-logger.
+* Added new adaptor based JSON logging. External loggers can now be used with Seneca.
+* Created new 'built-in' logger which is used as the default logger if none are provided.
+* Corrected bug in Seneca.util.deepextend via Lodash version bump.
+* Updated gate-executor plugin to fix issues in load determinism and generally improve perf.
+* Replaced large swathes custom code with Lodash to improve speed and reliability.
+* Exposed parsepattern function via seneca.util.parsepattern as required by seneca-chain to function.
+* Removed all 'dead' code marked legacy. Updated other parts of codebase with legacy comments for v.next.
+* Removed default settings for seneca-admin as it is not a default loaded plugin.
+* Moved `close_signals` from `options.internal` to `options.system`.
+* Moved `catchall` from `options.internal` to `options.system`.
+* Removed `options.schema` as it was only partially checking and needs a rethink.
+* Removed mem-store as a required dependency in the package.
+* Devolved store logic in 'store.js' fully to seneca-entity. Entites are now 'fully removed'.
+* Devolved chain functionality into seneca-chain and removed from library. Moved all related tests.
+* Devolved pin functionality into seneca-pin and removed from library. Moved all related tests.
+* Removed seneca-web as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-cluster as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-seneca as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-echo as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-basic as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-parambulator as a default loaded plugin. Removed related tests. Removed from package.
+* Removed parambulator as a default loaded plugin. Removed related tests. Removed from package.
+* Removed joi as a default loaded plugin. Removed related tests. Removed from package.
+* Moved min required version of Node to greater than `4.0`. `0.10` and `0.12` are no longer supported.
+* Added support for Node `6.x` with minimal changes to account for api differences.
+* Removed LTS doc as it gives the wrong information. Website update to follow.
+* Updated all dependencies. Locked deps because of `0.x` support have been updated too.
+* Modified tests to account for breaking changes in both lab and code after updating to latest.
+* Updated eslint-config-seneca with local rules and removed. Corrected peer dependency issues around linting plugins.
+* Annotations are no longer stored in the repo and must be generated locally. Annotations are found in `docs/annotated`
+* Annotations now work for the whole library, not just `seneca.js`
+* Coverage report now generates as `/docs/coverage.html` and is not stored in the repo.
+* Coverage and Annotations can now be generated via `npm run coverage` and `npm run annotate` respectively.
+* Paired back and updated travis file. Plugins are now tested via `seneca-test-rig` instead of with Seneca.
+* Moved older examples into folders for clarity and added another 5 examples showing more concepts; see `docs/examples`
+* Removed ALL redundant code files from `test` put stubs in `test/stubs` folder. All tests are now in the root.
+* Added test to show how to use exportmap in plugins to export values and functions; see `/test/plugin.test.js:L23`
+* Removed old release scripts in favour of `docs/examples/create-a-release.md` and using seneca-test-rig for plugin testing.
+
 ## 2.1.0: 2016-05-20
 
 * Fix for parambulator not correctly testing messages. PR #422
