@@ -377,7 +377,7 @@ Licensed under __[MIT][Lic]__.
 [Lic]: ./LICENSE
 [Logo]: http://senecajs.org/files/assets/seneca-logo.jpg
 [Npm]: https://www.npmjs.com/package/seneca
-[Org]: https://github.com/senecajs/issues
+[Org]: http://senecajs.org/
 [Pull]: https://github.com/senecajs/seneca/pulls
 [Sponsor]: http://nearform.com
 [Travis]: https://travis-ci.org/senecajs/seneca?branch=master
