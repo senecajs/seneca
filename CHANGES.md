@@ -22,6 +22,7 @@
 * Removed seneca-seneca as a default loaded plugin. Removed related tests. Removed from package.
 * Removed seneca-echo as a default loaded plugin. Removed related tests. Removed from package.
 * Removed seneca-basic as a default loaded plugin. Removed related tests. Removed from package.
+* Removed seneca-repl as a default loaded plugin. Removed related tests. Removed from package.
 * Removed seneca-parambulator as a default loaded plugin. Removed related tests. Removed from package.
 * Removed parambulator as a default loaded plugin. Removed related tests. Removed from package.
 * Removed joi as a default loaded plugin. Removed related tests. Removed from package.
