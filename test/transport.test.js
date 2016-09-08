@@ -1,20 +1,27 @@
 /* Copyright (c) 2014-2016 Richard Rodger, MIT License */
 'use strict'
 
-var Util = require('util')
 var _ = require('lodash')
 var Async = require('async')
 var Code = require('code')
+var Lab = require('lab')
+
 var Seneca = require('..')
 var Common = require('../lib/common')
 var Transport = require('../lib/transport')
-var Lab = require('lab')
+var TransportStubs = require('./stubs/transports')
+
 
 // Test shortcuts
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
+
+
+var make_test_transport = TransportStubs.make_test_transport
+var make_balance_transport = TransportStubs.make_balance_transport
+
 
 function testact (args, done) {
   var seneca = this
@@ -967,6 +974,7 @@ describe('transport', function () {
 */
 })
 
+/*
 // A simple transport that uses async.queue as the transport mechanism
 function make_test_transport () {
   test_transport.outmsgs = []
@@ -1101,3 +1109,4 @@ function make_balance_transport () {
     }
   }
 }
+*/
