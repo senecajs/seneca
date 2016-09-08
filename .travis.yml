@@ -8,7 +8,6 @@ node_js:
 env:
   matrix:
     - TEST_SUITE=senecajs/seneca
-    - TEST_SUITE=senecajs/gate-executor
     - TEST_SUITE=senecajs/seneca-entity
     - TEST_SUITE=senecajs/seneca-user
     - TEST_SUITE=senecajs/seneca-transport
