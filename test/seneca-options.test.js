@@ -10,9 +10,7 @@ var Code = require('code')
 var expect = Code.expect
 var _ = require('lodash')
 
-// Supported log levels are: `debug`, `info`, `warn`, `error`, `fatal`
-// The default logging level is `info+`
-
+// Supported Seneca log levels are: `debug`, `info`, `warn`, `error`, `fatal`
 // Seneca logging arguments:
 
 // --seneca.log.quiet - no log output
@@ -29,16 +27,6 @@ var _ = require('lodash')
 // --seneca.log=level:info,type:plugin,handler:print
 
 describe('seneca --seneca.log arguments tests', function () {
-// Minimist parsing results:
-// $ node index --seneca.log=level:warn
-// { seneca: { log: 'level:warn' } }
-// $ node index --seneca.log=level:warn+
-// seneca: { log: 'level:warn+' }
-// $ node index --seneca.log.level.warn+
-// seneca:{log:{level:{warn+:true}}}
-// $ node index -l level:warn+
-// seneca: { log: 'level:warn+' }
-
   it('--seneca.log=level:warn', function (done) {
     process.argv = ['', '', '--seneca.log=level:warn']
     var si = Seneca()
@@ -71,9 +59,21 @@ describe('seneca --seneca.log arguments tests', function () {
     done()
   })
 
-  // it('-l level:warn', function (done) {
-  //   done()
-  // })
+  it('duplicate param --seneca.log', function (done) {
+    process.argv = ['', '', '--seneca.log=level:warn', '--seneca.log=level:error']
+    var si = Seneca()
+    expect(_.isEqual(si.export('options').log, { level: 'warn' })).to.be.true()
+
+    done()
+  })
+
+  it('incorrect arg --seneca.log=level:', function (done) {
+    process.argv = ['', '', '--seneca.log=level:']
+    var si = Seneca()
+    expect(_.isEqual(si.export('options').log, { level: 'warn' })).to.be.true()
+
+    done()
+  })
 })
 
 describe('seneca --seneca.log aliases tests', function () {
