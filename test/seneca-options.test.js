@@ -70,7 +70,7 @@ describe('seneca --seneca.log arguments tests', function () {
   it('incorrect arg --seneca.log=level:', function (done) {
     process.argv = ['', '', '--seneca.log=level:']
     var si = Seneca()
-    expect(_.isEqual(si.export('options').log, { level: 'warn' })).to.be.true()
+    expect(_.isEqual(si.export('options').log, {})).to.be.true()
 
     done()
   })
