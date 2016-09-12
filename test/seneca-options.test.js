@@ -6,6 +6,7 @@ var Lab = require('lab')
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var after = lab.after
 var Code = require('code')
 var expect = Code.expect
 var _ = require('lodash')
@@ -25,8 +26,13 @@ var _ = require('lodash')
 // Deprecated logging arguments:
 // --seneca.log=plugin:foo bar // space works as val separator
 // --seneca.log=level:info,type:plugin,handler:print
-
+var initialEnv = process.argv
 describe('seneca --seneca.log arguments tests', function () {
+  after(function (done) {
+    process.argv = initialEnv
+    done()
+  })
+
   it('--seneca.log=level:warn', function (done) {
     process.argv = ['', '', '--seneca.log=level:warn']
     var si = Seneca()
