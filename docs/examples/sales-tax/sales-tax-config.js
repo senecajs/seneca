@@ -1,4 +1,4 @@
-var seneca = require('../..')()
+var seneca = require('../../..')()
 
 seneca.add({cmd: 'config'}, function (args, callback) {
   var config = {
