@@ -18,7 +18,7 @@ describe('cli', function () {
   it('won\'t display action patterns message when they aren\'t provided', function (done) {
     ChildProcess.exec(process.argv[0] + ' ' + launchPath, function (err, stdout, stderr) {
       expect(err).to.not.exist()
-      expect(stdout).to.contain('hello')
+      expect(stdout).to.contain('seneca started')
       done()
     })
   })
