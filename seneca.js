@@ -184,7 +184,7 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  seneca.log.info({kind: 'notice', notice: 'hello'})
+  seneca.log.info({kind: 'notice', notice: 'seneca started'})
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
