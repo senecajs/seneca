@@ -1,6 +1,6 @@
-var logentries = require('node-logentries')
+var Logentries = require('node-logentries')
 
-var log = logentries.logger({
+var log = Logentries.logger({
   token: 'YOUR_TOKEN',
 
   // redefine log levels to match the ones seneca uses

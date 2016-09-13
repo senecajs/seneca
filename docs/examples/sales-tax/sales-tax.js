@@ -1,4 +1,4 @@
-var seneca = require('../..')()
+var seneca = require('../../..')()
 
 seneca.add({cmd: 'salestax'}, function (args, callback) {
   var rate = 0.23

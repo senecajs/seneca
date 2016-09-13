@@ -1,12 +1,9 @@
-var seneca = require('../..')
+var Seneca = require('../../..')
 
 // need this to get a reference to seneca.loghandler
-seneca = seneca({
+var seneca = Seneca({
   log: {
-    map: [
-      {plugin: 'shop', handler: 'print'},
-      {level: 'all', handler: seneca.loghandler.file('shop.log')}
-    ]
+    level: 'debug+'
   }
 })
 

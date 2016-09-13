@@ -1,4 +1,4 @@
-var seneca = require('../..')()
+var seneca = require('../../..')()
 
 seneca.use('sales-tax-plugin', {country: 'IE', rate: 0.23})
 seneca.use('sales-tax-plugin', {country: 'UK', rate: 0.20})
