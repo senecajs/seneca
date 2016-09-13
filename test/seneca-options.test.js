@@ -18,6 +18,7 @@ var _ = require('lodash')
 // --seneca.log.silent - no log output
 
 // --seneca.log.all - log everything, alias for `debug+` level
+// --seneca.log.any - log everything, alias for `debug+` level
 // --seneca.log.print - log everything, alias for `debug+` level
 
 // --seneca.log.test alias for `error+` level
@@ -26,6 +27,7 @@ var _ = require('lodash')
 // Deprecated logging arguments:
 // --seneca.log=plugin:foo bar // space works as val separator
 // --seneca.log=level:info,type:plugin,handler:print
+
 var initialEnv = process.argv
 describe('seneca --seneca.log arguments tests', function () {
   after(function (done) {
