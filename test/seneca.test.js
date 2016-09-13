@@ -1299,4 +1299,65 @@ describe('seneca', function () {
       done()
     })
   })
+
+
+  // Confirms fix for https://github.com/senecajs/seneca/issues/375
+  it('catchall-pattern', function (done) {
+    var seneca = Seneca({ log: 'test' }).error(done)
+
+    seneca
+      .add('', function (msg, done) { done(null, {r: 1}) })
+      .add('a:1', function (msg, done) { done(null, {x: 1}) })
+      .add('b:1,c:1', function (msg, done) { done(null, {z: 1}) })
+
+    // Execute following actions sequentially, so that
+    // .ready(done) will wait for them to complete
+      .gate()
+
+      .act('k:1', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .act('a:1', function (ignored, out) {
+        expect(out.x).to.equal(1)
+      })
+
+      .act('a:2', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+    // Hits the catchall, even though b:1 is a partial pattern
+      .act('b:1', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .act('b:2', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .act('c:1', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .act('c:2', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .act('b:1,c:1', function (ignored, out) {
+        expect(out.z).to.equal(1)
+      })
+
+      .act('b:2,c:1', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+    // Hits the catchall, even though b:1 is a partial pattern
+      .act('b:1,c:2', function (ignored, out) {
+        expect(out.r).to.equal(1)
+      })
+
+      .ungate()
+
+      .ready(done)
+  })
 })

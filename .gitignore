@@ -13,5 +13,6 @@ out
 tmp
 test/db
 node_modules
+node_modules-*
 docs/annotated
 docs/coverage.html

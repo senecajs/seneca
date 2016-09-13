@@ -85,7 +85,7 @@
     "minimist": "1.2.0",
     "nid": "0.3.2",
     "norma": "0.3.0",
-    "patrun": "0.5.0",
+    "patrun": "0.5.1",
     "rolling-stats": "0.1.1",
     "semver": "5.3.0",
     "seneca-transport": "2.1.0",
