@@ -67,15 +67,14 @@ describe('error', function () {
 
     // ~~ CASE: callback; no-default; err-result; err-logged
     si.act('a:1', function (err, out) {
+      console.log(err, out)
       assert.equal(out, null)
       assert.equal('act_not_found', err.code)
-      // assert.equal('act_not_found', ctxt.errlog[8])
 
       // ~~ CASE: callback; bad-default; err-result; err-logged
       si.act('a:1,default$:"foo"', function (err, out) {
         assert.equal(out, null)
         assert.equal('act_default_bad', err.code)
-        // assert.equal('act_default_bad', ctxt.errlog[8])
 
         // ~~ CASE: fragile; throws; err-logged
         si.options({debug: {fragile: true}})

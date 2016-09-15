@@ -22,6 +22,7 @@ var Stats = require('rolling-stats')
 // Internal modules.
 var Actions = require('./lib/actions')
 var Common = require('./lib/common')
+var Ward = require('./lib/ward')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
 var Optioner = require('./lib/optioner')
@@ -29,6 +30,7 @@ var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
 var Transport = require('./lib/transport')
+
 
 // Shortcuts
 var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
@@ -408,6 +410,11 @@ function make_seneca (initial_options) {
 
   private$.action_modifiers = []
   private$.ready_list = []
+
+
+  private$.inward = Ward({name: 'inward'})
+  private$.inward.add(Actions.inward.act_default)
+  private$.inward.add(Actions.inward.act_not_found)
 
 
   function api_depends () {
@@ -859,7 +866,7 @@ function make_seneca (initial_options) {
     var actid = (id_tx[0] || instance.idgen()) + '/' + tx
     var actstart = Date.now()
 
-    args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
+    // args.default$ = args.default$ || (!so.strict.find ? {} : args.default$)
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
     actdone = actdone || _.noop
 
@@ -871,6 +878,33 @@ function make_seneca (initial_options) {
 
     var execute_action = function execute_action (act_instance, action_done) {
       actmeta = actmeta || act_instance.find(args, {catchall: so.internal.catchall})
+
+      var wardctxt = {
+        seneca: act_instance,
+        actmeta: actmeta,
+        options: act_instance.options(),
+
+        // TODO: should these be needed?
+        __actlog: actlog,
+        __errlog: errlog,
+        __make_error: internals.error,
+        __prior_ctxt: prior_ctxt,
+        __callargs: callargs,
+        __origargs: origargs
+      }
+      var msg = args // _.clone(origmsg)
+      var wardres = private$.inward.process(wardctxt, msg)
+      // console.log('WARD', actmeta && actmeta.pattern, wardres)
+
+      if (wardres) {
+        if ('error' === wardres.kind) {
+          return action_done.call(act_instance, wardres.error)
+        }
+        else if ('result' === wardres.kind) {
+          return action_done.call(act_instance, null, wardres.result)
+        }
+      }
+
 
       if (!executable_action(prior_ctxt, args, callargs, origargs,
                              actmeta, act_instance, action_done)) {
@@ -1130,27 +1164,11 @@ function make_seneca (initial_options) {
       }
     }
 
+    /*
     // action pattern not found
     else {
-      if (_.isPlainObject(args.default$) || _.isArray(args.default$)) {
-        act_instance.log.debug(actlog(
-          actmeta, prior_ctxt, callargs, origargs,
-          {
-            kind: 'act',
-            case: 'DEFAULT'
-          }))
-
-        action_done.call(act_instance, null, args.default$)
-        return false
-      }
-
       var errcode = 'act_not_found'
       var errinfo = { args: Util.inspect(Common.clean(args)).replace(/\n/g, '') }
-
-      if (!_.isUndefined(args.default$)) {
-        errcode = 'act_default_bad'
-        errinfo.xdefault = Util.inspect(args.default$)
-      }
 
       err = internals.error(errcode, errinfo)
 
@@ -1176,6 +1194,7 @@ function make_seneca (initial_options) {
       action_done.call(act_instance, err)
       return false
     }
+     */
 
     return true
   }
@@ -1707,6 +1726,7 @@ function make_seneca (initial_options) {
 
   return root
 }
+
 
 // Declarations
 
