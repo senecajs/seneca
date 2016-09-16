@@ -17,12 +17,12 @@ var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
 var Stats = require('rolling-stats')
+var Ordu = require('ordu')
 
 
 // Internal modules.
 var Actions = require('./lib/actions')
 var Common = require('./lib/common')
-var Ward = require('./lib/ward')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
 var Optioner = require('./lib/optioner')
@@ -412,7 +412,7 @@ function make_seneca (initial_options) {
   private$.ready_list = []
 
 
-  private$.inward = Ward({name: 'inward'})
+  private$.inward = Ordu({name: 'inward'})
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
 
@@ -879,7 +879,7 @@ function make_seneca (initial_options) {
     var execute_action = function execute_action (act_instance, action_done) {
       actmeta = actmeta || act_instance.find(args, {catchall: so.internal.catchall})
 
-      var wardctxt = {
+      var inwardctxt = {
         seneca: act_instance,
         actmeta: actmeta,
         options: act_instance.options(),
@@ -893,15 +893,15 @@ function make_seneca (initial_options) {
         __origargs: origargs
       }
       var msg = args // _.clone(origmsg)
-      var wardres = private$.inward.process(wardctxt, msg)
-      // console.log('WARD', actmeta && actmeta.pattern, wardres)
+      var inwardres = private$.inward.process(inwardctxt, msg)
+      // console.log('WARD', actmeta && actmeta.pattern, inwardres)
 
-      if (wardres) {
-        if ('error' === wardres.kind) {
-          return action_done.call(act_instance, wardres.error)
+      if (inwardres) {
+        if ('error' === inwardres.kind) {
+          return action_done.call(act_instance, inwardres.error)
         }
-        else if ('result' === wardres.kind) {
-          return action_done.call(act_instance, null, wardres.result)
+        else if ('result' === inwardres.kind) {
+          return action_done.call(act_instance, null, inwardres.result)
         }
       }
 
