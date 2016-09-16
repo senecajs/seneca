@@ -1,3 +1,15 @@
+## 3.1 2016-09-16
+
+* Correct issue with log handlers not working via command line
+* Extracted out log handling into seneca-log-filters for ease of reuse in custom loggers
+* Replaced the default log handler's filter logic with seneca-log-filters
+* Bumped patrun to correct incorrect matches with partial patterns due to missing catchall
+* Added error handling example in docs/examples/error-handling.js.
+* Changed boot log message from 'hello' to 'seneca-started'.
+* Updated salestax examples to work correctly.
+* Removed old legacy parsing handlers as they caused crashes
+* Added testable transport links
+
 ## 3.0: 2016-08-26
 
 * Refactored 'old' logging into it's own external plugin; seneca-legacy-logger.
