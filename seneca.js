@@ -905,12 +905,6 @@ function make_seneca (initial_options) {
         }
       }
 
-
-      if (!executable_action(prior_ctxt, args, callargs, origargs,
-                             actmeta, act_instance, action_done)) {
-        return
-      }
-
       validate_action_message(args, actmeta, function (err) {
         if (err) {
           return action_done.call(act_instance, err)
@@ -1137,67 +1131,6 @@ function make_seneca (initial_options) {
     execute_action_instance.private$.ge.add(execspec)
   }
 
-  function executable_action (
-    prior_ctxt,
-    args,
-    callargs,
-    origargs,
-    actmeta,
-    act_instance,
-    action_done
-  ) {
-    var err
-
-    if (actmeta) {
-      if (_.isArray(args.history$) && 0 < args.history$.length) {
-        var repeat_count = _.filter(args.history$, _.matches({action: actmeta.id})).length
-
-        if (so.strict.maxloop < repeat_count) {
-          err = internals.error('act_loop', {
-            pattern: actmeta.pattern,
-            actmeta: actmeta,
-            history: args.history$
-          })
-          action_done.call(act_instance, err)
-          return false
-        }
-      }
-    }
-
-    /*
-    // action pattern not found
-    else {
-      var errcode = 'act_not_found'
-      var errinfo = { args: Util.inspect(Common.clean(args)).replace(/\n/g, '') }
-
-      err = internals.error(errcode, errinfo)
-
-      // TODO: wrong approach - should always call action_done to complete
-      // error would then include a fatal flag
-      if (args.fatal$) {
-        act_instance.die(err)
-        return false
-      }
-
-      if (so.trace.unknown) {
-        act_instance.log.warn(
-          errlog(
-            err, errlog(
-              actmeta, prior_ctxt, callargs, origargs,
-              {
-                // kind is act as this log entry relates to an action
-                kind: 'act',
-                case: 'UNKNOWN'
-              })))
-      }
-
-      action_done.call(act_instance, err)
-      return false
-    }
-     */
-
-    return true
-  }
 
   function act_error (instance, err, actmeta, result, cb,
     duration, callargs, origargs, prior_ctxt, act_callpoint) {
