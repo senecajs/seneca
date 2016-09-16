@@ -67,7 +67,6 @@ describe('error', function () {
 
     // ~~ CASE: callback; no-default; err-result; err-logged
     si.act('a:1', function (err, out) {
-      console.log(err, out)
       assert.equal(out, null)
       assert.equal('act_not_found', err.code)
 

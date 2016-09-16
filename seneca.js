@@ -415,6 +415,7 @@ function make_seneca (initial_options) {
   private$.inward = Ordu({name: 'inward'})
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
+  private$.inward.add(Actions.inward.validate_msg)
 
 
   function api_depends () {
@@ -905,78 +906,72 @@ function make_seneca (initial_options) {
         }
       }
 
-      validate_action_message(args, actmeta, function (err) {
-        if (err) {
-          return action_done.call(act_instance, err)
-        }
+      actstats = act_stats_call(actmeta.pattern)
 
-        actstats = act_stats_call(actmeta.pattern)
+      // build callargs
+      // remove actid so that user manipulation of args for subsequent use does
+      // not cause inadvertent hit on existing action
+      delete callargs.id$
+      delete callargs.actid$ // legacy alias
 
-        // build callargs
-        // remove actid so that user manipulation of args for subsequent use does
-        // not cause inadvertent hit on existing action
-        delete callargs.id$
-        delete callargs.actid$ // legacy alias
+      callargs.meta$ = {
+        id: actid,
+        tx: tx,
+        start: actstart,
+        pattern: actmeta.pattern,
+        action: actmeta.id,
+        entry: prior_ctxt.entry,
+        chain: prior_ctxt.chain,
+        sync: is_sync,
+        plugin_name: actmeta.plugin_name,
+        plugin_tag: actmeta.plugin_tag
+      }
 
-        callargs.meta$ = {
-          id: actid,
-          tx: tx,
-          start: actstart,
+      if (actmeta.deprecate) {
+        instance.log.warn({
+          kind: 'act',
+          case: 'DEPRECATED',
           pattern: actmeta.pattern,
-          action: actmeta.id,
-          entry: prior_ctxt.entry,
-          chain: prior_ctxt.chain,
-          sync: is_sync,
-          plugin_name: actmeta.plugin_name,
-          plugin_tag: actmeta.plugin_tag
-        }
+          notice: actmeta.deprecate,
+          callpoint: act_callpoint})
+      }
 
-        if (actmeta.deprecate) {
-          instance.log.warn({
-            kind: 'act',
-            case: 'DEPRECATED',
-            pattern: actmeta.pattern,
-            notice: actmeta.deprecate,
-            callpoint: act_callpoint})
-        }
+      var delegate =
+            act_make_delegate(act_instance, tx, callargs, actmeta, prior_ctxt)
 
-        var delegate =
-              act_make_delegate(act_instance, tx, callargs, actmeta, prior_ctxt)
+      action_done = action_done.bind(delegate)
 
-        action_done = action_done.bind(delegate)
+      callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
 
-        callargs = _.extend({}, callargs, delegate.fixedargs, {tx$: tx})
+      if (!actmeta.sub) {
+        delegate.log.debug(actlog(
+          actmeta, prior_ctxt, callargs, origargs,
+          { kind: 'act', case: 'IN' }))
+      }
 
-        if (!actmeta.sub) {
-          delegate.log.debug(actlog(
-            actmeta, prior_ctxt, callargs, origargs,
-            { kind: 'act', case: 'IN' }))
-        }
+      delegate.emit('act-in', callargs)
 
-        delegate.emit('act-in', callargs)
+      action_done.seneca = delegate
 
-        action_done.seneca = delegate
+      if (root.closed && !callargs.closing$) {
+        return action_done(
+          internals.error('instance-closed',
+                          {args: Common.clean(callargs)}))
+      }
 
-        if (root.closed && !callargs.closing$) {
-          return action_done(
-            internals.error('instance-closed',
-                            {args: Common.clean(callargs)}))
-        }
+      delegate.good = function (out) {
+        action_done(null, out)
+      }
 
-        delegate.good = function (out) {
-          action_done(null, out)
-        }
+      delegate.bad = function (err) {
+        action_done(err)
+      }
 
-        delegate.bad = function (err) {
-          action_done(err)
-        }
+      if (_.isFunction(delegate.on_act_in)) {
+        delegate.on_act_in(actmeta, callargs)
+      }
 
-        if (_.isFunction(delegate.on_act_in)) {
-          delegate.on_act_in(actmeta, callargs)
-        }
-
-        actmeta.func.call(delegate, callargs, action_done)
-      })
+      actmeta.func.call(delegate, callargs, action_done)
     }
 
     var act_done = function act_done (err) {
@@ -1336,37 +1331,6 @@ function make_seneca (initial_options) {
 
     return delegate
   }
-
-
-  // Validate action message contents, if validator function defined.
-  //
-  //    * _msg_     (object)    &rarr;  action arguments
-  //    * _actmeta_  (object)    &rarr;  action meta data
-  //    * _done_     (function)  &rarr;  callback function
-  function validate_action_message () {
-    var args = Norma('msg:o actmeta:o done:f', arguments)
-
-    if (!_.isFunction(args.actmeta.validate)) {
-      return args.done()
-    }
-
-    args.actmeta.validate(args.msg, function (err) {
-      if (!err) {
-        return args.done()
-      }
-
-      return args.done(
-        internals.error(
-          so.legacy.error_codes ? 'act_invalid_args' : 'act_invalid_msg',
-          {
-            pattern: args.actmeta.pattern,
-            message: err.message,
-            msg: Common.clean(args.msg)
-          })
-      )
-    })
-  }
-
 
   function api_fix () {
     var self = this
