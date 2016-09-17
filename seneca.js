@@ -112,7 +112,12 @@ var internals = {
     trace: {
       act: false,
       stack: false,
-      unknown: true
+
+      // Messages that do not match a known pattern
+      unknown: true,
+
+      // Messages that have invalid content
+      invalid: false
     },
 
     // Action statistics settings. See rolling-stats module.
@@ -413,6 +418,7 @@ function make_seneca (initial_options) {
 
 
   private$.inward = Ordu({name: 'inward'})
+  private$.inward.add(Actions.inward.act_cache)
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
   private$.inward.add(Actions.inward.validate_msg)
@@ -871,27 +877,13 @@ function make_seneca (initial_options) {
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
     actdone = actdone || _.noop
 
-
-    // if previously seen message, provide previous result, and don't process again
-    if (apply_actcache(instance, callargs, origargs, prior_ctxt, actdone, act_callpoint)) {
-      return
-    }
-
     var execute_action = function execute_action (act_instance, action_done) {
       actmeta = actmeta || act_instance.find(args, {catchall: so.internal.catchall})
 
       var inwardctxt = {
         seneca: act_instance,
         actmeta: actmeta,
-        options: act_instance.options(),
-
-        // TODO: should these be needed?
-        __actlog: actlog,
-        __errlog: errlog,
-        __make_error: internals.error,
-        __prior_ctxt: prior_ctxt,
-        __callargs: callargs,
-        __origargs: origargs
+        options: act_instance.options()
       }
       var msg = args // _.clone(origmsg)
       var inwardres = private$.inward.process(inwardctxt, msg)
@@ -899,9 +891,24 @@ function make_seneca (initial_options) {
 
       if (inwardres) {
         if ('error' === inwardres.kind) {
-          return action_done.call(act_instance, inwardres.error)
+          var err = inwardres.error ||
+                internals.error(inwardres.code, inwardres.info)
+
+          if (inwardres.log && inwardres.log.level) {
+            act_instance.log[inwardres.log.level](errlog(err, errlog(
+              actmeta || {}, prior_ctxt, callargs, origargs, inwardres.log.data
+            )))
+          }
+
+          return action_done.call(act_instance, err)
         }
         else if ('result' === inwardres.kind) {
+          if (inwardres.log && inwardres.log.level) {
+            act_instance.log[inwardres.log.level](actlog(
+              actmeta || {}, prior_ctxt, callargs, origargs, inwardres.log.data
+            ))
+          }
+
           return action_done.call(act_instance, null, inwardres.result)
         }
       }
@@ -1221,36 +1228,6 @@ function make_seneca (initial_options) {
     if (so.errhandler) {
       so.errhandler.call(instance, err)
     }
-  }
-
-  // Check if actid has already been seen, and if action cache is active,
-  // then provide cached result, if any. Return true in this case.
-  function apply_actcache
-  (instance, callargs, origargs, prior_ctxt, actcb, act_callpoint) {
-    var actid = callargs.id$ || callargs.actid$
-
-    if (actid != null && so.actcache.active) {
-      var actdetails = private$.actcache.get(actid)
-
-      if (actdetails) {
-        var actmeta = actdetails.actmeta || {}
-        private$.stats.act.cache++
-
-        instance.log.debug(actlog(
-          {}, prior_ctxt, callargs, origargs,
-          { kind: 'act', case: 'CACHE' }))
-
-        if (actcb) {
-          setImmediate(function () {
-            actcb.apply(instance, actdetails.result)
-          })
-        }
-
-        return actmeta
-      }
-    }
-
-    return false
   }
 
   // Resolve action stats object, creating if ncessary, and count a call.
