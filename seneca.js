@@ -80,7 +80,10 @@ var internals = {
       short_logs: false,
 
       // Record and log callpoints (calling code locations).
-      callpoint: false
+      callpoint: false,
+
+      // Log deprecation warnings
+      deprecation: true
     },
 
     // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -300,6 +303,7 @@ function make_seneca (initial_options) {
   root.options = api_options // Get and set options.
   root.error = api_error // Set global error handler.
   root.decorate = api_decorate // Decorate seneca object with functions
+  root.inward = api_inward // Add a modifier function for inward messages
 
   // Method aliases.
   root.hasact = root.has
@@ -422,6 +426,7 @@ function make_seneca (initial_options) {
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
   private$.inward.add(Actions.inward.validate_msg)
+  private$.inward.add(Actions.inward.warnings)
 
 
   function api_depends () {
@@ -489,7 +494,7 @@ function make_seneca (initial_options) {
               subfunc.call(self, args, result)
             }
             catch (ex) {
-              // TODO: not really satisfactory
+              // TOO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
               self.log.error(errlog(err, {
                 kind: 'sub',
@@ -857,6 +862,16 @@ function make_seneca (initial_options) {
     return this.fullname
   }
 
+
+  function api_inward (inward) {
+    Assert('function' === typeof inward)
+    Assert(2 === inward.length)
+
+    private$.inward.add(inward)
+    return this
+  }
+
+
   function do_act (instance, actmeta, prior_ctxt, origargs, actdone) {
     var delegate = instance
     var args = _.clone(origargs)
@@ -883,7 +898,8 @@ function make_seneca (initial_options) {
       var inwardctxt = {
         seneca: act_instance,
         actmeta: actmeta,
-        options: act_instance.options()
+        options: act_instance.options(),
+        callpoint: act_callpoint
       }
       var msg = args // _.clone(origmsg)
       var inwardres = private$.inward.process(inwardctxt, msg)
@@ -932,15 +948,6 @@ function make_seneca (initial_options) {
         sync: is_sync,
         plugin_name: actmeta.plugin_name,
         plugin_tag: actmeta.plugin_tag
-      }
-
-      if (actmeta.deprecate) {
-        instance.log.warn({
-          kind: 'act',
-          case: 'DEPRECATED',
-          pattern: actmeta.pattern,
-          notice: actmeta.deprecate,
-          callpoint: act_callpoint})
       }
 
       var delegate =
