@@ -82,6 +82,14 @@ describe('seneca --seneca.log arguments tests', function () {
 
     done()
   })
+
+  it('incorrect arg --seneca.log.all:', function (done) {
+    process.argv = ['', '', '--seneca.log.all']
+    var si = Seneca()
+    expect(_.isMatch(si.export('options').log, {})).to.be.true()
+
+    done()
+  })
 })
 
 describe('seneca --seneca.log aliases tests', function () {
