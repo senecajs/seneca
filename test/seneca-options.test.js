@@ -78,7 +78,24 @@ describe('seneca --seneca.log arguments tests', function () {
   it('incorrect arg --seneca.log=level:', function (done) {
     process.argv = ['', '', '--seneca.log=level:']
     var si = Seneca()
-    expect(_.isMatch(si.export('options').log, {})).to.be.true()
+    expect(_.isObject(si.export('options').log)).to.be.true()
+    expect(si.export('options').log.level).to.not.exist()
+
+    done()
+  })
+
+  it('incorrect arg --seneca.log.level.abc', function (done) {
+    process.argv = ['', '', '--seneca.log.level.abc']
+    var si = Seneca()
+    expect(_.isMatch(si.export('options').log, { level: 'abc' })).to.be.true()
+
+    done()
+  })
+
+  it('incorrect arg --seneca.log.abc', function (done) {
+    process.argv = ['', '', '--seneca.log.abc']
+    var si = Seneca()
+    expect(_.isMatch(si.export('options').log, { level: 'abc' })).to.be.true()
 
     done()
   })
