@@ -8,6 +8,7 @@ require('../')({log: 'silent'})
   .ready(function () {
     var start = Date.now()
     var count = 0
+
     for (var i = 0; i < SIZE; ++i) {
       this.act('a:1', {x: i}, function (ignore, out) {
         ++count
