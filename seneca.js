@@ -32,7 +32,6 @@ var Transport = require('./lib/transport')
 
 
 // Shortcuts
-var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var errlog = Common.make_standard_err_log_entry
 var actlog = Common.make_standard_act_log_entry
 
@@ -231,8 +230,12 @@ module.exports.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
 module.exports.use = function top_use () {
+  var argsarr = new Array(arguments.length)
+  for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
   var instance = module.exports()
-  return instance.use.apply(instance, arrayify(arguments))
+
+  return instance.use.apply(instance, argsarr)
 }
 
 module.exports.util = seneca_util
@@ -703,8 +706,11 @@ function make_seneca (initial_options) {
 
   // TODO: deprecate
   root.findpins = root.pinact = function findpins () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var pins = []
-    var patterns = _.flatten(arrayify(arguments))
+    var patterns = _.flatten(argsarr)
 
     _.each(patterns, function (pattern) {
       pattern = _.isString(pattern) ? Jsonic(pattern) : pattern
@@ -731,8 +737,11 @@ function make_seneca (initial_options) {
   // Perform an action. The properties of the first argument are matched against
   // known patterns, and the most specific one wins.
   function api_act () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var self = this
-    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var spec = Common.parsePattern(self, argsarr, 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
     args = _.extend(args, self.fixedargs)
@@ -1016,6 +1025,9 @@ function make_seneca (initial_options) {
     }
 
     function act_done (err) {
+      var argsarr = new Array(arguments.length)
+      for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
       var delegate = this || instance
 
       try {
@@ -1028,7 +1040,7 @@ function make_seneca (initial_options) {
           private$.timestats.point(actend - actstart, actmeta.pattern)
         }
 
-        var result = arrayify(arguments)
+        var result = argsarr
         var call_cb = true
 
         var resdata = result[1]
@@ -1338,8 +1350,10 @@ function make_seneca (initial_options) {
   // DEPRECATED
   // for use with async
   root.next_act = function next_act () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var si = this || root
-    var args = arrayify(arguments)
 
     si.log.warn({
       kind: 'notice',
@@ -1349,8 +1363,8 @@ function make_seneca (initial_options) {
 
 
     return function (next) {
-      args.push(next)
-      si.act.apply(si, args)
+      argsarr.push(next)
+      si.act.apply(si, argsarr)
     }
   }
 
@@ -1522,10 +1536,13 @@ function make_log (instance, modifier) {
 
 function prepare_log (instance, log) {
   return function prepare_log_data () {
-    var a0 = arguments[0]
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
+    var a0 = argsarr[0]
     var data = _.isArray(a0) ? a0
           : _.isObject(a0) ? a0
-          : arrayify(arguments)
+          : argsarr
     log.call(instance, data)
   }
 }
@@ -1579,15 +1596,6 @@ function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
     data.plugin_tag = data.plugin_tag || actmeta.plugin_tag
     data.pattern = data.pattern || actmeta.pattern
   })
-
-/*
-  delegate.log = _.noop
-  delegate.log.debug = _.noop
-  delegate.log.info = _.noop
-  delegate.log.warn = _.noop
-  delegate.log.error = _.noop
-  delegate.log.fatal = _.noop
-*/
 
   if (actmeta.priormeta) {
     delegate.prior = function (prior_args, prior_cb) {
