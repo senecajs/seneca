@@ -11,7 +11,6 @@ var _ = require('lodash')
 var Eraro = require('eraro')
 var GateExecutor = require('gate-executor')
 var Jsonic = require('jsonic')
-var Lrucache = require('lru-cache')
 var Makeuse = require('use-plugin')
 var Nid = require('nid')
 var Norma = require('norma')
@@ -177,7 +176,7 @@ var seneca_util = {
   pattern: Common.pattern,
   print: Common.print,
   pincanon: Common.pincanon,
-  router: function () { return Patrun() },
+  router: function router () { return Patrun() },
   argprops: Common.argprops
 }
 
@@ -231,7 +230,7 @@ module.exports.Seneca = Seneca
 module.exports.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
-module.exports.use = function () {
+module.exports.use = function top_use () {
   var instance = module.exports()
   return instance.use.apply(instance, arrayify(arguments))
 }
@@ -272,7 +271,7 @@ function make_seneca (initial_options) {
 
   // Create internal tools.
   var actnid = Nid({length: so.idlen})
-  var refnid = function () { return '(' + actnid() + ')' }
+  var refnid = function refnid () { return '(' + actnid() + ')' }
 
   // These need to come from options as required during construction.
   so.internal.actrouter = so.internal.actrouter || Patrun({ gex: true })
@@ -303,7 +302,8 @@ function make_seneca (initial_options) {
   root.options = api_options // Get and set options.
   root.error = api_error // Set global error handler.
   root.decorate = api_decorate // Decorate seneca object with functions
-  root.inward = api_inward // Add a modifier function for inward messages
+  root.inward = api_inward // Add a modifier function for messages inward
+  root.outward = api_outward // Add a modifier function for responses outward
 
   // Method aliases.
   root.hasact = root.has
@@ -380,7 +380,7 @@ function make_seneca (initial_options) {
   // setup status log
   if (so.status.interval > 0 && so.status.running) {
     private$.stats = private$.stats || {}
-    setInterval(function () {
+    setInterval(function status () {
       root.log.info({
         kind: 'status',
         alive: (Date.now() - private$.stats.start),
@@ -393,7 +393,7 @@ function make_seneca (initial_options) {
     private$.timestats = new Stats.NamedStats(so.stats.size, so.stats.interval)
 
     if (so.stats.running) {
-      setInterval(function () {
+      setInterval(function stats () {
         private$.timestats.calculate()
       }, so.stats.interval)
     }
@@ -408,10 +408,6 @@ function make_seneca (initial_options) {
     builtin: ''
   })
 
-  private$.actcache = (so.actcache.active
-    ? Lrucache({ max: so.actcache.size })
-    : { set: _.noop })
-
   private$.actrouter = so.internal.actrouter
   private$.subrouter = so.internal.subrouter
 
@@ -425,9 +421,15 @@ function make_seneca (initial_options) {
   private$.inward.add(Actions.inward.act_cache)
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
+  private$.inward.add(Actions.inward.act_stats)
   private$.inward.add(Actions.inward.validate_msg)
   private$.inward.add(Actions.inward.warnings)
   private$.inward.add(Actions.inward.msg_meta)
+
+  private$.outward = Ordu({name: 'outward'})
+  private$.outward.add(Actions.outward.act_stats)
+  private$.outward.add(Actions.outward.act_cache)
+  private$.outward.add(Actions.outward.res_object)
 
 
   function api_depends () {
@@ -478,7 +480,7 @@ function make_seneca (initial_options) {
     }
 
     if (!private$.handle_sub) {
-      private$.handle_sub = function (args, result) {
+      private$.handle_sub = function handle_sub (args, result) {
         args.meta$ = args.meta$ || {}
 
         if (args.meta$.entry !== true) {
@@ -490,7 +492,7 @@ function make_seneca (initial_options) {
         if (subfuncs) {
           args.meta$.sub = subfuncs.pattern
 
-          _.each(subfuncs, function (subfunc) {
+          _.each(subfuncs, function subfunc (subfunc) {
             try {
               subfunc.call(self, args, result)
             }
@@ -515,7 +517,7 @@ function make_seneca (initial_options) {
     }
 
     function annotate (prop, handle_sub) {
-      return function (args, result) {
+      return function annotation (args, result) {
         args = _.clone(args)
         result = _.clone(result)
         args[prop] = true
@@ -556,7 +558,7 @@ function make_seneca (initial_options) {
 
     var raw_pattern = args.pattern
 
-    var action = args.action || function (msg, done) {
+    var action = args.action || function action (msg, done) {
       done.call(this, null, msg.default$ || null)
     }
 
@@ -700,7 +702,7 @@ function make_seneca (initial_options) {
 
 
   // TODO: deprecate
-  root.findpins = root.pinact = function () {
+  root.findpins = root.pinact = function findpins () {
     var pins = []
     var patterns = _.flatten(arrayify(arguments))
 
@@ -814,7 +816,7 @@ function make_seneca (initial_options) {
   function api_ready (ready) {
     var self = this
 
-    setImmediate(function () {
+    setImmediate(function register_ready () {
       if (root.private$.ge.isclear()) {
         ready.call(self)
       }
@@ -873,18 +875,25 @@ function make_seneca (initial_options) {
   }
 
 
+  function api_outward (outward) {
+    Assert('function' === typeof outward)
+    Assert(2 === outward.length)
+
+    private$.outward.add(outward)
+    return this
+  }
+
+
   function do_act (instance, actmeta, prior_ctxt, origmsg, actdone) {
     var actstart = Date.now()
     var msg = _.clone(origmsg)
     var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
     var execute_action_instance = instance
-    var actstats
 
     msg.meta$ = msg.meta$ || {}
 
-    resolve_msg_id(msg, instance)
-    var actid = msg.meta$.id
+    var actid = resolve_msg_id(msg, instance)
 
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
     actdone = actdone || _.noop
@@ -897,9 +906,9 @@ function make_seneca (initial_options) {
 
     var execspec = {
       id: actid,
-      fn: function (done) {
+      fn: function act_fn (done) {
         try {
-          execute_action(execute_action_instance, msg, function () {
+          execute_action(execute_action_instance, msg, function act_fn_exec () {
             act_done.apply(this, arguments)
             done()
           })
@@ -909,7 +918,7 @@ function make_seneca (initial_options) {
           done()
         }
       },
-      ontm: function (done) {
+      ontm: function act_tm (done) {
         act_done.call(execute_action_instance, new Error('[TIMEOUT]'))
       }
     }
@@ -921,18 +930,17 @@ function make_seneca (initial_options) {
     execute_action_instance.private$.ge.add(execspec)
 
 
+    var action_ctxt = {}
+
     function execute_action (act_instance, msg, action_done) {
       actmeta = actmeta || act_instance.find(msg, {catchall: so.internal.catchall})
 
-      var inwardctxt = {
-        seneca: act_instance,
-        actmeta: actmeta,
-        options: act_instance.options(),
-        callpoint: act_callpoint
-      }
+      action_ctxt.seneca = act_instance
+      action_ctxt.actmeta = actmeta
+      action_ctxt.options = act_instance.options()
+      action_ctxt.callpoint = act_callpoint
 
-      var inwardres = private$.inward.process(inwardctxt, msg)
-      // console.log('WARD', actmeta && actmeta.pattern, inwardres)
+      var inwardres = private$.inward.process(action_ctxt, {msg: msg})
 
       if (inwardres) {
         if ('error' === inwardres.kind) {
@@ -958,8 +966,6 @@ function make_seneca (initial_options) {
         }
       }
 
-      actstats = act_stats_call(actmeta.pattern)
-
       // build msg
       // remove actid so that user manipulation of msg for subsequent use does
       // not cause inadvertent hit on existing action
@@ -972,7 +978,7 @@ function make_seneca (initial_options) {
       msg.meta$.sync = is_sync
 
       var delegate =
-            act_make_delegate(act_instance, msg, actmeta, prior_ctxt)
+            act_make_delegate(act_instance, msg, actmeta, prior_ctxt, do_act)
 
       action_done = action_done.bind(delegate)
 
@@ -994,11 +1000,11 @@ function make_seneca (initial_options) {
                           {args: Common.clean(msg)}))
       }
 
-      delegate.good = function (out) {
+      delegate.good = function good (out) {
         action_done(null, out)
       }
 
-      delegate.bad = function (err) {
+      delegate.bad = function bad (err) {
         action_done(err)
       }
 
@@ -1027,43 +1033,20 @@ function make_seneca (initial_options) {
 
         var resdata = result[1]
 
-        if (err == null &&
-          resdata != null &&
-          !(_.isPlainObject(resdata) ||
-          _.isArray(resdata) ||
-          !!resdata.entity$ ||
-          !!resdata.force$
-         ) &&
-          so.strict.result) {
-          // allow legacy patterns
-          if (!(msg.cmd === 'generate_id' ||
-            msg.note === true ||
-            msg.cmd === 'native' ||
-            msg.cmd === 'quickcode'
-           )) {
-            err = internals.error(
-              'result_not_objarr', {
-                pattern: actmeta.pattern,
-                args: Util.inspect(Common.clean(msg)).replace(/\n/g, ''),
-                result: resdata
-              })
+        var outward = private$.outward.process(action_ctxt, {
+          msg: msg,
+          res: resdata,
+          err: err
+        })
+
+        if (outward) {
+          if ('error' === outward.kind) {
+            err = outward.error ||
+              internals.error(outward.code, outward.info)
           }
         }
 
-        private$.actcache.set(actid, {
-          result: result,
-          actmeta: actmeta,
-          when: Date.now()
-        })
-
         if (err) {
-          // TODO: is act_not_found an error for purposes of stats? probably not
-          private$.stats.act.fails++
-
-          if (actstats) {
-            actstats.fails++
-          }
-
           var out = act_error(instance, err, actmeta, result, actdone,
             actend - actstart, msg, origmsg, prior_ctxt, act_callpoint)
 
@@ -1092,11 +1075,6 @@ function make_seneca (initial_options) {
 
           if (_.isFunction(delegate.on_act_out)) {
             delegate.on_act_out(actmeta, result[1])
-          }
-
-          if (actstats) {
-            private$.stats.act.done++
-            actstats.done++
           }
         }
 
@@ -1145,6 +1123,8 @@ function make_seneca (initial_options) {
 
     msg.meta$.id = actid
     msg.meta$.tx = tx
+
+    return actid
   }
 
 
@@ -1244,84 +1224,6 @@ function make_seneca (initial_options) {
     }
   }
 
-  // Resolve action stats object, creating if ncessary, and count a call.
-  //
-  //    * _pattern_     (string)    &rarr;  action pattern
-  function act_stats_call (pattern) {
-    var actstats = (private$.stats.actmap[pattern] =
-      private$.stats.actmap[pattern] || {})
-
-    private$.stats.act.calls++
-    actstats.calls++
-
-    return actstats
-  }
-
-  function act_make_delegate (instance, msg, actmeta, prior_ctxt) {
-    var delegate_args = {
-      plugin$: {
-        name: actmeta.plugin_name,
-        tag: actmeta.plugin_tag
-      }
-    }
-
-    var delegate = instance.delegate(delegate_args)
-
-    // special overrides
-    if (msg.meta$.tx) { delegate.fixedargs.tx$ = msg.meta$.tx }
-
-    // automate actid log insertion
-    delegate.log = make_log(delegate, function act_delegate_log_modifier (data) {
-      data.actid = msg.meta$.id
-
-      data.plugin_name = data.plugin_name || actmeta.plugin_name
-      data.plugin_tag = data.plugin_tag || actmeta.plugin_tag
-      data.pattern = data.pattern || actmeta.pattern
-    })
-
-    if (actmeta.priormeta) {
-      delegate.prior = function (prior_args, prior_cb) {
-        prior_args = _.clone(prior_args)
-
-        var sub_prior_ctxt = _.clone(prior_ctxt)
-        sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
-        sub_prior_ctxt.chain.push(actmeta.id)
-        sub_prior_ctxt.entry = false
-        sub_prior_ctxt.depth++
-
-        delete prior_args.id$
-        delete prior_args.gate$
-        delete prior_args.actid$
-        delete prior_args.meta$
-        delete prior_args.transport$
-
-        if (msg.default$) {
-          prior_args.default$ = msg.default$
-        }
-
-        prior_args.tx$ = msg.meta$.tx
-
-        do_act(delegate, actmeta.priormeta, sub_prior_ctxt, prior_args, prior_cb)
-      }
-
-      delegate.parent = function (prior_args, prior_cb) {
-        delegate.log.warn({
-          kind: 'notice',
-          case: 'DEPRECATION',
-          notice: Errors.deprecation.seneca_parent
-        })
-        delegate.prior(prior_args, prior_cb)
-      }
-    }
-    else {
-      delegate.prior = function (msg, done) {
-        var out = msg.default$ ? msg.default$ : null
-        return done.call(delegate, null, out)
-      }
-    }
-
-    return delegate
-  }
 
   function api_fix () {
     var self = this
@@ -1330,7 +1232,7 @@ function make_seneca (initial_options) {
 
     var fix = self.delegate(defargs.pattern)
 
-    fix.add = function () {
+    fix.add = function fix_add () {
       var args = Common.parsePattern(fix, arguments, 'rest:.*', defargs.pattern)
       var addargs = [args.pattern].concat(args.rest)
       return self.add.apply(fix, addargs)
@@ -1338,6 +1240,7 @@ function make_seneca (initial_options) {
 
     return fix
   }
+
 
   function api_delegate (fixedargs) {
     var self = this
@@ -1349,7 +1252,7 @@ function make_seneca (initial_options) {
     delegate.did = refnid()
 
     var strdesc
-    delegate.toString = function () {
+    delegate.toString = function toString () {
       if (strdesc) return strdesc
       var vfa = {}
       _.each(fixedargs, function (v, k) {
@@ -1367,7 +1270,7 @@ function make_seneca (initial_options) {
       ? _.extend({}, fixedargs, self.fixedargs)
       : _.extend({}, self.fixedargs, fixedargs))
 
-    delegate.delegate = function (further_fixedargs) {
+    delegate.delegate = function delegate (further_fixedargs) {
       var args = _.extend({}, delegate.fixedargs, further_fixedargs || {})
       return self.delegate.call(this, args)
     }
@@ -1376,11 +1279,11 @@ function make_seneca (initial_options) {
     // For example, data for individual web requests.
     delegate.context = {}
 
-    delegate.client = function () {
+    delegate.client = function client () {
       return self.client.apply(this, arguments)
     }
 
-    delegate.listen = function () {
+    delegate.listen = function listen () {
       return self.listen.apply(this, arguments)
     }
 
@@ -1434,7 +1337,7 @@ function make_seneca (initial_options) {
 
   // DEPRECATED
   // for use with async
-  root.next_act = function () {
+  root.next_act = function next_act () {
     var si = this || root
     var args = arrayify(arguments)
 
@@ -1451,12 +1354,12 @@ function make_seneca (initial_options) {
     }
   }
 
-  root.gate = function () {
+  root.gate = function gate () {
     return this.delegate({gate$: true})
   }
 
 
-  root.ungate = function () {
+  root.ungate = function ungate () {
     this.fixedargs.gate$ = false
     return this
   }
@@ -1540,57 +1443,6 @@ function make_seneca (initial_options) {
     }
   })
 
-
-  function make_log (instance, modifier) {
-    var log = instance.log || function (data) {
-      private$.logger(this, data)
-    }
-
-    log = prepare_log(instance, make_modified_log(log, modifier))
-
-    make_log_levels(instance, log)
-
-    return log
-  }
-
-  function make_log_levels (instance, log) {
-    function log_level (level) {
-      return function (data) {
-        data.level = level
-      }
-    }
-
-    log.debug = prepare_log(instance, make_modified_log(log, log_level('debug')))
-    log.info = prepare_log(instance, make_modified_log(log, log_level('info')))
-    log.warn = prepare_log(instance, make_modified_log(log, log_level('warn')))
-    log.error = prepare_log(instance, make_modified_log(log, log_level('error')))
-    log.fatal = prepare_log(instance, make_modified_log(log, log_level('fatal')))
-  }
-
-  function prepare_log (instance, log) {
-    return function prepare_log_data () {
-      var a0 = arguments[0]
-      var data = _.isArray(a0) ? a0
-            : _.isObject(a0) ? a0
-            : arrayify(arguments)
-
-      log.call(instance, data)
-    }
-  }
-
-  function make_modified_log (log, modifier) {
-    return function log_modifier (data) {
-      modifier(data)
-      log.call(this, data)
-    }
-  }
-
-  function default_log_modifier (data) {
-    data.level = null == data.level ? 'debug' : data.level
-    data.seneca = null == data.seneca ? root.id : data.seneca
-    data.when = null == data.when ? Date.now() : data.when
-  }
-
   function load_logger (instance, log_plugin) {
     log_plugin = log_plugin || require('./lib/logging')
 
@@ -1616,8 +1468,6 @@ function make_seneca (initial_options) {
 }
 
 
-// Declarations
-
 // Private member variables of Seneca object.
 function make_private () {
   return {
@@ -1634,6 +1484,7 @@ function make_private () {
   }
 }
 
+
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint (active) {
   if (active) {
@@ -1645,4 +1496,139 @@ function make_callpoint (active) {
   }
 
   return _.noop
+}
+
+
+function make_log (instance, modifier) {
+/*
+  var log = _.noop
+  log.debug = _.noop
+  log.info = _.noop
+  log.warn = _.noop
+  log.error = _.noop
+  log.fatal = _.noop
+  return log
+*/
+
+  var log = instance.log || function log (data) {
+    instance.private$.logger(this, data)
+  }
+
+  log = prepare_log(instance, make_modified_log(log, modifier))
+  make_log_levels(instance, log)
+
+  return log
+}
+
+function prepare_log (instance, log) {
+  return function prepare_log_data () {
+    var a0 = arguments[0]
+    var data = _.isArray(a0) ? a0
+          : _.isObject(a0) ? a0
+          : arrayify(arguments)
+    log.call(instance, data)
+  }
+}
+
+function make_log_levels (instance, log) {
+  function log_level (level) {
+    return function (data) {
+      data.level = level
+    }
+  }
+  log.debug = prepare_log(instance, make_modified_log(log, log_level('debug')))
+  log.info = prepare_log(instance, make_modified_log(log, log_level('info')))
+  log.warn = prepare_log(instance, make_modified_log(log, log_level('warn')))
+  log.error = prepare_log(instance, make_modified_log(log, log_level('error')))
+  log.fatal = prepare_log(instance, make_modified_log(log, log_level('fatal')))
+}
+
+function make_modified_log (log, modifier) {
+  return function log_modifier (data) {
+    modifier(data)
+    log.call(this, data)
+  }
+}
+
+function default_log_modifier (data) {
+  data.level = null == data.level ? 'debug' : data.level
+  data.seneca = null == data.seneca ? root.id : data.seneca
+  data.when = null == data.when ? Date.now() : data.when
+}
+
+
+function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
+  var delegate_args = {
+    plugin$: {
+      name: actmeta.plugin_name,
+      tag: actmeta.plugin_tag
+    }
+  }
+
+  var delegate = instance.delegate(delegate_args)
+
+  // special overrides
+  if (msg.meta$.tx) { delegate.fixedargs.tx$ = msg.meta$.tx }
+
+  // automate actid log insertion
+
+  delegate.log = make_log(delegate, function act_delegate_log_modifier (data) {
+    data.actid = msg.meta$.id
+
+    data.plugin_name = data.plugin_name || actmeta.plugin_name
+    data.plugin_tag = data.plugin_tag || actmeta.plugin_tag
+    data.pattern = data.pattern || actmeta.pattern
+  })
+
+/*
+  delegate.log = _.noop
+  delegate.log.debug = _.noop
+  delegate.log.info = _.noop
+  delegate.log.warn = _.noop
+  delegate.log.error = _.noop
+  delegate.log.fatal = _.noop
+*/
+
+  if (actmeta.priormeta) {
+    delegate.prior = function (prior_args, prior_cb) {
+      prior_args = _.clone(prior_args)
+
+      var sub_prior_ctxt = _.clone(prior_ctxt)
+      sub_prior_ctxt.chain = _.clone(prior_ctxt.chain)
+      sub_prior_ctxt.chain.push(actmeta.id)
+      sub_prior_ctxt.entry = false
+      sub_prior_ctxt.depth++
+
+      delete prior_args.id$
+      delete prior_args.gate$
+      delete prior_args.actid$
+      delete prior_args.meta$
+      delete prior_args.transport$
+
+      if (msg.default$) {
+        prior_args.default$ = msg.default$
+      }
+
+      prior_args.tx$ = msg.meta$.tx
+
+      do_act(delegate, actmeta.priormeta, sub_prior_ctxt, prior_args, prior_cb)
+    }
+
+    delegate.parent = function (prior_args, prior_cb) {
+      delegate.log.warn({
+        kind: 'notice',
+        case: 'DEPRECATION',
+        notice: Errors.deprecation.seneca_parent
+      })
+      delegate.prior(prior_args, prior_cb)
+    }
+  }
+  else {
+    delegate.prior = function (msg, done) {
+      var out = msg.default$ ? msg.default$ : null
+      return done.call(delegate, null, out)
+    }
+  }
+
+  return delegate
 }
