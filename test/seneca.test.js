@@ -1360,4 +1360,36 @@ describe('seneca', function () {
 
       .ready(done)
   })
+
+  it('memory', function (done) {
+    var SIZE = 1000
+
+    Seneca({log: 'silent'})
+      .error(done)
+      .add('a:1', function (msg, done) {
+        done(null, {x: msg.x})
+      })
+      .ready(function () {
+        var start = Date.now()
+        var count = 0
+
+        for (var i = 0; i < SIZE; ++i) {
+          this.act('a:1', {x: i}, function (ignore, out) {
+            ++count
+
+            if (SIZE === count) validate(start)
+          })
+        }
+      })
+
+    function validate (start) {
+      var end = Date.now()
+      expect(end - start).below(1000)
+
+      var mem = process.memoryUsage()
+      expect(mem.rss).below(180000000)
+
+      done()
+    }
+  })
 })
