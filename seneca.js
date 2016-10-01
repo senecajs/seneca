@@ -297,7 +297,7 @@ function make_seneca (initial_options) {
 
   // Seneca methods. Official API.
 
-  // # seneca.add
+  // <a name="seneca.add">**seneca.add**</a>
   //
   // Add a message pattern and action.
   //   * `pattern` <small>_string|object_</small> &rarr;
@@ -511,6 +511,8 @@ function make_seneca (initial_options) {
 
 
   private$.inward = Ordu({name: 'inward'})
+  private$.inward.add(Actions.inward.closed)
+  private$.inward.add(Actions.inward.resolve_msg_id)
   private$.inward.add(Actions.inward.act_cache)
   private$.inward.add(Actions.inward.act_default)
   private$.inward.add(Actions.inward.act_not_found)
@@ -518,6 +520,7 @@ function make_seneca (initial_options) {
   private$.inward.add(Actions.inward.validate_msg)
   private$.inward.add(Actions.inward.warnings)
   private$.inward.add(Actions.inward.msg_meta)
+  private$.inward.add(Actions.inward.msg_modify)
 
   private$.outward = Ordu({name: 'outward'})
   private$.outward.add(Actions.outward.act_stats)
@@ -628,23 +631,8 @@ function make_seneca (initial_options) {
     return self
   }
 
-  // ### seneca.add
-  // Add an message pattern and action function.
-  //
-  // `seneca.add(pattern, action)`
-  //    * _pattern_ `o|s` &rarr; pattern definition
-  //    * _action_ `f` &rarr; pattern action function
-  //
-  // `seneca.add(pattern_string, pattern_object, action)`
-  //    * _pattern_string_ `s` &rarr; pattern definition as jsonic string
-  //    * _pattern_object_ `o` &rarr; pattern definition as object
-  //    * _action_ `f` &rarr; pattern action function
-  //
-  // The pattern is defined by the top level properties of the
-  // _pattern_ parameter.  In the case where the pattern is a string,
-  // it is first parsed by
-  // [jsonic](https://github.com/rjrodger/jsonic)
-  //
+
+  // See [`seneca.add`](#seneca.add)
   function api_add () {
     var self = this
     var args = Common.parsePattern(self, arguments, 'action:f? actmeta:o?')
@@ -988,26 +976,23 @@ function make_seneca (initial_options) {
     var msg = _.clone(origmsg)
     var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
-    var execute_action_instance = instance
+    var execute_instance = instance
 
     msg.meta$ = msg.meta$ || {}
-
-    var actid = resolve_msg_id(msg, instance)
 
     prior_ctxt = prior_ctxt || { chain: [], entry: true, depth: 1 }
     actdone = actdone || _.noop
 
     if (msg.gate$) {
-      execute_action_instance = instance.delegate()
-      execute_action_instance.private$.ge =
-        execute_action_instance.private$.ge.gate()
+      execute_instance = instance.delegate()
+      execute_instance.private$.ge =
+        execute_instance.private$.ge.gate()
     }
 
     var execspec = {
-      id: actid,
       fn: function act_fn (done) {
         try {
-          execute_action(execute_action_instance, msg, function act_fn_exec () {
+          execute_action(execute_instance, msg, function act_fn_exec () {
             act_done.apply(this, arguments)
             done()
           })
@@ -1018,7 +1003,7 @@ function make_seneca (initial_options) {
         }
       },
       ontm: function act_tm (done) {
-        act_done.call(execute_action_instance, new Error('[TIMEOUT]'))
+        act_done.call(execute_instance, new Error('[TIMEOUT]'))
       }
     }
 
@@ -1026,19 +1011,13 @@ function make_seneca (initial_options) {
       execspec.tm = msg.timeout$
     }
 
-    execute_action_instance.private$.ge.add(execspec)
+    execute_instance.private$.ge.add(execspec)
 
 
     var action_ctxt = {}
 
     function execute_action (act_instance, msg, action_done) {
       actmeta = actmeta || act_instance.find(msg, {catchall: so.internal.catchall})
-
-      // build msg
-      // remove actid so that user manipulation of msg for subsequent use does
-      // not cause inadvertent hit on existing action
-      delete msg.id$
-      delete msg.actid$ // legacy alias
 
       msg.meta$.start = actstart
       msg.meta$.entry = prior_ctxt.entry
@@ -1053,51 +1032,15 @@ function make_seneca (initial_options) {
       action_ctxt.options = delegate.options()
       action_ctxt.callpoint = act_callpoint
 
-      var inwardres = private$.inward.process(action_ctxt, {msg: msg})
+      var inward = private$.inward.process(action_ctxt, {msg: msg})
 
-      if (inwardres) {
-        if ('error' === inwardres.kind) {
-          var err = inwardres.error ||
-                internals.error(inwardres.code, inwardres.info)
-
-          if (inwardres.log && inwardres.log.level) {
-            act_instance.log[inwardres.log.level](errlog(err, errlog(
-              actmeta || {}, prior_ctxt, msg, origmsg, inwardres.log.data
-            )))
-          }
-
-          return action_done.call(act_instance, err)
-        }
-        else if ('result' === inwardres.kind) {
-          if (inwardres.log && inwardres.log.level) {
-            act_instance.log[inwardres.log.level](actlog(
-              actmeta || {}, prior_ctxt, msg, origmsg, inwardres.log.data
-            ))
-          }
-
-          return action_done.call(act_instance, null, inwardres.result)
-        }
+      if (handle_inward_break(
+        inward, act_instance, action_done, actmeta, prior_ctxt, msg, origmsg)) {
+        return
       }
 
       action_done = action_done.bind(delegate)
-
-      msg = _.extend({}, msg, delegate.fixedargs, {tx$: msg.meta$.tx})
-
-      if (!actmeta.sub) {
-        delegate.log.debug(actlog(
-          actmeta, prior_ctxt, msg, origmsg,
-          { kind: 'act', case: 'IN' }))
-      }
-
-      delegate.emit('act-in', msg)
-
       action_done.seneca = delegate
-
-      if (root.closed && !msg.closing$) {
-        return action_done(
-          internals.error('instance-closed',
-                          {args: Common.clean(msg)}))
-      }
 
       delegate.good = function good (out) {
         action_done(null, out)
@@ -1107,9 +1050,22 @@ function make_seneca (initial_options) {
         action_done(err)
       }
 
+      if (!actmeta.sub) {
+        delegate.log.debug(actlog(
+          actmeta, prior_ctxt, msg, origmsg,
+          { kind: 'act', case: 'IN' }))
+      }
+
+      // remove actid so that user manipulation of msg for subsequent use does
+      // not cause inadvertent hit on existing action
+      delete msg.id$
+      delete msg.actid$ // legacy alias
+
       if (_.isFunction(delegate.on_act_in)) {
         delegate.on_act_in(actmeta, msg)
       }
+
+      delegate.emit('act-in', msg)
 
       actmeta.func.call(delegate, msg, action_done)
     }
@@ -1207,6 +1163,37 @@ function make_seneca (initial_options) {
   }
 
 
+  function handle_inward_break
+  (inward, act_instance, action_done, actmeta, prior_ctxt, msg, origmsg) {
+    if (!inward) return false
+
+    if ('error' === inward.kind) {
+      var err = inward.error ||
+            internals.error(inward.code, inward.info)
+
+      if (inward.log && inward.log.level) {
+        act_instance.log[inward.log.level](errlog(err, errlog(
+          actmeta || {}, prior_ctxt, msg, origmsg, inward.log.data
+        )))
+      }
+
+      action_done.call(act_instance, err)
+      return true
+    }
+    else if ('result' === inward.kind) {
+      if (inward.log && inward.log.level) {
+        act_instance.log[inward.log.level](actlog(
+          actmeta || {}, prior_ctxt, msg, origmsg, inward.log.data
+        ))
+      }
+
+      action_done.call(act_instance, null, inward.result)
+      return true
+    }
+  }
+
+
+/*
   function resolve_msg_id (msg, instance) {
     var id_tx = (msg.id$ ||
                  msg.actid$ ||
@@ -1228,7 +1215,7 @@ function make_seneca (initial_options) {
 
     return actid
   }
-
+*/
 
   function act_error (instance, err, actmeta, result, cb,
     duration, msg, origmsg, prior_ctxt, act_callpoint) {
@@ -1682,6 +1669,7 @@ function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
   })
 
   if (actmeta.priormeta) {
+    // TODO: support Common.parsePattern
     delegate.prior = function (prior_args, prior_cb) {
       prior_args = _.clone(prior_args)
 
@@ -1697,13 +1685,29 @@ function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
       delete prior_args.meta$
       delete prior_args.transport$
 
+      // TODO: what if prior_args has a default$ ?
       if (msg.default$) {
         prior_args.default$ = msg.default$
       }
 
       prior_args.tx$ = msg.meta$.tx
 
-      do_act(delegate, actmeta.priormeta, sub_prior_ctxt, prior_args, prior_cb)
+      var pd = act_make_delegate(delegate, msg, actmeta.priormeta, prior_ctxt, do_act)
+
+      prior_args.meta$ = {}
+
+      prior_args.meta$.start = Date.now()
+      prior_args.meta$.entry = sub_prior_ctxt.entry
+      prior_args.meta$.chain = sub_prior_ctxt.chain
+      prior_args.meta$.sync = msg.meta$.sync
+
+      Actions.inward.msg_meta({
+        actmeta: actmeta.priormeta
+      }, {msg: prior_args})
+
+
+      actmeta.priormeta.func.call(pd, prior_args, prior_cb.bind(pd))
+      // do_act(delegate, actmeta.priormeta, sub_prior_ctxt, prior_args, prior_cb)
     }
 
     delegate.parent = function (prior_args, prior_cb) {
