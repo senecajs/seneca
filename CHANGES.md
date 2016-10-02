@@ -1,4 +1,11 @@
-## 3.1 2016-09-16
+## 3.2.0 2016-09-27
+
+* Added .inward() api method.
+* Added .outward() api method.
+* Made logging safely stringify input.
+* Fixed memory leak / timeout bug in gate-executor.
+
+## 3.1.0 2016-09-16
 
 * Correct issue with log handlers not working via command line
 * Extracted out log handling into seneca-log-filters for ease of reuse in custom loggers
@@ -10,7 +17,7 @@
 * Removed old legacy parsing handlers as they caused crashes
 * Added testable transport links
 
-## 3.0: 2016-08-26
+## 3.0.0 2016-08-26
 
 * Refactored 'old' logging into it's own external plugin; seneca-legacy-logger.
 * Added new adaptor based JSON logging. External loggers can now be used with Seneca.
