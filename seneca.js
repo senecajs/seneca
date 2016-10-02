@@ -1,10 +1,12 @@
 /* Copyright (c) 2010-2016 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-// Node API modules
+
+// Node API modules.
 var Assert = require('assert')
 var Events = require('events')
 var Util = require('util')
+
 
 // External modules.
 var _ = require('lodash')
@@ -17,6 +19,7 @@ var Norma = require('norma')
 var Patrun = require('patrun')
 var Stats = require('rolling-stats')
 var Ordu = require('ordu')
+var Lrucache = require('lru-cache')
 
 
 // Internal modules.
@@ -32,9 +35,9 @@ var Transport = require('./lib/transport')
 
 
 // Shortcuts
-var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var errlog = Common.make_standard_err_log_entry
 var actlog = Common.make_standard_act_log_entry
+
 
 var internals = {
   error: Eraro({
@@ -166,6 +169,8 @@ var internals = {
   }
 }
 
+
+// Utility functions exposed by Seneca via `seneca.util`.
 var seneca_util = {
   deepextend: Common.deepextend,
   recurse: Common.recurse,
@@ -180,6 +185,7 @@ var seneca_util = {
   argprops: Common.argprops
 }
 
+
 // Seneca is an EventEmitter.
 function Seneca () {
   Events.EventEmitter.call(this)
@@ -188,22 +194,18 @@ function Seneca () {
 Util.inherits(Seneca, Events.EventEmitter)
 
 
+// Create a Seneca instance.
 module.exports = function init (seneca_options, more_options) {
-  // Create instance.
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  seneca.log.info({kind: 'notice', notice: 'seneca started'})
+  seneca.log.info({kind: 'notice', notice: 'hello'})
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
   seneca.log.debug({kind: 'notice', options: _.omit(options, ['internal'])})
 
-  if (options.debug.print.options) {
-    console.log('\nSeneca Options (' + root.id + '): before plugins\n' + '===\n')
-    console.log(Util.inspect(options, { depth: null }))
-    console.log('')
-  }
+  Print.print_options(options)
 
   // TODO: these are core API and should not be decorations
   seneca.decorate('hasplugin', Plugins.api_decorations.hasplugin)
@@ -231,8 +233,12 @@ module.exports.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
 module.exports.use = function top_use () {
+  var argsarr = new Array(arguments.length)
+  for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
   var instance = module.exports()
-  return instance.use.apply(instance, arrayify(arguments))
+
+  return instance.use.apply(instance, argsarr)
 }
 
 module.exports.util = seneca_util
@@ -286,9 +292,96 @@ function make_seneca (initial_options) {
   root.context = {}
   root.version = Package.version
 
+  private$.actcache = Lrucache({ max: so.actcache.size })
+
+
   // Seneca methods. Official API.
-  root.add = api_add // Add a message pattern and action.
+
+  // # seneca.add
+  //
+  // Add a message pattern and action.
+  //   * `pattern` <small>_string|object_</small> &rarr;
+  //   Pattern definition as
+  //   [jsonic](https://github.com/rjrodger/jsonic) string or object.
+  //
+  //   * `action` <small>_function (optional)_</small> &rarr;
+  //   Action function.
+  //
+  // When a message that matches the pattern is submitted inward using
+  // `seneca.act`, the action function is called with parameters:
+  //   * `message` <small>_object_</small> &rarr; Message object.
+  //   * `reply` <small>_function_</small> &rarr; Callback function.
+  //
+  // The `reply` callback is used to provide a response to the
+  // message.  If the action function is not provided, the pattern
+  // will be added with a default action function that does
+  // nothing. The `reply` callback has parameters:
+  //   * `error` <small>_Error (optional)_</small> &rarr;
+  //   Provide this value if you wish to provide an error response to the message.
+  //   * `response` <small>_object|array (optional)_</small> &rarr;
+  //   Response data to the message.
+  //
+  // **The action function is not a lambda, and the `=>` function
+  // syntax should not be used.** The context `this` of the action
+  // function is a reference to the current Seneca instance, tha
+  // should always be used for subsequent `seneca.act` calls, as this
+  // enables accurate tracing of actions.
+  //
+  // If the pattern added has been added previously, then the new
+  // action function overrides the old action function. The old action
+  // function is available via the `seneca.prior` method of the
+  // current Seneca instance (`this` in the new action function).  A
+  // chain of priors is formed if additional action functions with the
+  // same pattern are added. There is a tutorial on [Seneca
+  // priors](http://senecajs.org/tutorials/priors.html).
+  root.add = api_add
+
+  // # Seneca.act
+  //
+  // Send a message. If the message matches a pattern, execute the
+  // action function.
+  //   * `msg` <small>_object_</small> &rarr;
+  //   The message data. Only data that can be fully represented as JSON is valid.
+  //   * `callback` <small>_function (optional)_</small> &rarr;
+  //   The callback function that will receive the response to the
+  //   message, generated by the action function.
+  //
+  // The message data may contain control properties, indicated by a
+  // `$` suffix.  These are described in the [control properties
+  // reference](http://senecajs.org/documentation/control-properties.html)
+  //
+  // **The callback function should not be a lambda (`=>`)**. The current
+  // Seneca instance is provided via `this`, and should be used for
+  // subsequent `seneca.act` calls, as this enables accurate tracing
+  // of actions.
+  //
+  // If the callback function is provided, then the message
+  // interaction is assumed to be synchronous, and a response from the
+  // action function will be expected. If the callback function is not
+  // provided, the interaction is assumed to be asynchronous, and no
+  // response is expected.
+  //
+  // The callback function has parameters:
+  //   * `error` <small>_Error_</small> &rarr; If an error occurred,
+  //   an Error object will be provided, otherwise this is `null`. If
+  //   the action times out, an error will be provided.
+  //   * `response` <small>_object|array_</small> &rarr;
+  //   The response data from the action function, if any.
+  //
+  // For convenience, you can build the full message from separate
+  // parts, including [jsonic](https://github.com/rjrodger/jsonic)
+  // strings. The full set of parameters to `seneca.act` is:
+  //   * `jsonic` <small>_string (optional)_</small> &rarr;
+  //   Message properties in jsonic format. These have precedence over
+  //   other message parts.
+  //   * `part1` <small>_object (optional)_</small> &rarr;
+  //   Message data having precedence over `part2`.
+  //   * `part2` <small>_object (optional)_</small> &rarr;
+  //   Message data.
+  //   * `callback` <small>_function (optional)_</small> &rarr;
+  //   As previously described.
   root.act = api_act // Perform action that matches pattern.
+
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
   root.listen = Transport.listen(callpoint) // Listen for inbound messages.
@@ -703,8 +796,11 @@ function make_seneca (initial_options) {
 
   // TODO: deprecate
   root.findpins = root.pinact = function findpins () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var pins = []
-    var patterns = _.flatten(arrayify(arguments))
+    var patterns = _.flatten(argsarr)
 
     _.each(patterns, function (pattern) {
       pattern = _.isString(pattern) ? Jsonic(pattern) : pattern
@@ -731,8 +827,11 @@ function make_seneca (initial_options) {
   // Perform an action. The properties of the first argument are matched against
   // known patterns, and the most specific one wins.
   function api_act () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var self = this
-    var spec = Common.parsePattern(self, arrayify(arguments), 'done:f?')
+    var spec = Common.parsePattern(self, argsarr, 'done:f?')
     var args = spec.pattern
     var actdone = spec.done
     args = _.extend(args, self.fixedargs)
@@ -935,9 +1034,23 @@ function make_seneca (initial_options) {
     function execute_action (act_instance, msg, action_done) {
       actmeta = actmeta || act_instance.find(msg, {catchall: so.internal.catchall})
 
-      action_ctxt.seneca = act_instance
+      // build msg
+      // remove actid so that user manipulation of msg for subsequent use does
+      // not cause inadvertent hit on existing action
+      delete msg.id$
+      delete msg.actid$ // legacy alias
+
+      msg.meta$.start = actstart
+      msg.meta$.entry = prior_ctxt.entry
+      msg.meta$.chain = prior_ctxt.chain
+      msg.meta$.sync = is_sync
+
+      var delegate =
+            act_make_delegate(act_instance, msg, actmeta, prior_ctxt, do_act)
+
+      action_ctxt.seneca = delegate
       action_ctxt.actmeta = actmeta
-      action_ctxt.options = act_instance.options()
+      action_ctxt.options = delegate.options()
       action_ctxt.callpoint = act_callpoint
 
       var inwardres = private$.inward.process(action_ctxt, {msg: msg})
@@ -965,20 +1078,6 @@ function make_seneca (initial_options) {
           return action_done.call(act_instance, null, inwardres.result)
         }
       }
-
-      // build msg
-      // remove actid so that user manipulation of msg for subsequent use does
-      // not cause inadvertent hit on existing action
-      delete msg.id$
-      delete msg.actid$ // legacy alias
-
-      msg.meta$.start = actstart
-      msg.meta$.entry = prior_ctxt.entry
-      msg.meta$.chain = prior_ctxt.chain
-      msg.meta$.sync = is_sync
-
-      var delegate =
-            act_make_delegate(act_instance, msg, actmeta, prior_ctxt, do_act)
 
       action_done = action_done.bind(delegate)
 
@@ -1016,6 +1115,9 @@ function make_seneca (initial_options) {
     }
 
     function act_done (err) {
+      var argsarr = new Array(arguments.length)
+      for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
       var delegate = this || instance
 
       try {
@@ -1028,7 +1130,7 @@ function make_seneca (initial_options) {
           private$.timestats.point(actend - actstart, actmeta.pattern)
         }
 
-        var result = arrayify(arguments)
+        var result = argsarr
         var call_cb = true
 
         var resdata = result[1]
@@ -1338,8 +1440,10 @@ function make_seneca (initial_options) {
   // DEPRECATED
   // for use with async
   root.next_act = function next_act () {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
     var si = this || root
-    var args = arrayify(arguments)
 
     si.log.warn({
       kind: 'notice',
@@ -1349,8 +1453,8 @@ function make_seneca (initial_options) {
 
 
     return function (next) {
-      args.push(next)
-      si.act.apply(si, args)
+      argsarr.push(next)
+      si.act.apply(si, argsarr)
     }
   }
 
@@ -1500,16 +1604,6 @@ function make_callpoint (active) {
 
 
 function make_log (instance, modifier) {
-/*
-  var log = _.noop
-  log.debug = _.noop
-  log.info = _.noop
-  log.warn = _.noop
-  log.error = _.noop
-  log.fatal = _.noop
-  return log
-*/
-
   var log = instance.log || function log (data) {
     instance.private$.logger(this, data)
   }
@@ -1522,10 +1616,13 @@ function make_log (instance, modifier) {
 
 function prepare_log (instance, log) {
   return function prepare_log_data () {
-    var a0 = arguments[0]
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
+    var a0 = argsarr[0]
     var data = _.isArray(a0) ? a0
           : _.isObject(a0) ? a0
-          : arrayify(arguments)
+          : argsarr
     log.call(instance, data)
   }
 }
@@ -1558,6 +1655,8 @@ function default_log_modifier (data) {
 
 
 function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
+  actmeta = actmeta || {}
+
   var delegate_args = {
     plugin$: {
       name: actmeta.plugin_name,
@@ -1568,7 +1667,9 @@ function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
   var delegate = instance.delegate(delegate_args)
 
   // special overrides
-  if (msg.meta$.tx) { delegate.fixedargs.tx$ = msg.meta$.tx }
+  if (msg.meta$.tx) {
+    delegate.fixedargs.tx$ = msg.meta$.tx
+  }
 
   // automate actid log insertion
 
@@ -1579,15 +1680,6 @@ function act_make_delegate (instance, msg, actmeta, prior_ctxt, do_act) {
     data.plugin_tag = data.plugin_tag || actmeta.plugin_tag
     data.pattern = data.pattern || actmeta.pattern
   })
-
-/*
-  delegate.log = _.noop
-  delegate.log.debug = _.noop
-  delegate.log.info = _.noop
-  delegate.log.warn = _.noop
-  delegate.log.error = _.noop
-  delegate.log.fatal = _.noop
-*/
 
   if (actmeta.priormeta) {
     delegate.prior = function (prior_args, prior_cb) {
