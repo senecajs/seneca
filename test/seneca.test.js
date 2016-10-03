@@ -337,21 +337,21 @@ describe('seneca', function () {
       si.add({op: 'foo'}, foo)
       si.act('op:foo,a:1', function (e, o) {
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
-        assert.ok(o.foo.entry)
+        assert.ok(o.foo.prior.entry)
 
         si.add({op: 'foo'}, bar)
         si.act('op:foo,a:1', function (e, o) {
           assert.ok(Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
-          assert.ok(o.bar.entry)
-          assert.ok(!o.foo.entry)
+          assert.ok(o.bar.prior.entry)
+          assert.ok(!o.foo.prior.entry)
 
           si.add({op: 'foo'}, zed)
           si.act('op:foo,a:1', function (e, o) {
             assert.ok(Gex('1~2~3~Seneca/*' + '/*').on(
               '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s))
-            assert.ok(o.zed.entry)
-            assert.ok(!o.bar.entry)
-            assert.ok(!o.foo.entry)
+            assert.ok(o.zed.prior.entry)
+            assert.ok(!o.bar.prior.entry)
+            assert.ok(!o.foo.prior.entry)
 
             done()
           })
@@ -410,15 +410,15 @@ describe('seneca', function () {
       si.act('op:foo,a:1', function (err, o) {
         assert.ok(!err)
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
-        assert.ok(!o.foo.entry)
-        assert.ok(o.bar.entry)
+        assert.ok(!o.foo.prior.entry)
+        assert.ok(o.bar.prior.entry)
 
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
           assert.ok(Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s))
-          assert.ok(!o.foo.entry)
-          assert.ok(!o.bar.entry)
-          assert.ok(o.zed.entry)
+          assert.ok(!o.foo.prior.entry)
+          assert.ok(!o.bar.prior.entry)
+          assert.ok(o.zed.prior.entry)
           done()
         })
       })

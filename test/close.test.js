@@ -44,6 +44,7 @@ describe('close', function () {
         tmp.sc = 1
       })
       .close(function () {
+        console.log('tmp.sc', tmp.sc)
         expect(1).to.equal(tmp.sc)
         done()
       })
