@@ -61,6 +61,9 @@ var internals = {
       transport: true
     },
 
+    // Test mode. Use for unit testing.
+    test: false,
+
     // Debug settings.
     debug: {
       // Throw (some) errors from seneca.act.
@@ -199,7 +202,7 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(_.extend({}, seneca_options, more_options))
   var options = seneca.options()
 
-  seneca.log.info({kind: 'notice', notice: 'hello'})
+  seneca.log.info({kind: 'notice', notice: 'hello seneca ' + seneca.id})
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
@@ -239,6 +242,17 @@ module.exports.use = function top_use () {
   var instance = module.exports()
 
   return instance.use.apply(instance, argsarr)
+}
+
+// Makes require('seneca').test() work.
+module.exports.test = function top_test () {
+  var argsarr = new Array(arguments.length)
+  for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
+  var instance = module.exports({test: true, log: 'test'})
+  instance.test.apply(instance, argsarr)
+
+  return instance
 }
 
 module.exports.util = seneca_util
@@ -397,6 +411,7 @@ function make_seneca (initial_options) {
   root.decorate = api_decorate // Decorate seneca object with functions
   root.inward = api_inward // Add a modifier function for messages inward
   root.outward = api_outward // Add a modifier function for responses outward
+  root.test = api_test // Set test mode.
 
   // Method aliases.
   root.hasact = root.has
@@ -828,7 +843,7 @@ function make_seneca (initial_options) {
     var msg = _.extend(spec.pattern, self.fixedargs)
     var actdone = spec.done
 
-    if (so.debug.act_caller) {
+    if (so.debug.act_caller || so.test) {
       msg.caller$ = '\n    Action call arguments and location: ' +
         (new Error(Util.inspect(msg).replace(/\n/g, '')).stack)
           .replace(/.*\/seneca\.js:.*\n/g, '')
@@ -998,8 +1013,7 @@ function make_seneca (initial_options) {
           })
         }
         catch (e) {
-          // console.log('===========', e.stack)
-          handle_result.call(this, e)
+          handle_result.call(execute_instance, e)
           done()
         }
       },
@@ -1348,8 +1362,27 @@ function make_seneca (initial_options) {
     return so
   }
 
+
   function api_error (errhandler) {
     this.options({ errhandler: errhandler })
+    return this
+  }
+
+
+  function api_test (errhandler, logspec) {
+    if ('function' !== typeof errhandler && null !== errhandler) {
+      logspec = errhandler
+      errhandler = null
+    }
+
+    this.options({
+      errhandler: null === errhandler ? null : (errhandler || console.log),
+      test: true,
+      log: logspec || 'test'
+    })
+
+    private$.logger = load_logger(root, so.internal.logger)
+
     return this
   }
 
