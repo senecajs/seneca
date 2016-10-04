@@ -522,6 +522,7 @@ function make_seneca (initial_options) {
     .add({tags: ['prior']}, Actions.inward.msg_meta)
     .add({tags: ['xprior']}, Actions.inward.prepare_delegate)
     .add(Actions.inward.msg_modify)
+    .add(Actions.inward.announce)
 
   private$.outward = Ordu({name: 'outward'})
     .add(Actions.outward.act_stats)
@@ -594,7 +595,7 @@ function make_seneca (initial_options) {
               subfunc.call(self, args, result)
             }
             catch (ex) {
-              // TOO: not really satisfactory
+              // TODO: not really satisfactory
               var err = internals.error(ex, 'sub_function_catch', { args: args, result: result })
               self.log.error(errlog(err, {
                 kind: 'sub',
@@ -834,7 +835,7 @@ function make_seneca (initial_options) {
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
 
-    do_act(self, null, msg, actdone)
+    do_act(self, msg, actdone)
     return self
   }
 
@@ -973,7 +974,7 @@ function make_seneca (initial_options) {
   }
 
 
-  function do_act (instance, actmeta, origmsg, actdone) {
+  function do_act (instance, origmsg, actdone) {
     var actstart = Date.now()
     var msg = _.clone(origmsg)
     var act_callpoint = callpoint()
@@ -1004,11 +1005,8 @@ function make_seneca (initial_options) {
       },
       ontm: function act_tm (done) {
         handle_result.call(execute_instance, new Error('[TIMEOUT]'))
-      }
-    }
-
-    if ('number' === typeof msg.timeout$) {
-      execspec.tm = msg.timeout$
+      },
+      tm: 'number' === typeof msg.timeout$ ? msg.timeout$ : null
     }
 
     execute_instance.private$.ge.add(execspec)
@@ -1017,7 +1015,7 @@ function make_seneca (initial_options) {
     var action_ctxt = {}
 
     function execute_action (act_instance, msg, reply) {
-      actmeta = actmeta || act_instance.find(msg, {catchall: so.internal.catchall})
+      var actmeta = act_instance.find(msg, {catchall: so.internal.catchall})
 
       msg.meta$ = msg.meta$ || {}
       var delegate = act_make_delegate(act_instance, msg, actmeta)
@@ -1032,11 +1030,7 @@ function make_seneca (initial_options) {
       var data = {msg: msg, reply: reply}
       var inward = private$.inward.process(action_ctxt, data)
 
-      msg = data.msg
-      reply = data.reply
-
-      if (handle_inward_break(
-        inward, act_instance, reply, actmeta, msg, origmsg)) {
+      if (handle_inward_break(inward, act_instance, data, actmeta, origmsg)) {
         return
       }
 
@@ -1046,113 +1040,98 @@ function make_seneca (initial_options) {
           { kind: 'act', case: 'IN' }))
       }
 
-      // remove actid so that user manipulation of msg for subsequent use does
-      // not cause inadvertent hit on existing action
-      delete msg.id$
-      delete msg.actid$ // legacy alias
-
-      if (_.isFunction(delegate.on_act_in)) {
-        delegate.on_act_in(actmeta, msg)
-      }
-
-      delegate.emit('act-in', msg)
-
-      actmeta.func.call(delegate, msg, reply)
+      actmeta.func.call(delegate, data.msg, data.reply)
     }
 
-    function handle_result (err) {
+
+    function handle_result () {
       var argsarr = new Array(arguments.length)
       for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
 
+      var actmeta = action_ctxt.actmeta
       var delegate = this || instance
 
-      try {
-        var actend = Date.now()
+      var actend = Date.now()
+      action_ctxt.duration = actend - action_ctxt.start
 
-        if (msg.meta$.prior && msg.meta$.prior.entry && actmeta) {
-          private$.timestats.point(actend - actstart, actmeta.pattern)
-        }
+      var call_cb = true
 
-        var result = argsarr
-        var call_cb = true
+      var data = {
+        msg: msg,
+        err: argsarr[0],
+        res: argsarr[1]
+      }
 
-        var resdata = result[1]
+      var outward = private$.outward.process(action_ctxt, data)
+      var err = data.err
 
-        var outward = private$.outward.process(action_ctxt, {
-          msg: msg,
-          res: resdata,
-          err: err
-        })
-
-        if (outward) {
-          if ('error' === outward.kind) {
-            err = outward.error ||
-              internals.error(outward.code, outward.info)
-          }
-        }
-
-        if (err) {
-          var out = act_error(instance, err, actmeta, result, actdone,
-            actend - actstart, msg, origmsg, act_callpoint)
-
-          if (msg.fatal$) {
-            return instance.die(out.err)
-          }
-
-          call_cb = out.call_cb
-          result[0] = out.err
-
-          if (delegate && _.isFunction(delegate.on_act_err)) {
-            delegate.on_act_err(actmeta, result[0])
-          }
-        }
-        else {
-          instance.emit('act-out', msg, result[1])
-          result[0] = null
-
-          delegate.log.debug(actlog(
-            actmeta, msg, origmsg,
-            { kind: 'act',
-              case: 'OUT',
-              duration: actend - actstart,
-              result: result[1]
-            }))
-
-          if (_.isFunction(delegate.on_act_out)) {
-            delegate.on_act_out(actmeta, result[1])
-          }
-        }
-
-        try {
-          if (call_cb) {
-            actdone.apply(delegate, result) // note: err == result[0]
-          }
-        }
-
-        // for exceptions thrown inside the callback
-        catch (ex) {
-          var formattedErr = ex
-          // handle throws of non-Error values
-          if (!Util.isError(ex)) {
-            formattedErr = _.isObject(ex)
-              ? new Error(Jsonic.stringify(ex))
-              : new Error('' + ex)
-          }
-
-          callback_error(instance, formattedErr, actmeta, result, actdone,
-            actend - actstart, msg, origmsg, act_callpoint)
+      if (outward) {
+        if ('error' === outward.kind) {
+          err = outward.error ||
+            internals.error(outward.code, outward.info)
         }
       }
+
+      if (err) {
+        var out = act_error(instance, err, actmeta, argsarr, actdone,
+                            actend - actstart, msg, origmsg, act_callpoint)
+
+        if (msg.fatal$) {
+          return instance.die(out.err)
+        }
+
+        call_cb = out.call_cb
+        argsarr[0] = out.err
+
+        if (delegate && _.isFunction(delegate.on_act_err)) {
+          delegate.on_act_err(actmeta, argsarr[0])
+        }
+      }
+      else {
+        instance.emit('act-out', msg, argsarr[1])
+        argsarr[0] = null
+
+        delegate.log.debug(actlog(
+          actmeta, msg, origmsg,
+          { kind: 'act',
+            case: 'OUT',
+            duration: actend - actstart,
+            result: argsarr[1]
+          }))
+
+        if (_.isFunction(delegate.on_act_out)) {
+          delegate.on_act_out(actmeta, argsarr[1])
+        }
+      }
+
+      try {
+        if (call_cb) {
+          actdone.apply(delegate, argsarr) // note: err == argsarr[0]
+        }
+      }
+
+      // for exceptions thrown inside the callback
       catch (ex) {
-        instance.emit('error', ex)
+        var formattedErr = ex
+        // handle throws of non-Error values
+        if (!Util.isError(ex)) {
+          formattedErr = _.isObject(ex)
+            ? new Error(Jsonic.stringify(ex))
+            : new Error('' + ex)
+        }
+
+        callback_error(instance, formattedErr, actmeta, argsarr, actdone,
+                       actend - actstart, msg, origmsg, act_callpoint)
       }
     }
   }
 
 
-  function handle_inward_break
-  (inward, act_instance, reply, actmeta, msg, origmsg) {
+  function handle_inward_break (inward, act_instance, data, actmeta, origmsg) {
     if (!inward) return false
+
+    var msg = data.msg
+    var reply = data.reply
 
     if ('error' === inward.kind) {
       var err = inward.error ||
