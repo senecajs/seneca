@@ -656,7 +656,14 @@ function make_seneca (initial_options) {
 
     var raw_pattern = args.pattern
 
-    var action = args.action || function action (msg, done) {
+    var pattern = self.util.clean(raw_pattern)
+
+    if (!_.keys(pattern)) {
+      throw internals.error('add_empty_pattern', {args: Common.clean(args)})
+    }
+
+
+    var action = args.action || function default_action (msg, done) {
       done.call(this, null, msg.default$ || null)
     }
 
@@ -688,12 +695,6 @@ function make_seneca (initial_options) {
     var internal_catchall = (raw_pattern.internal$ && raw_pattern.internal$.catchall !== null)
       ? !!raw_pattern.internal$.catchall : !!so.internal.catchall
 
-    var pattern = self.util.clean(raw_pattern)
-
-    if (!_.keys(pattern)) {
-      throw internals.error('add_empty_pattern', {args: Common.clean(args)})
-    }
-
     var pattern_rules = _.clone(action.validate || {})
     _.each(pattern, function (v, k) {
       if (_.isObject(v)) {
@@ -717,6 +718,7 @@ function make_seneca (initial_options) {
 
     // Canonical object form of the action pattern.
     actmeta.msgcanon = Jsonic(actmeta.pattern)
+
 
     var priormeta = self.find(pattern)
 
@@ -789,6 +791,7 @@ function make_seneca (initial_options) {
       time: {}
     }
   }
+
 
   function modify_action (seneca, actmeta) {
     _.each(private$.action_modifiers, function (actmod) {
