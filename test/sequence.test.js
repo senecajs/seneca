@@ -10,20 +10,16 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-var test_opts = {log: 'test'}
-
 describe('sequence', function () {
   it('ready-always-called', function (fin) {
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
       .ready(function () {
         this.ready(fin)
       })
   })
 
   it('single-add-act', function (fin) {
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
         done(null, msg)
@@ -37,8 +33,7 @@ describe('sequence', function () {
 
   it('double-add-act', function (fin) {
     var log = []
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
       .add('a:1', function (msg, done) {
         log.push('a:1-call')
         msg.x = 2
@@ -66,8 +61,7 @@ describe('sequence', function () {
 
   it('single-add-act-ready', {timeout: 3333}, function (fin) {
     var log = []
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
 
     // this works! acts only happen after all gates finished
       .act('a:1', function (ignore, out) {
@@ -100,8 +94,7 @@ describe('sequence', function () {
   })
 
   it('single-add-act-gate-action', function (fin) {
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
         done(null, msg)
@@ -114,8 +107,7 @@ describe('sequence', function () {
   })
 
   it('single-add-act-gate-instance', function (fin) {
-    Seneca(test_opts)
-      .error(fin)
+    Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
         done(null, msg)

@@ -160,7 +160,7 @@ describe('delegation', function () {
   })
 
   it('parent.plugin', function (done) {
-    var si = Seneca(testopts)
+    var si = Seneca(testopts).error(done)
 
     Async.series([
       function (next) {
@@ -185,7 +185,7 @@ describe('delegation', function () {
           this.add({a: 'A'}, function (args, cb) {
             this.log.debug('P', '2a')
 
-            this.parent(args, function (err, out) {
+            this.prior(args, function (err, out) {
               this.log.debug('P', '2b')
               out.p2 = 1
               cb(err, out)
@@ -207,7 +207,7 @@ describe('delegation', function () {
           this.add({a: 'A'}, function (args, cb) {
             this.log.debug('P', '3a')
 
-            this.parent(args, function (err, out) {
+            this.prior(args, function (err, out) {
               this.log.debug('P', '3b')
               out.p3 = 1
               cb(err, out)

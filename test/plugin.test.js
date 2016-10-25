@@ -21,11 +21,12 @@ describe('plugin', function () {
   })
 
   it('works with exportmap', function (done) {
-    var seneca = Seneca({
+    var seneca = Seneca.test(done)
+
+    seneca.options({
       debug: {
         undead: true
-      },
-      log: 'silent'
+      }
     })
 
     seneca.use(function () {
@@ -40,11 +41,12 @@ describe('plugin', function () {
       }
     })
 
-    seneca.ready(() => {
+    seneca.ready(function () {
       expect(typeof seneca.export('foo/bar')).to.equal('function')
       seneca.export('foo/bar')(42)
     })
   })
+
 
   it('bad', function (done) {
     var si = Seneca({
@@ -81,6 +83,7 @@ describe('plugin', function () {
     si.close(done)
   })
 
+
   it('plugin-error-def', function (done) {
     var si = Seneca({
       debug: {
@@ -97,6 +100,7 @@ describe('plugin', function () {
       throw new Error('plugin-def')
     })
   })
+
 
   it('plugin-error-deprecated', function (done) {
     var si = Seneca({
@@ -115,6 +119,7 @@ describe('plugin', function () {
     })
   })
 
+
   it('plugin-error-add', function (done) {
     var si = Seneca({
       debug: {
@@ -131,6 +136,7 @@ describe('plugin', function () {
       this.add(new Error())
     })
   })
+
 
   it('plugin-error-act', function (done) {
     var si = Seneca({
@@ -152,6 +158,7 @@ describe('plugin', function () {
       this.act('foo:1')
     })
   })
+
 
   it('depends', function (done) {
     var si = Seneca({
@@ -206,8 +213,9 @@ describe('plugin', function () {
     done()
   })
 
+
   it('plugin-fix', function (done) {
-    var si = Seneca({log: 'test'}).error(done)
+    var si = Seneca.test(done)
 
     function echo (args, cb) {
       cb(null, _.extend({ t: Date.now() }, args))
@@ -272,6 +280,7 @@ describe('plugin', function () {
     })
   })
 
+
   it('export', function (done) {
     var si = Seneca({
       // this lets you change undead per test
@@ -291,8 +300,9 @@ describe('plugin', function () {
     si.export('not-an-export')
   })
 
+
   it('hasplugin', function (done) {
-    var si = Seneca({log: 'test'})
+    var si = Seneca.test(done)
 
     si.use(function foo () {})
     si.use({init: function () {}, name: 'bar', tag: 'aaa'})
@@ -312,6 +322,7 @@ describe('plugin', function () {
     })
   })
 
+
   it('handles plugin with action that timesout', function (done) {
     Seneca({log: 'silent', timeout: 10, debug: {undead: true}})
       .use(function foo () {
@@ -323,6 +334,7 @@ describe('plugin', function () {
         this.close(done)
       })
   })
+
 
   it('handles plugin action that throws an error', function (done) {
     var seneca = Seneca({ log: 'silent' })
@@ -339,8 +351,9 @@ describe('plugin', function () {
     })
   })
 
+
   it('calling act from init actor is deprecated', function (done) {
-    var seneca = Seneca({ log: 'silent' })
+    var seneca = Seneca.test(done)
 
     seneca.add({ role: 'metrics', subscriptions: 'create' }, function (data, callback) {
       callback()
@@ -355,6 +368,7 @@ describe('plugin', function () {
 
     seneca.act({ init: 'msgstats-metrics' })
   })
+
 
   it('plugin actions receive errors in callback function', function (done) {
     var seneca = Seneca({ log: 'silent' })
@@ -379,11 +393,15 @@ describe('plugin', function () {
     })
   })
 
+
   it('dynamic-load-sequence', function (done) {
     var a = []
-    Seneca({log: 'test', debug: {undead: true}})
-      .error(done)
+    var seneca = Seneca
+      .test(done)
 
+    seneca.options({debug: {undead: true}})
+
+    seneca
       .use(function first () {
         this.add('init:first', function (m, d) {
           a.push(1)
@@ -417,11 +435,11 @@ describe('plugin', function () {
       })
   })
 
+
   it('serial-load-sequence', function (done) {
     var log = []
 
-    Seneca({ log: 'test' })
-      .error(done)
+    Seneca.test(done, 'silent')
 
       .use(function foo () {
         log.push('a')
@@ -442,6 +460,7 @@ describe('plugin', function () {
         done()
       })
   })
+
 
   it('plugin options can be modified by plugins during load sequence', function (done) {
     var seneca = Seneca({
@@ -520,8 +539,9 @@ describe('plugin', function () {
     })
   })
 
+
   it('plugin init can add actions for future init actions to call', function (done) {
-    var seneca = Seneca({ log: 'silent' })
+    var seneca = Seneca.test(done, 'silent')
 
     seneca.use(function foo (options) {
       this.add('init:foo', function (msg, cb) {

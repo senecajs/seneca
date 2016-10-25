@@ -21,6 +21,7 @@ describe('prior', function () {
     process.removeAllListeners('SIGBREAK')
     done()
   })
+
   it('add-general-to-specific', function (done) {
     Seneca(testopts)
       .error(done)

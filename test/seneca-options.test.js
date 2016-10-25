@@ -6,7 +6,6 @@ var Lab = require('lab')
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
-var after = lab.after
 var Code = require('code')
 var expect = Code.expect
 var _ = require('lodash')
@@ -30,8 +29,17 @@ var _ = require('lodash')
 
 var initialEnv = process.argv
 describe('seneca --seneca.log arguments tests', function () {
-  after(function (done) {
+  var stdout_write
+
+  lab.before(function (done) {
+    stdout_write = process.stdout.write
+    process.stdout.write = _.noop
+    done()
+  })
+
+  lab.after(function (done) {
     process.argv = initialEnv
+    process.stdout.write = stdout_write
     done()
   })
 
@@ -102,6 +110,19 @@ describe('seneca --seneca.log arguments tests', function () {
 })
 
 describe('seneca --seneca.log aliases tests', function () {
+  var stdout_write
+
+  lab.before(function (done) {
+    stdout_write = process.stdout.write
+    process.stdout.write = _.noop
+    done()
+  })
+
+  lab.after(function (done) {
+    process.stdout.write = stdout_write
+    done()
+  })
+
   it('--seneca.log.quiet', function (done) {
     process.argv = ['', '', '--seneca.log.quiet']
     var si = Seneca()
