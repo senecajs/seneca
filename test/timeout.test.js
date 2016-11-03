@@ -13,9 +13,7 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-
 describe('timeout', function () {
-
   it('returns error', function (fin) {
     Seneca({timeout: 100})
       .add('a:1', function (msg, done) {
@@ -43,5 +41,4 @@ describe('timeout', function () {
       })
       .act('a:1')
   })
-
 })
