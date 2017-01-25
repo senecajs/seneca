@@ -380,7 +380,8 @@ describe('transport', function () {
   it('transport-exact-single', function (done) {
     var tt = make_test_transport()
 
-    Seneca({tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }})
+    Seneca({tag: 'srv', timeout: 5555})
+      .test(done)
       .use(tt)
       .add('foo:1', function (args, done) {
         // ensure action id is transferred for traceability
@@ -389,8 +390,8 @@ describe('transport', function () {
       })
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function () {
-        Seneca({tag: 'cln', timeout: 5555, log: 'silent',
-                debug: {short_logs: true}})
+        Seneca({tag: 'cln', timeout: 5555})
+          .test(done)
           .use(tt)
           .client({type: 'test', pin: 'foo:1'})
 
@@ -634,14 +635,15 @@ describe('transport', function () {
   it('transport-local-prior-wrap', function (done) {
     var tt = make_test_transport()
 
-    Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
-      .error(done)
+    Seneca({tag: 'srv', timeout: 5555})
+      .test(done)
       .use(tt)
       .add('foo:1', testact)
       .listen({type: 'test', pin: 'foo:1'})
+
       .ready(function () {
-        Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
-          .error(done)
+        Seneca({tag: 'cln', timeout: 5555})
+          .test(done)
           .use(tt)
 
           .client({type: 'test', pin: 'foo:1'})

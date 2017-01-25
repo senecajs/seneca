@@ -14,7 +14,7 @@ construct meta data with default values if `meta$` is not
 present. This provides for the use case of simple manual HTTP
 interactions with tools like `curl`.
 
-The term _message_ refers to a single instance of outbound request
+The term _message_ refers to a single instance of an outbound request
 JSON data transmitted between two specific service instances. The term
 message does *not* refer to a message flow over multiple services, *nor*
 to the optional JSON data response. The concept of the message
@@ -35,6 +35,7 @@ flow should be used.
     mid:  // Seneca message identifier, an opaque string,
     cid:  // Seneca correlation identifier, an opaque string,
     snc:  // true if synchronous (expecting response), false if asynchronous
+    pat:  // pattern on the sending Seneca instance
     trk:  [ // array of previously visited seneca instances including timing,
       {
         sid: // Seneca instance identifier of sender (not always redundant!)
@@ -47,7 +48,7 @@ flow should be used.
     rtn:  { // return path description
       urn: // full network address for http response, optional
     }
-    usr: { // user data, use this for your own meta data, optional
+    ctm: { // custom data, use this for your own meta data, optional
       ...
     }
   }
