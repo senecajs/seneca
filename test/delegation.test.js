@@ -1,17 +1,21 @@
-/* Copyright (c) 2013-2015 Richard Rodger */
+/* Copyright (c) 2013-2017 Richard Rodger */
 'use strict'
 
+
 var Assert = require('assert')
-var Async = require('async')
+
+
 var Gex = require('gex')
 var Lab = require('lab')
 var Seneca = require('..')
+
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
 var testopts = { log: 'silent' }
+
 
 describe('delegation', function () {
   it('happy', function (done) {
@@ -47,43 +51,32 @@ describe('delegation', function () {
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
-    Async.series([
-      function (next) {
-        si.act({ c: 'C' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.c === 'C')
-          next()
-        })
-      },
-      function (next) {
-        si.act({ d: 'D' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.c === 'C')
-          assert.ok(out.d === 'D')
-          next()
-        })
-      },
-      function (next) {
+    si.act({ c: 'C' }, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.c === 'C')
+
+      si.act({ d: 'D' }, function (err, out) {
+        assert.ok(!err)
+        assert.ok(out.c === 'C')
+        assert.ok(out.d === 'D')
+
         sid.act({ c: 'C' }, function (err, out) {
           assert.ok(!err)
           assert.ok(out.a$ === 'A')
           assert.ok(out.c === 'C')
           assert.ok(out.b === 'B')
-          next()
+
+          sid.act({ d: 'D' }, function (err, out) {
+            assert.ok(!err)
+            assert.ok(out.a$ === 'A')
+            assert.ok(out.b === 'B')
+            assert.ok(out.c === 'C')
+            assert.ok(out.d === 'D')
+
+            sid.close(si.close.bind(si, done))
+          })
         })
-      },
-      function (next) {
-        sid.act({ d: 'D' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a$ === 'A')
-          assert.ok(out.b === 'B')
-          assert.ok(out.c === 'C')
-          assert.ok(out.d === 'D')
-          next()
-        })
-      }
-    ], function () {
-      si.close(done)
+      })
     })
   })
 
@@ -159,50 +152,43 @@ describe('delegation', function () {
     })
   })
 
+
   it('parent.plugin', function (done) {
     var si = Seneca(testopts).error(done)
 
-    Async.series([
-      function (next) {
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
-            this.log.debug('P', '1')
-            args.p1 = 1
-            cb(null, args)
+    si.use(function (opts) {
+      this.add({a: 'A'}, function (args, cb) {
+        this.log.debug('P', '1')
+        args.p1 = 1
+        cb(null, args)
+      })
+      return {name: 'p1'}
+    })
+
+    si.act({ a: 'A' }, function (err, out) {
+      assert.ok(!err)
+      assert.ok(out.a === 'A')
+      assert.ok(out.p1 === 1)
+
+      si.use(function (opts) {
+        this.add({a: 'A'}, function (args, cb) {
+          this.log.debug('P', '2a')
+
+          this.prior(args, function (err, out) {
+            this.log.debug('P', '2b')
+            out.p2 = 1
+            cb(err, out)
           })
-          return {name: 'p1'}
         })
+        return {name: 'p2'}
+      })
 
-        si.act({ a: 'A' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a === 'A')
-          assert.ok(out.p1 === 1)
-          next()
-        })
-      },
-      function (next) {
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
-            this.log.debug('P', '2a')
+      si.act({ a: 'A' }, function (err, out) {
+        assert.ok(!err)
+        assert.ok(out.a === 'A')
+        assert.ok(out.p1 === 1)
+        assert.ok(out.p2 === 1)
 
-            this.prior(args, function (err, out) {
-              this.log.debug('P', '2b')
-              out.p2 = 1
-              cb(err, out)
-            })
-          })
-          return {name: 'p2'}
-        })
-
-        si.act({ a: 'A' }, function (err, out) {
-          assert.ok(!err)
-          assert.ok(out.a === 'A')
-          assert.ok(out.p1 === 1)
-          assert.ok(out.p2 === 1)
-          next()
-        })
-      },
-      function (next) {
         si.use(function (opts) {
           this.add({a: 'A'}, function (args, cb) {
             this.log.debug('P', '3a')
@@ -222,11 +208,10 @@ describe('delegation', function () {
           assert.ok(out.p1 === 1)
           assert.ok(out.p2 === 1)
           assert.ok(out.p3 === 1)
-          next()
+
+          si.close(done)
         })
-      }
-    ], function () {
-      si.close(done)
+      })
     })
   })
 })
