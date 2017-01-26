@@ -28,10 +28,11 @@ flow should be used.
 
 ```js
 {
-  meta$:
+  msg$:
   {
+    vin:  // Transport protocol version increment
     sid:  // Seneca instance identifier of sender of this message
-    act:  // fixed value of true,
+    out:  // fixed value of true,
     mid:  // Seneca message identifier, an opaque string,
     cid:  // Seneca correlation identifier, an opaque string,
     snc:  // true if synchronous (expecting response), false if asynchronous
