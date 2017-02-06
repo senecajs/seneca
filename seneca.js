@@ -50,11 +50,11 @@ var option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
   tag: '-',
 
-  // Standard length of identifiers for actions.
-  idlen: 12,
-
   // Standard timeout for actions.
   timeout: 22222,
+
+  // Standard length of identifiers for actions.
+  idlen: 12,
 
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
@@ -64,6 +64,9 @@ var option_defaults = {
 
   // Test mode. Use for unit testing.
   test: false,
+
+  // Wait time for plugins to close gracefully.
+  deathdelay: 11111,
 
   // Debug settings.
   debug: {
@@ -136,9 +139,6 @@ var option_defaults = {
     running: false
   },
 
-  // Wait time for plugins to close gracefully.
-  deathdelay: 11111,
-
   // Plugin settings
   plugin: {},
 
@@ -156,7 +156,7 @@ var option_defaults = {
     }
   },
 
-  // Internal functionality. Reserved for objects and funtions only.
+  // Internal functionality. Reserved for objects and functions only.
   internal: {},
 
   // Log status at periodic intervals.
@@ -167,8 +167,17 @@ var option_defaults = {
     running: false
   },
 
-  // backwards compatibility settings
+  // Backwards compatibility settings.
   legacy: {
+
+    // Action callback must always have signature callback(error, result).
+    action_signature: false,
+
+    // Logger can be changed by options method.
+    logging: false,
+
+    // Use old error codes.
+    error_codes: false
   }
 }
 
@@ -206,8 +215,6 @@ module.exports = function init (seneca_options, more_options) {
   var seneca = make_seneca(initial_options)
   var options = seneca.options()
 
-  seneca.log.info({kind: 'notice', notice: 'hello seneca ' + seneca.id})
-
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
   seneca.log.debug({kind: 'notice', options: _.omit(options, ['internal'])})
@@ -227,6 +234,10 @@ module.exports = function init (seneca_options, more_options) {
   // Register plugins specified in options.
   _.each(options.plugins, function (plugindesc) {
     seneca.use(plugindesc)
+  })
+
+  seneca.ready(function () {
+    this.log.info({kind: 'notice', notice: 'hello seneca ' + seneca.id})
   })
 
   return seneca
@@ -443,6 +454,9 @@ function make_seneca (initial_options) {
     root.version +
     '/' +
     so.tag
+
+  // The instance tag, useful for grouping instances.
+  root.tag = so.tag
 
   if (so.debug.short_logs || so.log.short) {
     so.idlen = 2
@@ -997,6 +1011,7 @@ function make_seneca (initial_options) {
     var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
     var execute_instance = instance
+    var timedout = false
 
     actdone = actdone || _.noop
 
@@ -1010,7 +1025,9 @@ function make_seneca (initial_options) {
       fn: function act_fn (done) {
         try {
           execute_action(execute_instance, msg, function reply () {
-            handle_result.apply(this, arguments)
+            if (!timedout) {
+              handle_result.apply(this, arguments)
+            }
             done()
           })
         }
@@ -1019,7 +1036,8 @@ function make_seneca (initial_options) {
           done()
         }
       },
-      ontm: function act_tm (done) {
+      ontm: function act_tm () {
+        timedout = true
         handle_result.call(execute_instance, new Error('[TIMEOUT]'))
       },
       tm: 'number' === typeof msg.timeout$ ? msg.timeout$ : null
@@ -1063,6 +1081,12 @@ function make_seneca (initial_options) {
     function handle_result () {
       var argsarr = new Array(arguments.length)
       for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
+      if (!so.legacy.action_signature &&
+          1 === argsarr.length &&
+          !_.isError(argsarr[0])) {
+        argsarr.unshift(null)
+      }
 
       var actmeta = action_ctxt.actmeta
       var delegate = this || instance
@@ -1373,6 +1397,7 @@ function make_seneca (initial_options) {
   }
 
 
+  // TODO: should set all system.close_signals to false
   function api_test (errhandler, logspec) {
     if ('function' !== typeof errhandler && null !== errhandler) {
       logspec = errhandler

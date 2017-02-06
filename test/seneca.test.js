@@ -53,6 +53,7 @@ describe('seneca', function () {
 
   it('tag', function (done) {
     var si = Seneca({tag: 'foo'}, testopts)
+    expect(si.tag).to.equal('foo')
     expect(si.id).to.endWith('/foo')
     done()
   })
