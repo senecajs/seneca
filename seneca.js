@@ -1450,11 +1450,14 @@ function make_seneca (initial_options) {
     }
   }
 
+
+  // TODO: follow api_ convention
   root.gate = function gate () {
     return this.delegate({gate$: true})
   }
 
 
+  // TODO: follow api_ convention
   root.ungate = function ungate () {
     this.fixedargs.gate$ = false
     return this
