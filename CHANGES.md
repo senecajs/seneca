@@ -1,3 +1,10 @@
+## 3.3.0 2017-02-07
+
+* Action callback can omit Error parameter (hapi style): http://senecajs.org/api/#method-add
+* Minor updates for consistency with new API docs: http://senecajs.org/api
+* Updated use-plugin to 0.3.2.
+* Plugin options are now consistent with global options after plugin load.
+
 ## 3.2.0 2016-09-27
 
 * Added .inward() api method.
