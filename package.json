@@ -72,7 +72,8 @@
     "test": "lab -v -P test -L -t 80",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
-    "annotate": "docco seneca.js lib/*.js -o docs/annotated"
+    "annotate": "docco seneca.js lib/*.js -o docs/annotated",
+    "smoke": "node test/stubs/launch.js"
   },
   "dependencies": {
     "archy": "1.0.0",
@@ -92,7 +93,7 @@
     "semver": "5.3.0",
     "seneca-log-filter": "0.1.0",
     "seneca-transport": "2.1.0",
-    "use-plugin": "0.3.1"
+    "use-plugin": "0.3.2"
   },
   "devDependencies": {
     "async": "2.0.x",

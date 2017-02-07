@@ -2,7 +2,6 @@
 'use strict'
 
 var _ = require('lodash')
-var Async = require('async')
 var Code = require('code')
 var Lab = require('lab')
 
@@ -821,60 +820,40 @@ describe('transport', function () {
         .client({port: 44440, pin: 'bar:1'})
         .client({port: 44449, pin: 'bar:2'})
 
-      Async.series([
-        function (next) {
-          c0.act('foo:1,actid$:aa/BB', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.foo).to.equal(1)
-            expect(out.s).to.equal(0)
+      c0.act('foo:1,actid$:aa/BB', function (err, out) {
+        expect(err).to.not.exist()
+        expect(out.foo).to.equal(1)
+        expect(out.s).to.equal(0)
 
-            next()
-          })
-        },
-        function (next) {
-          c0.act('foo:1,actid$:cc/DD', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.foo).to.equal(1)
-            expect(out.s).to.equal(1)
-
-            next()
-          })
-        },
-        function (next) {
-          c0.act('bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.q).to.equal(1)
-
-            next()
-          })
-        },
-        function (next) {
-          c0.act('bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.q).to.equal(1)
-
-            next()
-          })
-        },
-        function (next) {
-          c0.act('bar:2', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.q).to.equal(2)
-
-            next()
-          })
-        }],
-        function (err, results) {
+        c0.act('foo:1,actid$:cc/DD', function (err, out) {
           expect(err).to.not.exist()
+          expect(out.foo).to.equal(1)
+          expect(out.s).to.equal(1)
 
-          s0.close(function () {
-            s1.close(function () {
-              s9.close(function () {
-                c0.close(done)
+          c0.act('bar:1', function (err, out) {
+            expect(err).to.not.exist()
+            expect(out.q).to.equal(1)
+
+            c0.act('bar:1', function (err, out) {
+              expect(err).to.not.exist()
+              expect(out.q).to.equal(1)
+
+              c0.act('bar:2', function (err, out) {
+                expect(err).to.not.exist()
+                expect(out.q).to.equal(2)
+
+                s0.close(function () {
+                  s1.close(function () {
+                    s9.close(function () {
+                      c0.close(done)
+                    })
+                  })
+                })
               })
             })
           })
         })
+      })
     }
   })
 

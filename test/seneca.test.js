@@ -3,7 +3,6 @@
 
 var Assert = require('assert')
 var Util = require('util')
-var Async = require('async')
 var Code = require('code')
 var Gex = require('gex')
 var _ = require('lodash')
@@ -30,6 +29,12 @@ var timerstub = {
 
 var testopts = { log: 'test' }
 
+
+function z (msg, reply) {
+  reply({z: msg.z})
+}
+
+
 describe('seneca', function () {
   lab.beforeEach(function (done) {
     process.removeAllListeners('SIGHUP')
@@ -54,6 +59,7 @@ describe('seneca', function () {
 
   it('tag', function (done) {
     var si = Seneca({tag: 'foo'}, testopts)
+    expect(si.tag).to.equal('foo')
     expect(si.id).to.endWith('/foo')
     done()
   })
@@ -674,72 +680,57 @@ describe('seneca', function () {
       cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
     })
 
-    Async.series([
-      function (next) {
-        si.act({a: 1, b: 2, c: 3}, function (err, out) {
-          assert.ok(!err)
-          assert.equal(6, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('a:1,b:2,c:3', function (err, out) {
-          assert.ok(!err)
-          assert.equal(6, out)
-          next()
-        })
-      },
-      function (next) {
+    si.act({a: 1, b: 2, c: 3}, function (err, out) {
+      assert.ok(!err)
+      assert.equal(6, out)
+
+      si.act('a:1,b:2,c:3', function (err, out) {
+        assert.ok(!err)
+        assert.equal(6, out)
+
         si.act('a:1,b:2', function (err, out) {
           assert.ok(!err)
           assert.equal(2, out)
-          next()
+
+          try {
+            si.add('a:,b:2', function (args, cb) {
+              cb()
+            })
+          }
+          catch (e) {
+            assert.equal(e.code, 'add_string_pattern_syntax')
+
+            try {
+              si.act('a:,b:2', {c: 3}, function () {
+                assert.fail()
+              })
+            }
+            catch (e) {
+              assert.equal(e.code, 'add_string_pattern_syntax')
+
+              try {
+                si.add('a:1,b:2', 'bad-arg', function (args, cb) {
+                  cb()
+                })
+              }
+              catch (e) {
+                assert.ok(e.message.match(/norma:/))
+
+                try {
+                  si.add(123, function (args, cb) { cb() })
+                }
+                catch (e) {
+                  assert.ok(e.message.match(/norma:/))
+                  done()
+                }
+              }
+            }
+          }
         })
-      },
-      function (next) {
-        try {
-          si.add('a:,b:2', function (args, cb) {
-            cb()
-          })
-        }
-        catch (e) {
-          assert.equal(e.code, 'add_string_pattern_syntax')
-          next()
-        }
-      },
-      function (next) {
-        try {
-          si.act('a:,b:2', {c: 3}, function () {
-            assert.fail()
-          })
-        }
-        catch (e) {
-          assert.equal(e.code, 'add_string_pattern_syntax')
-          next()
-        }
-      },
-      function (next) {
-        try {
-          si.add('a:1,b:2', 'bad-arg', function (args, cb) {
-            cb()
-          })
-        }
-        catch (e) {
-          assert.ok(e.message.match(/norma:/))
-          next()
-        }
-      },
-      function (next) {
-        try {
-          si.add(123, function (args, cb) { cb() })
-        }
-        catch (e) {
-          assert.ok(e.message.match(/norma:/))
-          next()
-        }
-      }
-    ], done)
+      })
+    })
   })
+
 
   it('string-add', function (done) {
     var addFunction = function (args, done) {
@@ -755,31 +746,25 @@ describe('seneca', function () {
     var si = Seneca(testopts)
       .error(done)
 
-    Async.series([
-      function (next) {
-        si.add('i:0,a:1,b:2', addFunction)
-        .act('i:0,a:1,b:2,c:3', function (err, out) {
-          checkFunction(err, out, next)
+    si
+      .add('i:0,a:1,b:2', addFunction)
+      .act('i:0,a:1,b:2,c:3', function (err, out) {
+        checkFunction(err, out, function () {
+          si
+            .add('i:1,a:1', {b: 2}, addFunction)
+            .act('i:1,a:1,b:2,c:3', function (err, out) {
+              checkFunction(err, out, function (next) {
+                si
+                  .add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
+                  .act('i:2,a:1,b:2,c:3', function (err, out) {
+                    checkFunction(err, out, done)
+                  })
+              })
+            })
         })
-      },
-      function (next) {
-        si.add('i:1,a:1', {b: 2}, addFunction)
-        .act('i:1,a:1,b:2,c:3', function (err, out) {
-          checkFunction(err, out, next)
-        })
-      },
-      function (next) {
-        si.add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
-        .act('i:2,a:1,b:2,c:3', function (err, out) {
-          checkFunction(err, out, next)
-        })
-      }],
-      function (err, results) {
-        assert.equal(err, null)
-
-        done()
       })
   })
+
 
   it('fix-basic', function (done) {
     var si = Seneca(testopts)
@@ -958,75 +943,55 @@ describe('seneca', function () {
 
     assertMetaName('second', 'a:1,d:4')
 
-    Async.series([
-      function (next) {
-        si.act('a:1,aa:1', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ aa: 1, X: 1 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('a:1,c:3,cc:3', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ cc: 3, X: 1 }, out)
-          next()
-        })
-      },
-      function (next) {
+    si.act('a:1,aa:1', function (err, out) {
+      assert.equal(err, null)
+      assert.deepEqual({ aa: 1, X: 1 }, out)
+
+      si.act('a:1,c:3,cc:3', function (err, out) {
+        assert.equal(err, null)
+        assert.deepEqual({ cc: 3, X: 1 }, out)
+
         si.act('a:1,d:4,dd:4', function (err, out) {
           assert.equal(err, null)
           assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('b:2,bb:2', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ bb: 2 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.wrap('', function (args, cb) {
-          this.prior(args, function (err, out) {
-            out.ALL = 2
-            cb(err, out)
+
+          si.act('b:2,bb:2', function (err, out) {
+            assert.equal(err, null)
+            assert.deepEqual({ bb: 2 }, out)
+
+            si.wrap('', function (args, cb) {
+              this.prior(args, function (err, out) {
+                out.ALL = 2
+                cb(err, out)
+              })
+            })
+
+            si.act('a:1,aa:1', function (err, out) {
+              assert.equal(err, null)
+              assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+
+              si.act('a:1,c:3,cc:3', function (err, out) {
+                assert.equal(err, null)
+                assert.deepEqual({ cc: 3, X: 1, ALL: 2 }, out)
+
+                si.act('a:1,d:4,dd:4', function (err, out) {
+                  assert.equal(err, null)
+                  assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
+
+                  si.act('b:2,bb:2', function (err, out) {
+                    assert.equal(err, null)
+                    assert.deepEqual({ bb: 2, ALL: 2 }, out)
+                    done()
+                  })
+                })
+              })
+            })
           })
         })
-        si.act('a:1,aa:1', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('a:1,c:3,cc:3', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ cc: 3, X: 1, ALL: 2 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('a:1,d:4,dd:4', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
-          next()
-        })
-      },
-      function (next) {
-        si.act('b:2,bb:2', function (err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ bb: 2, ALL: 2 }, out)
-          next()
-        })
-      }],
-      function (err, results) {
-        assert.equal(err, null)
-
-        done()
       })
+    })
   })
+
 
   it('meta', function (done) {
     var si = Seneca(testopts)
@@ -1391,5 +1356,56 @@ describe('seneca', function () {
 
       done()
     }
+  })
+
+
+  it('has-find-list', function (done) {
+    var seneca = Seneca()
+          .test(done)
+          .add('a:1', z)
+          .add('a:1,b:2', z)
+          .add('a:1,b:2,c:3', z)
+          .add('a:2', z)
+
+    expect(seneca.has('a:1')).to.be.true()
+    expect(seneca.has({a: 1})).to.be.true()
+
+    expect(seneca.has('a:1,b:2')).to.be.true()
+    expect(seneca.has('a:1,b:2,c:3')).to.be.true()
+
+    expect(seneca.has('not:0')).to.be.false()
+
+    expect(seneca.find('a:1').pattern).to.equal('a:1')
+    expect(seneca.find({a: 1}).pattern).to.equal('a:1')
+
+    expect(seneca.find('a:1,b:2').pattern).to.equal('a:1,b:2')
+    expect(seneca.find('a:1,b:2,c:3').pattern).to.equal('a:1,b:2,c:3')
+
+    expect(seneca.list('a:1')).to.equal(
+      [{a: '1'}, {a: '1', b: '2'}, {a: '1', b: '2', c: '3'}])
+    expect(seneca.list('a:1,b:2')).to.equal(
+      [{a: '1', b: '2'}, {a: '1', b: '2', c: '3'}])
+    expect(seneca.list('a:1,b:2,c:3')).to.equal(
+      [{a: '1', b: '2', c: '3'}])
+    expect(seneca.list({a: 1, b: 2, c: 3})).to.equal(
+      [{a: '1', b: '2', c: '3'}])
+
+    expect(seneca.list('a:*')).to.equal(
+      [ { a: '1' },
+        { a: '1', b: '2' },
+        { a: '1', b: '2', c: '3' },
+        { a: '2' } ])
+
+    expect(seneca.list('b:*')).to.equal(
+      [ { a: '1', b: '2' },
+        { a: '1', b: '2', c: '3' } ])
+
+    expect(seneca.list('c:*')).to.equal(
+      [ { a: '1', b: '2', c: '3' } ])
+
+    expect(seneca.list({c: '*'})).to.equal(
+      [ { a: '1', b: '2', c: '3' } ])
+
+    done()
   })
 })
