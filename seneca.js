@@ -546,7 +546,7 @@ function make_seneca (initial_options) {
     .add(Actions.inward.validate_msg)
     .add(Actions.inward.warnings)
     .add({tags: ['prior']}, Actions.inward.msg_meta)
-    .add({tags: ['xprior']}, Actions.inward.prepare_delegate)
+    .add({tags: ['prior']}, Actions.inward.prepare_delegate)
     .add(Actions.inward.msg_modify)
     .add(Actions.inward.announce)
 
@@ -1700,13 +1700,15 @@ function act_make_delegate (instance, msg, actmeta) {
       prior_msg.meta$.prior.depth++
 
       var prior_action_ctxt = {
-        actmeta: actmeta.priormeta
+        actmeta: actmeta.priormeta,
+        seneca: delegate
       }
 
       // TODO: handle inward result
       delegate.private$.inward.process(
         {tags: ['prior']},
-        prior_action_ctxt, {msg: msg})
+        prior_action_ctxt,
+        {msg: msg, reply: prior_cb})
 
       var pd = act_make_delegate(delegate, msg, actmeta.priormeta)
       actmeta.priormeta.func.call(pd, prior_msg, prior_cb.bind(pd))
