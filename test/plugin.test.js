@@ -121,20 +121,14 @@ describe('plugin', function () {
 
 
   it('plugin-error-add', function (done) {
-    var si = Seneca({
-      debug: {
-        undead: true
-      },
-      log: 'silent',
-      errhandler: function (err) {
+    Seneca({log: 'silent', debug: {undead: true}})
+      .error(function (err) {
         expect('invalid_arguments').to.equal(err.orig.code)
         done()
-      }
-    })
-
-    si.use(function () {
-      this.add(new Error())
-    })
+      })
+      .use(function foo () {
+        this.add(new Error())
+      })
   })
 
 

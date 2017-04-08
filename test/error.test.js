@@ -26,6 +26,7 @@ describe('error', function () {
   it('act_not_found', act_not_found)
 
   it('exec_action_throw_basic', exec_action_throw_basic)
+  it('exec_action_throw_basic_legacy', exec_action_throw_basic_legacy)
   it('exec_action_throw_nolog', exec_action_throw_nolog)
   it('exec_action_errhandler_throw', exec_action_errhandler_throw)
 
@@ -38,6 +39,28 @@ describe('error', function () {
   it('ready_die', ready_die)
 
   it('legacy_fail', legacy_fail)
+
+
+  function fail_assert (done) {
+    return function (err) {
+      if (err && 'AssertionError' === err.name) {
+        return done(err)
+      }
+    }
+  }
+
+  function exec_action_throw_basic (done) {
+    Seneca({legacy: {error: false}, log: 'silent'})
+      .error(fail_assert(done))
+      .add('a:1', function (args, done) {
+        throw new Error('AAA')
+      })
+      .act('a:1', function (err) {
+        assert.equal('AAA', err.message)
+        return done()
+      })
+  }
+
 
   function act_not_found (done) {
     var ctxt = {errlog: null}
@@ -88,7 +111,8 @@ describe('error', function () {
     })
   }
 
-  function exec_action_throw_basic (done) {
+
+  function exec_action_throw_basic_legacy (done) {
     var ctxt = {errlog: null, done: done, log: true, name: 'throw'}
     var si = make_seneca(ctxt)
 
@@ -98,6 +122,7 @@ describe('error', function () {
 
     test_action(si, ctxt)
   }
+
 
   function exec_action_result (done) {
     var ctxt = {errlog: null, done: done, log: true, name: 'result'}
