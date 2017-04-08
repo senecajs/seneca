@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2016 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2017 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 
@@ -573,6 +573,7 @@ function make_seneca (initial_options) {
     })
   }
 
+
   function api_export (key) {
     var self = this
 
@@ -582,6 +583,8 @@ function make_seneca (initial_options) {
     }
 
     var exportval = private$.exports[key]
+
+    // TODO: death should be optional
     if (!exportval) {
       return self.die(error('export_not_found', {key: key}))
     }
@@ -858,6 +861,8 @@ function make_seneca (initial_options) {
     var actdone = spec.done
 
     if (so.debug.act_caller || so.test) {
+
+      // TODO: remove term 'Error' from generated string as confusing
       msg.caller$ = '\n    Action call arguments and location: ' +
         (new Error(Util.inspect(msg).replace(/\n/g, '')).stack)
           .replace(/.*\/seneca\.js:.*\n/g, '')
