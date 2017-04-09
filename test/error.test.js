@@ -4,6 +4,7 @@
 var Assert = require('assert')
 var Lab = require('lab')
 var Seneca = require('..')
+var TransportStubs = require('./stubs/transports')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
@@ -13,6 +14,8 @@ var testopts = {log: 'silent'}
 
 // Shortcuts
 var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
+
+var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function () {
   lab.beforeEach(function (done) {
@@ -32,6 +35,8 @@ describe('error', function () {
 
   it('exec_action_result', exec_action_result)
   it('exec_deep_action_result', exec_deep_action_result)
+  it('exec_remote_action_result', exec_remote_action_result)
+
   it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)
   it('exec_action_errhandler_result', exec_action_errhandler_result)
@@ -95,6 +100,29 @@ describe('error', function () {
   }
 
 
+  function exec_remote_action_result (done) {
+    var tt = make_test_transport()
+
+    Seneca({tag: 's0', legacy: {error: false}, log: 'silent'})
+      .error(fail_assert(done))
+      .use(tt)
+      .add('a:1', function (msg, reply) {
+        reply(new Error('ERAR'))
+      })
+      .listen({type: 'test', pin: 'a:1'})
+      .ready(function () {
+        Seneca({tag: 'c0', legacy: {error: false}, log: 'silent'})
+          .error(fail_assert(done))
+          .use(tt)
+          .client({type: 'test', pin: 'a:1'})
+          .act('a:1', function (err) {
+            assert.equal('ERAR', err.message)
+            return done()
+          })
+      })
+  }
+
+
   function exec_action_throw_basic (done) {
     Seneca({legacy: {error: false}, log: 'silent'})
       .error(fail_assert(done))
@@ -106,6 +134,8 @@ describe('error', function () {
         return done()
       })
   }
+
+
 
 
   function act_not_found (done) {
