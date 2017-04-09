@@ -31,6 +31,7 @@ describe('error', function () {
   it('exec_action_errhandler_throw', exec_action_errhandler_throw)
 
   it('exec_action_result', exec_action_result)
+  it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)
   it('exec_action_errhandler_result', exec_action_errhandler_result)
 
@@ -48,6 +49,21 @@ describe('error', function () {
       }
     }
   }
+
+
+  function exec_action_result (done) {
+    Seneca({legacy: {error: false}, log: 'silent'})
+      .error(fail_assert(done))
+      .add('a:1', function (args, done) {
+        done(new Error('BBB'))
+      })
+      .act('a:1', function (err) {
+        console.log(err)
+        assert.equal('BBB', err.message)
+        return done()
+      })
+  }
+
 
   function exec_action_throw_basic (done) {
     Seneca({legacy: {error: false}, log: 'silent'})
@@ -124,7 +140,7 @@ describe('error', function () {
   }
 
 
-  function exec_action_result (done) {
+  function exec_action_result_legacy (done) {
     var ctxt = {errlog: null, done: done, log: true, name: 'result'}
     var si = make_seneca(ctxt)
 
@@ -134,6 +150,7 @@ describe('error', function () {
 
     test_action(si, ctxt)
   }
+
 
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
