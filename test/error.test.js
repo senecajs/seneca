@@ -31,6 +31,7 @@ describe('error', function () {
   it('exec_action_errhandler_throw', exec_action_errhandler_throw)
 
   it('exec_action_result', exec_action_result)
+  it('exec_deep_action_result', exec_deep_action_result)
   it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)
   it('exec_action_errhandler_result', exec_action_errhandler_result)
@@ -54,12 +55,41 @@ describe('error', function () {
   function exec_action_result (done) {
     Seneca({legacy: {error: false}, log: 'silent'})
       .error(fail_assert(done))
-      .add('a:1', function (args, done) {
-        done(new Error('BBB'))
+      .add('a:1', function (msg, reply) {
+        reply(new Error('BBB'))
       })
       .act('a:1', function (err) {
-        console.log(err)
         assert.equal('BBB', err.message)
+        return done()
+      })
+  }
+
+
+  function exec_deep_action_result (done) {
+    Seneca({legacy: {error: false}, log: 'silent'})
+      .error(fail_assert(done))
+      .add('a:1', function (msg, reply) {
+        this.act('b:1', reply)
+      })
+      .add('b:1', function (msg, reply) {
+        this.act('c:1', reply)
+      })
+      .add('c:1', function (msg, reply) {
+        reply(new Error('EDAR'))
+      })
+      .act('a:1', function (err) {
+        assert.equal('EDAR', err.message)
+        assert.equal('c:1', err.meta$.pattern)
+        assert.equal('act_execute', err.meta$.err.code)
+        assert.equal('b:1', err.meta$.err_trail[0].pattern)
+        assert.equal('a:1', err.meta$.err_trail[1].pattern)
+
+        assert.ok(err.meta$.id !== err.meta$.err_trail[0].id)
+        assert.ok(err.meta$.id !== err.meta$.err_trail[1].id)
+
+        assert.equal(err.meta$.tx, err.meta$.err_trail[0].tx)
+        assert.equal(err.meta$.tx, err.meta$.err_trail[1].tx)
+
         return done()
       })
   }
@@ -68,7 +98,7 @@ describe('error', function () {
   function exec_action_throw_basic (done) {
     Seneca({legacy: {error: false}, log: 'silent'})
       .error(fail_assert(done))
-      .add('a:1', function (args, done) {
+      .add('a:1', function (msg, reply) {
         throw new Error('AAA')
       })
       .act('a:1', function (err) {
@@ -132,7 +162,7 @@ describe('error', function () {
     var ctxt = {errlog: null, done: done, log: true, name: 'throw'}
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (args, done) {
+    si.add('a:1', function (msg, done) {
       throw new Error('AAA')
     })
 
@@ -144,7 +174,7 @@ describe('error', function () {
     var ctxt = {errlog: null, done: done, log: true, name: 'result'}
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (args, done) {
+    si.add('a:1', function (msg, done) {
       done(new Error('BBB'))
     })
 
@@ -159,7 +189,7 @@ describe('error', function () {
     var si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
-      si.add('a:1', function (args, done) {
+      si.add('a:1', function (msg, done) {
         var err = new Error('CCC')
         err.log = false
         throw err
@@ -179,7 +209,7 @@ describe('error', function () {
     var si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
-      si.add('a:1', function (args, done) {
+      si.add('a:1', function (msg, done) {
         var err = new Error('CCC')
         err.log = false
         done(err)
@@ -219,7 +249,7 @@ describe('error', function () {
       }
     })
 
-    si.add('a:1', function (args, done) {
+    si.add('a:1', function (msg, done) {
       throw new Error('AAA' + aI)
     })
 
@@ -242,10 +272,10 @@ describe('error', function () {
         ctxt.errlog = null
 
         // ~~ CASE: action-throws; no-callback; errhandler-nostop
-        si.on('act-err', function (args, err) {
+        si.on('act-err', function (msg, err) {
           if (aI === 1) {
             try {
-              assert.equal(1, args.a)
+              assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
               if (si.options().legacy.logging) {
@@ -305,7 +335,7 @@ describe('error', function () {
       }
     })
 
-    si.add('a:1', function (args, done) {
+    si.add('a:1', function (msg, done) {
       done(new Error('AAA' + aI))
     })
 
@@ -327,10 +357,10 @@ describe('error', function () {
         ctxt.errlog = null
 
         // ~~ CASE: action-throws; no-callback; errhandler-nostop
-        si.on('act-err', function (args, err) {
+        si.on('act-err', function (msg, err) {
           if (aI === 1) {
             try {
-              assert.equal(1, args.a)
+              assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
               if (si.options().legacy.logging) {
@@ -423,9 +453,9 @@ describe('error', function () {
           ctxt.errlog = null
 
           // ~~ CASE: action; no-callback; no-errhandler
-          si.on('act-err', function (args, err) {
+          si.on('act-err', function (msg, err) {
             try {
-              assert.equal(1, args.a)
+              assert.equal(1, msg.a)
               assert.equal('act_execute', err.code, ctxt.name + '-D')
               assert.equal('a:1', err.details.pattern, ctxt.name + '-E')
 
@@ -485,7 +515,7 @@ describe('error', function () {
     }})
 
     si.ready(function () {
-      si.add('a:1', function (args, done) { this.good({x: 1}) })
+      si.add('a:1', function (msg, done) { this.good({x: 1}) })
 
       setTimeout(function () {
         // ~~ CASE: action; callback; callback-throws; log

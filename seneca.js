@@ -1230,8 +1230,22 @@ function make_seneca (initial_options) {
         err = error(origerr, 'act_execute', details)
       }
       else {
-        err.meta$ = {
-          err: error('act_execute', details)
+        var seneca_err = error('act_execute', {
+          pattern: actmeta.pattern,
+          message: origerr.message
+        })
+
+        err.meta$ = (err.meta$ || msg.meta$ || {})
+        err.meta$.data = origmsg
+
+        if (err.meta$.err) {
+          var errmeta = _.clone(msg.meta$)
+          errmeta.err = seneca_err
+          err.meta$.err_trail = (err.meta$.err_trail || [])
+          err.meta$.err_trail.push(errmeta)
+        }
+        else {
+          err.meta$.err = seneca_err
         }
       }
 
