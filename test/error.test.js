@@ -136,8 +136,6 @@ describe('error', function () {
   }
 
 
-
-
   function act_not_found (done) {
     var ctxt = {errlog: null}
     var si = make_seneca(ctxt)
