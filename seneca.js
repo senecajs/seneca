@@ -34,6 +34,7 @@ var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
 var Actions = require('./lib/actions')
+var Transport = require('./lib/transport')
 
 
 // Shortcuts
@@ -182,7 +183,10 @@ var option_defaults = {
     error_codes: false,
 
     // Use old error handling.
-    error: true
+    error: true,
+
+    // Use seneca-transport plugin.
+    transport: true
   }
 }
 
@@ -232,7 +236,7 @@ module.exports = function init (seneca_options, more_options) {
   seneca.decorate('plugins', Plugins.api_decorations.plugins)
 
   // Register default plugins, unless turned off by options.
-  if (options.default_plugins.transport) {
+  if (options.legacy.transport && options.default_plugins.transport) {
     seneca.use(require('seneca-transport'))
   }
 
@@ -1502,6 +1506,11 @@ function make_seneca (initial_options) {
   }
 
   Actions(root)
+
+  if (!opts.$.legacy.transport) {
+    Transport(root)
+  }
+
   Print(root)
 
 

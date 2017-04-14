@@ -73,15 +73,16 @@
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
-    "smoke": "node test/stubs/launch.js"
+    "smoke": "node test/stubs/launch.js",
+    "prettier": "prettier --write lib/transport.js --no-semi --single-quote"
   },
   "dependencies": {
     "archy": "1.0.0",
     "eraro": "0.4.1",
     "gate-executor": "1.1.1",
     "gex": "0.2.2",
-    "jsonic": "0.3.0",
     "json-stringify-safe": "5.0.1",
+    "jsonic": "0.3.0",
     "lodash": "4.15.0",
     "lru-cache": "4.0.1",
     "minimist": "1.2.0",
@@ -89,11 +90,13 @@
     "norma": "0.3.0",
     "ordu": "0.1.1",
     "patrun": "0.5.1",
+    "qs": "^6.4.0",
     "rolling-stats": "0.1.1",
     "semver": "5.3.0",
     "seneca-log-filter": "0.1.0",
     "seneca-transport": "2.1.0",
-    "use-plugin": "0.3.2"
+    "use-plugin": "0.3.2",
+    "wreck": "^12.0.0"
   },
   "devDependencies": {
     "async": "2.0.x",
