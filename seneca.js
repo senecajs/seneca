@@ -23,7 +23,9 @@ var Lrucache = require('lru-cache')
 
 
 // Internal modules.
-var Actions = require('./lib/actions')
+var API = require('./lib/api')
+var Inward = require('./lib/inward')
+var Outward = require('./lib/outward')
 var Common = require('./lib/common')
 var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
@@ -31,7 +33,7 @@ var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
 var Plugins = require('./lib/plugins')
 var Print = require('./lib/print')
-var Transport = require('./lib/transport')
+var Actions = require('./lib/actions')
 
 
 // Shortcuts
@@ -405,16 +407,17 @@ function make_seneca (initial_options) {
   //   Message data.
   //   * `callback` <small>_function (optional)_</small> &rarr;
   //   As previously described.
-  root.act = api_act // Perform action that matches pattern.
+  root.act = api_act
+
+  root.has = API.has
+  root.find = API.find
+  root.list = API.list
 
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
-  root.listen = Transport.listen(callpoint) // Listen for inbound messages.
-  root.client = Transport.client(callpoint) // Send outbound messages.
+  root.listen = API.listen(callpoint) // Listen for inbound messages.
+  root.client = API.client(callpoint) // Send outbound messages.
   root.export = api_export // Export plain objects from a plugin.
-  root.has = Actions.has // True if action pattern defined.
-  root.find = Actions.find // Find action by pattern
-  root.list = Actions.list // List (a subset of) action patterns.
   root.ready = api_ready // Callback when plugins initialized.
   root.close = api_close // Close and shutdown plugins.
   root.options = api_options // Get and set options.
@@ -424,8 +427,8 @@ function make_seneca (initial_options) {
   root.outward = api_outward // Add a modifier function for responses outward
   root.test = api_test // Set test mode.
 
-  // Method aliases.
-  root.hasact = root.has
+
+  root.hasact = Legacy.hasact
 
   // Non-API methods.
   root.register = Plugins.register(opts, callpoint)
@@ -540,23 +543,23 @@ function make_seneca (initial_options) {
 
 
   private$.inward = Ordu({name: 'inward'})
-    .add(Actions.inward.closed)
-    .add(Actions.inward.resolve_msg_id)
-    .add(Actions.inward.act_cache)
-    .add(Actions.inward.act_default)
-    .add(Actions.inward.act_not_found)
-    .add(Actions.inward.act_stats)
-    .add(Actions.inward.validate_msg)
-    .add(Actions.inward.warnings)
-    .add({tags: ['prior']}, Actions.inward.msg_meta)
-    .add({tags: ['prior']}, Actions.inward.prepare_delegate)
-    .add(Actions.inward.msg_modify)
-    .add(Actions.inward.announce)
+    .add(Inward.closed)
+    .add(Inward.resolve_msg_id)
+    .add(Inward.act_cache)
+    .add(Inward.act_default)
+    .add(Inward.act_not_found)
+    .add(Inward.act_stats)
+    .add(Inward.validate_msg)
+    .add(Inward.warnings)
+    .add({tags: ['prior']}, Inward.msg_meta)
+    .add({tags: ['prior']}, Inward.prepare_delegate)
+    .add(Inward.msg_modify)
+    .add(Inward.announce)
 
   private$.outward = Ordu({name: 'outward'})
-    .add(Actions.outward.act_stats)
-    .add(Actions.outward.act_cache)
-    .add(Actions.outward.res_object)
+    .add(Outward.act_stats)
+    .add(Outward.act_cache)
+    .add(Outward.res_object)
 
 
   function api_depends () {
@@ -1498,84 +1501,16 @@ function make_seneca (initial_options) {
     return this
   }
 
-
-  // Add builtin actions.
-  root.add({role: 'seneca', cmd: 'stats'}, action_seneca_stats)
-  root.add({role: 'seneca', cmd: 'close'}, action_seneca_close)
-  root.add({role: 'seneca', info: 'fatal'}, action_seneca_fatal)
-  root.add({role: 'seneca', get: 'options'}, action_options_get)
-
-  // Legacy builtin actions.
-  // Remove in Seneca 4.x
-  root.add({role: 'seneca', stats: true, deprecate$: true}, action_seneca_stats)
-  root.add({role: 'options', cmd: 'get', deprecate$: true}, action_options_get)
-
+  Actions(root)
   Print(root)
 
-  // Define builtin actions.
-
-  function action_seneca_fatal (args, done) {
-    done()
-  }
-
-  function action_seneca_close (args, done) {
-    this.emit('close')
-    done()
-  }
-
-  function action_seneca_stats (args, done) {
-    args = args || {}
-    var stats
-
-    if (args.pattern && private$.stats.actmap[args.pattern]) {
-      stats = private$.stats.actmap[args.pattern]
-      stats.time = private$.timestats.calculate(args.pattern)
-    }
-    else {
-      stats = _.clone(private$.stats)
-      stats.now = new Date()
-      stats.uptime = stats.now - stats.start
-
-      stats.now = new Date(stats.now).toISOString()
-      stats.start = new Date(stats.start).toISOString()
-
-      var summary =
-      (args.summary == null) ||
-        (/^false$/i.exec(args.summary) ? false : !!(args.summary))
-
-      if (summary) {
-        stats.actmap = void 0
-      }
-      else {
-        _.each(private$.stats.actmap, function (a, p) {
-          private$.stats.actmap[p].time = private$.timestats.calculate(p)
-        })
-      }
-    }
-
-    if (done) {
-      done(null, stats)
-    }
-    return stats
-  }
-
-  root.stats = action_seneca_stats
-
-  function action_options_get (args, done) {
-    var options = private$.optioner.get()
-
-    var base = args.base || null
-    var root = base ? (options[base] || {}) : options
-    var val = args.key ? root[args.key] : root
-
-    done(null, Common.copydata(val))
-  }
 
   _.each(opts.$.internal.close_signals, function (active, signal) {
     if (active) {
       process.once(signal, handleClose)
     }
   })
+
 
   function load_logger (instance, log_plugin) {
     log_plugin = log_plugin || require('./lib/logging')

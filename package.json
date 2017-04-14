@@ -80,7 +80,7 @@
     "eraro": "0.4.1",
     "gate-executor": "1.1.1",
     "gex": "0.2.2",
-    "jsonic": "0.2.2",
+    "jsonic": "0.3.0",
     "json-stringify-safe": "5.0.1",
     "lodash": "4.15.0",
     "lru-cache": "4.0.1",

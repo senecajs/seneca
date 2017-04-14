@@ -7,7 +7,7 @@ var Lab = require('lab')
 
 var Seneca = require('..')
 var Common = require('../lib/common')
-var Transport = require('../lib/transport')
+var Transport = require('../lib/api')
 var TransportStubs = require('./stubs/transports')
 
 

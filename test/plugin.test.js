@@ -251,11 +251,7 @@ describe('plugin', function () {
       expect(si.hasact({ a: 1, q: 1 })).to.be.true()
 
 
-      // console.log('QQQ')
-
       si.act({a: 1}, function (err, out) {
-        // console.log('aaa',err,out)
-
         expect(err).to.not.exist()
         expect(1).to.equal(out.a)
         expect(1).to.equal(out.z)
