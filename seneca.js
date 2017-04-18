@@ -896,7 +896,10 @@ function make_seneca (initial_options) {
         pinthis.add(actpattern, meta, wrapper)
       })
     })
+
+    return this
   }
+
 
   var handleClose = function () {
     root.close(function (err) {
