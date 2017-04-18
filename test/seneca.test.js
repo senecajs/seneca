@@ -30,11 +30,6 @@ var timerstub = {
 var testopts = { log: 'test' }
 
 
-function z (msg, reply) {
-  reply({z: msg.z})
-}
-
-
 describe('seneca', function () {
   lab.beforeEach(function (done) {
     process.removeAllListeners('SIGHUP')
@@ -1356,56 +1351,5 @@ describe('seneca', function () {
 
       done()
     }
-  })
-
-
-  it('has-find-list', function (done) {
-    var seneca = Seneca()
-          .test(done)
-          .add('a:1', z)
-          .add('a:1,b:2', z)
-          .add('a:1,b:2,c:3', z)
-          .add('a:2', z)
-
-    expect(seneca.has('a:1')).to.be.true()
-    expect(seneca.has({a: 1})).to.be.true()
-
-    expect(seneca.has('a:1,b:2')).to.be.true()
-    expect(seneca.has('a:1,b:2,c:3')).to.be.true()
-
-    expect(seneca.has('not:0')).to.be.false()
-
-    expect(seneca.find('a:1').pattern).to.equal('a:1')
-    expect(seneca.find({a: 1}).pattern).to.equal('a:1')
-
-    expect(seneca.find('a:1,b:2').pattern).to.equal('a:1,b:2')
-    expect(seneca.find('a:1,b:2,c:3').pattern).to.equal('a:1,b:2,c:3')
-
-    expect(seneca.list('a:1')).to.equal(
-      [{a: '1'}, {a: '1', b: '2'}, {a: '1', b: '2', c: '3'}])
-    expect(seneca.list('a:1,b:2')).to.equal(
-      [{a: '1', b: '2'}, {a: '1', b: '2', c: '3'}])
-    expect(seneca.list('a:1,b:2,c:3')).to.equal(
-      [{a: '1', b: '2', c: '3'}])
-    expect(seneca.list({a: 1, b: 2, c: 3})).to.equal(
-      [{a: '1', b: '2', c: '3'}])
-
-    expect(seneca.list('a:*')).to.equal(
-      [ { a: '1' },
-        { a: '1', b: '2' },
-        { a: '1', b: '2', c: '3' },
-        { a: '2' } ])
-
-    expect(seneca.list('b:*')).to.equal(
-      [ { a: '1', b: '2' },
-        { a: '1', b: '2', c: '3' } ])
-
-    expect(seneca.list('c:*')).to.equal(
-      [ { a: '1', b: '2', c: '3' } ])
-
-    expect(seneca.list({c: '*'})).to.equal(
-      [ { a: '1', b: '2', c: '3' } ])
-
-    done()
   })
 })

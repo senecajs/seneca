@@ -121,20 +121,14 @@ describe('plugin', function () {
 
 
   it('plugin-error-add', function (done) {
-    var si = Seneca({
-      debug: {
-        undead: true
-      },
-      log: 'silent',
-      errhandler: function (err) {
+    Seneca({log: 'silent', debug: {undead: true}})
+      .error(function (err) {
         expect('invalid_arguments').to.equal(err.orig.code)
         done()
-      }
-    })
-
-    si.use(function () {
-      this.add(new Error())
-    })
+      })
+      .use(function foo () {
+        this.add(new Error())
+      })
   })
 
 
@@ -257,11 +251,7 @@ describe('plugin', function () {
       expect(si.hasact({ a: 1, q: 1 })).to.be.true()
 
 
-      // console.log('QQQ')
-
       si.act({a: 1}, function (err, out) {
-        // console.log('aaa',err,out)
-
         expect(err).to.not.exist()
         expect(1).to.equal(out.a)
         expect(1).to.equal(out.z)

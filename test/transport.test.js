@@ -7,7 +7,7 @@ var Lab = require('lab')
 
 var Seneca = require('..')
 var Common = require('../lib/common')
-var Transport = require('../lib/transport')
+var Transport = require('../lib/api')
 var TransportStubs = require('./stubs/transports')
 
 
@@ -46,6 +46,27 @@ describe('transport', function () {
     process.removeAllListeners('SIGBREAK')
     done()
   })
+
+
+  it('happy-nextgen', function (done) {
+    var s0 = Seneca({tag: 's0', legacy: {transport: false}}).test(done)
+    var c0 = Seneca({tag: 'c0', legacy: {transport: false}}).test(done)
+
+    s0
+      .add('a:1', function (msg, reply) {
+        reply({x: msg.x})
+      })
+      .listen(62010)
+      .ready(function () {
+        c0.client(62010)
+
+        c0.act('a:1,x:2', function (ignore, out) {
+          expect(out.x).equals(2)
+          done()
+        })
+      })
+  })
+
 
   describe('listen()', function () {
     it('supports null options', function (done) {

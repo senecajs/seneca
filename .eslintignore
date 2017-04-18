@@ -2,3 +2,4 @@ node_modules
 docs
 tmp
 test/stubs/plugin/bad-syntax-plugin.js
+lib/transport.js
