@@ -492,7 +492,7 @@ function make_seneca (initial_options) {
   private$.decorations = {}
 
   private$.logger = load_logger(root, opts.$.internal.logger)
-  root.log = make_log(root, default_log_modifier)
+  root.log = make_log(root, make_default_log_modifier(root))
 
 
   // Error events are fatal, unless you're undead.  These are not the
@@ -1621,12 +1621,13 @@ function make_modified_log (log, modifier) {
   }
 }
 
-function default_log_modifier (data) {
-  data.level = null == data.level ? 'debug' : data.level
-  data.seneca = null == data.seneca ? root.id : data.seneca
-  data.when = null == data.when ? Date.now() : data.when
+function make_default_log_modifier (root) {
+  return function default_log_modifier (data) {
+    data.level = null == data.level ? 'debug' : data.level
+    data.seneca = null == data.seneca ? root.id : data.seneca
+    data.when = null == data.when ? Date.now() : data.when
+  }
 }
-
 
 function act_make_delegate (instance, msg, actmeta) {
   actmeta = actmeta || {}
