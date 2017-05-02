@@ -74,7 +74,7 @@
     "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
-    "prettier": "prettier --write --no-semi --single-quote"
+    "prettier": "prettier --write --no-semi --single-quote seneca.js lib/*.js test/*.js"
   },
   "dependencies": {
     "archy": "1.0.0",

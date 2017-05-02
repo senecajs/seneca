@@ -6,19 +6,19 @@ var Lab = require('lab')
 var Seneca = require('..')
 var TransportStubs = require('./stubs/transports')
 
-var lab = exports.lab = Lab.script()
+var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
-var testopts = {log: 'silent'}
+var testopts = { log: 'silent' }
 
 // Shortcuts
 var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 
 var make_test_transport = TransportStubs.make_test_transport
 
-describe('error', function () {
-  lab.beforeEach(function (done) {
+describe('error', function() {
+  lab.beforeEach(function(done) {
     process.removeAllListeners('SIGHUP')
     process.removeAllListeners('SIGTERM')
     process.removeAllListeners('SIGINT')
@@ -47,42 +47,39 @@ describe('error', function () {
 
   it('legacy_fail', legacy_fail)
 
-
-  function fail_assert (done) {
-    return function (err) {
+  function fail_assert(done) {
+    return function(err) {
       if (err && 'AssertionError' === err.name) {
         return done(err)
       }
     }
   }
 
-
-  function exec_action_result (done) {
-    Seneca({legacy: {error: false}, log: 'silent'})
+  function exec_action_result(done) {
+    Seneca({ legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function(msg, reply) {
         reply(new Error('BBB'))
       })
-      .act('a:1', function (err) {
+      .act('a:1', function(err) {
         assert.equal('BBB', err.message)
         return done()
       })
   }
 
-
-  function exec_deep_action_result (done) {
-    Seneca({legacy: {error: false}, log: 'silent'})
+  function exec_deep_action_result(done) {
+    Seneca({ legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function(msg, reply) {
         this.act('b:1', reply)
       })
-      .add('b:1', function (msg, reply) {
+      .add('b:1', function(msg, reply) {
         this.act('c:1', reply)
       })
-      .add('c:1', function (msg, reply) {
+      .add('c:1', function(msg, reply) {
         reply(new Error('EDAR'))
       })
-      .act('a:1', function (err) {
+      .act('a:1', function(err) {
         assert.equal('EDAR', err.message)
         assert.equal('c:1', err.meta$.pattern)
         assert.equal('act_execute', err.meta$.err.code)
@@ -99,45 +96,42 @@ describe('error', function () {
       })
   }
 
-
-  function exec_remote_action_result (done) {
+  function exec_remote_action_result(done) {
     var tt = make_test_transport()
 
-    Seneca({tag: 's0', legacy: {error: false}, log: 'silent'})
+    Seneca({ tag: 's0', legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
       .use(tt)
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function(msg, reply) {
         reply(new Error('ERAR'))
       })
-      .listen({type: 'test', pin: 'a:1'})
-      .ready(function () {
-        Seneca({tag: 'c0', legacy: {error: false}, log: 'silent'})
+      .listen({ type: 'test', pin: 'a:1' })
+      .ready(function() {
+        Seneca({ tag: 'c0', legacy: { error: false }, log: 'silent' })
           .error(fail_assert(done))
           .use(tt)
-          .client({type: 'test', pin: 'a:1'})
-          .act('a:1', function (err) {
+          .client({ type: 'test', pin: 'a:1' })
+          .act('a:1', function(err) {
             assert.equal('ERAR', err.message)
             return done()
           })
       })
   }
 
-
-  function exec_action_throw_basic (done) {
-    Seneca({legacy: {error: false}, log: 'silent'})
+  function exec_action_throw_basic(done) {
+    Seneca({ legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
-      .add('a:1', function () {
+      .add('a:1', function() {
         throw new Error('AAA')
       })
-      .act('a:1', function (err) {
+      .act('a:1', function(err) {
         assert.equal('AAA', err.message)
         return done()
       })
   }
 
-
-  function act_not_found (done) {
-    var ctxt = {errlog: null}
+  function act_not_found(done) {
+    var ctxt = { errlog: null }
     var si = make_seneca(ctxt)
 
     // ~~ CASE: fire-and-forget; err-logged
@@ -147,7 +141,7 @@ describe('error', function () {
 
     // ~~ CASE: callback; default
     ctxt.errlog = null
-    si.act('a:1,default$:{x:1}', function (err, out) {
+    si.act('a:1,default$:{x:1}', function(err, out) {
       assert.equal(err, null)
       assert.equal(ctxt.errlog, null)
       assert.ok(out.x)
@@ -155,7 +149,7 @@ describe('error', function () {
 
     // ~~ CASE: callback; default Array
     ctxt.errlog = null
-    si.act('a:1,default$:[1,"foo"]', function (err, out) {
+    si.act('a:1,default$:[1,"foo"]', function(err, out) {
       assert.ok(err === null)
       assert.ok(ctxt.errlog === null)
       assert.equal(out[0], 1)
@@ -163,20 +157,20 @@ describe('error', function () {
     })
 
     // ~~ CASE: callback; no-default; err-result; err-logged
-    si.act('a:1', function (err, out) {
+    si.act('a:1', function(err, out) {
       assert.equal(out, null)
       assert.equal('act_not_found', err.code)
 
       // ~~ CASE: callback; bad-default; err-result; err-logged
-      si.act('a:1,default$:"foo"', function (err, out) {
+      si.act('a:1,default$:"foo"', function(err, out) {
         assert.equal(out, null)
         assert.equal('act_default_bad', err.code)
 
         // ~~ CASE: fragile; throws; err-logged
-        si.options({debug: {fragile: true}})
+        si.options({ debug: { fragile: true } })
         ctxt.errlog = null
 
-        si.act('a:1', function (ex) {
+        si.act('a:1', function(ex) {
           assert.equal('act_not_found', ex.code)
           // assert.equal('act_not_found', ctxt.errlog[8])
           return done()
@@ -185,78 +179,73 @@ describe('error', function () {
     })
   }
 
-
-  function exec_action_throw_basic_legacy (done) {
-    var ctxt = {errlog: null, done: done, log: true, name: 'throw'}
+  function exec_action_throw_basic_legacy(done) {
+    var ctxt = { errlog: null, done: done, log: true, name: 'throw' }
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function () {
+    si.add('a:1', function() {
       throw new Error('AAA')
     })
 
     test_action(si, ctxt)
   }
 
-
-  function exec_action_result_legacy (done) {
-    var ctxt = {errlog: null, done: done, log: true, name: 'result'}
+  function exec_action_result_legacy(done) {
+    var ctxt = { errlog: null, done: done, log: true, name: 'result' }
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (msg, done) {
+    si.add('a:1', function(msg, done) {
       done(new Error('BBB'))
     })
 
     test_action(si, ctxt)
   }
 
-
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
-  function exec_action_throw_nolog (done) {
-    var ctxt = {errlog: null, done: done, log: false, name: 'throw_nolog'}
+  function exec_action_throw_nolog(done) {
+    var ctxt = { errlog: null, done: done, log: false, name: 'throw_nolog' }
     var si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
-      si.add('a:1', function () {
+      si.add('a:1', function() {
         var err = new Error('CCC')
         err.log = false
         throw err
       })
 
       test_action(si, ctxt)
-    }
-    else {
+    } else {
       done()
     }
   }
 
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
-  function exec_action_result_nolog (done) {
-    var ctxt = {errlog: null, done: done, log: false, name: 'result_nolog'}
+  function exec_action_result_nolog(done) {
+    var ctxt = { errlog: null, done: done, log: false, name: 'result_nolog' }
     var si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
-      si.add('a:1', function (msg, done) {
+      si.add('a:1', function(msg, done) {
         var err = new Error('CCC')
         err.log = false
         done(err)
       })
 
       test_action(si, ctxt)
-    }
-    else {
+    } else {
       done()
     }
   }
 
-  function exec_action_errhandler_throw (done) {
-    var ctxt = {errlog: null}
+  function exec_action_errhandler_throw(done) {
+    var ctxt = { errlog: null }
     var si = make_seneca(ctxt)
     var aI = 0
 
     si.options({
-      errhandler: function (err) {
+      errhandler: function(err) {
         try {
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
@@ -269,20 +258,19 @@ describe('error', function () {
           }
 
           done()
-        }
-        catch (e) {
+        } catch (e) {
           done(e)
           return true
         }
       }
     })
 
-    si.add('a:1', function () {
+    si.add('a:1', function() {
       throw new Error('AAA' + aI)
     })
 
     // ~~ CASE: action-throws; callback; errhandler-nostop
-    si.act('a:1', function (err, out) {
+    si.act('a:1', function(err, out) {
       // Need to use try-catch here as we've subverted the log
       // to test logging.
       try {
@@ -292,15 +280,14 @@ describe('error', function () {
 
         if (si.options().legacy.logging) {
           assert.equal('act_execute', ctxt.errlog[14])
-        }
-        else {
+        } else {
           assert.equal('act_execute', ctxt.errlog.code)
         }
 
         ctxt.errlog = null
 
         // ~~ CASE: action-throws; no-callback; errhandler-nostop
-        si.on('act-err', function (msg, err) {
+        si.on('act-err', function(msg, err) {
           if (aI === 1) {
             try {
               assert.equal(1, msg.a)
@@ -308,138 +295,135 @@ describe('error', function () {
               assert.equal('a:1', err.details.pattern)
               if (si.options().legacy.logging) {
                 assert.equal('act_execute', ctxt.errlog[14])
-              }
-              else {
-                assert.equal('act_execute', ctxt.errlog.code)
-              }
-
-
-              // ~~ CASE: action-throws; callback; errhandler-stops
-              ctxt.errlog = null
-              si.act('a:1', function () {
-                try {
-                  assert.fail()
-                }
-                catch (e) {
-                  done(e)
-                }
-              })
-            }
-            catch (e) { done(e) }
-          }
-        })
-        si.act('a:1')
-      }
-      catch (e) {
-        done(e)
-      }
-    })
-  }
-
-  function exec_action_errhandler_result (done) {
-    var ctxt = {errlog: null}
-    var si = make_seneca(ctxt)
-    var aI = 0
-
-    si.options({
-      errhandler: function (err) {
-        try {
-          assert.equal('act_execute', err.code)
-          assert.equal('a:1', err.details.pattern)
-          assert.ok(err.message.indexOf('AAA' + aI) !== -1)
-
-          aI++
-
-          if (aI > 1) {
-            return true
-          }
-
-          done()
-        }
-        catch (e) {
-          done(e)
-          return true
-        }
-      }
-    })
-
-    si.add('a:1', function (msg, done) {
-      done(new Error('AAA' + aI))
-    })
-
-    // ~~ CASE: action-throws; callback; errhandler-nostop
-    si.act('a:1', function (err, out) {
-      // Need to use try-catch here as we've subverted the log
-      // to test logging.
-      try {
-        assert.equal(out, null)
-        assert.equal('act_execute', err.code)
-        assert.equal('a:1', err.details.pattern)
-        if (si.options().legacy.logging) {
-          assert.equal('act_execute', ctxt.errlog[14])
-        }
-        else {
-          assert.equal('act_execute', ctxt.errlog.code)
-        }
-
-        ctxt.errlog = null
-
-        // ~~ CASE: action-throws; no-callback; errhandler-nostop
-        si.on('act-err', function (msg, err) {
-          if (aI === 1) {
-            try {
-              assert.equal(1, msg.a)
-              assert.equal('act_execute', err.code)
-              assert.equal('a:1', err.details.pattern)
-              if (si.options().legacy.logging) {
-                assert.equal('act_execute', ctxt.errlog[14])
-              }
-              else {
+              } else {
                 assert.equal('act_execute', ctxt.errlog.code)
               }
 
               // ~~ CASE: action-throws; callback; errhandler-stops
               ctxt.errlog = null
-              si.act('a:1', function () {
+              si.act('a:1', function() {
                 try {
                   assert.fail()
-                }
-                catch (e) {
+                } catch (e) {
                   done(e)
                 }
               })
-            }
-            catch (e) {
+            } catch (e) {
               done(e)
             }
           }
         })
         si.act('a:1')
-      }
-      catch (e) {
+      } catch (e) {
         done(e)
       }
     })
   }
 
-  function make_seneca (ctxt) {
+  function exec_action_errhandler_result(done) {
+    var ctxt = { errlog: null }
+    var si = make_seneca(ctxt)
+    var aI = 0
+
+    si.options({
+      errhandler: function(err) {
+        try {
+          assert.equal('act_execute', err.code)
+          assert.equal('a:1', err.details.pattern)
+          assert.ok(err.message.indexOf('AAA' + aI) !== -1)
+
+          aI++
+
+          if (aI > 1) {
+            return true
+          }
+
+          done()
+        } catch (e) {
+          done(e)
+          return true
+        }
+      }
+    })
+
+    si.add('a:1', function(msg, done) {
+      done(new Error('AAA' + aI))
+    })
+
+    // ~~ CASE: action-throws; callback; errhandler-nostop
+    si.act('a:1', function(err, out) {
+      // Need to use try-catch here as we've subverted the log
+      // to test logging.
+      try {
+        assert.equal(out, null)
+        assert.equal('act_execute', err.code)
+        assert.equal('a:1', err.details.pattern)
+        if (si.options().legacy.logging) {
+          assert.equal('act_execute', ctxt.errlog[14])
+        } else {
+          assert.equal('act_execute', ctxt.errlog.code)
+        }
+
+        ctxt.errlog = null
+
+        // ~~ CASE: action-throws; no-callback; errhandler-nostop
+        si.on('act-err', function(msg, err) {
+          if (aI === 1) {
+            try {
+              assert.equal(1, msg.a)
+              assert.equal('act_execute', err.code)
+              assert.equal('a:1', err.details.pattern)
+              if (si.options().legacy.logging) {
+                assert.equal('act_execute', ctxt.errlog[14])
+              } else {
+                assert.equal('act_execute', ctxt.errlog.code)
+              }
+
+              // ~~ CASE: action-throws; callback; errhandler-stops
+              ctxt.errlog = null
+              si.act('a:1', function() {
+                try {
+                  assert.fail()
+                } catch (e) {
+                  done(e)
+                }
+              })
+            } catch (e) {
+              done(e)
+            }
+          }
+        })
+        si.act('a:1')
+      } catch (e) {
+        done(e)
+      }
+    })
+  }
+
+  function make_seneca(ctxt) {
     var si = Seneca(testopts)
     if (si.options().legacy.logging) {
       si.options({
-        log: {map: [{level: 'error+', handler: function () {
-          ctxt.errlog = arrayify(arguments)
-        }}]},
+        log: {
+          map: [
+            {
+              level: 'error+',
+              handler: function() {
+                ctxt.errlog = arrayify(arguments)
+              }
+            }
+          ]
+        },
         trace: { unknown: 'error' },
         legacy: { error_codes: false }
       })
       return si
-    }
-    else {
-      var logger = function () {}
-      logger.preload = function () {
+    } else {
+      var logger = function() {}
+      logger.preload = function() {
         return {
           extend: {
-            logger: function (s, d) {
+            logger: function(s, d) {
               ctxt.errlog = d
             }
           }
@@ -451,14 +435,15 @@ describe('error', function () {
         legacy: { error_codes: false },
         internal: {
           logger: logger
-        }})
+        }
+      })
     }
   }
 
-  function test_action (si, ctxt) {
+  function test_action(si, ctxt) {
     try {
       // ~~ CASE: action; callback; no-errhandler
-      si.act('a:1', function (err, out) {
+      si.act('a:1', function(err, out) {
         // Need to use try-catch here as we've subverted the log
         // to test logging.
         try {
@@ -469,19 +454,17 @@ describe('error', function () {
           if (ctxt.log) {
             if (si.options().legacy.logging) {
               assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-C')
-            }
-            else {
+            } else {
               assert.equal('act_execute', ctxt.errlog.code, ctxt.name + '-C')
             }
-          }
-          else {
+          } else {
             assert.equal(ctxt.errlog, null)
           }
 
           ctxt.errlog = null
 
           // ~~ CASE: action; no-callback; no-errhandler
-          si.on('act-err', function (msg, err) {
+          si.on('act-err', function(msg, err) {
             try {
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code, ctxt.name + '-D')
@@ -490,73 +473,75 @@ describe('error', function () {
               if (ctxt.log) {
                 if (si.options().legacy.logging) {
                   assert.equal('act_execute', ctxt.errlog[14], ctxt.name + '-F')
-                }
-                else {
-                  assert.equal('act_execute', ctxt.errlog.code, ctxt.name + '-F')
+                } else {
+                  assert.equal(
+                    'act_execute',
+                    ctxt.errlog.code,
+                    ctxt.name + '-F'
+                  )
                 }
               }
 
               ctxt.done()
-            }
-            catch (e) {
+            } catch (e) {
               ctxt.done(e)
             }
           })
           si.act('a:1')
-        }
-        catch (e) {
+        } catch (e) {
           ctxt.done(e)
         }
       })
-    }
-    catch (e) {
+    } catch (e) {
       ctxt.done(e)
     }
   }
 
-  function action_callback (done) {
-    var ctxt = {errlog: null}
+  function action_callback(done) {
+    var ctxt = { errlog: null }
     var si = make_seneca(ctxt)
 
     var log_it = true
 
-    si.options({errhandler: function (err) {
-      assert.equal('act_callback', err.code, 'callback-G')
-      assert.equal('seneca: Action a:1 callback threw: DDD.', err.message)
+    si.options({
+      errhandler: function(err) {
+        assert.equal('act_callback', err.code, 'callback-G')
+        assert.equal('seneca: Action a:1 callback threw: DDD.', err.message)
 
-      if (log_it) {
-        if (si.options().legacy.logging) {
-          assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
-        }
-        else {
-          assert.equal('act_callback', ctxt.errlog.code, 'callback-H')
+        if (log_it) {
+          if (si.options().legacy.logging) {
+            assert.equal('act_callback', ctxt.errlog[14], 'callback-H')
+          } else {
+            assert.equal('act_callback', ctxt.errlog.code, 'callback-H')
+          }
+        } else {
+          // REMOVE in Seneca 3.x
+          // e.log = false is a legacy logging feature
+          if (si.options().legacy.logging) {
+            assert.equal(ctxt.errlog, null)
+          }
+          done()
         }
       }
-      else {
-        // REMOVE in Seneca 3.x
-        // e.log = false is a legacy logging feature
-        if (si.options().legacy.logging) {
-          assert.equal(ctxt.errlog, null)
-        }
-        done()
-      }
-    }})
+    })
 
-    si.ready(function () {
-      si.add('a:1', function () { this.good({x: 1}) })
+    si.ready(function() {
+      si.add('a:1', function() {
+        this.good({ x: 1 })
+      })
 
-      setTimeout(function () {
+      setTimeout(function() {
         // ~~ CASE: action; callback; callback-throws; log
-        si.act('a:1', function (err, out) {
+        si.act('a:1', function(err, out) {
           assert.equal(err, null)
           assert.ok(out.x)
           throw new Error('DDD')
         })
       }, 20)
 
-      setTimeout(function () {
+      setTimeout(function() {
         // ~~ CASE: action; callback; callback-throws; no-log
-        si.act('a:1', function (err, out) {
+        si.act('a:1', function(err, out) {
           assert.equal(err, null)
           assert.ok(out.x)
           var e = new Error('DDD')
@@ -569,64 +554,65 @@ describe('error', function () {
     })
   }
 
-  function ready_die (done) {
+  function ready_die(done) {
     var si = Seneca({
       log: 'silent',
-      debug: {undead: true},
-      errhandler: function (err) {
+      debug: { undead: true },
+      errhandler: function(err) {
         try {
           assert.ok(err.foo)
           done()
-        }
-        catch (e) {
+        } catch (e) {
           done(e)
         }
       }
     })
 
-    si.ready(function () {
+    si.ready(function() {
       var e = new Error('EEE')
       e.foo = true
       throw e
     })
   }
 
-  function legacy_fail (done) {
+  function legacy_fail(done) {
     var si = Seneca({
       log: 'silent'
     })
 
-    si.options({errhandler: function (err) {
-      try {
-        assert.equal('foo', err.code)
-        assert.deepEqual({bar: 1}, err.details)
+    si.options({
+      errhandler: function(err) {
+        try {
+          assert.equal('foo', err.code)
+          assert.deepEqual({ bar: 1 }, err.details)
+        } catch (e) {
+          done(e)
+        }
       }
-      catch (e) {
-        done(e)
-      }
-    }})
+    })
 
-    var err = si.fail('foo', {bar: 1})
+    var err = si.fail('foo', { bar: 1 })
     assert.equal('foo', err.code)
-    assert.deepEqual({bar: 1}, err.details)
+    assert.deepEqual({ bar: 1 }, err.details)
 
-    si.options({errhandler: function (err) {
-      try {
-        assert.equal('FOO', err.code)
-        assert.deepEqual({BAR: 1}, err.details)
+    si.options({
+      errhandler: function(err) {
+        try {
+          assert.equal('FOO', err.code)
+          assert.deepEqual({ BAR: 1 }, err.details)
+        } catch (e) {
+          done(e)
+        }
       }
-      catch (e) {
-        done(e)
-      }
-    }})
+    })
 
-    err = si.fail('FOO', {BAR: 1}, function (err) {
+    err = si.fail('FOO', { BAR: 1 }, function(err) {
       assert.equal('FOO', err.code)
-      assert.deepEqual({BAR: 1}, err.details)
+      assert.deepEqual({ BAR: 1 }, err.details)
       setImmediate(done)
     })
 
     assert.equal('FOO', err.code)
-    assert.deepEqual({BAR: 1}, err.details)
+    assert.deepEqual({ BAR: 1 }, err.details)
   }
 })

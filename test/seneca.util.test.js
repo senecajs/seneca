@@ -8,13 +8,13 @@ var Seneca = require('..')
 var Util = require('util')
 
 var testopts = { log: 'silent' }
-var lab = exports.lab = Lab.script()
+var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-describe('util', function () {
-  lab.beforeEach(function (done) {
+describe('util', function() {
+  lab.beforeEach(function(done) {
     process.removeAllListeners('SIGHUP')
     process.removeAllListeners('SIGTERM')
     process.removeAllListeners('SIGINT')
@@ -23,13 +23,22 @@ describe('util', function () {
   })
   var si = Seneca(testopts)
 
-  it('seneca.util.deepextend.happy', function (done) {
-    expect(si.util.deepextend({}, {a: 1}, {b: {c: 2}}, {b: {c: 3, d: 4}})).to.include({ a: 1, b: { c: 3, d: 4 } })
-    expect(si.util.deepextend({}, {a: 1}, {b: [11, 22]}, {b: [undefined, 222, 333]})).to.include({ a: 1, b: [ 11, 222, 333 ] })
+  it('seneca.util.deepextend.happy', function(done) {
+    expect(
+      si.util.deepextend({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
+    ).to.include({ a: 1, b: { c: 3, d: 4 } })
+    expect(
+      si.util.deepextend(
+        {},
+        { a: 1 },
+        { b: [11, 22] },
+        { b: [undefined, 222, 333] }
+      )
+    ).to.include({ a: 1, b: [11, 222, 333] })
     done()
   })
 
-  it('seneca.util.deepextend.types with new', function (done) {
+  it('seneca.util.deepextend.types with new', function(done) {
     /* eslint no-new-wrappers: 0 */
     var t1 = {
       s: 's1',
@@ -39,7 +48,9 @@ describe('util', function () {
       b: true,
       bo: new Boolean(true),
       do: new Date(),
-      f: function () { return 'f' },
+      f: function() {
+        return 'f'
+      },
       re: /a/
     }
 
@@ -57,7 +68,7 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.deepextend.types', function (done) {
+  it('seneca.util.deepextend.types', function(done) {
     var t1 = {
       s: 's1',
       so: String('s2'),
@@ -66,7 +77,9 @@ describe('util', function () {
       b: true,
       bo: Boolean(true),
       do: Date(),
-      f: function () { return 'f' },
+      f: function() {
+        return 'f'
+      },
       re: /a/
     }
 
@@ -84,43 +97,60 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.argprops', function (done) {
-    var out = si.util.argprops({a: 1, b: 2, c: 3}, {b: 22, c: 33, d: 4}, {c: 333}, ['d'])
+  it('seneca.util.argprops', function(done) {
+    var out = si.util.argprops(
+      { a: 1, b: 2, c: 3 },
+      { b: 22, c: 33, d: 4 },
+      { c: 333 },
+      ['d']
+    )
     expect(out).to.include({ a: 1, b: 22, c: 333 })
 
-    out = si.util.argprops({}, {d: 1}, {}, 'd')
+    out = si.util.argprops({}, { d: 1 }, {}, 'd')
     expect('{}').to.equal(Util.inspect(out))
 
-    out = si.util.argprops({}, {d: 1, e: 2}, {}, 'd, e')
+    out = si.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
     expect('{}').to.equal(Util.inspect(out))
     done()
   })
 
-  it('seneca.util.deepextend.mixed', function (done) {
+  it('seneca.util.deepextend.mixed', function(done) {
     var obj = si.util.deepextend(
-      {}, {a: 1, b: {bb: 1}, c: 's', d: 'ss', e: [2, 3], f: {fa: 1, fb: 2}},
-      {a: {aa: 1}, b: {bb: {bbb: 1}}, c: [1], d: {dd: 1}, e: {ee: 1}, f: [4, 5, 6]}
+      {},
+      { a: 1, b: { bb: 1 }, c: 's', d: 'ss', e: [2, 3], f: { fa: 1, fb: 2 } },
+      {
+        a: { aa: 1 },
+        b: { bb: { bbb: 1 } },
+        c: [1],
+        d: { dd: 1 },
+        e: { ee: 1 },
+        f: [4, 5, 6]
+      }
     )
 
     expect(obj.a).to.equal({ aa: 1 })
     expect(obj.b).to.equal({ bb: { bbb: 1 } })
-    expect(obj.c).to.equal([ 1 ])
+    expect(obj.c).to.equal([1])
     expect(obj.d).to.equal({ dd: 1 })
     expect(obj.e).to.equal({ '0': 2, '1': 3, ee: 1 })
-    expect(obj.f).to.equal([ 4, 5, 6])
+    expect(obj.f).to.equal([4, 5, 6])
     expect(obj.f.fa).to.equal(1)
     expect(obj.f.fb).to.equal(2)
 
     done()
   })
 
-  it('seneca.util.deepextend.entity', function (done) {
+  it('seneca.util.deepextend.entity', function(done) {
     var obj = si.util.deepextend(
-      {a: {x: 1}, b: {y: 1, entity$: 'a/b/c'}},
-      {c: {z: 1}, b: {y: 2, entity$: 'a/b/c'}}
+      { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
+      { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } }
     )
 
-    expect(obj).to.include({ a: { x: 1 }, b: { y: 2, 'entity$': 'a/b/c' }, c: { z: 1 } })
+    expect(obj).to.include({
+      a: { x: 1 },
+      b: { y: 2, entity$: 'a/b/c' },
+      c: { z: 1 }
+    })
     done()
   })
 })
