@@ -4,5 +4,6 @@ module.exports = {
     node: true
   },
   rules: {
+    'no-console': 0
   }
 }

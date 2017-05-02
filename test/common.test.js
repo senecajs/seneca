@@ -198,31 +198,31 @@ describe('common', function() {
     h0.add({ id: 'a' })
     expect(h0.list()).to.equal(['a'])
     expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal({ id: 'a' })
+    expect(h0.get('a').id).to.equal('a')
     expect(h0.stats()).to.equal({ next: 1, size: 3, total: 1 })
 
     h0.add({ id: 'b' })
     expect(h0.list()).to.equal(['a', 'b'])
     expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal({ id: 'a' })
-    expect(h0.get('b')).to.equal({ id: 'b' })
+    expect(h0.get('a').id).to.equal('a')
+    expect(h0.get('b').id).to.equal('b')
     expect(h0.stats()).to.equal({ next: 2, size: 3, total: 2 })
 
     h0.add({ id: 'c' })
     expect(h0.list()).to.equal(['a', 'b', 'c'])
     expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal({ id: 'a' })
-    expect(h0.get('b')).to.equal({ id: 'b' })
-    expect(h0.get('c')).to.equal({ id: 'c' })
+    expect(h0.get('a').id).to.equal('a')
+    expect(h0.get('b').id).to.equal('b')
+    expect(h0.get('c').id).to.equal('c')
     expect(h0.stats()).to.equal({ next: 0, size: 3, total: 3 })
 
     h0.add({ id: 'd' })
     expect(h0.list()).to.equal(['b', 'c', 'd'])
     expect(h0.get()).to.equal(null)
     expect(h0.get('a')).to.equal(null)
-    expect(h0.get('b')).to.equal({ id: 'b' })
-    expect(h0.get('c')).to.equal({ id: 'c' })
-    expect(h0.get('d')).to.equal({ id: 'd' })
+    expect(h0.get('b').id).to.equal('b')
+    expect(h0.get('c').id).to.equal('c')
+    expect(h0.get('d').id).to.equal('d')
     expect(h0.stats()).to.equal({ next: 1, size: 3, total: 4 })
 
     expect(h0.list(3)).to.equal(['b', 'c', 'd'])
@@ -238,6 +238,46 @@ describe('common', function() {
     expect(h1.list()).to.equal([])
     expect(h1.stats()).to.equal({ next: 0, size: 0, total: 0 })
 
-    done()
+    // timelimits
+    var h2 = Common.history(2)
+    h2.add({id:'a', timelimit:Date.now()+100, result:[]})
+    h2.add({id:'b'})
+    h2.add({id:'c', timelimit:Date.now()+300, result:[]})
+    h2.add({id:'d'})
+    h2.add({id:'e', timelimit:Date.now()+500, result:[{}]})
+
+    expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
+
+    expect(h2.get('b')).to.equal(null)
+    expect(h2.get('a').id).to.equal('a')
+    expect(h2.get('c').id).to.equal('c')
+    expect(h2.get('d').id).to.equal('d')
+    expect(h2.get('e').id).to.equal('e')
+
+    setTimeout(function() {
+      expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
+      expect(h2.get('a')).to.equal(null)
+      expect(h2.get('b')).to.equal(null)
+
+      expect(h2.get('c').id).to.equal('c')
+      expect(h2.get('d').id).to.equal('d')
+      expect(h2.get('e').id).to.equal('e')
+
+      expect(h2.list()).to.equal(['c', 'd', 'e'])
+    }, 200)
+
+    setTimeout(function() {
+      expect(h2.list()).to.equal(['c', 'd', 'e'])
+
+      expect(h2.get('a')).to.equal(null)
+      expect(h2.get('b')).to.equal(null)
+      expect(h2.get('c')).to.equal(null)
+
+      expect(h2.get('d').id).to.equal('d')
+      expect(h2.get('e').id).to.equal('e')
+
+      expect(h2.list()).to.equal(['d', 'e'])
+      done()
+    }, 400)
   })
 })

@@ -885,7 +885,7 @@ function make_seneca(initial_options) {
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
 
-    do_act(self, msg, actdone)
+    do_act(self, opts, msg, actdone)
     return self
   }
 
@@ -1024,7 +1024,7 @@ function make_seneca(initial_options) {
     return this
   }
 
-  function do_act(instance, origmsg, actdone) {
+  function do_act(instance, opts, origmsg, actdone) {
     var actstart = Date.now()
     var msg = _.clone(origmsg)
     var act_callpoint = callpoint()
@@ -1033,6 +1033,9 @@ function make_seneca(initial_options) {
     var timedout = false
 
     actdone = actdone || _.noop
+
+    msg.timeout$ = 'number' === typeof msg.timeout$ ? msg.timeout$ : opts.$.timeout
+    msg.timeout$ = msg.timeout$ < 0 ? 0 : msg.timeout$
 
     if (msg.gate$) {
       execute_instance = instance.delegate()
@@ -1057,7 +1060,7 @@ function make_seneca(initial_options) {
         timedout = true
         handle_result.call(execute_instance, new Error('[TIMEOUT]'))
       },
-      tm: 'number' === typeof msg.timeout$ ? msg.timeout$ : null
+      tm: msg.timeout$
     }
 
     execute_instance.private$.ge.add(execspec)
@@ -1094,6 +1097,7 @@ function make_seneca(initial_options) {
 
       data.id = data.msg.meta$.id
       data.result = []
+      data.timelimit = Date.now() + data.msg.timeout$
       act_instance.private$.history.add(data)
 
       actmeta.func.call(delegate, data.msg, data.reply)
