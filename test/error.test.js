@@ -126,7 +126,7 @@ describe('error', function () {
   function exec_action_throw_basic (done) {
     Seneca({legacy: {error: false}, log: 'silent'})
       .error(fail_assert(done))
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function () {
         throw new Error('AAA')
       })
       .act('a:1', function (err) {
@@ -190,7 +190,7 @@ describe('error', function () {
     var ctxt = {errlog: null, done: done, log: true, name: 'throw'}
     var si = make_seneca(ctxt)
 
-    si.add('a:1', function (msg, done) {
+    si.add('a:1', function () {
       throw new Error('AAA')
     })
 
@@ -217,7 +217,7 @@ describe('error', function () {
     var si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
-      si.add('a:1', function (msg, done) {
+      si.add('a:1', function () {
         var err = new Error('CCC')
         err.log = false
         throw err
@@ -277,7 +277,7 @@ describe('error', function () {
       }
     })
 
-    si.add('a:1', function (msg, done) {
+    si.add('a:1', function () {
       throw new Error('AAA' + aI)
     })
 
@@ -543,7 +543,7 @@ describe('error', function () {
     }})
 
     si.ready(function () {
-      si.add('a:1', function (msg, done) { this.good({x: 1}) })
+      si.add('a:1', function () { this.good({x: 1}) })
 
       setTimeout(function () {
         // ~~ CASE: action; callback; callback-throws; log

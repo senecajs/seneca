@@ -1,5 +1,3 @@
-node_modules
-docs
+test/stubs
+docs/examples
 tmp
-test/stubs/plugin/bad-syntax-plugin.js
-lib/transport.js

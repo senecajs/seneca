@@ -16,8 +16,8 @@ describe('logging', function () {
 
     Seneca({log: 'all', internal: {logger: capture}})
       .error(fin)
-      .add('a:1', function (m, d) { d(null, {x: 1}) })
-      .act('a:1', function (e, o) {
+      .add('a:1', function (m, r) { r(null, {x: 1}) })
+      .act('a:1', function () {
         expect(this.seneca).to.exist()
         this.log({seen: 'a:1'})
       })
@@ -35,8 +35,8 @@ describe('logging', function () {
 
     Seneca({log: {basic: 'all'}, internal: {logger: capture}})
       .error(fin)
-      .add('a:1', function (m, d) { d(null, {x: 1}) })
-      .act('a:1', function (e, o) {
+      .add('a:1', function (m, r) { r(null, {x: 1}) })
+      .act('a:1', function () {
         expect(this.seneca).to.exist()
         this.log({seen: 'a:1'})
       })
@@ -196,8 +196,7 @@ function a1 (msg, reply) {
 }
 
 function make_log_capture () {
-  var capture = function capture (options) {
-  }
+  var capture = function capture () {}
 
   capture.log = []
 

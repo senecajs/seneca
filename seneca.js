@@ -19,7 +19,6 @@ var Norma = require('norma')
 var Patrun = require('patrun')
 var Stats = require('rolling-stats')
 var Ordu = require('ordu')
-var Lrucache = require('lru-cache')
 
 
 // Internal modules.
@@ -118,10 +117,12 @@ var option_defaults = {
   },
 
   // Action cache. Makes inbound messages idempotent.
+  // TODO: rename to `history`
   actcache: {
     active: false,
-    size: 11111
+    size: 1111
   },
+
 
   // Action executor tracing. See gate-executor module.
   trace: {
@@ -323,7 +324,7 @@ function make_seneca (initial_options) {
   root.context = {}
   root.version = Package.version
 
-  private$.actcache = Lrucache({ max: opts.$.actcache.size })
+  private$.history = Common.history(opts.$.actcache.size)
 
 
   // Seneca methods. Official API.
@@ -416,6 +417,8 @@ function make_seneca (initial_options) {
   root.has = API.has
   root.find = API.find
   root.list = API.list
+  root.status = API.status
+  root.reply = API.reply
 
   root.sub = api_sub // Subscribe to a message pattern.
   root.use = api_use // Define a plugin.
@@ -1066,11 +1069,12 @@ function make_seneca (initial_options) {
 
     var action_ctxt = {}
 
+
     function execute_action (act_instance, msg, reply) {
       var actmeta = act_instance.find(msg, {catchall: opts.$.internal.catchall})
 
       msg.meta$ = msg.meta$ || {}
-      var delegate = act_make_delegate(act_instance, msg, actmeta)
+      var delegate = act_make_delegate(act_instance, opts, msg, actmeta)
 
       action_ctxt.start = actstart
       action_ctxt.sync = is_sync
@@ -1091,6 +1095,10 @@ function make_seneca (initial_options) {
           actmeta, msg, origmsg,
           { kind: 'act', case: 'IN' }))
       }
+
+      data.id = data.msg.meta$.id
+      data.result = []
+      act_instance.private$.history.add(data)
 
       actmeta.func.call(delegate, data.msg, data.reply)
     }
@@ -1233,7 +1241,8 @@ function make_seneca (initial_options) {
           pattern: actmeta.pattern,
           fn: actmeta.func,
           cb: cb,
-          instance: instance.toString()
+          instance: instance.toString(),
+          callpoint: act_callpoint
         })
 
       if (opts.$.legacy.error) {
@@ -1242,7 +1251,8 @@ function make_seneca (initial_options) {
       else {
         var seneca_err = error('act_execute', {
           pattern: actmeta.pattern,
-          message: origerr.message
+          message: origerr.message,
+          callpoint: act_callpoint
         })
 
         err.meta$ = (err.meta$ || msg.meta$ || {})
@@ -1312,7 +1322,8 @@ function make_seneca (initial_options) {
           pattern: actmeta.pattern,
           fn: actmeta.func,
           cb: cb,
-          instance: instance.toString()
+          instance: instance.toString(),
+          callpoint: act_callpoint
         }))
 
       result[0] = err
@@ -1444,6 +1455,8 @@ function make_seneca (initial_options) {
 
   // TODO: should set all system.close_signals to false
   function api_test (errhandler, logspec) {
+    /* eslint no-console: 0 */
+
     if ('function' !== typeof errhandler && null !== errhandler) {
       logspec = errhandler
       errhandler = null
@@ -1632,7 +1645,7 @@ function make_default_log_modifier (root) {
   }
 }
 
-function act_make_delegate (instance, msg, actmeta) {
+function act_make_delegate (instance, opts, msg, actmeta) {
   actmeta = actmeta || {}
 
   var delegate_args = {
@@ -1693,8 +1706,19 @@ function act_make_delegate (instance, msg, actmeta) {
         prior_action_ctxt,
         {msg: msg, reply: prior_cb})
 
-      var pd = act_make_delegate(delegate, msg, actmeta.priormeta)
-      actmeta.priormeta.func.call(pd, prior_msg, prior_cb.bind(pd))
+      var pd = act_make_delegate(delegate, opts, msg, actmeta.priormeta)
+      actmeta.priormeta.func.call(pd, prior_msg, function () {
+        var argsarr = new Array(arguments.length)
+        for (var l = 0; l < argsarr.length; ++l) { argsarr[l] = arguments[l] }
+
+        if (!opts.$.legacy.action_signature &&
+            1 === argsarr.length &&
+            !_.isError(argsarr[0])) {
+          argsarr.unshift(null)
+        }
+
+        prior_cb.apply(pd, argsarr)
+      })
     }
 
     delegate.parent = function (prior_msg, prior_cb) {

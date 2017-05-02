@@ -22,10 +22,10 @@ var make_test_transport = TransportStubs.make_test_transport
 var make_balance_transport = TransportStubs.make_balance_transport
 
 
-function testact (args, done) {
+function testact (msg, reply) {
   var seneca = this
   setTimeout(function () {
-    var out = seneca.util.clean(_.clone(args))
+    var out = seneca.util.clean(_.clone(msg))
     out.bar = out.bar + 1
 
     if (out.baz) {
@@ -33,7 +33,7 @@ function testact (args, done) {
       delete out.bar
     }
 
-    done(null, out)
+    reply(out)
   }, 11)
 }
 
@@ -403,10 +403,10 @@ describe('transport', function () {
     Seneca({tag: 'srv', timeout: 5555})
       .test(done)
       .use(tt)
-      .add('foo:1', function (args, done) {
+      .add('foo:1', function (msg, reply) {
         // ensure action id is transferred for traceability
-        expect('aa/BB').to.equal(args.meta$.id)
-        testact.call(this, args, done)
+        expect('aa/BB').to.equal(msg.meta$.id)
+        testact.call(this, msg, reply)
       })
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function () {
@@ -444,7 +444,7 @@ describe('transport', function () {
             si.act('foo:2', function (err, out) {
               expect(err).to.not.exist()
               expect(out.foo).to.equal(2)
-              si.act('bar:1', function (err, out) {
+              si.act('bar:1', function (err) {
                 expect(err.code).to.equal('act_not_found')
 
                 done()
@@ -475,7 +475,7 @@ describe('transport', function () {
                   si.act('foo:2', function (err, out) {
                     expect(err).to.not.exist()
                     expect(out.foo).to.equal(2)
-                    si.act('bar:1', function (err, out) {
+                    si.act('bar:1', function (err) {
                       expect(err.code).to.equal('act_not_found')
 
                       done()
@@ -557,7 +557,7 @@ describe('transport', function () {
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
         si.use(tt)
-          .add('foo:1', function (args, done) { done(null, args) })
+          .add('foo:1', function (msg, reply) { reply(msg) })
 
           .client({type: 'test', pin: 'foo:1'})
           .client({type: 'test', pin: 'qaz:*'})
@@ -597,7 +597,7 @@ describe('transport', function () {
       .ready(function () {
         var si = Seneca({timeout: 5555, log: 'silent', debug: {short_logs: true}})
               .use(tt)
-              .add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
+              .add('foo:1', function (msg, reply) { reply({foo: 1, local: 1}) })
 
               .client({type: 'test', pin: 'foo:2,qaz:*'})
 
@@ -639,7 +639,7 @@ describe('transport', function () {
           .client({type: 'test', pin: 'foo:1'})
 
         si.ready(function () {
-          si.add('foo:1', function (args, done) { done(null, {foo: 1, local: 1}) })
+          si.add('foo:1', function (msg, reply) { reply({foo: 1, local: 1}) })
 
           si.act('foo:1,bar:1', function (err, out) {
             expect(err).to.not.exist()
@@ -668,10 +668,10 @@ describe('transport', function () {
 
           .client({type: 'test', pin: 'foo:1'})
 
-          .add('foo:1', function (args, done) {
-            args.local = 1
-            args.qaz = 1
-            this.prior(args, done)
+          .add('foo:1', function (msg, reply) {
+            msg.local = 1
+            msg.qaz = 1
+            this.prior(msg, reply)
           })
 
           .act('foo:1,bar:1', function (err, out) {
@@ -785,14 +785,14 @@ describe('transport', function () {
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
         .error(done)
-        .add('foo:1', function (args, done) {
+        .add('foo:1', function (msg, reply) {
           // ensure action id is transferred for traceability
-          expect('aa/BB').to.equal(args.meta$.id)
-          args.s = 0
-          testact.call(this, args, done)
+          expect('aa/BB').to.equal(msg.meta$.id)
+          msg.s = 0
+          testact.call(this, msg, reply)
         })
-        .add('bar:1', function (args, done) {
-          done(null, { bar: 1, q: 1 })
+        .add('bar:1', function (msg, reply) {
+          reply({ bar: 1, q: 1 })
         })
         .listen({ port: 44440, pin: 'foo:1' })
         .ready(make_s1)
@@ -803,11 +803,11 @@ describe('transport', function () {
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
         .error(done)
-        .add('foo:1', function (args, done) {
+        .add('foo:1', function (msg, reply) {
           // ensure action id is transferred for traceability
-          expect('cc/DD').to.equal(args.meta$.id)
-          args.s = 1
-          testact.call(this, args, done)
+          expect('cc/DD').to.equal(msg.meta$.id)
+          msg.s = 1
+          testact.call(this, msg, reply)
         })
         .listen({ port: 44441, pin: 'foo:1' })
         .ready(make_s9)
@@ -818,8 +818,8 @@ describe('transport', function () {
         tag: 'srv', timeout: 5555, log: 'silent', debug: { short_logs: true }
       })
         .error(done)
-        .add('bar:2', function (args, done) {
-          done(null, { bar: 2, q: 2 })
+        .add('bar:2', function (msg, reply) {
+          reply({ bar: 2, q: 2 })
         })
         .listen({ port: 44449, pin: 'foo:1' })
         .ready(run_client)
@@ -887,7 +887,7 @@ describe('transport', function () {
 
 
         client.ready(function () {
-          client.act({ foo: 1, fatal$: false }, function (err, result) {
+          client.act({ foo: 1, fatal$: false }, function (err) {
             expect(err).to.exist()
             done()
           })

@@ -20,8 +20,8 @@ var testopts = { log: 'silent' }
 describe('delegation', function () {
   it('happy', function (done) {
     var si = Seneca(testopts)
-    si.add({ c: 'C' }, function (args, cb) {
-      cb(null, args)
+    si.add({ c: 'C' }, function (msg, reply) {
+      reply(msg)
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
@@ -43,11 +43,11 @@ describe('delegation', function () {
 
   it('dynamic', function (done) {
     var si = Seneca(testopts)
-    si.add({ c: 'C' }, function (args, cb) {
-      cb(null, args)
+    si.add({ c: 'C' }, function (msg, reply) {
+      reply(msg)
     })
-    si.add({ d: 'D' }, function (args, cb) {
-      this.act({ c: 'C', d: 'D' }, cb)
+    si.add({ d: 'D' }, function (msg, reply) {
+      this.act({ c: 'C', d: 'D' }, reply)
     })
     var sid = si.delegate({ a$: 'A', b: 'B' })
 
@@ -99,15 +99,15 @@ describe('delegation', function () {
       }
     })
 
-    si.add({a: 'A'}, function (args, cb) {
+    si.add({a: 'A'}, function (msg, reply) {
       this.log.debug('aaa')
-      cb(null, args)
+      reply(msg)
     })
 
-    si.use(function (opts) {
-      this.add({p: 'P'}, function (args, cb) {
+    si.use(function () {
+      this.add({p: 'P'}, function (msg, reply) {
         this.log.debug('ppp')
-        cb(null, args)
+        reply(msg)
       })
       return {name: 'p1'}
     })
@@ -120,7 +120,6 @@ describe('delegation', function () {
         assert.ok(out.p === 'P')
 
         if (fail) {
-          console.log(fail)
           assert.fail(fail)
         }
 
@@ -129,18 +128,20 @@ describe('delegation', function () {
     })
   })
 
+
   it('prior.basic', function (done) {
-    var si = Seneca(testopts)
-    si.add({c: 'C'}, function c0 (args, cb) {
+    var si = Seneca().test(done)
+
+    si.add({c: 'C'}, function c0 (msg, reply) {
       // console.log('C='+this)
-      args.a = 1
-      cb(null, args)
+      msg.a = 1
+      reply(msg)
     })
 
-    si.add({c: 'C'}, function c1 (args, cb) {
-      this.prior(args, function (err, out) {
+    si.add({c: 'C'}, function c1 (msg, reply) {
+      this.prior(msg, function (err, out) {
         out.p = 2
-        cb(err, out)
+        reply(err, out)
       })
     })
 
@@ -156,11 +157,11 @@ describe('delegation', function () {
   it('parent.plugin', function (done) {
     var si = Seneca(testopts).error(done)
 
-    si.use(function (opts) {
-      this.add({a: 'A'}, function (args, cb) {
+    si.use(function () {
+      this.add({a: 'A'}, function (msg, reply) {
         this.log.debug('P', '1')
-        args.p1 = 1
-        cb(null, args)
+        msg.p1 = 1
+        reply(msg)
       })
       return {name: 'p1'}
     })
@@ -170,14 +171,14 @@ describe('delegation', function () {
       assert.ok(out.a === 'A')
       assert.ok(out.p1 === 1)
 
-      si.use(function (opts) {
-        this.add({a: 'A'}, function (args, cb) {
+      si.use(function () {
+        this.add({a: 'A'}, function (msg, reply) {
           this.log.debug('P', '2a')
 
-          this.prior(args, function (err, out) {
+          this.prior(msg, function (err, out) {
             this.log.debug('P', '2b')
             out.p2 = 1
-            cb(err, out)
+            reply(err, out)
           })
         })
         return {name: 'p2'}
@@ -189,14 +190,14 @@ describe('delegation', function () {
         assert.ok(out.p1 === 1)
         assert.ok(out.p2 === 1)
 
-        si.use(function (opts) {
-          this.add({a: 'A'}, function (args, cb) {
+        si.use(function () {
+          this.add({a: 'A'}, function (msg, reply) {
             this.log.debug('P', '3a')
 
-            this.prior(args, function (err, out) {
+            this.prior(msg, function (err, out) {
               this.log.debug('P', '3b')
               out.p3 = 1
-              cb(err, out)
+              reply(err, out)
             })
           })
           return {name: 'p3'}

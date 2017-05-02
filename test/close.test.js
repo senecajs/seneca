@@ -40,7 +40,7 @@ describe('close', function () {
     var tmp = {}
     Seneca(testopts)
       .error(done)
-      .sub('role:seneca,cmd:close', function (msg) {
+      .sub('role:seneca,cmd:close', function () {
         tmp.sc = 1
       })
       .close(function () {

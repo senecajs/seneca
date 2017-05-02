@@ -62,7 +62,7 @@ describe('seneca', function () {
   it('quick', function (done) {
     var si = Seneca({log: 'test'}).error(done)
 
-    si.use(function quickplugin (opts) {
+    si.use(function quickplugin () {
       this.add({ a: 1 }, function (args, cb) {
         cb(null, { b: 2 })
       })
@@ -97,7 +97,7 @@ describe('seneca', function () {
     si.ready(function () {
       mark.r0 = true
 
-      si.use(function p1 (opts) {
+      si.use(function p1 () {
         si.add({init: 'p1'}, function (args, done) {
           timerstub.setTimeout(function () { mark.p1 = true; done() }, 40)
         })
@@ -110,7 +110,7 @@ describe('seneca', function () {
       si.ready(function () {
         mark.r1 = true
 
-        si.use(function p2 (opts) {
+        si.use(function p2 () {
           si.add({ init: 'p2' }, function (args, done) {
             timerstub.setTimeout(function () {
               mark.p2 = true
@@ -432,44 +432,40 @@ describe('seneca', function () {
     var called = ''
 
     si.ready(function () {
-      si.add('foo:a', function (args, done) {
+      si.add('foo:a', function (msg, reply) {
         count++
-        count += args.x
-        done(null, {count: count})
+        count += msg.x
+        reply(null, {count: count})
       })
 
-      si.add('foo:a', function (args, done) {
-        count += args.y
-        args.z = 1
-        this.prior(args, done)
+      si.add('foo:a', function (msg, reply) {
+        count += msg.y
+        msg.z = 1
+        this.prior(msg, reply)
       })
 
       si
         .gate()
 
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          // console.log('A',count,called)
+        .act('foo:a,x:10,y:0.1', function (err) {
           assert.equal(err, null)
           assert.equal(11.1, count)
           called += 'A'
         })
 
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          // console.log('B',count,called)
+        .act('foo:a,x:100,y:0.01', function (err) {
           assert.equal(err, null)
           assert.equal(112.11, count)
           called += 'B'
         })
 
-        .act('foo:a,x:10,y:0.1', function (err, out) {
-          // console.log('C',count,called)
+        .act('foo:a,x:10,y:0.1', function (err) {
           assert.equal(err, null)
           assert.equal(123.21, count)
           called += 'C'
         })
 
-        .act('foo:a,x:100,y:0.01', function (err, out) {
-          // console.log('D',count,called)
+        .act('foo:a,x:100,y:0.01', function (err) {
           assert.equal(err, null)
           assert.equal(224.22, count)
           called += 'D'
@@ -480,12 +476,12 @@ describe('seneca', function () {
           assert.equal(224.22, count)
 
           this
-            .add('foo:a', function (args, done) {
-              count += args.z
-              this.prior(args, done)
+            .add('foo:a', function (msg, reply) {
+              count += msg.z
+              this.prior(msg, reply)
             })
             .gate()
-            .act('foo:a,x:10,y:0.1,z:1000000', function (err, out) {
+            .act('foo:a,x:10,y:0.1,z:1000000', function (err) {
               assert.equal(err, null)
               assert.equal(1000235.32, count)
               called += 'E'
@@ -511,17 +507,17 @@ describe('seneca', function () {
 
     si
       .gate()
-      .act('foo:a,x:10', function (err, out) {
+      .act('foo:a,x:10', function (err) {
         assert.equal(err, null)
         assert.equal(11, count)
         called += 'A'
       })
-      .act('foo:a,x:100', function (err, out) {
+      .act('foo:a,x:100', function (err) {
         assert.equal(err, null)
         assert.equal(112, count)
         called += 'B'
       })
-      .act('foo:a,x:1000', function (err, out) {
+      .act('foo:a,x:1000', function (err) {
         assert.equal(err, null)
         assert.equal(1113, count)
         called += 'C'
@@ -591,7 +587,7 @@ describe('seneca', function () {
       self.plugin = function () {
         return self
       }
-      self.init = function (options) {
+      self.init = function () {
         this.add({ role: self.name, cmd: 'foo' }, function (args, cb) {
           cb(null, 'foo:' + args.foo)
         })
@@ -626,7 +622,7 @@ describe('seneca', function () {
       self.plugin = function () {
         return self
       }
-      self.init = function (options) {
+      self.init = function () {
         this.add({role: 'mock1', cmd: 'foo'}, function (args, cb) {
           this.prior(args, function (err, out) {
             assert.equal(err, null)
@@ -748,7 +744,7 @@ describe('seneca', function () {
           si
             .add('i:1,a:1', {b: 2}, addFunction)
             .act('i:1,a:1,b:2,c:3', function (err, out) {
-              checkFunction(err, out, function (next) {
+              checkFunction(err, out, function () {
                 si
                   .add('i:2,a:1', {b: 2, c: {required$: true}}, addFunction)
                   .act('i:2,a:1,b:2,c:3', function (err, out) {
@@ -791,13 +787,13 @@ describe('seneca', function () {
 
     var tmp = {a: 0, as1: 0, as2: 0, as1_in: 0, as1_out: 0, all: 0}
 
-    si.sub({}, function (args) {
+    si.sub({}, function () {
       tmp.all++
     })
 
-    si.add({a: 1}, function (args, done) {
+    si.add({a: 1}, function (args, reply) {
       tmp.a = tmp.a + 1
-      done(null, {b: 1, y: 1})
+      reply({b: 1, y: 1})
     })
 
     si.act({a: 1}, function (err, out) {
@@ -835,7 +831,7 @@ describe('seneca', function () {
         assert.equal(1, tmp.as1_out)
         assert.equal(0, tmp.as2)
 
-        si.sub({a: 1}, function (args) {
+        si.sub({a: 1}, function () {
           tmp.as2 = tmp.as2 + 1
         })
 
@@ -869,7 +865,7 @@ describe('seneca', function () {
 
     var x = 0
 
-    si.add({a: 1}, function (args, cb) {
+    si.add({a: 1}, function () {
       x++
       this.good({x: x})
     })
@@ -1022,7 +1018,7 @@ describe('seneca', function () {
     si.add('a:1', function (a, cb) {
       cb(null, 'a')
     })
-    si.act('a:1', function (err, res) {
+    si.act('a:1', function (err) {
       assert.ok(err)
       assert.equal('result_not_objarr', err.code)
 
@@ -1334,7 +1330,7 @@ describe('seneca', function () {
         var count = 0
 
         for (var i = 0; i < SIZE; ++i) {
-          this.act('a:1', {x: i}, function (ignore, out) {
+          this.act('a:1', {x: i}, function () {
             ++count
 
             if (SIZE === count) validate(start)

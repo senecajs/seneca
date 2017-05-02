@@ -1,14 +1,17 @@
-/* Copyright (c) 2014 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2017 Richard Rodger, MIT License */
 'use strict'
 
 var Assert = require('assert')
 var Lab = require('lab')
+var Code = require('code')
 var Common = require('../lib/common')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
+var expect = Code.expect
+
 
 describe('common', function () {
   it('deepextend-empty', function (done) {
@@ -141,6 +144,73 @@ describe('common', function () {
     assert.equal('a:1;b:2', Common.pincanon(['b:2', 'a:1']))
     assert.equal('a:1;b:2', Common.pincanon(['b:2', {a: 1}]))
     assert.equal('a:1;b:2', Common.pincanon([{b: 2}, 'a:1']))
+    done()
+  })
+
+
+  it('history', function (done) {
+    var h0 = Common.history(3)
+    expect(h0.list()).to.equal([])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal(null)
+    expect(h0.stats()).to.equal({next: 0, size: 3, total: 0})
+
+    h0.add()
+    expect(h0.list()).to.equal([])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal(null)
+    expect(h0.stats()).to.equal({next: 0, size: 3, total: 0})
+
+    h0.add({})
+    expect(h0.list()).to.equal([])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal(null)
+    expect(h0.stats()).to.equal({next: 0, size: 3, total: 0})
+
+    h0.add({id:'a'})
+    expect(h0.list()).to.equal(['a'])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal({id: 'a'})
+    expect(h0.stats()).to.equal({next: 1, size: 3, total: 1})
+
+    h0.add({id:'b'})
+    expect(h0.list()).to.equal(['a', 'b'])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal({id: 'a'})
+    expect(h0.get('b')).to.equal({id: 'b'})
+    expect(h0.stats()).to.equal({next: 2, size: 3, total: 2})
+
+    h0.add({id:'c'})
+    expect(h0.list()).to.equal(['a', 'b', 'c'])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal({id: 'a'})
+    expect(h0.get('b')).to.equal({id: 'b'})
+    expect(h0.get('c')).to.equal({id: 'c'})
+    expect(h0.stats()).to.equal({next: 0, size: 3, total: 3})
+
+    h0.add({id:'d'})
+    expect(h0.list()).to.equal(['b', 'c', 'd'])
+    expect(h0.get()).to.equal(null)
+    expect(h0.get('a')).to.equal(null)
+    expect(h0.get('b')).to.equal({id: 'b'})
+    expect(h0.get('c')).to.equal({id: 'c'})
+    expect(h0.get('d')).to.equal({id: 'd'})
+    expect(h0.stats()).to.equal({next: 1, size: 3, total: 4})
+
+    expect(h0.list(3)).to.equal(['b', 'c', 'd'])
+    expect(h0.list(2)).to.equal(['c', 'd'])
+    expect(h0.list(1)).to.equal(['d'])
+    expect(h0.list(0)).to.equal([])
+
+
+    // empty history
+    var h1 = Common.history(0)
+    h1.add({id:'a'})
+    expect(h1.get()).to.equal(null)
+    expect(h1.get('a')).to.equal(null)
+    expect(h1.list()).to.equal([])
+    expect(h1.stats()).to.equal({next: 0, size: 0, total: 0})
+
     done()
   })
 })

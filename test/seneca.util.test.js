@@ -102,7 +102,15 @@ describe('util', function () {
       {a: {aa: 1}, b: {bb: {bbb: 1}}, c: [1], d: {dd: 1}, e: {ee: 1}, f: [4, 5, 6]}
     )
 
-    expect(obj).to.include({ a: { aa: 1 }, b: { bb: { bbb: 1 } }, c: [ 1 ], d: { dd: 1 }, e: { ee: 1 }, f: [ 4, 5, 6 ] })
+    expect(obj.a).to.equal({ aa: 1 })
+    expect(obj.b).to.equal({ bb: { bbb: 1 } })
+    expect(obj.c).to.equal([ 1 ])
+    expect(obj.d).to.equal({ dd: 1 })
+    expect(obj.e).to.equal({ '0': 2, '1': 3, ee: 1 })
+    expect(obj.f).to.equal([ 4, 5, 6])
+    expect(obj.f.fa).to.equal(1)
+    expect(obj.f.fb).to.equal(2)
+
     done()
   })
 

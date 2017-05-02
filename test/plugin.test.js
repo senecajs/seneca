@@ -103,6 +103,8 @@ describe('plugin', function () {
 
 
   it('plugin-error-deprecated', function (done) {
+    /* eslint no-unused-vars: 0 */
+
     var si = Seneca({
       debug: {
         undead: true
@@ -176,31 +178,31 @@ describe('plugin', function () {
       expect('plugin_required').to.equal(err.code)
     }})
 
-    si.use(function (opts) {
+    si.use(function () {
       this.depends('ccc', ['zzz'])
       return { name: 'ccc' }
     })
 
-    si.use(function (opts) {
+    si.use(function () {
       return { name: 'ddd' }
     })
 
-    si.use(function (opts) {
+    si.use(function () {
       this.depends('eee', 'aaa')
       return { name: 'eee' }
     })
 
-    si.use(function (opts) {
+    si.use(function () {
       this.depends('fff', ['aaa', 'ddd'])
       return { name: 'fff' }
     })
 
-    si.use(function (opts) {
+    si.use(function () {
       this.depends('ggg', 'aaa', 'ddd')
       return { name: 'ggg' }
     })
 
-    si.use(function (opts) {
+    si.use(function () {
       this.depends('hhh', 'aaa', 'zzz')
       return { name: 'hhh' }
     })
@@ -215,7 +217,7 @@ describe('plugin', function () {
       cb(null, _.extend({ t: Date.now() }, args))
     }
 
-    var plugin_aaa = function aaa (opts) {
+    var plugin_aaa = function aaa () {
       this.add({a: 1}, function (args, cb) {
         this.act('z:1', function (err, out) {
           expect(err).to.not.exist()
@@ -238,7 +240,7 @@ describe('plugin', function () {
 
       si
         .fix({q: 1})
-        .use(function bbb (opts) {
+        .use(function bbb () {
           this.add({a: 1}, function (args, done) {
             this.act('z:1', function (err, out) {
               expect(err).to.not.exist()
@@ -345,11 +347,12 @@ describe('plugin', function () {
   it('calling act from init actor is deprecated', function (done) {
     var seneca = Seneca.test(done)
 
-    seneca.add({ role: 'metrics', subscriptions: 'create' }, function (data, callback) {
-      callback()
-    })
+    seneca.add({ role: 'metrics', subscriptions: 'create' }, 
+               function (data, callback) {
+                 callback()
+               })
 
-    seneca.add({ init: 'msgstats-metrics' }, function (msg, callback) {
+    seneca.add({ init: 'msgstats-metrics' }, function () {
       seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
         expect(err).to.not.exist()
         done()
@@ -374,11 +377,12 @@ describe('plugin', function () {
       var self = this
 
       this.ready(function () {
-        self.act({ role: 'plugin', cmd: 'throw', blah: 'blah' }, function (err, result) {
-          expect(err).to.exist()
-          expect(err.msg).to.contain('from action')
-          done()
-        })
+        self.act({ role: 'plugin', cmd: 'throw', blah: 'blah' }, 
+                 function (err) {
+                   expect(err).to.exist()
+                   expect(err.msg).to.contain('from action')
+                   done()
+                 })
       })
     })
   })
@@ -508,23 +512,28 @@ describe('plugin', function () {
         cb()
       })
     })
-    .use(function bar (options) {
+    .use(function bar () {
       this.add('init:bar', function (msg, cb) {
         expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
         this.options({ plugin: { bar: { y: 4 } } })
         cb()
       })
     })
-    .use(function foobar (options) {
+    .use(function foobar () {
       this.add('init:foobar', function (msg, cb) {
-        this.options({ plugin: { foobar: { foo: seneca.options().plugin.foo, bar: seneca.options().plugin.bar } } })
+        this.options({ 
+          plugin: { 
+            foobar: { 
+              foo: seneca.options().plugin.foo, 
+              bar: seneca.options().plugin.bar } } })
         cb()
       })
     })
     .ready(function () {
       expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
       expect(seneca.options().plugin.bar).to.equal({ x: 2, y: 4 })
-      expect(seneca.options().plugin.foobar).to.equal({ foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
+      expect(seneca.options().plugin.foobar).to.equal({ 
+        foo: { x: 1, y: 3 }, bar: { x: 2, y: 4 } })
       done()
     })
   })
@@ -533,7 +542,7 @@ describe('plugin', function () {
   it('plugin init can add actions for future init actions to call', function (done) {
     var seneca = Seneca.test(done, 'silent')
 
-    seneca.use(function foo (options) {
+    seneca.use(function foo () {
       this.add('init:foo', function (msg, cb) {
         this.add({ role: 'test', cmd: 'foo' }, function (args, cb) {
           cb(null, { success: true })
@@ -541,7 +550,7 @@ describe('plugin', function () {
         cb()
       })
     })
-    .use(function bar (options) {
+    .use(function bar () {
       this.add('init:bar', function (msg, cb) {
         this.act({ role: 'test', cmd: 'foo' }, function (err, result) {
           expect(err).to.not.exist()
