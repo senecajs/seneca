@@ -1034,7 +1034,9 @@ function make_seneca(initial_options) {
 
     actdone = actdone || _.noop
 
-    msg.timeout$ = 'number' === typeof msg.timeout$ ? msg.timeout$ : opts.$.timeout
+    msg.timeout$ = 'number' === typeof msg.timeout$
+      ? msg.timeout$
+      : opts.$.timeout
     msg.timeout$ = msg.timeout$ < 0 ? 0 : msg.timeout$
 
     if (msg.gate$) {

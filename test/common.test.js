@@ -13,6 +13,54 @@ var assert = Assert
 var expect = Code.expect
 
 describe('common', function() {
+  it('misc', function(done) {
+    expect(Common.boolify(true)).to.equal(true)
+    expect(Common.boolify(false)).to.equal(false)
+    expect(Common.boolify('true')).to.equal(true)
+    expect(Common.boolify('false')).to.equal(false)
+    expect(Common.boolify(1)).to.equal(true)
+    expect(Common.boolify(0)).to.equal(false)
+
+    expect(Common.boolify()).to.equal(false)
+    expect(Common.boolify(null)).to.equal(false)
+    expect(Common.boolify(NaN)).to.equal(false)
+    expect(Common.boolify(void 0)).to.equal(false)
+    expect(Common.boolify(new Date())).to.equal(false)
+    expect(Common.boolify(/a/)).to.equal(false)
+
+
+    expect(Common.boolify('{')).to.equal(false)
+    expect(Common.boolify('}')).to.equal(false)
+
+
+    
+    expect(Common.copydata()).to.equal(void 0)
+    expect(Common.copydata(null)).to.equal(null)
+    expect(Common.copydata(NaN)).to.equal(NaN)
+    expect(Common.copydata(true)).to.equal(true)
+    expect(Common.copydata(false)).to.equal(false)
+    expect(Common.copydata(0)).to.equal(0)
+    expect(Common.copydata(1)).to.equal(1)
+
+    var d = new Date()
+    expect(Common.copydata(d).getTime()).to.equal(d.getTime())
+    
+    expect(Common.copydata([])).to.equal([])
+    expect(Common.copydata([1,2,3])).to.equal([1,2,3])
+    expect(Common.copydata([1,['a','b'],3])).to.equal([1,['a','b'],3])
+
+    expect(Common.copydata({})).to.equal({})
+    expect(Common.copydata({a:1})).to.equal({a:1})
+    expect(Common.copydata({a:1,b:{c:2}})).to.equal({a:1,b:{c:2}})
+
+    var a = {a:1}
+    var b = Object.create(a)
+    b.b = 2
+    expect(Common.copydata(b)).to.equal({b:2})
+
+    done()
+  })
+
   it('deepextend-empty', function(done) {
     assert.equal(null, Common.deepextend({}).a)
 
@@ -225,10 +273,10 @@ describe('common', function() {
     expect(h0.get('d').id).to.equal('d')
     expect(h0.stats()).to.equal({ next: 1, size: 3, total: 4 })
 
-    expect(h0.list(3)).to.equal(['b', 'c', 'd'])
-    expect(h0.list(2)).to.equal(['c', 'd'])
-    expect(h0.list(1)).to.equal(['d'])
-    expect(h0.list(0)).to.equal([])
+    expect(h0.list({len:3})).to.equal(['b', 'c', 'd'])
+    expect(h0.list({len:2})).to.equal(['c', 'd'])
+    expect(h0.list({len:1})).to.equal(['d'])
+    expect(h0.list({len:0})).to.equal([])
 
     // empty history
     var h1 = Common.history(0)
@@ -238,13 +286,15 @@ describe('common', function() {
     expect(h1.list()).to.equal([])
     expect(h1.stats()).to.equal({ next: 0, size: 0, total: 0 })
 
+    var t = 40
+
     // timelimits
     var h2 = Common.history(2)
-    h2.add({id:'a', timelimit:Date.now()+100, result:[]})
-    h2.add({id:'b'})
-    h2.add({id:'c', timelimit:Date.now()+300, result:[]})
-    h2.add({id:'d'})
-    h2.add({id:'e', timelimit:Date.now()+500, result:[{}]})
+    h2.add({ id: 'a', timelimit: Date.now() + t, result: [] })
+    h2.add({ id: 'b' })
+    h2.add({ id: 'c', timelimit: Date.now() + 3*t, result: [] })
+    h2.add({ id: 'd' })
+    h2.add({ id: 'e', timelimit: Date.now() + 5*t, result: [{}] })
 
     expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
 
@@ -264,7 +314,7 @@ describe('common', function() {
       expect(h2.get('e').id).to.equal('e')
 
       expect(h2.list()).to.equal(['c', 'd', 'e'])
-    }, 200)
+    }, 2*t)
 
     setTimeout(function() {
       expect(h2.list()).to.equal(['c', 'd', 'e'])
@@ -278,6 +328,6 @@ describe('common', function() {
 
       expect(h2.list()).to.equal(['d', 'e'])
       done()
-    }, 400)
+    }, 4*t)
   })
 })
