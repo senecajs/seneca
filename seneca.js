@@ -108,7 +108,10 @@ var option_defaults = {
     find: true,
 
     // Maximum number of times an action can call itself
-    maxloop: 11
+    maxloop: 11,
+
+    // Exports must exist
+    exports: false
   },
 
   // Action cache. Makes inbound messages idempotent.
@@ -165,6 +168,11 @@ var option_defaults = {
     running: false
   },
 
+  // Shared default transport configuration
+  transport: {
+    // TODO: make static in Seneca 4.x
+  },
+
   // Backwards compatibility settings.
   legacy: {
     // Action callback must always have signature callback(error, result).
@@ -173,7 +181,7 @@ var option_defaults = {
     // Logger can be changed by options method.
     logging: false,
 
-    // Use old error codes.
+    // Use old error codes. REMOVE in Seneca 4.x
     error_codes: false,
 
     // Use old error handling.
@@ -198,7 +206,8 @@ var seneca_util = {
   router: function router() {
     return Patrun()
   },
-  argprops: Common.argprops
+  argprops: Common.argprops,
+  resolve_option: Common.resolve_option
 }
 
 // Seneca is an EventEmitter.
@@ -559,6 +568,7 @@ function make_seneca(initial_options) {
     .add(Inward.announce)
 
   private$.outward = Ordu({ name: 'outward' })
+    .add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
@@ -596,8 +606,7 @@ function make_seneca(initial_options) {
 
     var exportval = private$.exports[key]
 
-    // TODO: death should be optional
-    if (!exportval) {
+    if (!exportval && opts.$.strict.exports) {
       return self.die(error('export_not_found', { key: key }))
     }
 
@@ -877,10 +886,11 @@ function make_seneca(initial_options) {
     var actdone = spec.done
 
     if (opts.$.debug.act_caller || opts.$.test) {
-      // TODO: remove term 'Error' from generated string as confusing
       msg.caller$ =
         '\n    Action call arguments and location: ' +
-        new Error(Util.inspect(msg).replace(/\n/g, '')).stack
+        (new Error(Util.inspect(msg).replace(/\n/g, '')).stack + '\n')
+          .replace(/Error: /, '')
+          .replace(/.*\/gate-executor\.js:.*\n/g, '')
           .replace(/.*\/seneca\.js:.*\n/g, '')
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
@@ -1284,9 +1294,10 @@ function make_seneca(initial_options) {
           message: origerr.message,
           callpoint: act_callpoint
         })
+        delete seneca_err.stack
 
         err.meta$ = err.meta$ || msg.meta$ || {}
-        err.meta$.data = origmsg
+        err.meta$.data = instance.util.clean(origmsg)
 
         if (err.meta$.err) {
           var errmeta = _.clone(msg.meta$)
@@ -1491,6 +1502,10 @@ function make_seneca(initial_options) {
   function api_test(errhandler, logspec) {
     /* eslint no-console: 0 */
 
+    if (opts.$.tag) {
+      root.id = opts.$.tag
+    }
+
     if ('function' !== typeof errhandler && null !== errhandler) {
       logspec = errhandler
       errhandler = null
@@ -1563,6 +1578,19 @@ function make_seneca(initial_options) {
   Actions(root)
 
   if (!opts.$.legacy.transport) {
+    opts.$.legacy.error = false
+
+    // TODO: move to static options in Seneca 4.x
+    opts.$.transport = root.util.deepextend(
+      {
+        port: 62345,
+        host: '127.0.0.1',
+        path: '/act',
+        protocol: 'http'
+      },
+      opts.$.transport
+    )
+
     Transport(root)
   }
 
@@ -1610,6 +1638,9 @@ function make_private() {
         cache: 0
       },
       actmap: {}
+    },
+    transport: {
+      register: []
     }
   }
 }

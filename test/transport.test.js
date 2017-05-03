@@ -63,6 +63,37 @@ describe('transport', function() {
       })
   })
 
+  it('config-nextgen', function(done) {
+    var s0 = Seneca({
+      tag: 's0',
+      legacy: { transport: false },
+      transport: { web: { port: 62020 } }
+    }).test(done)
+    var c0 = Seneca({
+      tag: 'c0',
+      legacy: { transport: false },
+      transport: { web: { port: 62020 } }
+    }).test(done)
+
+    s0
+      .add('a:1', function(msg, reply) {
+        reply({ x: msg.x })
+      })
+      .listen()
+      .ready(function() {
+        expect(s0.private$.transport.register.length).equal(1)
+
+        c0.client().ready(function() {
+          expect(c0.private$.transport.register.length).equal(1)
+
+          c0.act('a:1,x:2', function(ignore, out) {
+            expect(out.x).equals(2)
+            done()
+          })
+        })
+      })
+  })
+
   describe('listen()', function() {
     it('supports null options', function(done) {
       var listen = Transport.listen(_.noop)

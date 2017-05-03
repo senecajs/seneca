@@ -267,6 +267,9 @@ describe('plugin', function() {
       debug: {
         undead: true
       },
+      strict: {
+        exports: true
+      },
       log: 'silent'
     })
 

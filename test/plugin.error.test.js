@@ -14,16 +14,18 @@ describe('plugin.error', function() {
   var si
 
   lab.before(function(done) {
-    si = Seneca({ log: 'silent' })
+    si = Seneca({ tag: 's0', log: 'silent' })
       .use('./stubs/plugin-error/tmp.js')
       .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
-      .ready(done)
+      .ready(function() {
+        done()
+      })
   })
 
   it('should return "no errors created." when passing test false', function(
     done
   ) {
-    var seneca = Seneca({ log: 'silent' })
+    var seneca = Seneca({ tag: 'c0' }).test(done)
     seneca.use('./stubs/plugin-error/tmpApi')
     seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
@@ -38,7 +40,7 @@ describe('plugin.error', function() {
   })
 
   it('should return "error caught!" when passing test true', function(done) {
-    var seneca = Seneca({ log: 'silent' })
+    var seneca = Seneca({ tag: 'c1', log: 'silent' })
     seneca.use('./stubs/plugin-error/tmpApi')
     seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
