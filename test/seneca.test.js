@@ -1316,7 +1316,6 @@ describe('seneca', function() {
       })
       // Hits the catchall, even though b:1 is a partial pattern
       .act('b:1', function(ignored, out) {
-        console.log('BBB',out)
         expect(out.r).to.equal(1)
       })
       .act('b:2', function(ignored, out) {

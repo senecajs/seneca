@@ -226,8 +226,6 @@ module.exports = function init(seneca_options, more_options) {
   var seneca = make_seneca(initial_options)
   var options = seneca.options()
 
-  seneca.add('b:1')
-
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
   seneca.log.debug({ kind: 'notice', options: _.omit(options, ['internal']) })
@@ -1106,9 +1104,6 @@ function make_seneca(initial_options) {
       var actmeta = act_instance.find(msg, {
         catchall: opts.$.internal.catchall
       })
-
-      console.log('EA',msg,opts.$.internal.catchall,actmeta)
-
 
       var delegate = act_make_delegate(act_instance, opts, msg, actmeta)
 
