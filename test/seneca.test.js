@@ -908,7 +908,7 @@ describe('seneca', function() {
           assert.ok(!err)
           assert.equal(2, out.x)
 
-          si.act('role:seneca,stats:true', function(err, stats) {
+          si.act('role:seneca,cmd:stats', function(err, stats) {
             assert.ok(!err)
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l
@@ -1077,7 +1077,7 @@ describe('seneca', function() {
   })
 
   describe('#error', function() {
-    it("isn't called twice on fatal errors when falta$: true", function(done) {
+    it("isn't called twice on fatal errors when fatal$: true", function(done) {
       var si = Seneca({ log: 'silent', debug: { undead: true } })
 
       var count = 0
@@ -1171,13 +1171,13 @@ describe('seneca', function() {
     })
   })
 
-  it('can be closed', function(done) {
-    var si = Seneca({ log: 'silent' })
-
-    si.close(function(err) {
-      assert(!err)
-      done()
-    })
+  it('basic-close', function(fin) {
+    Seneca({legacy:{transport:false}})
+      .test(fin)
+      .close(function(err) {
+        assert(!err)
+        fin()
+      })
   })
 
   it('supports jsonic params to has', function(done) {
@@ -1302,6 +1302,9 @@ describe('seneca', function() {
       // Execute following actions sequentially, so that
       // .ready(done) will wait for them to complete
       .gate()
+      .act('', function(ignored, out) {
+        expect(out.r).to.equal(1)
+      })
       .act('k:1', function(ignored, out) {
         expect(out.r).to.equal(1)
       })
@@ -1313,6 +1316,7 @@ describe('seneca', function() {
       })
       // Hits the catchall, even though b:1 is a partial pattern
       .act('b:1', function(ignored, out) {
+        console.log('BBB',out)
         expect(out.r).to.equal(1)
       })
       .act('b:2', function(ignored, out) {
