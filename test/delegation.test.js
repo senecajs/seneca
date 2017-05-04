@@ -15,7 +15,8 @@ var testopts = { log: 'silent' }
 
 describe('delegation', function() {
   it('happy', function(done) {
-    var si = Seneca(testopts)
+    var si = Seneca().test(done)
+
     si.add({ c: 'C' }, function(msg, reply) {
       reply(msg)
     })
@@ -27,6 +28,7 @@ describe('delegation', function() {
     si.act({ c: 'C' }, function(err, out) {
       assert.ok(!err)
       assert.ok(out.c === 'C')
+
       sid.act({ c: 'C' }, function(err, out) {
         assert.ok(!err)
         assert.ok(out.c === 'C')

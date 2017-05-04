@@ -881,9 +881,9 @@ function make_seneca(initial_options) {
     }
 
     var self = this
-    var spec = Common.parsePattern(self, argsarr, 'done:f?')
+    var spec = Common.parsePattern(self, argsarr, 'reply:f?')
     var msg = _.extend(spec.pattern, self.fixedargs)
-    var actdone = spec.done
+    var reply = spec.reply
 
     if (opts.$.debug.act_caller || opts.$.test) {
       msg.caller$ =
@@ -895,7 +895,7 @@ function make_seneca(initial_options) {
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
 
-    do_act(self, opts, msg, actdone)
+    do_act(self, opts, msg, reply)
     return self
   }
 
@@ -1035,29 +1035,42 @@ function make_seneca(initial_options) {
   }
 
   function do_act(instance, opts, origmsg, actdone) {
+    // var msg = _.clone(origmsg)
     var actstart = Date.now()
-    var msg = _.clone(origmsg)
     var act_callpoint = callpoint()
     var is_sync = _.isFunction(actdone)
     var execute_instance = instance
     var timedout = false
+    var action_ctxt = {}
+    var actmsg = Object.create({meta$: origmsg.meta$ || {}})
+
+    for (var p in origmsg) {
+      //if ('$' != p[p.length-1]) {
+      if ('meta$' != p[p.length-1]) {
+        actmsg[p] = origmsg[p]
+      }
+    }
 
     actdone = actdone || _.noop
 
-    msg.timeout$ = 'number' === typeof msg.timeout$
-      ? msg.timeout$
-      : opts.$.timeout
-    msg.timeout$ = msg.timeout$ < 0 ? 0 : msg.timeout$
 
-    if (msg.gate$) {
+    actmsg.meta$.timeout = Math.max(
+      0, 'number' === typeof origmsg.timeout$ ? origmsg.timeout$ : opts.$.timeout)
+
+    actmsg.meta$.gate = !!origmsg.gate$
+    actmsg.meta$.fatal = !!origmsg.fatal$
+
+
+    if (actmsg.meta$.gate) {
       execute_instance = instance.delegate()
       execute_instance.private$.ge = execute_instance.private$.ge.gate()
     }
 
+
     var execspec = {
       fn: function act_fn(done) {
         try {
-          execute_action(execute_instance, msg, function reply() {
+          execute_action(execute_instance, actmsg, function reply() {
             if (!timedout) {
               handle_result.apply(this, arguments)
             }
@@ -1072,19 +1085,17 @@ function make_seneca(initial_options) {
         timedout = true
         handle_result.call(execute_instance, new Error('[TIMEOUT]'))
       },
-      tm: msg.timeout$
+      tm: actmsg.meta$.timeout
     }
 
     execute_instance.private$.ge.add(execspec)
 
-    var action_ctxt = {}
 
     function execute_action(act_instance, msg, reply) {
       var actmeta = act_instance.find(msg, {
         catchall: opts.$.internal.catchall
       })
 
-      msg.meta$ = msg.meta$ || {}
       var delegate = act_make_delegate(act_instance, opts, msg, actmeta)
 
       action_ctxt.start = actstart
@@ -1109,11 +1120,12 @@ function make_seneca(initial_options) {
 
       data.id = data.msg.meta$.id
       data.result = []
-      data.timelimit = Date.now() + data.msg.timeout$
+      data.timelimit = Date.now() + data.msg.meta$.timeout
       act_instance.private$.history.add(data)
 
       actmeta.func.call(delegate, data.msg, data.reply)
     }
+
 
     function handle_result() {
       var argsarr = new Array(arguments.length)
@@ -1138,7 +1150,7 @@ function make_seneca(initial_options) {
       var call_cb = true
 
       var data = {
-        msg: msg,
+        msg: actmsg,
         err: argsarr[0],
         res: argsarr[1]
       }
@@ -1160,12 +1172,12 @@ function make_seneca(initial_options) {
           argsarr,
           actdone,
           actend - actstart,
-          msg,
+          actmsg,
           origmsg,
           act_callpoint
         )
 
-        if (msg.fatal$) {
+        if (actmsg.meta$.fatal) {
           return instance.die(out.err)
         }
 
@@ -1176,11 +1188,11 @@ function make_seneca(initial_options) {
           delegate.on_act_err(actmeta, argsarr[0])
         }
       } else {
-        instance.emit('act-out', msg, argsarr[1])
+        instance.emit('act-out', actmsg, argsarr[1])
         argsarr[0] = null
 
         delegate.log.debug(
-          actlog(actmeta, msg, origmsg, {
+          actlog(actmeta, actmsg, origmsg, {
             kind: 'act',
             case: 'OUT',
             duration: actend - actstart,
@@ -1214,7 +1226,7 @@ function make_seneca(initial_options) {
           argsarr,
           actdone,
           actend - actstart,
-          msg,
+          actmsg,
           origmsg,
           act_callpoint
         )
