@@ -747,7 +747,7 @@ describe('transport', function() {
 
     var inits = {}
 
-    Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 5555, log: 'silent'})
       .use(tt)
       .add('foo:1', testact)
       .use(function bar() {

@@ -1050,7 +1050,6 @@ function make_seneca(initial_options) {
 
     for (var p in origmsg) {
       if ('$' != p[p.length-1]) {
-      //if ('meta$' != p[p.length-1]) {
         actmsg[p] = origmsg[p]
       }
     }
@@ -1063,8 +1062,15 @@ function make_seneca(initial_options) {
     actmsg.meta$.gate = !!origmsg.gate$
     actmsg.meta$.fatal = !!origmsg.fatal$
     actmsg.meta$.closing = !!origmsg.closing$
+    actmsg.meta$.local = !!origmsg.local$
 
+    actmsg.meta$.plugin = origmsg.plugin$
     actmsg.meta$.dflt = origmsg.default$
+
+    // backwards compatibility for Seneca 3.x transports
+    if (origmsg.transport$) {
+      actmsg.transport$ = origmsg.transport$
+    }
 
     //console.log('AM',actmsg,actmsg.meta$);
 
