@@ -1071,9 +1071,13 @@ function make_seneca(initial_options) {
       if (origmeta.closing) {
         actmsg.meta$.closing = origmeta.closing
       }
+
+      // (actmsg.meta$.trace = actmsg.meta$.trace || []).push(origmeta)
     }
 
     resolve_msg_id_tx(execute_instance, actmsg, origmsg)
+
+    actmsg.meta$.instance = root.id
 
     actmsg.meta$.start = actstart
 
@@ -1106,6 +1110,9 @@ function make_seneca(initial_options) {
     }
     if (origmsg.custom$) {
       actmsg.meta$.custom = origmsg.custom$
+    }
+    if (origmsg.parents$) {
+      actmsg.meta$.parents = origmsg.parents$
     }
 
     // backwards compatibility for Seneca 3.x transports
@@ -1264,12 +1271,13 @@ function make_seneca(initial_options) {
         meta.end = actend
 
         if (data.res) {
-          data.res.__proto__ = { meta$: meta }
-
-          if (_.isArray(data.res.trace$)) {
-            meta.trace = (meta.trace || []).concat(data.res.trace$)
-            delete data.res.trace$
+          //console.log('HR',root.id,data.res,data.res.meta$)
+          
+          if (data.res.trace$) {
+            (meta.trace = meta.trace || []).push(data.res.trace$)
           }
+
+          data.res.__proto__ = { meta$: meta }
         }
 
         var parent_meta = delegate.private$.act && delegate.private$.act.parent
@@ -1856,7 +1864,9 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
   var delegate = instance.delegate(delegate_args)
 
-  var parent_act = instance.private$.act
+  var parent_act = instance.private$.act || meta.parents
+
+  //console.log('MAD',instance.id,meta.action,(parent_act && parent_act.meta),meta.parents)
 
   delegate.private$.act = {
     parent: parent_act && parent_act.meta,
