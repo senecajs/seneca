@@ -316,44 +316,50 @@ describe('seneca', function() {
     })
   })
 
-  it('action-override', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('action-override', function(fin) {
+    var si = Seneca(testopts).error(fin)
 
-    function foo(args, done) {
-      done(null, { a: args.a, s: this.toString(), foo: args.meta$ })
+    function foo(msg, reply) {
+      reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
     }
 
-    function bar(args, done) {
-      var pargs = { a: args.a, s: args.s }
-      this.prior(pargs, function(e, o) {
+
+    function bar(msg, reply) {
+      var pmsg = { a: msg.a, s: msg.s }
+      this.prior(pmsg, function(e, o) {
         o.b = 2
-        o.bar = args.meta$
-        done(e, o)
+        o.bar = msg.meta$
+        reply(e, o)
       })
     }
 
-    function zed(args, done) {
-      args.z = 3
-      this.prior(args, function(e, o) {
+    function zed(msg, reply) {
+      msg.z = 3
+      this.prior(msg, function(e, o) {
         o.z = 3
-        o.zed = args.meta$
-        done(e, o)
+        o.zed = msg.meta$
+        reply(e, o)
       })
     }
 
     si.ready(function() {
       si.add({ op: 'foo' }, foo)
+
       si.act('op:foo,a:1', function(e, o) {
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
-        assert.ok(o.foo.prior.entry)
+        assert.ok(!o.foo.prior)
+        assert.ok(o.meta$.action.match(/foo/))
 
         si.add({ op: 'foo' }, bar)
         si.act('op:foo,a:1', function(e, o) {
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
-          assert.ok(o.bar.prior.entry)
-          assert.ok(!o.foo.prior.entry)
+          assert.ok(!o.bar.prior)
+          assert.ok(o.foo.prior)
+          assert.ok(o.meta$.action.match(/bar/))
+          assert.ok(o.meta$.trace[0].action.match(/foo/))
+
 
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1', function(e, o) {
@@ -362,16 +368,20 @@ describe('seneca', function() {
                 '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
               )
             )
-            assert.ok(o.zed.prior.entry)
-            assert.ok(!o.bar.prior.entry)
-            assert.ok(!o.foo.prior.entry)
+            assert.ok(!o.zed.prior)
+            assert.ok(o.bar.prior)
+            assert.ok(o.foo.prior)
 
-            done()
+            assert.ok(o.meta$.action.match(/zed/))
+            assert.ok(Util.inspect(o.meta$.trace,{depth:null}).replace(/\n/g,' ').match(/bar.*foo/))
+
+            fin()
           })
         })
       })
     })
   })
+
 
   it('action-callback-args', function(done) {
     var si = Seneca(testopts).error(done)
@@ -387,6 +397,7 @@ describe('seneca', function() {
       done()
     })
   })
+
 
   it('action-extend', function(done) {
     var si = Seneca(testopts).error(done)
@@ -423,22 +434,23 @@ describe('seneca', function() {
       si.act('op:foo,a:1', function(err, o) {
         assert.ok(!err)
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
-        assert.ok(!o.foo.prior.entry)
-        assert.ok(o.bar.prior.entry)
+        assert.ok(o.foo.prior)
+        assert.ok(!o.bar.prior)
 
         si.act('op:foo,a:1,b:2', function(err, o) {
           assert.ok(!err)
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
-          assert.ok(!o.foo.prior.entry)
-          assert.ok(!o.bar.prior.entry)
-          assert.ok(o.zed.prior.entry)
+          assert.ok(o.foo.prior)
+          assert.ok(o.bar.prior)
+          assert.ok(!o.zed.prior)
           done()
         })
       })
     })
   })
+
 
   it('prior-nocache', function(done) {
     var si = Seneca({ log: 'test', errhandler: done, trace: { act: false } })
@@ -801,7 +813,39 @@ describe('seneca', function() {
     done()
   })
 
-  it('sub', function(done) {
+
+  it('happy-sub', function(fin) {
+    var log = []
+    Seneca()
+      .test(fin)
+      .add('a:1', function (msg, reply) {
+        log.push('a')
+        expect(log).equal(['s1', 's2', 'a'])
+        reply({x:1})
+      })
+      .sub('a:1', function (msg) {
+        log.push('s1')
+        expect(msg.a).equal(1)
+        expect(msg.in$).equal(true)
+        expect(log).equal(['s1'])
+      })
+      .sub('a:1', function (msg) {
+        log.push('s2')
+        expect(msg.a).equal(1)
+        expect(msg.in$).equal(true)
+        expect(log).equal(['s1','s2'])
+      })
+      .act({a:1}, function (err, out) {
+        log.push('r')
+        expect(err).equal(null)
+        expect(out.x).equal(1)
+        expect(log).equal(['s1', 's2', 'a', 'r'])
+        fin()
+      })
+  })
+
+
+  it('mixed-sub', function(done) {
     var si = Seneca(testopts, { log: 'silent', errhandler: done })
 
     var tmp = { a: 0, as1: 0, as2: 0, as1_in: 0, as1_out: 0, all: 0 }
@@ -846,6 +890,7 @@ describe('seneca', function() {
         assert.equal(1, out.b)
         assert.equal(2, tmp.a)
         assert.equal(1, tmp.as1)
+
         assert.equal(1, tmp.as1_in)
         assert.equal(1, tmp.as1_out)
         assert.equal(0, tmp.as2)
