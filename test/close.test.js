@@ -21,17 +21,17 @@ describe('close', function() {
     done()
   })
 
-  it('add-close', function(done) {
+  it('add-close', function(fin) {
     var tmp = {}
     Seneca(testopts)
-      .error(done)
-      .add('role:seneca,cmd:close', function(msg, done) {
+      //.error(fin)
+      .add('role:seneca,cmd:close', function(msg, reply) {
         tmp.sc = 1
-        this.prior(msg, done)
+        this.prior(msg, reply)
       })
-      .close(function() {
+      .close(function(err) {
         expect(1).to.equal(tmp.sc)
-        done()
+        fin()
       })
   })
 

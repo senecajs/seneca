@@ -323,7 +323,6 @@ describe('seneca', function() {
       reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
     }
 
-
     function bar(msg, reply) {
       var pmsg = { a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
@@ -360,7 +359,6 @@ describe('seneca', function() {
           assert.ok(o.meta$.action.match(/bar/))
           assert.ok(o.meta$.trace[0].action.match(/foo/))
 
-
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1', function(e, o) {
             assert.ok(
@@ -373,7 +371,11 @@ describe('seneca', function() {
             assert.ok(o.foo.prior)
 
             assert.ok(o.meta$.action.match(/zed/))
-            assert.ok(Util.inspect(o.meta$.trace,{depth:null}).replace(/\n/g,' ').match(/bar.*foo/))
+            assert.ok(
+              Util.inspect(o.meta$.trace, { depth: null })
+                .replace(/\n/g, ' ')
+                .match(/bar.*foo/)
+            )
 
             fin()
           })
@@ -381,7 +383,6 @@ describe('seneca', function() {
       })
     })
   })
-
 
   it('action-callback-args', function(done) {
     var si = Seneca(testopts).error(done)
@@ -397,7 +398,6 @@ describe('seneca', function() {
       done()
     })
   })
-
 
   it('action-extend', function(done) {
     var si = Seneca(testopts).error(done)
@@ -450,7 +450,6 @@ describe('seneca', function() {
       })
     })
   })
-
 
   it('prior-nocache', function(done) {
     var si = Seneca({ log: 'test', errhandler: done, trace: { act: false } })
@@ -813,29 +812,28 @@ describe('seneca', function() {
     done()
   })
 
-
   it('happy-sub', function(fin) {
     var log = []
     Seneca()
       .test(fin)
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function(msg, reply) {
         log.push('a')
         expect(log).equal(['s1', 's2', 'a'])
-        reply({x:1})
+        reply({ x: 1 })
       })
-      .sub('a:1', function (msg) {
+      .sub('a:1', function(msg) {
         log.push('s1')
         expect(msg.a).equal(1)
         expect(msg.in$).equal(true)
         expect(log).equal(['s1'])
       })
-      .sub('a:1', function (msg) {
+      .sub('a:1', function(msg) {
         log.push('s2')
         expect(msg.a).equal(1)
         expect(msg.in$).equal(true)
-        expect(log).equal(['s1','s2'])
+        expect(log).equal(['s1', 's2'])
       })
-      .act({a:1}, function (err, out) {
+      .act({ a: 1 }, function(err, out) {
         log.push('r')
         expect(err).equal(null)
         expect(out.x).equal(1)
@@ -843,7 +841,6 @@ describe('seneca', function() {
         fin()
       })
   })
-
 
   it('mixed-sub', function(done) {
     var si = Seneca(testopts, { log: 'silent', errhandler: done })
@@ -1217,12 +1214,10 @@ describe('seneca', function() {
   })
 
   it('basic-close', function(fin) {
-    Seneca({legacy:{transport:false}})
-      .test(fin)
-      .close(function(err) {
-        assert(!err)
-        fin()
-      })
+    Seneca({ legacy: { transport: false } }).test(fin).close(function(err) {
+      assert(!err)
+      fin()
+    })
   })
 
   it('supports jsonic params to has', function(done) {

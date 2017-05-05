@@ -314,7 +314,7 @@ function make_seneca(initial_options) {
   // Create internal tools.
   var actnid = Nid({ length: opts.$.idlen })
   var refnid = function refnid(suffix) {
-    return '(' + actnid() + (suffix?'/'+suffix:'')+')'
+    return '(' + actnid() + (suffix ? '/' + suffix : '') + ')'
   }
 
   // These need to come from options as required during construction.
@@ -631,7 +631,7 @@ function make_seneca(initial_options) {
     if (!private$.handle_sub) {
       private$.handle_sub = function handle_sub(args, result) {
         if (!args.meta$) {
-          args.__proto__ = {meta$: {}}
+          args.__proto__ = { meta$: {} }
         }
 
         var subfuncs = private$.subrouter.find(args)
@@ -721,7 +721,7 @@ function make_seneca(initial_options) {
     actmeta.plugin = {
       name: actmeta.plugin_name,
       tag: actmeta.plugin_tag,
-      fullname: actmeta.plugin_fullname,
+      fullname: actmeta.plugin_fullname
     }
 
     var add_callpoint = callpoint()
@@ -1053,9 +1053,9 @@ function make_seneca(initial_options) {
     var reply = origreply || _.noop
 
     // copy only non-directives
-    var actmsg = Object.create({meta$: {}})
+    var actmsg = Object.create({ meta$: {} })
     for (var p in origmsg) {
-      if ('$' != p[p.length-1]) {
+      if ('$' != p[p.length - 1]) {
         actmsg[p] = origmsg[p]
       }
     }
@@ -1066,7 +1066,10 @@ function make_seneca(initial_options) {
         actmsg.meta$.dflt = origmeta.dflt
       }
       if (origmeta.custom) {
-        actmsg.meta$.custom = Object.assign({},origmeta.custom)
+        actmsg.meta$.custom = origmeta.custom
+      }
+      if (origmeta.closing) {
+        actmsg.meta$.closing = origmeta.closing
       }
     }
 
@@ -1075,17 +1078,35 @@ function make_seneca(initial_options) {
     actmsg.meta$.start = actstart
 
     actmsg.meta$.timeout = Math.max(
-      0, 'number' === typeof origmsg.timeout$ ? origmsg.timeout$ : opts.$.timeout)
+      0,
+      'number' === typeof origmsg.timeout$ ? origmsg.timeout$ : opts.$.timeout
+    )
 
-    if (origmsg.gate$) { actmsg.meta$.gate = true }
-    if (origmsg.fatal$) { actmsg.meta$.fatal = true }
-    if (origmsg.closing$) { actmsg.meta$.closing = true }
-    if (origmsg.local$) { actmsg.meta$.local = true }
+    if (origmsg.gate$) {
+      actmsg.meta$.gate = true
+    }
+    if (origmsg.fatal$) {
+      actmsg.meta$.fatal = true
+    }
+    if (origmsg.closing$) {
+      actmsg.meta$.closing = true
+    }
+    if (origmsg.local$) {
+      actmsg.meta$.local = true
+    }
 
-    if (origmsg.plugin$) { actmsg.meta$.plugin = origmsg.plugin$ }
-    if (origmsg.default$) { actmsg.meta$.dflt = origmsg.default$ }
-    if (origmsg.prior$) { actmsg.meta$.prior = origmsg.prior$ }
-    if (origmsg.custom$) { actmsg.meta$.custom = origmsg.custom$ }
+    if (origmsg.plugin$) {
+      actmsg.meta$.plugin = origmsg.plugin$
+    }
+    if (origmsg.default$) {
+      actmsg.meta$.dflt = origmsg.default$
+    }
+    if (origmsg.prior$) {
+      actmsg.meta$.prior = origmsg.prior$
+    }
+    if (origmsg.custom$) {
+      actmsg.meta$.custom = origmsg.custom$
+    }
 
     // backwards compatibility for Seneca 3.x transports
     if (origmsg.transport$) {
@@ -1094,12 +1115,10 @@ function make_seneca(initial_options) {
 
     //console.log('AM',actmsg,actmsg.meta$);
 
-
     if (actmsg.meta$.gate) {
       execute_instance = instance.delegate()
       execute_instance.private$.ge = execute_instance.private$.ge.gate()
     }
-
 
     var execspec = {
       dn: actmsg.meta$.id,
@@ -1125,15 +1144,14 @@ function make_seneca(initial_options) {
 
     execute_instance.private$.ge.add(execspec)
 
-
     function execute_action(act_instance, msg, reply) {
       var private$ = act_instance.private$
 
-      var actmeta = msg.meta$.prior ? 
-            private$.actmeta[msg.meta$.prior] : 
-            act_instance.find(msg, {
-              catchall: opts.$.internal.catchall
-            })
+      var actmeta = msg.meta$.prior
+        ? private$.actmeta[msg.meta$.prior]
+        : act_instance.find(msg, {
+            catchall: opts.$.internal.catchall
+          })
 
       var delegate = make_act_delegate(act_instance, opts, msg.meta$, actmeta)
 
@@ -1166,7 +1184,6 @@ function make_seneca(initial_options) {
 
       actmeta.func.call(delegate, data.msg, data.reply)
     }
-
 
     function handle_result() {
       //console.log('HRI',actmsg.meta$)
@@ -1234,7 +1251,7 @@ function make_seneca(initial_options) {
         call_cb = out.call_cb
         argsarr[0] = out.err
 
-        argsarr[0].__proto__ = {meta$: meta}
+        argsarr[0].__proto__ = { meta$: meta }
 
         if (delegate && _.isFunction(delegate.on_act_err)) {
           delegate.on_act_err(actmeta, argsarr[0])
@@ -1247,7 +1264,7 @@ function make_seneca(initial_options) {
         meta.end = actend
 
         if (data.res) {
-          data.res.__proto__ = {meta$: meta}
+          data.res.__proto__ = { meta$: meta }
 
           if (_.isArray(data.res.trace$)) {
             meta.trace = (meta.trace || []).concat(data.res.trace$)
@@ -1255,15 +1272,15 @@ function make_seneca(initial_options) {
           }
         }
 
-        
         var parent_meta = delegate.private$.act && delegate.private$.act.parent
         if (parent_meta) {
           parent_meta.trace = parent_meta.trace || []
-          parent_meta.trace.push(_.transform(meta, function (r,v,k) {
-            void 0 !== v && false !== v && 'parents' !== k &&  (r[k] = v)
-          }))
+          parent_meta.trace.push(
+            _.transform(meta, function(r, v, k) {
+              void 0 !== v && false !== v && 'parents' !== k && (r[k] = v)
+            })
+          )
         }
-
 
         instance.emit('act-out', actmsg, data.res)
 
@@ -1312,18 +1329,19 @@ function make_seneca(initial_options) {
     }
   }
 
-
   function resolve_msg_id_tx(act_instance, actmsg, origmsg) {
-    var id_tx = ( origmsg.id$ 
-                  || origmsg.actid$ 
-                  || actmsg.meta$.id 
-                  || act_instance.idgen() ).split('/')
+    var id_tx = (origmsg.id$ ||
+      origmsg.actid$ ||
+      actmsg.meta$.id ||
+      act_instance.idgen())
+      .split('/')
 
-    var tx = id_tx[1]
-          || origmsg.tx$ 
-          || actmsg.meta$.tx$ 
-          || act_instance.fixedargs.tx$
-          || act_instance.idgen()
+    var tx =
+      id_tx[1] ||
+      origmsg.tx$ ||
+      actmsg.meta$.tx$ ||
+      act_instance.fixedargs.tx$ ||
+      act_instance.idgen()
 
     var mi = id_tx[0] || act_instance.idgen()
 
@@ -1331,7 +1349,6 @@ function make_seneca(initial_options) {
     actmsg.meta$.tx = tx
     actmsg.meta$.id = mi + '/' + tx
   }
-
 
   function handle_inward_break(inward, act_instance, data, actmeta, origmsg) {
     if (!inward) return false
@@ -1862,16 +1879,14 @@ function make_act_delegate(instance, opts, meta, actmeta) {
     data.pattern = data.pattern || actmeta.pattern
   })
 
-
   delegate.prior = function(msg, reply) {
     if (actmeta.priormeta) {
       msg.prior$ = actmeta.priormeta.id
       this.act(msg, reply)
-    }
-    else {
+    } else {
       var out = msg.default$ || meta.dflt || null
       if (out) {
-        out.__proto__ = {meta$:meta}
+        out.__proto__ = { meta$: meta }
       }
 
       return reply.call(delegate, null, out)

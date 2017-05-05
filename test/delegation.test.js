@@ -32,7 +32,7 @@ describe('delegation', function() {
       sid.act({ c: 'C' }, function(err, out) {
         assert.ok(!err)
         assert.ok(out.c === 'C')
-        assert.ok(out.a$ === 'A')
+        assert.ok(void 0 === out.a$)
         assert.ok(out.b === 'B')
         si.close(done)
       })
@@ -60,13 +60,13 @@ describe('delegation', function() {
 
         sid.act({ c: 'C' }, function(err, out) {
           assert.ok(!err)
-          assert.ok(out.a$ === 'A')
+          assert.ok(void 0 === out.a$)
           assert.ok(out.c === 'C')
           assert.ok(out.b === 'B')
 
           sid.act({ d: 'D' }, function(err, out) {
             assert.ok(!err)
-            assert.ok(out.a$ === 'A')
+            assert.ok(void 0 === out.a$)
             assert.ok(out.b === 'B')
             assert.ok(out.c === 'C')
             assert.ok(out.d === 'D')
@@ -74,55 +74,6 @@ describe('delegation', function() {
             sid.close(si.close.bind(si, done))
           })
         })
-      })
-    })
-  })
-
-  it('logging.actid', function(done) {
-    var fail
-    var si = Seneca({
-      log: {
-        map: [
-          {
-            handler: function() {
-              if (arguments[6] === 'aaa') {
-                if (arguments[1] !== 'debug') fail = 'aaa,debug'
-                if (arguments[2] !== 'single') fail = 'aaa,single'
-              } else if (arguments[6] === 'ppp') {
-                if (arguments[1] !== 'debug') fail = 'ppp,debug'
-                if (arguments[2] !== 'plugin') fail = 'ppp,plugin'
-              }
-            }
-          }
-        ]
-      }
-    })
-
-    si.add({ a: 'A' }, function(msg, reply) {
-      this.log.debug('aaa')
-      reply(msg)
-    })
-
-    si.use(function() {
-      this.add({ p: 'P' }, function(msg, reply) {
-        this.log.debug('ppp')
-        reply(msg)
-      })
-      return { name: 'p1' }
-    })
-
-    si.act({ a: 'A' }, function(err, out) {
-      assert.ok(!err)
-      assert.ok(out.a === 'A')
-      si.act({ p: 'P' }, function(err, out) {
-        assert.ok(!err)
-        assert.ok(out.p === 'P')
-
-        if (fail) {
-          assert.fail(fail)
-        }
-
-        si.close(done)
       })
     })
   })
