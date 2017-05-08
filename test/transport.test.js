@@ -524,21 +524,19 @@ describe('transport', function() {
       })
   })
 
-  it('transport-single-notdef', function(done) {
+  it('transport-single-notdef', function(fin) {
     var tt = make_test_transport()
 
-    Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
+    Seneca({ tag:'s0', timeout: 5555 })
+      .test(fin)
       .use(tt)
       .add('foo:1', testact)
       .listen({ type: 'test', pin: 'foo:*' })
       .ready(function() {
-        var si = Seneca({
-          timeout: 5555,
-          log: 'silent',
-          debug: { short_logs: true }
-        })
-          .use(tt)
-          .client({ type: 'test', pin: 'foo:1' })
+
+        var si = Seneca({tag:'c0', timeout: 5555, log:'silent'})
+              .use(tt)
+              .client({ type: 'test', pin: 'foo:1' })
 
         si.act('foo:2', function(err) {
           expect(err.code).to.equal('act_not_found')
@@ -546,18 +544,19 @@ describe('transport', function() {
           this.act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.equal({ foo: 1, bar: 2 })
+            expect(out).contains({ foo: 1, bar: 2 })
 
-            done()
+            fin()
           })
         })
       })
   })
 
-  it('transport-pins-notdef', function(done) {
+  it('transport-pins-notdef', function(fin) {
     var tt = make_test_transport()
 
-    Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
+    Seneca({ tag:'s0', timeout: 5555 })
+      .test(fin)
       .use(tt)
       .add('foo:1', testact)
       .add('baz:2', testact)
@@ -577,14 +576,14 @@ describe('transport', function() {
           this.act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.equal({ foo: 1, bar: 2 })
+            expect(out).contains({ foo: 1, bar: 2 })
 
             this.act('baz:2,qoo:10', function(err, out) {
               expect(err).to.not.exist()
               expect(tt.outmsgs.length).to.equal(2)
-              expect(out).to.equal({ baz: 2, qoo: 20 })
+              expect(out).contains({ baz: 2, qoo: 20 })
 
-              done()
+              fin()
             })
           })
         })
@@ -618,17 +617,17 @@ describe('transport', function() {
           si.act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.equal({ foo: 1, bar: 2 })
+            expect(out).contains({ foo: 1, bar: 2 })
 
             si.act('foo:1,qaz:1,bar:1', function(err, out) {
               expect(err).to.not.exist()
               expect(tt.outmsgs.length).to.equal(2)
-              expect(out).to.equal({ foo: 1, qaz: 1, bar: 2 })
+              expect(out).contains({ foo: 1, qaz: 1, bar: 2 })
 
               si.act('foo:2,qaz:1,bar:1', function(err, out) {
                 expect(err).to.not.exist()
                 expect(tt.outmsgs.length).to.equal(3)
-                expect(out).to.equal({ foo: 2, qaz: 1, bar: 2 })
+                expect(out).contains({ foo: 2, qaz: 1, bar: 2 })
 
                 done()
               })
@@ -662,17 +661,17 @@ describe('transport', function() {
           si.act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(0)
-            expect(out).to.equal({ foo: 1, local: 1 })
+            expect(out).contains({ foo: 1, local: 1 })
 
             si.act('foo:2,qaz:1,bar:1', function(err, out) {
               expect(err).to.not.exist()
               expect(tt.outmsgs.length).to.equal(1)
-              expect(out).to.equal({ foo: 2, qaz: 1, bar: 2 })
+              expect(out).contains({ foo: 2, qaz: 1, bar: 2 })
 
               si.act('foo:2,qaz:2,bar:1', function(err, out) {
                 expect(err).to.not.exist()
                 expect(tt.outmsgs.length).to.equal(2)
-                expect(out).to.equal({ foo: 2, qaz: 2, bar: 2 })
+                expect(out).contains({ foo: 2, qaz: 2, bar: 2 })
 
                 done()
               })
@@ -706,7 +705,7 @@ describe('transport', function() {
           si.act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(0)
-            expect(out).to.equal({ foo: 1, local: 1 })
+            expect(out).contains({ foo: 1, local: 1 })
 
             done()
           })
@@ -735,7 +734,7 @@ describe('transport', function() {
           .act('foo:1,bar:1', function(err, out) {
             expect(err).to.not.exist()
             expect(tt.outmsgs.length).to.equal(1)
-            expect(out).to.equal({ foo: 1, bar: 2, local: 1, qaz: 1 })
+            expect(out).contains({ foo: 1, bar: 2, local: 1, qaz: 1 })
 
             done()
           })
