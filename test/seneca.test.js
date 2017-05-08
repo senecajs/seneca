@@ -692,10 +692,11 @@ describe('seneca', function() {
   })
 
   it('strargs', function(done) {
-    var si = Seneca({ log: 'silent', strict: { result: false } })
-    si.add({ a: 1, b: 2 }, function(args, cb) {
-      cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
-    })
+    var si = Seneca({ strict: { result: false } })
+      .test(done)
+      .add({ a: 1, b: 2 }, function(args, cb) {
+        cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
+      })
 
     si.act({ a: 1, b: 2, c: 3 }, function(err, out) {
       assert.ok(!err)

@@ -70,4 +70,10 @@ describe('message', function() {
         fin()
       })
   })
+
+  // TEST: custom$
+  // TEST: preserves prototype
+  // TEST: entities
+  
+
 })

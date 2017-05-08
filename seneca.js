@@ -639,7 +639,7 @@ function make_seneca(initial_options) {
     if (!private$.handle_sub) {
       private$.handle_sub = function handle_sub(args, result) {
         if (!args.meta$) {
-          args.__proto__ = { meta$: {} }
+          Common.setmeta(args, {})
         }
 
         var subfuncs = private$.subrouter.find(args)
@@ -1233,7 +1233,7 @@ function make_seneca(initial_options) {
           meta.trace.push(data.res.trace$)
         }
 
-        data.res.__proto__ = { meta$: meta }
+        Common.setmeta(data.res, meta)
       }
 
       var parent_meta = delegate.private$.act && delegate.private$.act.parent
@@ -1881,7 +1881,7 @@ function make_act_delegate(instance, opts, meta, actdef) {
     } else {
       var out = msg.default$ || meta.dflt || null
       if (out) {
-        out.__proto__ = { meta$: meta }
+        Common.setmeta(out, meta)
       }
 
       return reply.call(delegate, null, out)
