@@ -319,6 +319,10 @@ describe('seneca', function() {
   it('action-override', function(fin) {
     var si = Seneca(testopts).error(fin)
 
+    var trace = out => Seneca.util.flatten(out.meta$.trace,'trace')
+          .map(x=>x.desc[7])
+          .toString()
+
     function foo(msg, reply) {
       reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
     }
@@ -357,7 +361,7 @@ describe('seneca', function() {
           assert.ok(!o.bar.prior)
           assert.ok(o.foo.prior)
           assert.ok(o.meta$.action.match(/bar/))
-          assert.ok(o.meta$.trace[0].action.match(/foo/))
+          assert.ok(trace(o).match(/foo_/))
 
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1', function(e, o) {
@@ -369,13 +373,8 @@ describe('seneca', function() {
             assert.ok(!o.zed.prior)
             assert.ok(o.bar.prior)
             assert.ok(o.foo.prior)
-
             assert.ok(o.meta$.action.match(/zed/))
-            assert.ok(
-              Util.inspect(o.meta$.trace, { depth: null })
-                .replace(/\n/g, ' ')
-                .match(/bar.*foo/)
-            )
+            assert.ok(trace(o).match(/bar_.*foo_/))
 
             fin()
           })
@@ -394,7 +393,7 @@ describe('seneca', function() {
 
     var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
     si.act('op:foo', { items: items }, function() {
-      assert.equal(arguments.length, items.length)
+      assert.equal(arguments.length, 2)
       done()
     })
   })

@@ -448,6 +448,7 @@ describe('error', function() {
         // to test logging.
         try {
           assert.equal(out, null)
+
           assert.equal('act_execute', err.code, ctxt.name + '-A')
           assert.equal('a:1', err.details.pattern, ctxt.name + '-B')
 

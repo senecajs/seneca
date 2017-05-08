@@ -18,7 +18,7 @@ describe('outward', function() {
     err.meta$ = { err: err }
     var data = { res: err }
     Outward.make_error({ options: { legacy: { error: false } } }, data)
-    expect(data.err.message).equal('foo')
+    expect(data.res.message).equal('foo')
     fin()
   })
 })
