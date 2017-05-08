@@ -108,7 +108,7 @@
     "docco": "0.7.x",
     "lab": "13.0.x",
     "prettier": "1.2.x",
-    "seneca-entity": "1.3.x",
+    "seneca-entity": "2.0.x",
     "seneca-error-test": "0.2.x"
   }
 }
