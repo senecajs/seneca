@@ -5,24 +5,26 @@ var Lab = require('lab')
 var Code = require('code')
 var Seneca = require('..')
 
-var lab = exports.lab = Lab.script()
+var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-describe('logging', function () {
-  it('happy', function (fin) {
+describe('logging', function() {
+  it('happy', function(fin) {
     var capture = make_log_capture()
 
-    Seneca({log: 'all', internal: {logger: capture}})
+    Seneca({ log: 'all', internal: { logger: capture } })
       .error(fin)
-      .add('a:1', function (m, d) { d(null, {x: 1}) })
-      .act('a:1', function (e, o) {
-        expect(this.seneca).to.exist()
-        this.log({seen: 'a:1'})
+      .add('a:1', function(m, r) {
+        r(null, { x: 1 })
       })
-      .ready(function () {
-        var log = capture.log.filter(function (entry) {
+      .act('a:1', function() {
+        expect(this.seneca).to.exist()
+        this.log({ seen: 'a:1' })
+      })
+      .ready(function() {
+        var log = capture.log.filter(function(entry) {
           return entry.seen
         })
         expect(log[0].seen).to.equal('a:1')
@@ -30,18 +32,20 @@ describe('logging', function () {
       })
   })
 
-  it('basic', function (fin) {
+  it('basic', function(fin) {
     var capture = make_log_capture()
 
-    Seneca({log: {basic: 'all'}, internal: {logger: capture}})
+    Seneca({ log: { basic: 'all' }, internal: { logger: capture } })
       .error(fin)
-      .add('a:1', function (m, d) { d(null, {x: 1}) })
-      .act('a:1', function (e, o) {
-        expect(this.seneca).to.exist()
-        this.log({seen: 'a:1'})
+      .add('a:1', function(m, r) {
+        r(null, { x: 1 })
       })
-      .ready(function () {
-        var log = capture.log.filter(function (entry) {
+      .act('a:1', function() {
+        expect(this.seneca).to.exist()
+        this.log({ seen: 'a:1' })
+      })
+      .ready(function() {
+        var log = capture.log.filter(function(entry) {
           return entry.seen
         })
         expect(log[0].seen).to.equal('a:1')
@@ -49,166 +53,154 @@ describe('logging', function () {
       })
   })
 
-  it('shortcuts', function (fin) {
+  it('shortcuts', function(fin) {
     var log
     var stdout_write = process.stdout.write
-    process.stdout.write = function (data) {
+    process.stdout.write = function(data) {
       log.push(data.toString())
     }
 
-    function restore (err) {
+    function restore(err) {
       process.stdout.write = stdout_write
       fin(err)
     }
 
     nothing()
 
-    function nothing () {
+    function nothing() {
       log = []
-      Seneca()
-        .error(restore)
-        .add('a:1', a1)
-        .act('a:1')
-        .ready(function () {
-          expect(log.length).to.equal(1)
-          quiet()
-        })
+      Seneca().error(restore).add('a:1', a1).act('a:1').ready(function() {
+        expect(log.length).to.equal(1)
+        quiet()
+      })
     }
 
-    function quiet () {
+    function quiet() {
       log = []
-      Seneca({log: 'quiet'})
+      Seneca({ log: 'quiet' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).to.equal(0)
           silent()
         })
     }
 
-    function silent () {
+    function silent() {
       log = []
-      Seneca({log: 'silent'})
+      Seneca({ log: 'silent' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).to.equal(0)
           any()
         })
     }
 
-    function any () {
+    function any() {
       log = []
-      Seneca({log: 'any'})
+      Seneca({ log: 'any' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).above(11)
           all()
         })
     }
 
-    function all () {
+    function all() {
       log = []
-      Seneca({log: 'all'})
+      Seneca({ log: 'all' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).above(11)
           print()
         })
     }
 
-    function print () {
+    function print() {
       log = []
-      Seneca({log: 'print'})
+      Seneca({ log: 'print' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).above(11)
           standard()
         })
     }
 
-    function standard () {
+    function standard() {
       log = []
-      Seneca({log: 'standard'})
+      Seneca({ log: 'standard' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).to.equal(1)
           do_test()
         })
     }
 
-    function do_test () {
+    function do_test() {
       log = []
-      Seneca({log: 'test'})
+      Seneca({ log: 'test' })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
-        .ready(function () {
+        .ready(function() {
           expect(log.length).to.equal(0)
           restore()
         })
     }
   })
 
-  it('test-mode', function (fin) {
+  it('test-mode', function(fin) {
     var log
     var stdout_write = process.stdout.write
-    process.stdout.write = function (data) {
+    process.stdout.write = function(data) {
       log.push(data.toString())
     }
 
-    function restore (err) {
+    function restore(err) {
       process.stdout.write = stdout_write
       fin(err)
     }
 
-    Seneca.test(fin)
-      .add('a:1', a1)
-      .act('a:1')
-      .ready(print)
+    Seneca.test(fin).add('a:1', a1).act('a:1').ready(print)
 
-    function print () {
+    function print() {
       log = []
-      Seneca.test(fin, 'print')
-        .add('a:1', a1)
-        .act('a:1')
-        .ready(function () {
-          expect(log.length).above(11)
-          restore()
-        })
+      Seneca.test(fin, 'print').add('a:1', a1).act('a:1').ready(function() {
+        expect(log.length).above(11)
+        restore()
+      })
     }
   })
 })
 
-
-function a1 (msg, reply) {
-  reply(null, {x: 1})
+function a1(msg, reply) {
+  reply(null, { x: 1 })
 }
 
-function make_log_capture () {
-  var capture = function capture (options) {
-  }
+function make_log_capture() {
+  var capture = function capture() {}
 
   capture.log = []
 
-  capture.preload = function () {
+  capture.preload = function() {
     var seneca = this
     var so = seneca.options()
     capture.spec = so.log
 
     return {
       extend: {
-        logger: function (seneca, data) {
+        logger: function(seneca, data) {
           capture.log.push(data)
         }
       }

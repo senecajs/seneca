@@ -1,6 +1,0 @@
-{
-  "extends": "seneca",
-  "rules": {
-     "padded-blocks": 0
-  }
-}

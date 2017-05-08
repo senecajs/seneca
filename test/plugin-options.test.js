@@ -5,16 +5,16 @@ var Assert = require('assert')
 var Lab = require('lab')
 var Seneca = require('..')
 
-var lab = exports.lab = Lab.script()
+var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
 
-describe('plugin.options', function () {
-  it('happy', function (done) {
-    var si = Seneca({log: 'silent'})
+describe('plugin.options', function() {
+  it('happy', function(done) {
+    var si = Seneca({ log: 'silent' })
 
-    si.use('options', {a: 1})
+    si.use('options', { a: 1 })
     assert.equal(1, si.export('options').a)
 
     si.use('options', require('./stubs/plugin/options.file.js'))
