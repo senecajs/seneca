@@ -319,9 +319,11 @@ describe('seneca', function() {
   it('action-override', function(fin) {
     var si = Seneca(testopts).error(fin)
 
-    var trace = out => Seneca.util.flatten(out.meta$.trace,'trace')
-          .map(x=>x.desc[7])
-          .toString()
+    var trace = out =>
+      Seneca.util
+        .flatten(out.meta$.trace, 'trace')
+        .map(x => x.desc[7])
+        .toString()
 
     function foo(msg, reply) {
       reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })

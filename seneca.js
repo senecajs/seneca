@@ -323,7 +323,6 @@ function make_seneca(initial_options) {
   }
   var next_action_id = Common.autoincr()
 
-
   // These need to come from options as required during construction.
   opts.$.internal.actrouter = opts.$.internal.actrouter || Patrun({ gex: true })
   opts.$.internal.subrouter = opts.$.internal.subrouter || Patrun({ gex: true })
@@ -470,8 +469,8 @@ function make_seneca(initial_options) {
 
   // Create a unique identifer for this instance.
   root.id =
-    opts.$.id$ || 
-    ( root.idgen() +
+    opts.$.id$ ||
+    root.idgen() +
       '/' +
       root.start_time +
       '/' +
@@ -479,7 +478,7 @@ function make_seneca(initial_options) {
       '/' +
       root.version +
       '/' +
-      opts.$.tag )
+      opts.$.tag
 
   // The instance tag, useful for grouping instances.
   root.tag = opts.$.tag
@@ -769,7 +768,7 @@ function make_seneca(initial_options) {
     actdef.rules = pattern_rules
 
     //actdef.id = refnid(action.name)
-    actdef.id = action.name+'_'+next_action_id()
+    actdef.id = action.name + '_' + next_action_id()
     actdef.name = action.name
     actdef.func = action
 
@@ -1200,7 +1199,6 @@ function make_seneca(initial_options) {
       actdef.func.call(delegate, data.msg, data.reply)
     }
 
-
     function handle_result(err, out) {
       var actdef = action_ctxt.actdef
 
@@ -1210,7 +1208,6 @@ function make_seneca(initial_options) {
       action_ctxt.duration = actend - action_ctxt.start
 
       var call_cb = true
-
 
       var data = {
         msg: actmsg,
@@ -1222,19 +1219,18 @@ function make_seneca(initial_options) {
       if (outward) {
         if ('error' === outward.kind) {
           data.res = outward.error || error(outward.code, outward.info)
-        }
-        else if ('result' === outward.kind) {
+        } else if ('result' === outward.kind) {
           data.res = outward.result
         }
       }
-
 
       var meta = actmsg.meta$ || {}
       meta.end = actend
 
       if (data.res) {
         if (data.res.trace$) {
-          (meta.trace = meta.trace || []).push(data.res.trace$)
+          meta.trace = meta.trace || []
+          meta.trace.push(data.res.trace$)
         }
 
         data.res.__proto__ = { meta$: meta }
@@ -1243,14 +1239,20 @@ function make_seneca(initial_options) {
       var parent_meta = delegate.private$.act && delegate.private$.act.parent
       if (parent_meta) {
         parent_meta.trace = parent_meta.trace || []
-        parent_meta.trace.push(
-          {
-            desc:[meta.pattern,meta.id,meta.instance,meta.start,meta.end,meta.sync,meta.instance,meta.action],
-            trace: meta.trace
-          }
-        )
+        parent_meta.trace.push({
+          desc: [
+            meta.pattern,
+            meta.id,
+            meta.instance,
+            meta.start,
+            meta.end,
+            meta.sync,
+            meta.instance,
+            meta.action
+          ],
+          trace: meta.trace
+        })
       }
-
 
       if (_.isError(data.res)) {
         var errordesc = act_error(
@@ -1299,7 +1301,7 @@ function make_seneca(initial_options) {
           if (_.isError(data.res)) {
             rerr = errordesc.err
             rout = null
-          } 
+          }
 
           reply.call(delegate, rerr, rout)
         }
@@ -1317,7 +1319,7 @@ function make_seneca(initial_options) {
           instance,
           formattedErr,
           actdef,
-          [err,out],
+          [err, out],
           reply,
           actend - actstart,
           actmsg,
@@ -1349,7 +1351,6 @@ function make_seneca(initial_options) {
     actmsg.meta$.id = mi + '/' + tx
   }
 
-
   function handle_inward_break(inward, act_instance, data, actdef, origmsg) {
     if (!inward) return false
 
@@ -1363,13 +1364,7 @@ function make_seneca(initial_options) {
         act_instance.log[inward.log.level](
           errlog(
             err,
-            errlog(
-              actdef || {},
-              msg.meta$.prior,
-              msg,
-              origmsg,
-              inward.log.data
-            )
+            errlog(actdef || {}, msg.meta$.prior, msg, origmsg, inward.log.data)
           )
         )
       }
@@ -1387,7 +1382,6 @@ function make_seneca(initial_options) {
       return true
     }
   }
-
 
   function act_error(
     instance,
