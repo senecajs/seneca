@@ -993,6 +993,7 @@ describe('seneca', function() {
 
     function assertDefName(name, pattern) {
       var def = si.find(pattern)
+      //console.log(def.func.toString())
       assert.equal(name, def.func.name)
     }
 

@@ -94,6 +94,12 @@ describe('transport', function() {
       })
   })
 
+  
+  // TEST: parent and trace over transport - fake and network
+  // TEST: separate reply - write TCP
+
+
+
   describe('listen()', function() {
     it('supports null options', function(done) {
       var listen = Transport.listen(_.noop)

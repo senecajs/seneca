@@ -828,6 +828,8 @@ function make_seneca(initial_options) {
 
     private$.actdef[actdef.id] = actdef
 
+    //console.log(actdef)
+
     return self
   }
 
@@ -897,8 +899,18 @@ function make_seneca(initial_options) {
 
     var self = this
     var spec = Common.parsePattern(self, argsarr, 'reply:f?')
-    var msg = _.extend(spec.pattern, self.fixedargs)
+    var msg = spec.pattern
     var reply = spec.reply
+
+    msg = self.fixedargs ? Object.assign(msg, self.fixedargs) : msg
+
+/*    
+    if(self.fixedargs) {
+      for( var p in self.fixedargs) {
+        msg[p] = self.fixedargs[p]
+      }
+    }
+*/
 
     if (opts.$.debug.act_caller || opts.$.test) {
       msg.caller$ =
@@ -1062,8 +1074,14 @@ function make_seneca(initial_options) {
     var reply = origreply || _.noop
 
     // copy only non-directives
-    var actmsg = Object.create({ meta$: {} })
-    for (var p in origmsg) {
+    var metaproto = { meta$: {} }
+    metaproto.__proto__ = origmsg.__proto__
+    var actmsg = Object.create(metaproto)
+
+    var pn = Object.getOwnPropertyNames(origmsg)
+      for( var i = 0; i < pn.length; i++) {
+      var p = pn[i]
+
       if ('$' != p[p.length - 1]) {
         actmsg[p] = origmsg[p]
       }
@@ -1200,9 +1218,8 @@ function make_seneca(initial_options) {
     }
 
     function handle_result(err, out) {
+      var delegate = this
       var actdef = action_ctxt.actdef
-
-      var delegate = this //|| instance
 
       var actend = Date.now()
       action_ctxt.duration = actend - action_ctxt.start
@@ -1830,10 +1847,10 @@ function make_modified_log(log, modifier) {
   }
 }
 
-function make_default_log_modifier(root) {
+function make_default_log_modifier(instance) {
   return function default_log_modifier(data) {
     data.level = null == data.level ? 'debug' : data.level
-    data.seneca = null == data.seneca ? root.id : data.seneca
+    data.seneca = null == data.seneca ? instance.id : data.seneca
     data.when = null == data.when ? Date.now() : data.when
   }
 }
