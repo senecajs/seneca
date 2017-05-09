@@ -904,7 +904,7 @@ function make_seneca(initial_options) {
 
     msg = self.fixedargs ? Object.assign(msg, self.fixedargs) : msg
 
-/*    
+    /*    
     if(self.fixedargs) {
       for( var p in self.fixedargs) {
         msg[p] = self.fixedargs[p]
@@ -1079,7 +1079,7 @@ function make_seneca(initial_options) {
     var actmsg = Object.create(metaproto)
 
     var pn = Object.getOwnPropertyNames(origmsg)
-      for( var i = 0; i < pn.length; i++) {
+    for (var i = 0; i < pn.length; i++) {
       var p = pn[i]
 
       if ('$' != p[p.length - 1]) {

@@ -1293,7 +1293,7 @@ describe('seneca', function() {
   })
 
   it('strict-find-false', function(fin) {
-    var seneca = Seneca({strict: { find: false } }).test(fin)
+    var seneca = Seneca({ strict: { find: false } }).test(fin)
     seneca.act({ a: 1 }, function(err, out) {
       expect(err).not.exist()
       expect(out).object()
@@ -1302,7 +1302,7 @@ describe('seneca', function() {
   })
 
   it('strict-find-true', function(fin) {
-    var seneca = Seneca({log: 'silent', strict: { find: true } })
+    var seneca = Seneca({ log: 'silent', strict: { find: true } })
     seneca.act({ a: 1 }, function(err, out) {
       expect(err).to.exist()
       expect(out).to.not.exist()
@@ -1311,7 +1311,7 @@ describe('seneca', function() {
   })
 
   it('strict-find-default', function(fin) {
-    var seneca = Seneca({strict: { find: false } }).test(fin)
+    var seneca = Seneca({ strict: { find: false } }).test(fin)
     seneca.act({ a: 1, default$: { foo: 'bar' } }, function(err, out) {
       expect(err).to.not.exist()
       expect(out).contains({ foo: 'bar' })

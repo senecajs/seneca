@@ -94,11 +94,8 @@ describe('transport', function() {
       })
   })
 
-  
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
-
-
 
   describe('listen()', function() {
     it('supports null options', function(done) {
@@ -533,16 +530,15 @@ describe('transport', function() {
   it('transport-single-notdef', function(fin) {
     var tt = make_test_transport()
 
-    Seneca({ tag:'s0', timeout: 5555 })
+    Seneca({ tag: 's0', timeout: 5555 })
       .test(fin)
       .use(tt)
       .add('foo:1', testact)
       .listen({ type: 'test', pin: 'foo:*' })
       .ready(function() {
-
-        var si = Seneca({tag:'c0', timeout: 5555, log:'silent'})
-              .use(tt)
-              .client({ type: 'test', pin: 'foo:1' })
+        var si = Seneca({ tag: 'c0', timeout: 5555, log: 'silent' })
+          .use(tt)
+          .client({ type: 'test', pin: 'foo:1' })
 
         si.act('foo:2', function(err) {
           expect(err.code).to.equal('act_not_found')
@@ -561,7 +557,7 @@ describe('transport', function() {
   it('transport-pins-notdef', function(fin) {
     var tt = make_test_transport()
 
-    Seneca({ tag:'s0', timeout: 5555 })
+    Seneca({ tag: 's0', timeout: 5555 })
       .test(fin)
       .use(tt)
       .add('foo:1', testact)
