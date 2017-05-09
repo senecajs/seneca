@@ -173,6 +173,10 @@ var option_defaults = {
     // TODO: make static in Seneca 4.x
   },
 
+  limits: {
+    maxparents: 33
+  },
+
   // Backwards compatibility settings.
   legacy: {
     // Action callback must always have signature callback(error, result).
@@ -207,7 +211,8 @@ var seneca_util = {
     return Patrun()
   },
   argprops: Common.argprops,
-  resolve_option: Common.resolve_option
+  resolve_option: Common.resolve_option,
+  flatten: Common.flatten
 }
 
 // Seneca is an EventEmitter.
@@ -316,6 +321,7 @@ function make_seneca(initial_options) {
   var refnid = function refnid(suffix) {
     return '(' + actnid() + (suffix ? '/' + suffix : '') + ')'
   }
+  var next_action_id = Common.autoincr()
 
   // These need to come from options as required during construction.
   opts.$.internal.actrouter = opts.$.internal.actrouter || Patrun({ gex: true })
@@ -463,15 +469,16 @@ function make_seneca(initial_options) {
 
   // Create a unique identifer for this instance.
   root.id =
+    opts.$.id$ ||
     root.idgen() +
-    '/' +
-    root.start_time +
-    '/' +
-    process.pid +
-    '/' +
-    root.version +
-    '/' +
-    opts.$.tag
+      '/' +
+      root.start_time +
+      '/' +
+      process.pid +
+      '/' +
+      root.version +
+      '/' +
+      opts.$.tag
 
   // The instance tag, useful for grouping instances.
   root.tag = opts.$.tag
@@ -562,6 +569,7 @@ function make_seneca(initial_options) {
     .add(Inward.validate_msg)
     .add(Inward.warnings)
     .add(Inward.msg_meta)
+    .add(Inward.limit_msg)
     .add(Inward.prepare_delegate)
     .add(Inward.msg_modify)
     .add(Inward.announce)
@@ -631,7 +639,7 @@ function make_seneca(initial_options) {
     if (!private$.handle_sub) {
       private$.handle_sub = function handle_sub(args, result) {
         if (!args.meta$) {
-          args.__proto__ = { meta$: {} }
+          Common.setmeta(args, {})
         }
 
         var subfuncs = private$.subrouter.find(args)
@@ -759,7 +767,8 @@ function make_seneca(initial_options) {
 
     actdef.rules = pattern_rules
 
-    actdef.id = refnid(action.name)
+    //actdef.id = refnid(action.name)
+    actdef.id = action.name + '_' + next_action_id()
     actdef.name = action.name
     actdef.func = action
 
@@ -818,6 +827,8 @@ function make_seneca(initial_options) {
     }
 
     private$.actdef[actdef.id] = actdef
+
+    //console.log(actdef)
 
     return self
   }
@@ -888,8 +899,18 @@ function make_seneca(initial_options) {
 
     var self = this
     var spec = Common.parsePattern(self, argsarr, 'reply:f?')
-    var msg = _.extend(spec.pattern, self.fixedargs)
+    var msg = spec.pattern
     var reply = spec.reply
+
+    msg = self.fixedargs ? Object.assign(msg, self.fixedargs) : msg
+
+    /*    
+    if(self.fixedargs) {
+      for( var p in self.fixedargs) {
+        msg[p] = self.fixedargs[p]
+      }
+    }
+*/
 
     if (opts.$.debug.act_caller || opts.$.test) {
       msg.caller$ =
@@ -1053,8 +1074,14 @@ function make_seneca(initial_options) {
     var reply = origreply || _.noop
 
     // copy only non-directives
-    var actmsg = Object.create({ meta$: {} })
-    for (var p in origmsg) {
+    var metaproto = { meta$: {} }
+    metaproto.__proto__ = origmsg.__proto__
+    var actmsg = Object.create(metaproto)
+
+    var pn = Object.getOwnPropertyNames(origmsg)
+    for (var i = 0; i < pn.length; i++) {
+      var p = pn[i]
+
       if ('$' != p[p.length - 1]) {
         actmsg[p] = origmsg[p]
       }
@@ -1071,8 +1098,6 @@ function make_seneca(initial_options) {
       if (origmeta.closing) {
         actmsg.meta$.closing = origmeta.closing
       }
-
-      // (actmsg.meta$.trace = actmsg.meta$.trace || []).push(origmeta)
     }
 
     resolve_msg_id_tx(execute_instance, actmsg, origmsg)
@@ -1192,24 +1217,9 @@ function make_seneca(initial_options) {
       actdef.func.call(delegate, data.msg, data.reply)
     }
 
-    function handle_result() {
-      //console.log('HRI',actmsg.meta$)
-
-      var argsarr = new Array(arguments.length)
-      for (var l = 0; l < argsarr.length; ++l) {
-        argsarr[l] = arguments[l]
-      }
-
-      if (
-        !opts.$.legacy.action_signature &&
-        1 === argsarr.length &&
-        !_.isError(argsarr[0])
-      ) {
-        argsarr.unshift(null)
-      }
-
+    function handle_result(err, out) {
+      var delegate = this
       var actdef = action_ctxt.actdef
-      var delegate = this || instance
 
       var actend = Date.now()
       action_ctxt.duration = actend - action_ctxt.start
@@ -1218,32 +1228,55 @@ function make_seneca(initial_options) {
 
       var data = {
         msg: actmsg,
-        err: argsarr[0],
-        res: argsarr[1]
+        res: err || out
       }
-
-      //console.log('HR',data.err,data.res,data.res&&data.res.meta$,actmsg.meta$)
 
       var outward = private$.outward.process(action_ctxt, data)
 
       if (outward) {
         if ('error' === outward.kind) {
-          data.err = outward.error || error(outward.code, outward.info)
+          data.res = outward.error || error(outward.code, outward.info)
+        } else if ('result' === outward.kind) {
+          data.res = outward.result
         }
       }
 
-      var meta
+      var meta = actmsg.meta$ || {}
+      meta.end = actend
 
-      if (data.err) {
-        //meta = data.err.meta$ || actmsg.meta$ || {}
-        meta = actmsg.meta$ || {}
-        meta.end = actend
+      if (data.res) {
+        if (data.res.trace$) {
+          meta.trace = meta.trace || []
+          meta.trace.push(data.res.trace$)
+        }
 
-        var out = act_error(
+        Common.setmeta(data.res, meta)
+      }
+
+      var parent_meta = delegate.private$.act && delegate.private$.act.parent
+      if (parent_meta) {
+        parent_meta.trace = parent_meta.trace || []
+        parent_meta.trace.push({
+          desc: [
+            meta.pattern,
+            meta.id,
+            meta.instance,
+            meta.start,
+            meta.end,
+            meta.sync,
+            meta.instance,
+            meta.action
+          ],
+          trace: meta.trace
+        })
+      }
+
+      if (_.isError(data.res)) {
+        var errordesc = act_error(
           instance,
-          data.err,
+          data.res,
           actdef,
-          argsarr,
+          [err, out],
           reply,
           actend - actstart,
           actmsg,
@@ -1252,46 +1285,15 @@ function make_seneca(initial_options) {
         )
 
         if (actmsg.meta$.fatal) {
-          return instance.die(out.err)
+          return instance.die(errordesc.err)
         }
 
-        call_cb = out.call_cb
-        argsarr[0] = out.err
-
-        argsarr[0].__proto__ = { meta$: meta }
+        call_cb = errordesc.call_cb
 
         if (delegate && _.isFunction(delegate.on_act_err)) {
-          delegate.on_act_err(actdef, argsarr[0])
+          delegate.on_act_err(actdef, data.res)
         }
       } else {
-        argsarr[0] = null
-
-        // meta = (data.res && data.res.meta$) || actmsg.meta$ || {}
-        meta = actmsg.meta$ || {}
-        meta.end = actend
-
-        if (data.res) {
-          //console.log('HR',root.id,data.res,data.res.meta$)
-          
-          if (data.res.trace$) {
-            (meta.trace = meta.trace || []).push(data.res.trace$)
-          }
-
-          data.res.__proto__ = { meta$: meta }
-        }
-
-        var parent_meta = delegate.private$.act && delegate.private$.act.parent
-        if (parent_meta) {
-          parent_meta.trace = parent_meta.trace || []
-          parent_meta.trace.push(
-            _.transform(meta, function(r, v, k) {
-              void 0 !== v && false !== v && 'parents' !== k && (r[k] = v)
-            })
-          )
-        }
-
-        instance.emit('act-out', actmsg, data.res)
-
         delegate.log.debug(
           actlog(actdef, actmsg, origmsg, {
             kind: 'act',
@@ -1301,16 +1303,24 @@ function make_seneca(initial_options) {
           })
         )
 
+        instance.emit('act-out', actmsg, data.res)
+
         if (_.isFunction(delegate.on_act_out)) {
           delegate.on_act_out(actdef, data.res)
         }
-
-        //console.log('HRR',data.res,data.res.meta$)
       }
 
       try {
         if (call_cb) {
-          reply.apply(delegate, argsarr) // note: err == argsarr[0]
+          var rout = data.res
+          var rerr = null
+
+          if (_.isError(data.res)) {
+            rerr = errordesc.err
+            rout = null
+          }
+
+          reply.call(delegate, rerr, rout)
         }
       } catch (ex) {
         // for exceptions thrown inside the callback
@@ -1326,7 +1336,7 @@ function make_seneca(initial_options) {
           instance,
           formattedErr,
           actdef,
-          argsarr,
+          [err, out],
           reply,
           actend - actstart,
           actmsg,
@@ -1371,13 +1381,7 @@ function make_seneca(initial_options) {
         act_instance.log[inward.log.level](
           errlog(
             err,
-            errlog(
-              actdef || {},
-              msg.meta$.prior,
-              msg,
-              origmsg,
-              inward.log.data
-            )
+            errlog(actdef || {}, msg.meta$.prior, msg, origmsg, inward.log.data)
           )
         )
       }
@@ -1843,10 +1847,10 @@ function make_modified_log(log, modifier) {
   }
 }
 
-function make_default_log_modifier(root) {
+function make_default_log_modifier(instance) {
   return function default_log_modifier(data) {
     data.level = null == data.level ? 'debug' : data.level
-    data.seneca = null == data.seneca ? root.id : data.seneca
+    data.seneca = null == data.seneca ? instance.id : data.seneca
     data.when = null == data.when ? Date.now() : data.when
   }
 }
@@ -1864,9 +1868,7 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
   var delegate = instance.delegate(delegate_args)
 
-  var parent_act = instance.private$.act || meta.parents
-
-  //console.log('MAD',instance.id,meta.action,(parent_act && parent_act.meta),meta.parents)
+  var parent_act = instance.private$.act || meta.parent
 
   delegate.private$.act = {
     parent: parent_act && parent_act.meta,
@@ -1896,7 +1898,7 @@ function make_act_delegate(instance, opts, meta, actdef) {
     } else {
       var out = msg.default$ || meta.dflt || null
       if (out) {
-        out.__proto__ = { meta$: meta }
+        Common.setmeta(out, meta)
       }
 
       return reply.call(delegate, null, out)

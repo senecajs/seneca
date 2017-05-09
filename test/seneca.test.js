@@ -292,7 +292,7 @@ describe('seneca', function() {
 
     si.act({ op: 'bad', a1: 100, default$: { a: 1 } }, function(err, out) {
       assert.equal(err, null)
-      assert.deepEqual({ a: 1 }, out)
+      expect(out.a).equal(1)
 
       si.add('a:0', function(m, r) {
         this.prior(m, r)
@@ -300,7 +300,7 @@ describe('seneca', function() {
 
       si.act('a:0,default$:{y:2}', function(e, o) {
         assert.equal(null, e)
-        assert.deepEqual({ y: 2 }, o)
+        expect(o.y).equal(2)
 
         si.add('a:0', function(m, r) {
           this.prior(m, r)
@@ -308,7 +308,7 @@ describe('seneca', function() {
 
         si.act('a:0,default$:{y:3}', function(e, o) {
           assert.equal(null, e)
-          assert.deepEqual({ y: 3 }, o)
+          expect(o.y).equal(3)
 
           done()
         })
@@ -318,6 +318,12 @@ describe('seneca', function() {
 
   it('action-override', function(fin) {
     var si = Seneca(testopts).error(fin)
+
+    var trace = out =>
+      Seneca.util
+        .flatten(out.meta$.trace, 'trace')
+        .map(x => x.desc[7])
+        .toString()
 
     function foo(msg, reply) {
       reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
@@ -357,7 +363,7 @@ describe('seneca', function() {
           assert.ok(!o.bar.prior)
           assert.ok(o.foo.prior)
           assert.ok(o.meta$.action.match(/bar/))
-          assert.ok(o.meta$.trace[0].action.match(/foo/))
+          assert.ok(trace(o).match(/foo_/))
 
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1', function(e, o) {
@@ -369,13 +375,8 @@ describe('seneca', function() {
             assert.ok(!o.zed.prior)
             assert.ok(o.bar.prior)
             assert.ok(o.foo.prior)
-
             assert.ok(o.meta$.action.match(/zed/))
-            assert.ok(
-              Util.inspect(o.meta$.trace, { depth: null })
-                .replace(/\n/g, ' ')
-                .match(/bar.*foo/)
-            )
+            assert.ok(trace(o).match(/bar_.*foo_/))
 
             fin()
           })
@@ -394,7 +395,7 @@ describe('seneca', function() {
 
     var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
     si.act('op:foo', { items: items }, function() {
-      assert.equal(arguments.length, items.length)
+      assert.equal(arguments.length, 2)
       done()
     })
   })
@@ -691,10 +692,11 @@ describe('seneca', function() {
   })
 
   it('strargs', function(done) {
-    var si = Seneca({ log: 'silent', strict: { result: false } })
-    si.add({ a: 1, b: 2 }, function(args, cb) {
-      cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
-    })
+    var si = Seneca({ strict: { result: false } })
+      .test(done)
+      .add({ a: 1, b: 2 }, function(args, cb) {
+        cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
+      })
 
     si.act({ a: 1, b: 2, c: 3 }, function(err, out) {
       assert.ok(!err)
@@ -966,86 +968,78 @@ describe('seneca', function() {
     })
   })
 
-  it('wrap', function(done) {
-    var si = Seneca(testopts)
-    si.options({ errhandler: done })
+  it('wrap', function(fin) {
+    var si = Seneca().test(fin)
 
-    si.add('a:1', function(args, cb) {
-      cb(null, { aa: args.aa })
+    si.add('a:1', function(msg, reply) {
+      reply(null, { aa: msg.aa })
     })
-    si.add('b:2', function(args, cb) {
-      cb(null, { bb: args.bb })
+    si.add('b:2', function(msg, reply) {
+      reply(null, { bb: msg.bb })
     })
-    si.add('a:1,c:3', function(args, cb) {
-      cb(null, { cc: args.cc })
+    si.add('a:1,c:3', function(msg, reply) {
+      reply(null, { cc: msg.cc })
     })
-    si.add('a:1,d:4', function(args, cb) {
-      cb(null, { dd: args.dd })
+    si.add('a:1,d:4', function(msg, reply) {
+      reply(null, { dd: msg.dd })
     })
 
-    si.wrap('a:1', function first(args, cb) {
-      this.prior(args, function(err, out) {
+    si.wrap('a:1', function first(msg, reply) {
+      this.prior(msg, function(err, out) {
         out.X = 1
-        cb(err, out)
+        reply(err, out)
       })
     })
 
-    function assertMetaName(name, pattern) {
-      var meta = si.find(pattern)
-      assert.equal(name, meta.func.name)
+    function assertDefName(name, pattern) {
+      var def = si.find(pattern)
+      //console.log(def.func.toString())
+      assert.equal(name, def.func.name)
     }
 
-    assertMetaName('first', 'a:1')
+    assertDefName('first', 'a:1')
 
     // existence predicate!! d must exist
-    si.wrap('a:1,d:*', function second(args, cb) {
-      this.prior(args, function(err, out) {
+    si.wrap('a:1,d:*', function second(msg, reply) {
+      this.prior(msg, function(err, out) {
         out.DD = 44
-        cb(err, out)
+        reply(err, out)
       })
     })
 
-    assertMetaName('second', 'a:1,d:4')
+    assertDefName('second', 'a:1,d:4')
 
     si.act('a:1,aa:1', function(err, out) {
-      assert.equal(err, null)
-      assert.deepEqual({ aa: 1, X: 1 }, out)
+      expect(out).contains({ aa: 1, X: 1 })
 
       si.act('a:1,c:3,cc:3', function(err, out) {
-        assert.equal(err, null)
-        assert.deepEqual({ cc: 3, X: 1 }, out)
+        expect(out).contains({ cc: 3, X: 1 })
 
         si.act('a:1,d:4,dd:4', function(err, out) {
-          assert.equal(err, null)
-          assert.deepEqual({ dd: 4, X: 1, DD: 44 }, out)
+          expect(out).contains({ dd: 4, X: 1, DD: 44 })
 
           si.act('b:2,bb:2', function(err, out) {
-            assert.equal(err, null)
-            assert.deepEqual({ bb: 2 }, out)
+            expect(out).contains({ bb: 2 })
 
-            si.wrap('', function(args, cb) {
-              this.prior(args, function(err, out) {
+            si.wrap('', function(msg, reply) {
+              this.prior(msg, function(err, out) {
                 out.ALL = 2
-                cb(err, out)
+                reply(err, out)
               })
             })
 
             si.act('a:1,aa:1', function(err, out) {
-              assert.equal(err, null)
-              assert.deepEqual({ aa: 1, X: 1, ALL: 2 }, out)
+              expect(out).contains({ aa: 1, X: 1, ALL: 2 })
 
               si.act('a:1,c:3,cc:3', function(err, out) {
-                assert.equal(err, null)
-                assert.deepEqual({ cc: 3, X: 1, ALL: 2 }, out)
+                expect(out).contains({ cc: 3, X: 1, ALL: 2 })
 
                 si.act('a:1,d:4,dd:4', function(err, out) {
-                  assert.equal(err, null)
-                  assert.deepEqual({ dd: 4, X: 1, DD: 44, ALL: 2 }, out)
+                  expect(out).contains({ dd: 4, X: 1, DD: 44, ALL: 2 })
 
                   si.act('b:2,bb:2', function(err, out) {
-                    assert.equal(err, null)
-                    assert.deepEqual({ bb: 2, ALL: 2 }, out)
-                    done()
+                    expect(out).contains({ bb: 2, ALL: 2 })
+                    fin()
                   })
                 })
               })
@@ -1298,30 +1292,30 @@ describe('seneca', function() {
     })
   })
 
-  it('supports strict.find for allowing not found actions', function(done) {
-    var seneca = Seneca({ log: 'silent', strict: { find: false } })
+  it('strict-find-false', function(fin) {
+    var seneca = Seneca({ strict: { find: false } }).test(fin)
     seneca.act({ a: 1 }, function(err, out) {
-      expect(err).to.not.exist()
-      expect(Object.keys(out).length).to.equal(0)
-      done()
+      expect(err).not.exist()
+      expect(out).object()
+      fin()
     })
   })
 
-  it('supports strict.find for disabling not found actions', function(done) {
+  it('strict-find-true', function(fin) {
     var seneca = Seneca({ log: 'silent', strict: { find: true } })
     seneca.act({ a: 1 }, function(err, out) {
       expect(err).to.exist()
       expect(out).to.not.exist()
-      done()
+      fin()
     })
   })
 
-  it('supports strict.find not overriding existing default$', function(done) {
-    var seneca = Seneca({ log: 'test', strict: { find: false } })
+  it('strict-find-default', function(fin) {
+    var seneca = Seneca({ strict: { find: false } }).test(fin)
     seneca.act({ a: 1, default$: { foo: 'bar' } }, function(err, out) {
       expect(err).to.not.exist()
-      expect(Object.keys(out).length).to.equal(1)
-      done()
+      expect(out).contains({ foo: 'bar' })
+      fin()
     })
   })
 
