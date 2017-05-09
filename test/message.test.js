@@ -268,4 +268,7 @@ describe('message', function() {
       fin()
     })
   })
+
+  // TEST: transport direct
+  // TEST: transport indirect (seneca.reply)
 })
