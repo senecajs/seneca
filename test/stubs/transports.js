@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2016 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2017 Richard Rodger, MIT License */
 'use strict'
 
 var _ = require('lodash')
@@ -8,6 +8,7 @@ var Util = require('util')
 
 exports.make_test_transport = make_test_transport
 exports.make_balance_transport = make_balance_transport
+exports.make_simple_transport = make_simple_transport
 
 
 // A simple transport that uses async.queue as the transport mechanism
@@ -140,6 +141,62 @@ function make_balance_transport () {
       seneca.add('role:seneca,cmd:close', function (close_args, done) {
         var closer = this
         closer.prior(close_args, done)
+      })
+    }
+  }
+}
+
+
+
+// A simple transport that uses async.queue as the transport mechanism
+function make_simple_transport () {
+  simple_transport.queuemap = {}
+
+  return simple_transport
+
+  function simple_transport (options) {
+    var seneca = this
+    var tu = seneca.export('transport/utils')
+
+    seneca.add('role:transport,hook:listen,type:simple', hook_listen_simple)
+    seneca.add('role:transport,hook:client,type:simple', hook_client_simple)
+
+    function hook_listen_simple (config, ready) {
+      function handle_msg(data, done) {
+        var msg = tu.internalize_msg(data)
+
+        config.seneca.act(msg, function (err, out, meta) {
+          var rep = tu.externalize_reply(err||out, meta)
+
+          simple_transport.queuemap[config.pin+'~OUT'].push(rep) 
+        })
+
+        return done()
+      }
+
+      simple_transport.queuemap[config.pin+'~IN'] = Async.queue(handle_msg)
+      return ready(config)
+    }
+
+    function hook_client_simple (config, ready) {
+      function send_msg(msg, reply_not_used_here) {
+        simple_transport.queuemap[config.pin+'~OUT'] = Async.queue(handle_reply)
+
+        var msg = tu.externalize_msg(msg)
+        simple_transport.queuemap[config.pin+'~IN'].push(msg) 
+      }
+
+      function handle_reply(data, done) {
+        var rep = tu.internalize_reply(data)
+        //console.log('REP', data, rep, rep && rep.meta$)
+
+        config.seneca.reply(rep)
+        return done()
+      }
+
+      return ready({
+        config: config,
+        send: send_msg
       })
     }
   }

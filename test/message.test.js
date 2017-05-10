@@ -11,6 +11,9 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
+var Transports = require('./stubs/transports.js')
+
+
 var parents = msg => msg.meta$.parents.map(x => x[0])
 
 var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
@@ -234,6 +237,81 @@ describe('message', function() {
       })
   })
 
+
+  it('empty-response', function(fin) {
+    var si = Seneca()
+          .test(fin)
+    
+          .add('a:1', function a1 (msg, reply) {
+            reply()
+          })
+
+          .add('b:1', function b1 (msg, reply) {
+            this.act('a:1', reply)
+          })
+
+          .add('c:1', function c1 (msg, reply) {
+            this.prior(msg, reply)
+          })
+
+          .add('d:1', function d1a (msg, reply) {
+            reply()
+          })
+          .add('d:1', function d1b (msg, reply) {
+            this.prior(msg, reply)
+          })
+
+          .act('a:1', function (err, out, meta) {
+            expect(err).not.exist()
+            expect(out).not.exist()
+            expect(meta.pattern).equal('a:1')
+          })
+
+          .act('b:1', function (err, out, meta) {
+            expect(err).not.exist()
+            expect(out).not.exist()
+            expect(meta.pattern).equal('b:1')
+            expect(meta.trace[0].desc[0]).equal('a:1')
+          })
+
+          .act('c:1', function (err, out, meta) {
+            expect(err).not.exist()
+            expect(out).not.exist()
+            expect(meta.pattern).equal('c:1')
+          })
+
+          .act('d:1', function (err, out, meta) {
+            expect(err).not.exist()
+            expect(out).not.exist()
+            expect(meta.pattern).equal('d:1')
+            expect(meta.trace[0].desc[0]).equal('d:1')
+          })
+
+          .ready(fin)
+  })
+
+
+  it('prior', function(fin) {
+    var si = Seneca()
+          .test(fin)
+    
+          .add('a:1', function a1 (msg, reply) {
+            reply({x:1})
+          })
+          .add('a:1', function a1 (msg, reply) {
+            this.prior(msg, reply)
+          })
+
+          .act('a:1', function (err, out) {
+            expect(err).not.exist()
+            expect(out.x).equal(1)
+            expect(out.meta$.pattern).equal('a:1')
+            expect(out.meta$.trace[0].desc[0]).equal('a:1')
+            fin()
+          })
+  })
+
+
   it('entity', function(fin) {
     var si = Seneca().test(fin).use('entity')
 
@@ -259,6 +337,62 @@ describe('message', function() {
     })
   })
 
-  // TEST: transport direct
-  // TEST: transport indirect (seneca.reply)
+  it('simple-transport', function(fin) {
+    var st = Transports.make_simple_transport()
+
+    var s0 = Seneca({id$:'s0', log:'silent', legacy:{transport:false}})
+          .use(st)
+          .listen({type:'simple'})
+
+    var c0 = Seneca({id$:'c0', log:'silent', legacy:{transport:false}})
+          .use(st)
+          .client({type:'simple'})
+
+    s0.add('a:1', function a1 (msg, reply) {
+      reply()
+    })
+
+    s0.add('a:2', function a2 (msg, reply) {
+      reply({x:2})
+    })
+
+    s0.add('a:3', function a3 (msg, reply) {
+      reply(new Error('a3err'))
+    })
+
+
+    s0.ready(function () {
+      c0
+        .act('a:1,id$:m0/t0', function (err, out, meta) {
+          expect(err).not.exist()
+          expect(out).not.exist()
+          expect(meta.id).equal('m0/t0')
+          expect(meta.pattern).equal('') // catchall pin
+        })
+
+        .act('a:2,id$:m1/t1', function (err, out) {
+          //console.dir(out.meta$,{depth:null})
+          expect(err).not.exist()
+          expect(out.x).equal(2)
+          expect(out.meta$.id).equal('m1/t1')
+          expect(out.meta$.trace[0].desc[0]).equal('a:2')
+          expect(out.meta$.pattern).equal('') // catchall pin
+          expect(err.meta$.instance).equal('c0')
+        })
+
+        .act('a:3,id$:m2/t2', function (err, out) {
+          //console.dir(err.meta$,{depth:null})
+          expect(err.message).to.equal('a3err')
+          expect(out).equal(null)
+          expect(err.meta$.id).equal('m1/t1')
+          expect(err.meta$.pattern).equal('a:3')
+          expect(err.meta$.instance).equal('s0')
+          expect(err.meta$.err.code).equal('act_execute')
+        })
+
+        .ready(fin)
+    })
+  })
 })
+
+

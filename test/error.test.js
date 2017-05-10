@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2017 Richard Rodger, MIT License */
 'use strict'
 
 var Assert = require('assert')
@@ -67,9 +67,9 @@ describe('error', function() {
       })
   }
 
-  function exec_deep_action_result(done) {
-    Seneca({ legacy: { error: false }, log: 'silent' })
-      .error(fail_assert(done))
+  function exec_deep_action_result(fin) {
+    Seneca({ id$:'edar', legacy: { error: false }, log: 'silent' })
+      .error(fail_assert(fin))
       .add('a:1', function(msg, reply) {
         this.act('b:1', reply)
       })
@@ -83,16 +83,16 @@ describe('error', function() {
         assert.equal('EDAR', err.message)
         assert.equal('c:1', err.meta$.pattern)
         assert.equal('act_execute', err.meta$.err.code)
-        assert.equal('b:1', err.meta$.err_trail[0].pattern)
-        assert.equal('a:1', err.meta$.err_trail[1].pattern)
+        assert.equal('b:1', err.meta$.err_trace[0].pattern)
+        assert.equal('a:1', err.meta$.err_trace[1].pattern)
 
-        assert.ok(err.meta$.id !== err.meta$.err_trail[0].id)
-        assert.ok(err.meta$.id !== err.meta$.err_trail[1].id)
+        assert.ok(err.meta$.id !== err.meta$.err_trace[0].id)
+        assert.ok(err.meta$.id !== err.meta$.err_trace[1].id)
 
-        assert.equal(err.meta$.tx, err.meta$.err_trail[0].tx)
-        assert.equal(err.meta$.tx, err.meta$.err_trail[1].tx)
+        assert.equal(err.meta$.tx, err.meta$.err_trace[0].tx)
+        assert.equal(err.meta$.tx, err.meta$.err_trace[1].tx)
 
-        return done()
+        return fin()
       })
   }
 

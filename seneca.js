@@ -1245,9 +1245,22 @@ function make_seneca(initial_options) {
       meta.end = actend
 
       if (data.res) {
-        if (data.res.trace$) {
+        if (data.res.trace$ && data.res.meta$) {
+          var res_meta = data.res.meta$
+
           meta.trace = meta.trace || []
-          meta.trace.push(data.res.trace$)
+          meta.trace.push({
+            desc: [
+              res_meta.pattern,
+              res_meta.id,
+              res_meta.instance,
+              res_meta.start,
+              res_meta.end,
+              res_meta.sync,
+              res_meta.action
+            ],
+            trace: res_meta.trace
+          })
         }
 
         Common.setmeta(data.res, meta)
@@ -1264,7 +1277,6 @@ function make_seneca(initial_options) {
             meta.start,
             meta.end,
             meta.sync,
-            meta.instance,
             meta.action
           ],
           trace: meta.trace
@@ -1312,7 +1324,7 @@ function make_seneca(initial_options) {
 
       try {
         if (call_cb) {
-          var rout = data.res
+          var rout = data.res || null
           var rerr = null
 
           if (_.isError(data.res)) {
@@ -1320,7 +1332,7 @@ function make_seneca(initial_options) {
             rout = null
           }
 
-          reply.call(delegate, rerr, rout)
+          reply.call(delegate, rerr, rout, meta)
         }
       } catch (ex) {
         // for exceptions thrown inside the callback
@@ -1442,8 +1454,8 @@ function make_seneca(initial_options) {
         if (err.meta$.err) {
           var errmeta = _.clone(msg.meta$)
           errmeta.err = seneca_err
-          err.meta$.err_trail = err.meta$.err_trail || []
-          err.meta$.err_trail.push(errmeta)
+          err.meta$.err_trace = err.meta$.err_trace || []
+          err.meta$.err_trace.push(errmeta)
         } else {
           err.meta$.err = seneca_err
         }
@@ -1896,6 +1908,7 @@ function make_act_delegate(instance, opts, meta, actdef) {
       msg.prior$ = actdef.priormeta.id
       this.act(msg, reply)
     } else {
+      var meta = msg.meta$ || {}
       var out = msg.default$ || meta.dflt || null
       if (out) {
         Common.setmeta(out, meta)

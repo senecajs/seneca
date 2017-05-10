@@ -322,7 +322,7 @@ describe('seneca', function() {
     var trace = out =>
       Seneca.util
         .flatten(out.meta$.trace, 'trace')
-        .map(x => x.desc[7])
+        .map(x => x.desc[6])
         .toString()
 
     function foo(msg, reply) {
@@ -395,7 +395,7 @@ describe('seneca', function() {
 
     var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
     si.act('op:foo', { items: items }, function() {
-      assert.equal(arguments.length, 2)
+      assert.equal(arguments.length, 3)
       done()
     })
   })
