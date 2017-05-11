@@ -575,7 +575,7 @@ function make_seneca(initial_options) {
     .add(Inward.announce)
 
   private$.outward = Ordu({ name: 'outward' })
-    .add(Outward.make_error)
+    //.add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
@@ -1218,6 +1218,8 @@ function make_seneca(initial_options) {
     }
 
     function handle_result(err, out) {
+      // console.log('HR',root.id,_.isError(err), err || out, (err || out || {}).meta$)
+
       var delegate = this
       var actdef = action_ctxt.actdef
 
@@ -1246,20 +1248,14 @@ function make_seneca(initial_options) {
 
       if (data.res) {
         if (data.res.trace$ && data.res.meta$) {
+          data.res.__proto__.trace$ = false
+
           var res_meta = data.res.meta$
 
           meta.trace = meta.trace || []
           meta.trace.push({
-            desc: [
-              res_meta.pattern,
-              res_meta.id,
-              res_meta.instance,
-              res_meta.start,
-              res_meta.end,
-              res_meta.sync,
-              res_meta.action
-            ],
-            trace: res_meta.trace
+            desc: make_trace_desc(res_meta),
+            trace: res_meta.trace || []
           })
         }
 
@@ -1270,16 +1266,8 @@ function make_seneca(initial_options) {
       if (parent_meta) {
         parent_meta.trace = parent_meta.trace || []
         parent_meta.trace.push({
-          desc: [
-            meta.pattern,
-            meta.id,
-            meta.instance,
-            meta.start,
-            meta.end,
-            meta.sync,
-            meta.action
-          ],
-          trace: meta.trace
+          desc: make_trace_desc(meta),
+          trace: meta.trace || []
         })
       }
 
@@ -1919,4 +1907,16 @@ function make_act_delegate(instance, opts, meta, actdef) {
   }
 
   return delegate
+}
+
+function make_trace_desc(meta) {
+  return [
+    meta.pattern,
+    meta.id,
+    meta.instance,
+    meta.start,
+    meta.end,
+    meta.sync,
+    meta.action
+  ]
 }

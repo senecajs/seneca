@@ -68,7 +68,7 @@ describe('error', function() {
   }
 
   function exec_deep_action_result(fin) {
-    Seneca({ id$:'edar', legacy: { error: false }, log: 'silent' })
+    Seneca({ id$: 'edar', legacy: { error: false }, log: 'silent' })
       .error(fail_assert(fin))
       .add('a:1', function(msg, reply) {
         this.act('b:1', reply)
