@@ -39,4 +39,29 @@ describe('timeout', function() {
       })
       .act('a:1')
   })
+
+  it('should accept a timeout value from options', function(fin) {
+    var token = null  // Token for clearing the setTimeout call.
+    var seneca = Seneca() // Seneca instance with no timeout value specified.
+    seneca.options({timeout: 100}) // Set a global timeout via the options function.
+    seneca
+      .error(function(err, out) {
+        // Should get a timeout error.
+        expect(err).to.exist()
+        expect(out).to.not.exist()
+        expect(token).to.exist()
+        // Clear the timeout function to avoid duplicate callbacks.
+        clearTimeout(token)
+        fin()
+      })
+      .add('a:1', function(msg, done) {
+        token = setTimeout(function() {
+          done()
+          fin(new Error('Should never get here'))
+        }, 500)
+      })
+      .ready(function() {
+        seneca.act('a:1')
+      })
+  })
 })
