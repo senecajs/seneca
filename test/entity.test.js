@@ -122,30 +122,32 @@ describe('entity', function() {
             list[0].remove$(function(err) {
               Assert.equal(err, null)
 
+              si = si.gate()
+              fooent = si.make$('foo')
+
               fooent.list$(function(err, list) {
                 Assert.equal(err, null)
                 Assert.equal(0, list.length)
+              })
 
-                fooent.list$({ a: 2 }, function(err, list) {
-                  Assert.equal(err, null)
-                  Assert.equal(0, list.length)
+              fooent.list$({ a: 2 }, function(err, list) {
+                Assert.equal(err, null)
+                Assert.equal(0, list.length)
+              })
 
-                  fooent.make$({ b: 1 }).save$(function() {
-                    fooent.make$({ b: 2 }).save$(function() {
-                      fooent.list$(function(err, list) {
-                        Assert.equal(err, null)
-                        Assert.equal(2, list.length)
+              fooent.make$({ b: 1 }).save$() //function() {
+              fooent.make$({ b: 2 }).save$() //function() {
 
-                        fooent.list$({ b: 1 }, function(err, list) {
-                          Assert.equal(err, null)
-                          Assert.equal(1, list.length)
+              fooent.list$(function(err, list) {
+                Assert.equal(err, null)
+                Assert.equal(2, list.length)
+              })
 
-                          si.close(fin)
-                        })
-                      })
-                    })
-                  })
-                })
+              fooent.list$({ b: 1 }, function(err, list) {
+                Assert.equal(err, null)
+                Assert.equal(1, list.length)
+
+                si.close(fin)
               })
             })
           })

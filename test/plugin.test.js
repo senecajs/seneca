@@ -553,4 +553,18 @@ describe('plugin', function() {
         done()
       })
   })
+
+  
+  it('plugin-init-error', function (fin) {
+    var si = Seneca({debug:{undead:true}})
+          .error(function (err) {
+            fin()
+          })
+          .use(function foo () {
+            this.add('init:foo', function (config, done) {
+              done(new Error(foo))
+            })
+          })
+  })
+
 })

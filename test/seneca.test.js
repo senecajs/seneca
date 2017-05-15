@@ -1406,4 +1406,42 @@ describe('seneca', function() {
       done()
     }
   })
+
+  it('use-shortcut', function(fin) {
+    Seneca.use(function() {
+      this.add('a:1', function(msg, reply) {
+        reply({ x: 1 })
+      })
+    })
+      .test(fin)
+      .act('a:1', function(err, out) {
+        expect(err).equal(null)
+        expect(out.x).equal(1)
+        fin()
+      })
+  })
+
+  it('status-log', function(fin) {
+    var seen = false
+    var si = Seneca({
+      status: { interval: 100, running: true },
+      internal: {
+        logger: {
+          preload: function() {
+            return {
+              extend: {
+                logger: function() {
+                  if (!seen && si) {
+                    si.options().status.running = false
+                    seen = true
+                    fin()
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  })
 })

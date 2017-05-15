@@ -214,12 +214,21 @@ describe('common', function() {
     done()
   })
 
-  it('pattern', function(done) {
+  it('pattern', function(fin) {
+    assert.equal('a:1', Common.pattern('a:1'))
     assert.equal('a:1', Common.pattern({ a: 1 }))
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2 }))
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2, c$: 3 }))
     assert.equal('a:1,b:2', Common.pattern({ b: 2, c$: 3, a: 1 }))
-    done()
+    fin()
+  })
+
+  it('nil', function(fin) {
+    Common.nil({msg:1},function reply() {fin()})
+  })
+
+  it('recurse', function(fin) {
+    Common.recurse([1,2,3], function (i,next) {next()}, fin)
   })
 
   it('pincanon', function(done) {
@@ -296,6 +305,8 @@ describe('common', function() {
 
     // empty history
     var h1 = Common.history(0)
+    expect(h1.toString()).equal('{ next: 0, laps: 0, size: 0, log: [] }')
+
     h1.add({ id: 'a' })
     expect(h1.get()).to.equal(null)
     expect(h1.get('a')).to.equal(null)
