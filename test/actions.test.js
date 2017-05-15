@@ -18,6 +18,8 @@ describe('api', function() {
   }
 
   it('cmd_stats', function(fin) {
+    var si = Seneca().add('a:1').act('a:1')
+
     si.test(fin).act('role:seneca,cmd:stats', function(err, out) {
       expect(out.act).exists()
       expect(out.actmap).not.exists()
@@ -25,7 +27,15 @@ describe('api', function() {
       this.act('role:seneca,cmd:stats,summary:false', function(err, out) {
         expect(out.act).exists()
         expect(out.actmap).exists()
-        fin()
+
+        this.act('role:seneca,cmd:stats,summary:false,pattern:"a:1"', function(
+          err,
+          out
+        ) {
+          expect(out.calls).equal(1)
+
+          fin()
+        })
       })
     })
   })
@@ -66,13 +76,42 @@ describe('api', function() {
   })
 
   it('get_options', function(fin) {
-    var si = Seneca({ tag: 'foo' }).test(fin)
+    var si = Seneca({ tag: 'foo', zed: { bar: { zoo: 1 } } }).test(fin)
     si.act('role:seneca,get:options', function(err, out) {
       expect(err).not.exist()
       expect(out).exist()
       expect(out.tag).equals('foo')
       expect(si.tag).equals('foo')
-      fin()
+
+      this.act('role:seneca,get:options,base:zed,key:bar', function(err, out) {
+        expect(err).not.exist()
+        expect(out).exist()
+        expect(out.zoo).equals(1)
+
+        this.act('role:seneca,get:options,base:not-there,key:bar', function(
+          err,
+          out
+        ) {
+          expect(err).not.exist()
+          expect(out).not.exist()
+
+          fin()
+        })
+      })
     })
+  })
+
+  it('make_error', function(fin) {
+    var si = Seneca({ log: 'silent' })
+    si.act(
+      'role:seneca,make:error',
+      { code: 'foo', err: new Error('bar') },
+      function(err, out) {
+        expect(out).equal(null)
+        expect(err.message.match(/bar/)).exists()
+        expect(err.code).equal('act_execute')
+        fin()
+      }
+    )
   })
 })

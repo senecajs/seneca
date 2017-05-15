@@ -44,9 +44,9 @@ describe('transport', function() {
     done()
   })
 
-  it('happy-nextgen', function(done) {
-    var s0 = Seneca({ tag: 's0', legacy: { transport: false } }).test(done)
-    var c0 = Seneca({ tag: 'c0', legacy: { transport: false } }).test(done)
+  it('happy-nextgen', function(fin) {
+    var s0 = Seneca({ tag: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({ tag: 'c0', legacy: { transport: false } }).test(fin)
 
     s0
       .add('a:1', function(msg, reply) {
@@ -58,22 +58,24 @@ describe('transport', function() {
 
         c0.act('a:1,x:2', function(ignore, out) {
           expect(out.x).equals(2)
-          done()
+
+          s0.close(c0.close.bind(c0,fin))
         })
       })
   })
 
-  it('config-nextgen', function(done) {
+  it('config-nextgen', function(fin) {
     var s0 = Seneca({
       tag: 's0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(done)
+    }).test(fin)
+
     var c0 = Seneca({
       tag: 'c0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(done)
+    }).test(fin)
 
     s0
       .add('a:1', function(msg, reply) {
@@ -88,7 +90,8 @@ describe('transport', function() {
 
           c0.act('a:1,x:2', function(ignore, out) {
             expect(out.x).equals(2)
-            done()
+
+            s0.close(c0.close.bind(c0,fin))
           })
         })
       })

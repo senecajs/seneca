@@ -118,15 +118,22 @@ describe('error', function() {
       })
   }
 
-  function exec_action_throw_basic(done) {
+  function exec_action_throw_basic(fin) {
     Seneca({ legacy: { error: false }, log: 'silent' })
-      .error(fail_assert(done))
+      .error(fail_assert(fin))
       .add('a:1', function() {
         throw new Error('AAA')
       })
+      .add('a:2', function() {
+        throw { foo: 1 }
+      })
       .act('a:1', function(err) {
         assert.equal('AAA', err.message)
-        return done()
+
+        this.act('a:2', function(err, out) {
+          assert.equal('{ foo: 1 }', err.message)
+          return fin()
+        })
       })
   }
 

@@ -41,9 +41,9 @@ describe('timeout', function() {
   })
 
   it('should accept a timeout value from options', function(fin) {
-    var token = null  // Token for clearing the setTimeout call.
+    var token = null // Token for clearing the setTimeout call.
     var seneca = Seneca() // Seneca instance with no timeout value specified.
-    seneca.options({timeout: 100}) // Set a global timeout via the options function.
+    seneca.options({ timeout: 100 }) // Set a global timeout via the options function.
     seneca
       .error(function(err, out) {
         // Should get a timeout error.

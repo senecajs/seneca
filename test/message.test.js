@@ -445,7 +445,9 @@ describe('message', function() {
             expect(err.meta$.trace[0].desc[1]).equal('b1/t4')
             expect(err.meta$.trace[0].trace[0].desc[1]).equal('b1/t4')
           })
-          .ready(fin)
+          .ready(function () {
+            s0.close(c0.close.bind(c0,fin))
+          })
       })
     })
   })
