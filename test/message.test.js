@@ -11,6 +11,8 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
+var Transports = require('./stubs/transports.js')
+
 var parents = msg => msg.meta$.parents.map(x => x[0])
 
 var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
@@ -234,6 +236,67 @@ describe('message', function() {
       })
   })
 
+  it('empty-response', function(fin) {
+    var si = Seneca()
+      .test(fin)
+      .add('a:1', function a1(msg, reply) {
+        reply()
+      })
+      .add('b:1', function b1(msg, reply) {
+        this.act('a:1', reply)
+      })
+      .add('c:1', function c1(msg, reply) {
+        this.prior(msg, reply)
+      })
+      .add('d:1', function d1a(msg, reply) {
+        reply()
+      })
+      .add('d:1', function d1b(msg, reply) {
+        this.prior(msg, reply)
+      })
+      .act('a:1', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(out).not.exist()
+        expect(meta.pattern).equal('a:1')
+      })
+      .act('b:1', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(out).not.exist()
+        expect(meta.pattern).equal('b:1')
+        expect(meta.trace[0].desc[0]).equal('a:1')
+      })
+      .act('c:1', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(out).not.exist()
+        expect(meta.pattern).equal('c:1')
+      })
+      .act('d:1', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(out).not.exist()
+        expect(meta.pattern).equal('d:1')
+        expect(meta.trace[0].desc[0]).equal('d:1')
+      })
+      .ready(fin)
+  })
+
+  it('prior', function(fin) {
+    var si = Seneca()
+      .test(fin)
+      .add('a:1', function a1(msg, reply) {
+        reply({ x: 1 })
+      })
+      .add('a:1', function a1(msg, reply) {
+        this.prior(msg, reply)
+      })
+      .act('a:1', function(err, out) {
+        expect(err).not.exist()
+        expect(out.x).equal(1)
+        expect(out.meta$.pattern).equal('a:1')
+        expect(out.meta$.trace[0].desc[0]).equal('a:1')
+        fin()
+      })
+  })
+
   it('entity', function(fin) {
     var si = Seneca().test(fin).use('entity')
 
@@ -259,6 +322,131 @@ describe('message', function() {
     })
   })
 
-  // TEST: transport direct
-  // TEST: transport indirect (seneca.reply)
+  it('simple-transport', function(fin) {
+    var st = Transports.make_simple_transport()
+
+    var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
+      .test(function(err) {
+        if (
+          'a3err' === err.message ||
+          'a33throw' === err.message ||
+          't4' === (err.meta$ && err.meta$.tx)
+        )
+          return
+        else fin(err)
+      }, 'silent')
+      .use(st)
+      .listen({ type: 'simple' })
+    s0.id = 's0'
+
+    var c0 = Seneca({ id$: 'c0', log: 'silent', legacy: { transport: false } })
+      .test(function(err) {
+        //console.dir(err.meta$)
+        if (
+          'a3err' === err.message ||
+          'a33throw' === err.message ||
+          't4' === (err.meta$ && err.meta$.tx)
+        )
+          return
+        else fin(err)
+      }, 'silent')
+      .use(st)
+      .client({ type: 'simple' })
+    c0.id = 'c0'
+
+    s0.add('a:1', function a1(msg, reply) {
+      reply()
+    })
+
+    s0.add('a:2', function a2(msg, reply) {
+      reply({ x: 2 })
+    })
+
+    s0.add('a:3', function a3(msg, reply) {
+      reply(new Error('a3err'))
+    })
+
+    s0.add('a:33', function a3(msg, reply) {
+      throw new Error('a33throw')
+    })
+
+    s0.add('a:4', function a4(msg, reply) {
+      reply({ x: msg.x })
+    })
+    s0.add('a:4', function a4(msg, reply) {
+      this.prior({ x: 4 }, reply)
+    })
+
+    s0.ready(function() {
+      c0.ready(function() {
+        c0
+          .add('b:1', function b1(msg, reply) {
+            this.act({ id$: 'b1/' + msg.meta$.tx, x: msg.x }, reply)
+          })
+          .act('a:1,id$:m0/t0', function(err, out, meta) {
+            expect(err).not.exist()
+            expect(out).not.exist()
+            expect(meta.id).equal('m0/t0')
+            expect(meta.pattern).equal('') // catchall pin
+          })
+          .act('a:2,id$:m1/t1', function(err, out) {
+            //console.dir(out.meta$,{depth:null})
+            expect(err).not.exist()
+            expect(out.x).equal(2)
+            expect(out.meta$.id).equal('m1/t1')
+            expect(out.meta$.trace[0].desc[0]).equal('a:2')
+            expect(out.meta$.pattern).equal('') // catchall pin
+            expect(out.meta$.instance).equal('c0')
+          })
+          .act('a:3,id$:m2/t2', function(err, out) {
+            expect(out).equal(null)
+            expect(err.message).to.equal('a3err')
+            expect(err.meta$.id).equal('m2/t2')
+            expect(err.meta$.pattern).equal('') // catchall pin
+            expect(err.meta$.instance).equal('c0')
+            expect(err.meta$.err.code).equal('act_execute')
+            expect(err.meta$.trace[0].desc[0]).equal('a:3')
+            expect(err.meta$.trace[0].desc[1]).equal('m2/t2')
+            expect(err.meta$.trace[0].desc[2]).equal('s0')
+          })
+          .act('a:33,id$:m33/t33', function(err, out) {
+            expect(out).equal(null)
+            expect(err.message).to.equal('a33throw')
+            expect(err.meta$.id).equal('m33/t33')
+            expect(err.meta$.pattern).equal('') // catchall pin
+            expect(err.meta$.instance).equal('c0')
+            expect(err.meta$.err.code).equal('act_execute')
+            expect(err.meta$.trace[0].desc[0]).equal('a:33')
+            expect(err.meta$.trace[0].desc[1]).equal('m33/t33')
+            expect(err.meta$.trace[0].desc[2]).equal('s0')
+          })
+          .act('a:4,id$:m3/t3', function(err, out) {
+            //console.dir(out.meta$,{depth:null})
+
+            expect(err).equal(null)
+            expect(out.x).equal(4)
+            expect(out.meta$.id).equal('m3/t3')
+            expect(out.meta$.pattern).equal('') // catchall pin
+            expect(out.meta$.instance).equal('c0')
+
+            expect(out.meta$.trace[0].desc[0]).equal('a:4')
+            expect(out.meta$.trace[0].trace[0].desc[0]).equal('a:4')
+          })
+          .act('b:1,id$:m4/t4', function(err, out) {
+            expect(out).equal(null)
+            expect(err).exists()
+            //console.dir(err,{depth:null})
+
+            expect(err.message).to.match(/seneca/)
+            expect(err.meta$.id).equal('m4/t4')
+            expect(err.meta$.pattern).equal('b:1')
+            expect(err.meta$.instance).equal('c0')
+            expect(err.code).equal('act_not_found')
+            expect(err.meta$.trace[0].desc[1]).equal('b1/t4')
+            expect(err.meta$.trace[0].trace[0].desc[1]).equal('b1/t4')
+          })
+          .ready(fin)
+      })
+    })
+  })
 })
