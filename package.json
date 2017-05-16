@@ -69,9 +69,9 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 80",
+    "test": "lab -v -P test -L -t 90",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
+    "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write --no-semi --single-quote seneca.js lib/*.js test/*.js"

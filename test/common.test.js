@@ -13,7 +13,7 @@ var assert = Assert
 var expect = Code.expect
 
 describe('common', function() {
-  it('misc', function(done) {
+  it('misc', function(fin) {
     expect(Common.boolify(true)).to.equal(true)
     expect(Common.boolify(false)).to.equal(false)
     expect(Common.boolify('true')).to.equal(true)
@@ -74,10 +74,10 @@ describe('common', function() {
       )
     ).equal(2)
 
-    done()
+    fin()
   })
 
-  it('deepextend-empty', function(done) {
+  it('deepextend-empty', function(fin) {
     assert.equal(null, Common.deepextend({}).a)
 
     assert.equal(1, Common.deepextend({ a: 1 }).a)
@@ -162,10 +162,10 @@ describe('common', function() {
       Common.deepextend({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b
     )
 
-    done()
+    fin()
   })
 
-  it('deepextend-dups', function(done) {
+  it('deepextend-dups', function(fin) {
     var aa = { a: { aa: 1 } }
     var bb = { a: { bb: 2 } }
 
@@ -177,10 +177,10 @@ describe('common', function() {
     out = Common.deepextend({}, aa, bb, aa)
     assert.equal(1, out.a.aa)
     assert.equal(2, out.a.bb)
-    done()
+    fin()
   })
 
-  it('deepextend-objs', function(done) {
+  it('deepextend-objs', function(fin) {
     var d = {
       s: 's',
       n: 100,
@@ -192,10 +192,10 @@ describe('common', function() {
     }
     var o = Common.deepextend({}, d)
     assert.equal('' + o, '' + d)
-    done()
+    fin()
   })
 
-  it('deepextend-objs with functions', function(done) {
+  it('deepextend-objs with functions', function(fin) {
     function noop() {}
     function f1() {}
 
@@ -211,7 +211,7 @@ describe('common', function() {
 
     assert.strictEqual(out.a, f1)
     assert.strictEqual(out.b, noop)
-    done()
+    fin()
   })
 
   it('pattern', function(fin) {
@@ -239,7 +239,7 @@ describe('common', function() {
     )
   })
 
-  it('pincanon', function(done) {
+  it('pincanon', function(fin) {
     assert.equal('a:1', Common.pincanon({ a: 1 }))
     assert.equal('a:1', Common.pincanon([{ a: 1 }]))
     assert.equal('a:1', Common.pincanon('a:1'))
@@ -254,10 +254,10 @@ describe('common', function() {
     assert.equal('a:1;b:2', Common.pincanon(['b:2', 'a:1']))
     assert.equal('a:1;b:2', Common.pincanon(['b:2', { a: 1 }]))
     assert.equal('a:1;b:2', Common.pincanon([{ b: 2 }, 'a:1']))
-    done()
+    fin()
   })
 
-  it('history', function(done) {
+  it('history', function(fin) {
     var h0 = Common.history(3)
     expect(h0.list()).to.equal([])
     expect(h0.get()).to.equal(null)
@@ -362,7 +362,28 @@ describe('common', function() {
       expect(h2.get('e').id).to.equal('e')
 
       expect(h2.list()).to.equal(['d', 'e'])
-      done()
+      fin()
     }, 4 * t)
+  })
+
+  it('clean', function (fin) {
+    expect(Common.clean({})).equal({})
+    expect(Common.clean({a:1})).equal({a:1})
+    expect(Common.clean({b$:2,a:1})).equal({a:1})
+    expect(Common.clean({b$:2})).equal({})
+
+    expect(Common.clean([])).equal([])
+    expect(Common.clean([1])).equal([1])
+    expect(Common.clean([1,2])).equal([1,2])
+
+    var a = [1,2,3]
+    a.foo = 4
+    a.bar$ = 5
+    var ca = Common.clean(a)
+    expect(ca).equal([1,2,3])
+    expect(ca.foo).equal(4)
+    expect(ca.bar$).not.exist()
+
+    fin()
   })
 })
