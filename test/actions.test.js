@@ -59,20 +59,22 @@ describe('api', function() {
 
   it('info_fatal', function(fin) {
     var si = Seneca({ log: 'silent' })
-    si.close = function() {}
+    si.root.close = function() {}
 
-    si
-      .add('role:seneca,cmd:close', function(msg, reply) {
-        reply()
-      })
-      .sub('role:seneca,info:fatal', function(msg) {
-        expect(msg.err.meta$.pattern).equal('a:1')
-        fin()
-      })
-      .add('a:1', function() {
-        throw new Error('a:1')
-      })
-      .act('a:1,fatal$:true')
+    setImmediate(function() {
+      si
+        .add('role:seneca,cmd:close', function(msg, reply) {
+          reply()
+        })
+        .sub('role:seneca,info:fatal', function(msg) {
+          expect(msg.err.meta$.pattern).equal('a:1')
+          fin()
+        })
+        .add('a:1', function() {
+          throw new Error('a:1')
+        })
+        .act('a:1,fatal$:true')
+    })
   })
 
   it('get_options', function(fin) {
