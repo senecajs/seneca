@@ -1444,4 +1444,16 @@ describe('seneca', function() {
       }
     })
   })
+
+  it('handle-close', function(fin) {
+    var si = Seneca({
+      system: {
+        exit: function(exit_val) {
+          expect(exit_val).equal(0)
+          fin()
+        }
+      }
+    })
+    si.private$.handle_close()
+  })
 })

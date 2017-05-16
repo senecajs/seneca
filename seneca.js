@@ -145,6 +145,8 @@ var option_defaults = {
 
   // System wide functionality.
   system: {
+    exit: process.exit,
+
     // Close instance on these signals, if true.
     close_signals: {
       SIGHUP: true,
@@ -698,12 +700,7 @@ function make_seneca(initial_options) {
     var args = Common.parsePattern(self, arguments, 'action:f? actdef:o?')
 
     var raw_pattern = args.pattern
-
     var pattern = self.util.clean(raw_pattern)
-
-    if (!_.keys(pattern)) {
-      throw error('add_empty_pattern', { args: Common.clean(args) })
-    }
 
     var action =
       args.action ||
@@ -897,14 +894,6 @@ function make_seneca(initial_options) {
 
     msg = self.fixedargs ? Object.assign(msg, self.fixedargs) : msg
 
-    /*    
-    if(self.fixedargs) {
-      for( var p in self.fixedargs) {
-        msg[p] = self.fixedargs[p]
-      }
-    }
-*/
-
     if (opts.$.debug.act_caller || opts.$.test) {
       msg.caller$ =
         '\n    Action call arguments and location: ' +
@@ -935,13 +924,13 @@ function make_seneca(initial_options) {
     return this
   }
 
-  var handleClose = function() {
+  private$.handle_close = function() {
     root$.close(function(err) {
       if (err) {
         Print.err(err)
       }
 
-      process.exit(err ? err.exit === null ? 1 : err.exit : 0)
+      opts.$.system.exit(err ? err.exit === null ? 1 : err.exit : 0)
     })
   }
 
@@ -958,7 +947,7 @@ function make_seneca(initial_options) {
       // cleanup process event listeners
       _.each(opts.$.internal.close_signals, function(active, signal) {
         if (active) {
-          process.removeListener(signal, handleClose)
+          process.removeListener(signal, private$.handle_close)
         }
       })
 
@@ -1712,7 +1701,7 @@ function make_seneca(initial_options) {
 
   _.each(opts.$.internal.close_signals, function(active, signal) {
     if (active) {
-      process.once(signal, handleClose)
+      process.once(signal, private$.handle_close)
     }
   })
 
