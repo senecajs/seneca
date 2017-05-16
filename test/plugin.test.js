@@ -611,4 +611,18 @@ describe('plugin', function() {
       .act('role:seneca,cmd:stats')
       .ready(fin)
   })
+
+  it('plugins-from-options', function(fin) {
+    var si = Seneca({
+      log: 'silent',
+      legacy: { transport: false },
+      plugins: {
+        foo: function() {},
+        bar: { name: 'bar', init: function() {} }
+      }
+    }).ready(function() {
+      expect(Object.keys(this.plugins()).length).equal(2)
+      fin()
+    })
+  })
 })
