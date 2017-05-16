@@ -14,8 +14,8 @@ var expect = Code.expect
 describe('legacy', function() {
   it('fail', function(fin) {
     var f0 = Legacy.fail({})
-    var e0 = f0.call({log:{error:function(){}}},{code:'foo'})
-     expect(e0.code).equal('foo')
+    var e0 = f0.call({ log: { error: function() {} } }, { code: 'foo' })
+    expect(e0.code).equal('foo')
     fin()
   })
 })

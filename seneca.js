@@ -332,7 +332,7 @@ function make_seneca(initial_options) {
   root$.context = {}
   root$.version = Package.version
 
-  Object.defineProperty(root$, 'root', {value: root$})
+  Object.defineProperty(root$, 'root', { value: root$ })
 
   private$.history = Common.history(opts.$.actcache.size)
 
@@ -745,6 +745,7 @@ function make_seneca(initial_options) {
       ? !!raw_pattern.strict$.add
       : !!opts.$.strict.add
 
+    // TODO: this should be moved into seneca-joi/parambulator
     var pattern_rules = _.clone(action.validate || {})
     _.each(pattern, function(v, k) {
       if (_.isObject(v)) {
@@ -804,6 +805,7 @@ function make_seneca(initial_options) {
     private$.stats.actmap[actdef.pattern] =
       private$.stats.actmap[actdef.pattern] || make_action_stats(actdef)
 
+    // TODO: should occur before find to allow more extensive modifications
     actdef = modify_action(self, actdef)
 
     if (addroute) {
@@ -842,7 +844,7 @@ function make_seneca(initial_options) {
 
   function modify_action(seneca, actdef) {
     _.each(private$.action_modifiers, function(actmod) {
-      actdef = actmod.call(seneca, actdef)
+      actdef = actmod.call(seneca, actdef) || actdef
     })
 
     return actdef

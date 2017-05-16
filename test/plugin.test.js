@@ -554,17 +554,61 @@ describe('plugin', function() {
       })
   })
 
-  
-  it('plugin-init-error', function (fin) {
-    var si = Seneca({debug:{undead:true}})
-          .error(function (err) {
-            fin()
-          })
-          .use(function foo () {
-            this.add('init:foo', function (config, done) {
-              done(new Error(foo))
-            })
-          })
+  it('plugin-init-error', function(fin) {
+    var si = Seneca({ debug: { undead: true } })
+      .error(function(err) {
+        fin()
+      })
+      .use(function foo() {
+        this.add('init:foo', function(config, done) {
+          done(new Error('foo'))
+        })
+      })
   })
 
+  it('plugin-extend-action-modifier', function(fin) {
+    var si = Seneca({ log: 'silent' })
+      .use(function foo() {
+        return {
+          extend: {
+            action_modifier: function(actdef) {
+              actdef.validate = function(msg, done) {
+                if (!msg.x) done(new Error('no x!'))
+                else done(null, actdef)
+              }
+            }
+          }
+        }
+      })
+      .ready(function() {
+        this.add('a:1', function(msg, reply) {
+          reply({ x: msg.x })
+        }).act('a:1,x:1', function(err, out) {
+          expect(err).not.exist()
+          expect(out.x).equal(1)
+
+          this.act('a:1,y:1', function(err, out) {
+            expect(out).not.exist()
+            expect(err).exist()
+            expect(err.code).equal('act_invalid_msg')
+            fin()
+          })
+        })
+      })
+  })
+
+  it('plugin-extend-logger', function(fin) {
+    var si = Seneca({ log: 'silent' })
+      .use(function foo() {
+        return {
+          extend: {
+            logger: function(seneca, data) {
+              console.log(data)
+            }
+          }
+        }
+      })
+      .act('role:seneca,cmd:stats')
+      .ready(fin)
+  })
 })

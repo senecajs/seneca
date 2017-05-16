@@ -59,7 +59,7 @@ describe('transport', function() {
         c0.act('a:1,x:2', function(ignore, out) {
           expect(out.x).equals(2)
 
-          s0.close(c0.close.bind(c0,fin))
+          s0.close(c0.close.bind(c0, fin))
         })
       })
   })
@@ -91,7 +91,7 @@ describe('transport', function() {
           c0.act('a:1,x:2', function(ignore, out) {
             expect(out.x).equals(2)
 
-            s0.close(c0.close.bind(c0,fin))
+            s0.close(c0.close.bind(c0, fin))
           })
         })
       })

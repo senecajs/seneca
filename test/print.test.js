@@ -25,11 +25,11 @@ describe('print', function() {
   })
 
   it('options-and-tree', function(fin) {
-    var si = Seneca({debug:{print:{options:true}}})
-          .test(fin)
-          .add('a:1', function(msg, reply) {
-            reply({ x: 1 })
-          })
+    var si = Seneca({ debug: { print: { options: true } } })
+      .test(fin)
+      .add('a:1', function(msg, reply) {
+        reply({ x: 1 })
+      })
     Print.print_tree(si, { print: { tree: { all: false } } })
     Print.print_tree(si, { print: { tree: { all: true } } })
     fin()
@@ -37,7 +37,7 @@ describe('print', function() {
 
   it('options-and-tree', function(fin) {
     Print.print(new Error('foo'))
-    Print.print(null, {foo:1})
+    Print.print(null, { foo: 1 })
     fin()
   })
 })

@@ -224,11 +224,19 @@ describe('common', function() {
   })
 
   it('nil', function(fin) {
-    Common.nil({msg:1},function reply() {fin()})
+    Common.nil({ msg: 1 }, function reply() {
+      fin()
+    })
   })
 
   it('recurse', function(fin) {
-    Common.recurse([1,2,3], function (i,next) {next()}, fin)
+    Common.recurse(
+      [1, 2, 3],
+      function(i, next) {
+        next()
+      },
+      fin
+    )
   })
 
   it('pincanon', function(done) {
