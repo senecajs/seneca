@@ -922,6 +922,25 @@ describe('seneca', function() {
     })
   })
 
+  it('sub-prior', function(fin) {
+    var log = []
+    var si = Seneca()
+      .test(fin)
+      .add('a:1')
+      .add('a:1', function(msg, reply) {
+        this.prior(msg, reply)
+      })
+      .sub('a:1', function(msg) {
+        log.push(msg.meta$.pattern)
+      })
+      .act('a:1')
+      .ready(function() {
+        // only entry msg of prior chain is published
+        expect(log).equal(['a:1'])
+        fin()
+      })
+  })
+
   it('act-cache', function(done) {
     var si = Seneca(testopts, { actcache: { active: true } })
     si.options({ errhandler: done })

@@ -303,6 +303,7 @@ function make_seneca(initial_options) {
 
   // Create a private context.
   var private$ = make_private()
+  private$.error = error
 
   // Create a new root Seneca instance.
   var root$ = new Seneca()
@@ -430,8 +431,8 @@ function make_seneca(initial_options) {
   root$.list = API.list
   root$.status = API.status
   root$.reply = API.reply
+  root$.sub = API.sub
 
-  root$.sub = api_sub // Subscribe to a message pattern.
   root$.use = api_use // Define a plugin.
   root$.listen = API.listen(callpoint) // Listen for inbound messages.
   root$.client = API.client(callpoint) // Send outbound messages.
@@ -618,80 +619,6 @@ function make_seneca(initial_options) {
     }
 
     return exportval
-  }
-
-  function api_sub() {
-    var self = this
-
-    var subargs = Common.parsePattern(self, arguments, 'action:f actdef:o?')
-    var pattern = subargs.pattern
-    if (
-      pattern.in$ == null &&
-      pattern.out$ == null &&
-      pattern.error$ == null &&
-      pattern.cache$ == null &&
-      pattern.default$ == null &&
-      pattern.client$ == null
-    ) {
-      pattern.in$ = true
-    }
-
-    if (!private$.handle_sub) {
-      private$.handle_sub = function handle_sub(args, result) {
-        if (!args.meta$) {
-          Common.setmeta(args, {})
-        }
-
-        var subfuncs = private$.subrouter.find(args)
-
-        if (subfuncs) {
-          args.meta$.sub = subfuncs.pattern
-
-          _.each(subfuncs, function subfunc(subfunc) {
-            try {
-              subfunc.call(self, args, result)
-            } catch (ex) {
-              // TODO: not really satisfactory
-              var err = error(ex, 'sub_function_catch', {
-                args: args,
-                result: result
-              })
-              self.log.error(
-                errlog(err, {
-                  kind: 'sub',
-                  msg: args,
-                  actid: args.meta$.id
-                })
-              )
-            }
-          })
-        }
-      }
-
-      // TODO: other cases
-
-      // Subs are triggered via events
-      self.on('act-in', annotate('in$', private$.handle_sub))
-      self.on('act-out', annotate('out$', private$.handle_sub))
-    }
-
-    function annotate(prop, handle_sub) {
-      return function annotation(args, result) {
-        args = _.clone(args)
-        result = _.clone(result)
-        args[prop] = true
-        handle_sub(args, result)
-      }
-    }
-
-    var subs = private$.subrouter.find(pattern)
-    if (!subs) {
-      private$.subrouter.add(pattern, (subs = []))
-      subs.pattern = Common.pattern(pattern)
-    }
-    subs.push(subargs.action)
-
-    return self
   }
 
   // See [`seneca.add`](#seneca.add)

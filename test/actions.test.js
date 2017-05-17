@@ -58,10 +58,11 @@ describe('api', function() {
   })
 
   it('info_fatal', function(fin) {
-    var si = Seneca({ log: 'silent' })
-    si.root.close = function() {}
+    var si = Seneca({ log: 'silent', system: { exit: function noop() {} } })
+    setTimeout(function() {
+      si.close = function() {}
+      si.root.close = function() {}
 
-    setImmediate(function() {
       si
         .add('role:seneca,cmd:close', function(msg, reply) {
           reply()
@@ -74,7 +75,7 @@ describe('api', function() {
           throw new Error('a:1')
         })
         .act('a:1,fatal$:true')
-    })
+    }, 100)
   })
 
   it('get_options', function(fin) {

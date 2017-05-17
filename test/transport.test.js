@@ -220,6 +220,7 @@ describe('transport', function() {
     ) {
       var listen = Transport.listen(_.noop)
       var seneca = {
+        private$: { error: _.noop },
         log: {
           info: _.noop,
           debug: _.noop
@@ -239,9 +240,15 @@ describe('transport', function() {
       done()
     })
 
-    it('handles errors from action', function(done) {
+    it('action-error', function(fin) {
       var listen = Transport.listen(_.noop)
       var seneca = {
+        private$: {
+          error: function(err) {
+            expect(err).to.exist()
+            fin()
+          }
+        },
         log: {
           info: _.noop,
           debug: _.noop
@@ -252,10 +259,7 @@ describe('transport', function() {
         act: function(pattern, options, callback) {
           callback(new Error())
         },
-        die: function(err) {
-          expect(err).to.exist()
-          done()
-        },
+        die: _.noop,
         context: {},
         make_log: function() {}
       }
@@ -284,7 +288,7 @@ describe('transport', function() {
         add: _.noop,
         context: {},
         make_log: function() {},
-        private$: { ge: { gate: function() {} } }
+        private$: { ge: { gate: function() {} }, error: _.noop }
       }
 
       var fn = function() {
@@ -319,7 +323,7 @@ describe('transport', function() {
         },
         context: {},
         make_log: function() {},
-        private$: { ge: { gate: function() {} } }
+        private$: { ge: { gate: function() {} }, error: _.noop }
       }
 
       seneca.log.info = _.noop
@@ -357,81 +361,6 @@ describe('transport', function() {
 
       seneca.log.info = _.noop
       seneca.log.debug = _.noop
-
-      client.call(seneca)
-    })
-
-    it('handles errors from act', function(done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function() {
-        return function(err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
-      var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
-        options: function() {
-          return {
-            transport: {
-              pins: [{ test: true }]
-            }
-          }
-        },
-        act: function(pattern, options, callback) {
-          callback(new Error(), {})
-        },
-        delegate: function() {
-          return Object.create(this)
-        },
-        add: _.noop,
-        context: {},
-        make_log: function() {},
-        private$: { ge: { gate: function() {} } }
-      }
-
-      client.call(seneca)
-    })
-
-    it('handles a null liveclient', function(done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function() {
-        return function(err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
-
-      var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
-        options: function() {
-          return {
-            transport: {
-              pins: [{ test: true }]
-            }
-          }
-        },
-        act: function(pattern, options, callback) {
-          callback(null, null)
-        },
-        delegate: function() {
-          return Object.create(this)
-        },
-        add: _.noop,
-        context: {},
-        make_log: function() {},
-        private$: { ge: { gate: function() {} } }
-      }
 
       client.call(seneca)
     })

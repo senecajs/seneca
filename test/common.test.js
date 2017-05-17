@@ -366,21 +366,21 @@ describe('common', function() {
     }, 4 * t)
   })
 
-  it('clean', function (fin) {
+  it('clean', function(fin) {
     expect(Common.clean({})).equal({})
-    expect(Common.clean({a:1})).equal({a:1})
-    expect(Common.clean({b$:2,a:1})).equal({a:1})
-    expect(Common.clean({b$:2})).equal({})
+    expect(Common.clean({ a: 1 })).equal({ a: 1 })
+    expect(Common.clean({ b$: 2, a: 1 })).equal({ a: 1 })
+    expect(Common.clean({ b$: 2 })).equal({})
 
     expect(Common.clean([])).equal([])
     expect(Common.clean([1])).equal([1])
-    expect(Common.clean([1,2])).equal([1,2])
+    expect(Common.clean([1, 2])).equal([1, 2])
 
-    var a = [1,2,3]
+    var a = [1, 2, 3]
     a.foo = 4
     a.bar$ = 5
     var ca = Common.clean(a)
-    expect(ca).equal([1,2,3])
+    expect(ca).equal([1, 2, 3])
     expect(ca.foo).equal(4)
     expect(ca.bar$).not.exist()
 
