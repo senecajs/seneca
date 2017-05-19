@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Richard Rodger, MIT License */
 /* eslint no-console: 0 */
 
 var SIZE = parseInt(process.argv[2] || 10000, 10)

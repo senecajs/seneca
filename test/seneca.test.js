@@ -9,6 +9,7 @@ var _ = require('lodash')
 var Lab = require('lab')
 var Package = require('../package.json')
 var Seneca = require('..')
+var Common = require('../lib/common.js')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
@@ -322,7 +323,7 @@ describe('seneca', function() {
     var trace = out =>
       Seneca.util
         .flatten(out.meta$.trace, 'trace')
-        .map(x => x.desc[6])
+        .map(x => x.desc[Common.TRACE_ACTION]) // meta.action
         .toString()
 
     function foo(msg, reply) {

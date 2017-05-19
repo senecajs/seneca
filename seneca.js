@@ -170,6 +170,8 @@ var option_defaults = {
   // Shared default transport configuration
   transport: {
     // TODO: make static in Seneca 4.x
+
+    port: 10101
   },
 
   limits: {
@@ -1009,6 +1011,8 @@ function make_seneca(initial_options) {
     resolve_msg_id_tx(execute_instance, actmsg, origmsg)
 
     actmsg.meta$.instance = root$.id
+    actmsg.meta$.tag = root$.tag
+    actmsg.meta$.version = opts.$.version
 
     actmsg.meta$.start = actstart
 
@@ -1153,7 +1157,7 @@ function make_seneca(initial_options) {
 
           meta.trace = meta.trace || []
           meta.trace.push({
-            desc: make_trace_desc(res_meta),
+            desc: Common.make_trace_desc(res_meta),
             trace: res_meta.trace || []
           })
         }
@@ -1165,7 +1169,7 @@ function make_seneca(initial_options) {
       if (parent_meta) {
         parent_meta.trace = parent_meta.trace || []
         parent_meta.trace.push({
-          desc: make_trace_desc(meta),
+          desc: Common.make_trace_desc(meta),
           trace: meta.trace || []
         })
       }
@@ -1533,7 +1537,7 @@ function make_seneca(initial_options) {
   // TODO: should set all system.close_signals to false
   function api_test(errhandler, logspec) {
     if (opts.$.tag) {
-      root$.id = opts.$.tag
+      root$.id = opts.$.id$ || opts.$.tag
     }
 
     if ('function' !== typeof errhandler && null !== errhandler) {
@@ -1799,14 +1803,3 @@ function make_act_delegate(instance, opts, meta, actdef) {
   return delegate
 }
 
-function make_trace_desc(meta) {
-  return [
-    meta.pattern,
-    meta.id,
-    meta.instance,
-    meta.start,
-    meta.end,
-    meta.sync,
-    meta.action
-  ]
-}
