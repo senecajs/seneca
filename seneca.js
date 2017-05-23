@@ -149,10 +149,10 @@ var option_defaults = {
 
     // Close instance on these signals, if true.
     close_signals: {
-      SIGHUP: true,
-      SIGTERM: true,
-      SIGINT: true,
-      SIGBREAK: true
+      SIGHUP: false,
+      SIGTERM: false,
+      SIGINT: false,
+      SIGBREAK: false
     }
   },
 
@@ -874,7 +874,7 @@ function make_seneca(initial_options) {
       seneca.closed = true
 
       // cleanup process event listeners
-      _.each(opts.$.internal.close_signals, function(active, signal) {
+      _.each(opts.$.system.close_signals, function(active, signal) {
         if (active) {
           process.removeListener(signal, private$.handle_close)
         }
@@ -975,7 +975,7 @@ function make_seneca(initial_options) {
   function do_act(instance, opts, origmsg, origreply) {
     var actstart = Date.now()
     var act_callpoint = callpoint()
-    var is_sync = _.isFunction(origreply)
+    //var is_sync = _.isFunction(origreply)
     var execute_instance = instance
     var timedout = false
     var action_ctxt = {}
@@ -1009,6 +1009,11 @@ function make_seneca(initial_options) {
     }
 
     resolve_msg_id_tx(execute_instance, actmsg, origmsg)
+
+    actmsg.meta$.sync =
+      null != origmsg.sync$ ? !!origmsg.sync$ :
+      (origmeta && null != origmeta.sync) ? !!origmeta.sync :
+      _.isFunction(origreply)
 
     actmsg.meta$.instance = root$.id
     actmsg.meta$.tag = root$.tag
@@ -1095,7 +1100,6 @@ function make_seneca(initial_options) {
       var delegate = make_act_delegate(act_instance, opts, msg.meta$, actdef)
 
       action_ctxt.start = actstart
-      action_ctxt.sync = is_sync
       action_ctxt.seneca = delegate
       action_ctxt.actdef = actdef
       action_ctxt.options = delegate.options()
@@ -1103,6 +1107,7 @@ function make_seneca(initial_options) {
 
       var data = { msg: msg, reply: reply }
       var inward = private$.inward.process(action_ctxt, data)
+
 
       if (handle_inward_break(inward, act_instance, data, actdef, origmsg)) {
         return
@@ -1630,7 +1635,7 @@ function make_seneca(initial_options) {
 
   Print(root$, process.argv)
 
-  _.each(opts.$.internal.close_signals, function(active, signal) {
+  _.each(opts.$.system.close_signals, function(active, signal) {
     if (active) {
       process.once(signal, private$.handle_close)
     }
