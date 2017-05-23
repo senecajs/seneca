@@ -163,10 +163,10 @@ function make_simple_transport () {
 
     function hook_listen_simple (config, ready) {
       function handle_msg(data, done) {
-        var msg = tu.internalize_msg(data)
+        var msg = tu.internalize_msg(config.seneca, data)
 
         config.seneca.act(msg, function (err, out, meta) {
-          var rep = tu.externalize_reply(err||out, meta)
+          var rep = tu.externalize_reply(config.seneca, err||out, meta)
 
           simple_transport.queuemap[config.pin+'~OUT'].push(rep) 
         })
@@ -182,12 +182,12 @@ function make_simple_transport () {
       function send_msg(msg, reply_not_used_here) {
         simple_transport.queuemap[config.pin+'~OUT'] = Async.queue(handle_reply)
 
-        var msg = tu.externalize_msg(msg)
+        var msg = tu.externalize_msg(config.seneca, msg)
         simple_transport.queuemap[config.pin+'~IN'].push(msg) 
       }
 
       function handle_reply(data, done) {
-        var rep = tu.internalize_reply(data)
+        var rep = tu.internalize_reply(config.seneca,data)
         //console.log('REP', data, rep, rep && rep.meta$)
 
         config.seneca.reply(rep)

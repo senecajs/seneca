@@ -69,16 +69,26 @@ describe('transport', function() {
       tag: 's0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(fin)
+    })
+          .test(fin)
+          .use('entity')
 
     var c0 = Seneca({
       tag: 'c0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(fin)
+    })
+          .test(fin)
+          .use('entity')
 
     s0
       .add('a:1', function(msg, reply) {
+        reply({ x: msg.x })
+      })
+      .add('b:1', function(msg, reply) {
+        expect(msg.x.canon$()).equal('-/-/foo')
+        expect(msg.meta$.pattern).equal('b:1')
+        msg.x.g = 2
         reply({ x: msg.x })
       })
       .listen()
@@ -89,12 +99,21 @@ describe('transport', function() {
           expect(c0.private$.transport.register.length).equal(1)
 
           c0.act('a:1,x:2', function(ignore, out) {
-            expect(out.x).equals(2)
-
-            s0.close(c0.close.bind(c0, fin))
+            do_entity()
           })
         })
       })
+    
+    function do_entity() {
+      c0.act('b:1', {x:c0.make$('foo',{f:1})}, function(ignore, out) {
+        expect(out.x.f).equals(1)
+        expect(out.x.g).equals(2)
+        expect(out.x.canon$()).equal('-/-/foo')
+        expect(out.meta$.pattern).equal('')
+        
+        s0.close(c0.close.bind(c0, fin))
+      })
+    }
   })
 
   // TEST: parent and trace over transport - fake and network
