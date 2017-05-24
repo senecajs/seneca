@@ -631,6 +631,8 @@ function make_seneca(initial_options) {
     var raw_pattern = args.pattern
     var pattern = self.util.clean(raw_pattern)
 
+    //console.log('--ADD', raw_pattern)
+
     var action =
       args.action ||
       function default_action(msg, done) {
@@ -701,17 +703,35 @@ function make_seneca(initial_options) {
     var priormeta = self.find(pattern)
 
     if (priormeta) {
+/*
       if ('' === priormeta.pattern) {
         priormeta = null
-      } else if (strict_add && priormeta.pattern !== actdef.pattern) {
-        // only exact action patterns are overridden
-        // use .wrap for pin-based patterns
-        priormeta = null
-      }
+      } else {
+*/
+        if (strict_add && priormeta.pattern !== actdef.pattern) {
+          // only exact action patterns are overridden
+          // use .wrap for pin-based patterns
+          priormeta = null
+        }
     }
 
+    //console.log('ADD PM',actdef.pattern,!!priormeta,strict_add)
+
+
     if (priormeta) {
-      if (_.isFunction(priormeta.handle)) {
+
+      // TODO: the handle mechanism is fragile!
+      // Find something better.
+      // Clients needs special handling so that the catchall
+      // pattern does not such up all patterns into the handle
+      if (_.isFunction(priormeta.handle)
+          && (
+            (priormeta.client && actdef.client) ||
+            (!priormeta.client && !actdef.client)
+          )
+         ) {
+           //console.log('--ADD use handle',pattern,priormeta.handle)
+        
         priormeta.handle(args.pattern, action)
         addroute = false
       } else {
@@ -722,9 +742,13 @@ function make_seneca(initial_options) {
       actdef.priorpath = ''
     }
 
+
+    ////console.log('ADD', actdef, action.handle)
+
     // FIX: need a much better way to support layered actions
     // this ".handle" hack is just to make seneca.close work
     if (action && actdef && _.isFunction(action.handle)) {
+      ////console.log('ADD handle',actdef.pattern)
       actdef.handle = action.handle
     }
 
@@ -733,6 +757,8 @@ function make_seneca(initial_options) {
 
     // TODO: should occur before find to allow more extensive modifications
     actdef = modify_action(self, actdef)
+
+    //console.log('--ADD F',pattern,addroute)
 
     if (addroute) {
       self.log.debug({
@@ -1060,6 +1086,7 @@ function make_seneca(initial_options) {
       actmsg.transport$ = origmsg.transport$
     }
 
+    //console.log('ACT G',actmsg,actmsg.meta$.gate)
     if (actmsg.meta$.gate) {
       execute_instance = instance.delegate()
       execute_instance.private$.ge = execute_instance.private$.ge.gate()
