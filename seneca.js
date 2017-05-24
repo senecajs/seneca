@@ -1569,7 +1569,7 @@ function make_seneca(initial_options) {
   // TODO: should set all system.close_signals to false
   function api_test(errhandler, logspec) {
     if (opts.$.tag) {
-      root$.id = opts.$.id$ || opts.$.tag
+      root$.id = opts.$.id$ || (actnid().substring(0,4)+'/'+opts.$.tag)
     }
 
     if ('function' !== typeof errhandler && null !== errhandler) {
