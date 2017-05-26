@@ -631,8 +631,6 @@ function make_seneca(initial_options) {
     var raw_pattern = args.pattern
     var pattern = self.util.clean(raw_pattern)
 
-    //console.log('--ADD', raw_pattern)
-
     var action =
       args.action ||
       function default_action(msg, done) {
@@ -703,35 +701,28 @@ function make_seneca(initial_options) {
     var priormeta = self.find(pattern)
 
     if (priormeta) {
-/*
+      /*
       if ('' === priormeta.pattern) {
         priormeta = null
       } else {
 */
-        if (strict_add && priormeta.pattern !== actdef.pattern) {
-          // only exact action patterns are overridden
-          // use .wrap for pin-based patterns
-          priormeta = null
-        }
+      if (strict_add && priormeta.pattern !== actdef.pattern) {
+        // only exact action patterns are overridden
+        // use .wrap for pin-based patterns
+        priormeta = null
+      }
     }
 
-    //console.log('ADD PM',actdef.pattern,!!priormeta,strict_add)
-
-
     if (priormeta) {
-
       // TODO: the handle mechanism is fragile!
       // Find something better.
       // Clients needs special handling so that the catchall
       // pattern does not such up all patterns into the handle
-      if (_.isFunction(priormeta.handle)
-          && (
-            (priormeta.client && actdef.client) ||
-            (!priormeta.client && !actdef.client)
-          )
-         ) {
-           //console.log('--ADD use handle',pattern,priormeta.handle)
-        
+      if (
+        _.isFunction(priormeta.handle) &&
+        ((priormeta.client && actdef.client) ||
+          (!priormeta.client && !actdef.client))
+      ) {
         priormeta.handle(args.pattern, action)
         addroute = false
       } else {
@@ -742,13 +733,9 @@ function make_seneca(initial_options) {
       actdef.priorpath = ''
     }
 
-
-    ////console.log('ADD', actdef, action.handle)
-
     // FIX: need a much better way to support layered actions
     // this ".handle" hack is just to make seneca.close work
     if (action && actdef && _.isFunction(action.handle)) {
-      ////console.log('ADD handle',actdef.pattern)
       actdef.handle = action.handle
     }
 
@@ -757,8 +744,6 @@ function make_seneca(initial_options) {
 
     // TODO: should occur before find to allow more extensive modifications
     actdef = modify_action(self, actdef)
-
-    //console.log('--ADD F',pattern,addroute)
 
     if (addroute) {
       self.log.debug({
@@ -885,7 +870,7 @@ function make_seneca(initial_options) {
         Print.err(err)
       }
 
-      opts.$.system.exit(err ? err.exit === null ? 1 : err.exit : 0)
+      opts.$.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
     })
   }
 
@@ -1036,10 +1021,11 @@ function make_seneca(initial_options) {
 
     resolve_msg_id_tx(execute_instance, actmsg, origmsg)
 
-    actmsg.meta$.sync =
-      null != origmsg.sync$ ? !!origmsg.sync$ :
-      (origmeta && null != origmeta.sync) ? !!origmeta.sync :
-      _.isFunction(origreply)
+    actmsg.meta$.sync = null != origmsg.sync$
+      ? !!origmsg.sync$
+      : origmeta && null != origmeta.sync
+          ? !!origmeta.sync
+          : _.isFunction(origreply)
 
     actmsg.meta$.instance = root$.id
     actmsg.meta$.tag = root$.tag
@@ -1086,7 +1072,6 @@ function make_seneca(initial_options) {
       actmsg.transport$ = origmsg.transport$
     }
 
-    //console.log('ACT G',actmsg,actmsg.meta$.gate)
     if (actmsg.meta$.gate) {
       execute_instance = instance.delegate()
       execute_instance.private$.ge = execute_instance.private$.ge.gate()
@@ -1134,7 +1119,6 @@ function make_seneca(initial_options) {
 
       var data = { msg: msg, reply: reply }
       var inward = private$.inward.process(action_ctxt, data)
-
 
       if (handle_inward_break(inward, act_instance, data, actdef, origmsg)) {
         return
@@ -1569,7 +1553,7 @@ function make_seneca(initial_options) {
   // TODO: should set all system.close_signals to false
   function api_test(errhandler, logspec) {
     if (opts.$.tag) {
-      root$.id = opts.$.id$ || (actnid().substring(0,4)+'/'+opts.$.tag)
+      root$.id = opts.$.id$ || actnid().substring(0, 4) + '/' + opts.$.tag
     }
 
     if ('function' !== typeof errhandler && null !== errhandler) {
@@ -1834,4 +1818,3 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
   return delegate
 }
-

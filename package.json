@@ -83,7 +83,7 @@
     "gex": "0.2.2",
     "json-stringify-safe": "5.0.1",
     "jsonic": "0.3.0",
-    "lodash": "4.15.0",
+    "lodash": "4.17.4",
     "minimist": "1.2.0",
     "nid": "0.3.2",
     "norma": "0.3.0",
@@ -98,17 +98,17 @@
     "wreck": "^12.0.0"
   },
   "devDependencies": {
-    "async": "2.0.x",
+    "async": "2.4.x",
     "bench": "0.3.x",
-    "body-parser": "1.15.x",
+    "body-parser": "1.17.x",
     "code": "4.0.x",
-    "connect": "3.4.x",
-    "connect-query": "0.2.x",
+    "connect": "3.6.x",
+    "connect-query": "1.0.x",
     "coveralls": "2.13.x",
     "docco": "0.7.x",
     "hoek": "4.1.x",
-    "lab": "13.0.x",
-    "prettier": "1.2.x",
+    "lab": "13.1.x",
+    "prettier": "1.3.x",
     "seneca-entity": "2.0.x",
     "seneca-error-test": "0.2.x"
   }

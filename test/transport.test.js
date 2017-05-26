@@ -70,16 +70,16 @@ describe('transport', function() {
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
     })
-          .test(fin)
-          .use('entity')
+      .test(fin)
+      .use('entity')
 
     var c0 = Seneca({
       tag: 'c0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
     })
-          .test(fin)
-          .use('entity')
+      .test(fin)
+      .use('entity')
 
     s0
       .add('a:1', function(msg, reply) {
@@ -103,14 +103,14 @@ describe('transport', function() {
           })
         })
       })
-    
+
     function do_entity() {
-      c0.act('b:1', {x:c0.make$('foo',{f:1})}, function(ignore, out) {
+      c0.act('b:1', { x: c0.make$('foo', { f: 1 }) }, function(ignore, out) {
         expect(out.x.f).equals(1)
         expect(out.x.g).equals(2)
         expect(out.x.canon$()).equal('-/-/foo')
         expect(out.meta$.pattern).equal('')
-        
+
         s0.close(c0.close.bind(c0, fin))
       })
     }
