@@ -257,6 +257,7 @@ describe('common', function() {
     fin()
   })
 
+/*
   it('history', function(fin) {
     var h0 = Common.history(3)
     expect(h0.list()).to.equal([])
@@ -365,6 +366,7 @@ describe('common', function() {
       fin()
     }, 4 * t)
   })
+*/
 
   it('clean', function(fin) {
     expect(Common.clean({})).equal({})

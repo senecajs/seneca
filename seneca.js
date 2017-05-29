@@ -216,6 +216,8 @@ var seneca_util = {
   flatten: Common.flatten
 }
 
+var intern = {}
+
 // Seneca is an EventEmitter.
 function Seneca() {
   Events.EventEmitter.call(this)
@@ -293,10 +295,13 @@ module.exports.test = function top_test() {
 
 module.exports.util = seneca_util
 
+module.exports.intern = intern 
+
+
 // Mostly for testing.
-if (require.main === module) {
-  module.exports()
-}
+//if (require.main === module) {
+//  module.exports()
+//}
 
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
@@ -992,6 +997,7 @@ function make_seneca(initial_options) {
     var action_ctxt = {}
     var reply = origreply || _.noop
 
+/*
     // copy only non-directives
     var metaproto = { meta$: {} }
     metaproto.__proto__ = origmsg.__proto__
@@ -1005,6 +1011,9 @@ function make_seneca(initial_options) {
         actmsg[p] = origmsg[p]
       }
     }
+*/
+
+    var actmsg = intern.make_actmsg(origmsg)
 
     var origmeta = origmsg.meta$
     if (origmeta) {
@@ -1019,7 +1028,7 @@ function make_seneca(initial_options) {
       }
     }
 
-    resolve_msg_id_tx(execute_instance, actmsg, origmsg)
+    intern.resolve_msg_id_tx(execute_instance, actmsg.meta$, origmsg)
 
     actmsg.meta$.sync = null != origmsg.sync$
       ? !!origmsg.sync$
@@ -1259,26 +1268,6 @@ function make_seneca(initial_options) {
     }
   }
 
-  function resolve_msg_id_tx(act_instance, actmsg, origmsg) {
-    var id_tx = (origmsg.id$ ||
-      origmsg.actid$ ||
-      actmsg.meta$.id ||
-      act_instance.idgen())
-      .split('/')
-
-    var tx =
-      id_tx[1] ||
-      origmsg.tx$ ||
-      actmsg.meta$.tx$ ||
-      act_instance.fixedargs.tx$ ||
-      act_instance.idgen()
-
-    var mi = id_tx[0] || act_instance.idgen()
-
-    actmsg.meta$.mi = mi
-    actmsg.meta$.tx = tx
-    actmsg.meta$.id = mi + '/' + tx
-  }
 
   function handle_inward_break(inward, act_instance, data, actdef, origmsg) {
     if (!inward) return false
@@ -1817,4 +1806,51 @@ function make_act_delegate(instance, opts, meta, actdef) {
   }
 
   return delegate
+}
+
+
+intern.make_actmsg = function (origmsg) {
+  //var actmsg = _.clone(origmsg)
+  var actmsg = origmsg
+  actmsg.meta$ = {}
+  return actmsg
+
+/*
+  var metaproto = { meta$: {} }
+  metaproto.__proto__ = origmsg.__proto__
+  var actmsg = Object.create(metaproto)
+
+  var pn = Object.getOwnPropertyNames(origmsg)
+  for (var i = 0; i < pn.length; i++) {
+    var p = pn[i]
+    
+    if ('$' != p[p.length - 1]) {
+      actmsg[p] = origmsg[p]
+    }
+  }
+
+  return actmsg
+*/
+}
+
+
+intern.resolve_msg_id_tx = function (act_instance, meta, origmsg) {
+  var id_tx = (origmsg.id$ ||
+               origmsg.actid$ ||
+               meta.id ||
+               act_instance.idgen())
+        .split('/')
+
+  var tx =
+        id_tx[1] ||
+        origmsg.tx$ ||
+        meta.tx$ ||
+        act_instance.fixedargs.tx$ ||
+        act_instance.idgen()
+  
+  var mi = id_tx[0] || act_instance.idgen()
+  
+  meta.mi = mi
+  meta.tx = tx
+  meta.id = mi + '/' + tx
 }

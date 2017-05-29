@@ -26,6 +26,29 @@ describe('entity', function() {
       })
   })
 
+/*
+  it('entity-as-msg', function(fin) {
+    var si = Seneca()
+      .test(fin)
+      .use('entity')
+
+    var foo = si.make$('foo', { a: 1 })
+
+    si
+      .add('a:1',function (msg, reply) {
+        msg.x = 2
+        reply(msg)
+      })
+      .act(foo, function (err, out) {
+        expect(err).not.exist()
+        expect(out).exist()
+        expect(out).includes({a:1,x:2})
+        expect(out.canon$()).equal('-/-/foo')
+        fin()
+      })
+  })
+*/
+
   it('mem-ops', function(fin) {
     var si = Seneca({ tag: 'e0' }).test(fin).use('entity')
 
