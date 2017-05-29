@@ -56,6 +56,7 @@ describe('message', function() {
       })
   })
 
+
 /*
   it('happy-msg', function(fin) {
     Seneca({ tag: 'h0' })
@@ -328,22 +329,62 @@ describe('message', function() {
       .ready(fin)
   })
 
-  it('prior', function(fin) {
-    var si = Seneca()
+
+  it('reply', function(fin) {
+    Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply) {
         reply({ x: 1 })
       })
+      .add('b:1', function b1(msg, reply) {
+        msg.x = 2
+        reply(msg)
+      })
+      .gate()
+      .act('a:1', function(err, out) {
+        //console.log('a1', err, this.util.clean(out), out.meta$)
+        expect(out.meta$.pattern).equal('a:1')
+        expect(out.meta$.action).match(/a1/)
+      })
+      .act('b:1', function(err, out) {
+        //console.log('b1', err, this.util.clean(out), out.meta$)
+        expect(out.meta$.pattern).equal('b:1')
+        expect(out.meta$.action).match(/b1/)
+      })
+      .ready(fin)
+  })
+
+
+  it('prior', function(fin) {
+    Seneca()
+      .test(fin)
       .add('a:1', function a1(msg, reply) {
+        //console.log('a1', msg.meta$)
+        reply({ x: 1 })
+      })
+      .add('a:1', function a1p(msg, reply) {
+        //console.log('a1p', msg.meta$)
         this.prior(msg, reply)
       })
+      .add('b:1', function b1(msg, reply) {
+        this.prior(msg, reply)
+      })
+      .gate()
+      .act('b:1', function(err, out, meta) {
+        //console.log('b1', err, out, meta)
+        expect(meta.pattern).equal('b:1')
+        expect(meta.action).match(/b1/)
+      })
+
       .act('a:1', function(err, out) {
+        //console.log('out a1', err, this.util.clean(out), out.meta$)
+
         expect(err).not.exist()
         expect(out.x).equal(1)
         expect(out.meta$.pattern).equal('a:1')
         expect(out.meta$.trace[0].desc[0]).equal('a:1')
-        fin()
       })
+    .ready(fin)
   })
 
   it('entity', function(fin) {

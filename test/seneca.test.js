@@ -39,6 +39,28 @@ describe('seneca', function() {
     done()
   })
 
+  it('happy', function(fin) {
+    Seneca()
+      .test(fin)
+      .add('a:1', function (msg, reply) {
+        //console.log('ACTION', msg, msg.meta$, reply)
+        expect(msg).includes({a: 1})
+        expect(JSON.stringify(_.omit(msg,['caller$']))).equals('{"a":1}')
+        expect(msg.meta$).includes({pattern: 'a:1'})
+        reply({x:1})
+      })
+      .act('a:1', function (err, out, meta) {
+        // console.log('REPLY', err, out, out.meta$, meta)
+        expect(err).not.exist()
+        expect(out).includes({x: 1})
+        expect(JSON.stringify(out)).equals('{"x":1}')
+        expect(out.meta$).includes({pattern: 'a:1'})
+        expect(out.meta$).includes(meta)
+        expect(meta).includes(out.meta$)
+        fin()
+      })
+  })
+
   it('version', function(done) {
     var start = Date.now()
     var si = Seneca({ log: 'test', legacy: { logging: false } })
@@ -331,19 +353,22 @@ describe('seneca', function() {
     }
 
     function bar(msg, reply) {
+      var bar_meta = msg.meta$
       var pmsg = { a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
         o.b = 2
-        o.bar = msg.meta$
+        o.bar = bar_meta
         reply(e, o)
       })
     }
 
     function zed(msg, reply) {
-      msg.z = 3
-      this.prior(msg, function(e, o) {
+      var zed_meta = msg.meta$
+      //msg.z = 3
+      var pmsg = { z: 3, a: msg.a, s: msg.s }
+      this.prior(pmsg, function(e, o) {
         o.z = 3
-        o.zed = msg.meta$
+        o.zed = zed_meta
         reply(e, o)
       })
     }
@@ -351,13 +376,13 @@ describe('seneca', function() {
     si.ready(function() {
       si.add({ op: 'foo' }, foo)
 
-      si.act('op:foo,a:1', function(e, o) {
+      si.act('op:foo,a:1,i:1', function(e, o) {
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(!o.foo.prior)
         assert.ok(o.meta$.action.match(/foo/))
 
         si.add({ op: 'foo' }, bar)
-        si.act('op:foo,a:1', function(e, o) {
+        si.act('op:foo,a:1,i:2', function(e, o) {
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
@@ -367,7 +392,7 @@ describe('seneca', function() {
           assert.ok(trace(o).match(/foo_/))
 
           si.add({ op: 'foo' }, zed)
-          si.act('op:foo,a:1', function(e, o) {
+          si.act('op:foo,a:1,i:3', function(e, o) {
             assert.ok(
               Gex('1~2~3~Seneca/*' + '/*').on(
                 '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
@@ -376,6 +401,7 @@ describe('seneca', function() {
             assert.ok(!o.zed.prior)
             assert.ok(o.bar.prior)
             assert.ok(o.foo.prior)
+
             assert.ok(o.meta$.action.match(/zed/))
             assert.ok(trace(o).match(/bar_.*foo_/))
 
@@ -386,44 +412,46 @@ describe('seneca', function() {
     })
   })
 
-  it('action-callback-args', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('action-callback-args', function(fin) {
+    var si = Seneca(testopts).test(fin)
 
-    function foo(args, next) {
-      next.apply(null, args.items)
+    function foo(msg, reply) {
+      reply.apply(null, msg.items)
     }
     si.add({ op: 'foo' }, foo)
 
     var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
     si.act('op:foo', { items: items }, function() {
       assert.equal(arguments.length, 3)
-      done()
+      fin()
     })
   })
 
-  it('action-extend', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('action-extend', function(fin) {
+    var si = Seneca(testopts).test(fin)
 
     si.options({ strict: { add: false } })
 
-    function foo(args, next) {
-      next(null, { a: args.a, s: this.toString(), foo: args.meta$ })
+    function foo(msg, next) {
+      next(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
     }
 
-    function bar(args, next) {
-      var pargs = { a: args.a, s: args.s }
-      this.prior(pargs, function(e, o) {
+    function bar(msg, next) {
+      var bar_meta = msg.meta$
+      var pmsg = { a: msg.a, s: msg.s }
+      this.prior(pmsg, function(e, o) {
         o.b = 2
-        o.bar = args.meta$
+        o.bar = bar_meta
         next(e, o)
       })
     }
 
-    function zed(args, next) {
-      args.z = 3
-      this.prior(args, function(e, o) {
+    function zed(msg, next) {
+      var zed_meta = msg.meta$
+      msg.z = 3
+      this.prior(msg, function(e, o) {
         o.z = 3
-        o.zed = args.meta$
+        o.zed = zed_meta
         next(e, o)
       })
     }
@@ -447,7 +475,7 @@ describe('seneca', function() {
           assert.ok(o.foo.prior)
           assert.ok(o.bar.prior)
           assert.ok(!o.zed.prior)
-          done()
+          fin()
         })
       })
     })
@@ -723,7 +751,7 @@ describe('seneca', function() {
                 assert.fail()
               })
             } catch (e) {
-              assert.equal(e.code, 'add_string_pattern_syntax')
+              assert.equal(e.code, 'msg_jsonic_syntax')
 
               try {
                 si.add('a:1,b:2', 'bad-arg', function(args, cb) {
