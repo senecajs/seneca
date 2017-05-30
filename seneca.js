@@ -857,7 +857,7 @@ function make_seneca(initial_options) {
           .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
     }
 
-    do_act(self, opts, msg, reply)
+    do_act(self, msg, reply)
     return self
   }
 
@@ -1002,78 +1002,17 @@ function make_seneca(initial_options) {
     return this
   }
 
-  function do_act(instance, opts, origmsg, origreply) {
-    var actstart = Date.now()
+  function do_act(instance, origmsg, origreply) {
     var act_callpoint = callpoint()
     //var is_sync = _.isFunction(origreply)
     var execute_instance = instance
     var timedout = false
     var action_ctxt = {}
     var reply = origreply || _.noop
-
     var actmsg = intern.make_actmsg(origmsg)
-    var meta = {}
+    var meta = new intern.Meta(instance, opts, origmsg, origreply)
 
-    var origmeta = origmsg.meta$
-    if (origmeta) {
-      if (origmeta.dflt) {
-        meta.dflt = origmeta.dflt
-      }
-      if (origmeta.custom) {
-        meta.custom = origmeta.custom
-      }
-      if (origmeta.closing) {
-        meta.closing = origmeta.closing
-      }
-    }
-
-    intern.resolve_msg_id_tx(execute_instance, meta, origmsg)
-
-    meta.sync = null != origmsg.sync$
-      ? !!origmsg.sync$
-      : origmeta && null != origmeta.sync
-          ? !!origmeta.sync
-          : _.isFunction(origreply)
-
-    meta.instance = root$.id
-    meta.tag = root$.tag
-    meta.version = opts.$.version
-
-    meta.start = actstart
-
-    meta.timeout = Math.max(
-      0,
-      'number' === typeof origmsg.timeout$ ? origmsg.timeout$ : opts.$.timeout
-    )
-
-    if (origmsg.gate$) {
-      meta.gate = true
-    }
-    if (origmsg.fatal$) {
-      meta.fatal = true
-    }
-    if (origmsg.closing$) {
-      meta.closing = true
-    }
-    if (origmsg.local$) {
-      meta.local = true
-    }
-
-    if (origmsg.plugin$) {
-      meta.plugin = origmsg.plugin$
-    }
-    if (origmsg.default$) {
-      meta.dflt = origmsg.default$
-    }
-    if (origmsg.prior$) {
-      meta.prior = origmsg.prior$
-    }
-    if (origmsg.custom$) {
-      meta.custom = origmsg.custom$
-    }
-    if (origmsg.parents$) {
-      meta.parents = origmsg.parents$
-    }
+    var actstart = meta.start
 
     // backwards compatibility for Seneca 3.x transports
     if (origmsg.transport$) {
@@ -1085,25 +1024,33 @@ function make_seneca(initial_options) {
       execute_instance.private$.ge = execute_instance.private$.ge.gate()
     }
 
+    var actdef
+    var delegate
+
     var execspec = {
       dn: meta.id,
       fn: function act_fn(done) {
         try {
-          execute_action(execute_instance, actmsg, function reply() {
+          execute_action(execute_instance, actmsg, function action_reply(err, out) {
             if (!timedout) {
-              handle_reply.apply(this, arguments)
+              //handle_reply.apply(this, arguments)
+              // handle_reply.call(this, err, out)
+              intern.handle_reply(
+                delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out)
             }
             done()
           })
         } catch (e) {
           var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-          handle_reply.call(execute_instance, ex)
+          intern.handle_reply(
+            execute_instance, actdef, meta, action_ctxt, actmsg, origmsg, reply, ex)
           done()
         }
       },
       ontm: function act_tm() {
         timedout = true
-        handle_reply.call(execute_instance, new Error('[TIMEOUT]'))
+        intern.handle_reply(
+          execute_instance, actdef, meta, action_ctxt, actmsg, origmsg, reply, new Error('[TIMEOUT]'))
       },
       tm: meta.timeout
     }
@@ -1113,11 +1060,11 @@ function make_seneca(initial_options) {
     function execute_action(act_instance, msg, reply) {
       var private$ = act_instance.private$
 
-      var actdef = meta.prior
+      actdef = meta.prior
         ? private$.actdef[meta.prior]
         : act_instance.find(msg)
 
-      var delegate = make_act_delegate(act_instance, opts, meta, actdef)
+      delegate = make_act_delegate(act_instance, opts, meta, actdef)
 
       action_ctxt.start = actstart
       action_ctxt.seneca = delegate
@@ -1144,129 +1091,6 @@ function make_seneca(initial_options) {
       private$.history.add(data)
 
       actdef.func.call(delegate, data.msg, data.reply)
-    }
-
-    function handle_reply(err, out) {
-      var delegate = this
-      var actdef = action_ctxt.actdef
-
-      var actend = Date.now()
-      action_ctxt.duration = actend - action_ctxt.start
-
-      var call_cb = true
-
-      var data = {
-        meta: meta,
-        msg: actmsg,
-        res: err || out
-      }
-
-      var outward = private$.outward.process(action_ctxt, data)
-
-      if (outward) {
-        if ('error' === outward.kind) {
-          data.res = outward.error || error(outward.code, outward.info)
-        } else if ('result' === outward.kind) {
-          data.res = outward.result
-        }
-      }
-
-      //console.log('HR', delegate.util.clean(actmsg), meta)
-
-      //var meta = meta || {}
-      meta.end = actend
-
-      if (data.res) {
-        if (data.res.trace$ && data.res.meta$) {
-          data.res.__proto__.trace$ = false
-
-          var res_meta = data.res.meta$
-
-          meta.trace = meta.trace || []
-          meta.trace.push({
-            desc: Common.make_trace_desc(res_meta),
-            trace: res_meta.trace || []
-          })
-        }
-
-        Common.setmeta(data.res, meta)
-      }
-
-      var parent_meta = delegate.private$.act && delegate.private$.act.parent
-      if (parent_meta) {
-        parent_meta.trace = parent_meta.trace || []
-        parent_meta.trace.push({
-          desc: Common.make_trace_desc(meta),
-          trace: meta.trace || []
-        })
-      }
-
-      if (_.isError(data.res)) {
-        var errordesc = act_error(
-          instance,
-          data,
-          actdef,
-          [err, out],
-          reply,
-          actend - actstart,
-          actmsg,
-          origmsg,
-          act_callpoint
-        )
-
-        if (meta.fatal) {
-          return instance.die(errordesc.err)
-        }
-
-        call_cb = errordesc.call_cb
-
-        if (delegate && _.isFunction(delegate.on_act_err)) {
-          delegate.on_act_err(actdef, data.res)
-        }
-      } else {
-        delegate.log.debug(
-          actlog(actdef, actmsg, origmsg, {
-            kind: 'act',
-            case: 'OUT',
-            duration: actend - actstart,
-            result: data.res
-          })
-        )
-
-        instance.emit('act-out', actmsg, data.res)
-
-        if (_.isFunction(delegate.on_act_out)) {
-          delegate.on_act_out(actdef, data.res)
-        }
-      }
-
-      try {
-        if (call_cb) {
-          var rout = data.res || null
-          var rerr = null
-
-          if (_.isError(data.res)) {
-            rerr = errordesc.err
-            rout = null
-          }
-
-          reply.call(delegate, rerr, rout, meta)
-        }
-      } catch (e) {
-        var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-
-        callback_error(
-          instance,
-          ex,
-          actdef,
-          [err, out],
-          reply,
-          actend - actstart,
-          actmsg,
-          origmsg,
-          act_callpoint
-        )
-      }
     }
   }
 
@@ -1304,145 +1128,6 @@ function make_seneca(initial_options) {
     }
   }
 
-  function act_error(
-    instance,
-    data,
-    actdef,
-    result,
-    cb,
-    duration,
-    msg,
-    origmsg,
-    act_callpoint
-  ) {
-    var call_cb = true
-    actdef = actdef || {}
-
-    var err = data.res || data.err
-    var meta = data.meta
-
-    if (!err.seneca) {
-      var details = _.extend({}, err.details, {
-        message: err.eraro && err.orig ? err.orig.message : err.message,
-        pattern: actdef.pattern,
-        fn: actdef.func,
-        cb: cb,
-        instance: instance.toString(),
-        callpoint: act_callpoint
-      })
-
-      if (opts.$.legacy.error) {
-        err = error(err, 'act_execute', details)
-      } else {
-        var seneca_err = error('act_execute', {
-          pattern: actdef.pattern,
-          message: err.message,
-          callpoint: act_callpoint
-        })
-        delete seneca_err.stack
-
-        err.meta$ = err.meta$ || meta || {}
-        err.meta$.data = instance.util.clean(origmsg)
-
-        if (err.meta$.err) {
-          var errmeta = _.clone(meta)
-          errmeta.err = seneca_err
-          err.meta$.err_trace = err.meta$.err_trace || []
-          err.meta$.err_trace.push(errmeta)
-        } else {
-          err.meta$.err = seneca_err
-        }
-      }
-
-      result[0] = err
-    } else if (
-      err.orig &&
-      _.isString(err.orig.code) &&
-      err.orig.code.indexOf('perm/') === 0
-    ) {
-      // Special legacy case for seneca-perm
-      err = err.orig
-      result[0] = err
-    }
-
-    if (opts.$.legacy.error) {
-      err.details = err.details || {}
-      err.details.plugin = err.details.plugin || {}
-    }
-
-    var entry = actlog(actdef, msg, origmsg, {
-      // kind is act as this log entry relates to an action
-      kind: 'act',
-      case: 'ERR',
-      duration: duration
-    })
-    entry = errlog(err, entry)
-
-    instance.log.error(entry)
-    instance.emit('act-err', msg, err)
-
-    // when fatal$ is set, prefer to die instead
-    if (opts.$.errhandler && (!msg || !meta.fatal)) {
-      call_cb = !opts.$.errhandler.call(instance, err)
-    }
-
-    return {
-      call_cb: call_cb,
-      err: err
-    }
-  }
-
-  function callback_error(
-    instance,
-    err,
-    actdef,
-    result,
-    cb,
-    duration,
-    msg,
-    origmsg,
-    act_callpoint
-  ) {
-    actdef = actdef || {}
-
-    if (!err.seneca) {
-      err = error(
-        err,
-        'act_callback',
-        _.extend({}, err.details, {
-          message: err.message,
-          pattern: actdef.pattern,
-          fn: actdef.func,
-          cb: cb,
-          instance: instance.toString(),
-          callpoint: act_callpoint
-        })
-      )
-
-      result[0] = err
-    }
-
-    err.details = err.details || {}
-    err.details.plugin = err.details.plugin || {}
-
-    instance.log.error(
-      actlog(actdef, msg, origmsg, {
-        // kind is act as this log entry relates to an action
-        kind: 'act',
-        case: 'ERR',
-        info: err.message,
-        code: err.code,
-        err: err,
-        duration: duration
-      })
-    )
-
-    instance.emit('act-err', msg, err, result[1])
-
-    if (opts.$.errhandler) {
-      opts.$.errhandler.call(instance, err)
-    }
-  }
 
   function api_fix() {
     var self = this
@@ -1814,6 +1499,131 @@ function make_act_delegate(instance, opts, meta, actdef) {
 }
 
 
+intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out) {
+  var actend = Date.now()
+  action_ctxt.duration = actend - action_ctxt.start
+
+  var private$ = delegate.private$
+  var act_callpoint = action_ctxt.callpoint
+
+  var call_cb = true
+
+  var data = {
+    meta: meta,
+    msg: actmsg,
+    res: err || out
+  }
+
+  var outward = private$.outward.process(action_ctxt, data)
+
+  if (outward) {
+    if ('error' === outward.kind) {
+      data.res = outward.error || error(outward.code, outward.info)
+    } else if ('result' === outward.kind) {
+      data.res = outward.result
+    }
+  }
+
+  //console.log('HR', delegate.util.clean(actmsg), meta)
+
+  //var meta = meta || {}
+  meta.end = actend
+
+  if (data.res) {
+    if (data.res.trace$ && data.res.meta$) {
+      data.res.__proto__.trace$ = false
+
+      var res_meta = data.res.meta$
+
+      meta.trace = meta.trace || []
+      meta.trace.push({
+        desc: Common.make_trace_desc(res_meta),
+        trace: res_meta.trace || []
+      })
+    }
+
+    Common.setmeta(data.res, meta)
+  }
+
+  var parent_meta = delegate.private$.act && delegate.private$.act.parent
+  if (parent_meta) {
+    parent_meta.trace = parent_meta.trace || []
+    parent_meta.trace.push({
+      desc: Common.make_trace_desc(meta),
+      trace: meta.trace || []
+    })
+  }
+
+  if (_.isError(data.res)) {
+    var errordesc = intern.act_error(
+      delegate,
+      data,
+      actdef,
+      [err, out],
+      reply,
+      actend - meta.start,
+      actmsg,
+      origmsg,
+      act_callpoint
+    )
+
+    if (meta.fatal) {
+      return delegate.die(errordesc.err)
+    }
+
+    call_cb = errordesc.call_cb
+
+    if (delegate && _.isFunction(delegate.on_act_err)) {
+      delegate.on_act_err(actdef, data.res)
+    }
+  } else {
+    delegate.log.debug(
+      actlog(actdef, actmsg, origmsg, {
+        kind: 'act',
+        case: 'OUT',
+        duration: actend - meta.start,
+        result: data.res
+      })
+    )
+
+    delegate.emit('act-out', actmsg, data.res)
+
+    if (_.isFunction(delegate.on_act_out)) {
+      delegate.on_act_out(actdef, data.res)
+    }
+  }
+
+  try {
+    if (call_cb) {
+      var rout = data.res || null
+      var rerr = null
+
+      if (_.isError(data.res)) {
+        rerr = errordesc.err
+        rout = null
+      }
+
+      reply.call(delegate, rerr, rout, meta)
+    }
+  } catch (e) {
+    var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
+
+    intern.callback_error(
+      delegate,
+      ex,
+      actdef,
+      [err, out],
+      reply,
+      actend - meta.start,
+      actmsg,
+      origmsg,
+      act_callpoint
+    )
+  }
+}
+
+
+
 intern.make_actmsg = function (origmsg) {
 /*
   var actmsg = _.clone(origmsg)
@@ -1844,23 +1654,218 @@ intern.make_actmsg = function (origmsg) {
 }
 
 
-intern.resolve_msg_id_tx = function (act_instance, meta, origmsg) {
+intern.resolve_msg_id_tx = function (act_instance, origmsg) {
   var id_tx = (origmsg.id$ ||
                origmsg.actid$ ||
-               meta.id ||
+               //meta.id ||
                act_instance.idgen())
         .split('/')
 
-  var tx =
-        id_tx[1] ||
-        origmsg.tx$ ||
-        meta.tx$ ||
-        act_instance.fixedargs.tx$ ||
-        act_instance.idgen()
+  id_tx[1] =
+    id_tx[1] ||
+    origmsg.tx$ ||
+    act_instance.fixedargs.tx$ ||
+    act_instance.idgen()
   
-  var mi = id_tx[0] || act_instance.idgen()
-  
-  meta.mi = mi
-  meta.tx = tx
-  meta.id = mi + '/' + tx
+  id_tx[0] = id_tx[0] || act_instance.idgen()
+ 
+  return id_tx
 }
+
+
+intern.Meta = function (instance, opts, origmsg, origreply) {
+  var id_tx = intern.resolve_msg_id_tx(instance, origmsg)
+  var origmeta = origmsg.meta$
+
+
+  this.start = Date.now()
+  this.end = null
+  this.pattern = null
+  this.action = null
+
+  this.mi = id_tx[0]
+  this.tx = id_tx[1]
+  this.id = id_tx[0] + '/' + id_tx[1]
+
+  this.instance = instance.id
+  this.tag = instance.tag
+  this.version = opts.$.version
+
+  this.gate = !!origmsg.gate$
+  this.fatal = !!origmsg.fatal$
+  this.local = !!origmsg.local$
+
+  this.closing = !!origmsg.closing$ || (origmeta && origmeta.closing)
+
+  this.timeout = Math.max(
+    0,
+    'number' === typeof origmsg.timeout$ ? origmsg.timeout$ : opts.$.timeout
+  )
+
+  this.dflt = origmsg.default$ || (origmeta && origmeta.dflt)
+  this.custom = origmsg.custom$ || (origmeta && origmeta.custom)
+
+  this.plugin = origmsg.plugin$
+  this.prior = origmsg.prior$
+  this.parents = origmsg.parents$
+
+  this.sync = (null != origmsg.sync$
+               ? !!origmsg.sync$
+               : origmeta && null != origmeta.sync
+               ? !!origmeta.sync
+               : _.isFunction(origreply))
+
+  this.trace = null
+  this.sub = null
+  this.data = null
+  this.err = null
+  this.err_trace = null
+  this.error = null
+  this.empty = null
+}
+
+
+intern.act_error = function(
+    instance,
+    data,
+    actdef,
+    result,
+    cb,
+    duration,
+    msg,
+    origmsg,
+    act_callpoint
+  ) {
+    var opts = instance.options()
+
+    var call_cb = true
+    actdef = actdef || {}
+
+    var err = data.res || data.err
+    var meta = data.meta
+
+    if (!err.seneca) {
+      var details = _.extend({}, err.details, {
+        message: err.eraro && err.orig ? err.orig.message : err.message,
+        pattern: actdef.pattern,
+        fn: actdef.func,
+        cb: cb,
+        instance: instance.toString(),
+        callpoint: act_callpoint
+      })
+
+      if (opts.legacy.error) {
+        err = error(err, 'act_execute', details)
+      } else {
+        var seneca_err = error('act_execute', {
+          pattern: actdef.pattern,
+          message: err.message,
+          callpoint: act_callpoint
+        })
+        delete seneca_err.stack
+
+        err.meta$ = err.meta$ || meta || {}
+        err.meta$.data = instance.util.clean(origmsg)
+
+        if (err.meta$.err) {
+          var errmeta = _.clone(meta)
+          errmeta.err = seneca_err
+          err.meta$.err_trace = err.meta$.err_trace || []
+          err.meta$.err_trace.push(errmeta)
+        } else {
+          err.meta$.err = seneca_err
+        }
+      }
+
+      result[0] = err
+    } else if (
+      err.orig &&
+      _.isString(err.orig.code) &&
+      err.orig.code.indexOf('perm/') === 0
+    ) {
+      // Special legacy case for seneca-perm
+      err = err.orig
+      result[0] = err
+    }
+
+    if (opts.legacy.error) {
+      err.details = err.details || {}
+      err.details.plugin = err.details.plugin || {}
+    }
+
+    var entry = actlog(actdef, msg, origmsg, {
+      // kind is act as this log entry relates to an action
+      kind: 'act',
+      case: 'ERR',
+      duration: duration
+    })
+    entry = errlog(err, entry)
+
+    instance.log.error(entry)
+    instance.emit('act-err', msg, err)
+
+    // when fatal$ is set, prefer to die instead
+    if (opts.errhandler && (!msg || !meta.fatal)) {
+      call_cb = !opts.errhandler.call(instance, err)
+    }
+
+    return {
+      call_cb: call_cb,
+      err: err
+    }
+  }
+
+
+intern.callback_error = function (
+    instance,
+    err,
+    actdef,
+    result,
+    cb,
+    duration,
+    msg,
+    origmsg,
+    act_callpoint
+  ) {
+    var opts = instance.options()
+
+    actdef = actdef || {}
+
+    if (!err.seneca) {
+      err = error(
+        err,
+        'act_callback',
+        _.extend({}, err.details, {
+          message: err.message,
+          pattern: actdef.pattern,
+          fn: actdef.func,
+          cb: cb,
+          instance: instance.toString(),
+          callpoint: act_callpoint
+        })
+      )
+
+      result[0] = err
+    }
+
+    err.details = err.details || {}
+    err.details.plugin = err.details.plugin || {}
+
+    instance.log.error(
+      actlog(actdef, msg, origmsg, {
+        // kind is act as this log entry relates to an action
+        kind: 'act',
+        case: 'ERR',
+        info: err.message,
+        code: err.code,
+        err: err,
+        duration: duration
+      })
+    )
+
+    instance.emit('act-err', msg, err, result[1])
+
+    if (opts.errhandler) {
+      opts.errhandler.call(instance, err)
+    }
+  }
