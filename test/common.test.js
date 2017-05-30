@@ -257,116 +257,117 @@ describe('common', function() {
     fin()
   })
 
-/*
+
   it('history', function(fin) {
-    var h0 = Common.history(3)
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+    function itemlist(item) {
+      return item.id+'~'+item.timelimit
+    }
 
-    h0.add()
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+    var h0 = Common.history()
 
-    h0.add({})
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+    h0.add({id:'a0',timelimit:100})
+    expect(h0._list.map(itemlist)).equal(['a0~100'])
 
-    h0.add({ id: 'a' })
-    expect(h0.list()).to.equal(['a'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.stats()).to.equal({ next: 1, size: 3, total: 1 })
+    h0.add({id:'a1',timelimit:200})
+    expect(h0._list.map(itemlist)).equal(['a0~100','a1~200'])
 
-    h0.add({ id: 'b' })
-    expect(h0.list()).to.equal(['a', 'b'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.stats()).to.equal({ next: 2, size: 3, total: 2 })
+    h0.add({id:'a2',timelimit:300})
+    expect(h0._list.map(itemlist)).equal(['a0~100','a1~200','a2~300'])
 
-    h0.add({ id: 'c' })
-    expect(h0.list()).to.equal(['a', 'b', 'c'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.get('c').id).to.equal('c')
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 3 })
+    h0.add({id:'a3',timelimit:200})
+    expect(h0._list.map(itemlist)).equal(['a0~100','a1~200','a3~200','a2~300'])
 
-    h0.add({ id: 'd' })
-    expect(h0.list()).to.equal(['b', 'c', 'd'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.get('c').id).to.equal('c')
-    expect(h0.get('d').id).to.equal('d')
-    expect(h0.stats()).to.equal({ next: 1, size: 3, total: 4 })
+    h0.add({id:'a4',timelimit:300})
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100','a1~200','a3~200','a2~300','a4~300'])
 
-    expect(h0.list({ len: 3 })).to.equal(['b', 'c', 'd'])
-    expect(h0.list({ len: 2 })).to.equal(['c', 'd'])
-    expect(h0.list({ len: 1 })).to.equal(['d'])
-    expect(h0.list({ len: 0 })).to.equal([])
+    h0.add({id:'a5',timelimit:100})
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100','a5~100','a1~200','a3~200','a2~300','a4~300'])
 
-    // empty history
-    var h1 = Common.history(0)
-    expect(h1.toString()).equal('{ next: 0, laps: 0, size: 0, log: [] }')
+    expect(Object.keys(h0._map)).equal([ 'a0', 'a1', 'a2', 'a3', 'a4', 'a5' ])
 
-    h1.add({ id: 'a' })
-    expect(h1.get()).to.equal(null)
-    expect(h1.get('a')).to.equal(null)
-    expect(h1.list()).to.equal([])
-    expect(h1.stats()).to.equal({ next: 0, size: 0, total: 0 })
+    h0.add({id:'a6',timelimit:101})
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100','a5~100','a6~101','a1~200','a3~200','a2~300','a4~300'])
 
-    var t = 40
+    h0.add({id:'a7',timelimit:199})
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100','a5~100','a6~101','a7~199','a1~200','a3~200','a2~300','a4~300'])
 
-    // timelimits
-    var h2 = Common.history(2)
-    h2.add({ id: 'a', timelimit: Date.now() + t, result: [] })
-    h2.add({ id: 'b' })
-    h2.add({ id: 'c', timelimit: Date.now() + 3 * t, result: [] })
-    h2.add({ id: 'd' })
-    h2.add({ id: 'e', timelimit: Date.now() + 5 * t, result: [{}] })
+    h0.prune(99)
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100','a5~100','a6~101','a7~199','a1~200','a3~200','a2~300','a4~300'])
 
-    expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
+    h0.prune(100)
+    expect(h0._list.map(itemlist)).equal([
+      'a6~101','a7~199','a1~200','a3~200','a2~300','a4~300'])
 
-    expect(h2.get('b')).to.equal(null)
-    expect(h2.get('a').id).to.equal('a')
-    expect(h2.get('c').id).to.equal('c')
-    expect(h2.get('d').id).to.equal('d')
-    expect(h2.get('e').id).to.equal('e')
+    h0.prune(101)
+    expect(h0._list.map(itemlist)).equal([
+      'a7~199','a1~200','a3~200','a2~300','a4~300'])
 
-    setTimeout(function() {
-      expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
-      expect(h2.get('a')).to.equal(null)
-      expect(h2.get('b')).to.equal(null)
+    h0.prune(299)
+    expect(h0._list.map(itemlist)).equal([
+      'a2~300','a4~300'])
 
-      expect(h2.get('c').id).to.equal('c')
-      expect(h2.get('d').id).to.equal('d')
-      expect(h2.get('e').id).to.equal('e')
+    h0.prune(299)
+    expect(h0._list.map(itemlist)).equal([
+      'a2~300','a4~300'])
 
-      expect(h2.list()).to.equal(['c', 'd', 'e'])
-    }, 2 * t)
+    h0.prune(300)
+    expect(h0._list.map(itemlist)).equal([])
 
-    setTimeout(function() {
-      expect(h2.list()).to.equal(['c', 'd', 'e'])
 
-      expect(h2.get('a')).to.equal(null)
-      expect(h2.get('b')).to.equal(null)
-      expect(h2.get('c')).to.equal(null)
 
-      expect(h2.get('d').id).to.equal('d')
-      expect(h2.get('e').id).to.equal('e')
 
-      expect(h2.list()).to.equal(['d', 'e'])
-      fin()
-    }, 4 * t)
+    var h1 = Common.history()
+
+    h1.add({id:'a0',timelimit:100})
+    expect(h1._list.map(itemlist)).equal(['a0~100'])
+
+    h1.add({id:'a1',timelimit:50})
+    expect(h1._list.map(itemlist)).equal(['a1~50','a0~100'])
+
+    h1.add({id:'a2',timelimit:25})
+    expect(h1._list.map(itemlist)).equal(['a2~25','a1~50','a0~100'])
+
+    expect(Object.keys(h1._map)).equal([ 'a0', 'a1', 'a2' ])
+
+    h1.prune(0)
+    expect(h1._list.map(itemlist)).equal(['a2~25','a1~50','a0~100'])
+
+    h1.prune(25)
+    expect(h1._list.map(itemlist)).equal(['a1~50','a0~100'])
+
+    h1.prune(100)
+    expect(h1._list.map(itemlist)).equal([])
+
+
+    var h2 = Common.history()
+
+    h2.add({id:'a0',timelimit:100})
+    expect(h2._list.map(itemlist)).equal(['a0~100'])
+
+    h2.add({id:'a1',timelimit:200})
+    expect(h2._list.map(itemlist)).equal(['a0~100','a1~200'])
+
+    h2.add({id:'a2',timelimit:150})
+    expect(h2._list.map(itemlist)).equal(['a0~100','a2~150','a1~200'])
+
+    h2.add({id:'a3',timelimit:125})
+    expect(h2._list.map(itemlist)).equal(['a0~100','a3~125','a2~150','a1~200'])
+
+    h2.add({id:'a4',timelimit:175})
+    expect(h2._list.map(itemlist)).equal([
+      'a0~100','a3~125','a2~150','a4~175','a1~200'])
+
+    expect(Object.keys(h2._map)).equal([ 'a0', 'a1', 'a2', 'a3', 'a4' ])
+
+
+    fin()
   })
-*/
+
 
   it('clean', function(fin) {
     expect(Common.clean({})).equal({})

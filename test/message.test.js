@@ -57,7 +57,6 @@ describe('message', function() {
   })
 
 
-/*
   it('happy-msg', function(fin) {
     Seneca({ tag: 'h0' })
       .test(fin)
@@ -89,15 +88,13 @@ describe('message', function() {
         reply(msg)
       })
       .act('a:1,x:1', function(err, out) {
-        console.log(out.meta$)
-
         expect(
           this.util.flatten(out.meta$.trace, 'trace').map(x => x.desc[0])
         ).equal(['a:2', 'a:3', 'a:4'])
         fin()
       })
   })
-*/
+
 
   it('loop', function(fin) {
     var i = 0

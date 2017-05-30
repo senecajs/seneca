@@ -1,5 +1,9 @@
 var aI = 0
 
+//var memwatch = require('memwatch-next')
+//memwatch.on('leak', console.log)
+
+
 var max = parseInt(process.argv[2+aI],10)
 var duration = parseInt(process.argv[3+aI],10)*1000
 var version = process.argv[4+aI]
@@ -7,7 +11,8 @@ var local = 'local' === process.argv[5+aI]
 
 console.log(max,duration,version,local)
 
-var Seneca = require( version === 'old' ? '../../../seneca-main' : '../..')
+//var Seneca = require( version === 'old' ? '../../../seneca-main' : '../..')
+var Seneca = require( version === 'old' ? '../../seneca-main' : '..')
 
 var stats = {
   sent: 0, err: 0, pass: 0, fail: 0
@@ -44,14 +49,18 @@ function finish(active) {
   console.dir(stats, {colors:true})
 
   si.close(function () {
-    console.log(si.private$.history._prunehist)
-
-    //var ph = si.private$.history._prunehist.map(x=>x.join(',')).join('\n')
-  //console.log(ph)
+    var ph = 'S,E\n'+si.private$.history._prunehist.map(x=>x.join(',')).join('\n')
+    require('fs').writeFileSync('./prune.csv',ph)
   })
 }
 
-var si = Seneca()
+var si = Seneca({
+  timeout:1111,
+  status:{
+    running:true,
+    interval:500
+  }
+})
   //.test('print')
 
 if(local) {

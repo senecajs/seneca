@@ -108,6 +108,7 @@
     "docco": "0.7.x",
     "hoek": "4.1.x",
     "lab": "13.1.x",
+    "memwatch-next": "^0.3.0",
     "prettier": "1.3.x",
     "seneca-entity": "2.0.x",
     "seneca-error-test": "0.2.x"

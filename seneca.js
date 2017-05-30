@@ -121,6 +121,11 @@ var option_defaults = {
     size: 1111
   },
 
+  history: {
+    prune: true,
+    interval: 100
+  },
+
   // Action executor tracing. See gate-executor module.
   trace: {
     act: false,
@@ -344,7 +349,8 @@ function make_seneca(initial_options) {
 
   Object.defineProperty(root$, 'root', { value: root$ })
 
-  private$.history = Common.history(opts.$.actcache.size)
+  private$.history = Common.history(opts.$.history)
+
 
   // Seneca methods. Official API.
 
@@ -529,7 +535,7 @@ function make_seneca(initial_options) {
   // setup status log
   if (opts.$.status.interval > 0 && opts.$.status.running) {
     private$.stats = private$.stats || {}
-    setInterval(function status() {
+    private$.status_interval = setInterval(function status() {
       root$.log.info({
         kind: 'status',
         alive: Date.now() - private$.stats.start,
@@ -912,6 +918,12 @@ function make_seneca(initial_options) {
         seneca.removeAllListeners('pin')
         seneca.removeAllListeners('after-pin')
         seneca.removeAllListeners('ready')
+
+        seneca.private$.history.close()
+
+        if(seneca.private$.status_interval) {
+          clearInterval(seneca.private$.status_interval)
+        }
 
         if (_.isFunction(done)) {
           return done.call(seneca, err)
@@ -1813,15 +1825,20 @@ intern.make_actmsg = function (origmsg) {
   var metaproto = { meta$: {} }
   metaproto.__proto__ = origmsg.__proto__
   var actmsg = Object.create(metaproto)
+  Object.assign(actmsg,origmsg)
 
+/*
   var pn = Object.getOwnPropertyNames(origmsg)
   for (var i = 0; i < pn.length; i++) {
     var p = pn[i]
     
-    if ('$' != p[p.length - 1]) {
+    //if ('$' != p[p.length - 1]) {
       actmsg[p] = origmsg[p]
-    }
+    //}
   }
+*/
+
+  delete actmsg.caller$
 
   return actmsg
 }
