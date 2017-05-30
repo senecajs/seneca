@@ -189,7 +189,7 @@ describe('message', function() {
       .act('a:1', function(err, out) {
         expect(err).equal(null)
         //expect(out).equal({ a: 4, a1: 1, a2: 1, a3: 1, a4: 1 })
-        expect(out).equal({ a4: 1 })
+        expect(out).includes({ a4: 1 })
         expect(log).equal(['a1', 'b1', 'a2', 'c1', 'a3', 'a4', 'a2r', 'c2'])
 
         expect(
@@ -232,7 +232,7 @@ describe('message', function() {
       .gate()
       .act({ a: 1, custom$: foo }, function(err, out) {
         expect(err).equal(null)
-        expect(out).equal({ x: 1 })
+        expect(out).includes({ x: 1 })
         expect(foo).equal({ y: 1, a1: 1 })
         expect(out.meta$.custom).equal({ y: 1, a1: 1 })
       })
@@ -276,7 +276,7 @@ describe('message', function() {
       .gate()
       .act(m0, function(err, out) {
         expect(err).equal(null)
-        expect(out).equal({ x: 1 })
+        expect(out).includes({ x: 1 })
       })
       .act(m1, function(err, out) {
         expect(err).equal(null)

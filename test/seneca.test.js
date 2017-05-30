@@ -43,9 +43,9 @@ describe('seneca', function() {
     Seneca()
       .test(fin)
       .add('a:1', function (msg, reply) {
-        //console.log('ACTION', msg, msg.meta$, reply)
+        // console.log('ACTION', msg, JSON.stringify(msg), msg.meta$, reply)
         expect(msg).includes({a: 1})
-        expect(JSON.stringify(_.omit(msg,['caller$']))).equals('{"a":1}')
+        expect(JSON.stringify(msg)).equals('{"a":1}')
         expect(msg.meta$).includes({pattern: 'a:1'})
         reply({x:1})
       })

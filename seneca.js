@@ -1803,12 +1803,13 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
 
 intern.make_actmsg = function (origmsg) {
+/*
   var actmsg = _.clone(origmsg)
   //var actmsg = origmsg
   //actmsg.meta$ = {}
   return actmsg
+*/
 
-/*
   var metaproto = { meta$: {} }
   metaproto.__proto__ = origmsg.__proto__
   var actmsg = Object.create(metaproto)
@@ -1823,7 +1824,6 @@ intern.make_actmsg = function (origmsg) {
   }
 
   return actmsg
-*/
 }
 
 
