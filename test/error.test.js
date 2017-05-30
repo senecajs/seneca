@@ -79,18 +79,11 @@ describe('error', function() {
       .add('c:1', function(msg, reply) {
         reply(new Error('EDAR'))
       })
-      .act('a:1', function(err) {
+      .act('a:1', function(err, out, meta) {
+        //console.dir(meta,{depth:null})
+
         assert.equal('EDAR', err.message)
-        assert.equal('c:1', err.meta$.pattern)
-        assert.equal('act_execute', err.meta$.err.code)
-        assert.equal('b:1', err.meta$.err_trace[0].pattern)
-        assert.equal('a:1', err.meta$.err_trace[1].pattern)
-
-        assert.ok(err.meta$.id !== err.meta$.err_trace[0].id)
-        assert.ok(err.meta$.id !== err.meta$.err_trace[1].id)
-
-        assert.equal(err.meta$.tx, err.meta$.err_trace[0].tx)
-        assert.equal(err.meta$.tx, err.meta$.err_trace[1].tx)
+        assert.equal('a:1', meta.pattern)
 
         return fin()
       })

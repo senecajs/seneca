@@ -31,7 +31,7 @@ function make_test_transport () {
       var type = args.type
       var listen_options = seneca.util.clean(_.extend({}, options[type], args))
 
-      tu.listen_topics(seneca, args, listen_options, function (topic) {
+      tu.listen_topics(seneca, seneca.util.clean(args), listen_options, function (topic) {
         seneca.log.debug('listen', 'subscribe', topic + '_act',
                          listen_options, seneca)
 

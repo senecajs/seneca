@@ -223,6 +223,11 @@ var seneca_util = {
 
 var intern = {}
 
+var dur = {
+  handle_reply: []
+}
+
+
 // Seneca is an EventEmitter.
 function Seneca() {
   Events.EventEmitter.call(this)
@@ -589,7 +594,7 @@ function make_seneca(initial_options) {
     .add(Inward.announce)
 
   private$.outward = Ordu({ name: 'outward' })
-    //.add(Outward.make_error)
+    .add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
@@ -909,6 +914,7 @@ function make_seneca(initial_options) {
         notice: 'start',
         callpoint: callpoint()
       })
+
       seneca.act('role:seneca,cmd:close,closing$:true', function(err) {
         seneca.log.debug(errlog(err, { kind: 'close', notice: 'end' }))
 
@@ -925,9 +931,18 @@ function make_seneca(initial_options) {
           clearInterval(seneca.private$.status_interval)
         }
 
+/*
+        Object.keys(dur).forEach(function(metric){
+          console.log('AVG', metric, dur[metric].reduce(function(s,v) {
+            return s+v
+          },0)/dur[metric].length)
+          //require('fs').writeFileSync(__dirname+'/tmp/'+metric+'.csv',dur[metric].join('\n'))
+        })
+*/
         if (_.isFunction(done)) {
           return done.call(seneca, err)
         }
+
       })
     }
   }
@@ -1104,6 +1119,7 @@ function make_seneca(initial_options) {
 
     if ('error' === inward.kind) {
       var err = inward.error || error(inward.code, inward.info)
+      meta.error = true
 
       if (inward.log && inward.log.level) {
         act_instance.log[inward.log.level](
@@ -1500,6 +1516,8 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
 
 intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out) {
+
+
   var actend = Date.now()
   action_ctxt.duration = actend - action_ctxt.start
 
@@ -1514,11 +1532,15 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
     res: err || out
   }
 
+  meta.error = data.res instanceof Error
+
   var outward = private$.outward.process(action_ctxt, data)
+
 
   if (outward) {
     if ('error' === outward.kind) {
       data.res = outward.error || error(outward.code, outward.info)
+      meta.error = true
     } else if ('result' === outward.kind) {
       data.res = outward.result
     }
@@ -1529,9 +1551,13 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
   //var meta = meta || {}
   meta.end = actend
 
+
+  var dur_start = process.hrtime()
+
   if (data.res) {
     if (data.res.trace$ && data.res.meta$) {
-      data.res.__proto__.trace$ = false
+      //data.res.__proto__.trace$ = false
+      data.res.trace$ = false
 
       var res_meta = data.res.meta$
 
@@ -1545,6 +1571,7 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
     Common.setmeta(data.res, meta)
   }
 
+
   var parent_meta = delegate.private$.act && delegate.private$.act.parent
   if (parent_meta) {
     parent_meta.trace = parent_meta.trace || []
@@ -1554,7 +1581,7 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
     })
   }
 
-  if (_.isError(data.res)) {
+  if (meta.error) {
     var errordesc = intern.act_error(
       delegate,
       data,
@@ -1598,10 +1625,20 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       var rout = data.res || null
       var rerr = null
 
-      if (_.isError(data.res)) {
+      if (meta.error) {
         rerr = errordesc.err
         rout = null
       }
+      else if(rout && rout.entity$ && delegate.make$) {
+        rout = delegate.make$(rout)
+        rout.meta$ = meta
+      }
+
+      //var rmeta = Object.create(meta)
+
+      //if(rout) {
+      //  delete rout.meta$
+      //}
 
       reply.call(delegate, rerr, rout, meta)
     }
@@ -1620,11 +1657,15 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       act_callpoint
     )
   }
+
+  var dur_diff = process.hrtime(dur_start)
+  dur.handle_reply.push( dur_diff[0] * 1e9 + dur_diff[1] )
 }
 
 
 
 intern.make_actmsg = function (origmsg) {
+  //var actmsg = origmsg
 /*
   var actmsg = _.clone(origmsg)
   //var actmsg = origmsg
@@ -1632,10 +1673,12 @@ intern.make_actmsg = function (origmsg) {
   return actmsg
 */
 
-  var metaproto = { meta$: {} }
-  metaproto.__proto__ = origmsg.__proto__
-  var actmsg = Object.create(metaproto)
-  Object.assign(actmsg,origmsg)
+  //var metaproto = { meta$: {} }
+  //metaproto.__proto__ = origmsg.__proto__
+  //var actmsg = Object.create(metaproto)
+  //Object.assign(actmsg,origmsg)
+  
+  var actmsg = Object.assign({},origmsg)
 
 /*
   var pn = Object.getOwnPropertyNames(origmsg)
@@ -1648,7 +1691,14 @@ intern.make_actmsg = function (origmsg) {
   }
 */
 
-  delete actmsg.caller$
+
+  if(actmsg.caller$) {
+    delete actmsg.caller$
+  }
+
+  if(actmsg.meta$) {
+    delete actmsg.meta$
+  }
 
   return actmsg
 }
@@ -1708,6 +1758,7 @@ intern.Meta = function (instance, opts, origmsg, origreply) {
   this.plugin = origmsg.plugin$
   this.prior = origmsg.prior$
   this.parents = origmsg.parents$
+  this.caller = origmsg.caller$
 
   this.sync = (null != origmsg.sync$
                ? !!origmsg.sync$

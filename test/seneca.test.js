@@ -45,7 +45,8 @@ describe('seneca', function() {
       .add('a:1', function (msg, reply) {
         // console.log('ACTION', msg, JSON.stringify(msg), msg.meta$, reply)
         expect(msg).includes({a: 1})
-        expect(JSON.stringify(msg)).equals('{"a":1}')
+        //expect(JSON.stringify(msg)).equals('{"a":1}')
+        expect(JSON.stringify(this.util.clean(msg))).equals('{"a":1}')
         expect(msg.meta$).includes({pattern: 'a:1'})
         reply({x:1})
       })
@@ -53,7 +54,8 @@ describe('seneca', function() {
         // console.log('REPLY', err, out, out.meta$, meta)
         expect(err).not.exist()
         expect(out).includes({x: 1})
-        expect(JSON.stringify(out)).equals('{"x":1}')
+        //expect(JSON.stringify(out)).equals('{"x":1}')
+        expect(JSON.stringify(this.util.clean(out))).equals('{"x":1}')
         expect(out.meta$).includes({pattern: 'a:1'})
         expect(out.meta$).includes(meta)
         expect(meta).includes(out.meta$)
@@ -1126,7 +1128,7 @@ describe('seneca', function() {
     })
   })
 
-  it('strict', function(done) {
+  it('strict', function(fin) {
     var si = Seneca({ log: 'silent' })
 
     si.add('a:1', function(a, cb) {
@@ -1137,10 +1139,10 @@ describe('seneca', function() {
       assert.equal('result_not_objarr', err.code)
 
       si.options({ strict: { result: false } })
-      si.act('a:1', function(err, res) {
+      si.act('a:1', function(err, out) {
         assert.ok(!err)
-        assert.equal('a', res)
-        done()
+        assert.equal('a', out)
+        fin()
       })
     })
   })

@@ -57,7 +57,7 @@ function finish(active) {
 var si = Seneca({
   timeout:1111,
   status:{
-    running:true,
+    running:false,
     interval:500
   }
 })

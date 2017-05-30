@@ -44,7 +44,8 @@ describe('transport', function() {
     done()
   })
 
-  it('happy-nextgen', function(fin) {
+
+  it('happy-nextgen', {parallel:false}, function(fin) {
     var s0 = Seneca({ tag: 's0', legacy: { transport: false } }).test(fin)
     var c0 = Seneca({ tag: 'c0', legacy: { transport: false } }).test(fin)
 
@@ -57,12 +58,14 @@ describe('transport', function() {
         c0.client(62010)
 
         c0.act('a:1,x:2', function(ignore, out) {
+
           expect(out.x).equals(2)
 
           s0.close(c0.close.bind(c0, fin))
         })
       })
   })
+
 
   it('config-nextgen', function(fin) {
     var s0 = Seneca({
@@ -385,7 +388,8 @@ describe('transport', function() {
     })
   })
 
-  it('transport-exact-single', function(done) {
+
+  it('transport-exact-single', {parallel:false}, function(done) {
     var tt = make_test_transport()
 
     Seneca({ tag: 'srv', timeout: 5555 })
@@ -397,11 +401,16 @@ describe('transport', function() {
         testact.call(this, msg, reply)
       })
       .listen({ type: 'test', pin: 'foo:1' })
+      //.listen({ port: 62222, pin: 'foo:1' })
       .ready(function() {
+        //console.log(this.private$.actrouter)
+
         Seneca({ tag: 'cln', timeout: 5555 })
           .test(done)
           .use(tt)
           .client({ type: 'test', pin: 'foo:1' })
+
+          //.client({ port: 62222, pin: 'foo:1' })
           .act('foo:1,actid$:aa/BB', function(err, out) {
             expect(err).to.not.exist()
             expect(out.foo).to.equal(1)
@@ -410,6 +419,7 @@ describe('transport', function() {
           })
       })
   })
+
 
   it('transport-star', function(done) {
     var tt = make_test_transport()
@@ -893,6 +903,7 @@ describe('transport', function() {
       })
     }
   })
+
 
   it('fatal$ false with transport not-found kill process', function(done) {
     Seneca({ log: 'silent' }).listen().ready(function() {

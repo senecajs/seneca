@@ -242,6 +242,7 @@ describe('message', function() {
       })
   })
 
+/*
   it('proto', function(fin) {
     var si = Seneca()
       .test(fin)
@@ -282,6 +283,7 @@ describe('message', function() {
         fin()
       })
   })
+*/
 
   it('empty-response', function(fin) {
     var si = Seneca()
