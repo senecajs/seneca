@@ -11,7 +11,7 @@ var expect = Code.expect
 
 var Seneca = require('..')
 
-describe('api', function() {
+describe('actions', function() {
   var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
@@ -69,7 +69,7 @@ describe('api', function() {
           reply()
         })
         .sub('role:seneca,info:fatal', function(msg) {
-          expect(msg.err.meta$.pattern).equal('a:1')
+          expect(msg.err).exist()
           fin()
         })
         .add('a:1', function() {

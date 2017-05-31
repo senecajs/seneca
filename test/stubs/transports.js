@@ -192,7 +192,7 @@ function make_simple_transport () {
 
       function handle_reply(data, done) {
         var rep = tu.internalize_reply(seneca,data)
-        //console.log('REP', data, rep, rep && rep.meta$)
+        //console.log('REP', rep)
 
         seneca.reply(rep)
         return done()

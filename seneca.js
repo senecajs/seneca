@@ -1022,12 +1022,15 @@ function make_seneca(initial_options) {
     //var is_sync = _.isFunction(origreply)
     var execute_instance = instance
     var timedout = false
-    var action_ctxt = {}
     var reply = origreply || _.noop
     var actmsg = intern.make_actmsg(origmsg)
     var meta = new intern.Meta(instance, opts, origmsg, origreply)
 
-    var actstart = meta.start
+    var action_ctxt = {
+      origmsg: origmsg,
+      reply: reply
+    }
+
 
     // backwards compatibility for Seneca 3.x transports
     if (origmsg.transport$) {
@@ -1046,26 +1049,21 @@ function make_seneca(initial_options) {
       dn: meta.id,
       fn: function act_fn(done) {
         try {
-          execute_action(execute_instance, actmsg, function action_reply(err, out) {
+          execute_action(execute_instance, actmsg, function action_reply(err, out, reply_meta) {
             if (!timedout) {
-              //handle_reply.apply(this, arguments)
-              // handle_reply.call(this, err, out)
-              intern.handle_reply(
-                delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out)
+              intern.handle_reply(meta, action_ctxt, actmsg, err, out, reply_meta)
             }
             done()
           })
         } catch (e) {
           var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-          intern.handle_reply(
-            execute_instance, actdef, meta, action_ctxt, actmsg, origmsg, reply, ex)
+          intern.handle_reply(meta, action_ctxt, actmsg, ex)
           done()
         }
       },
       ontm: function act_tm() {
         timedout = true
-        intern.handle_reply(
-          execute_instance, actdef, meta, action_ctxt, actmsg, origmsg, reply, new Error('[TIMEOUT]'))
+        intern.handle_reply(meta, action_ctxt, actmsg, new Error('[TIMEOUT]'))
       },
       tm: meta.timeout
     }
@@ -1081,7 +1079,6 @@ function make_seneca(initial_options) {
 
       delegate = make_act_delegate(act_instance, opts, meta, actdef)
 
-      action_ctxt.start = actstart
       action_ctxt.seneca = delegate
       action_ctxt.actdef = actdef
       action_ctxt.options = delegate.options()
@@ -1515,8 +1512,13 @@ function make_act_delegate(instance, opts, meta, actdef) {
 }
 
 
-intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out) {
+intern.handle_reply = function (meta, action_ctxt, actmsg, err, out, reply_meta) {
   meta.end = Date.now()
+
+  var delegate = action_ctxt.seneca
+  var actdef = action_ctxt.actdef
+  var origmsg = action_ctxt.origmsg
+  var reply = action_ctxt.reply
 
   var duration = meta.end - meta.start
   var call_cb = true
@@ -1536,7 +1538,7 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
 
   //var dur_start = process.hrtime()
 
-  intern.meta_trace(data)
+  intern.meta_trace(meta, reply_meta)
   intern.parent_meta_trace(delegate, meta)
 
 
@@ -1587,6 +1589,7 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       if (meta.error) {
         rerr = errordesc.err
         rout = null
+        meta = errordesc.err.meta$ || meta
       }
       else if(rout && rout.entity$ && delegate.make$) {
         rout = delegate.make$(rout)
@@ -1718,22 +1721,13 @@ intern.process_outward = function(delegate, meta, action_ctxt, data) {
 }
 
 
-intern.meta_trace = function(data) {
-  var meta = data.meta
-  if (data.res) {
-    if (data.res.trace$ && data.res.meta$) {
-      data.res.trace$ = false
-      
-      var res_meta = data.res.meta$
-      
-        meta.trace = meta.trace || []
-      meta.trace.push({
-        desc: Common.make_trace_desc(res_meta),
-        trace: res_meta.trace || []
-      })
-    }
-    
-    Common.setmeta(data.res, meta)
+intern.meta_trace = function(meta, reply_meta) {
+  if(meta && reply_meta) {
+    meta.trace = meta.trace || []
+    meta.trace.push({
+      desc: Common.make_trace_desc(reply_meta),
+      trace: reply_meta.trace || []
+    })
   }
 }
 
@@ -1831,7 +1825,7 @@ intern.act_error = function(
 
     // when fatal$ is set, prefer to die instead
     if (opts.errhandler && (!msg || !meta.fatal)) {
-      call_cb = !opts.errhandler.call(instance, err)
+      call_cb = !opts.errhandler.call(instance, err, err.meta$ || meta)
     }
 
     return {
@@ -1891,6 +1885,6 @@ intern.callback_error = function (
     instance.emit('act-err', msg, err, result[1])
 
     if (opts.errhandler) {
-      opts.errhandler.call(instance, err)
+      opts.errhandler.call(instance, err, err.meta$)
     }
   }

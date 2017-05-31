@@ -56,9 +56,8 @@ describe('seneca', function() {
         expect(out).includes({x: 1})
         //expect(JSON.stringify(out)).equals('{"x":1}')
         expect(JSON.stringify(this.util.clean(out))).equals('{"x":1}')
-        expect(out.meta$).includes({pattern: 'a:1'})
-        expect(out.meta$).includes(meta)
-        expect(meta).includes(out.meta$)
+        expect(meta).includes({pattern: 'a:1'})
+        expect(meta).includes(meta)
         fin()
       })
   })
@@ -344,9 +343,9 @@ describe('seneca', function() {
   it('action-override', function(fin) {
     var si = Seneca(testopts).error(fin)
 
-    var trace = out =>
+    var trace = meta =>
       Seneca.util
-        .flatten(out.meta$.trace, 'trace')
+        .flatten(meta.trace, 'trace')
         .map(x => x.desc[Common.TRACE_ACTION]) // meta.action
         .toString()
 
@@ -378,23 +377,23 @@ describe('seneca', function() {
     si.ready(function() {
       si.add({ op: 'foo' }, foo)
 
-      si.act('op:foo,a:1,i:1', function(e, o) {
+      si.act('op:foo,a:1,i:1', function(e, o, m) {
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(!o.foo.prior)
-        assert.ok(o.meta$.action.match(/foo/))
+        assert.ok(m.action.match(/foo/))
 
         si.add({ op: 'foo' }, bar)
-        si.act('op:foo,a:1,i:2', function(e, o) {
+        si.act('op:foo,a:1,i:2', function(e, o, m) {
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
           assert.ok(!o.bar.prior)
           assert.ok(o.foo.prior)
-          assert.ok(o.meta$.action.match(/bar/))
-          assert.ok(trace(o).match(/foo_/))
+          assert.ok(m.action.match(/bar/))
+          assert.ok(trace(m).match(/foo_/))
 
           si.add({ op: 'foo' }, zed)
-          si.act('op:foo,a:1,i:3', function(e, o) {
+          si.act('op:foo,a:1,i:3', function(e, o, m) {
             assert.ok(
               Gex('1~2~3~Seneca/*' + '/*').on(
                 '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
@@ -404,8 +403,8 @@ describe('seneca', function() {
             assert.ok(o.bar.prior)
             assert.ok(o.foo.prior)
 
-            assert.ok(o.meta$.action.match(/zed/))
-            assert.ok(trace(o).match(/bar_.*foo_/))
+            assert.ok(m.action.match(/zed/))
+            assert.ok(trace(m).match(/bar_.*foo_/))
 
             fin()
           })

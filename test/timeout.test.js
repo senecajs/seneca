@@ -45,10 +45,10 @@ describe('timeout', function() {
     var seneca = Seneca() // Seneca instance with no timeout value specified.
     seneca.options({ timeout: 100 }) // Set a global timeout via the options function.
     seneca
-      .error(function(err, out) {
+      .error(function(err, meta) {
         // Should get a timeout error.
         expect(err).to.exist()
-        expect(out).to.not.exist()
+        expect(meta).to.exist()
         expect(token).to.exist()
         // Clear the timeout function to avoid duplicate callbacks.
         clearTimeout(token)

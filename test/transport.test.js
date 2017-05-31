@@ -58,9 +58,9 @@ describe('transport', function() {
         c0.client(62010)
 
         c0.act('a:1,x:2', function(ignore, out) {
+          //console.log(arguments)
 
           expect(out.x).equals(2)
-
           s0.close(c0.close.bind(c0, fin))
         })
       })
@@ -108,11 +108,11 @@ describe('transport', function() {
       })
 
     function do_entity() {
-      c0.act('b:1', { x: c0.make$('foo', { f: 1 }) }, function(ignore, out) {
+      c0.act('b:1', { x: c0.make$('foo', { f: 1 }) }, function(ignore, out, meta) {
         expect(out.x.f).equals(1)
         expect(out.x.g).equals(2)
         expect(out.x.canon$()).equal('-/-/foo')
-        expect(out.meta$.pattern).equal('')
+        expect(meta.pattern).equal('')
 
         s0.close(c0.close.bind(c0, fin))
       })
