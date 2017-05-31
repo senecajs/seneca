@@ -1430,9 +1430,7 @@ intern.execute_action = function(
   reply
 ) {
   var private$ = act_instance.private$
-
   var actdef = meta.prior ? private$.actdef[meta.prior] : act_instance.find(msg)
-
   var delegate = intern.make_act_delegate(act_instance, opts, meta, actdef)
 
   actctxt.seneca = delegate
@@ -1463,6 +1461,10 @@ intern.execute_action = function(
   data.result = []
   data.timelimit = Date.now() + data.meta.timeout
   private$.history.add(data)
+
+  if(opts.$.legacy.transport) {
+    data.msg.meta$ = meta
+  }
 
   actdef.func.call(delegate, data.msg, data.reply, data.meta)
 }
