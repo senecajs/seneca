@@ -223,9 +223,9 @@ var seneca_util = {
 
 var intern = {}
 
-var dur = {
-  handle_reply: []
-}
+//var dur = {
+//  handle_reply: []
+//}
 
 
 // Seneca is an EventEmitter.
@@ -1516,15 +1516,12 @@ function make_act_delegate(instance, opts, meta, actdef) {
 
 
 intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, origmsg, reply, err, out) {
+  meta.end = Date.now()
 
-
-  var actend = Date.now()
-  action_ctxt.duration = actend - action_ctxt.start
-
-  var private$ = delegate.private$
-  var act_callpoint = action_ctxt.callpoint
-
+  var duration = meta.end - meta.start
   var call_cb = true
+
+  action_ctxt.duration = duration
 
   var data = {
     meta: meta,
@@ -1534,52 +1531,14 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
 
   meta.error = data.res instanceof Error
 
-  var outward = private$.outward.process(action_ctxt, data)
+  intern.process_outward(delegate, meta, action_ctxt, data)
 
 
-  if (outward) {
-    if ('error' === outward.kind) {
-      data.res = outward.error || error(outward.code, outward.info)
-      meta.error = true
-    } else if ('result' === outward.kind) {
-      data.res = outward.result
-    }
-  }
+  //var dur_start = process.hrtime()
 
-  //console.log('HR', delegate.util.clean(actmsg), meta)
+  intern.meta_trace(data)
+  intern.parent_meta_trace(delegate, meta)
 
-  //var meta = meta || {}
-  meta.end = actend
-
-
-  var dur_start = process.hrtime()
-
-  if (data.res) {
-    if (data.res.trace$ && data.res.meta$) {
-      //data.res.__proto__.trace$ = false
-      data.res.trace$ = false
-
-      var res_meta = data.res.meta$
-
-      meta.trace = meta.trace || []
-      meta.trace.push({
-        desc: Common.make_trace_desc(res_meta),
-        trace: res_meta.trace || []
-      })
-    }
-
-    Common.setmeta(data.res, meta)
-  }
-
-
-  var parent_meta = delegate.private$.act && delegate.private$.act.parent
-  if (parent_meta) {
-    parent_meta.trace = parent_meta.trace || []
-    parent_meta.trace.push({
-      desc: Common.make_trace_desc(meta),
-      trace: meta.trace || []
-    })
-  }
 
   if (meta.error) {
     var errordesc = intern.act_error(
@@ -1588,10 +1547,10 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       actdef,
       [err, out],
       reply,
-      actend - meta.start,
+      duration,
       actmsg,
       origmsg,
-      act_callpoint
+      action_ctxt.callpoint
     )
 
     if (meta.fatal) {
@@ -1608,7 +1567,7 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       actlog(actdef, actmsg, origmsg, {
         kind: 'act',
         case: 'OUT',
-        duration: actend - meta.start,
+        duration: duration,
         result: data.res
       })
     )
@@ -1634,12 +1593,6 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
         rout.meta$ = meta
       }
 
-      //var rmeta = Object.create(meta)
-
-      //if(rout) {
-      //  delete rout.meta$
-      //}
-
       reply.call(delegate, rerr, rout, meta)
     }
   } catch (e) {
@@ -1651,46 +1604,21 @@ intern.handle_reply = function (delegate, actdef, meta, action_ctxt, actmsg, ori
       actdef,
       [err, out],
       reply,
-      actend - meta.start,
+      duration,
       actmsg,
       origmsg,
-      act_callpoint
+      action_ctxt.callpoint
     )
   }
 
-  var dur_diff = process.hrtime(dur_start)
-  dur.handle_reply.push( dur_diff[0] * 1e9 + dur_diff[1] )
+  //var dur_diff = process.hrtime(dur_start)
+  //dur.handle_reply.push( dur_diff[0] * 1e9 + dur_diff[1] )
 }
 
 
 
-intern.make_actmsg = function (origmsg) {
-  //var actmsg = origmsg
-/*
-  var actmsg = _.clone(origmsg)
-  //var actmsg = origmsg
-  //actmsg.meta$ = {}
-  return actmsg
-*/
-
-  //var metaproto = { meta$: {} }
-  //metaproto.__proto__ = origmsg.__proto__
-  //var actmsg = Object.create(metaproto)
-  //Object.assign(actmsg,origmsg)
-  
+intern.make_actmsg = function (origmsg) {  
   var actmsg = Object.assign({},origmsg)
-
-/*
-  var pn = Object.getOwnPropertyNames(origmsg)
-  for (var i = 0; i < pn.length; i++) {
-    var p = pn[i]
-    
-    //if ('$' != p[p.length - 1]) {
-      actmsg[p] = origmsg[p]
-    //}
-  }
-*/
-
 
   if(actmsg.caller$) {
     delete actmsg.caller$
@@ -1773,6 +1701,52 @@ intern.Meta = function (instance, opts, origmsg, origreply) {
   this.err_trace = null
   this.error = null
   this.empty = null
+}
+
+
+intern.process_outward = function(delegate, meta, action_ctxt, data) {
+  var outward = delegate.private$.outward.process(action_ctxt, data)
+
+  if (outward) {
+    if ('error' === outward.kind) {
+      data.res = outward.error || error(outward.code, outward.info)
+      meta.error = true
+    } else if ('result' === outward.kind) {
+      data.res = outward.result
+    }
+  }
+}
+
+
+intern.meta_trace = function(data) {
+  var meta = data.meta
+  if (data.res) {
+    if (data.res.trace$ && data.res.meta$) {
+      data.res.trace$ = false
+      
+      var res_meta = data.res.meta$
+      
+        meta.trace = meta.trace || []
+      meta.trace.push({
+        desc: Common.make_trace_desc(res_meta),
+        trace: res_meta.trace || []
+      })
+    }
+    
+    Common.setmeta(data.res, meta)
+  }
+}
+
+
+intern.parent_meta_trace = function(delegate, meta) {
+  var parent_meta = delegate.private$.act && delegate.private$.act.parent
+  if (parent_meta) {
+    parent_meta.trace = parent_meta.trace || []
+    parent_meta.trace.push({
+      desc: Common.make_trace_desc(meta),
+      trace: meta.trace || []
+    })
+  }
 }
 
 

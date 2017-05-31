@@ -25,10 +25,12 @@ var x = 0
 function send(seneca, next) {
   var y = x++
   stats.sent++
-  var callstart = Date.now()
+  var dur_start = process.hrtime()
 
   seneca.act({a:1, x:y}, function (err, out) {
-    calltimes.push(Date.now()-callstart)
+    var dur_diff = process.hrtime(dur_start)
+    calltimes.push( parseInt(dur_diff[0] * 1e9 + dur_diff[1],10) )
+
     if(err) { 
       stats.err++
       return next(true)
@@ -42,11 +44,19 @@ function send(seneca, next) {
 function finish(active) {
   stats.active = active
 
-  stats.avgcall = calltimes.reduce(function (acc,elm) {
+  stats.avgcall = Math.floor(calltimes.reduce(function (acc,elm) {
     return acc+elm
-  },0)/calltimes.length
+  },0)/calltimes.length)
+
+  calltimes.sort(function(a,b) {return a-b})
+
+  stats.callmin = calltimes[0]
+  stats.callmax = calltimes[calltimes.length-1]
+  stats.call90p = calltimes[Math.floor(0.9*calltimes.length)]
 
   console.dir(stats, {colors:true})
+
+  require('fs').writeFileSync('./calltimes.csv','ct\n'+calltimes.join('\n'))
 
   si.close(function () {
     var ph = 'S,E\n'+si.private$.history._prunehist.map(x=>x.join(',')).join('\n')
