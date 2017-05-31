@@ -27,43 +27,35 @@ describe('entity', function() {
   })
 
   it('entity-msg', function(fin) {
-    var si = Seneca()
-      .test(fin)
-      .use('entity')
+    var si = Seneca().test(fin).use('entity')
 
     var foo = si.make$('foo', { a: 1 })
     var bar = si.make$('bar', { c: 3 })
 
     si
-      .add('a:1',function (msg, reply) {
+      .add('a:1', function(msg, reply) {
         msg.x = 2
         reply(msg)
       })
-
-      .add('c:3',function (msg, reply) {
+      .add('c:3', function(msg, reply) {
         msg.b.y = 3
-        reply({z:msg.b})
+        reply({ z: msg.b })
       })
-
       .gate()
-
-      .act(foo, function (err, out) {
+      .act(foo, function(err, out) {
         expect(err).not.exist()
         expect(out).exist()
-        expect(out).includes({a:1,x:2})
+        expect(out).includes({ a: 1, x: 2 })
         expect(out.canon$()).equal('-/-/foo')
       })
-
-      .act({c:3,b:bar}, function (err, out) {
+      .act({ c: 3, b: bar }, function(err, out) {
         expect(err).not.exist()
         expect(out).exist()
         expect(out.z).exist()
         expect(out.z.canon$()).equal('-/-/bar')
       })
-
       .ready(fin)
   })
-
 
   it('mem-ops', function(fin) {
     var si = Seneca({ tag: 'e0' }).test(fin).use('entity')

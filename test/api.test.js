@@ -143,8 +143,8 @@ describe('api', function() {
   it('reply', function(fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
     expect(si.reply()).equal(false)
-    expect(si.reply({ out: {z: 1} })).equal(false)
-    expect(si.reply({ meta: { id: 'foo' }, out: {z: 2} })).equal(false)
+    expect(si.reply({ out: { z: 1 } })).equal(false)
+    expect(si.reply({ meta: { id: 'foo' }, out: { z: 2 } })).equal(false)
 
     si.add('a:1', function() {}).act('a:1,id$:aa/bb', function(err, out) {
       expect(err).not.exist()
@@ -153,7 +153,7 @@ describe('api', function() {
     })
 
     setImmediate(function() {
-      si.reply({ meta: { id: 'aa/bb' }, out: {x: 1} })
+      si.reply({ meta: { id: 'aa/bb' }, out: { x: 1 } })
     })
   })
 })

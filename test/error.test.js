@@ -83,7 +83,7 @@ describe('error', function() {
         //console.dir(meta,{depth:null})
 
         assert.equal('EDAR', err.message)
-        assert.equal('c:1', meta.pattern)
+        assert.equal('a:1', meta.pattern)
 
         return fin()
       })

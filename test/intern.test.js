@@ -12,13 +12,11 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-
 var intern = Seneca.intern
-
 
 describe('intern', function() {
   it('make_actmsg', function(fin) {
-/*
+    /*
 
     var om0 = {a:1, b$: 2}
     om0.__proto__ = {c:3}

@@ -42,21 +42,21 @@ describe('seneca', function() {
   it('happy', function(fin) {
     Seneca()
       .test(fin)
-      .add('a:1', function (msg, reply) {
-        // console.log('ACTION', msg, JSON.stringify(msg), msg.meta$, reply)
-        expect(msg).includes({a: 1})
+      .add('a:1', function(msg, reply, meta) {
+        // console.log('ACTION', msg, JSON.stringify(msg), meta, reply)
+        expect(msg).includes({ a: 1 })
         //expect(JSON.stringify(msg)).equals('{"a":1}')
         expect(JSON.stringify(this.util.clean(msg))).equals('{"a":1}')
-        expect(msg.meta$).includes({pattern: 'a:1'})
-        reply({x:1})
+        expect(meta).includes({ pattern: 'a:1' })
+        reply({ x: 1 })
       })
-      .act('a:1', function (err, out, meta) {
+      .act('a:1', function(err, out, meta) {
         // console.log('REPLY', err, out, out.meta$, meta)
         expect(err).not.exist()
-        expect(out).includes({x: 1})
+        expect(out).includes({ x: 1 })
         //expect(JSON.stringify(out)).equals('{"x":1}')
         expect(JSON.stringify(this.util.clean(out))).equals('{"x":1}')
-        expect(meta).includes({pattern: 'a:1'})
+        expect(meta).includes({ pattern: 'a:1' })
         expect(meta).includes(meta)
         fin()
       })
@@ -349,12 +349,12 @@ describe('seneca', function() {
         .map(x => x.desc[Common.TRACE_ACTION]) // meta.action
         .toString()
 
-    function foo(msg, reply) {
-      reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
+    function foo(msg, reply, meta) {
+      reply(null, { a: msg.a, s: this.toString(), foo: meta })
     }
 
-    function bar(msg, reply) {
-      var bar_meta = msg.meta$
+    function bar(msg, reply, meta) {
+      var bar_meta = meta
       var pmsg = { a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
         o.b = 2
@@ -363,8 +363,8 @@ describe('seneca', function() {
       })
     }
 
-    function zed(msg, reply) {
-      var zed_meta = msg.meta$
+    function zed(msg, reply, meta) {
+      var zed_meta = meta
       //msg.z = 3
       var pmsg = { z: 3, a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
@@ -433,12 +433,12 @@ describe('seneca', function() {
 
     si.options({ strict: { add: false } })
 
-    function foo(msg, next) {
-      next(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
+    function foo(msg, next, meta) {
+      next(null, { a: msg.a, s: this.toString(), foo: meta })
     }
 
-    function bar(msg, next) {
-      var bar_meta = msg.meta$
+    function bar(msg, next, meta) {
+      var bar_meta = meta
       var pmsg = { a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
         o.b = 2
@@ -447,8 +447,8 @@ describe('seneca', function() {
       })
     }
 
-    function zed(msg, next) {
-      var zed_meta = msg.meta$
+    function zed(msg, next, meta) {
+      var zed_meta = meta
       msg.z = 3
       this.prior(msg, function(e, o) {
         o.z = 3
@@ -488,13 +488,13 @@ describe('seneca', function() {
     var called = ''
 
     si.ready(function() {
-      si.add('foo:a', function(msg, reply) {
+      si.add('foo:a', function(msg, reply, meta) {
         count++
         count += msg.x
         reply(null, { count: count })
       })
 
-      si.add('foo:a', function(msg, reply) {
+      si.add('foo:a', function(msg, reply, meta) {
         count += msg.y
         msg.z = 1
         this.prior(msg, reply)
@@ -526,7 +526,7 @@ describe('seneca', function() {
           assert.equal('ABCD', called)
           assert.equal(224.22, count)
 
-          this.add('foo:a', function(msg, reply) {
+          this.add('foo:a', function(msg, reply, meta) {
             count += msg.z
             this.prior(msg, reply)
           })
@@ -848,7 +848,7 @@ describe('seneca', function() {
     var log = []
     Seneca()
       .test(fin)
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function(msg, reply, meta) {
         log.push('a')
         expect(log).equal(['s1', 's2', 'a'])
         reply({ x: 1 })
@@ -957,16 +957,18 @@ describe('seneca', function() {
     var si = Seneca()
       .test(fin)
       .add('a:1')
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function(msg, reply, meta) {
         this.prior(msg, reply)
       })
-      .sub('a:1', function(msg) {
-        log.push(msg.meta$.pattern)
+      .sub('a:1', function(msg, out, meta) {
+        //console.log('SUBCALL',msg,meta)
+        log.push(meta && meta.pattern)
       })
       .act('a:1')
       .ready(function() {
         // only entry msg of prior chain is published
         expect(log).equal(['a:1'])
+        //console.log(log)
         fin()
       })
   })
@@ -1020,16 +1022,16 @@ describe('seneca', function() {
   it('wrap', function(fin) {
     var si = Seneca().test(fin)
 
-    si.add('a:1', function(msg, reply) {
+    si.add('a:1', function(msg, reply, meta) {
       reply(null, { aa: msg.aa })
     })
-    si.add('b:2', function(msg, reply) {
+    si.add('b:2', function(msg, reply, meta) {
       reply(null, { bb: msg.bb })
     })
-    si.add('a:1,c:3', function(msg, reply) {
+    si.add('a:1,c:3', function(msg, reply, meta) {
       reply(null, { cc: msg.cc })
     })
-    si.add('a:1,d:4', function(msg, reply) {
+    si.add('a:1,d:4', function(msg, reply, meta) {
       reply(null, { dd: msg.dd })
     })
 
@@ -1070,7 +1072,7 @@ describe('seneca', function() {
           si.act('b:2,bb:2', function(err, out) {
             expect(out).contains({ bb: 2 })
 
-            si.wrap('', function(msg, reply) {
+            si.wrap('', function(msg, reply, meta) {
               this.prior(msg, function(err, out) {
                 out.ALL = 2
                 reply(err, out)
@@ -1099,30 +1101,32 @@ describe('seneca', function() {
     })
   })
 
-  it('meta', function(done) {
-    var si = Seneca(testopts)
-    si.options({ errhandler: done })
+  it('meta', function(fin) {
+    var si = Seneca().test(fin)
+    var tmp = {}
 
-    var meta = {}
-
-    si.add('a:1', function(args, cb) {
-      meta.a = args.meta$
-      cb(null, { aa: args.aa })
+    si.add('a:1', function(msg, reply, meta) {
+      tmp.a = meta
+      reply({ aa: msg.aa })
     })
 
-    si.add('b:2', function(args, cb) {
-      meta.b = args.meta$
-      cb(null, { bb: args.bb })
+    si.add('b:2', function(msg, reply, meta) {
+      tmp.b = meta
+      reply({ bb: msg.bb })
     })
 
-    si.act('a:1', function(err) {
-      assert.ok(!err)
-      si.act('b:2', function(err) {
-        assert.ok(!err)
-        assert.equal('a:1', meta.a.pattern)
-        assert.equal('b:2', meta.b.pattern)
+    si.act('a:1', function(err, out, meta) {
+      expect(err).not.exist()
+      expect(meta.pattern).equal('a:1')
 
-        done()
+      si.act('b:2', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(meta.pattern).equal('b:2')
+
+        expect(tmp.a.pattern).equal('a:1')
+        expect(tmp.b.pattern).equal('b:2')
+
+        fin()
       })
     })
   })
@@ -1458,7 +1462,7 @@ describe('seneca', function() {
 
   it('use-shortcut', function(fin) {
     Seneca.use(function() {
-      this.add('a:1', function(msg, reply) {
+      this.add('a:1', function(msg, reply, meta) {
         reply({ x: 1 })
       })
     })

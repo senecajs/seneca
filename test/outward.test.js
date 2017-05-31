@@ -16,7 +16,7 @@ var Outward = require('../lib/outward')
 describe('outward', function() {
   it('make_error', function(fin) {
     var err = { message: 'foo', meta$: { err: true } }
-    var data = { meta: {error:true}, res: err }
+    var data = { meta: { error: true }, res: err }
 
     Outward.make_error({ options: { legacy: { error: false } } }, data)
     expect(data.res.message).equal('foo')
