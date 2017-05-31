@@ -1018,127 +1018,48 @@ function make_seneca(initial_options) {
   }
 
   function do_act(instance, origmsg, origreply) {
-    var act_callpoint = callpoint()
-    //var is_sync = _.isFunction(origreply)
-    var execute_instance = instance
     var timedout = false
-    var reply = origreply || _.noop
+
     var actmsg = intern.make_actmsg(origmsg)
     var meta = new intern.Meta(instance, opts, origmsg, origreply)
 
-    var action_ctxt = {
-      origmsg: origmsg,
-      reply: reply
-    }
-
-
-    // backwards compatibility for Seneca 3.x transports
-    if (origmsg.transport$) {
-      actmsg.transport$ = origmsg.transport$
-    }
-
     if (meta.gate) {
-      execute_instance = instance.delegate()
-      execute_instance.private$.ge = execute_instance.private$.ge.gate()
+      instance = instance.delegate()
+      instance.private$.ge = instance.private$.ge.gate()
     }
 
-    var actdef
-    var delegate
+    var actctxt = {
+      seneca: instance,
+      origmsg: origmsg,
+      reply: origreply || _.noop,
+      options: instance.options(),
+      callpoint: callpoint()
+    }
 
     var execspec = {
       dn: meta.id,
       fn: function act_fn(done) {
         try {
-          execute_action(execute_instance, actmsg, function action_reply(err, out, reply_meta) {
+          intern.execute_action(instance, opts, actctxt, actmsg, meta, function action_reply(err, out, reply_meta) {
             if (!timedout) {
-              intern.handle_reply(meta, action_ctxt, actmsg, err, out, reply_meta)
+              intern.handle_reply(meta, actctxt, actmsg, err, out, reply_meta)
             }
             done()
           })
         } catch (e) {
           var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-          intern.handle_reply(meta, action_ctxt, actmsg, ex)
+          intern.handle_reply(meta, actctxt, actmsg, ex)
           done()
         }
       },
       ontm: function act_tm() {
         timedout = true
-        intern.handle_reply(meta, action_ctxt, actmsg, new Error('[TIMEOUT]'))
+        intern.handle_reply(meta, actctxt, actmsg, new Error('[TIMEOUT]'))
       },
       tm: meta.timeout
     }
 
-    execute_instance.private$.ge.add(execspec)
-
-    function execute_action(act_instance, msg, reply) {
-      var private$ = act_instance.private$
-
-      actdef = meta.prior
-        ? private$.actdef[meta.prior]
-        : act_instance.find(msg)
-
-      delegate = make_act_delegate(act_instance, opts, meta, actdef)
-
-      action_ctxt.seneca = delegate
-      action_ctxt.actdef = actdef
-      action_ctxt.options = delegate.options()
-      action_ctxt.callpoint = act_callpoint
-
-      var data = { meta: meta, msg: msg, reply: reply }
-      var inward = private$.inward.process(action_ctxt, data)
-
-      if (handle_inward_break(inward, act_instance, data, actdef, origmsg)) {
-        return
-      }
-
-      if (!actdef.sub) {
-        delegate.log.debug(
-          actlog(actdef, msg, origmsg, { kind: 'act', case: 'IN' })
-        )
-      }
-
-      data.id = data.meta.id
-      data.result = []
-      data.timelimit = Date.now() + data.meta.timeout
-      private$.history.add(data)
-
-      actdef.func.call(delegate, data.msg, data.reply)
-    }
-  }
-
-
-  function handle_inward_break(inward, act_instance, data, actdef, origmsg) {
-    if (!inward) return false
-
-    var msg = data.msg
-    var reply = data.reply
-    var meta = data.meta
-
-    if ('error' === inward.kind) {
-      var err = inward.error || error(inward.code, inward.info)
-      meta.error = true
-
-      if (inward.log && inward.log.level) {
-        act_instance.log[inward.log.level](
-          errlog(
-            err,
-            errlog(actdef || {}, meta.prior, msg, origmsg, inward.log.data)
-          )
-        )
-      }
-
-      reply.call(act_instance, err)
-      return true
-    } else if ('result' === inward.kind) {
-      if (inward.log && inward.log.level) {
-        act_instance.log[inward.log.level](
-          actlog(actdef || {}, msg, origmsg, inward.log.data)
-        )
-      }
-
-      reply.call(act_instance, null, inward.result)
-      return true
-    }
+    instance.private$.ge.add(execspec)
   }
 
 
@@ -1456,7 +1377,8 @@ function make_default_log_modifier(instance) {
   }
 }
 
-function make_act_delegate(instance, opts, meta, actdef) {
+
+intern.make_act_delegate = function(instance, opts, meta, actdef) {
   meta = meta || {}
   actdef = actdef || {}
 
@@ -1495,7 +1417,6 @@ function make_act_delegate(instance, opts, meta, actdef) {
   delegate.prior = function(msg, reply) {
     if (actdef.priormeta) {
       msg.prior$ = actdef.priormeta.id
-      //console.log('PRIOR', msg.meta$)
       this.act(msg, reply)
     } else {
       var meta = msg.meta$ || {}
@@ -1511,19 +1432,51 @@ function make_act_delegate(instance, opts, meta, actdef) {
   return delegate
 }
 
+intern.execute_action = function(act_instance, opts, actctxt, msg, meta, reply) {
+  var private$ = act_instance.private$
 
-intern.handle_reply = function (meta, action_ctxt, actmsg, err, out, reply_meta) {
+  var actdef = meta.prior
+        ? private$.actdef[meta.prior]
+        : act_instance.find(msg)
+
+  var delegate = intern.make_act_delegate(act_instance, opts, meta, actdef)
+
+  actctxt.seneca = delegate
+  actctxt.actdef = actdef
+
+  var data = { meta: meta, msg: msg, reply: reply }
+  var inward = private$.inward.process(actctxt, data)
+
+  if (intern.handle_inward_break(inward, act_instance, data, actdef, actctxt.origmsg)) {
+    return
+  }
+
+  if (!actdef.sub) {
+    delegate.log.debug(
+      actlog(actdef, msg, actctxt.origmsg, { kind: 'act', case: 'IN' })
+    )
+  }
+
+  data.id = data.meta.id
+  data.result = []
+  data.timelimit = Date.now() + data.meta.timeout
+  private$.history.add(data)
+
+  actdef.func.call(delegate, data.msg, data.reply)
+}
+
+intern.handle_reply = function (meta, actctxt, actmsg, err, out, reply_meta) {
   meta.end = Date.now()
 
-  var delegate = action_ctxt.seneca
-  var actdef = action_ctxt.actdef
-  var origmsg = action_ctxt.origmsg
-  var reply = action_ctxt.reply
+  var delegate = actctxt.seneca
+  var actdef = actctxt.actdef
+  var origmsg = actctxt.origmsg
+  var reply = actctxt.reply
 
   var duration = meta.end - meta.start
   var call_cb = true
 
-  action_ctxt.duration = duration
+  actctxt.duration = duration
 
   var data = {
     meta: meta,
@@ -1533,7 +1486,7 @@ intern.handle_reply = function (meta, action_ctxt, actmsg, err, out, reply_meta)
 
   meta.error = data.res instanceof Error
 
-  intern.process_outward(delegate, meta, action_ctxt, data)
+  intern.process_outward(meta, actctxt, data)
 
 
   //var dur_start = process.hrtime()
@@ -1552,7 +1505,7 @@ intern.handle_reply = function (meta, action_ctxt, actmsg, err, out, reply_meta)
       duration,
       actmsg,
       origmsg,
-      action_ctxt.callpoint
+      actctxt.callpoint
     )
 
     if (meta.fatal) {
@@ -1610,12 +1563,47 @@ intern.handle_reply = function (meta, action_ctxt, actmsg, err, out, reply_meta)
       duration,
       actmsg,
       origmsg,
-      action_ctxt.callpoint
+      actctxt.callpoint
     )
   }
 
   //var dur_diff = process.hrtime(dur_start)
   //dur.handle_reply.push( dur_diff[0] * 1e9 + dur_diff[1] )
+}
+
+
+intern.handle_inward_break = function(inward, act_instance, data, actdef, origmsg) {
+  if (!inward) return false
+
+  var msg = data.msg
+  var reply = data.reply
+  var meta = data.meta
+
+  if ('error' === inward.kind) {
+    var err = inward.error || error(inward.code, inward.info)
+    meta.error = true
+
+    if (inward.log && inward.log.level) {
+      act_instance.log[inward.log.level](
+        errlog(
+          err,
+          errlog(actdef || {}, meta.prior, msg, origmsg, inward.log.data)
+        )
+      )
+    }
+
+    reply.call(act_instance, err)
+    return true
+  } else if ('result' === inward.kind) {
+    if (inward.log && inward.log.level) {
+      act_instance.log[inward.log.level](
+        actlog(actdef || {}, msg, origmsg, inward.log.data)
+      )
+    }
+
+    reply.call(act_instance, null, inward.result)
+    return true
+  }
 }
 
 
@@ -1629,6 +1617,11 @@ intern.make_actmsg = function (origmsg) {
 
   if(actmsg.meta$) {
     delete actmsg.meta$
+  }
+
+  // backwards compatibility for Seneca 3.x transports
+  if (origmsg.transport$) {
+    actmsg.transport$ = origmsg.transport$
   }
 
   return actmsg
@@ -1707,8 +1700,8 @@ intern.Meta = function (instance, opts, origmsg, origreply) {
 }
 
 
-intern.process_outward = function(delegate, meta, action_ctxt, data) {
-  var outward = delegate.private$.outward.process(action_ctxt, data)
+intern.process_outward = function(meta, actctxt, data) {
+  var outward = actctxt.seneca.private$.outward.process(actctxt, data)
 
   if (outward) {
     if ('error' === outward.kind) {
