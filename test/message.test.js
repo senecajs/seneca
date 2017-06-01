@@ -410,13 +410,13 @@ describe('message', function() {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
-      .test(fin, 'silent')
+      .test(fin)
       .use(st)
       .listen({ type: 'simple' })
     s0.id = 's0'
 
     var c0 = Seneca({ id$: 'c0', legacy: { transport: false } })
-      .test(fin, 'silent')
+      .test(fin)
       .use(st)
       .client({ type: 'simple' })
     c0.id = 'c0'

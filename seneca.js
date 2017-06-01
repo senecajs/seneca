@@ -52,6 +52,7 @@ var option_defaults = {
 
   // Standard length of identifiers for actions.
   idlen: 12,
+  didlen: 4,
 
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
@@ -198,7 +199,9 @@ var option_defaults = {
     error: true,
 
     // Use seneca-transport plugin.
-    transport: true
+    transport: true,
+
+    meta: false
   }
 }
 
@@ -333,9 +336,14 @@ function make_seneca(initial_options) {
 
   // Create internal tools.
   var actnid = Nid({ length: opts.$.idlen })
+  var didnid = Nid({ length: opts.$.didlen })
+
+/*
   var refnid = function refnid(suffix) {
     return '(' + actnid() + (suffix ? '/' + suffix : '') + ')'
   }
+*/
+
   var next_action_id = Common.autoincr()
 
   // These need to come from options as required during construction.
@@ -1080,7 +1088,11 @@ function make_seneca(initial_options) {
     var delegate = Object.create(self)
     delegate.private$ = Object.create(self.private$)
 
-    delegate.did = refnid()
+    var loc = new Error().stack.split('\n').filter(function(line){
+      return line.match(/mesh/) || line.match(/balance-client/)
+    }).map(x=>x.split('/').pop())
+
+    delegate.did = (delegate.did ? delegate.did+'/' : '')+(didnid()+'~'+loc) 
 
     var strdesc
     delegate.toString = function toString() {
@@ -1462,7 +1474,7 @@ intern.execute_action = function(
   data.timelimit = Date.now() + data.meta.timeout
   private$.history.add(data)
 
-  if(opts.$.legacy.transport) {
+  if(opts.$.legacy.meta) {
     data.msg.meta$ = meta
   }
 
@@ -1517,7 +1529,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
     call_cb = errordesc.call_cb
 
     if (delegate && _.isFunction(delegate.on_act_err)) {
-      delegate.on_act_err(actdef, data.res)
+      delegate.on_act_err(actdef, data.res, meta)
     }
   } else {
     delegate.log.debug(
@@ -1533,7 +1545,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
     delegate.emit('act-out', actmsg, data.res, meta)
 
     if (_.isFunction(delegate.on_act_out)) {
-      delegate.on_act_out(actdef, data.res)
+      delegate.on_act_out(actdef, data.res, meta)
     }
   }
 
@@ -1550,7 +1562,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
 
       } else if (rout && rout.entity$ && delegate.make$) {
         rout = delegate.make$(rout)
-        //rout.meta$ = meta
+        // rout.meta$ = meta
       }
 
       reply.call(delegate, rerr, rout, meta)

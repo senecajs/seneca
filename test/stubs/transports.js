@@ -72,12 +72,12 @@ function make_test_transport () {
           return done()
         })
 
-        send_done(null, function (args, done) {
+        send_done(null, function (args, done, meta) {
           if (!test_transport.queuemap[topic + '_act']) {
             return done(new Error('Unknown topic:' + topic +
                                   ' for: ' + Util.inspect(args)))
           }
-          var outmsg = tu.prepare_request(seneca, args, done)
+          var outmsg = tu.prepare_request(seneca, args, done, meta)
           test_transport.queuemap[topic + '_act'].push(outmsg)
         })
       }
@@ -132,9 +132,9 @@ function make_balance_transport () {
       function make_send (spec, topic, send_done) {
         seneca.log.debug('client', 'send', topic + '_res', client_options, seneca)
 
-        send_done(null, function (args, done) {
+        send_done(null, function (args, done, meta) {
           index = (index + 1) % targets.length
-          targets[index].call(this, args, done)
+          targets[index].call(this, args, done, meta)
         })
       }
 
