@@ -12,5 +12,5 @@ Seneca()
   .ready(function () {
     console.log('start time: ' + (Date.now() - start))
   })
-  .act('a:1', console.log)
-  .act('b:2', console.log)
+  .act('a:1', Seneca.util.print)
+  .act('b:2', Seneca.util.print)

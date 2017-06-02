@@ -31,7 +31,7 @@ function make_test_transport () {
       var type = args.type
       var listen_options = seneca.util.clean(_.extend({}, options[type], args))
 
-      tu.listen_topics(seneca, args, listen_options, function (topic) {
+      tu.listen_topics(seneca, seneca.util.clean(args), listen_options, function (topic) {
         seneca.log.debug('listen', 'subscribe', topic + '_act',
                          listen_options, seneca)
 
@@ -72,12 +72,12 @@ function make_test_transport () {
           return done()
         })
 
-        send_done(null, function (args, done) {
+        send_done(null, function (args, done, meta) {
           if (!test_transport.queuemap[topic + '_act']) {
             return done(new Error('Unknown topic:' + topic +
                                   ' for: ' + Util.inspect(args)))
           }
-          var outmsg = tu.prepare_request(seneca, args, done)
+          var outmsg = tu.prepare_request(seneca, args, done, meta)
           test_transport.queuemap[topic + '_act'].push(outmsg)
         })
       }
@@ -132,9 +132,9 @@ function make_balance_transport () {
       function make_send (spec, topic, send_done) {
         seneca.log.debug('client', 'send', topic + '_res', client_options, seneca)
 
-        send_done(null, function (args, done) {
+        send_done(null, function (args, done, meta) {
           index = (index + 1) % targets.length
-          targets[index].call(this, args, done)
+          targets[index].call(this, args, done, meta)
         })
       }
 
@@ -162,11 +162,13 @@ function make_simple_transport () {
     seneca.add('role:transport,hook:client,type:simple', hook_client_simple)
 
     function hook_listen_simple (config, ready) {
-      function handle_msg(data, done) {
-        var msg = tu.internalize_msg(data)
+      var seneca = this.root.delegate()
 
-        config.seneca.act(msg, function (err, out, meta) {
-          var rep = tu.externalize_reply(err||out, meta)
+      function handle_msg(data, done) {
+        var msg = tu.internalize_msg(seneca, JSON.parse(data))
+
+        seneca.act(msg, function (err, out, meta) {
+          var rep = JSON.stringify(tu.externalize_reply(seneca, err, out, meta))
 
           simple_transport.queuemap[config.pin+'~OUT'].push(rep) 
         })
@@ -179,18 +181,22 @@ function make_simple_transport () {
     }
 
     function hook_client_simple (config, ready) {
-      function send_msg(msg, reply_not_used_here) {
+      var seneca = this.root.delegate()
+
+      function send_msg(msg, reply_not_used_here, meta) {
         simple_transport.queuemap[config.pin+'~OUT'] = Async.queue(handle_reply)
 
-        var msg = tu.externalize_msg(msg)
+        var msg = JSON.stringify(tu.externalize_msg(seneca, msg, meta))
+        //console.log('ST CS', msg)
+
         simple_transport.queuemap[config.pin+'~IN'].push(msg) 
       }
 
       function handle_reply(data, done) {
-        var rep = tu.internalize_reply(data)
-        //console.log('REP', data, rep, rep && rep.meta$)
+        var rep = tu.internalize_reply(seneca,JSON.parse(data))
+        //console.log('ST CR', rep)
 
-        config.seneca.reply(rep)
+        seneca.reply(rep)
         return done()
       }
 

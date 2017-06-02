@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.3.0",
+  "version": "3.4.0dev",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -69,9 +69,9 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 80",
+    "test": "lab -v -P test -L -t 90",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
+    "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write --no-semi --single-quote seneca.js lib/*.js test/*.js"
@@ -83,32 +83,32 @@
     "gex": "0.2.2",
     "json-stringify-safe": "5.0.1",
     "jsonic": "0.3.0",
-    "lodash": "4.15.0",
+    "lodash": "4.17.4",
     "minimist": "1.2.0",
     "nid": "0.3.2",
     "norma": "0.3.0",
     "ordu": "0.1.1",
     "patrun": "0.5.1",
-    "qs": "^6.4.0",
+    "qs": "6.4.0",
     "rolling-stats": "0.1.1",
     "semver": "5.3.0",
     "seneca-log-filter": "0.1.0",
-    "seneca-transport": "2.1.0",
+    "seneca-transport": "senecajs/seneca-transport",
     "use-plugin": "0.3.2",
-    "wreck": "^12.0.0"
+    "wreck": "12.0.0"
   },
   "devDependencies": {
-    "async": "2.0.x",
+    "async": "2.4.x",
     "bench": "0.3.x",
-    "body-parser": "1.15.x",
+    "body-parser": "1.17.x",
     "code": "4.0.x",
-    "connect": "3.4.x",
-    "connect-query": "0.2.x",
+    "connect": "3.6.x",
+    "connect-query": "1.0.x",
     "coveralls": "2.13.x",
     "docco": "0.7.x",
     "hoek": "4.1.x",
-    "lab": "13.0.x",
-    "prettier": "1.2.x",
+    "lab": "13.1.x",
+    "prettier": "1.3.x",
     "seneca-entity": "2.0.x",
     "seneca-error-test": "0.2.x"
   }

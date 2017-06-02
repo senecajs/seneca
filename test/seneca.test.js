@@ -9,6 +9,7 @@ var _ = require('lodash')
 var Lab = require('lab')
 var Package = require('../package.json')
 var Seneca = require('..')
+var Common = require('../lib/common.js')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
@@ -36,6 +37,29 @@ describe('seneca', function() {
     process.removeAllListeners('SIGINT')
     process.removeAllListeners('SIGBREAK')
     done()
+  })
+
+  it('happy', function(fin) {
+    Seneca()
+      .test(fin)
+      .add('a:1', function(msg, reply, meta) {
+        // console.log('ACTION', msg, JSON.stringify(msg), meta, reply)
+        expect(msg).includes({ a: 1 })
+        //expect(JSON.stringify(msg)).equals('{"a":1}')
+        expect(JSON.stringify(this.util.clean(msg))).equals('{"a":1}')
+        expect(meta).includes({ pattern: 'a:1' })
+        reply({ x: 1 })
+      })
+      .act('a:1', function(err, out, meta) {
+        // console.log('REPLY', err, out, out.meta$, meta)
+        expect(err).not.exist()
+        expect(out).includes({ x: 1 })
+        //expect(JSON.stringify(out)).equals('{"x":1}')
+        expect(JSON.stringify(this.util.clean(out))).equals('{"x":1}')
+        expect(meta).includes({ pattern: 'a:1' })
+        expect(meta).includes(meta)
+        fin()
+      })
   })
 
   it('version', function(done) {
@@ -319,30 +343,33 @@ describe('seneca', function() {
   it('action-override', function(fin) {
     var si = Seneca(testopts).error(fin)
 
-    var trace = out =>
+    var trace = meta =>
       Seneca.util
-        .flatten(out.meta$.trace, 'trace')
-        .map(x => x.desc[6])
+        .flatten(meta.trace, 'trace')
+        .map(x => x.desc[Common.TRACE_ACTION]) // meta.action
         .toString()
 
-    function foo(msg, reply) {
-      reply(null, { a: msg.a, s: this.toString(), foo: msg.meta$ })
+    function foo(msg, reply, meta) {
+      reply(null, { a: msg.a, s: this.toString(), foo: meta })
     }
 
-    function bar(msg, reply) {
+    function bar(msg, reply, meta) {
+      var bar_meta = meta
       var pmsg = { a: msg.a, s: msg.s }
       this.prior(pmsg, function(e, o) {
         o.b = 2
-        o.bar = msg.meta$
+        o.bar = bar_meta
         reply(e, o)
       })
     }
 
-    function zed(msg, reply) {
-      msg.z = 3
-      this.prior(msg, function(e, o) {
+    function zed(msg, reply, meta) {
+      var zed_meta = meta
+      //msg.z = 3
+      var pmsg = { z: 3, a: msg.a, s: msg.s }
+      this.prior(pmsg, function(e, o) {
         o.z = 3
-        o.zed = msg.meta$
+        o.zed = zed_meta
         reply(e, o)
       })
     }
@@ -350,23 +377,23 @@ describe('seneca', function() {
     si.ready(function() {
       si.add({ op: 'foo' }, foo)
 
-      si.act('op:foo,a:1', function(e, o) {
+      si.act('op:foo,a:1,i:1', function(e, o, m) {
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
         assert.ok(!o.foo.prior)
-        assert.ok(o.meta$.action.match(/foo/))
+        assert.ok(m.action.match(/foo/))
 
         si.add({ op: 'foo' }, bar)
-        si.act('op:foo,a:1', function(e, o) {
+        si.act('op:foo,a:1,i:2', function(e, o, m) {
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
           assert.ok(!o.bar.prior)
           assert.ok(o.foo.prior)
-          assert.ok(o.meta$.action.match(/bar/))
-          assert.ok(trace(o).match(/foo_/))
+          assert.ok(m.action.match(/bar/))
+          assert.ok(trace(m).match(/foo_/))
 
           si.add({ op: 'foo' }, zed)
-          si.act('op:foo,a:1', function(e, o) {
+          si.act('op:foo,a:1,i:3', function(e, o, m) {
             assert.ok(
               Gex('1~2~3~Seneca/*' + '/*').on(
                 '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
@@ -375,8 +402,9 @@ describe('seneca', function() {
             assert.ok(!o.zed.prior)
             assert.ok(o.bar.prior)
             assert.ok(o.foo.prior)
-            assert.ok(o.meta$.action.match(/zed/))
-            assert.ok(trace(o).match(/bar_.*foo_/))
+
+            assert.ok(m.action.match(/zed/))
+            assert.ok(trace(m).match(/bar_.*foo_/))
 
             fin()
           })
@@ -385,44 +413,46 @@ describe('seneca', function() {
     })
   })
 
-  it('action-callback-args', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('action-callback-args', function(fin) {
+    var si = Seneca(testopts).test(fin)
 
-    function foo(args, next) {
-      next.apply(null, args.items)
+    function foo(msg, reply) {
+      reply.apply(null, msg.items)
     }
     si.add({ op: 'foo' }, foo)
 
     var items = [null, { one: 1 }, { two: 2 }, { three: 3 }]
     si.act('op:foo', { items: items }, function() {
       assert.equal(arguments.length, 3)
-      done()
+      fin()
     })
   })
 
-  it('action-extend', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('action-extend', function(fin) {
+    var si = Seneca(testopts).test(fin)
 
     si.options({ strict: { add: false } })
 
-    function foo(args, next) {
-      next(null, { a: args.a, s: this.toString(), foo: args.meta$ })
+    function foo(msg, next, meta) {
+      next(null, { a: msg.a, s: this.toString(), foo: meta })
     }
 
-    function bar(args, next) {
-      var pargs = { a: args.a, s: args.s }
-      this.prior(pargs, function(e, o) {
+    function bar(msg, next, meta) {
+      var bar_meta = meta
+      var pmsg = { a: msg.a, s: msg.s }
+      this.prior(pmsg, function(e, o) {
         o.b = 2
-        o.bar = args.meta$
+        o.bar = bar_meta
         next(e, o)
       })
     }
 
-    function zed(args, next) {
-      args.z = 3
-      this.prior(args, function(e, o) {
+    function zed(msg, next, meta) {
+      var zed_meta = meta
+      msg.z = 3
+      this.prior(msg, function(e, o) {
         o.z = 3
-        o.zed = args.meta$
+        o.zed = zed_meta
         next(e, o)
       })
     }
@@ -446,7 +476,7 @@ describe('seneca', function() {
           assert.ok(o.foo.prior)
           assert.ok(o.bar.prior)
           assert.ok(!o.zed.prior)
-          done()
+          fin()
         })
       })
     })
@@ -458,13 +488,13 @@ describe('seneca', function() {
     var called = ''
 
     si.ready(function() {
-      si.add('foo:a', function(msg, reply) {
+      si.add('foo:a', function(msg, reply, meta) {
         count++
         count += msg.x
         reply(null, { count: count })
       })
 
-      si.add('foo:a', function(msg, reply) {
+      si.add('foo:a', function(msg, reply, meta) {
         count += msg.y
         msg.z = 1
         this.prior(msg, reply)
@@ -496,7 +526,7 @@ describe('seneca', function() {
           assert.equal('ABCD', called)
           assert.equal(224.22, count)
 
-          this.add('foo:a', function(msg, reply) {
+          this.add('foo:a', function(msg, reply, meta) {
             count += msg.z
             this.prior(msg, reply)
           })
@@ -722,7 +752,7 @@ describe('seneca', function() {
                 assert.fail()
               })
             } catch (e) {
-              assert.equal(e.code, 'add_string_pattern_syntax')
+              assert.equal(e.code, 'msg_jsonic_syntax')
 
               try {
                 si.add('a:1,b:2', 'bad-arg', function(args, cb) {
@@ -818,7 +848,7 @@ describe('seneca', function() {
     var log = []
     Seneca()
       .test(fin)
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function(msg, reply, meta) {
         log.push('a')
         expect(log).equal(['s1', 's2', 'a'])
         reply({ x: 1 })
@@ -922,6 +952,27 @@ describe('seneca', function() {
     })
   })
 
+  it('sub-prior', function(fin) {
+    var log = []
+    var si = Seneca()
+      .test(fin)
+      .add('a:1')
+      .add('a:1', function(msg, reply, meta) {
+        this.prior(msg, reply)
+      })
+      .sub('a:1', function(msg, out, meta) {
+        //console.log('SUBCALL',msg,meta)
+        log.push(meta && meta.pattern)
+      })
+      .act('a:1')
+      .ready(function() {
+        // only entry msg of prior chain is published
+        expect(log).equal(['a:1'])
+        //console.log(log)
+        fin()
+      })
+  })
+
   it('act-cache', function(done) {
     var si = Seneca(testopts, { actcache: { active: true } })
     si.options({ errhandler: done })
@@ -971,16 +1022,16 @@ describe('seneca', function() {
   it('wrap', function(fin) {
     var si = Seneca().test(fin)
 
-    si.add('a:1', function(msg, reply) {
+    si.add('a:1', function(msg, reply, meta) {
       reply(null, { aa: msg.aa })
     })
-    si.add('b:2', function(msg, reply) {
+    si.add('b:2', function(msg, reply, meta) {
       reply(null, { bb: msg.bb })
     })
-    si.add('a:1,c:3', function(msg, reply) {
+    si.add('a:1,c:3', function(msg, reply, meta) {
       reply(null, { cc: msg.cc })
     })
-    si.add('a:1,d:4', function(msg, reply) {
+    si.add('a:1,d:4', function(msg, reply, meta) {
       reply(null, { dd: msg.dd })
     })
 
@@ -1021,7 +1072,7 @@ describe('seneca', function() {
           si.act('b:2,bb:2', function(err, out) {
             expect(out).contains({ bb: 2 })
 
-            si.wrap('', function(msg, reply) {
+            si.wrap('', function(msg, reply, meta) {
               this.prior(msg, function(err, out) {
                 out.ALL = 2
                 reply(err, out)
@@ -1050,35 +1101,37 @@ describe('seneca', function() {
     })
   })
 
-  it('meta', function(done) {
-    var si = Seneca(testopts)
-    si.options({ errhandler: done })
+  it('meta', function(fin) {
+    var si = Seneca().test(fin)
+    var tmp = {}
 
-    var meta = {}
-
-    si.add('a:1', function(args, cb) {
-      meta.a = args.meta$
-      cb(null, { aa: args.aa })
+    si.add('a:1', function(msg, reply, meta) {
+      tmp.a = meta
+      reply({ aa: msg.aa })
     })
 
-    si.add('b:2', function(args, cb) {
-      meta.b = args.meta$
-      cb(null, { bb: args.bb })
+    si.add('b:2', function(msg, reply, meta) {
+      tmp.b = meta
+      reply({ bb: msg.bb })
     })
 
-    si.act('a:1', function(err) {
-      assert.ok(!err)
-      si.act('b:2', function(err) {
-        assert.ok(!err)
-        assert.equal('a:1', meta.a.pattern)
-        assert.equal('b:2', meta.b.pattern)
+    si.act('a:1', function(err, out, meta) {
+      expect(err).not.exist()
+      expect(meta.pattern).equal('a:1')
 
-        done()
+      si.act('b:2', function(err, out, meta) {
+        expect(err).not.exist()
+        expect(meta.pattern).equal('b:2')
+
+        expect(tmp.a.pattern).equal('a:1')
+        expect(tmp.b.pattern).equal('b:2')
+
+        fin()
       })
     })
   })
 
-  it('strict', function(done) {
+  it('strict', function(fin) {
     var si = Seneca({ log: 'silent' })
 
     si.add('a:1', function(a, cb) {
@@ -1089,10 +1142,10 @@ describe('seneca', function() {
       assert.equal('result_not_objarr', err.code)
 
       si.options({ strict: { result: false } })
-      si.act('a:1', function(err, res) {
+      si.act('a:1', function(err, out) {
         assert.ok(!err)
-        assert.equal('a', res)
-        done()
+        assert.equal('a', out)
+        fin()
       })
     })
   })
@@ -1401,7 +1454,7 @@ describe('seneca', function() {
       expect(end - start).below(1500)
 
       var mem = process.memoryUsage()
-      expect(mem.rss).below(180000000)
+      expect(mem.rss).below(200000000)
 
       done()
     }
@@ -1409,7 +1462,7 @@ describe('seneca', function() {
 
   it('use-shortcut', function(fin) {
     Seneca.use(function() {
-      this.add('a:1', function(msg, reply) {
+      this.add('a:1', function(msg, reply, meta) {
         reply({ x: 1 })
       })
     })
@@ -1456,4 +1509,37 @@ describe('seneca', function() {
     })
     si.private$.handle_close()
   })
+
+  it('reply-seneca', function (fin) {
+    Seneca()
+      .test(fin)
+
+      .add('a:1', function (msg, reply) {
+        reply({sid:reply.seneca.id})
+      })
+
+      .add('b:1', function (msg, reply) {
+        msg.id1 = reply.seneca.id
+        reply(msg)
+      })
+
+      .add('b:1', function (msg, reply) {
+        msg.id0 = reply.seneca.id
+        this.prior(msg,reply)
+      })
+
+      .gate()
+
+      .act('a:1',function(ignore, out) {
+        expect(this.id).equal(out.sid)
+      })
+
+      .act('b:1',function(ignore, out) {
+        expect(this.id).equal(out.id0)
+        expect(this.id).equal(out.id1)
+      })
+
+      .ready(fin)
+  })
+
 })

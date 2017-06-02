@@ -44,20 +44,52 @@ describe('transport', function() {
     done()
   })
 
-  it('happy-nextgen', function(fin) {
-    var s0 = Seneca({ tag: 's0', legacy: { transport: false } }).test(fin)
-    var c0 = Seneca({ tag: 'c0', legacy: { transport: false } }).test(fin)
+  it('happy-nextgen', { parallel: false }, function(fin) {
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({ id$: 'c0', legacy: { transport: false } }).test(fin)
 
     s0
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function a1 (msg, reply, meta) {
         reply({ x: msg.x })
       })
       .listen(62010)
       .ready(function() {
         c0.client(62010)
 
-        c0.act('a:1,x:2', function(ignore, out) {
+        c0.act('a:1,x:2', function (ignore, out, meta) {
           expect(out.x).equals(2)
+          expect(out.meta$).not.exist()
+
+          expect(meta.pattern).equals('')
+          expect(meta.trace[0].desc[0]).equals('a:1')
+
+          s0.close(c0.close.bind(c0, fin))
+        })
+      })
+  })
+
+
+  it('error-nextgen', { parallel: false }, function(fin) {
+    var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
+    var c0 = Seneca({ id$: 'c0', log: 'silent', legacy: { transport: false } })
+
+    s0
+      .add('a:1', function a1 (msg, reply, meta) {
+        reply(new Error('bad'))
+      })
+      .listen(62011)
+      .ready(function() {
+        c0.client(62011)
+
+        c0.act('a:1,x:2', function(err, out, meta) {
+          expect(err).exist()
+          expect(out).not.exist()
+          expect(err.meta$).not.exist()
+
+          expect(err.message).equal('bad')
+
+          expect(meta.pattern).equals('')
+          expect(meta.err.code).equals('act_execute')
 
           s0.close(c0.close.bind(c0, fin))
         })
@@ -69,16 +101,26 @@ describe('transport', function() {
       tag: 's0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(fin)
+    })
+      .test(fin)
+      .use('entity')
 
     var c0 = Seneca({
       tag: 'c0',
       legacy: { transport: false },
       transport: { web: { port: 62020 } }
-    }).test(fin)
+    })
+      .test(fin)
+      .use('entity')
 
     s0
       .add('a:1', function(msg, reply) {
+        reply({ x: msg.x })
+      })
+      .add('b:1', function(msg, reply, meta) {
+        expect(msg.x.canon$()).equal('-/-/foo')
+        expect(meta.pattern).equal('b:1')
+        msg.x.g = 2
         reply({ x: msg.x })
       })
       .listen()
@@ -89,12 +131,25 @@ describe('transport', function() {
           expect(c0.private$.transport.register.length).equal(1)
 
           c0.act('a:1,x:2', function(ignore, out) {
-            expect(out.x).equals(2)
-
-            s0.close(c0.close.bind(c0, fin))
+            do_entity()
           })
         })
       })
+
+    function do_entity() {
+      c0.act('b:1', { x: c0.make$('foo', { f: 1 }) }, function(
+        ignore,
+        out,
+        meta
+      ) {
+        expect(out.x.f).equals(1)
+        expect(out.x.g).equals(2)
+        expect(out.x.canon$()).equal('-/-/foo')
+        expect(meta.pattern).equal('')
+
+        s0.close(c0.close.bind(c0, fin))
+      })
+    }
   })
 
   // TEST: parent and trace over transport - fake and network
@@ -220,6 +275,7 @@ describe('transport', function() {
     ) {
       var listen = Transport.listen(_.noop)
       var seneca = {
+        private$: { error: _.noop },
         log: {
           info: _.noop,
           debug: _.noop
@@ -239,9 +295,15 @@ describe('transport', function() {
       done()
     })
 
-    it('handles errors from action', function(done) {
+    it('action-error', function(fin) {
       var listen = Transport.listen(_.noop)
       var seneca = {
+        private$: {
+          error: function(err) {
+            expect(err).to.exist()
+            fin()
+          }
+        },
         log: {
           info: _.noop,
           debug: _.noop
@@ -252,10 +314,7 @@ describe('transport', function() {
         act: function(pattern, options, callback) {
           callback(new Error())
         },
-        die: function(err) {
-          expect(err).to.exist()
-          done()
-        },
+        die: _.noop,
         context: {},
         make_log: function() {}
       }
@@ -284,7 +343,7 @@ describe('transport', function() {
         add: _.noop,
         context: {},
         make_log: function() {},
-        private$: { ge: { gate: function() {} } }
+        private$: { ge: { gate: function() {} }, error: _.noop }
       }
 
       var fn = function() {
@@ -319,7 +378,7 @@ describe('transport', function() {
         },
         context: {},
         make_log: function() {},
-        private$: { ge: { gate: function() {} } }
+        private$: { ge: { gate: function() {} }, error: _.noop }
       }
 
       seneca.log.info = _.noop
@@ -360,100 +419,29 @@ describe('transport', function() {
 
       client.call(seneca)
     })
-
-    it('handles errors from act', function(done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function() {
-        return function(err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
-      var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
-        options: function() {
-          return {
-            transport: {
-              pins: [{ test: true }]
-            }
-          }
-        },
-        act: function(pattern, options, callback) {
-          callback(new Error(), {})
-        },
-        delegate: function() {
-          return Object.create(this)
-        },
-        add: _.noop,
-        context: {},
-        make_log: function() {},
-        private$: { ge: { gate: function() {} } }
-      }
-
-      client.call(seneca)
-    })
-
-    it('handles a null liveclient', function(done) {
-      var client = Transport.client(_.noop)
-      var makedie = Common.makedie
-      Common.makedie = function() {
-        return function(err) {
-          Common.makedie = makedie
-          expect(err).to.exist()
-          done()
-        }
-      }
-
-      var seneca = {
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
-        options: function() {
-          return {
-            transport: {
-              pins: [{ test: true }]
-            }
-          }
-        },
-        act: function(pattern, options, callback) {
-          callback(null, null)
-        },
-        delegate: function() {
-          return Object.create(this)
-        },
-        add: _.noop,
-        context: {},
-        make_log: function() {},
-        private$: { ge: { gate: function() {} } }
-      }
-
-      client.call(seneca)
-    })
   })
 
-  it('transport-exact-single', function(done) {
+  it('transport-exact-single', { parallel: false }, function(done) {
     var tt = make_test_transport()
 
     Seneca({ tag: 'srv', timeout: 5555 })
       .test(done)
       .use(tt)
-      .add('foo:1', function(msg, reply) {
+      .add('foo:1', function(msg, reply, meta) {
         // ensure action id is transferred for traceability
-        expect('aa/BB').to.equal(msg.meta$.id)
+        expect('aa/BB').to.equal(meta.id)
         testact.call(this, msg, reply)
       })
       .listen({ type: 'test', pin: 'foo:1' })
+      //.listen({ port: 62222, pin: 'foo:1' })
       .ready(function() {
+        //console.log(this.private$.actrouter)
+
         Seneca({ tag: 'cln', timeout: 5555 })
           .test(done)
           .use(tt)
           .client({ type: 'test', pin: 'foo:1' })
+          //.client({ port: 62222, pin: 'foo:1' })
           .act('foo:1,actid$:aa/BB', function(err, out) {
             expect(err).to.not.exist()
             expect(out.foo).to.equal(1)
@@ -848,9 +836,9 @@ describe('transport', function() {
         debug: { short_logs: true }
       })
         .error(done)
-        .add('foo:1', function(msg, reply) {
+        .add('foo:1', function(msg, reply, meta) {
           // ensure action id is transferred for traceability
-          expect('aa/BB').to.equal(msg.meta$.id)
+          expect('aa/BB').to.equal(meta.id)
           msg.s = 0
           testact.call(this, msg, reply)
         })
@@ -869,9 +857,9 @@ describe('transport', function() {
         debug: { short_logs: true }
       })
         .error(done)
-        .add('foo:1', function(msg, reply) {
+        .add('foo:1', function(msg, reply, meta) {
           // ensure action id is transferred for traceability
-          expect('cc/DD').to.equal(msg.meta$.id)
+          expect('cc/DD').to.equal(meta.id)
           msg.s = 1
           testact.call(this, msg, reply)
         })

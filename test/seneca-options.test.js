@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
 var Seneca = require('..')

@@ -16,7 +16,7 @@ var Outward = require('../lib/outward')
 describe('outward', function() {
   it('make_error', function(fin) {
     var err = { message: 'foo', meta$: { err: true } }
-    var data = { res: err }
+    var data = { meta: { error: true }, res: err }
 
     Outward.make_error({ options: { legacy: { error: false } } }, data)
     expect(data.res.message).equal('foo')
@@ -30,14 +30,14 @@ describe('outward', function() {
     fin()
   })
 
-  it('make_error', function(fin) {
+  it('act_stats', function(fin) {
     var private$ = {
       stats: { act: { done: 0 }, actmap: {} },
       timestats: { point: function() {} }
     }
     Outward.act_stats(
       { actdef: { pattern: 'foo:1' }, seneca: { private$: private$ } },
-      {}
+      { meta: {} }
     )
     expect(private$.stats.act.done).equal(1)
     fin()

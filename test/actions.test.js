@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
 var Code = require('code')
@@ -10,7 +11,7 @@ var expect = Code.expect
 
 var Seneca = require('..')
 
-describe('api', function() {
+describe('actions', function() {
   var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
@@ -58,23 +59,24 @@ describe('api', function() {
   })
 
   it('info_fatal', function(fin) {
-    var si = Seneca({ log: 'silent' })
-    si.root.close = function() {}
+    var si = Seneca({ log: 'silent', system: { exit: function noop() {} } })
+    setTimeout(function() {
+      si.close = function() {}
+      si.root.close = function() {}
 
-    setImmediate(function() {
       si
         .add('role:seneca,cmd:close', function(msg, reply) {
           reply()
         })
         .sub('role:seneca,info:fatal', function(msg) {
-          expect(msg.err.meta$.pattern).equal('a:1')
+          expect(msg.err).exist()
           fin()
         })
         .add('a:1', function() {
           throw new Error('a:1')
         })
         .act('a:1,fatal$:true')
-    })
+    }, 100)
   })
 
   it('get_options', function(fin) {

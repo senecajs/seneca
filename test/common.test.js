@@ -13,7 +13,7 @@ var assert = Assert
 var expect = Code.expect
 
 describe('common', function() {
-  it('misc', function(done) {
+  it('misc', function(fin) {
     expect(Common.boolify(true)).to.equal(true)
     expect(Common.boolify(false)).to.equal(false)
     expect(Common.boolify('true')).to.equal(true)
@@ -74,10 +74,10 @@ describe('common', function() {
       )
     ).equal(2)
 
-    done()
+    fin()
   })
 
-  it('deepextend-empty', function(done) {
+  it('deepextend-empty', function(fin) {
     assert.equal(null, Common.deepextend({}).a)
 
     assert.equal(1, Common.deepextend({ a: 1 }).a)
@@ -162,10 +162,10 @@ describe('common', function() {
       Common.deepextend({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b
     )
 
-    done()
+    fin()
   })
 
-  it('deepextend-dups', function(done) {
+  it('deepextend-dups', function(fin) {
     var aa = { a: { aa: 1 } }
     var bb = { a: { bb: 2 } }
 
@@ -177,10 +177,10 @@ describe('common', function() {
     out = Common.deepextend({}, aa, bb, aa)
     assert.equal(1, out.a.aa)
     assert.equal(2, out.a.bb)
-    done()
+    fin()
   })
 
-  it('deepextend-objs', function(done) {
+  it('deepextend-objs', function(fin) {
     var d = {
       s: 's',
       n: 100,
@@ -192,10 +192,10 @@ describe('common', function() {
     }
     var o = Common.deepextend({}, d)
     assert.equal('' + o, '' + d)
-    done()
+    fin()
   })
 
-  it('deepextend-objs with functions', function(done) {
+  it('deepextend-objs with functions', function(fin) {
     function noop() {}
     function f1() {}
 
@@ -211,7 +211,7 @@ describe('common', function() {
 
     assert.strictEqual(out.a, f1)
     assert.strictEqual(out.b, noop)
-    done()
+    fin()
   })
 
   it('pattern', function(fin) {
@@ -239,7 +239,7 @@ describe('common', function() {
     )
   })
 
-  it('pincanon', function(done) {
+  it('pincanon', function(fin) {
     assert.equal('a:1', Common.pincanon({ a: 1 }))
     assert.equal('a:1', Common.pincanon([{ a: 1 }]))
     assert.equal('a:1', Common.pincanon('a:1'))
@@ -254,115 +254,190 @@ describe('common', function() {
     assert.equal('a:1;b:2', Common.pincanon(['b:2', 'a:1']))
     assert.equal('a:1;b:2', Common.pincanon(['b:2', { a: 1 }]))
     assert.equal('a:1;b:2', Common.pincanon([{ b: 2 }, 'a:1']))
-    done()
+    fin()
   })
 
-  it('history', function(done) {
-    var h0 = Common.history(3)
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+  it('history', function(fin) {
+    function itemlist(item) {
+      return item.id + '~' + item.timelimit
+    }
 
-    h0.add()
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+    var h0 = Common.history()
 
-    h0.add({})
-    expect(h0.list()).to.equal([])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 0 })
+    h0.add({ id: 'a0', timelimit: 100 })
+    expect(h0._list.map(itemlist)).equal(['a0~100'])
 
-    h0.add({ id: 'a' })
-    expect(h0.list()).to.equal(['a'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.stats()).to.equal({ next: 1, size: 3, total: 1 })
+    h0.add({ id: 'a1', timelimit: 200 })
+    expect(h0._list.map(itemlist)).equal(['a0~100', 'a1~200'])
 
-    h0.add({ id: 'b' })
-    expect(h0.list()).to.equal(['a', 'b'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.stats()).to.equal({ next: 2, size: 3, total: 2 })
+    h0.add({ id: 'a2', timelimit: 300 })
+    expect(h0._list.map(itemlist)).equal(['a0~100', 'a1~200', 'a2~300'])
 
-    h0.add({ id: 'c' })
-    expect(h0.list()).to.equal(['a', 'b', 'c'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a').id).to.equal('a')
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.get('c').id).to.equal('c')
-    expect(h0.stats()).to.equal({ next: 0, size: 3, total: 3 })
+    h0.add({ id: 'a3', timelimit: 200 })
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a1~200',
+      'a3~200',
+      'a2~300'
+    ])
 
-    h0.add({ id: 'd' })
-    expect(h0.list()).to.equal(['b', 'c', 'd'])
-    expect(h0.get()).to.equal(null)
-    expect(h0.get('a')).to.equal(null)
-    expect(h0.get('b').id).to.equal('b')
-    expect(h0.get('c').id).to.equal('c')
-    expect(h0.get('d').id).to.equal('d')
-    expect(h0.stats()).to.equal({ next: 1, size: 3, total: 4 })
+    h0.add({ id: 'a4', timelimit: 300 })
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    expect(h0.list({ len: 3 })).to.equal(['b', 'c', 'd'])
-    expect(h0.list({ len: 2 })).to.equal(['c', 'd'])
-    expect(h0.list({ len: 1 })).to.equal(['d'])
-    expect(h0.list({ len: 0 })).to.equal([])
+    h0.add({ id: 'a5', timelimit: 100 })
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a5~100',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    // empty history
-    var h1 = Common.history(0)
-    expect(h1.toString()).equal('{ next: 0, laps: 0, size: 0, log: [] }')
+    expect(Object.keys(h0._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4', 'a5'])
 
-    h1.add({ id: 'a' })
-    expect(h1.get()).to.equal(null)
-    expect(h1.get('a')).to.equal(null)
-    expect(h1.list()).to.equal([])
-    expect(h1.stats()).to.equal({ next: 0, size: 0, total: 0 })
+    h0.add({ id: 'a6', timelimit: 101 })
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a5~100',
+      'a6~101',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    var t = 40
+    h0.add({ id: 'a7', timelimit: 199 })
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a5~100',
+      'a6~101',
+      'a7~199',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    // timelimits
-    var h2 = Common.history(2)
-    h2.add({ id: 'a', timelimit: Date.now() + t, result: [] })
-    h2.add({ id: 'b' })
-    h2.add({ id: 'c', timelimit: Date.now() + 3 * t, result: [] })
-    h2.add({ id: 'd' })
-    h2.add({ id: 'e', timelimit: Date.now() + 5 * t, result: [{}] })
+    h0.prune(99)
+    expect(h0._list.map(itemlist)).equal([
+      'a0~100',
+      'a5~100',
+      'a6~101',
+      'a7~199',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
+    h0.prune(100)
+    expect(h0._list.map(itemlist)).equal([
+      'a6~101',
+      'a7~199',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    expect(h2.get('b')).to.equal(null)
-    expect(h2.get('a').id).to.equal('a')
-    expect(h2.get('c').id).to.equal('c')
-    expect(h2.get('d').id).to.equal('d')
-    expect(h2.get('e').id).to.equal('e')
+    h0.prune(101)
+    expect(h0._list.map(itemlist)).equal([
+      'a7~199',
+      'a1~200',
+      'a3~200',
+      'a2~300',
+      'a4~300'
+    ])
 
-    setTimeout(function() {
-      expect(h2.list()).to.equal(['a', 'c', 'd', 'e'])
-      expect(h2.get('a')).to.equal(null)
-      expect(h2.get('b')).to.equal(null)
+    h0.prune(299)
+    expect(h0._list.map(itemlist)).equal(['a2~300', 'a4~300'])
 
-      expect(h2.get('c').id).to.equal('c')
-      expect(h2.get('d').id).to.equal('d')
-      expect(h2.get('e').id).to.equal('e')
+    h0.prune(299)
+    expect(h0._list.map(itemlist)).equal(['a2~300', 'a4~300'])
 
-      expect(h2.list()).to.equal(['c', 'd', 'e'])
-    }, 2 * t)
+    h0.prune(300)
+    expect(h0._list.map(itemlist)).equal([])
 
-    setTimeout(function() {
-      expect(h2.list()).to.equal(['c', 'd', 'e'])
+    var h1 = Common.history()
 
-      expect(h2.get('a')).to.equal(null)
-      expect(h2.get('b')).to.equal(null)
-      expect(h2.get('c')).to.equal(null)
+    h1.add({ id: 'a0', timelimit: 100 })
+    expect(h1._list.map(itemlist)).equal(['a0~100'])
 
-      expect(h2.get('d').id).to.equal('d')
-      expect(h2.get('e').id).to.equal('e')
+    h1.add({ id: 'a1', timelimit: 50 })
+    expect(h1._list.map(itemlist)).equal(['a1~50', 'a0~100'])
 
-      expect(h2.list()).to.equal(['d', 'e'])
-      done()
-    }, 4 * t)
+    h1.add({ id: 'a2', timelimit: 25 })
+    expect(h1._list.map(itemlist)).equal(['a2~25', 'a1~50', 'a0~100'])
+
+    expect(Object.keys(h1._map)).equal(['a0', 'a1', 'a2'])
+
+    h1.prune(0)
+    expect(h1._list.map(itemlist)).equal(['a2~25', 'a1~50', 'a0~100'])
+
+    h1.prune(25)
+    expect(h1._list.map(itemlist)).equal(['a1~50', 'a0~100'])
+
+    h1.prune(100)
+    expect(h1._list.map(itemlist)).equal([])
+
+    var h2 = Common.history()
+
+    h2.add({ id: 'a0', timelimit: 100 })
+    expect(h2._list.map(itemlist)).equal(['a0~100'])
+
+    h2.add({ id: 'a1', timelimit: 200 })
+    expect(h2._list.map(itemlist)).equal(['a0~100', 'a1~200'])
+
+    h2.add({ id: 'a2', timelimit: 150 })
+    expect(h2._list.map(itemlist)).equal(['a0~100', 'a2~150', 'a1~200'])
+
+    h2.add({ id: 'a3', timelimit: 125 })
+    expect(h2._list.map(itemlist)).equal([
+      'a0~100',
+      'a3~125',
+      'a2~150',
+      'a1~200'
+    ])
+
+    h2.add({ id: 'a4', timelimit: 175 })
+    expect(h2._list.map(itemlist)).equal([
+      'a0~100',
+      'a3~125',
+      'a2~150',
+      'a4~175',
+      'a1~200'
+    ])
+
+    expect(Object.keys(h2._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4'])
+
+    fin()
+  })
+
+  it('clean', function(fin) {
+    expect(Common.clean({})).equal({})
+    expect(Common.clean({ a: 1 })).equal({ a: 1 })
+    expect(Common.clean({ b$: 2, a: 1 })).equal({ a: 1 })
+    expect(Common.clean({ b$: 2 })).equal({})
+
+    expect(Common.clean([])).equal([])
+    expect(Common.clean([1])).equal([1])
+    expect(Common.clean([1, 2])).equal([1, 2])
+
+    var a = [1, 2, 3]
+    a.foo = 4
+    a.bar$ = 5
+    var ca = Common.clean(a)
+    expect(ca).equal([1, 2, 3])
+    expect(ca.foo).equal(4)
+    expect(ca.bar$).not.exist()
+
+    fin()
   })
 })
