@@ -69,9 +69,9 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 80",
-    "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > docs/coverage.html",
+    "test": "lab -v -P test -L -t 80  -I WebAssembly",
+    "coveralls": "lab -s -P test -r lcov -I WebAssembly | coveralls",
+    "coverage": "lab -v -P test -L -t 80 -r html -I WebAssembly > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js"
   },
