@@ -36,13 +36,6 @@ function testact(msg, reply) {
 
 describe('transport', function() {
   // TODO: test top level qaz:* : def and undef other pats
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
 
   it('happy-nextgen', { parallel: false }, function(fin) {
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
@@ -96,6 +89,51 @@ describe('transport', function() {
       })
   })
 
+  it('interop-nextgen', { parallel: false }, function(fin) {
+    var s0n = Seneca({ id$: 's0n', log: 'silent', legacy: { transport: false } })
+    var s0o = Seneca({ id$: 's0o', log: 'silent', legacy: { transport: true } })
+    var c0n = Seneca({ id$: 'c0n', log: 'silent', legacy: { transport: false } })
+    var c0o = Seneca({ id$: 'c0o', log: 'silent', legacy: { transport: true } })
+
+    //s0o.test('print')
+    //c0n.test('print')
+    //s0n.test('print')
+    //c0o.test('print')
+
+    
+    s0n
+      .add('a:1', function a1 (msg, reply, meta) {
+        reply({r:msg.x})
+      })
+      .listen(62012)
+
+    s0o
+      .add('a:1', function a1 (msg, reply, meta) {
+        reply({r:msg.x})
+      })
+      .listen(62013)
+
+    s0n.ready(s0o.ready.bind(s0o, function() {
+      c0n.client(62013) // n -> o
+      c0o.client(62012) // o -> n
+
+      c0n.act('a:1,x:1', function (err, out,meta) {
+        expect(err).not.exist()
+        expect(out.r).equal(1)
+        expect(meta.pattern).equal('')
+
+        c0o.act('a:1,x:2', function (err, out,meta) {
+          expect(err).not.exist()
+          expect(out.r).equal(2)
+          expect(meta.pattern).equal('')
+          
+          fin()
+        })
+      })
+    }))
+  })
+
+  
   it('config-nextgen', function(fin) {
     var s0 = Seneca({
       tag: 's0',
@@ -810,15 +848,6 @@ describe('transport', function() {
           })
         })
       })
-  })
-
-  it('handles timeout from client connecting', function(done) {
-    var seneca = Seneca({ log: 'silent', timeout: 50 }).client({ port: 1 })
-    seneca.act({ cmd: 'test' }, function(err) {
-      expect(err).to.exist()
-      expect(err.message).to.contain('TIMEOUT')
-      done()
-    })
   })
 
   it('transport-balance-exact', function(done) {

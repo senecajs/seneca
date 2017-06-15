@@ -1,11 +1,17 @@
+var fs = require('fs')
+
 var aI = 0
 
-//var memwatch = require('memwatch-next')
-//memwatch.on('leak', console.log)
-
+// max concurrent actions
 var max = parseInt(process.argv[2 + aI], 10)
+
+// duration of benchmark in seconds
 var duration = parseInt(process.argv[3 + aI], 10) * 1000
+
+// old or new
 var version = process.argv[4 + aI]
+
+// local or remote
 var local = 'local' === process.argv[5 + aI]
 
 console.log(max, duration, version, local)
@@ -21,6 +27,20 @@ var stats = {
 }
 
 var calltimes = []
+var memory = []
+
+var memI = 0
+var mem_start = Date.now()
+setInterval(function () {
+  var when = Date.now()-mem_start
+  if(0 == memI % 100) console.log(when)
+
+  var mem = process.memoryUsage()
+  memory.push([when,mem.rss, mem.heapTotal, mem.heapUsed, mem.external])
+  memI++
+  
+}, 100).unref()
+
 
 var x = 0
 
@@ -66,12 +86,15 @@ function finish(active) {
 
   console.dir(stats, { colors: true })
 
-  require('fs').writeFileSync('./calltimes.csv', 'ct\n' + calltimes.join('\n'))
+  fs.writeFileSync('./bench-memory.csv', 'w,r,t,u,e\n' +
+                   memory.map(x=>x.join(',')).join('\n'))
+
+  fs.writeFileSync('./bench-calltimes.csv', 'ct\n' + calltimes.join('\n'))
 
   si.close(function() {
     var ph =
       'S,E\n' + si.private$.history._prunehist.map(x => x.join(',')).join('\n')
-    require('fs').writeFileSync('./prune.csv', ph)
+    fs.writeFileSync('./bench-prune.csv', ph)
   })
 }
 

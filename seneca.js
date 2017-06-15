@@ -1600,7 +1600,8 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
 
   this.instance = instance.id
   this.tag = instance.tag
-  this.version = opts.$.version
+  this.seneca = instance.version
+  this.version = '0.1.0'
 
   this.gate = !!origmsg.gate$
   this.fatal = !!origmsg.fatal$
