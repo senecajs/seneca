@@ -20,12 +20,12 @@ describe('outward', function() {
 
     Outward.make_error({ options: { legacy: { error: false } } }, data)
     expect(data.res.message).equal('foo')
-    expect(Util.isError(data.res))
+    expect(Util.isError(data.res)).false()
 
     data = { res: err }
     Outward.make_error({ options: { legacy: { error: true } } }, data)
     expect(data.res.message).equal('foo')
-    expect(!Util.isError(data.res))
+    expect(!Util.isError(data.res)).true()
 
     fin()
   })

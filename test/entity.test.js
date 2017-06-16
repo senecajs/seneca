@@ -21,7 +21,7 @@ describe('entity', function() {
       .use('entity')
       .make$('foo', { a: 1 })
       .save$(function(err, foo) {
-        expect(foo.toString().match(/foo;.*a:1}/))
+        expect(foo.toString().match(/foo;.*a:1}/)).exists()
         fin()
       })
   })
