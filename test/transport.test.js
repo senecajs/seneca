@@ -1,7 +1,7 @@
 /* Copyright (c) 2014-2016 Richard Rodger, MIT License */
 'use strict'
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLER||1, 10)
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER||1, 10)
 console.log('TEST transport tmx='+tmx)
 
 var _ = require('lodash')
