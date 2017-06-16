@@ -2,6 +2,7 @@
 'use strict'
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLER||1, 10)
+console.log('TEST transport tmx='+tmx)
 
 var _ = require('lodash')
 var Code = require('code')
@@ -36,7 +37,7 @@ function testact(msg, reply) {
   }, 11*tmx)
 }
 
-var test_opts = {parallel: false, timeout: 5555 }
+var test_opts = {parallel: false, timeout: 5555*tmx }
 
 describe('transport', function() {
   // TODO: test top level qaz:* : def and undef other pats

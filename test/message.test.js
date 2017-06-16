@@ -1,6 +1,8 @@
 /* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLER||1, 10)
+
 var Lab = require('lab')
 var Code = require('code')
 var Hoek = require('hoek')
@@ -17,8 +19,10 @@ var parents = meta => meta.parents.map(x => x[0])
 
 var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
 
+var test_opts = {parallel: false, timeout: 5555*tmx }
+
 describe('message', function() {
-  it('happy-vanilla', function(fin) {
+  it('happy-vanilla', test_opts, function(fin) {
     Seneca({ tag: 'h0' })
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -56,7 +60,7 @@ describe('message', function() {
       })
   })
 
-  it('happy-msg', function(fin) {
+  it('happy-msg', test_opts, function(fin) {
     Seneca({ tag: 'h0' })
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -94,7 +98,7 @@ describe('message', function() {
       })
   })
 
-  it('loop', function(fin) {
+  it('loop', test_opts, function(fin) {
     var i = 0
     Seneca({ id$: 'loop', idlen: 4, log: 'silent', limits: { maxparents: 3 } })
       .add('a:1', function a1(msg, reply, meta) {
@@ -111,7 +115,7 @@ describe('message', function() {
       })
   })
 
-  it('branch', function(fin) {
+  it('branch', test_opts, function(fin) {
     var log = []
     Seneca({ id$: 'branch', idlen: 4, limits: { maxparents: 3 } })
       .test(fin)
@@ -194,7 +198,7 @@ describe('message', function() {
       })
   })
 
-  it('custom', function(fin) {
+  it('custom', test_opts, function(fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -227,7 +231,7 @@ describe('message', function() {
       })
   })
 
-  it('empty-response', function(fin) {
+  it('empty-response', test_opts, function(fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -270,7 +274,7 @@ describe('message', function() {
       .ready(fin)
   })
 
-  it('reply', function(fin) {
+  it('reply', test_opts, function(fin) {
     Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -292,7 +296,7 @@ describe('message', function() {
       .ready(fin)
   })
 
-  it('prior', function(fin) {
+  it('prior', test_opts, function(fin) {
     Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -318,7 +322,7 @@ describe('message', function() {
       .ready(fin)
   })
 
-  it('entity', function(fin) {
+  it('entity', test_opts, function(fin) {
     var si = Seneca().test(fin).use('entity')
 
     si = si.gate()
@@ -343,9 +347,7 @@ describe('message', function() {
     })
   })
 
-  it('single-simple-transport', { parallel: false, timeout: 5555 }, function(
-    fin
-  ) {
+  it('single-simple-transport', test_opts, function(fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
@@ -375,7 +377,7 @@ describe('message', function() {
     })
   })
 
-  it('simple-transport', { parallel: false, timeout: 5555 }, function(fin) {
+  it('simple-transport', test_opts, function(fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
