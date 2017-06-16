@@ -121,16 +121,10 @@ describe('message', function() {
         msg.a1 = 1
         this.act('b:1,a:null', msg)
         this.act('a:2', msg, reply)
-        //this.act('b:1,a:null', {a1:1})
-        //this.act('a:2', {a1:1}, reply)
       })
       .add('a:2', function a2(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:1'])
         log.push('a2')
-
-        //msg.a2 = 1
-        //this.act('c:1,a:null', msg)
-        //this.act('a:3', msg, function(err, out) {
 
         this.act('c:1,a:null', { a2: 1 })
         this.act('a:3', { a2: 1 }, function(err, out, meta) {
@@ -144,7 +138,6 @@ describe('message', function() {
           ).true()
 
           log.push('a2r')
-          //msg.a2r = 1
           this.act('c:2,a:null', { a2: 1, a2r: 1 })
 
           // capture c2
@@ -154,36 +147,30 @@ describe('message', function() {
       .add('a:3', function a3(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:2', 'a:1'])
         log.push('a3')
-        //msg.a3 = 1
         this.act('a:4', { a3: 1 }, reply)
       })
       .add('a:4', function a3(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:3', 'a:2', 'a:1'])
         log.push('a4')
-        //msg.a4 = 1
         reply({ a4: 1 })
       })
       .add('b:1', function b1(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:1'])
         log.push('b1')
-        //msg.b1 = 1
         reply()
       })
       .add('c:1', function c1(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:2', 'a:1'])
         log.push('c1')
-        //msg.c1 = 1
         reply()
       })
       .add('c:2', function c2(msg, reply, meta) {
         expect(meta.parents.map(x => x[0])).equal(['a:3', 'a:2', 'a:1'])
         log.push('c2')
-        //msg.c2 = 1
         reply()
       })
       .act('a:1', function(err, out, meta) {
         expect(err).equal(null)
-        //expect(out).equal({ a: 4, a1: 1, a2: 1, a3: 1, a4: 1 })
         expect(out).includes({ a4: 1 })
         expect(log).equal(['a1', 'b1', 'a2', 'c1', 'a3', 'a4', 'a2r', 'c2'])
 
@@ -240,49 +227,6 @@ describe('message', function() {
       })
   })
 
-  /*
-  it('proto', function(fin) {
-    var si = Seneca()
-      .test(fin)
-      .add('a:1', function a1(msg, reply, meta) {
-        expect(msg.a).equal(1)
-        expect(msg.y).equal(1)
-        reply({ x: 1 })
-      })
-      .add('a:2', function a2(msg, reply, meta) {
-        expect(msg.a).equal(2)
-        expect(msg.z).equal(1)
-        msg.x = 2
-        reply(msg)
-      })
-
-    var foo = { y: 1 }
-    var bar = { z: 1 }
-
-    var m0 = Object.create(foo)
-    m0.a = 1
-
-    var m1 = { a: 2 }
-    m1.__proto__ = bar
-
-    //var cm1 = Seneca.util.clean(m1)
-    //console.log(cm1,cm1.z)
-
-    si
-      .gate()
-      .act(m0, function(err, out) {
-        expect(err).equal(null)
-        expect(out).includes({ x: 1 })
-      })
-      .act(m1, function(err, out) {
-        expect(err).equal(null)
-        expect(out.x).equal(2)
-        expect(out.z).equal(1)
-        fin()
-      })
-  })
-*/
-
   it('empty-response', function(fin) {
     var si = Seneca()
       .test(fin)
@@ -338,12 +282,10 @@ describe('message', function() {
       })
       .gate()
       .act('a:1', function(err, out, meta) {
-        //console.log('a1', err, this.util.clean(out), meta)
         expect(meta.pattern).equal('a:1')
         expect(meta.action).match(/a1/)
       })
       .act('b:1', function(err, out, meta) {
-        //console.log('b1', err, this.util.clean(out), meta)
         expect(meta.pattern).equal('b:1')
         expect(meta.action).match(/b1/)
       })
@@ -354,11 +296,9 @@ describe('message', function() {
     Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
-        //console.log('a1', meta)
         reply({ x: 1 })
       })
       .add('a:1', function a1p(msg, reply, meta) {
-        //console.log('a1p', meta)
         this.prior(msg, reply)
       })
       .add('b:1', function b1(msg, reply, meta) {
@@ -366,13 +306,10 @@ describe('message', function() {
       })
       .gate()
       .act('b:1', function(err, out, meta) {
-        //console.log('b1', err, out, meta)
         expect(meta.pattern).equal('b:1')
         expect(meta.action).match(/b1/)
       })
       .act('a:1', function(err, out, meta) {
-        //console.log('out a1', err, this.util.clean(out), meta)
-
         expect(err).not.exist()
         expect(out.x).equal(1)
         expect(meta.pattern).equal('a:1')
@@ -406,7 +343,9 @@ describe('message', function() {
     })
   })
 
-  it('single-simple-transport', function(fin) {
+  it('single-simple-transport', { parallel: false, timeout: 5555 }, function(
+    fin
+  ) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
@@ -422,13 +361,11 @@ describe('message', function() {
     c0.id = 'c0'
 
     s0.add('a:1', function a1(msg, reply, meta) {
-      //console.log('ACT',msg,meta)
       reply({ x: 1 })
     })
 
     s0.ready(function() {
       c0.act('a:1', function(err, out, meta) {
-        //console.log('RES',err, out, meta)
         expect(err).not.exist()
         expect(out).equal({ x: 1 })
         expect(meta.pattern).equal('') // catchall
@@ -438,12 +375,11 @@ describe('message', function() {
     })
   })
 
-  it('simple-transport', function(fin) {
+  it('simple-transport', { parallel: false, timeout: 5555 }, function(fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
       .test(function(err, meta) {
-        //console.log('s0 TEST',meta)
         if (
           'a3err' === err.message ||
           'a33throw' === err.message ||
@@ -458,7 +394,6 @@ describe('message', function() {
 
     var c0 = Seneca({ id$: 'c0', log: 'silent', legacy: { transport: false } })
       .test(function(err, meta) {
-        //console.dir(meta)
         if (
           'a3err' === err.message ||
           'a33throw' === err.message ||
@@ -507,7 +442,6 @@ describe('message', function() {
             expect(meta.pattern).equal('') // catchall pin
           })
           .act('a:2,id$:m1/t1', function(err, out, meta) {
-            //console.dir(meta,{depth:null})
             expect(err).not.exist()
             expect(out.x).equal(2)
             expect(meta.id).equal('m1/t1')
@@ -516,35 +450,18 @@ describe('message', function() {
             expect(meta.instance).equal('c0')
           })
           .act('a:3,id$:m2/t2', function(err, out, meta) {
-            //console.log(err,'OUT',out,'META',meta)
-
             expect(out).equal(null)
             expect(err.message).to.equal('a3err')
 
             expect(meta.err.code).equal('act_execute')
             expect(meta.id).equal('m2/t2')
-
-            //expect(meta.pattern).equal('') // catchall pin
-            //expect(meta.instance).equal('c0')
-            //expect(meta.trace[0].desc[0]).equal('a:3')
-            //expect(meta.trace[0].desc[1]).equal('m2/t2')
-            //expect(meta.trace[0].desc[2]).equal('s0')
           })
           .act('a:33,id$:m33/t33', function(err, out, meta) {
             expect(out).equal(null)
             expect(err.message).to.equal('a33throw')
             expect(meta.id).equal('m33/t33')
-
-            //expect(meta.pattern).equal('') // catchall pin
-            //expect(meta.instance).equal('c0')
-            //expect(meta.err.code).equal('act_execute')
-            //expect(meta.trace[0].desc[0]).equal('a:33')
-            //expect(meta.trace[0].desc[1]).equal('m33/t33')
-            //expect(meta.trace[0].desc[2]).equal('s0')
           })
           .act('a:4,id$:m3/t3', function(err, out, meta) {
-            //console.dir(meta,{depth:null})
-
             expect(err).equal(null)
             expect(out.x).equal(4)
             expect(meta.id).equal('m3/t3')
@@ -557,16 +474,7 @@ describe('message', function() {
           .act('b:1,id$:m4/t4', function(err, out, meta) {
             expect(out).equal(null)
             expect(err).exists()
-            //console.dir(err,{depth:null})
-
             expect(err.message).to.match(/seneca/)
-
-            //expect(meta.id).equal('m4/t4')
-            //expect(meta.pattern).equal('b:1')
-            //expect(meta.instance).equal('c0')
-            //expect(err.code).equal('act_not_found')
-            //expect(meta.trace[0].desc[1]).equal('b1/t4')
-            //expect(meta.trace[0].trace[0].desc[1]).equal('b1/t4')
           })
           .ready(function() {
             s0.close(c0.close.bind(c0, fin))

@@ -16,7 +16,6 @@ var local = 'local' === process.argv[5 + aI]
 
 console.log(max, duration, version, local)
 
-
 var Seneca = require(version === 'old' ? '../../seneca-main' : '..')
 
 var stats = {
@@ -31,16 +30,14 @@ var memory = []
 
 var memI = 0
 var mem_start = Date.now()
-setInterval(function () {
-  var when = Date.now()-mem_start
-  if(0 == memI % 100) console.log(when)
+setInterval(function() {
+  var when = Date.now() - mem_start
+  if (0 == memI % 100) console.log(when)
 
   var mem = process.memoryUsage()
-  memory.push([when,mem.rss, mem.heapTotal, mem.heapUsed, mem.external])
+  memory.push([when, mem.rss, mem.heapTotal, mem.heapUsed, mem.external])
   memI++
-  
 }, 100).unref()
-
 
 var x = 0
 
@@ -86,8 +83,10 @@ function finish(active) {
 
   console.dir(stats, { colors: true })
 
-  fs.writeFileSync('./bench-memory.csv', 'w,r,t,u,e\n' +
-                   memory.map(x=>x.join(',')).join('\n'))
+  fs.writeFileSync(
+    './bench-memory.csv',
+    'w,r,t,u,e\n' + memory.map(x => x.join(',')).join('\n')
+  )
 
   fs.writeFileSync('./bench-calltimes.csv', 'ct\n' + calltimes.join('\n'))
 
@@ -105,7 +104,7 @@ var si = Seneca({
     interval: 500
   },
   legacy: {
-    transport: 'old' === version 
+    transport: 'old' === version
   }
 })
 //.test('print')
