@@ -973,11 +973,8 @@ describe('seneca', function() {
       })
   })
 
-  it('act-cache', function(done) {
-    var si = Seneca(testopts, { actcache: { active: true } })
-    si.options({ errhandler: done })
-
-    si.use('entity')
+  it('act-history', function(fin) {
+    var si = Seneca().test(fin).use('entity')
 
     var x = 0
 
@@ -1012,7 +1009,7 @@ describe('seneca', function() {
               '{ calls: 8, done: 8, fails: 0, cache: 1 }',
               Util.inspect(stats.act)
             )
-            done()
+            fin()
           })
         })
       })
@@ -1510,36 +1507,28 @@ describe('seneca', function() {
     si.private$.handle_close()
   })
 
-  it('reply-seneca', function (fin) {
+  it('reply-seneca', function(fin) {
     Seneca()
       .test(fin)
-
-      .add('a:1', function (msg, reply) {
-        reply({sid:reply.seneca.id})
+      .add('a:1', function(msg, reply) {
+        reply({ sid: reply.seneca.id })
       })
-
-      .add('b:1', function (msg, reply) {
+      .add('b:1', function(msg, reply) {
         msg.id1 = reply.seneca.id
         reply(msg)
       })
-
-      .add('b:1', function (msg, reply) {
+      .add('b:1', function(msg, reply) {
         msg.id0 = reply.seneca.id
-        this.prior(msg,reply)
+        this.prior(msg, reply)
       })
-
       .gate()
-
-      .act('a:1',function(ignore, out) {
+      .act('a:1', function(ignore, out) {
         expect(this.id).equal(out.sid)
       })
-
-      .act('b:1',function(ignore, out) {
+      .act('b:1', function(ignore, out) {
         expect(this.id).equal(out.id0)
         expect(this.id).equal(out.id1)
       })
-
       .ready(fin)
   })
-
 })

@@ -9,6 +9,8 @@ node_js:
   - '8'
 
 env:
+  global:
+    - TIMEOUT_MULTIPLIER=8
   matrix:
     - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/seneca-entity
