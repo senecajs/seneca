@@ -1,4 +1,4 @@
-## 3.4.0rc0 2017-06-16
+## 3.4.0 2017-07-03
 
 * Verified working against Node 8.
 * Added github standard code of conduct.
