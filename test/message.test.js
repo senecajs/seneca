@@ -356,7 +356,7 @@ describe('message', function() {
       .listen({ type: 'simple' })
     s0.id = 's0'
 
-    var c0 = Seneca({ id$: 'c0', legacy: { transport: false } })
+    var c0 = Seneca({ id$: 'c0', timeout: 22222*tmx, legacy: { transport: false } })
       .test(fin)
       .use(st)
       .client({ type: 'simple' })
@@ -394,7 +394,7 @@ describe('message', function() {
       .listen({ type: 'simple' })
     s0.id = 's0'
 
-    var c0 = Seneca({ id$: 'c0', log: 'silent', legacy: { transport: false } })
+    var c0 = Seneca({ id$: 'c0', log: 'silent', timeout: 22222*tmx, legacy: { transport: false } })
       .test(function(err, meta) {
         if (
           'a3err' === err.message ||

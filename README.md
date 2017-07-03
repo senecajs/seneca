@@ -10,7 +10,7 @@
 
 - __Lead Maintainer:__ [Richard Rodger][Lead]
 - __Sponsor:__ [nearForm][Sponsor]
-- __Node:__ 4.x, 5.x
+- __Node:__ 4.x, 6.x, 8.x
 
 Seneca is a toolkit for writing microservices and organizing the business logic of your
 app. You can break down your app into "stuff that happens", rather than focusing on data
