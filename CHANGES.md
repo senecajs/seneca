@@ -1,3 +1,8 @@
+## 3.4.1 2017-07-06
+
+* Backwards compatibility fix for seneca-amqp-transport 2.2.0 (legacy.meta=true)
+
+
 ## 3.4.0 2017-07-03
 
 * Verified working against Node 8.
@@ -10,6 +15,7 @@
 * Action cache replaced by action history utility, making a decoupled seneca.reply mehtod possible (as used (and needed) by next-generation transport).
 * Fixed root deprecation warning; Better, but incomplete refactor of source files; some minor fixes;
 
+
 ## 3.3.0 2017-02-07
 
 * Action callback can omit Error parameter (hapi style): http://senecajs.org/api/#method-add
@@ -17,12 +23,14 @@
 * Updated use-plugin to 0.3.2.
 * Plugin options are now consistent with global options after plugin load.
 
+
 ## 3.2.0 2016-09-27
 
 * Added .inward() api method.
 * Added .outward() api method.
 * Made logging safely stringify input.
 * Fixed memory leak / timeout bug in gate-executor.
+
 
 ## 3.1.0 2016-09-16
 
@@ -35,6 +43,7 @@
 * Updated salestax examples to work correctly.
 * Removed old legacy parsing handlers as they caused crashes
 * Added testable transport links
+
 
 ## 3.0.0 2016-08-26
 
@@ -80,6 +89,7 @@
 * Added test to show how to use exportmap in plugins to export values and functions; see `/test/plugin.test.js:L23`
 * Removed old release scripts in favour of `docs/examples/create-a-release.md` and using seneca-test-rig for plugin testing.
 
+
 ## 2.1.0: 2016-05-20
 
 * Fix for parambulator not correctly testing messages. PR #422
@@ -87,10 +97,12 @@
 * Allow validation provider to be swapped out (requires flag). PR #420
 * Improvements to the test rig. PR #427, #405
 
+
 ## 2.0.1: 2016-04-13
 
 * Filter undefined options. PR #386
 * Enhancement to README. PR #391
+
 
 ## 2.0.0: 2016-03-22
 
@@ -98,12 +110,14 @@
 * Remove Seneca as a dependency. PR #378
 * Remove entities as a default plugin. PR #379
 
+
 ## 1.4.0: 2016-03-16
 
 * Add setting for immediate pinning. PR #358
 * Allow overriding action timeout. PR #359
 * Use lodash defaultsDeep to implement util.deepextend. PR #364
 * Update transport dependency. PR #372
+
 
 ## 1.3.0: 2016-03-01
 
