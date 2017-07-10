@@ -11,8 +11,8 @@
 * Refactored message and reply meta data, making message tracking much easier; Actions and callbacks get a third parameter `meta`, that has all the details.
 * Minor refactor of error handling so that errors are passed-through; intended for 4.x, enable with legacy.error=false.
 * Next-generation transport (2X faster, new simpler API for transport writers) included in core Seneca; only http transport written; intended to be default transport in 4.x, enable with legacy.transport=false.
-* As part of next-generation transport, a new message protocol that gives the message data prioity as a JSON object, and placed Seneca meta data into the meta$ property.
-* Action cache replaced by action history utility, making a decoupled seneca.reply mehtod possible (as used (and needed) by next-generation transport).
+* As part of next-generation transport, a new message protocol that gives the message data priority as a JSON object, and placed Seneca meta data into the meta$ property.
+* Action cache replaced by action history utility, making a decoupled seneca.reply method possible (as used (and needed) by next-generation transport).
 * Fixed root deprecation warning; Better, but incomplete refactor of source files; some minor fixes;
 
 
