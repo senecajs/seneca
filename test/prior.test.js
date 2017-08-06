@@ -14,14 +14,26 @@ var expect = Code.expect
 var testopts = { log: 'test' }
 
 describe('prior', function() {
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
 
+  it('happy', function(fin) {
+    Seneca()
+      .test(fin)
+
+      .add('a:1', function a1(msg, reply) {
+        reply({x:msg.x})
+      })
+
+      .add('a:1', function a1p(msg, reply) {
+        msg.x = msg.x + 1
+        this.prior(msg, reply)
+      })
+
+      .act('a:1,x:2', function(ignore, out) {
+        console.log(out)
+        fin()
+      })
+  })
+  
   it('add-general-to-specific', function(done) {
     Seneca(testopts)
       .error(done)
