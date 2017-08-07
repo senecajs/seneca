@@ -945,15 +945,8 @@ function make_seneca(initial_options) {
     var delegate = Object.create(self)
     delegate.private$ = Object.create(self.private$)
 
-    var loc = new Error().stack
-      .split('\n')
-      .filter(function(line) {
-        return line.match(/mesh/) || line.match(/balance-client/)
-      })
-      .map(x => x.split('/').pop())
-
     delegate.did =
-      (delegate.did ? delegate.did + '/' : '') + (didnid() + '~' + loc)
+      (delegate.did ? delegate.did + '/' : '') + didnid()
 
     var strdesc
     delegate.toString = function toString() {
@@ -1297,6 +1290,7 @@ intern.execute_action = function(
   data.id = data.meta.id
   data.result = []
   data.timelimit = Date.now() + data.meta.timeout
+
   private$.history.add(data)
 
   if (opts.$.legacy.meta) {
