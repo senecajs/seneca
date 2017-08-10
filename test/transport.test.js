@@ -43,12 +43,17 @@ describe('transport', function() {
   // TODO: test top level qaz:* : def and undef other pats
 
   it('happy-nextgen', test_opts, function(fin) {
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
-    var c0 = Seneca({ id$: 'c0', timeout: 22222*tmx, legacy: { transport: false } }).test(fin)
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
+        .test(fin)
+    var c0 = Seneca({ id$: 'c0', timeout: 22222*tmx, legacy: { transport: false } })
+        .test(fin)
 
     s0
       .add('a:1', function a1(msg, reply, meta) {
         reply({ x: msg.x })
+      })
+      .add('b:1', function a1(msg, reply, meta) {
+        reply([1,2,3])
       })
       .listen(62010)
       .ready(function() {
@@ -61,7 +66,11 @@ describe('transport', function() {
           expect(meta.pattern).equals('')
           expect(meta.trace[0].desc[0]).equals('a:1')
 
-          s0.close(c0.close.bind(c0, fin))
+          c0.act('b:1', function(ignore, out, meta) {
+            expect(out).equals([1,2,3])
+            
+            s0.close(c0.close.bind(c0, fin))
+          })
         })
       })
   })
