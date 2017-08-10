@@ -42,7 +42,7 @@ describe('actions', function() {
   })
 
   it('cmd_close', function(fin) {
-    var si = Seneca({ log: 'silent' })
+    var si = Seneca().test(fin)
 
     var log = []
     si.on('close', function() {

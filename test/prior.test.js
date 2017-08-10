@@ -29,7 +29,7 @@ describe('prior', function() {
       })
 
       .act('a:1,x:2', function(ignore, out) {
-        console.log(out)
+        expect(out.x).equal(3)
         fin()
       })
   })

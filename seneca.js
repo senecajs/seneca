@@ -1443,6 +1443,10 @@ intern.handle_inward_break = function(
 intern.make_actmsg = function(origmsg) {
   var actmsg = Object.assign({}, origmsg)
 
+  if (actmsg.id$) {
+    delete actmsg.id$
+  }
+
   if (actmsg.caller$) {
     delete actmsg.caller$
   }
@@ -1450,12 +1454,12 @@ intern.make_actmsg = function(origmsg) {
   if (actmsg.meta$) {
     delete actmsg.meta$
   }
-
+  
   // backwards compatibility for Seneca 3.x transports
   if (origmsg.transport$) {
     actmsg.transport$ = origmsg.transport$
   }
-
+  
   return actmsg
 }
 
