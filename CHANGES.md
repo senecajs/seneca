@@ -1,3 +1,11 @@
+## 3.4.2 2017-08-10
+
+* Fixes priors bug #662
+* Removes errant debugging code
+* Fixes history pruning
+* Slightly neater test logs (suffix to IN/OUT indicates sync/async message)
+
+
 ## 3.4.1 2017-07-06
 
 * Backwards compatibility fix for seneca-amqp-transport 2.2.0 (legacy.meta=true)
