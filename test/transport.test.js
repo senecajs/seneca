@@ -1,8 +1,8 @@
 /* Copyright (c) 2014-2016 Richard Rodger, MIT License */
 'use strict'
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER||1, 10)
-console.log('TEST transport tmx='+tmx)
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
+console.log('TEST transport tmx=' + tmx)
 
 var _ = require('lodash')
 var Code = require('code')
@@ -34,26 +34,28 @@ function testact(msg, reply) {
     }
 
     reply(out)
-  }, 11*tmx)
+  }, 11 * tmx)
 }
 
-var test_opts = {parallel: false, timeout: 5555*tmx }
+var test_opts = { parallel: false, timeout: 5555 * tmx }
 
 describe('transport', function() {
   // TODO: test top level qaz:* : def and undef other pats
 
   it('happy-nextgen', test_opts, function(fin) {
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
-        .test(fin)
-    var c0 = Seneca({ id$: 'c0', timeout: 22222*tmx, legacy: { transport: false } })
-        .test(fin)
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({
+      id$: 'c0',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    }).test(fin)
 
     s0
       .add('a:1', function a1(msg, reply, meta) {
         reply({ x: msg.x })
       })
       .add('b:1', function a1(msg, reply, meta) {
-        reply([1,2,3])
+        reply([1, 2, 3])
       })
       .listen(62010)
       .ready(function() {
@@ -67,8 +69,8 @@ describe('transport', function() {
           expect(meta.trace[0].desc[0]).equals('a:1')
 
           c0.act('b:1', function(ignore, out, meta) {
-            expect(out).equals([1,2,3])
-            
+            expect(out).equals([1, 2, 3])
+
             s0.close(c0.close.bind(c0, fin))
           })
         })
@@ -77,7 +79,12 @@ describe('transport', function() {
 
   it('error-nextgen', test_opts, function(fin) {
     var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
-    var c0 = Seneca({ id$: 'c0', log: 'silent', timeout: 22222*tmx, legacy: { transport: false } })
+    var c0 = Seneca({
+      id$: 'c0',
+      log: 'silent',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    })
 
     s0
       .add('a:1', function a1(msg, reply, meta) {
@@ -112,10 +119,15 @@ describe('transport', function() {
     var c0n = Seneca({
       id$: 'c0n',
       log: 'silent',
-      timeout: 22222*tmx, 
+      timeout: 22222 * tmx,
       legacy: { transport: false }
     })
-    var c0o = Seneca({ id$: 'c0o', log: 'silent', timeout: 22222*tmx, legacy: { transport: true } })
+    var c0o = Seneca({
+      id$: 'c0o',
+      log: 'silent',
+      timeout: 22222 * tmx,
+      legacy: { transport: true }
+    })
 
     //s0o.test('print')
     //c0n.test('print')
@@ -167,7 +179,7 @@ describe('transport', function() {
 
     var c0 = Seneca({
       tag: 'c0',
-      timeout: 22222*tmx, 
+      timeout: 22222 * tmx,
       transport: { web: { port: 62020 } },
       legacy: { transport: false }
     })
@@ -309,7 +321,9 @@ describe('transport', function() {
       done()
     })
 
-    it('supports the port number and host as an argument', test_opts, function(done) {
+    it('supports the port number and host as an argument', test_opts, function(
+      done
+    ) {
       var listen = Transport.listen(_.noop)
       var seneca = {
         log: {
@@ -331,30 +345,32 @@ describe('transport', function() {
       done()
     })
 
-    it('supports the port number, host, and path as an argument', test_opts, function(
-      done
-    ) {
-      var listen = Transport.listen(_.noop)
-      var seneca = {
-        private$: { error: _.noop },
-        log: {
-          info: _.noop,
-          debug: _.noop
-        },
-        options: function() {
-          return {}
-        },
-        act: _.noop,
-        context: {},
-        make_log: function() {}
-      }
+    it(
+      'supports the port number, host, and path as an argument',
+      test_opts,
+      function(done) {
+        var listen = Transport.listen(_.noop)
+        var seneca = {
+          private$: { error: _.noop },
+          log: {
+            info: _.noop,
+            debug: _.noop
+          },
+          options: function() {
+            return {}
+          },
+          act: _.noop,
+          context: {},
+          make_log: function() {}
+        }
 
-      var fn = function() {
-        listen.call(seneca, 8080, 'localhost', '/')
+        var fn = function() {
+          listen.call(seneca, 8080, 'localhost', '/')
+        }
+        expect(fn).to.not.throw()
+        done()
       }
-      expect(fn).to.not.throw()
-      done()
-    })
+    )
 
     it('action-error', test_opts, function(fin) {
       var listen = Transport.listen(_.noop)
@@ -498,7 +514,7 @@ describe('transport', function() {
       .ready(function() {
         //console.log(this.private$.actrouter)
 
-        Seneca({ tag: 'cln', timeout: 22222*tmx })
+        Seneca({ tag: 'cln', timeout: 22222 * tmx })
           .test(done)
           .use(tt)
           .client({ type: 'test', pin: 'foo:1' })
@@ -515,7 +531,7 @@ describe('transport', function() {
   it('transport-star', test_opts, function(done) {
     var tt = make_test_transport()
 
-    Seneca({ timeout: 22222*tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
       .use(tt)
       .add('foo:1', testact)
       .add('foo:2', testact)
@@ -548,7 +564,7 @@ describe('transport', function() {
   it('transport-star-pin-object', test_opts, function(done) {
     var tt = make_test_transport()
 
-    Seneca({timeout: 22222*tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
       .use(tt)
       .add('foo:1', testact)
       .add('foo:2', testact)
@@ -588,7 +604,7 @@ describe('transport', function() {
       .add('foo:1', testact)
       .listen({ type: 'test', pin: 'foo:*' })
       .ready(function() {
-        var si = Seneca({ tag: 'c0', timeout: 22222*tmx, log: 'silent' })
+        var si = Seneca({ tag: 'c0', timeout: 22222 * tmx, log: 'silent' })
           .use(tt)
           .client({ type: 'test', pin: 'foo:1' })
 
@@ -617,7 +633,7 @@ describe('transport', function() {
       .listen({ type: 'test', pins: ['foo:1', 'baz:2'] })
       .ready(function() {
         var si = Seneca({
-          timeout: 22222*tmx, 
+          timeout: 22222 * tmx,
           log: 'silent',
           debug: { short_logs: true }
         })
@@ -647,7 +663,7 @@ describe('transport', function() {
   it('transport-single-wrap-and-star', test_opts, function(done) {
     var tt = make_test_transport()
 
-    Seneca({ timeout: 22222*tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
       .use(tt)
       .add('foo:1', testact)
       .add('qaz:1', testact)
@@ -655,7 +671,7 @@ describe('transport', function() {
       .listen({ type: 'test', pin: 'qaz:*' })
       .ready(function() {
         var si = Seneca({
-          timeout: 22222*tmx, 
+          timeout: 22222 * tmx,
           log: 'silent',
           debug: { short_logs: true }
         })
@@ -701,7 +717,7 @@ describe('transport', function() {
       .listen({ type: 'test', pin: 'foo:2,qaz:*' })
       .ready(function() {
         var si = Seneca({
-          timeout: 22222*tmx, 
+          timeout: 22222 * tmx,
           log: 'silent',
           debug: { short_logs: true }
         })
@@ -744,7 +760,7 @@ describe('transport', function() {
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function() {
         var si = Seneca({
-          timeout: 22222*tmx, 
+          timeout: 22222 * tmx,
           log: 'silent',
           debug: { short_logs: true }
         })
@@ -770,13 +786,13 @@ describe('transport', function() {
   it('transport-local-prior-wrap', test_opts, function(done) {
     var tt = make_test_transport()
 
-    Seneca({ tag: 'srv', timeout: 22222*tmx })
+    Seneca({ tag: 'srv', timeout: 22222 * tmx })
       .test(done)
       .use(tt)
       .add('foo:1', testact)
       .listen({ type: 'test', pin: 'foo:1' })
       .ready(function() {
-        Seneca({ tag: 'cln', timeout: 22222*tmx })
+        Seneca({ tag: 'cln', timeout: 22222 * tmx })
           .test(done)
           .use(tt)
           .client({ type: 'test', pin: 'foo:1' })
@@ -800,7 +816,7 @@ describe('transport', function() {
 
     var inits = {}
 
-    Seneca({ timeout: 22222*tmx, log: 'silent' })
+    Seneca({ timeout: 22222 * tmx, log: 'silent' })
       .use(tt)
       .add('foo:1', testact)
       .use(function bar() {
@@ -840,7 +856,7 @@ describe('transport', function() {
   it('transport-no-plugin-init', test_opts, function(done) {
     var tt = make_test_transport()
 
-    Seneca({ timeout: 22222*tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
       .use(tt)
       .client({ type: 'test' })
       .add('foo:1', testact)
@@ -922,7 +938,7 @@ describe('transport', function() {
     function make_s9() {
       s9 = Seneca({
         tag: 'srv',
-        timeout: 22222*tmx, 
+        timeout: 22222 * tmx,
         log: 'silent',
         debug: { short_logs: true }
       })
@@ -937,7 +953,7 @@ describe('transport', function() {
     function run_client() {
       c0 = Seneca({
         tag: 'cln',
-        timeout: 22222*tmx, 
+        timeout: 22222 * tmx,
         log: 'silent',
         debug: { short_logs: true }
       })
@@ -986,7 +1002,9 @@ describe('transport', function() {
     }
   })
 
-  it('fatal$ false with transport not-found kill process', test_opts, function(done) {
+  it('fatal$ false with transport not-found kill process', test_opts, function(
+    done
+  ) {
     Seneca({ log: 'silent' }).listen().ready(function() {
       var client = Seneca({ timeout: 30, log: 'silent' })
       client.client()
@@ -1000,7 +1018,9 @@ describe('transport', function() {
     })
   })
 
-  it('server can be restarted without issues to clients', test_opts, function(done) {
+  it('server can be restarted without issues to clients', test_opts, function(
+    done
+  ) {
     var execCount = 0
     var server = Seneca({ log: 'silent' })
     server.add({ cmd: 'foo' }, function(message, cb) {
@@ -1009,7 +1029,7 @@ describe('transport', function() {
     })
     server.listen({ port: 0 }, function(err, address) {
       expect(err).to.not.exist()
-      var client = Seneca({ log: 'silent', timeout: 22222*tmx })
+      var client = Seneca({ log: 'silent', timeout: 22222 * tmx })
       client.client({ port: address.port })
       client.ready(function() {
         client.act({ cmd: 'foo' }, function(err, message) {

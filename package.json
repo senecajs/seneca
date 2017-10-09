@@ -69,7 +69,7 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 90",
+    "test": "lab -v -P test -L -t 85",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",

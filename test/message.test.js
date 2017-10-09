@@ -1,7 +1,7 @@
 /* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER||1, 10)
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 var Lab = require('lab')
 var Code = require('code')
@@ -19,7 +19,7 @@ var parents = meta => meta.parents.map(x => x[0])
 
 var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
 
-var test_opts = {parallel: false, timeout: 5555*tmx }
+var test_opts = { parallel: false, timeout: 5555 * tmx }
 
 describe('message', function() {
   it('happy-vanilla', test_opts, function(fin) {
@@ -356,7 +356,11 @@ describe('message', function() {
       .listen({ type: 'simple' })
     s0.id = 's0'
 
-    var c0 = Seneca({ id$: 'c0', timeout: 22222*tmx, legacy: { transport: false } })
+    var c0 = Seneca({
+      id$: 'c0',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    })
       .test(fin)
       .use(st)
       .client({ type: 'simple' })
@@ -394,7 +398,12 @@ describe('message', function() {
       .listen({ type: 'simple' })
     s0.id = 's0'
 
-    var c0 = Seneca({ id$: 'c0', log: 'silent', timeout: 22222*tmx, legacy: { transport: false } })
+    var c0 = Seneca({
+      id$: 'c0',
+      log: 'silent',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    })
       .test(function(err, meta) {
         if (
           'a3err' === err.message ||

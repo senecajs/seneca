@@ -161,26 +161,7 @@ describe('logging', function() {
   })
 
   it('test-mode', function(fin) {
-    var log
-    var stdout_write = process.stdout.write
-    process.stdout.write = function(data) {
-      log.push(data.toString())
-    }
-
-    function restore(err) {
-      process.stdout.write = stdout_write
-      fin(err)
-    }
-
-    Seneca.test(fin).add('a:1', a1).act('a:1').ready(print)
-
-    function print() {
-      log = []
-      Seneca.test(fin, 'print').add('a:1', a1).act('a:1').ready(function() {
-        expect(log.length).above(11)
-        restore()
-      })
-    }
+    Seneca.test(fin).add('a:1', a1).act('a:1').ready(fin)
   })
 })
 

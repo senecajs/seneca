@@ -14,26 +14,22 @@ var expect = Code.expect
 var testopts = { log: 'test' }
 
 describe('prior', function() {
-
   it('happy', function(fin) {
     Seneca()
       .test(fin)
-
       .add('a:1', function a1(msg, reply) {
-        reply({x:msg.x})
+        reply({ x: msg.x })
       })
-
       .add('a:1', function a1p(msg, reply) {
         msg.x = msg.x + 1
         this.prior(msg, reply)
       })
-
       .act('a:1,x:2', function(ignore, out) {
         expect(out.x).equal(3)
         fin()
       })
   })
-  
+
   it('add-general-to-specific', function(done) {
     Seneca(testopts)
       .error(done)

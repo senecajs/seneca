@@ -289,15 +289,7 @@ module.exports.use = function top_use() {
 
 // Makes require('seneca').test() work.
 module.exports.test = function top_test() {
-  var argsarr = new Array(arguments.length)
-  for (var l = 0; l < argsarr.length; ++l) {
-    argsarr[l] = arguments[l]
-  }
-
-  var instance = module.exports({ test: true, log: 'test' })
-  instance.test.apply(instance, argsarr)
-
-  return instance
+  return module.exports().test(arguments[0], arguments[1])
 }
 
 module.exports.util = seneca_util
@@ -324,8 +316,8 @@ function make_seneca(initial_options) {
   var opts = { $: private$.optioner.get() }
 
   // Create internal tools.
-  var actnid = Nid({ length: opts.$.idlen })
-  var didnid = Nid({ length: opts.$.didlen })
+  private$.actnid = Nid({ length: opts.$.idlen })
+  private$.didnid = Nid({ length: opts.$.didlen })
 
   var next_action_id = Common.autoincr()
 
@@ -359,6 +351,7 @@ function make_seneca(initial_options) {
   root$.client = API.client(callpoint) // Send outbound messages.
   root$.gate = API.gate // Create a delegate that executes actions in sequence.
   root$.ungate = API.ungate // Execute actions in parallel.
+  root$.test = API.test // Set test mode.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
@@ -371,7 +364,6 @@ function make_seneca(initial_options) {
   root$.decorate = api_decorate // Decorate seneca object with functions
   root$.inward = api_inward // Add a modifier function for messages inward
   root$.outward = api_outward // Add a modifier function for responses outward
-  root$.test = api_test // Set test mode.
 
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
@@ -511,6 +503,10 @@ function make_seneca(initial_options) {
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
+
+  if (opts.$.test) {
+    root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
+  }
 
   function api_depends() {
     var self = this
@@ -946,7 +942,7 @@ function make_seneca(initial_options) {
     delegate.private$ = Object.create(self.private$)
 
     delegate.did =
-      (delegate.did ? delegate.did + '/' : '') + didnid()
+      (delegate.did ? delegate.did + '/' : '') + self.private$.didnid()
 
     var strdesc
     delegate.toString = function toString() {
@@ -1019,27 +1015,6 @@ function make_seneca(initial_options) {
 
   function api_error(errhandler) {
     this.options({ errhandler: errhandler })
-    return this
-  }
-
-  function api_test(errhandler, logspec) {
-    if (opts.$.tag) {
-      root$.id = opts.$.id$ || actnid().substring(0, 4) + '/' + opts.$.tag
-    }
-
-    if ('function' !== typeof errhandler && null !== errhandler) {
-      logspec = errhandler
-      errhandler = null
-    }
-
-    this.options({
-      errhandler: null === errhandler ? null : errhandler || Print.log,
-      test: true,
-      log: logspec || 'test'
-    })
-
-    private$.logger = load_logger(root$, opts.$.internal.logger)
-
     return this
   }
 
@@ -1454,12 +1429,12 @@ intern.make_actmsg = function(origmsg) {
   if (actmsg.meta$) {
     delete actmsg.meta$
   }
-  
+
   // backwards compatibility for Seneca 3.x transports
   if (origmsg.transport$) {
     actmsg.transport$ = origmsg.transport$
   }
-  
+
   return actmsg
 }
 
@@ -1517,8 +1492,8 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   this.sync = null != origmsg.sync$
     ? !!origmsg.sync$
     : origmeta && null != origmeta.sync
-        ? !!origmeta.sync
-        : _.isFunction(origreply)
+      ? !!origmeta.sync
+      : _.isFunction(origreply)
 
   this.trace = null
   this.sub = null
