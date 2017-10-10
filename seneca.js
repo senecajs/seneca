@@ -355,6 +355,7 @@ function make_seneca(initial_options) {
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
+  root$.act_promise = api_act_promisefied // Submit a message and trigger the associated action and return a promise
   root$.use = api_use // Define a plugin.
   root$.export = api_export // Export plain objects from a plugin.
   root$.ready = api_ready // Callback when plugins initialized.
@@ -695,6 +696,38 @@ function make_seneca(initial_options) {
     })
 
     return actdef
+  }
+
+  // Perform an action. The properties of the first argument are matched against
+  // known patterns, and the most specific one wins.
+  // Return a promise and done callback if exists
+  function api_act_promisefied () {
+    const argumentsData = Array.prototype.slice.call(arguments)
+    const spec = Common.parsePattern(this, argumentsData, 'done:f?')
+    const msg = _.extend(spec.pattern, this.fixedargs)
+
+    if (so.debug.act_caller || so.test) {
+      const errorMessage = (new Error(
+          Util.inspect(msg).replace(/\n/g, '')
+        ).stack)
+        .replace(/.*\/seneca\.js:.*\n/g, '')
+        .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
+      msg.caller$ = `
+        Action call arguments and location
+        ${errorMessage}
+      `
+    }
+
+    return new Promise((resolve, reject) => {
+      do_act(this, msg, (err, response) => {
+        if (_.isFunction(spec.done)) {
+          if (err) return spec.done(new Error(err))
+          if (!err) spec.done(null, response)
+        }
+        if (err) return reject(new Error(err))
+        return resolve(response)
+      })
+    })
   }
 
   // Perform an action. The properties of the first argument are matched against

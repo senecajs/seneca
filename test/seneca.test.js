@@ -239,6 +239,29 @@ describe('seneca', function() {
     }, 100)
   })
 
+  it('action-basic-promisified', function(done) {
+    var si = Seneca(testopts).error(done)
+    si.options({ debug: { fragile: true } })
+
+    var a1 = 0
+
+    si.add({ op: 'foo' }, function(args, cb) {
+      a1 = args.a1
+      cb(null, { s: '+' + a1 })
+    })
+
+    si.act_promise({ op: 'foo', a1: 100 }, function(err, out) {
+      assert.equal(err, null)
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+    }).then((out) => {
+      assert.equal('+100', out.s)
+      assert.equal(100, a1)
+    }).catch((err) => {
+      assert.not.equal(err, null)
+    })
+  })
+
   it('action-basic', function(done) {
     var si = Seneca(testopts).error(done)
     si.options({ debug: { fragile: true } })
