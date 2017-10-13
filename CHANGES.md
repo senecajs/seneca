@@ -1,3 +1,9 @@
+## 3.4.3 2017-10-13
+
+* Supports --seneca.test to trigger test mode
+* Support SENECA_TEST enviroment variable
+
+
 ## 3.4.2 2017-08-10
 
 * Fixes priors bug #662

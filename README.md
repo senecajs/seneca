@@ -9,12 +9,13 @@
 [![Gitter][BadgeGitter]][Gitter]
 
 - __Lead Maintainer:__ [Richard Rodger][Lead]
-- __Sponsor:__ [nearForm][Sponsor]
+- __Sponsor:__ [metsitaba][Sponsor]
 - __Node:__ 4.x, 6.x, 8.x
 
-Seneca is a toolkit for writing microservices and organizing the business logic of your
-app. You can break down your app into "stuff that happens", rather than focusing on data
-models or managing dependencies.
+Seneca is a toolkit for writing microservices and organizing the
+business logic of your app. You can break down your app into "stuff
+that happens", rather than focusing on data models or managing
+dependencies.
 
 Seneca provides,
 
@@ -23,17 +24,18 @@ Seneca provides,
 - __transport independence:__ how messages get to the right server is not something you
 should have to worry about
 
-- __maturity:__ 5 years in production (before we called it _microservices_), but was
+- __maturity:__ 7 years in production (before we called it _microservices_), but was
 once taken out by [lightning][]
 
 - __plus:__ a deep and wide ecosystem of [plugins][]
 
-Use this module to define commands that work by taking in some JSON, and, optionally,
-returning some JSON. The command to run is selected by pattern-matching on the the input
-JSON. There are built-in and optional sets of commands that help you build Minimum Viable
-Products: data storage, user management, distributed logic, caching, logging, etc. And you
-can define your own product by breaking it into a set of commands - "stuff that happens".
-That's pretty much it.
+Use this module to define commands that work by taking in some JSON,
+and, optionally, returning some JSON. The command to run is selected
+by pattern-matching on the the input JSON. There are built-in and
+optional sets of commands that help you build Minimum Viable Products:
+data storage, user management, distributed logic, caching, logging,
+etc. And you can define your own product by breaking it into a set of
+commands - "stuff that happens".  That's pretty much it.
 
 If you're using this module, and need help, you can:
 
@@ -52,19 +54,6 @@ To install via npm,
 
 ```
 npm install seneca
-```
-
-## Test
-To run tests locally,
-
-```
-npm run test
-```
-
-To obtain a coverage report,
-
-```
-npm run coverage; open docs/coverage.html
 ```
 
 ## Quick Example
@@ -143,6 +132,24 @@ Seneca()
 // null { tag: 'local' }
 // null { tag: 'approver' }
 // null { tag: 'rejector' }
+```
+
+
+## Running
+
+To run normally, say in a container, use
+
+```sh
+$ node microservice.js
+```
+
+(where `microservice.js` is a script file that uses Seneca).
+Logs are output in JSON format so you can send them to a logging service.
+
+To run in test mode, with human-readable, full debug logs, use:
+
+```
+$ node microservice.js --seneca.test
 ```
 
 
@@ -352,10 +359,27 @@ isolate complexity into well-defined places. It also means you can deal with spe
 cases very easily.
 
 ## Contributing
+
 The [Senecajs org][Org] encourages participation. If you feel you can help in any way, be
 it with bug reporting, documentation, examples, extra testing, or new features feel free
 to [create an issue][Issue], or better yet, [submit a [Pull Request][Pull]. For more
 information on contribution please see our [Contributing][Contrib] guide.
+
+
+### Test
+To run tests locally,
+
+```
+npm run test
+```
+
+To obtain a coverage report,
+
+```
+npm run coverage; open docs/coverage.html
+```
+
+
 
 ## License
 Copyright (c) 2015-2016 Richard Rodger and other contributors;
@@ -379,7 +403,7 @@ Licensed under __[MIT][Lic]__.
 [Npm]: https://www.npmjs.com/package/seneca
 [Org]: http://senecajs.org/
 [Pull]: https://github.com/senecajs/seneca/pulls
-[Sponsor]: http://nearform.com
+[Sponsor]: http://www.metsitaba.com
 [Travis]: https://travis-ci.org/senecajs/seneca?branch=master
 [Tweet]: https://twitter.com/senecajs
 
