@@ -1531,4 +1531,59 @@ describe('seneca', function() {
       })
       .ready(fin)
   })
+
+
+  it('pattern-types', function(fin) {
+    Seneca()
+      .test(fin)
+
+    // Just the value types from json.org, excluding object and array
+    
+      .add({s:'s'}, function(msg, reply) {
+        reply({s: msg.s})
+      })
+
+      .add({i:1}, function(msg, reply) {
+        reply({i: msg.i})
+      })
+
+      .add({f:1.1}, function(msg, reply) {
+        reply({f: msg.f})
+      })
+
+      .add({bt:true}, function(msg, reply) {
+        reply({bt: msg.bt})
+      })
+
+      .add({bf:false}, function(msg, reply) {
+        reply({bf: msg.bf})
+      })
+
+      .add({n:null}, function(msg, reply) {
+        reply({n: msg.n})
+      })
+
+      .gate()
+
+      .act({s:'s'}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ s: 's' }")
+      })
+      .act({i:1}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ i: 1 }")
+      })
+      .act({f:1.1}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ f: 1.1 }")
+      })
+      .act({bt:true}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ bt: true }")
+      })
+      .act({bf:false}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ bf: false }")
+      })
+      .act({n:null}, function(ignore, out) {
+        expect(Util.inspect(out)).equal("{ n: null }")
+      })
+      .ready(fin)
+  })
+
 })
