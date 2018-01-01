@@ -481,7 +481,10 @@ function make_seneca(initial_options) {
 
   root$.toString = api_toString
 
+  // TODO: provide an api to add these
   private$.action_modifiers = []
+  private$.sub = { handler: null, tracers: [] }
+
   private$.ready_list = []
 
   private$.inward = Ordu({ name: 'inward' })
