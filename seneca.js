@@ -706,7 +706,7 @@ function make_seneca(initial_options) {
     const spec = Common.parsePattern(this, argumentsData, 'done:f?')
     const msg = _.extend(spec.pattern, this.fixedargs)
 
-    if (so.debug.act_caller || so.test) {
+    if (opts.$.debug.act_caller || opts.$.test) {
       const errorMessage = (new Error(
           Util.inspect(msg).replace(/\n/g, '')
         ).stack)
