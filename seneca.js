@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2017 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2018 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 // Node API modules.
@@ -442,6 +442,7 @@ function make_seneca(initial_options) {
     .clear(action_queue_clear)
     .start()
 
+  // TODO: this should be a plugin
   // setup status log
   if (opts.$.status.interval > 0 && opts.$.status.running) {
     private$.stats = private$.stats || {}
@@ -506,6 +507,7 @@ function make_seneca(initial_options) {
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
+    .add(Outward.announce)
 
   if (opts.$.test) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
@@ -1335,13 +1337,6 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
         result: data.res
       })
     )
-
-    // TODO: this should be in process outward
-    delegate.emit('act-out', actmsg, data.res, meta)
-
-    if (_.isFunction(delegate.on_act_out)) {
-      delegate.on_act_out(actdef, data.res, meta)
-    }
   }
 
   try {
