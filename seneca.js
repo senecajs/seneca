@@ -1298,8 +1298,8 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
     res: err || out,
     reply_meta: reply_meta,
     has_callback: true,
-    err: err,
-    out: out
+    err: err || null,
+    out: out || null
   }
 
   actctxt.duration = meta.end - meta.start
@@ -1311,19 +1311,8 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   intern.process_outward(actctxt, data)
   
   if (data.has_callback) {
-    var rout = data.res || null
-    var rerr = null
-
-    // TODO: can outward_act_error handle this?
-    if (meta.error) {
-      rerr = data.error_desc.err
-      rout = null
-      meta = data.error_desc.err.meta$ || meta
-      delete rerr.meta$
-    }
-      
     try {
-      reply.call(delegate, rerr, rout, meta)
+      reply.call(delegate, data.err, data.res, data.meta)
     } catch (e) {
       var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
 
