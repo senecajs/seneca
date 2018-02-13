@@ -507,6 +507,7 @@ function make_seneca(initial_options) {
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
+    .add(Outward.res_entity)
     .add(Outward.trace)
     .add(Outward.announce)
     .add(Outward.act_error)
@@ -1309,37 +1310,36 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
 
   intern.process_outward(actctxt, data)
   
-  try {
-    if (data.has_callback) {
-      var rout = data.res || null
-      var rerr = null
+  if (data.has_callback) {
+    var rout = data.res || null
+    var rerr = null
 
-      if (meta.error) {
-        rerr = data.error_desc.err
-        rout = null
-        meta = data.error_desc.err.meta$ || meta
-        delete rerr.meta$
-      } else if (rout && rout.entity$ && delegate.make$) {
-        rout = delegate.make$(rout)
-      }
-
-      reply.call(delegate, rerr, rout, meta)
+    // TODO: can outward_act_error handle this?
+    if (meta.error) {
+      rerr = data.error_desc.err
+      rout = null
+      meta = data.error_desc.err.meta$ || meta
+      delete rerr.meta$
     }
-  } catch (e) {
-    var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
+      
+    try {
+      reply.call(delegate, rerr, rout, meta)
+    } catch (e) {
+      var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
 
-    intern.callback_error(
-      delegate,
-      ex,
-      actdef,
-      meta,
-      [err, out],
-      reply,
-      actctxt.duration,
-      actmsg,
-      origmsg,
-      actctxt.callpoint
-    )
+      intern.callback_error(
+        delegate,
+        ex,
+        actdef,
+        meta,
+        [err, out],
+        reply,
+        actctxt.duration,
+        actmsg,
+        origmsg,
+        actctxt.callpoint
+      )
+    }
   }
 }
 

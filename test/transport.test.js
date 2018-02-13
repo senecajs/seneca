@@ -1,9 +1,6 @@
 /* Copyright (c) 2014-2016 Richard Rodger, MIT License */
 'use strict'
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
-console.log('TEST transport tmx=' + tmx)
-
 var _ = require('lodash')
 var Code = require('code')
 var Lab = require('lab')
@@ -18,6 +15,8 @@ var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
+
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 var make_test_transport = TransportStubs.make_test_transport
 var make_balance_transport = TransportStubs.make_balance_transport
