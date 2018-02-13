@@ -17,6 +17,9 @@ var it = lab.it
 var expect = Code.expect
 var assert = Assert
 
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
+console.log('TEST transport tmx=' + tmx)
+
 // timerstub broken on node 0.11
 // var timerstub = require('timerstub')
 var timerstub = {
@@ -1403,7 +1406,7 @@ describe('seneca', function() {
 
     function validate(start) {
       var end = Date.now()
-      expect(end - start).below(1500)
+      expect(end - start).below(1500*tmx)
 
       var mem = process.memoryUsage()
       expect(mem.rss).below(200000000)
