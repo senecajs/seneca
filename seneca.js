@@ -509,6 +509,7 @@ function make_seneca(initial_options) {
     .add(Outward.res_object)
     .add(Outward.trace)
     .add(Outward.announce)
+    .add(Outward.act_error)
 
 
   if (opts.$.test) {
@@ -1290,67 +1291,33 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   var origmsg = actctxt.origmsg
   var reply = actctxt.reply
 
-  var duration = meta.end - meta.start
-  var call_cb = true
-
-  actctxt.duration = duration
-
   var data = {
     meta: meta,
     msg: actmsg,
     res: err || out,
-    reply_meta: reply_meta
+    reply_meta: reply_meta,
+    has_callback: true,
+    err: err,
+    out: out
   }
 
+  actctxt.duration = meta.end - meta.start
+  actctxt.actlog = actlog
+  actctxt.act_error = intern.act_error
+  
   meta.error = data.res instanceof Error
 
-  intern.process_outward(meta, actctxt, data)
-
-  //intern.meta_trace(meta, reply_meta)
-  //intern.parent_meta_trace(delegate, meta)
-
-  if (meta.error) {
-    var errordesc = intern.act_error(
-      delegate,
-      data,
-      actdef,
-      [err, out],
-      reply,
-      duration,
-      actmsg,
-      origmsg,
-      actctxt.callpoint
-    )
-
-    if (meta.fatal) {
-      return delegate.die(errordesc.err)
-    }
-
-    call_cb = errordesc.call_cb
-
-    if (delegate && _.isFunction(delegate.on_act_err)) {
-      delegate.on_act_err(actdef, data.res, meta)
-    }
-  } else {
-    delegate.log.debug(
-      actlog(actdef, actmsg, meta, origmsg, {
-        kind: 'act',
-        case: 'OUT',
-        duration: duration,
-        result: data.res
-      })
-    )
-  }
-
+  intern.process_outward(actctxt, data)
+  
   try {
-    if (call_cb) {
+    if (data.has_callback) {
       var rout = data.res || null
       var rerr = null
 
       if (meta.error) {
-        rerr = errordesc.err
+        rerr = data.error_desc.err
         rout = null
-        meta = errordesc.err.meta$ || meta
+        meta = data.error_desc.err.meta$ || meta
         delete rerr.meta$
       } else if (rout && rout.entity$ && delegate.make$) {
         rout = delegate.make$(rout)
@@ -1368,7 +1335,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
       meta,
       [err, out],
       reply,
-      duration,
+      actctxt.duration,
       actmsg,
       origmsg,
       actctxt.callpoint
@@ -1505,41 +1472,18 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   this.empty = null
 }
 
-intern.process_outward = function(meta, actctxt, data) {
+intern.process_outward = function(actctxt, data) {
   var outward = actctxt.seneca.private$.outward.process(actctxt, data)
 
   if (outward) {
     if ('error' === outward.kind) {
       data.res = outward.error || error(outward.code, outward.info)
-      meta.error = true
+      data.meta.error = true
     } else if ('result' === outward.kind) {
       data.res = outward.result
     }
   }
 }
-
-/*
-intern.meta_trace = function(meta, reply_meta) {
-  if (meta && reply_meta) {
-    meta.trace = meta.trace || []
-    meta.trace.push({
-      desc: Common.make_trace_desc(reply_meta),
-      trace: reply_meta.trace || []
-    })
-  }
-}
-
-intern.parent_meta_trace = function(delegate, meta) {
-  var parent_meta = delegate.private$.act && delegate.private$.act.parent
-  if (parent_meta) {
-    parent_meta.trace = parent_meta.trace || []
-    parent_meta.trace.push({
-      desc: Common.make_trace_desc(meta),
-      trace: meta.trace || []
-    })
-  }
-}
-*/
 
 intern.act_error = function(
   instance,

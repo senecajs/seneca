@@ -1128,23 +1128,24 @@ describe('seneca', function() {
     })
   })
 
-  it('strict', function(fin) {
-    var si = Seneca({ log: 'silent' })
+  it('strict-result', function(fin) {
+    var si = Seneca({ log: 'silent', legacy: {transport: false} })
 
-    si.add('a:1', function(a, cb) {
-      cb(null, 'a')
-    })
-    si.act('a:1', function(err) {
-      assert.ok(err)
-      assert.equal('result_not_objarr', err.code)
-
-      si.options({ strict: { result: false } })
-      si.act('a:1', function(err, out) {
-        assert.ok(!err)
-        assert.equal('a', out)
-        fin()
+    si
+      .add('a:1', function(msg, reply) {
+        reply('a')
       })
-    })
+      .act('a:1', function(err) {
+        assert.ok(err)
+        assert.equal('result_not_objarr', err.code)
+
+        si.options({ strict: { result: false } })
+        si.act('a:1', function(err, out) {
+          assert.ok(!err)
+          assert.equal('a', out)
+          fin()
+        })
+      })
   })
 
   it('add-noop', function(done) {
@@ -1160,52 +1161,6 @@ describe('seneca', function() {
           done()
         })
       })
-  })
-
-  describe('#error', function() {
-    it("isn't called twice on fatal errors when fatal$: true", function(done) {
-      var si = Seneca({ log: 'silent', debug: { undead: true } })
-
-      var count = 0
-      si.error(function() {
-        assert(++count === 1)
-      })
-
-      si.add({ role: 'foo', cmd: 'bar' }, function(args, cb) {
-        cb(new Error('test error'))
-      })
-
-      si.act({ role: 'foo', cmd: 'bar', fatal$: true }, function(err) {
-        assert(!err)
-      })
-
-      setTimeout(function() {
-        assert(count === 1)
-        done()
-      }, 200)
-    })
-
-    it("isn't called twice when fatal$: false", function(done) {
-      var si = Seneca({ log: 'silent', debug: { undead: true } })
-
-      var count = 0
-      si.error(function() {
-        ++count
-      })
-
-      si.add({ role: 'foo', cmd: 'bar' }, function(args, cb) {
-        cb(new Error('test error'))
-      })
-
-      si.act({ role: 'foo', cmd: 'bar', fatal$: false }, function(err) {
-        assert(err)
-      })
-
-      setTimeout(function() {
-        assert(count === 1)
-        done()
-      }, 200)
-    })
   })
 
   describe('#decorate', function() {
