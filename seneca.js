@@ -507,7 +507,9 @@ function make_seneca(initial_options) {
     .add(Outward.act_stats)
     .add(Outward.act_cache)
     .add(Outward.res_object)
+    .add(Outward.trace)
     .add(Outward.announce)
+
 
   if (opts.$.test) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
@@ -1296,15 +1298,16 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   var data = {
     meta: meta,
     msg: actmsg,
-    res: err || out
+    res: err || out,
+    reply_meta: reply_meta
   }
 
   meta.error = data.res instanceof Error
 
   intern.process_outward(meta, actctxt, data)
 
-  intern.meta_trace(meta, reply_meta)
-  intern.parent_meta_trace(delegate, meta)
+  //intern.meta_trace(meta, reply_meta)
+  //intern.parent_meta_trace(delegate, meta)
 
   if (meta.error) {
     var errordesc = intern.act_error(
@@ -1515,6 +1518,7 @@ intern.process_outward = function(meta, actctxt, data) {
   }
 }
 
+/*
 intern.meta_trace = function(meta, reply_meta) {
   if (meta && reply_meta) {
     meta.trace = meta.trace || []
@@ -1535,6 +1539,7 @@ intern.parent_meta_trace = function(delegate, meta) {
     })
   }
 }
+*/
 
 intern.act_error = function(
   instance,
