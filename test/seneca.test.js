@@ -1132,7 +1132,7 @@ describe('seneca', function() {
   })
 
   it('strict-result', function(fin) {
-    var si = Seneca({ log: 'silent', legacy: {transport: false} })
+    var si = Seneca({ log: 'silent', legacy: { transport: false } })
 
     si
       .add('a:1', function(msg, reply) {
@@ -1383,7 +1383,7 @@ describe('seneca', function() {
       .ready(done)
   })
 
-  it('memory', function(done) {
+  it('memory', { timeout: 2222 * tmx }, function(done) {
     var SIZE = 1000
 
     Seneca({ log: 'silent' })
@@ -1406,7 +1406,7 @@ describe('seneca', function() {
 
     function validate(start) {
       var end = Date.now()
-      expect(end - start).below(1500*tmx)
+      expect(end - start).below(1500 * tmx)
 
       var mem = process.memoryUsage()
       expect(mem.rss).below(200000000)
@@ -1490,58 +1490,48 @@ describe('seneca', function() {
       .ready(fin)
   })
 
-
   it('pattern-types', function(fin) {
     Seneca()
       .test(fin)
+      // Just the value types from json.org, excluding object and array
 
-    // Just the value types from json.org, excluding object and array
-    
-      .add({s:'s'}, function(msg, reply) {
-        reply({s: msg.s})
+      .add({ s: 's' }, function(msg, reply) {
+        reply({ s: msg.s })
       })
-
-      .add({i:1}, function(msg, reply) {
-        reply({i: msg.i})
+      .add({ i: 1 }, function(msg, reply) {
+        reply({ i: msg.i })
       })
-
-      .add({f:1.1}, function(msg, reply) {
-        reply({f: msg.f})
+      .add({ f: 1.1 }, function(msg, reply) {
+        reply({ f: msg.f })
       })
-
-      .add({bt:true}, function(msg, reply) {
-        reply({bt: msg.bt})
+      .add({ bt: true }, function(msg, reply) {
+        reply({ bt: msg.bt })
       })
-
-      .add({bf:false}, function(msg, reply) {
-        reply({bf: msg.bf})
+      .add({ bf: false }, function(msg, reply) {
+        reply({ bf: msg.bf })
       })
-
-      .add({n:null}, function(msg, reply) {
-        reply({n: msg.n})
+      .add({ n: null }, function(msg, reply) {
+        reply({ n: msg.n })
       })
-
       .gate()
-
-      .act({s:'s'}, function(ignore, out) {
+      .act({ s: 's' }, function(ignore, out) {
         expect(Util.inspect(out)).equal("{ s: 's' }")
       })
-      .act({i:1}, function(ignore, out) {
-        expect(Util.inspect(out)).equal("{ i: 1 }")
+      .act({ i: 1 }, function(ignore, out) {
+        expect(Util.inspect(out)).equal('{ i: 1 }')
       })
-      .act({f:1.1}, function(ignore, out) {
-        expect(Util.inspect(out)).equal("{ f: 1.1 }")
+      .act({ f: 1.1 }, function(ignore, out) {
+        expect(Util.inspect(out)).equal('{ f: 1.1 }')
       })
-      .act({bt:true}, function(ignore, out) {
-        expect(Util.inspect(out)).equal("{ bt: true }")
+      .act({ bt: true }, function(ignore, out) {
+        expect(Util.inspect(out)).equal('{ bt: true }')
       })
-      .act({bf:false}, function(ignore, out) {
-        expect(Util.inspect(out)).equal("{ bf: false }")
+      .act({ bf: false }, function(ignore, out) {
+        expect(Util.inspect(out)).equal('{ bf: false }')
       })
-      .act({n:null}, function(ignore, out) {
-        expect(Util.inspect(out)).equal("{ n: null }")
+      .act({ n: null }, function(ignore, out) {
+        expect(Util.inspect(out)).equal('{ n: null }')
       })
       .ready(fin)
   })
-
 })

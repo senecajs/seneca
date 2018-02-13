@@ -512,7 +512,6 @@ function make_seneca(initial_options) {
     .add(Outward.announce)
     .add(Outward.act_error)
 
-
   if (opts.$.test) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
   }
@@ -1288,8 +1287,6 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   meta.end = Date.now()
 
   var delegate = actctxt.seneca
-  var actdef = actctxt.actdef
-  var origmsg = actctxt.origmsg
   var reply = actctxt.reply
 
   var data = {
@@ -1305,29 +1302,16 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   actctxt.duration = meta.end - meta.start
   actctxt.actlog = actlog
   actctxt.act_error = intern.act_error
-  
+
   meta.error = data.res instanceof Error
 
   intern.process_outward(actctxt, data)
-  
+
   if (data.has_callback) {
     try {
       reply.call(delegate, data.err, data.res, data.meta)
-    } catch (e) {
-      var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-
-      intern.callback_error(
-        delegate,
-        ex,
-        actdef,
-        meta,
-        [err, out],
-        reply,
-        actctxt.duration,
-        actmsg,
-        origmsg,
-        actctxt.callpoint
-      )
+    } catch (thrown_obj) {
+      intern.callback_error(delegate, thrown_obj, actctxt, data)
     }
   }
 }
@@ -1564,21 +1548,21 @@ intern.act_error = function(
   }
 }
 
-intern.callback_error = function(
-  instance,
-  err,
-  actdef,
-  meta,
-  result,
-  cb,
-  duration,
-  msg,
-  origmsg,
-  act_callpoint
-) {
-  var opts = instance.options()
+intern.callback_error = function(instance, thrown_obj, actctxt, data) {
+  var duration = actctxt.duration
+  var act_callpoint = actctxt.callpoint
+  var actdef = actctxt.actdef || {}
+  var origmsg = actctxt.origmsg
+  var reply = actctxt.reply
 
-  actdef = actdef || {}
+  var meta = data.meta
+  var msg = data.msg
+
+  var err = Util.isError(thrown_obj)
+    ? thrown_obj
+    : new Error(Util.inspect(thrown_obj))
+
+  var opts = instance.options()
 
   if (!err.seneca) {
     err = error(
@@ -1588,13 +1572,11 @@ intern.callback_error = function(
         message: err.message,
         pattern: actdef.pattern,
         fn: actdef.func,
-        cb: cb,
+        callback: reply,
         instance: instance.toString(),
         callpoint: act_callpoint
       })
     )
-
-    result[0] = err
   }
 
   err.details = err.details || {}
@@ -1612,7 +1594,7 @@ intern.callback_error = function(
     })
   )
 
-  instance.emit('act-err', msg, err, result[1])
+  instance.emit('act-err', msg, err, data.res)
 
   if (opts.errhandler) {
     opts.errhandler.call(instance, err, err.meta$)
