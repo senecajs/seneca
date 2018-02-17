@@ -21,14 +21,10 @@ var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function() {
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
+  
+  it('action_callback', action_callback)
+  it('plugin_load', plugin_load)
+  
   it('act_not_found', act_not_found)
 
   it('exec_action_throw_basic', exec_action_throw_basic)
@@ -44,7 +40,6 @@ describe('error', function() {
   it('exec_action_result_nolog', exec_action_result_nolog)
   it('exec_action_errhandler_result', exec_action_errhandler_result)
 
-  it('action_callback', action_callback)
   it('action_callback', action_callback_legacy)
 
   it('ready_die', ready_die)
@@ -107,6 +102,21 @@ describe('error', function() {
   }
 
 
+  function plugin_load(fin) {
+    var si = Seneca({log: 'silent', debug: { undead: true }})
+
+    si.error(function(err){
+      // TODO: validate
+      fin()
+    })
+
+    si.use(function p0() {
+      throw new Error('p0')
+    })
+  }
+
+
+  
   function fail_assert(done) {
     return function(err) {
       if (err && 'AssertionError' === err.name) {

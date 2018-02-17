@@ -86,7 +86,8 @@ describe('plugin', function() {
       },
       log: 'silent',
       errhandler: function(err) {
-        expect('plugin-def').to.equal(err.details.message)
+        expect('plugin_define').equal(err.code)
+        expect(err.details.message).contains('plugin-def')
         done()
       }
     })

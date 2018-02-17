@@ -105,6 +105,7 @@ describe('actions', function() {
     })
   })
 
+  /*
   it('make_error', function(fin) {
     var si = Seneca({ log: 'silent' })
     si.act(
@@ -118,4 +119,5 @@ describe('actions', function() {
       }
     )
   })
+  */
 })

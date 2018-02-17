@@ -8,7 +8,6 @@ var Util = require('util')
 
 // External modules.
 var _ = require('lodash')
-var Eraro = require('eraro')
 var GateExecutor = require('gate-executor')
 var Jsonic = require('jsonic')
 var Makeuse = require('use-plugin')
@@ -23,7 +22,6 @@ var API = require('./lib/api')
 var Inward = require('./lib/inward')
 var Outward = require('./lib/outward')
 var Common = require('./lib/common')
-var Errors = require('./lib/errors')
 var Legacy = require('./lib/legacy')
 var Optioner = require('./lib/optioner')
 var Package = require('./package.json')
@@ -37,11 +35,7 @@ var errlog = Common.make_standard_err_log_entry
 var actlog = Common.make_standard_act_log_entry
 
 // Internal data and utilities.
-var error = Eraro({
-  package: 'seneca',
-  msgmap: Errors,
-  override: true
-})
+var error = Common.error
 
 var option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
@@ -77,7 +71,10 @@ var option_defaults = {
     // Print debug info to console
     print: {
       // Print options. Best used via --seneca.print.options.
-      options: false
+      options: false,
+
+      // Amount of information to print on fatal error: 'summary', 'full'
+      fatal: 'summary'
     },
 
     // Trace action caller and place in args.caller$.
