@@ -1457,6 +1457,9 @@ intern.process_outward = function(actctxt, data) {
     } else if ('result' === outward.kind) {
       data.res = outward.result
     }
+    else {
+      Assert.fail('unknown outward kind: '+outward.kind)
+    }
   }
 }
 
