@@ -100,11 +100,11 @@ describe('seneca', function() {
       intern.seneca.process_outward(actctxt,d3)
     }
     catch(e) {
-      if( 6 < parseInt(process.versions.node.substring(0,1),10) ) {
+      if( 8 <= parseInt(process.versions.node.substring(0,1),10) ) {
         expect(e.code).equal('ERR_ASSERTION')
       }
       
-      expect(e.message).equal('unknown outward kind: bad')
+      expect(e.message).contains('unknown outward kind: bad')
       expect(d3.x).equals(1)
       fin()
     }
