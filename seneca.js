@@ -224,7 +224,8 @@ var seneca_util = {
   },
   argprops: Common.argprops,
   resolve_option: Common.resolve_option,
-  flatten: Common.flatten
+  flatten: Common.flatten,
+  error: error
 }
 
 // Internal implementations.
@@ -293,7 +294,7 @@ module.exports.test = function top_test() {
 }
 
 module.exports.util = seneca_util
-module.exports.intern = intern
+module.exports.test$ = {intern: intern}
 
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
@@ -1301,7 +1302,8 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
 
   actctxt.duration = meta.end - meta.start
   actctxt.actlog = actlog
-  actctxt.act_error = intern.act_error
+  actctxt.errlog = errlog
+  actctxt.error = error
 
   meta.error = data.res instanceof Error
 
@@ -1458,102 +1460,13 @@ intern.process_outward = function(actctxt, data) {
   }
 }
 
-intern.act_error = function(
-  instance,
-  data,
-  actdef,
-  result,
-  cb,
-  duration,
-  msg,
-  origmsg,
-  act_callpoint
-) {
-  var opts = instance.options()
 
-  var call_cb = true
-  actdef = actdef || {}
-
-  var err = data.res || data.err
-  var meta = data.meta
-
-  if (!err.seneca) {
-    var details = _.extend({}, err.details, {
-      message: err.eraro && err.orig ? err.orig.message : err.message,
-      pattern: actdef.pattern,
-      fn: actdef.func,
-      cb: cb,
-      instance: instance.toString(),
-      callpoint: act_callpoint
-    })
-
-    if (opts.legacy.error) {
-      err = error(err, 'act_execute', details)
-    } else {
-      var seneca_err = error('act_execute', {
-        pattern: actdef.pattern,
-        message: err.message,
-        callpoint: act_callpoint
-      })
-      delete seneca_err.stack
-
-      err.meta$ = err.meta$ || meta || {}
-      err.meta$.data = instance.util.clean(origmsg)
-
-      if (err.meta$.err) {
-        var errmeta = _.clone(meta)
-        errmeta.err = seneca_err
-        err.meta$.err_trace = err.meta$.err_trace || []
-        err.meta$.err_trace.push(errmeta)
-      } else {
-        err.meta$.err = seneca_err
-      }
-    }
-
-    result[0] = err
-  } else if (
-    err.orig &&
-    _.isString(err.orig.code) &&
-    err.orig.code.indexOf('perm/') === 0
-  ) {
-    // Special legacy case for seneca-perm
-    err = err.orig
-    result[0] = err
-  }
-
-  if (opts.legacy.error) {
-    err.details = err.details || {}
-    err.details.plugin = err.details.plugin || {}
-  }
-
-  var entry = actlog(actdef, msg, meta, origmsg, {
-    // kind is act as this log entry relates to an action
-    kind: 'act',
-    case: 'ERR',
-    duration: duration
-  })
-  entry = errlog(err, entry)
-
-  instance.log.error(entry)
-  instance.emit('act-err', msg, err)
-
-  // when fatal$ is set, prefer to die instead
-  if (opts.errhandler && (!msg || !meta.fatal)) {
-    call_cb = !opts.errhandler.call(instance, err, err.meta$ || meta)
-  }
-
-  return {
-    call_cb: call_cb,
-    err: err
-  }
-}
-
-intern.callback_error = function(instance, thrown_obj, actctxt, data) {
-  var duration = actctxt.duration
-  var act_callpoint = actctxt.callpoint
-  var actdef = actctxt.actdef || {}
-  var origmsg = actctxt.origmsg
-  var reply = actctxt.reply
+intern.callback_error = function(instance, thrown_obj, ctxt, data) {
+  var duration = ctxt.duration
+  var act_callpoint = ctxt.callpoint
+  var actdef = ctxt.actdef || {}
+  var origmsg = ctxt.origmsg
+  var reply = ctxt.reply
 
   var meta = data.meta
   var msg = data.msg
@@ -1578,9 +1491,6 @@ intern.callback_error = function(instance, thrown_obj, actctxt, data) {
       })
     )
   }
-
-  err.details = err.details || {}
-  err.details.plugin = err.details.plugin || {}
 
   instance.log.error(
     actlog(actdef, msg, meta, origmsg, {

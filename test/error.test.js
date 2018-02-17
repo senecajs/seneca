@@ -1,15 +1,18 @@
-/* Copyright (c) 2014-2017 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
 'use strict'
 
 var Assert = require('assert')
 var Lab = require('lab')
+var Code = require('code')
 var Seneca = require('..')
 var TransportStubs = require('./stubs/transports')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
+var expect = Code.expect
 var assert = Assert
+
 var testopts = { log: 'silent' }
 
 // Shortcuts
@@ -42,10 +45,67 @@ describe('error', function() {
   it('exec_action_errhandler_result', exec_action_errhandler_result)
 
   it('action_callback', action_callback)
+  it('action_callback', action_callback_legacy)
 
   it('ready_die', ready_die)
 
   it('legacy_fail', legacy_fail)
+
+
+
+  function action_callback(fin) {
+    var si = Seneca({log: 'silent'})
+
+    si.add('a:1', function(msg, reply) {
+      reply({x:1})
+    })
+
+    throw_err_obj()
+    
+    function throw_err_obj() {
+      si.error(function(err) {
+        try {
+          expect(err.code).equal('act_callback')
+          expect(err.message).contains('CALLBACK')
+          throw_obj()
+        } catch(e) { fin(e) }
+      })
+
+      si.act('a:1', function(err, out) {
+        throw new Error('CALLBACK')
+      })
+    }
+
+
+    function throw_obj() {
+      si.error(function(err) {
+        try {
+          expect(err.code).equal('act_callback')
+          expect(err.message).contains('CALLBACK')
+          throw_seneca_error()
+        } catch(e) { fin(e) }
+      })
+
+      si.act('a:1', function(err, out) {
+        throw 'CALLBACK'
+      })
+    }
+
+    function throw_seneca_error() {
+      si.error(function(err) {
+        try {
+          expect(err.code).equal('foo')
+          expect(err.message).contains('foo')
+          fin()
+        } catch(e) { fin(e) }
+      })
+
+      si.act('a:1', function(err, out) {
+        throw si.util.error('foo')
+      })
+    }
+  }
+
 
   function fail_assert(done) {
     return function(err) {
@@ -498,7 +558,8 @@ describe('error', function() {
     }
   }
 
-  function action_callback(done) {
+  
+  function action_callback_legacy(done) {
     var ctxt = { errlog: null }
     var si = make_seneca(ctxt)
 
