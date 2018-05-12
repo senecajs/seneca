@@ -94,7 +94,7 @@
     "semver": "5.5",
     "seneca-log-filter": "0.1",
     "seneca-transport": "2.1",
-    "use-plugin": "0.3",
+    "use-plugin": "1.0",
     "wreck": "12.5"
   },
   "devDependencies": {
