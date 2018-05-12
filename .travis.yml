@@ -35,12 +35,16 @@ before_script:
       npm install $SENECA_INSTALL;
     fi
 
-cache:
-  directories:
-      - node_modules
+script:
+  - npm test
+  - npm audit
 
 after_script:
   - npm run coveralls
+
+cache:
+  directories:
+      - node_modules
 
 notifications:
   webhooks:

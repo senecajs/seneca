@@ -100,7 +100,7 @@
   "devDependencies": {
     "async": "2",
     "bench": "0",
-    "code": "5",
+    "code": "4",
     "coveralls": "3",
     "docco": "0",
     "hoek": "5",
