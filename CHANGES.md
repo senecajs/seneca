@@ -1,3 +1,10 @@
+## 3.5.0 2018-05-14
+
+* Better format for fatal error messages
+* Passes `npm audit`
+* Fixed double `sub` call
+
+
 ## 3.4.3 2017-10-13
 
 * Supports --seneca.test to trigger test mode
