@@ -15,6 +15,10 @@ env:
     - TEST_SUITE=senecajs/seneca-entity
     - TEST_SUITE=senecajs/seneca-transport
 
+install:
+  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
+
+
 before_script:
   - export SENECA_REPO_NAME=${TRAVIS_REPO_SLUG%/*}
   - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
@@ -36,15 +40,12 @@ before_script:
 
 script:
   - npm test
-
+  - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
 
 
 after_script:
   - npm run coveralls
 
-cache:
-  directories:
-      - node_modules
 
 notifications:
   webhooks:

@@ -69,7 +69,7 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 85 -I SharedArrayBuffer,Atomics",
+    "test": "lab -v -P test -L -t 85 -I URL,URLSearchParams,SharedArrayBuffer,Atomics",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 85 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
@@ -102,7 +102,7 @@
     "code": "4",
     "coveralls": "3",
     "docco": "0",
-    "hoek": "5",
+    "hoek": "4",
     "lab": "14",
     "prettier": "1",
     "seneca-entity": "2.1",
