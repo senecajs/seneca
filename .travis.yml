@@ -3,10 +3,9 @@ sudo: false
 
 node_js:
   - '4'
-  - '5'
   - '6'
-  - '7'
   - '8'
+  - '10'
 
 env:
   global:
@@ -37,7 +36,8 @@ before_script:
 
 script:
   - npm test
-  - npm audit
+
+
 
 after_script:
   - npm run coveralls

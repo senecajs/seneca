@@ -74,26 +74,25 @@
     "coverage": "lab -v -P test -L -t 85 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
-    "prettier": "prettier --write --no-semi --single-quote seneca.js lib/*.js test/*.js"
+    "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js"
   },
   "dependencies": {
     "archy": "1.0",
-    "eraro": "0.4",
+    "eraro": "1.0",
     "gate-executor": "1.1",
-    "gex": "0.2",
+    "gex": "0.3",
     "json-stringify-safe": "5.0",
     "jsonic": "0.3",
     "lodash": "4.17",
     "minimist": "1.2",
     "nid": "0.3",
-    "norma": "0.3",
+    "norma": "0.4",
     "ordu": "0.1",
-    "patrun": "0.5",
+    "patrun": "1.0",
     "qs": "6.5",
     "rolling-stats": "0.1",
     "semver": "5.5",
-    "seneca-log-filter": "0.1",
-    "seneca-transport": "2.1",
+    "seneca-transport": "2.2",
     "use-plugin": "1.0",
     "wreck": "12.5"
   },
@@ -106,7 +105,7 @@
     "hoek": "5",
     "lab": "14",
     "prettier": "1",
-    "seneca-entity": "2",
+    "seneca-entity": "2.1",
     "seneca-error-test": "0"
   }
 }
