@@ -350,6 +350,7 @@ function make_seneca(initial_options) {
   root$.gate = API.gate // Create a delegate that executes actions in sequence.
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.test = API.test // Set test mode.
+  root$.translate = API.translate // Set test mode.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
@@ -1384,6 +1385,7 @@ intern.handle_inward_break = function(
 intern.make_actmsg = function(origmsg) {
   var actmsg = Object.assign({}, origmsg)
 
+
   if (actmsg.id$) {
     delete actmsg.id$
   }
@@ -1396,6 +1398,10 @@ intern.make_actmsg = function(origmsg) {
     delete actmsg.meta$
   }
 
+  if (actmsg.prior$) {
+    delete actmsg.prior$
+  }
+  
   // backwards compatibility for Seneca 3.x transports
   if (origmsg.transport$) {
     actmsg.transport$ = origmsg.transport$
