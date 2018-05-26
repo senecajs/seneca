@@ -13,7 +13,7 @@ var Seneca = require('..')
 
 describe('options', function() {
   it('strict.find', function(fin) {
-    Seneca({strict: {find: false}})
+    Seneca({ strict: { find: false } })
       .test(fin)
       .act('foo:1')
       .ready(fin)

@@ -69,10 +69,14 @@ describe('logging', function() {
 
     function nothing() {
       log = []
-      Seneca().error(restore).add('a:1', a1).act('a:1').ready(function() {
-        expect(log.length).to.equal(1)
-        quiet()
-      })
+      Seneca()
+        .error(restore)
+        .add('a:1', a1)
+        .act('a:1')
+        .ready(function() {
+          expect(log.length).to.equal(1)
+          quiet()
+        })
     }
 
     function quiet() {
@@ -161,7 +165,10 @@ describe('logging', function() {
   })
 
   it('test-mode', function(fin) {
-    Seneca.test(fin).add('a:1', a1).act('a:1').ready(fin)
+    Seneca.test(fin)
+      .add('a:1', a1)
+      .act('a:1')
+      .ready(fin)
   })
 })
 

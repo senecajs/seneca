@@ -291,7 +291,7 @@ module.exports.test = function top_test() {
 }
 
 module.exports.util = seneca_util
-module.exports.test$ = {intern: intern}
+module.exports.test$ = { intern: intern }
 
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
@@ -506,6 +506,7 @@ function make_seneca(initial_options) {
     .add(Outward.act_cache)
     .add(Outward.res_object)
     .add(Outward.res_entity)
+    .add(Outward.msg_meta)
     .add(Outward.trace)
     .add(Outward.announce)
     .add(Outward.act_error)
@@ -575,7 +576,9 @@ function make_seneca(initial_options) {
     actdef.plugin_fullname =
       actdef.plugin_fullname ||
       actdef.plugin_name +
-        ((actdef.plugin_tag === '-' ? void 0 : actdef.plugin_tag)
+        ((actdef.plugin_tag === '-'
+        ? void 0
+        : actdef.plugin_tag)
           ? '/' + actdef.plugin_tag
           : '')
 
@@ -596,9 +599,10 @@ function make_seneca(initial_options) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actdef.deprecate = raw_pattern.deprecate$
 
-    var strict_add = raw_pattern.strict$ && raw_pattern.strict$.add !== null
-      ? !!raw_pattern.strict$.add
-      : !!opts.$.strict.add
+    var strict_add =
+      raw_pattern.strict$ && raw_pattern.strict$.add !== null
+        ? !!raw_pattern.strict$.add
+        : !!opts.$.strict.add
 
     var pattern_rules = _.clone(action.validate || {})
     _.each(pattern, function(v, k) {
@@ -626,28 +630,28 @@ function make_seneca(initial_options) {
     // Canonical object form of the action pattern.
     actdef.msgcanon = Jsonic(actdef.pattern)
 
-    var priormeta = self.find(pattern)
+    var priordef = self.find(pattern)
 
-    if (priormeta && strict_add && priormeta.pattern !== actdef.pattern) {
+    if (priordef && strict_add && priordef.pattern !== actdef.pattern) {
       // only exact action patterns are overridden
       // use .wrap for pin-based patterns
-      priormeta = null
+      priordef = null
     }
 
-    if (priormeta) {
+    if (priordef) {
       // Clients needs special handling so that the catchall
       // pattern does not submit all patterns into the handle
       if (
-        _.isFunction(priormeta.handle) &&
-        ((priormeta.client && actdef.client) ||
-          (!priormeta.client && !actdef.client))
+        _.isFunction(priordef.handle) &&
+        ((priordef.client && actdef.client) ||
+          (!priordef.client && !actdef.client))
       ) {
-        priormeta.handle(args.pattern, action)
+        priordef.handle(args.pattern, action)
         addroute = false
       } else {
-        actdef.priormeta = priormeta
+        actdef.priordef = priordef
       }
-      actdef.priorpath = priormeta.id + ';' + priormeta.priorpath
+      actdef.priorpath = priordef.id + ';' + priordef.priorpath
     } else {
       actdef.priorpath = ''
     }
@@ -874,7 +878,6 @@ function make_seneca(initial_options) {
 
   function do_act(instance, origmsg, origreply) {
     var timedout = false
-
     var actmsg = intern.make_actmsg(origmsg)
     var meta = new intern.Meta(instance, opts, origmsg, origreply)
 
@@ -940,9 +943,11 @@ function make_seneca(initial_options) {
     return fix
   }
 
-  function api_delegate(fixedargs) {
+  // TODO: rename fixedargs
+  function api_delegate(fixedargs, fixedmeta) {
     var self = this
     fixedargs = fixedargs || {}
+    fixedmeta = fixedmeta || {}
 
     var delegate = Object.create(self)
     delegate.private$ = Object.create(self.private$)
@@ -970,9 +975,17 @@ function make_seneca(initial_options) {
       ? _.extend({}, fixedargs, self.fixedargs)
       : _.extend({}, self.fixedargs, fixedargs)
 
-    delegate.delegate = function delegate(further_fixedargs) {
+    delegate.fixedmeta = opts.$.strict.fixedmeta
+      ? _.extend({}, fixedmeta, self.fixedmeta)
+      : _.extend({}, self.fixedmeta, fixedmeta)
+
+    delegate.delegate = function delegate(
+      further_fixedargs,
+      further_fixedmeta
+    ) {
       var args = _.extend({}, delegate.fixedargs, further_fixedargs || {})
-      return self.delegate.call(this, args)
+      var meta = _.extend({}, delegate.fixedmeta, further_fixedmeta || {})
+      return self.delegate.call(this, args, meta)
     }
 
     // Somewhere to put contextual data for this delegate.
@@ -1002,9 +1015,8 @@ function make_seneca(initial_options) {
       })
     }
 
-    opts.$ = private$.exports.options = options == null
-      ? private$.optioner.get()
-      : private$.optioner.set(options)
+    opts.$ = private$.exports.options =
+      options == null ? private$.optioner.get() : private$.optioner.set(options)
 
     if (opts.$.legacy.logging) {
       if (options && options.log && _.isArray(options.log.map)) {
@@ -1218,9 +1230,23 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
     data.pattern = data.pattern || actdef.pattern
   })
 
-  delegate.prior = function(msg, reply) {
-    if (actdef.priormeta) {
-      msg.prior$ = actdef.priormeta.id
+  delegate.prior = function() {
+    var argsarr = new Array(arguments.length)
+    for (var l = 0; l < argsarr.length; ++l) {
+      argsarr[l] = arguments[l]
+    }
+
+    var spec = Common.build_message(
+      delegate,
+      argsarr,
+      'reply:f?',
+      delegate.fixedargs
+    )
+    var msg = spec.msg
+    var reply = spec.reply
+
+    if (actdef.priordef) {
+      msg.prior$ = actdef.priordef.id
       this.act(msg, reply)
     } else {
       var meta = msg.meta$ || {}
@@ -1396,6 +1422,9 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   var id_tx = intern.resolve_msg_id_tx(instance, origmsg)
   var origmeta = origmsg.meta$
 
+  // Only a limited set of meta properties can be fixed
+  var fixedmeta = instance.fixedmeta || {}
+
   this.start = Date.now()
   this.end = null
   this.pattern = null
@@ -1410,9 +1439,9 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   this.seneca = instance.version
   this.version = '0.1.0'
 
-  this.gate = !!origmsg.gate$
-  this.fatal = !!origmsg.fatal$
-  this.local = !!origmsg.local$
+  this.gate = !!origmsg.gate$ || fixedmeta.gate
+  this.fatal = !!origmsg.fatal$ || fixedmeta.fatal
+  this.local = !!origmsg.local$ || fixedmeta.local
 
   this.closing = !!origmsg.closing$ || (origmeta && origmeta.closing)
 
@@ -1422,18 +1451,23 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   )
 
   this.dflt = origmsg.default$ || (origmeta && origmeta.dflt)
-  this.custom = origmsg.custom$ || (origmeta && origmeta.custom)
+
+  this.custom = origmsg.custom$ || (origmeta && origmeta.custom) || {}
+  if (fixedmeta.custom) {
+    Object.assign(this.custom, fixedmeta.custom)
+  }
 
   this.plugin = origmsg.plugin$
   this.prior = origmsg.prior$
   this.parents = origmsg.parents$
   this.caller = origmsg.caller$
 
-  this.sync = null != origmsg.sync$
-    ? !!origmsg.sync$
-    : origmeta && null != origmeta.sync
-      ? !!origmeta.sync
-      : _.isFunction(origreply)
+  this.sync =
+    null != origmsg.sync$
+      ? !!origmsg.sync$
+      : origmeta && null != origmeta.sync
+        ? !!origmeta.sync
+        : _.isFunction(origreply)
 
   this.trace = null
   this.sub = null
@@ -1453,13 +1487,11 @@ intern.process_outward = function(actctxt, data) {
       data.meta.error = true
     } else if ('result' === outward.kind) {
       data.res = outward.result
-    }
-    else {
-      Assert.fail('unknown outward kind: '+outward.kind)
+    } else {
+      Assert.fail('unknown outward kind: ' + outward.kind)
     }
   }
 }
-
 
 intern.callback_error = function(instance, thrown_obj, ctxt, data) {
   var duration = ctxt.duration

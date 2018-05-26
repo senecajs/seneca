@@ -21,10 +21,9 @@ var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function() {
-  
   it('action_callback', action_callback)
   it('plugin_load', plugin_load)
-  
+
   it('act_not_found', act_not_found)
 
   it('exec_action_throw_basic', exec_action_throw_basic)
@@ -46,24 +45,24 @@ describe('error', function() {
 
   it('legacy_fail', legacy_fail)
 
-
-
   function action_callback(fin) {
-    var si = Seneca({log: 'silent'})
+    var si = Seneca({ log: 'silent' })
 
     si.add('a:1', function(msg, reply) {
-      reply({x:1})
+      reply({ x: 1 })
     })
 
     throw_err_obj()
-    
+
     function throw_err_obj() {
       si.error(function(err) {
         try {
           expect(err.code).equal('act_callback')
           expect(err.message).contains('CALLBACK')
           throw_obj()
-        } catch(e) { fin(e) }
+        } catch (e) {
+          fin(e)
+        }
       })
 
       si.act('a:1', function(err, out) {
@@ -71,14 +70,15 @@ describe('error', function() {
       })
     }
 
-
     function throw_obj() {
       si.error(function(err) {
         try {
           expect(err.code).equal('act_callback')
           expect(err.message).contains('CALLBACK')
           throw_seneca_error()
-        } catch(e) { fin(e) }
+        } catch (e) {
+          fin(e)
+        }
       })
 
       si.act('a:1', function(err, out) {
@@ -92,7 +92,9 @@ describe('error', function() {
           expect(err.code).equal('foo')
           expect(err.message).contains('foo')
           fin()
-        } catch(e) { fin(e) }
+        } catch (e) {
+          fin(e)
+        }
       })
 
       si.act('a:1', function(err, out) {
@@ -101,11 +103,10 @@ describe('error', function() {
     }
   }
 
-
   function plugin_load(fin) {
-    var si = Seneca({log: 'silent', debug: { undead: true }})
+    var si = Seneca({ log: 'silent', debug: { undead: true } })
 
-    si.error(function(err){
+    si.error(function(err) {
       // TODO: validate
       fin()
     })
@@ -115,8 +116,6 @@ describe('error', function() {
     })
   }
 
-
-  
   function fail_assert(done) {
     return function(err) {
       if (err && 'AssertionError' === err.name) {
@@ -568,7 +567,6 @@ describe('error', function() {
     }
   }
 
-  
   function action_callback_legacy(done) {
     var ctxt = { errlog: null }
     var si = make_seneca(ctxt)

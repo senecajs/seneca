@@ -977,7 +977,9 @@ describe('seneca', function() {
   })
 
   it('act-history', function(fin) {
-    var si = Seneca().test(fin).use('entity')
+    var si = Seneca()
+      .test(fin)
+      .use('entity')
 
     var x = 0
 
@@ -1216,10 +1218,12 @@ describe('seneca', function() {
   })
 
   it('basic-close', function(fin) {
-    Seneca({ legacy: { transport: false } }).test(fin).close(function(err) {
-      assert(!err)
-      fin()
-    })
+    Seneca({ legacy: { transport: false } })
+      .test(fin)
+      .close(function(err) {
+        assert(!err)
+        fin()
+      })
   })
 
   it('supports jsonic params to has', function(done) {

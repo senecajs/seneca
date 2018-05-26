@@ -23,9 +23,7 @@ describe('plugin.error', function() {
       })
   })
 
-  it('should return "no errors created." when passing test false', function(
-    done
-  ) {
+  it('should return "no errors created." when passing test false', function(done) {
     var seneca = Seneca({ tag: 'c0' }).test(done)
     seneca.use('./stubs/plugin-error/tmpApi')
     seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })

@@ -433,9 +433,7 @@ describe('plugin', function() {
       })
   })
 
-  it('plugin options can be modified by plugins during load sequence', function(
-    done
-  ) {
+  it('plugin options can be modified by plugins during load sequence', function(done) {
     var seneca = Seneca({
       log: 'test',
       plugin: {
@@ -470,9 +468,7 @@ describe('plugin', function() {
       })
   })
 
-  it('plugin options can be modified by plugins during init sequence', function(
-    done
-  ) {
+  it('plugin options can be modified by plugins during init sequence', function(done) {
     var seneca = Seneca({
       log: 'silent',
       plugin: {
@@ -525,9 +521,7 @@ describe('plugin', function() {
       })
   })
 
-  it('plugin init can add actions for future init actions to call', function(
-    done
-  ) {
+  it('plugin init can add actions for future init actions to call', function(done) {
     var seneca = Seneca.test(done, 'silent')
 
     seneca

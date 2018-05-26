@@ -27,7 +27,9 @@ describe('entity', function() {
   })
 
   it('entity-msg', function(fin) {
-    var si = Seneca().test(fin).use('entity')
+    var si = Seneca()
+      .test(fin)
+      .use('entity')
 
     var foo = si.make$('foo', { a: 1 })
     var bar = si.make$('bar', { c: 3 })
@@ -58,7 +60,9 @@ describe('entity', function() {
   })
 
   it('mem-ops', function(fin) {
-    var si = Seneca({ tag: 'e0' }).test(fin).use('entity')
+    var si = Seneca({ tag: 'e0' })
+      .test(fin)
+      .use('entity')
 
     si = si.gate()
 

@@ -224,6 +224,84 @@ describe('transport', function() {
     }
   })
 
+  it('nextgen-transport-local-override', test_opts, function(fin) {
+    Seneca({
+      tag: 's0',
+      timeout: 22222 * tmx,
+      transport: { web: { port: 62020 } },
+      legacy: { transport: false }
+    })
+      .test(fin)
+      .add('foo:1', function foo_srv(msg, reply, meta) {
+        reply({ bar: 1 })
+      })
+      .listen({ pin: 'foo:1' })
+      .ready(function() {
+        Seneca({
+          tag: 'c0',
+          timeout: 22222 * tmx,
+          transport: { web: { port: 62020 } },
+          legacy: { transport: false }
+        })
+          .test(fin)
+          .add('foo:1', function foo_cln(msg, reply, meta) {
+            reply({ bar: 2 })
+          })
+          .client({ pin: 'foo:1' })
+          .act('foo:1,actid$:aa/BB', function(err, out) {
+            expect(err).to.not.exist()
+
+            // The remote version overrides the local version
+            expect(out.bar).to.equal(1)
+
+            console.dir(this.find('foo:1'), { depth: null })
+
+            fin()
+          })
+      })
+  })
+
+  it('nextgen-meta', test_opts, function(fin) {
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({
+      id$: 'c0',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    }).test(fin)
+
+    s0
+      .add('a:1', function a1(msg, reply, meta) {
+        reply({ x: msg.x, y: meta.custom.y })
+      })
+      .add('b:1', function a1(msg, reply, meta) {
+        this.act('a:1', { x: msg.x }, reply)
+      })
+      .listen(62010)
+      .ready(function() {
+        c0
+          .client(62010)
+          .act('a:1,x:2', { meta$: { custom: { y: 33 } } }, function(
+            ignore,
+            out,
+            meta
+          ) {
+            expect(out.y).equals(33)
+            expect(out.x).equals(2)
+
+            this.act('b:1,x:3', { meta$: { custom: { y: 44 } } }, function(
+              ignore,
+              out,
+              meta
+            ) {
+              expect(out.y).equals(44)
+              expect(out.x).equals(3)
+
+              s0.close(c0.close.bind(c0, fin))
+            })
+          })
+      })
+  })
+
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
@@ -527,6 +605,35 @@ describe('transport', function() {
       })
   })
 
+  it('transport-local-override', test_opts, function(done) {
+    var tt = make_test_transport()
+
+    Seneca({ tag: 'srv', timeout: 5555 })
+      .test(done)
+      .use(tt)
+      .add('foo:1', function foo_srv(msg, reply, meta) {
+        reply({ bar: 1 })
+      })
+      .listen({ type: 'test', pin: 'foo:1' })
+      .ready(function() {
+        Seneca({ tag: 'cln', timeout: 22222 * tmx })
+          .test(done)
+          .use(tt)
+          .add('foo:1', function foo_cln(msg, reply, meta) {
+            reply({ bar: 2 })
+          })
+          .client({ type: 'test', pin: 'foo:1' })
+          .act('foo:1,actid$:aa/BB', function(err, out) {
+            expect(err).to.not.exist()
+
+            // The remote version overrides the local version
+            expect(out.bar).to.equal(1)
+
+            done()
+          })
+      })
+  })
+
   it('transport-star', test_opts, function(done) {
     var tt = make_test_transport()
 
@@ -542,21 +649,24 @@ describe('transport', function() {
           debug: { short_logs: true }
         })
 
-        si.use(tt).client({ type: 'test', pin: 'foo:*' }).ready(function() {
-          si.act('foo:1', function(err, out) {
-            expect(err).to.not.exist()
-            expect(out.foo).to.equal(1)
-            si.act('foo:2', function(err, out) {
+        si
+          .use(tt)
+          .client({ type: 'test', pin: 'foo:*' })
+          .ready(function() {
+            si.act('foo:1', function(err, out) {
               expect(err).to.not.exist()
-              expect(out.foo).to.equal(2)
-              si.act('bar:1', function(err) {
-                expect(err.code).to.equal('act_not_found')
+              expect(out.foo).to.equal(1)
+              si.act('foo:2', function(err, out) {
+                expect(err).to.not.exist()
+                expect(out.foo).to.equal(2)
+                si.act('bar:1', function(err) {
+                  expect(err.code).to.equal('act_not_found')
 
-                done()
+                  done()
+                })
               })
             })
           })
-        })
       })
   })
 
@@ -1001,6 +1111,7 @@ describe('transport', function() {
     }
   })
 
+  /*
   it('fatal$ false with transport not-found kill process', test_opts, function(
     done
   ) {
@@ -1016,6 +1127,7 @@ describe('transport', function() {
       })
     })
   })
+  */
 
   it('server can be restarted without issues to clients', test_opts, function(
     done

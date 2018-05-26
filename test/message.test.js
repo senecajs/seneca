@@ -323,7 +323,9 @@ describe('message', function() {
   })
 
   it('entity', test_opts, function(fin) {
-    var si = Seneca().test(fin).use('entity')
+    var si = Seneca()
+      .test(fin)
+      .use('entity')
 
     si = si.gate()
 
