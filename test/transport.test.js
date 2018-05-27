@@ -302,6 +302,49 @@ describe('transport', function() {
       })
   })
 
+
+  it('nextgen-ordering', test_opts, function(fin) {
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({
+      id$: 'c0',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    }).test(fin)
+
+    s0
+      .add('a:1', function a1(msg, reply, meta) {
+        reply({ x: 'a' })
+      })
+      .add('a:1,b:1', function a1(msg, reply, meta) {
+        reply({x: 'ab'})
+      })
+      .add('c:1', function a1(msg, reply, meta) {
+        reply({ x: 'c' })
+      })
+      .add('c:1,d:1', function a1(msg, reply, meta) {
+        reply({x: 'cd'})
+      })
+      .listen(62010)
+      .ready(function() {
+        var i = 0
+        c0
+          .client({port:62010,pin:'a:1'})
+          .client({port:62010,pin:'a:1,b:1'})
+          .client({port:62010,pin:'c:1,d:1'})
+          .client({port:62010,pin:'c:1'})
+          .act('a:1', function(ignore,out) {expect(out).equal({x:'a'}); i++ })
+          .act('c:1', function(ignore,out) {expect(out).equal({x:'c'}); i++ })
+          .act('a:1,b:1', function(ignore,out) {expect(out).equal({x:'ab'}); i++ })
+          .act('c:1,d:1', function(ignore,out) {expect(out).equal({x:'cd'}); i++ })
+          .ready(function() {
+            expect(i).equal(4)
+            fin()
+          })
+      })
+  })
+
+
+  
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
