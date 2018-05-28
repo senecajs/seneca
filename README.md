@@ -9,8 +9,8 @@
 [![Gitter][BadgeGitter]][Gitter]
 
 - __Lead Maintainer:__ [Richard Rodger][Lead]
-- __Sponsor:__ [metsitaba][Sponsor]
-- __Node:__ 4.x, 6.x, 8.x
+- __Sponsor:__ [voxgig][Sponsor]
+- __Node:__ 4.x, 6.x, 8.x, 10.x
 
 Seneca is a toolkit for writing microservices and organizing the
 business logic of your app. You can break down your app into "stuff
@@ -24,10 +24,12 @@ Seneca provides,
 - __transport independence:__ how messages get to the right server is not something you
 should have to worry about
 
-- __maturity:__ 7 years in production (before we called it _microservices_), but was
+- __maturity:__ 8 years in production (before we called it _microservices_), but was
 once taken out by [lightning][]
 
 - __plus:__ a deep and wide ecosystem of [plugins][]
+
+- __book:__ a guide to designing microservice architectures: [taomicro][]
 
 Use this module to define commands that work by taking in some JSON,
 and, optionally, returning some JSON. The command to run is selected
@@ -382,7 +384,7 @@ npm run coverage; open docs/coverage.html
 
 
 ## License
-Copyright (c) 2015-2016 Richard Rodger and other contributors;
+Copyright (c) 2010-2018 Richard Rodger and other contributors;
 Licensed under __[MIT][Lic]__.
 
 
@@ -403,7 +405,7 @@ Licensed under __[MIT][Lic]__.
 [Npm]: https://www.npmjs.com/package/seneca
 [Org]: http://senecajs.org/
 [Pull]: https://github.com/senecajs/seneca/pulls
-[Sponsor]: http://www.metsitaba.com
+[Sponsor]: http://www.voxgig.com
 [Travis]: https://travis-ci.org/senecajs/seneca?branch=master
 [Tweet]: https://twitter.com/senecajs
 
@@ -412,3 +414,5 @@ Licensed under __[MIT][Lic]__.
 [Jsonic]: https//github.com/rjrodger/jsonic
 [Lightning]: http://aws.amazon.com/message/67457/
 [Plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
+[taomicro]: https://bitly.com/rrtaomicro
+

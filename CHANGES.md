@@ -1,3 +1,9 @@
+## 3.6.0 2018-05-28
+
+* `translate` method simplifies translating message patterns 
+* Message metadata has `custom` sub-object that propogates with message 
+
+
 ## 3.5.0 2018-05-14
 
 * Better format for fatal error messages
