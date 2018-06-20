@@ -16,7 +16,8 @@ env:
     - TEST_SUITE=senecajs/seneca-transport
 
 install:
-  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
+  - npm i -g npm@latest
+  - npm ci
 
 
 before_script:
@@ -40,7 +41,7 @@ before_script:
 
 script:
   - npm test
-  - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
+  - npm audit
 
 
 after_script:
