@@ -226,7 +226,9 @@ var seneca_util = {
 }
 
 // Internal implementations.
-var intern = {}
+var intern = {
+  util: seneca_util
+}
 
 // Seneca is an EventEmitter.
 function Seneca() {
@@ -1385,7 +1387,6 @@ intern.handle_inward_break = function(
 intern.make_actmsg = function(origmsg) {
   var actmsg = Object.assign({}, origmsg)
 
-
   if (actmsg.id$) {
     delete actmsg.id$
   }
@@ -1401,7 +1402,11 @@ intern.make_actmsg = function(origmsg) {
   if (actmsg.prior$) {
     delete actmsg.prior$
   }
-  
+
+  if (actmsg.parents$) {
+    delete actmsg.parents$
+  }
+
   // backwards compatibility for Seneca 3.x transports
   if (origmsg.transport$) {
     actmsg.transport$ = origmsg.transport$
@@ -1426,6 +1431,7 @@ intern.resolve_msg_id_tx = function(act_instance, origmsg) {
 
 intern.Meta = function(instance, opts, origmsg, origreply) {
   var id_tx = intern.resolve_msg_id_tx(instance, origmsg)
+
   var origmeta = origmsg.meta$
 
   // Only a limited set of meta properties can be fixed
@@ -1458,10 +1464,10 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
 
   this.dflt = origmsg.default$ || (origmeta && origmeta.dflt)
 
-  this.custom = origmsg.custom$ || (origmeta && origmeta.custom) || {}
-  if (fixedmeta.custom) {
-    Object.assign(this.custom, fixedmeta.custom)
-  }
+  // NOTE: do not create object here if not provided explicitly.
+  // The parent custom object will be used when available during inward processing.
+  // This preserves object ref of custom object, as it is shared over calls
+  this.custom = origmsg.custom$ || (origmeta && origmeta.custom) || null
 
   this.plugin = origmsg.plugin$
   this.prior = origmsg.prior$

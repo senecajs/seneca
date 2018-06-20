@@ -503,8 +503,7 @@ describe('seneca', function() {
         this.prior(msg, reply)
       })
 
-      si
-        .gate()
+      si.gate()
         .act('foo:a,x:10,y:0.1', function(err) {
           assert.equal(err, null)
           assert.equal(11.1, count)
@@ -558,8 +557,7 @@ describe('seneca', function() {
       done(null, { count: count })
     })
 
-    si
-      .gate()
+    si.gate()
       .act('foo:a,x:10', function(err) {
         assert.equal(err, null)
         assert.equal(11, count)
@@ -795,23 +793,27 @@ describe('seneca', function() {
 
     var si = Seneca(testopts).error(done)
 
-    si
-      .add('i:0,a:1,b:2', addFunction)
-      .act('i:0,a:1,b:2,c:3', function(err, out) {
-        checkFunction(err, out, function() {
-          si
-            .add('i:1,a:1', { b: 2 }, addFunction)
-            .act('i:1,a:1,b:2,c:3', function(err, out) {
-              checkFunction(err, out, function() {
-                si
-                  .add('i:2,a:1', { b: 2, c: { required$: true } }, addFunction)
-                  .act('i:2,a:1,b:2,c:3', function(err, out) {
-                    checkFunction(err, out, done)
-                  })
+    si.add('i:0,a:1,b:2', addFunction).act('i:0,a:1,b:2,c:3', function(
+      err,
+      out
+    ) {
+      checkFunction(err, out, function() {
+        si.add('i:1,a:1', { b: 2 }, addFunction).act(
+          'i:1,a:1,b:2,c:3',
+          function(err, out) {
+            checkFunction(err, out, function() {
+              si.add(
+                'i:2,a:1',
+                { b: 2, c: { required$: true } },
+                addFunction
+              ).act('i:2,a:1,b:2,c:3', function(err, out) {
+                checkFunction(err, out, done)
               })
             })
-        })
+          }
+        )
       })
+    })
   })
 
   it('fix-basic', function(done) {
@@ -821,8 +823,7 @@ describe('seneca', function() {
       cb(null, { r: '' + args.a + (args.b || '-') + (args.c || '-') + args.z })
     }
 
-    si
-      .fix('a:1')
+    si.fix('a:1')
       .add('b:2', ab)
       .add('c:3', ab)
       .act('b:2,z:8', function(err, out) {
@@ -834,15 +835,13 @@ describe('seneca', function() {
         assert.equal('1-39', out.r)
       })
 
-    si
-      .act('a:1,b:2,z:8', function(err, out) {
-        assert.equal(err, null)
-        assert.equal('12-8', out.r)
-      })
-      .act('a:1,c:3,z:9', function(err, out) {
-        assert.equal(err, null)
-        assert.equal('1-39', out.r)
-      })
+    si.act('a:1,b:2,z:8', function(err, out) {
+      assert.equal(err, null)
+      assert.equal('12-8', out.r)
+    }).act('a:1,c:3,z:9', function(err, out) {
+      assert.equal(err, null)
+      assert.equal('1-39', out.r)
+    })
 
     done()
   })
@@ -1136,21 +1135,19 @@ describe('seneca', function() {
   it('strict-result', function(fin) {
     var si = Seneca({ log: 'silent', legacy: { transport: false } })
 
-    si
-      .add('a:1', function(msg, reply) {
-        reply('a')
-      })
-      .act('a:1', function(err) {
-        assert.ok(err)
-        assert.equal('result_not_objarr', err.code)
+    si.add('a:1', function(msg, reply) {
+      reply('a')
+    }).act('a:1', function(err) {
+      assert.ok(err)
+      assert.equal('result_not_objarr', err.code)
 
-        si.options({ strict: { result: false } })
-        si.act('a:1', function(err, out) {
-          assert.ok(!err)
-          assert.equal('a', out)
-          fin()
-        })
+      si.options({ strict: { result: false } })
+      si.act('a:1', function(err, out) {
+        assert.ok(!err)
+        assert.equal('a', out)
+        fin()
       })
+    })
   })
 
   it('add-noop', function(done) {

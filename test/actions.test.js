@@ -66,10 +66,9 @@ describe('actions', function() {
       si.close = function() {}
       si.root.close = function() {}
 
-      si
-        .add('role:seneca,cmd:close', function(msg, reply) {
-          reply()
-        })
+      si.add('role:seneca,cmd:close', function(msg, reply) {
+        reply()
+      })
         .sub('role:seneca,info:fatal', function(msg) {
           expect(msg.err).exist()
           fin()

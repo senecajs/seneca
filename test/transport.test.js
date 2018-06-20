@@ -49,10 +49,9 @@ describe('transport', function() {
       legacy: { transport: false }
     }).test(fin)
 
-    s0
-      .add('a:1', function a1(msg, reply, meta) {
-        reply({ x: msg.x })
-      })
+    s0.add('a:1', function a1(msg, reply, meta) {
+      reply({ x: msg.x })
+    })
       .add('b:1', function a1(msg, reply, meta) {
         reply([1, 2, 3])
       })
@@ -85,10 +84,9 @@ describe('transport', function() {
       legacy: { transport: false }
     })
 
-    s0
-      .add('a:1', function a1(msg, reply, meta) {
-        reply(new Error('bad'))
-      })
+    s0.add('a:1', function a1(msg, reply, meta) {
+      reply(new Error('bad'))
+    })
       .listen(62011)
       .ready(function() {
         c0.client(62011)
@@ -185,10 +183,9 @@ describe('transport', function() {
       .test(fin)
       .use('entity')
 
-    s0
-      .add('a:1', function(msg, reply) {
-        reply({ x: msg.x })
-      })
+    s0.add('a:1', function(msg, reply) {
+      reply({ x: msg.x })
+    })
       .add('b:1', function(msg, reply, meta) {
         expect(msg.x.canon$()).equal('-/-/foo')
         expect(meta.pattern).equal('b:1')
@@ -269,22 +266,18 @@ describe('transport', function() {
       legacy: { transport: false }
     }).test(fin)
 
-    s0
-      .add('a:1', function a1(msg, reply, meta) {
-        reply({ x: msg.x, y: meta.custom.y })
-      })
+    s0.add('a:1', function a1(msg, reply, meta) {
+      reply({ x: msg.x, y: meta.custom.y })
+    })
       .add('b:1', function a1(msg, reply, meta) {
         this.act('a:1', { x: msg.x }, reply)
       })
       .listen(62010)
       .ready(function() {
-        c0
-          .client(62010)
-          .act('a:1,x:2', { meta$: { custom: { y: 33 } } }, function(
-            ignore,
-            out,
-            meta
-          ) {
+        c0.client(62010).act(
+          'a:1,x:2',
+          { meta$: { custom: { y: 33 } } },
+          function(ignore, out, meta) {
             expect(out.y).equals(33)
             expect(out.x).equals(2)
 
@@ -298,10 +291,10 @@ describe('transport', function() {
 
               s0.close(c0.close.bind(c0, fin))
             })
-          })
+          }
+        )
       })
   })
-
 
   it('nextgen-ordering', test_opts, function(fin) {
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
@@ -311,31 +304,41 @@ describe('transport', function() {
       legacy: { transport: false }
     }).test(fin)
 
-    s0
-      .add('a:1', function a1(msg, reply, meta) {
-        reply({ x: 'a' })
-      })
+    s0.add('a:1', function a1(msg, reply, meta) {
+      reply({ x: 'a' })
+    })
       .add('a:1,b:1', function a1(msg, reply, meta) {
-        reply({x: 'ab'})
+        reply({ x: 'ab' })
       })
       .add('c:1', function a1(msg, reply, meta) {
         reply({ x: 'c' })
       })
       .add('c:1,d:1', function a1(msg, reply, meta) {
-        reply({x: 'cd'})
+        reply({ x: 'cd' })
       })
       .listen(62010)
       .ready(function() {
         var i = 0
-        c0
-          .client({port:62010,pin:'a:1'})
-          .client({port:62010,pin:'a:1,b:1'})
-          .client({port:62010,pin:'c:1,d:1'})
-          .client({port:62010,pin:'c:1'})
-          .act('a:1', function(ignore,out) {expect(out).equal({x:'a'}); i++ })
-          .act('c:1', function(ignore,out) {expect(out).equal({x:'c'}); i++ })
-          .act('a:1,b:1', function(ignore,out) {expect(out).equal({x:'ab'}); i++ })
-          .act('c:1,d:1', function(ignore,out) {expect(out).equal({x:'cd'}); i++ })
+        c0.client({ port: 62010, pin: 'a:1' })
+          .client({ port: 62010, pin: 'a:1,b:1' })
+          .client({ port: 62010, pin: 'c:1,d:1' })
+          .client({ port: 62010, pin: 'c:1' })
+          .act('a:1', function(ignore, out) {
+            expect(out).equal({ x: 'a' })
+            i++
+          })
+          .act('c:1', function(ignore, out) {
+            expect(out).equal({ x: 'c' })
+            i++
+          })
+          .act('a:1,b:1', function(ignore, out) {
+            expect(out).equal({ x: 'ab' })
+            i++
+          })
+          .act('c:1,d:1', function(ignore, out) {
+            expect(out).equal({ x: 'cd' })
+            i++
+          })
           .ready(function() {
             expect(i).equal(4)
             fin()
@@ -343,8 +346,6 @@ describe('transport', function() {
       })
   })
 
-
-  
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
@@ -692,8 +693,7 @@ describe('transport', function() {
           debug: { short_logs: true }
         })
 
-        si
-          .use(tt)
+        si.use(tt)
           .client({ type: 'test', pin: 'foo:*' })
           .ready(function() {
             si.act('foo:1', function(err, out) {
@@ -827,8 +827,7 @@ describe('transport', function() {
           log: 'silent',
           debug: { short_logs: true }
         })
-        si
-          .use(tt)
+        si.use(tt)
           .add('foo:1', function(msg, reply) {
             reply(msg)
           })

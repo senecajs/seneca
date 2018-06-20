@@ -34,11 +34,10 @@ describe('entity', function() {
     var foo = si.make$('foo', { a: 1 })
     var bar = si.make$('bar', { c: 3 })
 
-    si
-      .add('a:1', function(msg, reply) {
-        msg.x = 2
-        reply(msg)
-      })
+    si.add('a:1', function(msg, reply) {
+      msg.x = 2
+      reply(msg)
+    })
       .add('c:3', function(msg, reply) {
         msg.b.y = 3
         reply({ z: msg.b })
