@@ -16,6 +16,7 @@ var Norma = require('norma')
 var Patrun = require('patrun')
 var Stats = require('rolling-stats')
 var Ordu = require('ordu')
+var Eraro = require('eraro')
 
 // Internal modules.
 var API = require('./lib/api')
@@ -207,6 +208,8 @@ var option_defaults = {
 
 // Utility functions exposed by Seneca via `seneca.util`.
 var seneca_util = {
+  Eraro: Eraro,
+
   deepextend: Common.deepextend,
   recurse: Common.recurse,
   clean: Common.clean,
@@ -294,6 +297,7 @@ module.exports.test = function top_test() {
 
 module.exports.util = seneca_util
 module.exports.test$ = { intern: intern }
+
 
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
