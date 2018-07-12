@@ -42,6 +42,9 @@ script:
   - npm test
   - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
 
+cache:
+  directories:
+    - "$HOME/.npm"
 
 after_script:
   - npm run coveralls
