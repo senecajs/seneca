@@ -828,7 +828,7 @@ function make_seneca(initial_options) {
 
     setImmediate(function register_ready() {
       if (root$.private$.ge.isclear()) {
-        ready.call(self)
+        execute_ready(ready.bind(self))
       } else {
         root$.private$.ready_list.push(ready.bind(self))
       }
@@ -1101,21 +1101,41 @@ function make_seneca(initial_options) {
     return log_plugin.preload.call(instance).extend.logger
   }
 
+  // NOTE: this could be called from an arbitrary GateExecutor task,
+  // if the task queue is emptied.
   function action_queue_clear() {
     root$.emit('ready')
-
-    var ready = root$.private$.ready_list.shift()
-    if (ready) {
-      ready()
-    }
+    execute_ready(root$.private$.ready_list.shift())
 
     if (root$.private$.ge.isclear()) {
       while (0 < root$.private$.ready_list.length) {
-        root$.private$.ready_list.shift()()
+        execute_ready(root$.private$.ready_list.shift())
       }
     }
   }
 
+  function execute_ready(ready_func) {
+    if(null == ready_func) return
+    
+    try {
+      ready_func()
+    }
+    catch(ready_err) {
+      var err = error(ready_err, 'ready_failed', {message: ready_err.message})
+
+      if(opts.$.test) {
+        if(opts.$.errhandler) {
+          opts.$.errhandler.call(root$, err)
+        }
+        else throw err
+      }
+      else {
+        root$.die(err)
+      }
+    }
+  }
+
+  
   return root$
 }
 

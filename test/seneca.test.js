@@ -159,6 +159,20 @@ describe('seneca', function() {
     })
   })
 
+  it('ready-error-test', function(fin) {
+    var si = Seneca()
+        .test()
+        .error(function(err) {
+          expect(err.code).equal('ready_failed')
+          expect(err.message).equal('seneca: Ready function failed: foo')
+          fin()
+        })
+
+    si.ready(function() {
+      throw new Error('foo')
+    })
+  })
+  
   it('ready-event', function(done) {
     var si = Seneca(testopts)
 
