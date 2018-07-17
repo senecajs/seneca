@@ -18,6 +18,23 @@ describe('actions', function() {
     reply({ z: msg.z })
   }
 
+  it('cmd_ping', function(fin) {
+    var si = Seneca({legacy:{transport:false}}).test(fin)
+    expect(si.ping().id).equals(si.id)
+
+    si
+      .listen()
+      .ready(function(){
+        this
+          .act('role:seneca,cmd:ping',function(err, out) {
+            //console.dir(out,{depth:null})
+            expect(out.id).equals(this.id)
+            si.close(fin)
+          })
+      })
+  })
+  
+     
   it('cmd_stats', function(fin) {
     var si = Seneca()
       .add('a:1')

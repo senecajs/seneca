@@ -209,15 +209,21 @@ var option_defaults = {
 // Utility functions exposed by Seneca via `seneca.util`.
 var seneca_util = {
   Eraro: Eraro,
+  Jsonic: Jsonic,
+  Nid: Nid,
+  Patrun: Patrun,
 
+  clean: Common.clean,
+  pattern: Common.pattern,
+  print: Common.print,
+  error: error,
+  
+  // Legacy
   deepextend: Common.deepextend,
   recurse: Common.recurse,
-  clean: Common.clean,
   copydata: Common.copydata,
   nil: Common.nil,
   parsepattern: Common.parsePattern,
-  pattern: Common.pattern,
-  print: Common.print,
   pincanon: Common.pincanon,
   router: function router() {
     return Patrun()
@@ -225,7 +231,6 @@ var seneca_util = {
   argprops: Common.argprops,
   resolve_option: Common.resolve_option,
   flatten: Common.flatten,
-  error: error
 }
 
 // Internal implementations.
@@ -356,8 +361,10 @@ function make_seneca(initial_options) {
   root$.gate = API.gate // Create a delegate that executes actions in sequence.
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.test = API.test // Set test mode.
-  root$.translate = API.translate // Set test mode.
+  root$.translate = API.translate // Translate message to new pattern.
+  root$.ping = API.ping // Generate ping response.
 
+  
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
   root$.use = api_use // Define a plugin.

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2018 Richard Rodger, MIT License */
 'use strict'
 
 var Code = require('code')
@@ -10,6 +10,7 @@ var it = lab.it
 var expect = Code.expect
 
 var Seneca = require('..')
+
 
 describe('api', function() {
   var si = Seneca({ log: 'silent' })
@@ -46,6 +47,32 @@ describe('api', function() {
 
     fin()
   })
+
+  
+  it('translate', function(fin) {
+    si = si.test()
+
+    si.add('a:2',function(msg,reply){reply(msg)})
+    si.add('a:4',function(msg,reply){reply(msg)})
+    si.add('b:3',function(msg,reply){reply(msg)})
+    si.translate('a:1','a:2')
+    si.translate({a:3},{a:4})
+    si.translate('c:3,d:4','b:3')
+
+    si
+      .gate()
+      .act('a:1', function(err, out) {
+        expect(out).contains({a:2})
+      })
+      .act('a:3', function(err, out) {
+        expect(out).contains({a:4})
+      })
+      .act('c:3,d:4', function(err, out) {
+        expect(out).contains({b:3,c:3,d:4})
+      })
+      .ready(fin)
+  })
+
 
   it('has', function(fin) {
     si = si.test()
