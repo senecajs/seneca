@@ -21,6 +21,7 @@ var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function() {
+  it('response_is_error', response_is_error)
   it('action_callback', action_callback)
   it('plugin_load', plugin_load)
 
@@ -44,6 +45,28 @@ describe('error', function() {
   it('ready_die', ready_die)
 
   it('legacy_fail', legacy_fail)
+
+
+  function response_is_error(fin) {
+    var si = Seneca({ log: 'silent' })
+
+    si.add('a:1', function(msg, reply) {
+      var foo = new Error('foo')
+      foo.a = 1
+      reply(null, foo)
+    })
+
+    si.error(function(err){
+      expect(err.code).equal('result_not_objarr')
+      fin()
+    })
+
+    si.act('a:1', function(err, out) {
+      expect(out).not.exist()
+      expect(err.code).equal('result_not_objarr')
+    })
+  }
+
 
   function action_callback(fin) {
     var si = Seneca({ log: 'silent' })
