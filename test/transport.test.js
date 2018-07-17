@@ -75,6 +75,39 @@ describe('transport', function() {
       })
   })
 
+  
+  it('config-legacy-nextgen', test_opts, function(fin) {
+    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
+    var c0 = Seneca({
+      id$: 'c0',
+      timeout: 22222 * tmx,
+      legacy: { transport: false }
+    }).test(fin)
+
+    s0
+      .add('a:1', function a1(msg, reply, meta) {
+        reply({ x: msg.x })
+      })
+      .listen({id:'s0a',port:62011,type:'direct'})
+      .listen({id:'s0b',port:62012,type:'http'})
+      .ready(function() {
+        c0
+          .client({id:'c0a',port:62011,pin:'x:1'})
+          .client({id:'c0b',port:62012,pin:'x:2'})
+
+          .act('a:1,x:1', function(ignore, out) {
+            expect(out.x).equals(1)
+          })
+          .act('a:1,x:2', function(ignore, out) {
+            expect(out.x).equals(2)
+          })
+          .ready(function(){
+            s0.close(c0.close.bind(c0, fin))
+          })
+      })
+  })
+
+  
   it('error-nextgen', test_opts, function(fin) {
     var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
     var c0 = Seneca({
@@ -723,7 +756,7 @@ describe('transport', function() {
       .listen({ type: 'test', pin: { foo: '*' } })
       .ready(function() {
         var si = Seneca({
-          timeout: 5555,
+          timeout: 9999,
           log: 'silent',
           debug: { short_logs: true }
         })

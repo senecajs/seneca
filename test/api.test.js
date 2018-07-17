@@ -74,6 +74,42 @@ describe('api', function() {
   })
 
 
+  it('test-mode', function(fin) {
+    var si0 = Seneca({ id$:'foo', tag: null, log: 'silent' })
+    si0.error(console.log)
+    si0.test()
+    expect(si0.id).equals('foo')
+    
+    var si1 = Seneca({ tag: 't0', log: 'silent' })
+    si1.error(null)
+    si1.test(console.log)
+    expect(si1.id).endsWith('/t0')
+
+    var si2 = Seneca({ id$:'bar', tag: 't0', log: 'silent' })
+    si2.test()
+    expect(si2.id).equals('bar')
+
+    fin()
+  })
+
+
+  it('find_plugin', function(fin) {
+    var si = Seneca().test(fin)
+    si.use(function foo() {})
+    si.use({tag:'t0', name:'bar', init:function bar() {}})
+
+    si.ready(function(){
+      expect(si.find_plugin('foo').name).equals('foo')
+      expect(si.find_plugin('bar','t0').name).equals('bar')
+
+      expect(si.find_plugin({name:'foo'}).name).equals('foo')
+      expect(si.find_plugin({name:'bar',tag:'t0'}).name).equals('bar')
+
+      fin()
+    })
+  })
+
+
   it('has', function(fin) {
     si = si.test()
 
@@ -157,7 +193,10 @@ describe('api', function() {
 
   it('status', function(fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
+
     expect(si.status().stats.act.calls).equal(0)
+    expect(si.status({stats:false}).stats.act.calls).equal(0)
+
     si.ready(function() {
       expect(si.status().stats.act.calls).equal(0)
       expect(si.status().stats.act.done).equal(0)
