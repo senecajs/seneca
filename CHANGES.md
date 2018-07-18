@@ -1,3 +1,11 @@
+## 3.7.0 2018-07-18
+
+* `role:seneca,cmd:ping` responds with instance and process metrics.
+* Fixed memory leak in history: https://github.com/senecajs/seneca/issues/680
+* Utility modules available via Seneca.util: Eraro, Jsonic, Nid, Patrun
+* `meta.custom` is now preserved properly over entire action pathway including transports
+
+
 ## 3.6.0 2018-05-28
 
 * `translate` method simplifies translating message patterns 
