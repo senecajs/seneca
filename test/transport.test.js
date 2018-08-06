@@ -284,7 +284,7 @@ describe('transport', function() {
             // The remote version overrides the local version
             expect(out.bar).to.equal(1)
 
-            console.dir(this.find('foo:1'), { depth: null })
+            // console.dir(this.find('foo:1'), { depth: null })
 
             fin()
           })

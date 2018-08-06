@@ -93,7 +93,7 @@
     "rolling-stats": "0.1",
     "semver": "5.5",
     "seneca-transport": "2.3",
-    "use-plugin": "1.0",
+    "use-plugin": "2.0",
     "wreck": "12.5"
   },
   "devDependencies": {
