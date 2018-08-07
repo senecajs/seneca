@@ -11,7 +11,6 @@ var expect = Code.expect
 
 var Seneca = require('..')
 
-
 describe('api', function() {
   var si = Seneca({ log: 'silent' })
 
@@ -48,67 +47,68 @@ describe('api', function() {
     fin()
   })
 
-  
   it('translate', function(fin) {
     si = si.test()
 
-    si.add('a:2',function(msg,reply){reply(msg)})
-    si.add('a:4',function(msg,reply){reply(msg)})
-    si.add('b:3',function(msg,reply){reply(msg)})
-    si.translate('a:1','a:2')
-    si.translate({a:3},{a:4})
-    si.translate('c:3,d:4','b:3')
+    si.add('a:2', function(msg, reply) {
+      reply(msg)
+    })
+    si.add('a:4', function(msg, reply) {
+      reply(msg)
+    })
+    si.add('b:3', function(msg, reply) {
+      reply(msg)
+    })
+    si.translate('a:1', 'a:2')
+    si.translate({ a: 3 }, { a: 4 })
+    si.translate('c:3,d:4', 'b:3')
 
-    si
-      .gate()
+    si.gate()
       .act('a:1', function(err, out) {
-        expect(out).contains({a:2})
+        expect(out).contains({ a: 2 })
       })
       .act('a:3', function(err, out) {
-        expect(out).contains({a:4})
+        expect(out).contains({ a: 4 })
       })
       .act('c:3,d:4', function(err, out) {
-        expect(out).contains({b:3,c:3,d:4})
+        expect(out).contains({ b: 3, c: 3, d: 4 })
       })
       .ready(fin)
   })
 
-
   it('test-mode', function(fin) {
-    var si0 = Seneca({ id$:'foo', tag: null, log: 'silent' })
+    var si0 = Seneca({ id$: 'foo', tag: null, log: 'silent' })
     si0.error(console.log)
     si0.test()
     expect(si0.id).equals('foo')
-    
+
     var si1 = Seneca({ tag: 't0', log: 'silent' })
     si1.error(null)
     si1.test(console.log)
     expect(si1.id).endsWith('/t0')
 
-    var si2 = Seneca({ id$:'bar', tag: 't0', log: 'silent' })
+    var si2 = Seneca({ id$: 'bar', tag: 't0', log: 'silent' })
     si2.test()
     expect(si2.id).equals('bar')
 
     fin()
   })
 
-
   it('find_plugin', function(fin) {
     var si = Seneca().test(fin)
     si.use(function foo() {})
-    si.use({tag:'t0', name:'bar', init:function bar() {}})
+    si.use({ tag: 't0', name: 'bar', init: function bar() {} })
 
-    si.ready(function(){
+    si.ready(function() {
       expect(si.find_plugin('foo').name).equals('foo')
-      expect(si.find_plugin('bar','t0').name).equals('bar')
+      expect(si.find_plugin('bar', 't0').name).equals('bar')
 
-      expect(si.find_plugin({name:'foo'}).name).equals('foo')
-      expect(si.find_plugin({name:'bar',tag:'t0'}).name).equals('bar')
+      expect(si.find_plugin({ name: 'foo' }).name).equals('foo')
+      expect(si.find_plugin({ name: 'bar', tag: 't0' }).name).equals('bar')
 
       fin()
     })
   })
-
 
   it('has', function(fin) {
     si = si.test()
@@ -195,7 +195,7 @@ describe('api', function() {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
 
     expect(si.status().stats.act.calls).equal(0)
-    expect(si.status({stats:false}).stats.act.calls).equal(0)
+    expect(si.status({ stats: false }).stats.act.calls).equal(0)
 
     si.ready(function() {
       expect(si.status().stats.act.calls).equal(0)

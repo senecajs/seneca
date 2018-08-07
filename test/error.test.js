@@ -46,7 +46,6 @@ describe('error', function() {
 
   it('legacy_fail', legacy_fail)
 
-
   function response_is_error(fin) {
     var si = Seneca({ log: 'silent' })
 
@@ -56,7 +55,7 @@ describe('error', function() {
       reply(null, foo)
     })
 
-    si.error(function(err){
+    si.error(function(err) {
       expect(err.code).equal('result_not_objarr')
       fin()
     })
@@ -66,7 +65,6 @@ describe('error', function() {
       expect(err.code).equal('result_not_objarr')
     })
   }
-
 
   function action_callback(fin) {
     var si = Seneca({ log: 'silent' })

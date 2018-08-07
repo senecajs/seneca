@@ -46,18 +46,14 @@ describe('seneca', function() {
     Seneca()
       .test(fin)
       .add('a:1', function(msg, reply, meta) {
-        // console.log('ACTION', msg, JSON.stringify(msg), meta, reply)
         expect(msg).includes({ a: 1 })
-        //expect(JSON.stringify(msg)).equals('{"a":1}')
         expect(JSON.stringify(this.util.clean(msg))).equals('{"a":1}')
         expect(meta).includes({ pattern: 'a:1' })
         reply({ x: 1 })
       })
       .act('a:1', function(err, out, meta) {
-        // console.log('REPLY', err, out, out.meta$, meta)
         expect(err).not.exist()
         expect(out).includes({ x: 1 })
-        //expect(JSON.stringify(out)).equals('{"x":1}')
         expect(JSON.stringify(this.util.clean(out))).equals('{"x":1}')
         expect(meta).includes({ pattern: 'a:1' })
         expect(meta).includes(meta)
@@ -74,7 +70,7 @@ describe('seneca', function() {
     // ensure startup time does not degenerate
     expect(end - start).to.be.below(333)
 
-    expect(si).to.equal(si.seneca())
+    expect(si === si.seneca()).true()
     done()
   })
 
@@ -161,18 +157,18 @@ describe('seneca', function() {
 
   it('ready-error-test', function(fin) {
     var si = Seneca()
-        .test()
-        .error(function(err) {
-          expect(err.code).equal('ready_failed')
-          expect(err.message).equal('seneca: Ready function failed: foo')
-          fin()
-        })
+      .test()
+      .error(function(err) {
+        expect(err.code).equal('ready_failed')
+        expect(err.message).equal('seneca: Ready function failed: foo')
+        fin()
+      })
 
     si.ready(function() {
       throw new Error('foo')
     })
   })
-  
+
   it('ready-event', function(done) {
     var si = Seneca(testopts)
 

@@ -1,4 +1,4 @@
-/* Copyright © 2014-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 // Node API modules.
@@ -206,18 +206,20 @@ var option_defaults = {
   }
 }
 
+
 // Utility functions exposed by Seneca via `seneca.util`.
 var seneca_util = {
   Eraro: Eraro,
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
-
+  Joi: Makeuse.Joi,
+  
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,
   error: error,
-  
+
   // Legacy
   deepextend: Common.deepextend,
   recurse: Common.recurse,
@@ -230,7 +232,7 @@ var seneca_util = {
   },
   argprops: Common.argprops,
   resolve_option: Common.resolve_option,
-  flatten: Common.flatten,
+  flatten: Common.flatten
 }
 
 // Internal implementations.
@@ -303,7 +305,6 @@ module.exports.test = function top_test() {
 module.exports.util = seneca_util
 module.exports.test$ = { intern: intern }
 
-
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
 function make_seneca(initial_options) {
@@ -363,11 +364,10 @@ function make_seneca(initial_options) {
   root$.test = API.test // Set test mode.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
+  root$.use = API.use // Define and load a plugin.
 
-  
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
-  root$.use = api_use // Define a plugin.
   root$.export = api_export // Export plain objects from a plugin.
   root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
@@ -837,33 +837,6 @@ function make_seneca(initial_options) {
     return self
   }
 
-  // use('pluginname') - built-in, or provide calling code 'require' as seneca opt
-  // use(require('pluginname')) - plugin object, init will be called
-  // if first arg has property senecaplugin
-  function api_use(arg0, arg1, arg2) {
-    var self = this
-    var plugindesc
-
-    // DEPRECATED: Remove when Seneca >= 4.x
-    // Allow chaining with seneca.use('options', {...})
-    // see https://github.com/rjrodger/seneca/issues/80
-    if (arg0 === 'options') {
-      self.options(arg1)
-      return self
-    }
-
-    try {
-      plugindesc = private$.use(arg0, arg1, arg2)
-    } catch (e) {
-      self.die(error(e, 'plugin_' + e.code))
-      return self
-    }
-
-    self.register(plugindesc)
-
-    return self
-  }
-
   // Return self. Mostly useful as a check that this is a Seneca instance.
   function api_seneca() {
     return this
@@ -1115,27 +1088,23 @@ function make_seneca(initial_options) {
   }
 
   function execute_ready(ready_func) {
-    if(null == ready_func) return
-    
+    if (null == ready_func) return
+
     try {
       ready_func()
-    }
-    catch(ready_err) {
-      var err = error(ready_err, 'ready_failed', {message: ready_err.message})
+    } catch (ready_err) {
+      var err = error(ready_err, 'ready_failed', { message: ready_err.message })
 
-      if(opts.$.test) {
-        if(opts.$.errhandler) {
+      if (opts.$.test) {
+        if (opts.$.errhandler) {
           opts.$.errhandler.call(root$, err)
-        }
-        else throw err
-      }
-      else {
+        } else throw err
+      } else {
         root$.die(err)
       }
     }
   }
 
-  
   return root$
 }
 
@@ -1335,7 +1304,7 @@ intern.execute_action = function(
   if (opts.$.history.active) {
     private$.history.add(data)
   }
-  
+
   if (opts.$.legacy.meta) {
     data.msg.meta$ = meta
   }
