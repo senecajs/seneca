@@ -10,21 +10,11 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-var testopts = { log: 'test', debug: { short_logs: true } }
-
 describe('close', function() {
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
   it('add-close', function(fin) {
     var tmp = {}
-    Seneca(testopts)
-      //.error(fin)
+    Seneca()
+      .test(fin,'print')
       .add('role:seneca,cmd:close', function(msg, reply) {
         tmp.sc = 1
         this.prior(msg, reply)
@@ -35,16 +25,38 @@ describe('close', function() {
       })
   })
 
-  it('sub-close', function(done) {
+  it('sub-close', function(fin) {
     var tmp = {}
-    Seneca(testopts)
-      .error(done)
+    Seneca()
+      .test(fin)
       .sub('role:seneca,cmd:close', function() {
         tmp.sc = 1
       })
       .close(function() {
         expect(1).to.equal(tmp.sc)
-        done()
+        fin()
+      })
+  })
+
+  it('close-graceful', function(fin) {
+    var log = []
+    Seneca({log: 'silent'})
+      .add('a:1', function a1(msg, reply) {
+        log.push(msg.x)
+        reply()
+      })
+      .ready(function() {
+        this
+          .act('a:1,x:1')
+          .close(function() {
+            expect(log).equal([1])
+          })
+          .ready(function(){
+            this.act('a:1,x:2', function(err) {
+              expect(err.code).equal('closed')
+              fin()
+            })
+          })
       })
   })
 })

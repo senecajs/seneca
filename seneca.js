@@ -219,7 +219,7 @@ var seneca_util = {
   pattern: Common.pattern,
   print: Common.print,
   error: error,
-
+  
   // Legacy
   deepextend: Common.deepextend,
   recurse: Common.recurse,
@@ -778,12 +778,11 @@ function make_seneca(initial_options) {
   // sets public seneca.closed property
   function api_close(done) {
     var seneca = this
-
     seneca.ready(do_close)
 
     function do_close() {
       seneca.closed = true
-
+    
       // cleanup process event listeners
       _.each(opts.$.system.close_signals, function(active, signal) {
         if (active) {
@@ -818,6 +817,8 @@ function make_seneca(initial_options) {
         }
       })
     }
+
+    return seneca
   }
 
   // useful when defining services!
@@ -1473,8 +1474,9 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
 
   this.plugin = origmsg.plugin$
   this.prior = origmsg.prior$
-  this.parents = origmsg.parents$
   this.caller = origmsg.caller$
+
+  this.parents = origmsg.parents$
 
   this.sync =
     null != origmsg.sync$
