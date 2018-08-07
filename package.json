@@ -74,7 +74,8 @@
     "coverage": "lab -v -P test -L -t 85 -r html > docs/coverage.html",
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
-    "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js"
+    "prettier": "prettier --write *.js lib/*.js test/*.js",
+    "clean": "rm -rf node_modules package-lock.json yarn.lock"
   },
   "dependencies": {
     "archy": "1.0",
@@ -93,7 +94,7 @@
     "rolling-stats": "0.1",
     "semver": "5.5",
     "seneca-transport": "2.3",
-    "use-plugin": "2.0",
+    "use-plugin": "2.1",
     "wreck": "12.5"
   },
   "devDependencies": {
