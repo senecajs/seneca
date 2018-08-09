@@ -206,7 +206,6 @@ var option_defaults = {
   }
 }
 
-
 // Utility functions exposed by Seneca via `seneca.util`.
 var seneca_util = {
   Eraro: Eraro,
@@ -214,12 +213,12 @@ var seneca_util = {
   Nid: Nid,
   Patrun: Patrun,
   Joi: Makeuse.Joi,
-  
+
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,
   error: error,
-  
+
   // Legacy
   deepextend: Common.deepextend,
   recurse: Common.recurse,
@@ -782,7 +781,7 @@ function make_seneca(initial_options) {
 
     function do_close() {
       seneca.closed = true
-    
+
       // cleanup process event listeners
       _.each(opts.$.system.close_signals, function(active, signal) {
         if (active) {

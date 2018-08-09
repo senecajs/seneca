@@ -22,7 +22,6 @@ describe('plugin', function() {
     fin()
   })
 
-
   lab.before(function(fin) {
     si = Seneca({ tag: 's0', log: 'silent' })
       .use('./stubs/plugin-error/tmp.js')
@@ -36,71 +35,76 @@ describe('plugin', function() {
     si.close(fin)
   })
 
-
   it('load-defaults', function(fin) {
     Seneca()
       .test(fin)
 
-    // NOTE: the assertions are in the plugin
+      // NOTE: the assertions are in the plugin
       .use('./stubs/bar-plugin', {
         b: 2
       })
       .ready(fin)
   })
 
-
   it('good-default-options', function(fin) {
-    var init_p1 = function(opts){
-      expect(opts).equal({c:1,d:2})
+    var init_p1 = function(opts) {
+      expect(opts).equal({ c: 1, d: 2 })
     }
     init_p1.defaults = {
       c: 1
     }
-    
+
     Seneca()
       .test(fin)
 
-      .use({
-        name: 'p0',
-        init:function(opts){
-          expect(opts).equal({a:1,b:2})
+      .use(
+        {
+          name: 'p0',
+          init: function(opts) {
+            expect(opts).equal({ a: 1, b: 2 })
+          },
+          defaults: { a: 1 }
         },
-        defaults: {a:1}
-      }, {
-        b: 2
-      })
+        {
+          b: 2
+        }
+      )
 
-      .use({
-        name: 'p1',
-        init: init_p1,
-      }, {
-        d: 2
-      })
+      .use(
+        {
+          name: 'p1',
+          init: init_p1
+        },
+        {
+          d: 2
+        }
+      )
 
       .ready(fin)
   })
 
-
   it('bad-default-options', function(fin) {
-    Seneca({log: 'silent', debug:{undead:true}})
-      .test(function(err){
+    Seneca({ log: 'silent', debug: { undead: true } })
+      .test(function(err) {
         expect(err.code).equals('plugin_invalid_option')
         fin()
       })
-      .use({
-        name: 'p0',
-        init:function(){
-          Code.fail()
+      .use(
+        {
+          name: 'p0',
+          init: function() {
+            Code.fail()
+          },
+          defaults: {
+            a: Seneca.util.Joi.string()
+          }
         },
-        defaults: {
-          a: Seneca.util.Joi.string()
+        {
+          a: 1,
+          b: 2
         }
-      }, {
-        a: 1,
-        b: 2
-      })
+      )
   })
-
 
   // REMOVE in 4.x
   it('legacy-options', function(fin) {
@@ -115,7 +119,6 @@ describe('plugin', function() {
     fin()
   })
 
-  
   it('should return "no errors created." when passing test false', function(fin) {
     var seneca = Seneca({ tag: 'c0' }).test(fin)
     seneca.use('./stubs/plugin-error/tmpApi')
@@ -145,7 +148,6 @@ describe('plugin', function() {
       seneca.close(fin)
     })
   })
-
 
   it('works with exportmap', function(fin) {
     var seneca = Seneca.test(fin)
