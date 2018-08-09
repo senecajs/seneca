@@ -50,8 +50,16 @@ describe('plugin', function() {
 
 
   it('good-default-options', function(fin) {
+    var init_p1 = function(opts){
+      expect(opts).equal({c:1,d:2})
+    }
+    init_p1.defaults = {
+      c: 1
+    }
+    
     Seneca()
       .test(fin)
+
       .use({
         name: 'p0',
         init:function(opts){
@@ -61,6 +69,14 @@ describe('plugin', function() {
       }, {
         b: 2
       })
+
+      .use({
+        name: 'p1',
+        init: init_p1,
+      }, {
+        d: 2
+      })
+
       .ready(fin)
   })
 

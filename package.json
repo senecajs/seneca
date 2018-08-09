@@ -94,7 +94,7 @@
     "rolling-stats": "0.1",
     "semver": "5.5",
     "seneca-transport": "2.3",
-    "use-plugin": "2.1",
+    "use-plugin": "2.2",
     "wreck": "12.5"
   },
   "devDependencies": {
@@ -106,7 +106,7 @@
     "hoek": "4",
     "lab": "14",
     "prettier": "1",
-    "seneca-entity": "github:senecajs/seneca-entity",
+    "seneca-entity": "2",
     "seneca-error-test": "0"
   }
 }
