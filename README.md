@@ -364,7 +364,7 @@ cases very easily.
 
 The [Senecajs org][Org] encourages participation. If you feel you can help in any way, be
 it with bug reporting, documentation, examples, extra testing, or new features feel free
-to [create an issue][Issue], or better yet, [submit a [Pull Request][Pull]. For more
+to [create an issue][Issue], or better yet, [submit a Pull Request][Pull]. For more
 information on contribution please see our [Contributing][Contrib] guide.
 
 
