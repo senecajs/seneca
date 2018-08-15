@@ -13,15 +13,7 @@ var expect = Code.expect
 
 describe('plugin', function() {
   var si = null
-
-  lab.beforeEach(function(fin) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    fin()
-  })
-
+  
   lab.before(function(fin) {
     si = Seneca({ tag: 's0', log: 'silent' })
       .use('./stubs/plugin-error/tmp.js')
@@ -35,6 +27,31 @@ describe('plugin', function() {
     si.close(fin)
   })
 
+
+  it('plugin-delegate-init', function(fin) {
+    Seneca()
+      .test(fin)
+      .use(function p0(opts) {
+        var z
+        
+        this.add('a:1', function(msg, reply) {
+          reply({x:msg.x,y:opts.y,z:z})
+        })
+
+        this.init(function(done) {
+          z = 4
+          done()
+        })
+      }, {y: 3})
+      .ready(function() {
+        this.act('a:1,x:2', function(err, out) {
+          expect(out).equal({ x: 2, y: 3, z: 4 })
+          fin()
+        })
+      })
+  })
+
+  
   it('load-defaults', function(fin) {
     Seneca()
       .test(fin)
