@@ -59,7 +59,10 @@ var option_defaults = {
   test: false,
 
   // Wait time for plugins to close gracefully.
-  deathdelay: 11111,
+  death_delay: 11111,
+
+  // Wait time for actions to complete before shutdown.
+  close_delay: 22222,
 
   // Debug settings.
   debug: {
@@ -252,6 +255,9 @@ module.exports = function init(seneca_options, more_options) {
     ? _.extend({}, { from: seneca_options }, more_options)
     : _.extend({}, seneca_options, more_options)
 
+  // Legacy options, remove in 4.x
+  initial_options.deathdelay = initial_options.death_delay
+
   var seneca = make_seneca(initial_options)
   var options = seneca.options()
 
@@ -338,9 +344,15 @@ function make_seneca(initial_options) {
 
   // Define public member variables.
   root$.start_time = Date.now()
-  root$.fixedargs = {}
   root$.context = {}
   root$.version = Package.version
+
+  // TODO: rename in 4.x as "args" terminology is legacy
+  root$.fixedargs = {}
+
+  root$.flags = {
+    closed: false
+  }
 
   Object.defineProperty(root$, 'root', { value: root$ })
 
@@ -777,10 +789,32 @@ function make_seneca(initial_options) {
   // sets public seneca.closed property
   function api_close(done) {
     var seneca = this
+
+    var safe_done = _.once(function(err) {
+      if (_.isFunction(done)) {
+        return done.call(seneca, err)
+      }
+    })
+
+    // don't try to close twice
+    if (seneca.flags.closed) {
+      return safe_done()
+    }
+
     seneca.ready(do_close)
+    var close_timeout = setTimeout(do_close, opts.$.close_delay)
 
     function do_close() {
+      clearTimeout(close_timeout)
+
+      if (seneca.flags.closed) {
+        return safe_done()
+      }
+
+      // TODO: remove in 4.x
       seneca.closed = true
+
+      seneca.flags.closed = true
 
       // cleanup process event listeners
       _.each(opts.$.system.close_signals, function(active, signal) {
@@ -811,9 +845,7 @@ function make_seneca(initial_options) {
           clearInterval(seneca.private$.status_interval)
         }
 
-        if (_.isFunction(done)) {
-          return done.call(seneca, err)
-        }
+        return safe_done(err)
       })
     }
 

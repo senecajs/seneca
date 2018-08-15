@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
+/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Code = require('code')
@@ -11,10 +11,19 @@ var it = lab.it
 var expect = Code.expect
 
 describe('close', function() {
-  it('add-close', function(fin) {
+  it('happy', function(fin) {
+    Seneca()
+      .test(fin)
+      .close(function(err) {
+        expect(err).not.exists()
+        fin()
+      })
+  })
+
+  it('add', function(fin) {
     var tmp = {}
     Seneca()
-      .test(fin, 'print')
+      .test(fin)
       .add('role:seneca,cmd:close', function(msg, reply) {
         tmp.sc = 1
         this.prior(msg, reply)
@@ -25,7 +34,7 @@ describe('close', function() {
       })
   })
 
-  it('sub-close', function(fin) {
+  it('sub', function(fin) {
     var tmp = {}
     Seneca()
       .test(fin)
@@ -38,7 +47,7 @@ describe('close', function() {
       })
   })
 
-  it('close-graceful', function(fin) {
+  it('graceful', function(fin) {
     var log = []
     Seneca({ log: 'silent' })
       .add('a:1', function a1(msg, reply) {
@@ -56,6 +65,49 @@ describe('close', function() {
               fin()
             })
           })
+      })
+  })
+
+  it('timeout', function(fin) {
+    var tmp = {}
+    Seneca({ close_delay: 111 })
+      .test(fin)
+      .add('a:1', function a1(msg, reply) {
+        setTimeout(function() {
+          tmp.a = 1
+          reply()
+        }, 1111)
+      })
+      .act('a:1')
+      .close(function() {
+        expect(tmp.a).not.exists()
+        fin()
+      })
+  })
+
+  it('handle-signal', function(fin) {
+    Seneca({
+      system: {
+        exit: function(exit_val) {
+          expect(exit_val).equal(0)
+          fin()
+        }
+      }
+    })
+      .test(fin)
+      .private$.handle_close()
+  })
+
+  it('error', function(fin) {
+    Seneca({ log: 'silent' })
+      .add('role:seneca,cmd:close', function(msg, reply) {
+        reply(new Error('bad-close'))
+      })
+      .close(function(err) {
+        expect(err.message).equal(
+          'seneca: Action cmd:close,role:seneca failed: bad-close.'
+        )
+        fin()
       })
   })
 })

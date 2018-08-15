@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2017 Richard Rodger */
+/* Copyright © 2013-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Assert = require('assert')
@@ -14,8 +14,8 @@ var assert = Assert
 var testopts = { log: 'silent' }
 
 describe('delegation', function() {
-  it('happy', function(done) {
-    var si = Seneca().test(done)
+  it('happy', function(fin) {
+    var si = Seneca().test(fin)
 
     si.add({ c: 'C' }, function(msg, reply) {
       reply(msg)
@@ -32,15 +32,14 @@ describe('delegation', function() {
       sid.act({ c: 'C' }, function(err, out) {
         assert.ok(!err)
         assert.ok(out.c === 'C')
-        // assert.ok(void 0 === out.a$)
         assert.ok(out.b === 'B')
-        si.close(done)
+        si.close(fin)
       })
     })
   })
 
-  it('dynamic', function(done) {
-    var si = Seneca(testopts)
+  it('dynamic', function(fin) {
+    var si = Seneca.test(fin)
     si.add({ c: 'C' }, function(msg, reply) {
       reply(msg)
     })
@@ -60,29 +59,26 @@ describe('delegation', function() {
 
         sid.act({ c: 'C' }, function(err, out) {
           assert.ok(!err)
-          // assert.ok(void 0 === out.a$)
           assert.ok(out.c === 'C')
           assert.ok(out.b === 'B')
 
           sid.act({ d: 'D' }, function(err, out) {
             assert.ok(!err)
-            // assert.ok(void 0 === out.a$)
             assert.ok(out.b === 'B')
             assert.ok(out.c === 'C')
             assert.ok(out.d === 'D')
 
-            sid.close(si.close.bind(si, done))
+            sid.close(si.close.bind(si, fin))
           })
         })
       })
     })
   })
 
-  it('prior.basic', function(done) {
-    var si = Seneca().test(done)
+  it('prior.basic', function(fin) {
+    var si = Seneca().test(fin)
 
     si.add({ c: 'C' }, function c0(msg, reply) {
-      // console.log('C='+this)
       msg.a = 1
       reply(msg)
     })
@@ -98,12 +94,12 @@ describe('delegation', function() {
       assert.equal(err, null)
       assert.equal(out.a, 1)
       assert.equal(out.p, 2)
-      si.close(done)
+      si.close(fin)
     })
   })
 
-  it('parent.plugin', function(done) {
-    var si = Seneca(testopts).error(done)
+  it('parent.plugin', function(fin) {
+    var si = Seneca.test(fin)
 
     si.use(function() {
       this.add({ a: 'A' }, function(msg, reply) {
@@ -158,7 +154,7 @@ describe('delegation', function() {
           assert.ok(out.p2 === 1)
           assert.ok(out.p3 === 1)
 
-          si.close(done)
+          si.close(fin)
         })
       })
     })

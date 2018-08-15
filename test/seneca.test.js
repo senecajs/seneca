@@ -1224,15 +1224,6 @@ describe('seneca', function() {
     })
   })
 
-  it('basic-close', function(fin) {
-    Seneca({ legacy: { transport: false } })
-      .test(fin)
-      .close(function(err) {
-        assert(!err)
-        fin()
-      })
-  })
-
   it('supports jsonic params to has', function(done) {
     var si = Seneca({ log: 'silent' })
     si.add({ cmd: 'a' }, function(msg, done) {
@@ -1462,18 +1453,6 @@ describe('seneca', function() {
         }
       }
     })
-  })
-
-  it('handle-close', function(fin) {
-    var si = Seneca({
-      system: {
-        exit: function(exit_val) {
-          expect(exit_val).equal(0)
-          fin()
-        }
-      }
-    })
-    si.private$.handle_close()
   })
 
   it('reply-seneca', function(fin) {
