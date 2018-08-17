@@ -495,7 +495,7 @@ function make_seneca(initial_options) {
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = Makeuse({
     prefix: 'seneca-',
-    module: module,
+    module: opts.$.internal.module || module,
     msgprefix: false,
     builtin: ''
   })

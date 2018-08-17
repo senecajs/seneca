@@ -63,6 +63,16 @@ describe('plugin', function() {
       .ready(fin)
   })
 
+
+  it('load-relative-to-root', function(fin) {
+    var subfolder = require('./stubs/plugin/subfolder')
+    subfolder(function(out){
+      expect(out).equal('relative-to-root')
+      fin()
+    })
+  })
+
+  
   it('good-default-options', function(fin) {
     var init_p1 = function(opts) {
       expect(opts).equal({ c: 1, d: 2 })

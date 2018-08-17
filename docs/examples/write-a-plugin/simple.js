@@ -9,8 +9,8 @@ var plugin = function( options ) {
 }
 
 
-var seneca = require('../../..')()
+var Seneca = require('../../..')
 
-seneca.use( plugin, {color:'pink'} )
-
-seneca.act( {foo:'bar'}, console.log )
+Seneca()
+  .use( plugin, {color:'pink'} )
+  .act( {foo:'bar'}, Seneca.util.print )
