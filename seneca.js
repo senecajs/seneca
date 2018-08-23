@@ -372,10 +372,11 @@ function make_seneca(initial_options) {
   root$.client = API.client(callpoint) // Send outbound messages.
   root$.gate = API.gate // Create a delegate that executes actions in sequence.
   root$.ungate = API.ungate // Execute actions in parallel.
-  root$.test = API.test // Set test mode.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
   root$.use = API.use // Define and load a plugin.
+  root$.test = API.test // Set test mode.
+  root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
@@ -1045,6 +1046,7 @@ function make_seneca(initial_options) {
       }
     }
 
+    // TODO: in 4.x, when given options, it should chain
     // Allow chaining with seneca.options({...}, true)
     // see https://github.com/rjrodger/seneca/issues/80
     return chain ? self : opts.$

@@ -32,6 +32,14 @@ describe('logging', function() {
       })
   })
 
+  it('quiet', function(fin) {
+    Seneca()
+      .quiet()
+      .error(fin)
+      .ready(fin)
+  })
+
+  
   it('basic', function(fin) {
     var capture = make_log_capture()
 
