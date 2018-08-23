@@ -377,10 +377,11 @@ function make_seneca(initial_options) {
   root$.use = API.use // Define and load a plugin.
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
-
+  root$.export = API.export // Export plain objects from a plugin.
+  root$.depends = API.depends // Check for plugin dependencies.  
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
-  root$.export = api_export // Export plain objects from a plugin.
+
   root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
   root$.options = api_options // Get and set options.
@@ -391,8 +392,7 @@ function make_seneca(initial_options) {
 
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
-  root$.depends = api_depends
-  // root$.act_if = api_act_if
+
   root$.wrap = api_wrap
   root$.seneca = api_seneca
   root$.fix = api_fix
@@ -541,46 +541,7 @@ function make_seneca(initial_options) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
   }
 
-  function api_depends() {
-    var self = this
-
-    var args = Norma('{pluginname:s deps:a? moredeps:s*}', arguments)
-
-    var deps = args.deps || args.moredeps
-
-    _.every(deps, function(depname) {
-      if (
-        !_.includes(private$.plugin_order.byname, depname) &&
-        !_.includes(private$.plugin_order.byname, 'seneca-' + depname)
-      ) {
-        self.die(
-          error('plugin_required', {
-            name: args.pluginname,
-            dependency: depname
-          })
-        )
-        return false
-      } else return true
-    })
-  }
-
-  function api_export(key) {
-    var self = this
-
-    // Legacy aliases
-    if (key === 'util') {
-      key = 'basic'
-    }
-
-    var exportval = private$.exports[key]
-
-    if (!exportval && opts.$.strict.exports) {
-      return self.die(error('export_not_found', { key: key }))
-    }
-
-    return exportval
-  }
-
+    
   // See [`seneca.add`](#seneca.add)
   function api_add() {
     var self = this
