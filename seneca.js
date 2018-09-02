@@ -150,6 +150,9 @@ var option_defaults = {
   // Plugin settings
   plugin: {},
 
+  // Plugins to load (will be passed to .use)
+  plugins: [],
+
   // System wide functionality.
   system: {
     exit: process.exit,
@@ -160,6 +163,10 @@ var option_defaults = {
       SIGTERM: false,
       SIGINT: false,
       SIGBREAK: false
+    },
+
+    plugin: {
+      load_once: false
     }
   },
 
@@ -1019,6 +1026,7 @@ function make_seneca(initial_options) {
   }
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
+  // TODO: convert to seneca errors
   function api_decorate() {
     var args = Norma('property:s value:.', arguments)
 
@@ -1026,7 +1034,7 @@ function make_seneca(initial_options) {
     Assert(property[0] !== '_', 'property cannot start with _')
     Assert(
       private$.decorations[property] === undefined,
-      'seneca is already decorated with the property'
+      'seneca is already decorated with the property: '+property
     )
     Assert(
       root$[property] === undefined,
