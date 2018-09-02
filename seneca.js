@@ -280,9 +280,18 @@ module.exports = function init(seneca_options, more_options) {
   }
 
   // Register plugins specified in options.
-  _.each(options.plugins, function(plugindesc) {
-    seneca.use(plugindesc)
-  })
+  var pluginkeys = Object.keys(options.plugins)
+  for( var pkI = 0; pkI < pluginkeys.length; pkI++) {
+    var pluginkey = pluginkeys[pkI]
+    var plugindesc = options.plugins[pluginkey]
+
+    if(false === plugindesc) {
+      seneca.private$.ignore_plugins[pluginkey] = true
+    }
+    else {
+      seneca.use(plugindesc)
+    }
+  }
 
   seneca.ready(function() {
     this.log.info({ kind: 'notice', notice: 'hello seneca ' + seneca.id })
@@ -499,7 +508,7 @@ function make_seneca(initial_options) {
     }
   }
 
-  private$.plugins = {}
+  // private$.plugins = {}
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = Makeuse({
     prefix: 'seneca-',
@@ -1127,7 +1136,9 @@ function make_private() {
     actdef: {},
     transport: {
       register: []
-    }
+    },
+    plugins: {},
+    ignore_plugins: {}
   }
 }
 
