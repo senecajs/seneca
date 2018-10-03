@@ -84,7 +84,7 @@
     "gex": "0.3",
     "json-stringify-safe": "5.0",
     "jsonic": "0.3",
-    "lodash": "4.17",
+    "lodash": "4.17.11",
     "minimist": "1.2",
     "nid": "0.3",
     "norma": "0.4",
@@ -94,7 +94,7 @@
     "rolling-stats": "0.1",
     "semver": "5.5",
     "seneca-transport": "2.3",
-    "use-plugin": "github:rjrodger/use-plugin",
+    "use-plugin": "2.3",
     "wreck": "12.5"
   },
   "devDependencies": {
@@ -103,7 +103,7 @@
     "code": "4",
     "coveralls": "3",
     "docco": "0",
-    "hoek": "4",
+    "hoek": "4.2.1",
     "lab": "14",
     "prettier": "1",
     "seneca-entity": "2",
