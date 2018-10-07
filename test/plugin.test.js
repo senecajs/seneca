@@ -113,7 +113,7 @@ describe('plugin', function() {
   it('bad-default-options', function(fin) {
     Seneca({ log: 'silent', debug: { undead: true } })
       .test(function(err) {
-        expect(err.code).equals('plugin_invalid_option')
+        expect(err.code).equals('invalid_plugin_option')
         fin()
       })
       .use(
@@ -776,4 +776,33 @@ describe('plugin', function() {
       fin()
     })
   })
+
+
+  it('plugins-options-precedence', function(fin) {
+    var si = Seneca({
+      log: 'silent',
+      legacy: { transport: false },
+      plugin: {
+        foo: {a:2,c:2},
+        bar: {a:2,c:1},
+      }
+    })
+
+    function bar(opts) {
+      expect(opts).equal({a:3,b:1,c:1,d:1})
+    }
+    bar.defaults = {a:1,b:1}
+    
+    si
+      .use({name:'foo', defaults:{a:1,b:1}, init: function(opts) {
+        expect(opts).equal({a:2,b:2,c:3,d:1})
+      }}, {b:2,c:3,d:1})
+      .use(bar, {a:3,d:1})
+
+      .ready(function() {
+        console.log(this.options().plugin)
+        fin()
+      })
+  })
+
 })

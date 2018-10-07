@@ -10,7 +10,7 @@ var Util = require('util')
 var _ = require('lodash')
 var GateExecutor = require('gate-executor')
 var Jsonic = require('jsonic')
-var Makeuse = require('use-plugin')
+var UsePlugin = require('use-plugin')
 var Nid = require('nid')
 var Norma = require('norma')
 var Patrun = require('patrun')
@@ -222,7 +222,8 @@ var seneca_util = {
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
-  Joi: Makeuse.Joi,
+  Joi: UsePlugin.Joi,
+  Optioner: UsePlugin.Optioner,
 
   clean: Common.clean,
   pattern: Common.pattern,
@@ -510,11 +511,12 @@ function make_seneca(initial_options) {
 
   // private$.plugins = {}
   private$.plugin_order = { byname: [], byref: [] }
-  private$.use = Makeuse({
+  private$.use = UsePlugin({
     prefix: 'seneca-',
     module: opts.$.internal.module || module,
     msgprefix: false,
-    builtin: ''
+    builtin: '',
+    merge_defaults: false
   })
 
   private$.actrouter = opts.$.internal.actrouter
