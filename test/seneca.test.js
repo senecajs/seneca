@@ -453,6 +453,7 @@ describe('seneca', function() {
     function bar(msg, next, meta) {
       var bar_meta = meta
       var pmsg = { a: msg.a, s: msg.s }
+
       this.prior(pmsg, function(e, o) {
         o.b = 2
         o.bar = bar_meta

@@ -397,6 +397,7 @@ function make_seneca(initial_options) {
   root$.export = API.export // Export plain objects from a plugin.
   root$.depends = API.depends // Check for plugin dependencies.  
   root$.delegate = API.delegate // Create an action-specific Seneca instance.
+  root$.prior = API.prior // Call the previous action definition for message pattern.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
@@ -944,67 +945,8 @@ function make_seneca(initial_options) {
     return fix
   }
 
-  /*
-  // TODO: rename fixedargs
-  function api_delegate(fixedargs, fixedmeta) {
-    var self = this
-    fixedargs = fixedargs || {}
-    fixedmeta = fixedmeta || {}
 
-    var delegate = Object.create(self)
-    delegate.private$ = Object.create(self.private$)
 
-    delegate.did =
-      (delegate.did ? delegate.did + '/' : '') + self.private$.didnid()
-
-    var strdesc
-    delegate.toString = function toString() {
-      if (strdesc) return strdesc
-      var vfa = {}
-      _.each(fixedargs, function(v, k) {
-        if (~k.indexOf('$')) return
-        vfa[k] = v
-      })
-
-      strdesc =
-        self.toString() +
-        (_.keys(vfa).length ? '/' + Jsonic.stringify(vfa) : '')
-
-      return strdesc
-    }
-
-    delegate.fixedargs = opts.$.strict.fixedargs
-      ? _.extend({}, fixedargs, self.fixedargs)
-      : _.extend({}, self.fixedargs, fixedargs)
-
-    delegate.fixedmeta = opts.$.strict.fixedmeta
-      ? _.extend({}, fixedmeta, self.fixedmeta)
-      : _.extend({}, self.fixedmeta, fixedmeta)
-
-    delegate.delegate = function delegate(
-      further_fixedargs,
-      further_fixedmeta
-    ) {
-      var args = _.extend({}, delegate.fixedargs, further_fixedargs || {})
-      var meta = _.extend({}, delegate.fixedmeta, further_fixedmeta || {})
-      return self.delegate.call(this, args, meta)
-    }
-
-    // Somewhere to put contextual data for this delegate.
-    // For example, data for individual web requests.
-    delegate.context = {}
-
-    delegate.client = function client() {
-      return self.client.apply(this, arguments)
-    }
-
-    delegate.listen = function listen() {
-      return self.listen.apply(this, arguments)
-    }
-
-    return delegate
-  }
-  */
   
   function api_options(options, chain) {
     var self = this
@@ -1252,32 +1194,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
     data.plugin_tag = data.plugin_tag || actdef.plugin_tag
     data.pattern = data.pattern || actdef.pattern
   })
-
-  delegate.prior = function() {
-    var argsarr = new Array(arguments.length)
-    for (var l = 0; l < argsarr.length; ++l) {
-      argsarr[l] = arguments[l]
-    }
-
-    var spec = Common.build_message(
-      delegate,
-      argsarr,
-      'reply:f?',
-      delegate.fixedargs
-    )
-    var msg = spec.msg
-    var reply = spec.reply
-
-    if (actdef.priordef) {
-      msg.prior$ = actdef.priordef.id
-      this.act(msg, reply)
-    } else {
-      var meta = msg.meta$ || {}
-      var out = _.clone(msg.default$ || meta.dflt || null)
-      return reply.call(delegate, null, out, meta)
-    }
-  }
-
+  
   return delegate
 }
 
