@@ -222,4 +222,25 @@ describe('api', function() {
       si.reply({ meta: { id: 'aa/bb' }, out: { x: 1 } })
     })
   })
+
+  it('delegate', function(fin) {
+    var si = Seneca({ legacy: { transport: false } }).test(fin)
+
+    si.add('a:1', function(msg, reply) {
+      this.context.bar = 2
+      this.context.zed = 4
+      this.act('b:1', reply)
+    })
+
+    si.add('b:1', function(msg, reply) {
+      expect(this.context).equal({foo:1, bar:2, zed:4})
+      reply()
+    })
+    
+    si.context.foo = 1
+    si.context.zed = 3
+    
+    si.act('a:1', fin)
+  })
+
 })

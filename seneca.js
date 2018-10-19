@@ -396,6 +396,8 @@ function make_seneca(initial_options) {
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
   root$.depends = API.depends // Check for plugin dependencies.  
+  root$.delegate = API.delegate // Create an action-specific Seneca instance.
+
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
@@ -407,13 +409,13 @@ function make_seneca(initial_options) {
   root$.inward = api_inward // Add a modifier function for messages inward
   root$.outward = api_outward // Add a modifier function for responses outward
 
+  
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
 
   root$.wrap = api_wrap
   root$.seneca = api_seneca
   root$.fix = api_fix
-  root$.delegate = api_delegate
 
   // DEPRECATE IN 4.x
   root$.findact = root$.find
@@ -942,6 +944,7 @@ function make_seneca(initial_options) {
     return fix
   }
 
+  /*
   // TODO: rename fixedargs
   function api_delegate(fixedargs, fixedmeta) {
     var self = this
@@ -1001,7 +1004,8 @@ function make_seneca(initial_options) {
 
     return delegate
   }
-
+  */
+  
   function api_options(options, chain) {
     var self = this
 
