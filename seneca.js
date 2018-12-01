@@ -398,7 +398,9 @@ function make_seneca(initial_options) {
   root$.depends = API.depends // Check for plugin dependencies.  
   root$.delegate = API.delegate // Create an action-specific Seneca instance.
   root$.prior = API.prior // Call the previous action definition for message pattern.
-
+  root$.inward = API.inward // Add a modifier function for messages inward
+  root$.outward = API.outward // Add a modifier function for responses outward
+  
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
@@ -407,8 +409,11 @@ function make_seneca(initial_options) {
   root$.options = api_options // Get and set options.
   root$.error = api_error // Set global error handler.
   root$.decorate = api_decorate // Decorate seneca object with functions
-  root$.inward = api_inward // Add a modifier function for messages inward
-  root$.outward = api_outward // Add a modifier function for responses outward
+
+
+  //root$.inward = api_inward // Add a modifier function for messages inward
+  //root$.outward = api_outward // Add a modifier function for responses outward
+
 
   
   // Non-API methods.
@@ -862,6 +867,7 @@ function make_seneca(initial_options) {
     return this.fullname
   }
 
+/*
   function api_inward(inward) {
     Assert('function' === typeof inward)
     Assert(2 === inward.length)
@@ -877,7 +883,8 @@ function make_seneca(initial_options) {
     private$.outward.add(outward)
     return this
   }
-
+*/
+  
   function do_act(instance, origmsg, origreply) {
     var timedout = false
     var actmsg = intern.make_actmsg(origmsg)

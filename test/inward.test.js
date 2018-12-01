@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Richard Rodger, MIT License */
+/* Copyright © 2016-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Lab = require('lab')
@@ -11,6 +11,7 @@ var expect = Code.expect
 
 var Seneca = require('..')
 var Inward = require('../lib/inward')
+var API = require('../lib/api')
 
 describe('inward', function() {
   it('announce', function(fin) {
@@ -26,5 +27,17 @@ describe('inward', function() {
       Inward.announce({ seneca: seneca }, { msg: { a: 1 } })
       Inward.announce({ seneca: seneca, actdef: {} }, { msg: { a: 2 } })
     })
+  })
+
+  it('arg-check', function(fin) {
+    try {
+      API.inward()
+      expect(false).true()
+    }
+    catch(e) {
+      expect(e.code).equal('invalid_arguments')
+    }
+
+    fin()
   })
 })
