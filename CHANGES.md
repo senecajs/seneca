@@ -1,7 +1,9 @@
 ## 3.8.0
 
+* Plugin Seneca instance has `init` convenience method for initialization action.
 * Plugins can define local error codes with `errors` property.
 * Updated `fail` method throws Seneca Eraro exceptions directly and supports plugin-local codes.
+* Option to ensure plugins load only once.
 
 
 ## 3.7.0 2018-07-18

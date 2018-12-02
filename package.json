@@ -93,7 +93,7 @@
     "qs": "6.5",
     "rolling-stats": "0.1",
     "semver": "5.5",
-    "seneca-transport": "2.3",
+    "seneca-transport": "2.4",
     "use-plugin": "2.4.1",
     "wreck": "12.5"
   },
