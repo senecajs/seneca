@@ -668,7 +668,9 @@ describe('error', function() {
 
   function legacy_fail(done) {
     var si = Seneca({
-      log: 'silent'
+      log: 'silent',
+      legacy: { fail: true }
+
     })
 
     si.options({

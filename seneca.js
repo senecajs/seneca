@@ -212,7 +212,10 @@ var option_defaults = {
     meta: false,
 
     // Add legacy properties
-    actdef: false
+    actdef: false,
+
+    // Use old fail method
+    fail: false
   }
 }
 
@@ -410,11 +413,9 @@ function make_seneca(initial_options) {
   root$.error = api_error // Set global error handler.
   root$.decorate = api_decorate // Decorate seneca object with functions
 
-
-  //root$.inward = api_inward // Add a modifier function for messages inward
-  //root$.outward = api_outward // Add a modifier function for responses outward
-
-
+  if(opts.$.legacy.fail) {
+    root$.fail = Legacy.make_legacy_fail(opts.$)
+  }
   
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
@@ -425,7 +426,6 @@ function make_seneca(initial_options) {
 
   // DEPRECATE IN 4.x
   root$.findact = root$.find
-  root$.fail = Legacy.fail(opts.$)
   root$.plugins = API.list_plugins
   root$.findplugin = API.find_plugin
   root$.hasplugin = API.has_plugin
