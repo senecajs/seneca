@@ -21,6 +21,21 @@ var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function() {
+  it('fail', function(fin){
+    var si = Seneca({tag:'aaa'}).test()
+    
+    try {
+      si.fail('foo','Foo')
+      expect(false).true()
+    }
+    catch(e) {
+      expect(e.code).equal('foo')
+      expect(e.message).contains('Foo')
+      fin()
+    }
+  })
+
+
   it('response_is_error', response_is_error)
   it('action_callback', action_callback)
   it('plugin_load', plugin_load)
@@ -670,7 +685,6 @@ describe('error', function() {
     var si = Seneca({
       log: 'silent',
       legacy: { fail: true }
-
     })
 
     si.options({

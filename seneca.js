@@ -413,10 +413,9 @@ function make_seneca(initial_options) {
   root$.error = api_error // Set global error handler.
   root$.decorate = api_decorate // Decorate seneca object with functions
 
-  if(opts.$.legacy.fail) {
-    root$.fail = Legacy.make_legacy_fail(opts.$)
-  }
-  
+  // DEPRECATE Legacy fail in 4.x
+  root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail
+
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
 
