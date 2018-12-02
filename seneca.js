@@ -866,23 +866,6 @@ function make_seneca(initial_options) {
     return this.fullname
   }
 
-/*
-  function api_inward(inward) {
-    Assert('function' === typeof inward)
-    Assert(2 === inward.length)
-
-    private$.inward.add(inward)
-    return this
-  }
-
-  function api_outward(outward) {
-    Assert('function' === typeof outward)
-    Assert(2 === outward.length)
-
-    private$.outward.add(outward)
-    return this
-  }
-*/
   
   function do_act(instance, origmsg, origreply) {
     var timedout = false
@@ -1171,6 +1154,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
 
   var delegate_args = {
     plugin$: {
+      full: actdef.plugin_fullname,
       name: actdef.plugin_name,
       tag: actdef.plugin_tag
     }
@@ -1200,7 +1184,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
     data.plugin_tag = data.plugin_tag || actdef.plugin_tag
     data.pattern = data.pattern || actdef.pattern
   })
-  
+
   return delegate
 }
 

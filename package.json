@@ -75,11 +75,11 @@
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
-    "clean": "rm -rf node_modules package-lock.json yarn.lock"
+    "clean-npm": "rm -rf node_modules package-lock.json"
   },
   "dependencies": {
     "archy": "1.0",
-    "eraro": "1.0",
+    "eraro": "1.1",
     "gate-executor": "1.1",
     "gex": "0.3",
     "json-stringify-safe": "5.0",

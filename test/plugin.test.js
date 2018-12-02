@@ -254,8 +254,6 @@ describe('plugin', function() {
   })
 
   it('plugin-error-deprecated', function(fin) {
-    /* eslint no-unused-vars: 0 */
-
     var si = Seneca({
       debug: {
         undead: true
@@ -803,6 +801,78 @@ describe('plugin', function() {
         console.log(this.options().plugin)
         fin()
       })
+  })
+
+  it('error-plugin-define', function(fin) {
+    var s0 = Seneca({log:'silent',debug:{undead:true}})
+    s0.error(function(err){
+      try {
+        expect(err.code).equal('e0')
+        expect(err.message).contains('a is 1')
+        fin()
+      }
+      catch(e) {
+        fin(e)
+      }
+    })
+    
+    var p0 = function p0() {
+      this.fail('e0', {a:1})
+    }
+    p0.errors = {
+      e0: 'a is <%=a%>'
+    }
+
+    s0.use(p0)
+  })
+
+  it('error-plugin-init', function(fin) {
+    var s0 = Seneca({log:'silent',debug:{undead:true}})
+    s0.error(function(err){
+      try {
+        expect(err.code).equal('e0')
+        expect(err.message).contains('a is 1')
+        fin()
+      }
+      catch(e) {
+        fin(e)
+      }
+    })
+    
+    var p0 = function p0() {
+      this.init(function(){
+        this.fail('e0', {a:1})
+      })
+    }
+    p0.errors = {
+      e0: 'a is <%=a%>'
+    }
+
+    s0.use(p0)
+  })
+
+  it('error-plugin-action', function(fin) {
+    var s0 = Seneca({log:'silent',debug:{undead:true}})
+    
+    var p0 = function p0() {
+      this.add('a:1',function(msg, reply){
+        this.fail('e0', {a:1})
+      })
+    }
+    p0.errors = {
+      e0: 'a is <%=a%>'
+    }
+
+    s0.use(p0).act('a:1',function(err){
+      try {
+        expect(err.code).equal('e0')
+        expect(err.message).contains('a is 1')
+        fin()
+      }
+      catch(e) {
+        fin(e)
+      }
+    })
   })
 
 })
