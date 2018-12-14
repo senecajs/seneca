@@ -110,6 +110,62 @@ describe('api', function() {
     })
   })
 
+  
+  it('has_plugin', function(fin) {
+    var si = Seneca.test(fin)
+
+    si.use(function foo() {})
+    si.use({ init: function() {}, name: 'bar', tag: 'aaa' })
+
+    si.ready(function() {
+      expect(si.has_plugin('foo')).true()
+      expect(si.has_plugin('bar')).false()
+      expect(si.has_plugin('bar', 'bbb')).false()
+      expect(si.has_plugin('bar', 'aaa')).true()
+
+      si.close(fin)
+    })
+  })
+
+
+  it('ignore_plugin', function(fin) {
+    var si = Seneca.test(fin)
+
+    var tmp = {}
+    function zed() {tmp.a=1}
+    
+    si.ignore_plugin('foo')
+    si.ignore_plugin('zed', true)
+    si.ignore_plugin('qaz', false)
+    si.ignore_plugin('red', 't0', true)
+    si.ignore_plugin('red$t1', true)
+
+    si.use(function foo() {})
+    si.use(function bar() {})
+    si.use(zed)
+    si.use(function qaz() {})
+    si.use({tag: 't0', name: 'red', init: function () {}})
+    si.use({tag: 't1', name: 'red', init: function () {}})
+
+    si.ready(function() {
+      expect(si.has_plugin('foo')).false()
+      expect(si.has_plugin('bar')).true()
+      expect(si.has_plugin('zed')).false()
+      expect(si.has_plugin('qaz')).true()
+      expect(si.has_plugin('red','t0')).false()
+      expect(si.has_plugin('red','t1')).false()
+
+      si.ignore_plugin('zed', false)
+      si.use(zed)
+      si.ready(function(){
+        expect(si.has_plugin('zed')).true()
+        expect(tmp.a).equal(1)
+        si.close(fin)
+      })
+    })
+  })
+
+  
   it('has', function(fin) {
     si = si.test()
 

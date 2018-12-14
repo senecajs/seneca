@@ -243,9 +243,9 @@ var seneca_util = {
   router: function router() {
     return Patrun()
   },
-  argprops: Common.argprops,
   resolve_option: Common.resolve_option,
-  flatten: Common.flatten
+  flatten: Common.flatten,
+  argprops: Legacy.argprops
 }
 
 // Internal implementations.
@@ -388,6 +388,7 @@ function make_seneca(initial_options) {
   root$.list_plugins = API.list_plugins // List the registered plugins.
   root$.find_plugin = API.find_plugin // Find the plugin definition.
   root$.has_plugin = API.has_plugin // True if the plugin is registered.
+  root$.ignore_plugin = API.ignore_plugin // Ignore plugin and don't register it.
   root$.listen = API.listen(callpoint) // Listen for inbound messages.
   root$.client = API.client(callpoint) // Send outbound messages.
   root$.gate = API.gate // Create a delegate that executes actions in sequence.
@@ -591,7 +592,7 @@ function make_seneca(initial_options) {
         ((actdef.plugin_tag === '-'
         ? void 0
         : actdef.plugin_tag)
-          ? '/' + actdef.plugin_tag
+          ? '$' + actdef.plugin_tag
           : '')
 
     actdef.plugin = {

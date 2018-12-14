@@ -97,23 +97,6 @@ describe('util', function() {
     done()
   })
 
-  it('seneca.util.argprops', function(done) {
-    var out = si.util.argprops(
-      { a: 1, b: 2, c: 3 },
-      { b: 22, c: 33, d: 4 },
-      { c: 333 },
-      ['d']
-    )
-    expect(out).to.include({ a: 1, b: 22, c: 333 })
-
-    out = si.util.argprops({}, { d: 1 }, {}, 'd')
-    expect('{}').to.equal(Util.inspect(out))
-
-    out = si.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
-    expect('{}').to.equal(Util.inspect(out))
-    done()
-  })
-
   it('seneca.util.deepextend.mixed', function(done) {
     var obj = si.util.deepextend(
       {},

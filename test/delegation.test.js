@@ -101,7 +101,7 @@ describe('delegation', function() {
   it('parent.plugin', function(fin) {
     var si = Seneca.test(fin)
 
-    si.use(function() {
+    si.use(function () {
       this.add({ a: 'A' }, function(msg, reply) {
         this.log.debug('P', '1')
         msg.p1 = 1

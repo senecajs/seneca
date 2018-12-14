@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2017 Richard Rodger, MIT License */
+/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Assert = require('assert')
@@ -438,6 +438,60 @@ describe('common', function() {
     expect(ca.foo).equal(4)
     expect(ca.bar$).not.exist()
 
+    fin()
+  })
+
+  
+  it('parse_jsonic', function(fin) {
+    expect(Common.parse_jsonic('a:b')).equal({a:'b'})
+    expect(Common.parse_jsonic('\na:b')).equal({a:'b'})
+
+    try { Common.parse_jsonic('a'); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_jsonic') }
+
+    try { Common.parse_jsonic('\n\na:\n\n  x}'); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_jsonic') }
+
+    fin()
+  })
+
+  
+  it('make_plugin_key', function(fin) {
+    expect(Common.make_plugin_key('foo')).equal('foo')
+    expect(Common.make_plugin_key('foo','0')).equal('foo$0')
+    expect(Common.make_plugin_key('foo',0)).equal('foo$0')
+    expect(Common.make_plugin_key('foo$0')).equal('foo$0')
+    expect(Common.make_plugin_key({name:'foo'},'0')).equal('foo$0')
+    expect(Common.make_plugin_key({name:'foo', tag:'0'})).equal('foo$0')
+    expect(Common.make_plugin_key({name:'foo', tag:'0'},'a')).equal('foo$0')
+
+    try { Common.make_plugin_key(); expect(false).true() }
+    catch(e) { expect(e.code).equals('missing_plugin_name') }
+
+    try { Common.make_plugin_key({}); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_name') }
+
+    try { Common.make_plugin_key(''); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_name') }
+
+    try { Common.make_plugin_key('$'); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_name') }
+
+    try { Common.make_plugin_key('a','$'); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_tag') }
+
+    var b = []
+    for(var i = 0; i < 1026; i++) {
+      b.push('b')
+    }
+    var s = b.join('')
+
+    try { Common.make_plugin_key(s); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_name') }
+
+    try { Common.make_plugin_key('a',s); expect(false).true() }
+    catch(e) { expect(e.code).equals('bad_plugin_tag') }
+    
     fin()
   })
 })
