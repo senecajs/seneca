@@ -107,6 +107,7 @@
     "lab": "14",
     "prettier": "1",
     "seneca-entity": "2",
-    "seneca-error-test": "0"
+    "seneca-error-test": "0",
+    "@seneca/test-plugin": "0"
   }
 }

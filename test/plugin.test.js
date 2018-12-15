@@ -28,6 +28,38 @@ describe('plugin', function() {
   })
 
 
+  it('standard-test-plugin', function(fin) {
+    Seneca()
+      .test(fin)
+      .use('test-plugin')
+      .ready(function() {
+        this.act('role:test,cmd:foo,size:3', function(err, out) {
+          expect(out.foo).equal(6)
+          fin()
+        })
+      })
+  })
+
+  it('standard-test-plugin-full-ignore', function(fin) {
+    Seneca()
+      .test(fin)
+      .ignore_plugin('@seneca/test-plugin')
+      .use('@seneca/test-plugin')
+      .ready(function() {
+        expect(this.has_plugin('@seneca/test-plugin')).false()
+        this
+          .ignore_plugin('@seneca/test-plugin', false)
+          .use('@seneca/test-plugin')
+          .ready(function() {
+            this.act('role:test,cmd:foo,size:3', function(err, out) {
+              expect(out.foo).equal(6)
+              fin()
+            })
+          })
+      })
+  })
+
+  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)
