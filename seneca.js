@@ -520,7 +520,7 @@ function make_seneca(initial_options) {
   // private$.plugins = {}
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = UsePlugin({
-    prefix: 'seneca-',
+    prefix: ['seneca-','@seneca/'],
     module: opts.$.internal.module || module,
     msgprefix: false,
     builtin: '',
