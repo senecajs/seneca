@@ -13,7 +13,7 @@ var expect = Code.expect
 
 describe('plugin', function() {
   var si = null
-  
+
   lab.before(function(fin) {
     si = Seneca({ tag: 's0', log: 'silent' })
       .use('./stubs/plugin-error/tmp.js')
@@ -26,7 +26,6 @@ describe('plugin', function() {
   lab.after(function(fin) {
     si.close(fin)
   })
-
 
   it('standard-test-plugin', function(fin) {
     Seneca()
@@ -47,8 +46,7 @@ describe('plugin', function() {
       .use('@seneca/test-plugin')
       .ready(function() {
         expect(this.has_plugin('@seneca/test-plugin')).false()
-        this
-          .ignore_plugin('@seneca/test-plugin', false)
+        this.ignore_plugin('@seneca/test-plugin', false)
           .use('@seneca/test-plugin')
           .ready(function() {
             this.act('role:test,cmd:foo,size:3', function(err, out) {
@@ -59,22 +57,24 @@ describe('plugin', function() {
       })
   })
 
-  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)
-      .use(function p0(opts) {
-        var z
-        
-        this.add('a:1', function(msg, reply) {
-          reply({x:msg.x,y:opts.y,z:z})
-        })
+      .use(
+        function p0(opts) {
+          var z
 
-        this.init(function(done) {
-          z = 4
-          done()
-        })
-      }, {y: 3})
+          this.add('a:1', function(msg, reply) {
+            reply({ x: msg.x, y: opts.y, z: z })
+          })
+
+          this.init(function(done) {
+            z = 4
+            done()
+          })
+        },
+        { y: 3 }
+      )
       .ready(function() {
         this.act('a:1,x:2', function(err, out) {
           expect(out).equal({ x: 2, y: 3, z: 4 })
@@ -83,7 +83,6 @@ describe('plugin', function() {
       })
   })
 
-  
   it('load-defaults', function(fin) {
     Seneca()
       .test(fin)
@@ -95,16 +94,14 @@ describe('plugin', function() {
       .ready(fin)
   })
 
-
   it('load-relative-to-root', function(fin) {
     var subfolder = require('./stubs/plugin/subfolder')
-    subfolder(function(out){
+    subfolder(function(out) {
       expect(out).equal('relative-to-root')
       fin()
     })
   })
 
-  
   it('good-default-options', function(fin) {
     var init_p1 = function(opts) {
       expect(opts).equal({ c: 1, d: 2 })
@@ -471,7 +468,7 @@ describe('plugin', function() {
 
     si.export('not-an-export')
   })
-  
+
   it('handles plugin with action that timesout', function(fin) {
     Seneca({ log: 'silent', timeout: 10, debug: { undead: true } })
       .use(function foo() {
@@ -786,27 +783,32 @@ describe('plugin', function() {
     })
   })
 
-
   it('plugins-options-precedence', function(fin) {
     var si = Seneca({
       log: 'silent',
       legacy: { transport: false },
       plugin: {
-        foo: {a:2,c:2},
-        bar: {a:2,c:1},
+        foo: { a: 2, c: 2 },
+        bar: { a: 2, c: 1 }
       }
     })
 
     function bar(opts) {
-      expect(opts).equal({a:3,b:1,c:1,d:1})
+      expect(opts).equal({ a: 3, b: 1, c: 1, d: 1 })
     }
-    bar.defaults = {a:1,b:1}
-    
-    si
-      .use({name:'foo', defaults:{a:1,b:1}, init: function(opts) {
-        expect(opts).equal({a:2,b:2,c:3,d:1})
-      }}, {b:2,c:3,d:1})
-      .use(bar, {a:3,d:1})
+    bar.defaults = { a: 1, b: 1 }
+
+    si.use(
+      {
+        name: 'foo',
+        defaults: { a: 1, b: 1 },
+        init: function(opts) {
+          expect(opts).equal({ a: 2, b: 2, c: 3, d: 1 })
+        }
+      },
+      { b: 2, c: 3, d: 1 }
+    )
+      .use(bar, { a: 3, d: 1 })
 
       .ready(function() {
         console.log(this.options().plugin)
@@ -815,20 +817,19 @@ describe('plugin', function() {
   })
 
   it('error-plugin-define', function(fin) {
-    var s0 = Seneca({log:'silent',debug:{undead:true}})
-    s0.error(function(err){
+    var s0 = Seneca({ log: 'silent', debug: { undead: true } })
+    s0.error(function(err) {
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')
         fin()
-      }
-      catch(e) {
+      } catch (e) {
         fin(e)
       }
     })
-    
+
     var p0 = function p0() {
-      this.fail('e0', {a:1})
+      this.fail('e0', { a: 1 })
     }
     p0.errors = {
       e0: 'a is <%=a%>'
@@ -838,21 +839,20 @@ describe('plugin', function() {
   })
 
   it('error-plugin-init', function(fin) {
-    var s0 = Seneca({log:'silent',debug:{undead:true}})
-    s0.error(function(err){
+    var s0 = Seneca({ log: 'silent', debug: { undead: true } })
+    s0.error(function(err) {
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')
         fin()
-      }
-      catch(e) {
+      } catch (e) {
         fin(e)
       }
     })
-    
+
     var p0 = function p0() {
-      this.init(function(){
-        this.fail('e0', {a:1})
+      this.init(function() {
+        this.fail('e0', { a: 1 })
       })
     }
     p0.errors = {
@@ -863,27 +863,25 @@ describe('plugin', function() {
   })
 
   it('error-plugin-action', function(fin) {
-    var s0 = Seneca({log:'silent',debug:{undead:true}})
-    
+    var s0 = Seneca({ log: 'silent', debug: { undead: true } })
+
     var p0 = function p0() {
-      this.add('a:1',function(msg, reply){
-        this.fail('e0', {a:1})
+      this.add('a:1', function(msg, reply) {
+        this.fail('e0', { a: 1 })
       })
     }
     p0.errors = {
       e0: 'a is <%=a%>'
     }
 
-    s0.use(p0).act('a:1',function(err){
+    s0.use(p0).act('a:1', function(err) {
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')
         fin()
-      }
-      catch(e) {
+      } catch (e) {
         fin(e)
       }
     })
   })
-
 })

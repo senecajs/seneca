@@ -21,20 +21,18 @@ var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
 var make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function() {
-  it('fail', function(fin){
-    var si = Seneca({tag:'aaa'}).test()
-    
+  it('fail', function(fin) {
+    var si = Seneca({ tag: 'aaa' }).test()
+
     try {
-      si.fail('foo','Foo')
+      si.fail('foo', 'Foo')
       expect(false).true()
-    }
-    catch(e) {
+    } catch (e) {
       expect(e.code).equal('foo')
       expect(e.message).contains('Foo')
       fin()
     }
   })
-
 
   it('response_is_error', response_is_error)
   it('action_callback', action_callback)

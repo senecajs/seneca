@@ -34,10 +34,9 @@ describe('prior', function() {
     try {
       Seneca()
         .test()
-        .prior({a:1})
+        .prior({ a: 1 })
       expect(false).true()
-    }
-    catch(e) {
+    } catch (e) {
       expect(e.code).equal('no_prior_action')
       fin()
     }

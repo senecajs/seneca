@@ -33,8 +33,7 @@ describe('inward', function() {
     try {
       API.inward()
       expect(false).true()
-    }
-    catch(e) {
+    } catch (e) {
       expect(e.code).equal('invalid_arguments')
     }
 

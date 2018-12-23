@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.8.0-rc2",
+  "version": "3.8.0-rc3",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -75,7 +75,9 @@
     "annotate": "docco seneca.js lib/*.js -o docs/annotated",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
-    "clean-npm": "rm -rf node_modules package-lock.json"
+    "clean-npm": "rm -rf node_modules package-lock.json",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"`; echo TAG: v$REPO_VERSION; git commit -a -m v$REPO_VERSION; git push; git tag v$REPO_VERSION; git push --tags;",
+    "repo-publish": "npm run repo-tag; npm publish --access public"
   },
   "dependencies": {
     "archy": "1.0",

@@ -285,14 +285,13 @@ module.exports = function init(seneca_options, more_options) {
 
   // Register plugins specified in options.
   var pluginkeys = Object.keys(options.plugins)
-  for( var pkI = 0; pkI < pluginkeys.length; pkI++) {
+  for (var pkI = 0; pkI < pluginkeys.length; pkI++) {
     var pluginkey = pluginkeys[pkI]
     var plugindesc = options.plugins[pluginkey]
 
-    if(false === plugindesc) {
+    if (false === plugindesc) {
       seneca.private$.ignore_plugins[pluginkey] = true
-    }
-    else {
+    } else {
       seneca.use(plugindesc)
     }
   }
@@ -399,12 +398,12 @@ function make_seneca(initial_options) {
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
-  root$.depends = API.depends // Check for plugin dependencies.  
+  root$.depends = API.depends // Check for plugin dependencies.
   root$.delegate = API.delegate // Create an action-specific Seneca instance.
   root$.prior = API.prior // Call the previous action definition for message pattern.
   root$.inward = API.inward // Add a modifier function for messages inward
   root$.outward = API.outward // Add a modifier function for responses outward
-  
+
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
@@ -520,7 +519,7 @@ function make_seneca(initial_options) {
   // private$.plugins = {}
   private$.plugin_order = { byname: [], byref: [] }
   private$.use = UsePlugin({
-    prefix: ['seneca-','@seneca/'],
+    prefix: ['seneca-', '@seneca/'],
     module: opts.$.internal.module || module,
     msgprefix: false,
     builtin: '',
@@ -567,7 +566,6 @@ function make_seneca(initial_options) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
   }
 
-    
   // See [`seneca.add`](#seneca.add)
   function api_add() {
     var self = this
@@ -867,7 +865,6 @@ function make_seneca(initial_options) {
     return this.fullname
   }
 
-  
   function do_act(instance, origmsg, origreply) {
     var timedout = false
     var actmsg = intern.make_actmsg(origmsg)
@@ -935,9 +932,6 @@ function make_seneca(initial_options) {
     return fix
   }
 
-
-
-  
   function api_options(options, chain) {
     var self = this
 
@@ -981,7 +975,7 @@ function make_seneca(initial_options) {
     Assert(property[0] !== '_', 'property cannot start with _')
     Assert(
       private$.decorations[property] === undefined,
-      'seneca is already decorated with the property: '+property
+      'seneca is already decorated with the property: ' + property
     )
     Assert(
       root$[property] === undefined,
@@ -1409,8 +1403,8 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
     null != origmsg.sync$
       ? !!origmsg.sync$
       : origmeta && null != origmeta.sync
-        ? !!origmeta.sync
-        : _.isFunction(origreply)
+      ? !!origmeta.sync
+      : _.isFunction(origreply)
 
   this.trace = null
   this.sub = null

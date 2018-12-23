@@ -39,7 +39,6 @@ describe('logging', function() {
       .ready(fin)
   })
 
-  
   it('basic', function(fin) {
     var capture = make_log_capture()
 
@@ -82,7 +81,6 @@ describe('logging', function() {
         .add('a:1', a1)
         .act('a:1')
         .ready(function() {
-
           // hello entry, legacy-transport ready entry
           // remove legacy-transport entry in 4.x
           expect(log.length).to.equal(2)
@@ -158,7 +156,6 @@ describe('logging', function() {
         .add('a:1', a1)
         .act('a:1')
         .ready(function() {
-
           // hello entry, legacy-transport ready entry
           // remove legacy-transport entry in 4.x
           expect(log.length).to.equal(2)

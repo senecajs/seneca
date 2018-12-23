@@ -110,7 +110,6 @@ describe('api', function() {
     })
   })
 
-  
   it('has_plugin', function(fin) {
     var si = Seneca.test(fin)
 
@@ -127,13 +126,14 @@ describe('api', function() {
     })
   })
 
-
   it('ignore_plugin', function(fin) {
     var si = Seneca.test(fin)
 
     var tmp = {}
-    function zed() {tmp.a=1}
-    
+    function zed() {
+      tmp.a = 1
+    }
+
     si.ignore_plugin('foo')
     si.ignore_plugin('zed', true)
     si.ignore_plugin('qaz', false)
@@ -144,20 +144,20 @@ describe('api', function() {
     si.use(function bar() {})
     si.use(zed)
     si.use(function qaz() {})
-    si.use({tag: 't0', name: 'red', init: function () {}})
-    si.use({tag: 't1', name: 'red', init: function () {}})
+    si.use({ tag: 't0', name: 'red', init: function() {} })
+    si.use({ tag: 't1', name: 'red', init: function() {} })
 
     si.ready(function() {
       expect(si.has_plugin('foo')).false()
       expect(si.has_plugin('bar')).true()
       expect(si.has_plugin('zed')).false()
       expect(si.has_plugin('qaz')).true()
-      expect(si.has_plugin('red','t0')).false()
-      expect(si.has_plugin('red','t1')).false()
+      expect(si.has_plugin('red', 't0')).false()
+      expect(si.has_plugin('red', 't1')).false()
 
       si.ignore_plugin('zed', false)
       si.use(zed)
-      si.ready(function(){
+      si.ready(function() {
         expect(si.has_plugin('zed')).true()
         expect(tmp.a).equal(1)
         si.close(fin)
@@ -165,7 +165,6 @@ describe('api', function() {
     })
   })
 
-  
   it('has', function(fin) {
     si = si.test()
 
@@ -289,14 +288,13 @@ describe('api', function() {
     })
 
     si.add('b:1', function(msg, reply) {
-      expect(this.context).equal({foo:1, bar:2, zed:4})
+      expect(this.context).equal({ foo: 1, bar: 2, zed: 4 })
       reply()
     })
-    
+
     si.context.foo = 1
     si.context.zed = 3
-    
+
     si.act('a:1', fin)
   })
-
 })

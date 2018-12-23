@@ -14,7 +14,6 @@ var expect = Code.expect
 var Outward = require('../lib/outward')
 var API = require('../lib/api')
 
-
 describe('outward', function() {
   it('make_error', function(fin) {
     var err = { message: 'foo', meta$: { err: true } }
@@ -49,8 +48,7 @@ describe('outward', function() {
     try {
       API.outward()
       expect(false).true()
-    }
-    catch(e) {
+    } catch (e) {
       expect(e.code).equal('invalid_arguments')
     }
 
