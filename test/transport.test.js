@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2016 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2018 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var _ = require('lodash')
@@ -296,21 +296,29 @@ describe('transport', function() {
     }).test(fin)
 
     s0.add('a:1', function a1(msg, reply, meta) {
+      expect(meta.remote).equal(1 === msg.r)
+
+      // remote is not propogated - top level only
+      if('b' === msg.from) {
+        expect(meta.remote).false()
+      }
+
       reply({ x: msg.x, y: meta.custom.y })
     })
       .add('b:1', function a1(msg, reply, meta) {
-        this.act('a:1', { x: msg.x }, reply)
+        expect(meta.remote).equal(1 === msg.r)
+        this.act('a:1', { x: msg.x, from:'b' }, reply)
       })
       .listen(62010)
       .ready(function() {
         c0.client(62010).act(
-          'a:1,x:2',
+          'a:1,x:2,r:1',
           { meta$: { custom: { y: 33 } } },
           function(ignore, out, meta) {
             expect(out.y).equals(33)
             expect(out.x).equals(2)
 
-            this.act('b:1,x:3', { meta$: { custom: { y: 44 } } }, function(
+            this.act('b:1,x:3,r:1', { meta$: { custom: { y: 44 } } }, function(
               ignore,
               out,
               meta

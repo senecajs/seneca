@@ -1396,9 +1396,12 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   this.plugin = origmsg.plugin$
   this.prior = origmsg.prior$
   this.caller = origmsg.caller$
-
   this.parents = origmsg.parents$
 
+  // Only true for arriving messages. Child messages called from an
+  // action triggered by a remote message are not considered remote.
+  this.remote = !!origmsg.remote$
+  
   this.sync =
     null != origmsg.sync$
       ? !!origmsg.sync$
