@@ -59,6 +59,10 @@ describe('error', function() {
 
   it('legacy_fail', legacy_fail)
 
+  it('types', types)
+
+
+  
   function response_is_error(fin) {
     var si = Seneca({ log: 'silent' })
 
@@ -720,4 +724,24 @@ describe('error', function() {
     assert.equal('FOO', err.code)
     assert.deepEqual({ BAR: 1 }, err.details)
   }
+
+
+  function types(fin) {
+    var si = Seneca({ log: 'silent' })
+
+    si.add('a:1', function(msg, reply) {
+      throw new TypeError('t0')
+    })
+
+    si.error(function(err) {
+      expect(err.code).equal('act_execute')
+      fin()
+    })
+
+    si.act('a:1', function(err, out) {
+      expect(out).not.exist()
+      expect(err.code).equal('act_execute')
+    })
+  }
+
 })

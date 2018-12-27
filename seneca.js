@@ -1255,7 +1255,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   actctxt.errlog = errlog
   actctxt.error = error
 
-  meta.error = data.res instanceof Error
+  meta.error = Util.isError(data.res)
 
   intern.process_outward(actctxt, data)
 
