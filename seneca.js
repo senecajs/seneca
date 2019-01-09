@@ -844,13 +844,15 @@ function make_seneca(initial_options) {
   function api_ready(ready) {
     var self = this
 
-    setImmediate(function register_ready() {
-      if (root$.private$.ge.isclear()) {
-        execute_ready(ready.bind(self))
-      } else {
-        root$.private$.ready_list.push(ready.bind(self))
-      }
-    })
+    if('function' === typeof(ready) ) {
+      setImmediate(function register_ready() {
+        if (root$.private$.ge.isclear()) {
+          execute_ready(ready.bind(self))
+        } else {
+          root$.private$.ready_list.push(ready.bind(self))
+        }
+      })
+    }
 
     return self
   }
