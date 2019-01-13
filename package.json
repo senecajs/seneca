@@ -76,8 +76,8 @@
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean-npm": "rm -rf node_modules package-lock.json",
-    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"`; echo TAG: v$REPO_VERSION; git commit -a -m v$REPO_VERSION; git push; git tag v$REPO_VERSION; git push --tags;",
-    "repo-publish": "npm run repo-tag; npm publish --access public"
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
+    "repo-publish": "npm test && npm run repo-tag && npm publish --access public"
   },
   "dependencies": {
     "archy": "1.0",
@@ -92,9 +92,9 @@
     "norma": "0.4",
     "ordu": "0.1",
     "patrun": "1.0",
-    "qs": "6.5",
+    "qs": "6.6",
     "rolling-stats": "0.1",
-    "semver": "5.5",
+    "semver": "5.6",
     "seneca-transport": "2.4",
     "use-plugin": "3.0",
     "wreck": "12.5"

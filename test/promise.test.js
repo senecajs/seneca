@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Richard Rodger, MIT License */
+/* Copyright (c) 2019 Richard Rodger, MIT License */
 'use strict'
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
@@ -15,13 +15,13 @@ var describe = lab.describe
 var it = lab.it
 var expect = Code.expect
 
-// TODO: test priors
-
 describe('promise', function() {
+/* TODO: enable for Seneca 4
   it('ready', function(fin) {
     (async function work() {
       await Seneca().test().ready()
       fin()
     })()
   })
+*/
 })
