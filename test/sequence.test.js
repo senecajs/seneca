@@ -13,7 +13,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
 describe('sequence', function() {
   it('ready-always-called', function(fin) {
     Seneca.test(fin).ready(function() {

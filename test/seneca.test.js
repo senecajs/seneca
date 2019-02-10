@@ -37,7 +37,6 @@ var timerstub = {
 var testopts = { log: 'test' }
 
 describe('seneca', function() {
-
   it('happy', function(fin) {
     Seneca()
       .test(fin)
@@ -798,14 +797,11 @@ describe('seneca', function() {
       done()
     }
 
-    var si = Seneca().test(done)//(testopts).error(done)
+    var si = Seneca().test(done) //(testopts).error(done)
 
     si.add('i:0,a:1,b:2', addFunction)
 
-    si.act('i:0,a:1,b:2,c:3', function(
-      err,
-      out
-    ) {
+    si.act('i:0,a:1,b:2,c:3', function(err, out) {
       checkFunction(err, out, function() {
         si.add('i:1,a:1', { b: 2 }, addFunction).act(
           'i:1,a:1,b:2,c:3',

@@ -1,4 +1,9 @@
-## 3.8.0
+## 3.8.1 2019-02-10
+
+* Fix action annotations - seneca-joi now works again
+
+
+## 3.8.0 2019-01-13
 
 * Plugin Seneca instance has `init` convenience method for initialization action.
 * Plugins can define local error codes with `errors` property.

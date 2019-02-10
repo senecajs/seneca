@@ -20,17 +20,19 @@ describe('add', function() {
     si.private$.action_modifiers.push(function(actdef) {
       actdef.desc = actdef.func.desc
     })
-    
-    si.add({a:1},a1)
 
-    a1.validate = {b:2}
-    a1.desc = "The ubiquitous a1 action."
-    function a1(m,r){r()}
+    si.add({ a: 1 }, a1)
+
+    a1.validate = { b: 2 }
+    a1.desc = 'The ubiquitous a1 action.'
+    function a1(m, r) {
+      r()
+    }
 
     si.ready(function() {
       var actdef = si.find('a:1')
       expect(actdef.rules.b).equal(2)
-      expect(actdef.desc).equal("The ubiquitous a1 action.")
+      expect(actdef.desc).equal('The ubiquitous a1 action.')
       fin()
     })
   })

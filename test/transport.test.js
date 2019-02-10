@@ -19,7 +19,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 var make_test_transport = TransportStubs.make_test_transport
@@ -303,7 +302,7 @@ describe('transport', function() {
       expect(meta.remote).equal(1 === msg.r)
 
       // remote is not propogated - top level only
-      if('b' === msg.from) {
+      if ('b' === msg.from) {
         expect(meta.remote).false()
       }
 
@@ -311,7 +310,7 @@ describe('transport', function() {
     })
       .add('b:1', function a1(msg, reply, meta) {
         expect(meta.remote).equal(1 === msg.r)
-        this.act('a:1', { x: msg.x, from:'b' }, reply)
+        this.act('a:1', { x: msg.x, from: 'b' }, reply)
       })
       .listen(62010)
       .ready(function() {

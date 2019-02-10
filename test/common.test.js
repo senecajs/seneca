@@ -14,7 +14,6 @@ var expect = Code.expect
 var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
-
 describe('common', function() {
   it('misc', function(fin) {
     expect(Common.boolify(true)).to.equal(true)

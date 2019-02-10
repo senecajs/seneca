@@ -17,7 +17,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
 // TODO: move all legacy functions here and isolate lack of test coverage
 
 describe('legacy', function() {

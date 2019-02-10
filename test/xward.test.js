@@ -13,7 +13,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
 describe('xward', function() {
   it('happy-inward', function(fin) {
     Seneca()

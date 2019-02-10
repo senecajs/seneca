@@ -64,8 +64,6 @@ describe('error', function() {
 
   it('types', types)
 
-
-  
   function response_is_error(fin) {
     var si = Seneca({ log: 'silent' })
 
@@ -728,7 +726,6 @@ describe('error', function() {
     assert.deepEqual({ BAR: 1 }, err.details)
   }
 
-
   function types(fin) {
     var si = Seneca({ log: 'silent' })
 
@@ -746,5 +743,4 @@ describe('error', function() {
       expect(err.code).equal('act_execute')
     })
   }
-
 })

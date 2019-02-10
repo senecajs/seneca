@@ -16,7 +16,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
 describe('util', function() {
   var si = Seneca(testopts)
 

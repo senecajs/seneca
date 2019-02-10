@@ -94,7 +94,7 @@ var option_defaults = {
     deprecation: true,
 
     // Set to array to force artificial argv and ignore process.argv
-    argv: null,
+    argv: null
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -537,10 +537,13 @@ function make_seneca(initial_options) {
   // TODO: provide an api to add these
   private$.action_modifiers = [
     function add_rules_from_validate_annotation(actdef) {
-      actdef.rules = Object.assign(actdef.rules, _.clone(actdef.func.validate || {}))
+      actdef.rules = Object.assign(
+        actdef.rules,
+        _.clone(actdef.func.validate || {})
+      )
     }
   ]
-  
+
   private$.sub = { handler: null, tracers: [] }
 
   private$.ready_list = []
@@ -624,7 +627,7 @@ function make_seneca(initial_options) {
         : !!opts.$.strict.add
 
     // QQQ
-    
+
     var addroute = true
 
     if (opts.$.legacy.actdef) {
@@ -722,7 +725,7 @@ function make_seneca(initial_options) {
   // NOTE: use setImmediate so that action annotations (such as .validate)
   // can be defined after call to seneca.add (for nicer plugin code order).
   function deferred_modify_action(seneca, actdef) {
-    setImmediate(function(){
+    setImmediate(function() {
       _.each(seneca.private$.action_modifiers, function(actmod) {
         actmod.call(seneca, actdef)
       })
@@ -855,7 +858,7 @@ function make_seneca(initial_options) {
   function api_ready(ready) {
     var self = this
 
-    if('function' === typeof(ready) ) {
+    if ('function' === typeof ready) {
       setImmediate(function register_ready() {
         if (root$.private$.ge.isclear()) {
           execute_ready(ready.bind(self))
@@ -1414,7 +1417,7 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   // Only true for arriving messages. Child messages called from an
   // action triggered by a remote message are not considered remote.
   this.remote = !!origmsg.remote$
-  
+
   this.sync =
     null != origmsg.sync$
       ? !!origmsg.sync$

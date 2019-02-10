@@ -15,8 +15,6 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-
-
 describe('actions', function() {
   var si = Seneca({ log: 'silent' })
 
