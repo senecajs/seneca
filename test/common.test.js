@@ -8,9 +8,12 @@ var Common = require('../lib/common')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var assert = Assert
 var expect = Code.expect
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
 
 describe('common', function() {
   it('misc', function(fin) {

@@ -91,7 +91,10 @@ var option_defaults = {
     callpoint: false,
 
     // Log deprecation warnings
-    deprecation: true
+    deprecation: true,
+
+    // Set to array to force artificial argv and ignore process.argv
+    argv: null,
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -532,7 +535,12 @@ function make_seneca(initial_options) {
   root$.toString = api_toString
 
   // TODO: provide an api to add these
-  private$.action_modifiers = []
+  private$.action_modifiers = [
+    function add_rules_from_validate_annotation(actdef) {
+      actdef.rules = Object.assign(actdef.rules, _.clone(actdef.func.validate || {}))
+    }
+  ]
+  
   private$.sub = { handler: null, tracers: [] }
 
   private$.ready_list = []
@@ -615,21 +623,13 @@ function make_seneca(initial_options) {
         ? !!raw_pattern.strict$.add
         : !!opts.$.strict.add
 
-    var pattern_rules = _.clone(action.validate || {})
-    _.each(pattern, function(v, k) {
-      if (_.isObject(v)) {
-        pattern_rules[k] = _.clone(v)
-        delete pattern[k]
-      }
-    })
-
+    // QQQ
+    
     var addroute = true
 
     if (opts.$.legacy.actdef) {
       actdef.args = _.clone(pattern)
     }
-
-    actdef.rules = pattern_rules
 
     actdef.id = action.name + '_' + next_action_id()
     actdef.name = action.name
@@ -674,7 +674,14 @@ function make_seneca(initial_options) {
     private$.stats.actmap[actdef.pattern] =
       private$.stats.actmap[actdef.pattern] || make_action_stats(actdef)
 
-    actdef = modify_action(self, actdef)
+    var pattern_rules = {}
+    _.each(pattern, function(v, k) {
+      if (_.isObject(v)) {
+        pattern_rules[k] = _.clone(v)
+        delete pattern[k]
+      }
+    })
+    actdef.rules = pattern_rules
 
     if (addroute) {
       self.log.debug({
@@ -690,6 +697,8 @@ function make_seneca(initial_options) {
     }
 
     private$.actdef[actdef.id] = actdef
+
+    deferred_modify_action(self, actdef)
 
     return self
   }
@@ -710,12 +719,14 @@ function make_seneca(initial_options) {
     }
   }
 
-  function modify_action(seneca, actdef) {
-    _.each(private$.action_modifiers, function(actmod) {
-      actdef = actmod.call(seneca, actdef) || actdef
+  // NOTE: use setImmediate so that action annotations (such as .validate)
+  // can be defined after call to seneca.add (for nicer plugin code order).
+  function deferred_modify_action(seneca, actdef) {
+    setImmediate(function(){
+      _.each(seneca.private$.action_modifiers, function(actmod) {
+        actmod.call(seneca, actdef)
+      })
     })
-
-    return actdef
   }
 
   // Perform an action. The properties of the first argument are matched against
@@ -1006,7 +1017,7 @@ function make_seneca(initial_options) {
     Transport(root$)
   }
 
-  Print(root$, process.argv)
+  Print(root$, opts.$.debug.argv || process.argv)
 
   _.each(opts.$.system.close_signals, function(active, signal) {
     if (active) {

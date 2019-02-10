@@ -77,7 +77,7 @@
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean-npm": "rm -rf node_modules package-lock.json",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm test && npm run repo-tag && npm publish --access public"
+    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm test && npm run repo-tag && npm publish && npm dist-tag add seneca@$REPO_VERSION next && npm dist-tag add seneca@$REPO_VERSION plugin"
   },
   "dependencies": {
     "archy": "1.0",
@@ -100,16 +100,16 @@
     "wreck": "12.5"
   },
   "devDependencies": {
+    "@seneca/test-plugin": "0",
     "async": "2",
     "bench": "0",
     "code": "4",
     "coveralls": "3",
     "docco": "0",
     "hoek": "4.2.1",
-    "lab": "14",
+    "lab": "^18.0.1",
     "prettier": "1",
     "seneca-entity": "2",
-    "seneca-error-test": "0",
-    "@seneca/test-plugin": "0"
+    "seneca-error-test": "0"
   }
 }

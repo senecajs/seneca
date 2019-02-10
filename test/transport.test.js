@@ -5,7 +5,6 @@ var _ = require('lodash')
 var Code = require('code')
 var Lab = require('lab')
 
-var Seneca = require('..')
 var Common = require('../lib/common')
 var Transport = require('../lib/api')
 var TransportStubs = require('./stubs/transports')
@@ -13,8 +12,13 @@ var TransportStubs = require('./stubs/transports')
 // Test shortcuts
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
+
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 

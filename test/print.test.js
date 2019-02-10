@@ -6,13 +6,16 @@ var Path = require('path')
 var Code = require('code')
 var Lab = require('lab')
 
-var Seneca = require('..')
 var Print = require('../lib/print.js')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
 
 describe('print', function() {
   it('init', function(fin) {

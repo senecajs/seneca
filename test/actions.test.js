@@ -1,15 +1,21 @@
-/* Copyright (c) 2017 Richard Rodger, MIT License */
+/* Copyright (c) 2017-2019 Richard Rodger and other contributors, MIT License */
 'use strict'
+
+var Util = require('util')
 
 var Code = require('code')
 var Lab = require('lab')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
 
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
 var Seneca = require('..')
+
+
 
 describe('actions', function() {
   var si = Seneca({ log: 'silent' })
@@ -24,7 +30,6 @@ describe('actions', function() {
 
     si.listen().ready(function() {
       this.act('role:seneca,cmd:ping', function(err, out) {
-        //console.dir(out,{depth:null})
         expect(out.id).equals(this.id)
         si.close(fin)
       })
@@ -118,20 +123,4 @@ describe('actions', function() {
       })
     })
   })
-
-  /*
-  it('make_error', function(fin) {
-    var si = Seneca({ log: 'silent' })
-    si.act(
-      'role:seneca,make:error',
-      { code: 'foo', err: new Error('bar') },
-      function(err, out) {
-        expect(out).equal(null)
-        expect(err.message.match(/bar/)).exists()
-        expect(err.code).equal('act_execute')
-        fin()
-      }
-    )
-  })
-  */
 })

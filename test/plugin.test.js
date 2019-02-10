@@ -4,28 +4,17 @@
 var _ = require('lodash')
 var Code = require('code')
 var Lab = require('lab')
-var Seneca = require('..')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
 
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
+
 describe('plugin', function() {
-  var si = null
-
-  lab.before(function(fin) {
-    si = Seneca({ tag: 's0', log: 'silent' })
-      .use('./stubs/plugin-error/tmp.js')
-      .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
-      .ready(function() {
-        fin()
-      })
-  })
-
-  lab.after(function(fin) {
-    si.close(fin)
-  })
 
   it('standard-test-plugin', function(fin) {
     Seneca()
@@ -140,11 +129,12 @@ describe('plugin', function() {
   })
 
   it('bad-default-options', function(fin) {
-    Seneca({ log: 'silent', debug: { undead: true } })
+    Seneca({ debug: { undead: true } })
       .test(function(err) {
         expect(err.code).equals('invalid_plugin_option')
         fin()
       })
+      .quiet()
       .use(
         {
           name: 'p0',
@@ -176,35 +166,50 @@ describe('plugin', function() {
   })
 
   it('should return "no errors created." when passing test false', function(fin) {
-    var seneca = Seneca({ tag: 'c0' }).test(fin)
-    seneca.use('./stubs/plugin-error/tmpApi')
-    seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
+    Seneca({ tag: 's0', log: 'silent' })
+      .use('./stubs/plugin-error/tmp.js')
+      .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
+      .ready(function() {
+        var s0 = this
+        
+        var seneca = Seneca({ tag: 'c0' }).test(fin)
+        seneca.use('./stubs/plugin-error/tmpApi')
+        seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
+        
+        seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'false' }, function(
+          err,
+          res
+        ) {
+          console.log('=============',err, res)
 
-    seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'false' }, function(
-      err,
-      res
-    ) {
-      expect(err).to.not.exist()
-      expect(res.message).to.contain('no errors created.')
-      seneca.close(fin)
-    })
+          expect(err).to.not.exist()
+          expect(res.message).to.contain('no errors created.')
+          s0.close(seneca.close.bind(seneca,fin))
+        })
+      })
   })
-
+  
   it('should return "error caught!" when passing test true', function(fin) {
-    var seneca = Seneca({ tag: 'c1', log: 'silent' })
-    seneca.use('./stubs/plugin-error/tmpApi')
-    seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
-
-    seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'true' }, function(
-      err,
-      res
+    Seneca({ tag: 's0', log: 'silent' })
+      .use('./stubs/plugin-error/tmp.js')
+      .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
+      .ready(function() {
+        var s0 = this
+        var seneca = Seneca({ tag: 'c1', log: 'silent' })
+        seneca.use('./stubs/plugin-error/tmpApi')
+        seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
+        
+        seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'true' }, function(
+          err,
+          res
     ) {
-      expect(err).to.not.exist()
-      expect(res.message).to.contain('error caught!')
-      seneca.close(fin)
-    })
+          expect(err).to.not.exist()
+          expect(res.message).to.contain('error caught!')
+          s0.close(seneca.close.bind(seneca,fin))
+        })
+      })
   })
-
+  
   it('works with exportmap', function(fin) {
     var seneca = Seneca.test(fin)
 

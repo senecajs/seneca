@@ -3,12 +3,15 @@
 
 var Assert = require('assert')
 var Lab = require('lab')
-var Seneca = require('..')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var assert = Assert
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
 
 describe('debug', function() {
   // REMOVE after Seneca 4.x

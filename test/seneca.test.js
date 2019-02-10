@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2016 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var Assert = require('assert')
@@ -8,14 +8,17 @@ var Gex = require('gex')
 var _ = require('lodash')
 var Lab = require('lab')
 var Package = require('../package.json')
-var Seneca = require('..')
 var Common = require('../lib/common.js')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
 var assert = Assert
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 console.log('TEST transport tmx=' + tmx)
@@ -34,13 +37,6 @@ var timerstub = {
 var testopts = { log: 'test' }
 
 describe('seneca', function() {
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
 
   it('happy', function(fin) {
     Seneca()
@@ -621,11 +617,11 @@ describe('seneca', function() {
     }
 
     si = Seneca(testopts)
-      .add('a:1', function(args) {
-        this.good({ b: args.a + 1 })
+      .add('a:1', function(msg, reply) {
+        reply({ b: msg.a + 1 })
       })
-      .add('a:2', function(args) {
-        this.good({ b: args.a + 2 })
+      .add('a:2', function(msg, reply) {
+        reply({ b: msg.a + 2 })
       })
 
     si.act_if(true, 'a:1', function(err, out) {
@@ -652,8 +648,8 @@ describe('seneca', function() {
         return self
       }
       self.init = function() {
-        this.add({ role: self.name, cmd: 'foo' }, function(args, cb) {
-          cb(null, 'foo:' + args.foo)
+        this.add({ role: self.name, cmd: 'foo' }, function(msg, cb) {
+          cb(null, 'foo:' + msg.foo)
         })
       }
     }
@@ -687,8 +683,8 @@ describe('seneca', function() {
         return self
       }
       self.init = function() {
-        this.add({ role: 'mock1', cmd: 'foo' }, function(args, cb) {
-          this.prior(args, function(err, out) {
+        this.add({ role: 'mock1', cmd: 'foo' }, function(msg, cb) {
+          this.prior(msg, function(err, out) {
             assert.equal(err, null)
             cb(null, 'bar:' + out)
           })
@@ -715,11 +711,11 @@ describe('seneca', function() {
 
   it('fire-and-forget', function(done) {
     var si = Seneca({ log: 'silent' })
-    si.add({ a: 1 }, function(args, cb) {
-      cb(null, args.a + 1)
+    si.add({ a: 1 }, function(msg, cb) {
+      cb(null, msg.a + 1)
     })
-    si.add({ a: 1, b: 2 }, function(args, cb) {
-      cb(null, args.a + args.b)
+    si.add({ a: 1, b: 2 }, function(msg, cb) {
+      cb(null, msg.a + msg.b)
     })
 
     si.act({ a: 1 })
@@ -802,9 +798,11 @@ describe('seneca', function() {
       done()
     }
 
-    var si = Seneca(testopts).error(done)
+    var si = Seneca().test(done)//(testopts).error(done)
 
-    si.add('i:0,a:1,b:2', addFunction).act('i:0,a:1,b:2,c:3', function(
+    si.add('i:0,a:1,b:2', addFunction)
+
+    si.act('i:0,a:1,b:2,c:3', function(
       err,
       out
     ) {
@@ -993,9 +991,9 @@ describe('seneca', function() {
 
     var x = 0
 
-    si.add({ a: 1 }, function() {
+    si.add({ a: 1 }, function(msg, reply) {
       x++
-      this.good({ x: x })
+      reply({ x: x })
     })
 
     si.act({ a: 1 }, function(err, out) {

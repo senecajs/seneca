@@ -1,26 +1,20 @@
-/* Copyright (c) 2013-2015 Richard Rodger */
+/* Copyright (c) 2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var Assert = require('assert')
 var Lab = require('lab')
-var Seneca = require('../../..')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 var assert = Assert
 
+var Shared = require('../../shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('../../..')
 
 describe('options', function () {
-  lab.before(function (done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
-
-
   it('options-happy', function (done) {
     // loads ./seneca.options.js as well
     var si = Seneca({d: 4, foo: {dd: 4}, module: module})

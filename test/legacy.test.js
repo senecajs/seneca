@@ -6,13 +6,17 @@ var Util = require('util')
 var Lab = require('lab')
 var Code = require('code')
 
-var Legacy = require('../lib/legacy.js')
-var Seneca = require('..')
-
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
+
+var Legacy = require('../lib/legacy.js')
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
+
 
 // TODO: move all legacy functions here and isolate lack of test coverage
 

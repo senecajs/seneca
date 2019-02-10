@@ -4,23 +4,20 @@
 
 var Code = require('code')
 var Lab = require('lab')
-var Seneca = require('..')
 var Util = require('util')
 
 var testopts = { log: 'silent' }
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
 
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
+
+
 describe('util', function() {
-  lab.beforeEach(function(done) {
-    process.removeAllListeners('SIGHUP')
-    process.removeAllListeners('SIGTERM')
-    process.removeAllListeners('SIGINT')
-    process.removeAllListeners('SIGBREAK')
-    done()
-  })
   var si = Seneca(testopts)
 
   it('seneca.util.deepextend.happy', function(done) {

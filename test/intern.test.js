@@ -10,8 +10,10 @@ var Ordu = require('ordu')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
 
 var intern = {
   seneca: require('..').test$.intern,

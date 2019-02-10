@@ -8,12 +8,15 @@ var Util = require('util')
 var Lab = require('lab')
 var Code = require('code')
 var Hoek = require('hoek')
-var Seneca = require('..')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
 var expect = Code.expect
+
+var Shared = require('./shared')
+var it = Shared.make_it(lab)
+
+var Seneca = require('..')
 
 describe('promise', function() {
 /* TODO: enable for Seneca 4
