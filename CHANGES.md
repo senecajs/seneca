@@ -1,3 +1,8 @@
+## 3.8.2
+
+* Allow plugin names that are file paths
+
+
 ## 3.8.1 2019-02-10
 
 * Fix action annotations - seneca-joi now works again

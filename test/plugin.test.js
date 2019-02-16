@@ -179,8 +179,6 @@ describe('plugin', function() {
           err,
           res
         ) {
-          console.log('=============', err, res)
-
           expect(err).to.not.exist()
           expect(res.message).to.contain('no errors created.')
           s0.close(seneca.close.bind(seneca, fin))
@@ -815,7 +813,9 @@ describe('plugin', function() {
       .use(bar, { a: 3, d: 1 })
 
       .ready(function() {
-        console.log(this.options().plugin)
+        expect(this.options().plugin).equal(
+          { bar: { a: 3, c: 1, d: 1, b: 1 },
+            foo: { a: 2, c: 3, b: 2, d: 1 } })
         fin()
       })
   })
@@ -888,4 +888,25 @@ describe('plugin', function() {
       }
     })
   })
+
+  it('no-name', function(fin) {
+    var s0 = Seneca({legacy:{transport:false}}).test(fin)
+    s0.use(function(){})
+    s0.use('./stubs/plugin/no-name.js')
+    s0.use(__dirname+'/stubs/plugin/no-name.js')
+    s0.ready(function() {
+      expect(Object.keys(s0.list_plugins()).length).equal(3)
+      fin()
+    })
+  })
+
+  it('seneca-prefix-wins', function(fin) {
+    var s0 = Seneca({legacy:{transport:false}}).test(fin)
+    s0.use('joi')
+    s0.ready(function() {
+      expect(Object.keys(s0.list_plugins())[0]).equal('joi')
+      fin()
+    })
+  })
+
 })
