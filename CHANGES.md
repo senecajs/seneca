@@ -1,6 +1,7 @@
-## 3.8.2
+## 3.8.2 2019-02-17
 
-* Allow plugin names that are file paths, and allow . in plugin names and tags
+* Allow plugin names that are file paths, and allow . in plugin names and tags.
+* Plugins with seneca prefixes (seneca- or seneca@/) win - thus joi and seneca-joi in particular, are no longer confused.
 
 
 ## 3.8.1 2019-02-10

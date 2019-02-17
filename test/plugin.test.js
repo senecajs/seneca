@@ -15,6 +15,7 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('plugin', function() {
+  // Validates that @seneca/ prefix can be dropped.
   it('standard-test-plugin', function(fin) {
     Seneca()
       .test(fin)
@@ -813,9 +814,10 @@ describe('plugin', function() {
       .use(bar, { a: 3, d: 1 })
 
       .ready(function() {
-        expect(this.options().plugin).equal(
-          { bar: { a: 3, c: 1, d: 1, b: 1 },
-            foo: { a: 2, c: 3, b: 2, d: 1 } })
+        expect(this.options().plugin).equal({
+          bar: { a: 3, c: 1, d: 1, b: 1 },
+          foo: { a: 2, c: 3, b: 2, d: 1 }
+        })
         fin()
       })
   })
@@ -890,10 +892,10 @@ describe('plugin', function() {
   })
 
   it('no-name', function(fin) {
-    var s0 = Seneca({legacy:{transport:false}}).test(fin)
-    s0.use(function(){})
+    var s0 = Seneca({ legacy: { transport: false } }).test(fin)
+    s0.use(function() {})
     s0.use('./stubs/plugin/no-name.js')
-    s0.use(__dirname+'/stubs/plugin/no-name.js')
+    s0.use(__dirname + '/stubs/plugin/no-name.js')
     s0.ready(function() {
       expect(Object.keys(s0.list_plugins()).length).equal(3)
       fin()
@@ -901,12 +903,11 @@ describe('plugin', function() {
   })
 
   it('seneca-prefix-wins', function(fin) {
-    var s0 = Seneca({legacy:{transport:false}}).test(fin)
+    var s0 = Seneca({ legacy: { transport: false } }).test(fin)
     s0.use('joi')
     s0.ready(function() {
       expect(Object.keys(s0.list_plugins())[0]).equal('joi')
       fin()
     })
   })
-
 })

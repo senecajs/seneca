@@ -1193,39 +1193,41 @@ describe('transport', function() {
     }
   })
 
-
   // Thanks to https://github.com/davide-talesco for this test
   // https://github.com/senecajs/seneca-transport/issues/165
   it('multi-layer-error', test_opts, function(fin) {
-    const s1 = Seneca({tag: 's1', legacy:{transport:false}}).quiet()
-    const s2 = Seneca({tag: 's2', legacy:{transport:false}}).quiet()
-    const s3 = Seneca({tag: 's3', legacy:{transport:false}}).quiet()
+    const s1 = Seneca({ tag: 's1', legacy: { transport: false } }).quiet()
+    const s2 = Seneca({ tag: 's2', legacy: { transport: false } }).quiet()
+    const s3 = Seneca({ tag: 's3', legacy: { transport: false } }).quiet()
 
-    s1.client({port:40402, pin: 'cmd:test2'})
-      .add('cmd:test1', function(msg, reply){
+    s1.client({ port: 40402, pin: 'cmd:test2' })
+      .add('cmd:test1', function(msg, reply) {
         this.act('cmd:test2', reply)
       })
       .listen(40401)
 
-    s2.client({port:40403, pin: 'cmd:test3'})
-      .add('cmd:test2', function(msg, reply){
+    s2.client({ port: 40403, pin: 'cmd:test3' })
+      .add('cmd:test2', function(msg, reply) {
         this.act('cmd:test3', reply)
       })
       .listen(40402)
 
-    s3.add('cmd:test3', function(msg, reply){
+    s3.add('cmd:test3', function(msg, reply) {
       throw new Error('from-test3')
-    })
-      .listen(40403)
+    }).listen(40403)
 
-    s1.ready(s2.ready.bind(s2,s3.ready.bind(s3,function() {
-      s1.act('cmd:test1', function(err) {
-        expect(err.message).equal('from-test3')
-        fin()
-      })
-    })))
+    s1.ready(
+      s2.ready.bind(
+        s2,
+        s3.ready.bind(s3, function() {
+          s1.act('cmd:test1', function(err) {
+            expect(err.message).equal('from-test3')
+            fin()
+          })
+        })
+      )
+    )
   })
-
 
   it('server can be restarted without issues to clients', test_opts, function(
     done
