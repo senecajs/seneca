@@ -1,6 +1,6 @@
 ## 3.8.2
 
-* Allow plugin names that are file paths
+* Allow plugin names that are file paths, and allow . in plugin names and tags
 
 
 ## 3.8.1 2019-02-10

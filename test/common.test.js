@@ -475,6 +475,8 @@ describe('common', function() {
       'foo$0'
     )
 
+    expect(Common.make_plugin_key('foo.1~2-3$_')).equal('foo.1~2-3$_')
+    
     try {
       Common.make_plugin_key()
       expect(false).true()
