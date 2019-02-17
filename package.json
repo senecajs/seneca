@@ -95,7 +95,7 @@
     "qs": "^6.6.0",
     "rolling-stats": "^0.1.1",
     "semver": "^5.6.0",
-    "seneca-transport": "^2.4.0",
+    "seneca-transport": "^3.0.0",
     "use-plugin": "^4.0.0",
     "wreck": "^12.5.1"
   },
