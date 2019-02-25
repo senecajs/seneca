@@ -226,7 +226,7 @@ describe('api', function() {
     expect(si.has('g:1')).equal(false)
     expect(si.has('h:1,g:1')).equal(true)
     expect(si.has('h:1,g:1,x:1')).equal(false)
-    
+
     fin()
   })
 

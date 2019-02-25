@@ -12,7 +12,6 @@ env:
   matrix:
     - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/seneca-entity
-    - TEST_SUITE=senecajs/seneca-promisify
 
 install:
   - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi

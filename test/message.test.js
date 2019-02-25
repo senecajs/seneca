@@ -115,7 +115,10 @@ describe('message', function() {
         expect(i).equal(4)
         expect(err.code).equal('maxparents')
         expect(err.details.parents).equal([
-          'a:1 a1_8', 'a:1 a1_8', 'a:1 a1_8', 'a:1 a1_8'
+          'a:1 a1_8',
+          'a:1 a1_8',
+          'a:1 a1_8',
+          'a:1 a1_8'
         ])
         fin()
       })

@@ -1,3 +1,9 @@
+## 3.8.3 2019-02-25
+
+* Seneca.fail throws Seneca Errors, whereas Seneca.error creates them
+* Seneca.error can create plugin scoped errors
+
+
 ## 3.8.2 2019-02-17
 
 * Allow plugin names that are file paths, and allow . in plugin names and tags.
