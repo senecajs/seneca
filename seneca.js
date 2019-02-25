@@ -406,6 +406,8 @@ function make_seneca(initial_options) {
   root$.prior = API.prior // Call the previous action definition for message pattern.
   root$.inward = API.inward // Add a modifier function for messages inward
   root$.outward = API.outward // Add a modifier function for responses outward
+  root$.error = API.error // Set global error handler, or generate Seneca Error
+  root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail // Throw a Seneca error
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
@@ -413,11 +415,7 @@ function make_seneca(initial_options) {
   root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
   root$.options = api_options // Get and set options.
-  root$.error = api_error // Set global error handler.
   root$.decorate = api_decorate // Decorate seneca object with functions
-
-  // DEPRECATE Legacy fail in 4.x
-  root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail
 
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
@@ -975,11 +973,6 @@ function make_seneca(initial_options) {
     // Allow chaining with seneca.options({...}, true)
     // see https://github.com/rjrodger/seneca/issues/80
     return chain ? self : opts.$
-  }
-
-  function api_error(errhandler) {
-    this.options({ errhandler: errhandler })
-    return this
   }
 
   // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate

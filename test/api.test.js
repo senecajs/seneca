@@ -20,6 +20,47 @@ describe('api', function() {
     reply({ z: msg.z })
   }
 
+  it('error', function(fin) {
+    si = si.test()
+
+    try {
+      si.error()
+    } catch (e) {
+      expect(e.code).equal('no_error_code')
+    }
+
+    try {
+      si.error(null)
+    } catch (e) {
+      expect(e.code).equal('no_error_code')
+    }
+
+    var e0 = si.error('test_args', {
+      arg0: 'foo',
+      arg1: { bar: 1 },
+      not_an_arg: 1
+    })
+    expect(e0.code).equal('test_args')
+    expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
+    expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+    expect(e0.seneca).true()
+
+    fin()
+  })
+
+  it('fail', function(fin) {
+    try {
+      si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+    } catch (e0) {
+      expect(e0.code).equal('test_args')
+      expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
+      expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+      expect(e0.seneca).true()
+    }
+
+    fin()
+  })
+
   it('list', function(fin) {
     si = si.test()
 
@@ -85,7 +126,7 @@ describe('api', function() {
     expect(si0.id).equals('foo')
 
     var si1 = Seneca({ tag: 't0', log: 'silent' })
-    si1.error(null)
+    si1.options({ errhandler: null })
     si1.test(console.log)
     expect(si1.id).endsWith('/t0')
 
