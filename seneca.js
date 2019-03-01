@@ -1103,6 +1103,9 @@ function make_log(instance, modifier) {
     instance.log ||
     function log(data) {
       instance.private$.logger(this, data)
+      if(instance.on_log) {
+        instance.on_log(data)
+      }
     }
 
   log = prepare_log(instance, make_modified_log(log, modifier))

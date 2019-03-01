@@ -108,7 +108,7 @@
     "hoek": "^5.0.4",
     "lab": "^18.0.2",
     "prettier": "^1.16.4",
-    "seneca-entity": "^3.0.1",
+    "seneca-entity": "^3.2.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^3.1.0"
   }
