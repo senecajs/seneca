@@ -1,7 +1,13 @@
+## 3.8.4 2019-03-03
+
+* Seneca.translate can include/exclude message properties.
+* Added `log` event so that plugins can capture log entries directly.
+
+
 ## 3.8.3 2019-02-25
 
-* Seneca.fail throws Seneca Errors, whereas Seneca.error creates them
-* Seneca.error can create plugin scoped errors
+* Seneca.fail throws Seneca Errors, whereas Seneca.error creates them.
+* Seneca.error can create plugin scoped errors.
 
 
 ## 3.8.2 2019-02-17
@@ -12,7 +18,7 @@
 
 ## 3.8.1 2019-02-10
 
-* Fix action annotations - seneca-joi now works again
+* Fix action annotations - seneca-joi now works again.
 
 
 ## 3.8.0 2019-01-13
@@ -20,47 +26,47 @@
 * Plugin Seneca instance has `init` convenience method for initialization action.
 * Plugins can define local error codes with `errors` property.
 * Updated `fail` method throws Seneca Eraro exceptions directly and supports plugin-local codes.
-* Option to ensure plugins load only once, and to ignore plugins
+* Option to ensure plugins load only once, and to ignore plugins.
 
 
 ## 3.7.0 2018-07-18
 
 * `role:seneca,cmd:ping` responds with instance and process metrics.
-* Fixed memory leak in history: https://github.com/senecajs/seneca/issues/680
-* Utility modules available via Seneca.util: Eraro, Jsonic, Nid, Patrun
-* `meta.custom` is now preserved properly over entire action pathway including transports
+* Fixed memory leak in history: https://github.com/senecajs/seneca/issues/680 .
+* Utility modules available via Seneca.util: Eraro, Jsonic, Nid, Patrun.
+* `meta.custom` is now preserved properly over entire action pathway including transports.
 
 
 ## 3.6.0 2018-05-28
 
-* `translate` method simplifies translating message patterns 
-* Message metadata has `custom` sub-object that propogates with message 
+* `translate` method simplifies translating message patterns.
+* Message metadata has `custom` sub-object that propogates with message.
 
 
 ## 3.5.0 2018-05-14
 
-* Better format for fatal error messages
-* Passes `npm audit`
-* Fixed double `sub` call
+* Better format for fatal error messages.
+* Passes `npm audit`.
+* Fixed double `sub` call.
 
 
 ## 3.4.3 2017-10-13
 
-* Supports --seneca.test to trigger test mode
-* Support SENECA_TEST enviroment variable
+* Supports --seneca.test to trigger test mode.
+* Support SENECA_TEST enviroment variable.
 
 
 ## 3.4.2 2017-08-10
 
-* Fixes priors bug #662
-* Removes errant debugging code
-* Fixes history pruning
-* Slightly neater test logs (suffix to IN/OUT indicates sync/async message)
+* Fixes priors bug #662.
+* Removes errant debugging code.
+* Fixes history pruning.
+* Slightly neater test logs (suffix to IN/OUT indicates sync/async message).
 
 
 ## 3.4.1 2017-07-06
 
-* Backwards compatibility fix for seneca-amqp-transport 2.2.0 (legacy.meta=true)
+* Backwards compatibility fix for seneca-amqp-transport 2.2.0 (legacy.meta=true).
 
 
 ## 3.4.0 2017-07-03
