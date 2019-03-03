@@ -199,7 +199,7 @@ var option_defaults = {
 
   // Setup event listeners before starting
   events: {},
-  
+
   // Backwards compatibility settings.
   legacy: {
     // Action callback must always have signature callback(error, result).
@@ -352,18 +352,20 @@ function make_seneca(initial_options) {
 
   // Expose private data to plugins.
   root$.private$ = private$
-  
+
   // Resolve initial options.
   private$.optioner = Optioner(module, option_defaults, initial_options)
   var opts = { $: private$.optioner.get() }
-  
-  // Setup event handlers, if defined 
-  ;['log','act_in','act_out','act_err','ready','close'].forEach(function(event_name){
-    if( 'function' === typeof(opts.$.events[event_name]) ) {
+
+  // Setup event handlers, if defined
+  ;['log', 'act_in', 'act_out', 'act_err', 'ready', 'close'].forEach(function(
+    event_name
+  ) {
+    if ('function' === typeof opts.$.events[event_name]) {
       root$.on(event_name, opts.$.events[event_name])
     }
   })
-  
+
   // Create internal tools.
   private$.actnid = Nid({ length: opts.$.idlen })
   private$.didnid = Nid({ length: opts.$.didlen })
@@ -1116,7 +1118,7 @@ function make_log(instance, modifier) {
     instance.log ||
     function log(data) {
       instance.private$.logger(this, data)
-      instance.emit('log',data)
+      instance.emit('log', data)
     }
 
   log = prepare_log(instance, make_modified_log(log, modifier))

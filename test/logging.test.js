@@ -38,24 +38,26 @@ describe('logging', function() {
   it('event', function(fin) {
     var loga = []
     var logb = []
-    Seneca({events:{
-      log: function(data) {
-        loga.push(data)
+    Seneca({
+      events: {
+        log: function(data) {
+          loga.push(data)
+        }
       }
-    }})
+    })
       .test()
       .on('log', function(data) {
         logb.push(data)
       })
       .ready(function() {
         expect(loga.length).above(logb.length)
-        var last_entry = logb[logb.length-1]
-        expect(last_entry).contains({kind:'notice',level:'info'})
+        var last_entry = logb[logb.length - 1]
+        expect(last_entry).contains({ kind: 'notice', level: 'info' })
         expect(last_entry.notice).startsWith('hello')
         fin()
       })
   })
-  
+
   it('quiet', function(fin) {
     Seneca()
       .quiet()

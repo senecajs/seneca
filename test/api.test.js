@@ -91,8 +91,7 @@ describe('api', function() {
   })
 
   it('translate', function(fin) {
-    si
-      .test()
+    si.test()
       .add('a:2', function(msg, reply) {
         reply(msg)
       })
@@ -103,22 +102,21 @@ describe('api', function() {
         reply(msg)
       })
       .add('a:5', function(msg, reply) {
-        reply({a:5,x:msg.x,y:msg.y})
+        reply({ a: 5, x: msg.x, y: msg.y })
       })
       .add('e:5,f:1', function(msg, reply) {
         reply(msg)
       })
 
-    si
-      .translate('a:1', 'a:2')
+    si.translate('a:1', 'a:2')
       .translate({ a: 3 }, { a: 4 })
       .translate('c:3,d:4', 'b:3')
       .translate('a:6', 'a:5', 'x')
       .translate('a:7', 'a:5', '-x,y')
       .translate('a:8', 'a:5', ['x'])
-      .translate('a:9', 'a:5', ['-x','y'])
-      .translate('a:10', 'a:5', {x:true})
-      .translate('a:11', 'a:5', {x:false,y:true})
+      .translate('a:9', 'a:5', ['-x', 'y'])
+      .translate('a:10', 'a:5', { x: true })
+      .translate('a:11', 'a:5', { x: false, y: true })
       .translate('e:6,g:1', 'e:5,f:1', 'x')
       .translate('e:7,g:1', 'e:5,f:1', 'x,g')
 
@@ -133,41 +131,41 @@ describe('api', function() {
         expect(out).contains({ b: 3, c: 3, d: 4 })
       })
 
-    // y is removed as not picked
+      // y is removed as not picked
       .act('a:6,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, x: 1})
+        expect(out).contains({ a: 5, x: 1 })
       })
-    // x is removed as not picked
+      // x is removed as not picked
       .act('a:7,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, y: 2})
+        expect(out).contains({ a: 5, y: 2 })
       })
 
-    // y is removed as not picked
+      // y is removed as not picked
       .act('a:8,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, x: 1})
+        expect(out).contains({ a: 5, x: 1 })
       })
-    // x is removed as not picked
+      // x is removed as not picked
       .act('a:9,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, y: 2})
+        expect(out).contains({ a: 5, y: 2 })
       })
 
-    // y is removed as not picked
+      // y is removed as not picked
       .act('a:10,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, x: 1})
+        expect(out).contains({ a: 5, x: 1 })
       })
-    // x is removed as not picked
+      // x is removed as not picked
       .act('a:11,x:1,y:2', function(err, out) {
-        expect(out).contains({ a: 5, y: 2})
+        expect(out).contains({ a: 5, y: 2 })
       })
 
-    // with pick, unused from props are dropped
+      // with pick, unused from props are dropped
       .act('e:6,g:1,x:1,y:2', function(err, out) {
-        expect(this.util.clean(out)).equals({ e: 5, x: 1, f: 1})
+        expect(this.util.clean(out)).equals({ e: 5, x: 1, f: 1 })
       })
 
-    // ... unless explicitly added
+      // ... unless explicitly added
       .act('e:7,g:1,x:1,y:2', function(err, out) {
-        expect(this.util.clean(out)).equals({ e: 5, g: 1, x: 1, f: 1})
+        expect(this.util.clean(out)).equals({ e: 5, g: 1, x: 1, f: 1 })
       })
 
       .ready(fin)
