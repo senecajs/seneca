@@ -94,7 +94,10 @@ var option_defaults = {
     deprecation: true,
 
     // Set to array to force artificial argv and ignore process.argv
-    argv: null
+    argv: null,
+
+    // Length of data description in logs
+    datalen: 111
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -1235,7 +1238,11 @@ intern.execute_action = function(
 
   if (!actdef.sub) {
     delegate.log.debug(
-      actlog(actdef, msg, meta, actctxt.origmsg, { kind: 'act', case: 'IN' })
+      actlog(actdef, msg, meta, actctxt.origmsg, {
+        kind: 'act',
+        case: 'IN',
+        did: delegate.did
+      })
     )
   }
 
@@ -1492,7 +1499,8 @@ intern.callback_error = function(instance, thrown_obj, ctxt, data) {
       info: err.message,
       code: err.code,
       err: err,
-      duration: duration
+      duration: duration,
+      did: instance.did
     })
   )
 
