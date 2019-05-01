@@ -562,6 +562,7 @@ function make_seneca(initial_options) {
   private$.ready_list = []
 
   private$.inward = Ordu({ name: 'inward' })
+    .add(Inward.msg_modify)
     .add(Inward.closed)
     .add(Inward.act_cache)
     .add(Inward.act_default)
@@ -572,7 +573,6 @@ function make_seneca(initial_options) {
     .add(Inward.msg_meta)
     .add(Inward.limit_msg)
     .add(Inward.prepare_delegate)
-    .add(Inward.msg_modify)
     .add(Inward.announce)
 
   private$.outward = Ordu({ name: 'outward' })
@@ -594,7 +594,7 @@ function make_seneca(initial_options) {
   function api_add() {
     var self = this
     var args = Common.parsePattern(self, arguments, 'action:f? actdef:o?')
-
+    
     var raw_pattern = args.pattern
     var pattern = self.util.clean(raw_pattern)
 
@@ -634,12 +634,13 @@ function make_seneca(initial_options) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actdef.deprecate = raw_pattern.deprecate$
 
+    actdef.fixed = raw_pattern.fixed$ || {}
+    actdef.custom = raw_pattern.custom$ || {}
+    
     var strict_add =
       raw_pattern.strict$ && raw_pattern.strict$.add !== null
         ? !!raw_pattern.strict$.add
         : !!opts.$.strict.add
-
-    // QQQ
 
     var addroute = true
 

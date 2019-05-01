@@ -91,9 +91,9 @@
     "norma": "^0.4.1",
     "ordu": "^0.1.1",
     "patrun": "^1.0.0",
-    "qs": "^6.6.0",
+    "qs": "^6.7.0",
     "rolling-stats": "^0.1.1",
-    "semver": "^5.6.0",
+    "semver": "^5.7.0",
     "seneca-transport": "^3.0.0",
     "use-plugin": "^4.0.0",
     "wreck": "^12.5.1"
@@ -104,12 +104,13 @@
     "bench": "^0.3.6",
     "code": "^5.2.4",
     "coveralls": "^3.0.2",
-    "handlebars": "^4.1.0",
+    "handlebars": "^4.1.2",
     "hoek": "^5.0.4",
     "lab": "^18.0.2",
-    "prettier": "^1.16.4",
-    "seneca-entity": "^3.2.0",
+    "prettier": "^1.17.0",
+    "seneca-entity": "^3.3.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-joi": "^3.1.0"
+    "seneca-joi": "^3.1.0",
+    "seneca-promisify": "^0.7.1"
   }
 }
