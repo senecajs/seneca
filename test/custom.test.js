@@ -390,10 +390,11 @@ describe('custom', function() {
         .test()
         .use('promisify')
     // TODO: extend seneca.message in promisify to handle this form
-        .add('foo:true',{fixed$:{bar:1},custom$:{zed:'a'}}, function foo_true(msg,reply, meta) {
-          msg.custom_zed = meta.custom.zed
-          reply(msg)
-        })
+        .add('foo:true',{fixed$:{bar:1},custom$:{zed:'a'}},
+             function foo_true(msg,reply, meta) {
+               msg.custom_zed = meta.custom.zed
+               reply(msg)
+             })
         .ready()
 
     var out = await si.post('foo:true')
@@ -414,15 +415,50 @@ describe('custom', function() {
     var out = await si.post('foo:true')
     expect(out).equal({ foo: true, bar: 1, custom_zed: 'a' })
 
-    si.add('foo:true',{fixed$:{bar:2,qaz:3},custom$:{zed:'b',dez:'c'}}, function foo_true(msg,reply, meta) {
-      msg.custom_zed = meta.custom.zed
-      msg.custom_dez = meta.custom.dez
-      reply(msg)
-    })
-
+    si.add('foo:true',{fixed$:'bar:2,qaz:3',custom$:'zed:"b",dez:"c"'},
+           function foo_true(msg,reply, meta) {
+             msg.custom_zed = meta.custom.zed
+             msg.custom_dez = meta.custom.dez
+             reply(msg)
+           })
+    
     var out = await si.post('foo:true')
     expect(out).equal({ foo: true, bar: 2, qaz: 3, custom_zed: 'b', custom_dez: 'c' })
 
+  })
+
+
+  lab.it('custom-add-fix', test_opts, async () => {
+    var si = await Seneca({legacy:{transport:false}})
+        .test()
+        .use('promisify')
+
+    si.message('role:qaz,foo:false', async function(msg) {
+      return msg
+    })
+
+    si
+      .fix({role:'qaz'},{bar:1},{zed:'a'})
+      .add('foo:true',
+           function foo_true(msg,reply, meta) {
+             msg.custom_zed = meta.custom.zed
+             reply(msg)
+           })
+      .ready()
+
+    var out = await si.post('role:qaz,foo:true')
+    expect(out).equal({ role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
+
+    out = await si.post('role:qaz,foo:false')
+    expect(out).equal({ role: 'qaz', foo: false })
+
+    si.message('role:qaz,foo:true', async function foo_true_a(msg) {
+      // TODO: this is adding plugin$ to msg and should not
+      return this.util.clean(await this.prior(msg))
+    })
+
+    var out = await si.post('role:qaz,foo:true')
+    expect(out).equal({ role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
   })
 
 })

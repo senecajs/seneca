@@ -634,8 +634,8 @@ function make_seneca(initial_options) {
     // Deprecate a pattern by providing a string message using deprecate$ key.
     actdef.deprecate = raw_pattern.deprecate$
 
-    actdef.fixed = raw_pattern.fixed$ || {}
-    actdef.custom = raw_pattern.custom$ || {}
+    actdef.fixed = Jsonic(raw_pattern.fixed$ || {})
+    actdef.custom = Jsonic(raw_pattern.custom$ || {})
     
     var strict_add =
       raw_pattern.strict$ && raw_pattern.strict$.add !== null
@@ -946,20 +946,26 @@ function make_seneca(initial_options) {
     instance.private$.ge.add(execspec)
   }
 
-  function api_fix() {
+  function api_fix(patargs,msgargs,custom) {
     var self = this
 
-    var defargs = Common.parsePattern(self, arguments)
+    // var defargs = Common.parsePattern(self, arguments)
+    patargs = Jsonic(patargs || {})
 
-    var fix = self.delegate(defargs.pattern)
+    var fix_delegate = self.delegate(patargs)
 
-    fix.add = function fix_add() {
-      var args = Common.parsePattern(fix, arguments, 'rest:.*', defargs.pattern)
-      var addargs = [args.pattern].concat(args.rest)
-      return self.add.apply(fix, addargs)
+    fix_delegate.add = function fix_add() {
+      var args = Common.parsePattern(this, arguments, 'rest:.*', patargs)
+      var addargs = [args.pattern]
+          .concat({
+            fixed$:Object.assign({},msgargs,args.pattern.fixed$),
+            custom$:Object.assign({},custom,args.pattern.custom$),
+          })
+          .concat(args.rest)
+      return self.add.apply(this, addargs)
     }
 
-    return fix
+    return fix_delegate
   }
 
   function api_options(options, chain) {
