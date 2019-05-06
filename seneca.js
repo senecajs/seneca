@@ -78,7 +78,11 @@ var option_defaults = {
       options: false,
 
       // Amount of information to print on fatal error: 'summary', 'full'
-      fatal: 'summary'
+      fatal: 'summary',
+
+      // Include environment when printing full crash report.
+      // Default: false for security.
+      env: false
     },
 
     // Trace action caller and place in args.caller$.
@@ -97,7 +101,7 @@ var option_defaults = {
     argv: null,
 
     // Length of data description in logs
-    datalen: 111
+    datalen: 111,
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
