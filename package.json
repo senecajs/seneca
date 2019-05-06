@@ -93,10 +93,9 @@
     "patrun": "^1.0.0",
     "qs": "^6.7.0",
     "rolling-stats": "^0.1.1",
-    "semver": "^5.7.0",
     "seneca-transport": "^3.0.0",
     "use-plugin": "^4.0.0",
-    "wreck": "^12.5.1"
+    "wreck": "^12"
   },
   "devDependencies": {
     "@seneca/test-plugin": "0.0.1",
@@ -105,7 +104,7 @@
     "code": "^5.2.4",
     "coveralls": "^3.0.2",
     "handlebars": "^4.1.2",
-    "hoek": "^5.0.4",
+    "hoek": "^5",
     "lab": "^18.0.2",
     "prettier": "^1.17.0",
     "seneca-entity": "^3.3.0",
