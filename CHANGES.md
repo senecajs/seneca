@@ -1,3 +1,8 @@
+## 3.9.0 2019-05-06
+
+* Added custom$ and fixed$ directives to seneca.add - see test/custom.test.js:custom-add - allows fixed message arguments and meta custom values on individual messages.
+
+
 ## 3.8.4 2019-03-03
 
 * Seneca.translate can include/exclude message properties.

@@ -101,7 +101,7 @@ var option_defaults = {
     argv: null,
 
     // Length of data description in logs
-    datalen: 111,
+    datalen: 111
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -598,7 +598,7 @@ function make_seneca(initial_options) {
   function api_add() {
     var self = this
     var args = Common.parsePattern(self, arguments, 'action:f? actdef:o?')
-    
+
     var raw_pattern = args.pattern
     var pattern = self.util.clean(raw_pattern)
 
@@ -640,7 +640,7 @@ function make_seneca(initial_options) {
 
     actdef.fixed = Jsonic(raw_pattern.fixed$ || {})
     actdef.custom = Jsonic(raw_pattern.custom$ || {})
-    
+
     var strict_add =
       raw_pattern.strict$ && raw_pattern.strict$.add !== null
         ? !!raw_pattern.strict$.add
@@ -950,7 +950,7 @@ function make_seneca(initial_options) {
     instance.private$.ge.add(execspec)
   }
 
-  function api_fix(patargs,msgargs,custom) {
+  function api_fix(patargs, msgargs, custom) {
     var self = this
 
     // var defargs = Common.parsePattern(self, arguments)
@@ -961,11 +961,11 @@ function make_seneca(initial_options) {
     fix_delegate.add = function fix_add() {
       var args = Common.parsePattern(this, arguments, 'rest:.*', patargs)
       var addargs = [args.pattern]
-          .concat({
-            fixed$:Object.assign({},msgargs,args.pattern.fixed$),
-            custom$:Object.assign({},custom,args.pattern.custom$),
-          })
-          .concat(args.rest)
+        .concat({
+          fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
+          custom$: Object.assign({}, custom, args.pattern.custom$)
+        })
+        .concat(args.rest)
       return self.add.apply(this, addargs)
     }
 
