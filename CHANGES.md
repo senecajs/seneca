@@ -1,3 +1,8 @@
+## 3.10.0 2019-05-12
+
+* Added explain$ directive to seneca.act - see test/explain.test.js - allows message actions to provide context-specific explanation data for behaviour on an ad hoc basis.
+
+
 ## 3.9.0 2019-05-06
 
 * Added custom$ and fixed$ directives to seneca.add - see test/custom.test.js:custom-add - allows fixed message arguments and meta custom values on individual messages.

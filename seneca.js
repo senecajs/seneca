@@ -426,8 +426,8 @@ function make_seneca(initial_options) {
   root$.outward = API.outward // Add a modifier function for responses outward
   root$.error = API.error // Set global error handler, or generate Seneca Error
   root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail // Throw a Seneca error
-  root$.explain = API.explain // Toggle top level explain capture 
-  
+  root$.explain = API.explain // Toggle top level explain capture
+
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
