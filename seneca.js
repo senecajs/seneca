@@ -2,43 +2,42 @@
 'use strict'
 
 // Node API modules.
-var Assert = require('assert')
-var Events = require('events')
-var Util = require('util')
+const Assert = require('assert')
+const Events = require('events')
+const Util = require('util')
 
 // External modules.
-var _ = require('lodash')
-var GateExecutor = require('gate-executor')
-var Jsonic = require('jsonic')
-var UsePlugin = require('use-plugin')
-var Nid = require('nid')
-var Norma = require('norma')
-var Patrun = require('patrun')
-var Stats = require('rolling-stats')
-var Ordu = require('ordu')
-var Eraro = require('eraro')
+const GateExecutor = require('gate-executor')
+const Jsonic = require('jsonic')
+const UsePlugin = require('use-plugin')
+const Nid = require('nid')
+const Norma = require('norma')
+const Patrun = require('patrun')
+const Stats = require('rolling-stats')
+const Ordu = require('ordu')
+const Eraro = require('eraro')
 
 // Internal modules.
-var API = require('./lib/api')
-var Inward = require('./lib/inward')
-var Outward = require('./lib/outward')
-var Common = require('./lib/common')
-var Legacy = require('./lib/legacy')
-var Optioner = require('./lib/optioner')
-var Package = require('./package.json')
-var Plugins = require('./lib/plugins')
-var Print = require('./lib/print')
-var Actions = require('./lib/actions')
-var Transport = require('./lib/transport')
+const API = require('./lib/api')
+const Inward = require('./lib/inward')
+const Outward = require('./lib/outward')
+const Common = require('./lib/common')
+const Legacy = require('./lib/legacy')
+const Optioner = require('./lib/optioner')
+const Package = require('./package.json')
+const Plugins = require('./lib/plugins')
+const Print = require('./lib/print')
+const Actions = require('./lib/actions')
+const Transport = require('./lib/transport')
 
 // Shortcuts.
-var errlog = Common.make_standard_err_log_entry
-var actlog = Common.make_standard_act_log_entry
+const errlog = Common.make_standard_err_log_entry
+const actlog = Common.make_standard_act_log_entry
 
 // Internal data and utilities.
-var error = Common.error
+const error = Common.error
 
-var option_defaults = {
+const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
   tag: '-',
 
@@ -233,7 +232,7 @@ var option_defaults = {
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.
-var seneca_util = {
+const seneca_util = {
   Eraro: Eraro,
   Jsonic: Jsonic,
   Nid: Nid,
@@ -262,7 +261,7 @@ var seneca_util = {
 }
 
 // Internal implementations.
-var intern = {
+const intern = {
   util: seneca_util
 }
 
@@ -270,14 +269,32 @@ var intern = {
 function Seneca() {
   Events.EventEmitter.call(this)
   this.setMaxListeners(0)
+
 }
 Util.inherits(Seneca, Events.EventEmitter)
 
+// Mark the Seneca object
+Seneca.prototype.isSeneca = true
+
+
+// Provide useful description when convered to JSON.
+// Cannot be instantiated from JSON.
+Seneca.prototype.toJSON = function toJSON() {
+  return {
+    isSeneca: true,
+    id: this.id,
+    did: this.did,
+    fixedargs: this.fixedargs,
+    fixedmeta: this.fixedmeta,
+  }
+}
+
+
 // Create a Seneca instance.
 module.exports = function init(seneca_options, more_options) {
-  var initial_options = _.isString(seneca_options)
-    ? _.extend({}, { from: seneca_options }, more_options)
-    : _.extend({}, seneca_options, more_options)
+  var initial_options = 'string' === typeof(seneca_options)
+    ? Common.deepextend({}, { from: seneca_options }, more_options)
+    : Common.deepextend({}, seneca_options, more_options)
 
   // Legacy options, remove in 4.x
   initial_options.deathdelay = initial_options.death_delay
@@ -287,7 +304,7 @@ module.exports = function init(seneca_options, more_options) {
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
-  seneca.log.debug({ kind: 'notice', options: _.omit(options, ['internal']) })
+  seneca.log.debug({ kind: 'notice', options: { ...options, internal: null }})
 
   Print.print_options(seneca, options)
 
@@ -557,7 +574,7 @@ function make_seneca(initial_options) {
     function add_rules_from_validate_annotation(actdef) {
       actdef.rules = Object.assign(
         actdef.rules,
-        _.clone(actdef.func.validate || {})
+        Common.deepextend({}, actdef.func.validate || {})
       )
     }
   ]
@@ -611,7 +628,7 @@ function make_seneca(initial_options) {
 
     var actdef = args.actdef || {}
 
-    actdef.raw = _.cloneDeep(raw_pattern)
+    actdef.raw = Common.deepextend({}, raw_pattern)
     actdef.plugin_name = actdef.plugin_name || 'root$'
     actdef.plugin_fullname =
       actdef.plugin_fullname ||
@@ -650,7 +667,7 @@ function make_seneca(initial_options) {
     var addroute = true
 
     if (opts.$.legacy.actdef) {
-      actdef.args = _.clone(pattern)
+      actdef.args = Common.deepextend(pattern)
     }
 
     actdef.id = action.name + '_' + next_action_id()
@@ -675,7 +692,7 @@ function make_seneca(initial_options) {
       // Clients needs special handling so that the catchall
       // pattern does not submit all patterns into the handle
       if (
-        _.isFunction(priordef.handle) &&
+        'function' === typeof(priordef.handle) &&
         ((priordef.client && actdef.client) ||
           (!priordef.client && !actdef.client))
       ) {
@@ -689,7 +706,7 @@ function make_seneca(initial_options) {
       actdef.priorpath = ''
     }
 
-    if (action && actdef && _.isFunction(action.handle)) {
+    if (action && actdef && 'function' === typeof(action.handle)) {
       actdef.handle = action.handle
     }
 
@@ -697,9 +714,9 @@ function make_seneca(initial_options) {
       private$.stats.actmap[actdef.pattern] || make_action_stats(actdef)
 
     var pattern_rules = {}
-    _.each(pattern, function(v, k) {
-      if (_.isObject(v)) {
-        pattern_rules[k] = _.clone(v)
+    Common.each(pattern, function(v, k) {
+      if ('object' === typeof(v)) {
+        pattern_rules[k] = Common.deepextend({},v)
         delete pattern[k]
       }
     })
@@ -745,7 +762,7 @@ function make_seneca(initial_options) {
   // can be defined after call to seneca.add (for nicer plugin code order).
   function deferred_modify_action(seneca, actdef) {
     setImmediate(function() {
-      _.each(seneca.private$.action_modifiers, function(actmod) {
+      Common.each(seneca.private$.action_modifiers, function(actmod) {
         actmod.call(seneca, actdef)
       })
     })
@@ -781,12 +798,12 @@ function make_seneca(initial_options) {
   function api_wrap(pin, meta, wrapper) {
     var pinthis = this
 
-    wrapper = _.isFunction(meta) ? meta : wrapper
-    meta = _.isFunction(meta) ? {} : meta
+    wrapper = 'function' === typeof(meta) ? meta : wrapper
+    meta = 'function' === typeof(meta) ? {} : meta
 
-    pin = _.isArray(pin) ? pin : [pin]
-    _.each(pin, function(p) {
-      _.each(pinthis.list(p), function(actpattern) {
+    pin = Array.isArray(pin) ? pin : [pin]
+    Common.each(pin, function(p) {
+      Common.each(pinthis.list(p), function(actpattern) {
         pinthis.add(actpattern, meta, wrapper)
       })
     })
@@ -809,11 +826,13 @@ function make_seneca(initial_options) {
   function api_close(done) {
     var seneca = this
 
-    var safe_done = _.once(function(err) {
-      if (_.isFunction(done)) {
+    var done_called = false
+    var safe_done = function safe_done(err) {
+      if (!done_called && 'function' === typeof(done)) {
+        done_called = true
         return done.call(seneca, err)
       }
-    })
+    }
 
     // don't try to close twice
     if (seneca.flags.closed) {
@@ -836,7 +855,7 @@ function make_seneca(initial_options) {
       seneca.flags.closed = true
 
       // cleanup process event listeners
-      _.each(opts.$.system.close_signals, function(active, signal) {
+      Common.each(opts.$.system.close_signals, function(active, signal) {
         if (active) {
           process.removeListener(signal, private$.handle_close)
         }
@@ -913,7 +932,7 @@ function make_seneca(initial_options) {
     var actctxt = {
       seneca: instance,
       origmsg: origmsg,
-      reply: origreply || _.noop,
+      reply: origreply || Common.noop,
       options: instance.options(),
       callpoint: callpoint()
     }
@@ -989,7 +1008,7 @@ function make_seneca(initial_options) {
       options == null ? private$.optioner.get() : private$.optioner.set(options)
 
     if (opts.$.legacy.logging) {
-      if (options && options.log && _.isArray(options.log.map)) {
+      if (options && options.log && Array.isArray(options.log.map)) {
         for (var i = 0; i < options.log.map.length; ++i) {
           self.logroute(options.log.map[i])
         }
@@ -1042,7 +1061,7 @@ function make_seneca(initial_options) {
 
   Print(root$, opts.$.debug.argv || process.argv)
 
-  _.each(opts.$.system.close_signals, function(active, signal) {
+  Common.each(opts.$.system.close_signals, function(active, signal) {
     if (active) {
       process.once(signal, private$.handle_close)
     }
@@ -1122,7 +1141,7 @@ function make_callpoint(active) {
     }
   }
 
-  return _.noop
+  return Common.noop
 }
 
 function make_log(instance, modifier) {
@@ -1147,7 +1166,7 @@ function prepare_log(instance, log) {
     }
 
     var a0 = argsarr[0]
-    var data = _.isArray(a0) ? a0 : _.isObject(a0) ? a0 : argsarr
+    var data = Array.isArray(a0) ? a0 : 'object' === typeof(a0) ? a0 : argsarr
     log.call(instance, data)
   }
 }
@@ -1448,7 +1467,7 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
       ? !!origmsg.sync$
       : origmeta && null != origmeta.sync
       ? !!origmeta.sync
-      : _.isFunction(origreply)
+      : 'function' === typeof(origreply)
 
   this.trace = null
   this.sub = null
@@ -1494,7 +1513,7 @@ intern.callback_error = function(instance, thrown_obj, ctxt, data) {
     err = error(
       err,
       'act_callback',
-      _.extend({}, err.details, {
+      Common.deepextend({}, err.details, {
         message: err.message,
         pattern: actdef.pattern,
         fn: actdef.func,

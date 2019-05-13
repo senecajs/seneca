@@ -65,7 +65,7 @@
     "seneca.js"
   ],
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.0.0"
   },
   "main": "seneca.js",
   "scripts": {
@@ -98,6 +98,7 @@
     "wreck": "^12"
   },
   "devDependencies": {
+    "@hapi/lab": "^18.1.2",
     "@seneca/test-plugin": "0.0.1",
     "async": "^2.6.2",
     "bench": "^0.3.6",
@@ -105,8 +106,7 @@
     "coveralls": "^3.0.2",
     "handlebars": "^4.1.2",
     "hoek": "^5",
-    "lab": "^18.0.2",
-    "prettier": "^1.17.0",
+    "prettier": "^1.17.1",
     "seneca-entity": "^3.3.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^3.1.0",

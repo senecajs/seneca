@@ -78,6 +78,36 @@ describe('explain', function() {
     })
   })
 
+
+  it('explain-data', async () => {
+    var si = Seneca({id$:'s01'})
+        .test()
+        .use('promisify')
+        .use('entity')
+        .message('a:1', async function(msg, meta) {
+          var exp = this.explain()
+          exp && exp({ z: 1, s: this, e: this.make('foo').data$({d:2}) })
+          return { x: msg.x }
+        })
+
+    var exp = []
+    var out = await si.post('a:1,x:2', { explain$: exp })
+    expect(out.x).equal(2)
+
+    var json_exp = JSON.stringify(exp)
+    var exp_json = JSON.parse(json_exp)
+
+    expect(exp_json[0].explain$.pattern).equal('a:1')
+    expect(exp_json[0].msg$).equal({ a: 1, x: 2 })
+    expect(exp_json[1].z).equal(1)
+    expect(exp_json[1].s).includes({
+      isSeneca: true,
+      id: 's01'
+    })
+    expect(exp_json[1].e).equal({ 'entity$': '-/-/foo', d: 2 })
+  })
+
+  
   it('explain-deep', async () => {
     var si = Seneca()
       .test()
