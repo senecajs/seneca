@@ -109,7 +109,7 @@
     "handlebars": "^4.1.2",
     "hoek": "^5",
     "prettier": "^1.17.1",
-    "seneca-entity": "^3.3.0",
+    "seneca-entity": "^4.0.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^4.0.0",
     "seneca-promisify": "^0.8.0"

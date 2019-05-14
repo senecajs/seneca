@@ -27,7 +27,7 @@ describe('legacy', function() {
     fin()
   })
 
-  it('argprops', function(done) {
+  it('argprops', function(fin) {
     var out = Seneca.util.argprops(
       { a: 1, b: 2, c: 3 },
       { b: 22, c: 33, d: 4 },
@@ -41,6 +41,24 @@ describe('legacy', function() {
 
     out = Seneca.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
     expect('{}').to.equal(Util.inspect(out))
-    done()
+    fin()
   })
+
+  it('router', function(fin) {
+    expect(Seneca.util.router()).exists()
+    fin()
+  })
+
+  it('no-default-transport', function(fin) {
+    Seneca({default_plugins:{transport:false}}).test().ready(function(){
+      expect(this.list_plugins().transport).not.exists()
+      fin()
+    })
+  })
+
+  it('actdef', function(fin) {
+    Seneca({legacy:{actdef:true}}).test(fin).add('a:1').act('a:1').ready(fin)
+    fin()
+  })
+
 })

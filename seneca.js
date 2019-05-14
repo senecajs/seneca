@@ -368,7 +368,6 @@ module.exports.test$ = { intern: intern }
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
 function make_seneca(initial_options) {
-  initial_options = initial_options || {}
 
   // Create a private context.
   var private$ = make_private()

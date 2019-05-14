@@ -46,6 +46,18 @@ describe('plugin', function() {
       })
   })
 
+
+  it('plugin-ignore-via-options', function(fin) {
+    Seneca({plugins:{foo:false}})
+      .test(fin)
+      .use(function foo() {})
+      .ready(function() {
+        expect(this.has_plugin('foo')).false()
+        fin()
+      })
+  })
+
+  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)
