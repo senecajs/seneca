@@ -90,12 +90,13 @@
     "minimist": "^1.2.0",
     "nid": "^0.3.2",
     "norma": "^0.4.1",
+    "optioner": "^4.0.0",
     "ordu": "^0.1.1",
     "patrun": "^1.0.0",
     "qs": "^6.7.0",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^3.0.0",
-    "use-plugin": "^4.0.0",
+    "use-plugin": "^5.0.0",
     "wreck": "^12"
   },
   "devDependencies": {
@@ -111,6 +112,6 @@
     "seneca-entity": "^3.3.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^3.1.0",
-    "seneca-promisify": "^0.7.1"
+    "seneca-promisify": "^0.8.0"
   }
 }

@@ -16,6 +16,7 @@ const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const Ordu = require('ordu')
 const Eraro = require('eraro')
+const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
 
 // Internal modules.
@@ -24,7 +25,7 @@ const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Common = require('./lib/common')
 const Legacy = require('./lib/legacy')
-const Optioner = require('./lib/optioner')
+const Options = require('./lib/options')
 const Package = require('./package.json')
 const Plugins = require('./lib/plugins')
 const Print = require('./lib/print')
@@ -239,7 +240,7 @@ const seneca_util = {
   Nid: Nid,
   Patrun: Patrun,
   Joi: Joi,
-  Optioner: UsePlugin.Optioner,
+  Optioner: Optioner,
 
   clean: Common.clean,
   pattern: Common.pattern,
@@ -376,7 +377,7 @@ function make_seneca(initial_options) {
   root$.private$ = private$
 
   // Resolve initial options.
-  private$.optioner = Optioner(module, option_defaults, initial_options)
+  private$.optioner = Options(module, option_defaults, initial_options)
   var opts = { $: private$.optioner.get() }
 
   // Setup event handlers, if defined
