@@ -16,6 +16,7 @@ const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const Ordu = require('ordu')
 const Eraro = require('eraro')
+const Joi = require('@hapi/joi')
 
 // Internal modules.
 const API = require('./lib/api')
@@ -237,7 +238,7 @@ const seneca_util = {
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
-  Joi: UsePlugin.Joi,
+  Joi: Joi,
   Optioner: UsePlugin.Optioner,
 
   clean: Common.clean,

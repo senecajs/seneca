@@ -79,6 +79,7 @@
     "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run prettier && npm test && npm run repo-tag && npm publish && npm dist-tag add seneca@$REPO_VERSION next && npm dist-tag add seneca@$REPO_VERSION plugin"
   },
   "dependencies": {
+    "@hapi/joi": "^15.0.3",
     "archy": "^1.0.0",
     "eraro": "^1.1.0",
     "gate-executor": "^1.1.1",
