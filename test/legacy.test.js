@@ -50,15 +50,20 @@ describe('legacy', function() {
   })
 
   it('no-default-transport', function(fin) {
-    Seneca({default_plugins:{transport:false}}).test().ready(function(){
-      expect(this.list_plugins().transport).not.exists()
-      fin()
-    })
+    Seneca({ default_plugins: { transport: false } })
+      .test()
+      .ready(function() {
+        expect(this.list_plugins().transport).not.exists()
+        fin()
+      })
   })
 
   it('actdef', function(fin) {
-    Seneca({legacy:{actdef:true}}).test(fin).add('a:1').act('a:1').ready(fin)
+    Seneca({ legacy: { actdef: true } })
+      .test(fin)
+      .add('a:1')
+      .act('a:1')
+      .ready(fin)
     fin()
   })
-
 })

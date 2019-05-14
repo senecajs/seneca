@@ -82,7 +82,6 @@ describe('explain', function() {
       })
     })
 
-
     exp = []
     out = await si.post('c:1,x:5')
     expect(out).equal([5])
@@ -102,20 +101,18 @@ describe('explain', function() {
         resolve(out)
       })
     })
-
   })
 
-
   it('explain-data', async () => {
-    var si = Seneca({id$:'s01'})
-        .test()
-        .use('promisify')
-        .use('entity')
-        .message('a:1', async function(msg, meta) {
-          var exp = this.explain()
-          exp && exp({ z: 1, s: this, e: this.make('foo').data$({d:2}) })
-          return { x: msg.x }
-        })
+    var si = Seneca({ id$: 's01' })
+      .test()
+      .use('promisify')
+      .use('entity')
+      .message('a:1', async function(msg, meta) {
+        var exp = this.explain()
+        exp && exp({ z: 1, s: this, e: this.make('foo').data$({ d: 2 }) })
+        return { x: msg.x }
+      })
 
     var exp = []
     var out = await si.post('a:1,x:2', { explain$: exp })
@@ -131,10 +128,9 @@ describe('explain', function() {
       isSeneca: true,
       id: 's01'
     })
-    expect(exp_json[1].e).equal({ 'entity$': '-/-/foo', d: 2 })
+    expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
   })
 
-  
   it('explain-deep', async () => {
     var si = Seneca()
       .test()
@@ -279,11 +275,10 @@ describe('explain', function() {
       .add('b:1', function b1(msg, reply, meta) {
         var exp = this.explain()
 
-        if(1 === msg.x ) {
+        if (1 === msg.x) {
           expect(exp).not.exist()
           exp && exp('bbb')
-        }
-        else {
+        } else {
           expect(exp).exist()
           exp && exp('ccc')
         }
@@ -334,7 +329,6 @@ describe('explain', function() {
             expect(meta.explain[1].msg$).includes({ b: 1, x: 2 })
             expect(meta.explain[1].explain$).includes({ instance: 's0' })
 
-            
             exp = []
             c0.act('c:1,x:3', { explain$: exp }, function(ignore, out, meta) {
               expect(out).equals([3])
@@ -343,18 +337,17 @@ describe('explain', function() {
               expect(exp[0].explain$).includes({ instance: 'c0' })
               expect(exp[1].msg$).includes({ c: 1, x: 3 })
               expect(exp[1].explain$).includes({ instance: 's0' })
-              
+
               expect(meta.explain[0].msg$).includes({ c: 1, x: 3 })
               expect(meta.explain[0].explain$).includes({ instance: 'c0' })
               expect(meta.explain[1].msg$).includes({ c: 1, x: 3 })
               expect(meta.explain[1].explain$).includes({ instance: 's0' })
-              
-              
+
               s0.close(c0.close.bind(c0, resolve))
             })
           })
         })
       })
-    })      
+    })
   })
 })

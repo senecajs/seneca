@@ -15,8 +15,6 @@ var it = lab.it
 
 var Seneca = require('..')
 
-
-
 describe('options', function() {
   it('strict.find', async () => {
     await Seneca({ strict: { find: false } })
@@ -26,14 +24,15 @@ describe('options', function() {
   })
 
   it('internal.routers', async () => {
-    await Seneca({ internal: {
-      actrouter: new Patrun( {gex:true} ),
-      subrouter: new Patrun( {gex:true} )
-    } })
+    await Seneca({
+      internal: {
+        actrouter: new Patrun({ gex: true }),
+        subrouter: new Patrun({ gex: true })
+      }
+    })
       .test()
       .add('foo:1')
       .act('foo:1')
       .ready()
   })
-
 })

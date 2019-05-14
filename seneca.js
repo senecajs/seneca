@@ -271,13 +271,11 @@ const intern = {
 function Seneca() {
   Events.EventEmitter.call(this)
   this.setMaxListeners(0)
-
 }
 Util.inherits(Seneca, Events.EventEmitter)
 
 // Mark the Seneca object
 Seneca.prototype.isSeneca = true
-
 
 // Provide useful description when convered to JSON.
 // Cannot be instantiated from JSON.
@@ -295,12 +293,12 @@ Seneca.prototype.toJSON = function toJSON() {
 
 Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
 
-
 // Create a Seneca instance.
 module.exports = function init(seneca_options, more_options) {
-  var initial_options = 'string' === typeof(seneca_options)
-    ? Common.deepextend({}, { from: seneca_options }, more_options)
-    : Common.deepextend({}, seneca_options, more_options)
+  var initial_options =
+    'string' === typeof seneca_options
+      ? Common.deepextend({}, { from: seneca_options }, more_options)
+      : Common.deepextend({}, seneca_options, more_options)
 
   // Legacy options, remove in 4.x
   initial_options.deathdelay = initial_options.death_delay
@@ -310,7 +308,7 @@ module.exports = function init(seneca_options, more_options) {
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
-  seneca.log.debug({ kind: 'notice', options: { ...options, internal: null }})
+  seneca.log.debug({ kind: 'notice', options: { ...options, internal: null } })
 
   Print.print_options(seneca, options)
 
@@ -368,7 +366,6 @@ module.exports.test$ = { intern: intern }
 // Create a new Seneca instance.
 // * _initial_options_ `o` &rarr; instance options
 function make_seneca(initial_options) {
-
   // Create a private context.
   var private$ = make_private()
   private$.error = error
@@ -697,7 +694,7 @@ function make_seneca(initial_options) {
       // Clients needs special handling so that the catchall
       // pattern does not submit all patterns into the handle
       if (
-        'function' === typeof(priordef.handle) &&
+        'function' === typeof priordef.handle &&
         ((priordef.client && actdef.client) ||
           (!priordef.client && !actdef.client))
       ) {
@@ -711,7 +708,7 @@ function make_seneca(initial_options) {
       actdef.priorpath = ''
     }
 
-    if (action && actdef && 'function' === typeof(action.handle)) {
+    if (action && actdef && 'function' === typeof action.handle) {
       actdef.handle = action.handle
     }
 
@@ -720,8 +717,8 @@ function make_seneca(initial_options) {
 
     var pattern_rules = {}
     Common.each(pattern, function(v, k) {
-      if ('object' === typeof(v)) {
-        pattern_rules[k] = (v && v.isJoi) ? v : Common.deepextend({},v)
+      if ('object' === typeof v) {
+        pattern_rules[k] = v && v.isJoi ? v : Common.deepextend({}, v)
         delete pattern[k]
       }
     })
@@ -803,8 +800,8 @@ function make_seneca(initial_options) {
   function api_wrap(pin, meta, wrapper) {
     var pinthis = this
 
-    wrapper = 'function' === typeof(meta) ? meta : wrapper
-    meta = 'function' === typeof(meta) ? {} : meta
+    wrapper = 'function' === typeof meta ? meta : wrapper
+    meta = 'function' === typeof meta ? {} : meta
 
     pin = Array.isArray(pin) ? pin : [pin]
     Common.each(pin, function(p) {
@@ -833,7 +830,7 @@ function make_seneca(initial_options) {
 
     var done_called = false
     var safe_done = function safe_done(err) {
-      if (!done_called && 'function' === typeof(done)) {
+      if (!done_called && 'function' === typeof done) {
         done_called = true
         return done.call(seneca, err)
       }
@@ -1173,7 +1170,7 @@ function prepare_log(instance, log) {
     }
 
     var a0 = argsarr[0]
-    var data = Array.isArray(a0) ? a0 : 'object' === typeof(a0) ? a0 : argsarr
+    var data = Array.isArray(a0) ? a0 : 'object' === typeof a0 ? a0 : argsarr
     log.call(instance, data)
   }
 }
@@ -1325,19 +1322,16 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   meta.error = Util.isError(data.res)
 
   // Add any additional explain items from responder
-  if (  meta.explain &&
-        (reply_meta && reply_meta.explain) &&
-        meta.explain.length < reply_meta.explain.length
-     ) {
-    for (
-      var i = meta.explain.length;
-      i < reply_meta.explain.length;
-      i++
-    ) {
+  if (
+    meta.explain &&
+    (reply_meta && reply_meta.explain) &&
+    meta.explain.length < reply_meta.explain.length
+  ) {
+    for (var i = meta.explain.length; i < reply_meta.explain.length; i++) {
       meta.explain.push(reply_meta.explain[i])
     }
   }
-  
+
   intern.process_outward(actctxt, data, delegate)
 
   if (data.has_callback) {
@@ -1488,7 +1482,7 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
       ? !!origmsg.sync$
       : origmeta && null != origmeta.sync
       ? !!origmeta.sync
-      : 'function' === typeof(origreply)
+      : 'function' === typeof origreply
 
   this.trace = null
   this.sub = null

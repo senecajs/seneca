@@ -1,3 +1,9 @@
+## 3.11.0 2019-05-15
+
+* Fixed explain$ transport issues.
+* Updated `joi` to @hapi/joi
+
+
 ## 3.10.0 2019-05-12
 
 * Added explain$ directive to seneca.act - see test/explain.test.js - allows message actions to provide context-specific explanation data for behaviour on an ad hoc basis.

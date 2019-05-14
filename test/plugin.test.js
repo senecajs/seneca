@@ -46,9 +46,8 @@ describe('plugin', function() {
       })
   })
 
-
   it('plugin-ignore-via-options', function(fin) {
-    Seneca({plugins:{foo:false}})
+    Seneca({ plugins: { foo: false } })
       .test(fin)
       .use(function foo() {})
       .ready(function() {
@@ -57,7 +56,6 @@ describe('plugin', function() {
       })
   })
 
-  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)

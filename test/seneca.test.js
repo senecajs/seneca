@@ -77,10 +77,18 @@ describe('seneca', function() {
   })
 
   it('json-inspect', function(done) {
-    var si = Seneca({id$:'a'},testopts)
+    var si = Seneca({ id$: 'a' }, testopts)
     si.start_time = 123
-    expect(JSON.stringify(si)).equal('{"isSeneca":true,"id":"a","fixedargs":{},"start_time":123,"version":"'+Package.version+'"}')
-    expect(Util.inspect(si)).equal('{ isSeneca: true,\n  id: \'a\',\n  did: undefined,\n  fixedargs: {},\n  fixedmeta: undefined,\n  start_time: 123,\n  version: \'3.10.0\' }')
+    expect(JSON.stringify(si)).equal(
+      '{"isSeneca":true,"id":"a","fixedargs":{},"start_time":123,"version":"' +
+        Package.version +
+        '"}'
+    )
+    expect(Util.inspect(si)).equal(
+      "{ isSeneca: true,\n  id: 'a',\n  did: undefined,\n  fixedargs: {},\n  fixedmeta: undefined,\n  start_time: 123,\n  version: '" +
+        Package.version +
+        "' }"
+    )
     done()
   })
 
