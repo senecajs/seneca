@@ -288,8 +288,12 @@ Seneca.prototype.toJSON = function toJSON() {
     did: this.did,
     fixedargs: this.fixedargs,
     fixedmeta: this.fixedmeta,
+    start_time: this.start_time,
+    version: this.version
   }
 }
+
+Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
 
 
 // Create a Seneca instance.
@@ -718,7 +722,7 @@ function make_seneca(initial_options) {
     var pattern_rules = {}
     Common.each(pattern, function(v, k) {
       if ('object' === typeof(v)) {
-        pattern_rules[k] = v.isJoi ? v : Common.deepextend({},v)
+        pattern_rules[k] = (v && v.isJoi) ? v : Common.deepextend({},v)
         delete pattern[k]
       }
     })
