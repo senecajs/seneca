@@ -68,7 +68,6 @@ describe('transport', function() {
 
           expect(meta.pattern).equals('')
           expect(meta.trace[0].desc[0]).equals('a:1')
-
           c0.act('b:1', function(ignore, out, meta) {
             expect(out).equals([1, 2, 3])
 

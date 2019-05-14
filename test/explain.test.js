@@ -35,6 +35,11 @@ describe('explain', function() {
         exp && exp({ z: 3 })
         return { x: msg.x }
       })
+      .message('c:1', async function(msg, meta) {
+        var exp = meta.explain
+        exp && exp.push({ z: 4 })
+        return [msg.x]
+      })
 
     var exp = []
     var out = await si.post('a:1,x:1')
@@ -76,6 +81,28 @@ describe('explain', function() {
         resolve(out)
       })
     })
+
+
+    exp = []
+    out = await si.post('c:1,x:5')
+    expect(out).equal([5])
+    expect(exp.length).equal(0)
+
+    exp = []
+    out = await si.post('c:1,x:6', { explain$: exp })
+    expect(out).equal([6])
+    expect(exp[1]).includes({ z: 4 })
+
+    await new Promise((resolve, reject) => {
+      exp = []
+      si.act('c:1,x:7', { explain$: exp }, function(err, out, meta) {
+        if (err) return reject(err)
+        expect(out).equal([7])
+        expect(meta.explain[1]).includes({ z: 4 })
+        resolve(out)
+      })
+    })
+
   })
 
 
@@ -249,11 +276,25 @@ describe('explain', function() {
 
         reply({ x: msg.x })
       })
-      .add('b:1', function a1(msg, reply, meta) {
+      .add('b:1', function b1(msg, reply, meta) {
         var exp = this.explain()
-        expect(exp).not.exist()
-        exp && exp('bbb')
-        reply([1, 2, 3])
+
+        if(1 === msg.x ) {
+          expect(exp).not.exist()
+          exp && exp('bbb')
+        }
+        else {
+          expect(exp).exist()
+          exp && exp('ccc')
+        }
+        //reply([1, 2, 3])
+        reply({ x: msg.x })
+      })
+      .add('c:1', function c1(msg, reply, meta) {
+        var exp = this.explain()
+        exp && exp('ccc')
+
+        reply([msg.x])
       })
       .listen(62110)
       .ready()
@@ -275,14 +316,45 @@ describe('explain', function() {
         expect(exp[2]).includes({ direct: 1 })
         expect(exp[3]).includes({ content: 'aaa' })
 
-        c0.act('b:1', function(ignore, out, meta) {
-          expect(out).equals([1, 2, 3])
+        c0.act('b:1,x:1', function(ignore, out, meta) {
+          expect(out.x).equals(1)
+          expect(meta.explain).equal(void 0)
 
-          expect(meta.explain, null)
+          exp = []
+          c0.act('b:1,x:2', { explain$: exp }, function(ignore, out, meta) {
+            expect(out.x).equals(2)
 
-          s0.close(c0.close.bind(c0, resolve))
+            expect(exp[0].msg$).includes({ b: 1, x: 2 })
+            expect(exp[0].explain$).includes({ instance: 'c0' })
+            expect(exp[1].msg$).includes({ b: 1, x: 2 })
+            expect(exp[1].explain$).includes({ instance: 's0' })
+
+            expect(meta.explain[0].msg$).includes({ b: 1, x: 2 })
+            expect(meta.explain[0].explain$).includes({ instance: 'c0' })
+            expect(meta.explain[1].msg$).includes({ b: 1, x: 2 })
+            expect(meta.explain[1].explain$).includes({ instance: 's0' })
+
+            
+            exp = []
+            c0.act('c:1,x:3', { explain$: exp }, function(ignore, out, meta) {
+              expect(out).equals([3])
+
+              expect(exp[0].msg$).includes({ c: 1, x: 3 })
+              expect(exp[0].explain$).includes({ instance: 'c0' })
+              expect(exp[1].msg$).includes({ c: 1, x: 3 })
+              expect(exp[1].explain$).includes({ instance: 's0' })
+              
+              expect(meta.explain[0].msg$).includes({ c: 1, x: 3 })
+              expect(meta.explain[0].explain$).includes({ instance: 'c0' })
+              expect(meta.explain[1].msg$).includes({ c: 1, x: 3 })
+              expect(meta.explain[1].explain$).includes({ instance: 's0' })
+              
+              
+              s0.close(c0.close.bind(c0, resolve))
+            })
+          })
         })
       })
-    })
+    })      
   })
 })

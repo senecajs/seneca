@@ -962,6 +962,8 @@ function make_seneca(initial_options) {
       },
       ontm: function act_tm() {
         timedout = true
+
+        // TODO: this should be a seneca error with useful details
         intern.handle_reply(meta, actctxt, actmsg, new Error('[TIMEOUT]'))
       },
       tm: meta.timeout
@@ -1317,7 +1319,21 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
 
   meta.error = Util.isError(data.res)
 
-  intern.process_outward(actctxt, data)
+  // Add any additional explain items from responder
+  if (  meta.explain &&
+        (reply_meta && reply_meta.explain) &&
+        meta.explain.length < reply_meta.explain.length
+     ) {
+    for (
+      var i = meta.explain.length;
+      i < reply_meta.explain.length;
+      i++
+    ) {
+      meta.explain.push(reply_meta.explain[i])
+    }
+  }
+  
+  intern.process_outward(actctxt, data, delegate)
 
   if (data.has_callback) {
     try {
