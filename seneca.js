@@ -1,4 +1,4 @@
-/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2019 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 // Node API modules.
