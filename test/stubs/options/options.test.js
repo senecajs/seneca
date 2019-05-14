@@ -2,7 +2,7 @@
 'use strict'
 
 var Assert = require('assert')
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe

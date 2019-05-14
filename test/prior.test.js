@@ -3,7 +3,7 @@
 
 var _ = require('lodash')
 var Code = require('code')
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe

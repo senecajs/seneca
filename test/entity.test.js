@@ -3,7 +3,7 @@
 
 var Assert = require('assert')
 
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var Code = require('code')
 
 var lab = (exports.lab = Lab.script())

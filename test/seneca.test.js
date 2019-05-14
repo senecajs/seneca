@@ -6,7 +6,7 @@ var Util = require('util')
 var Code = require('code')
 var Gex = require('gex')
 var _ = require('lodash')
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var Package = require('../package.json')
 var Common = require('../lib/common.js')
 

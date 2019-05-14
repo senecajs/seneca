@@ -3,7 +3,7 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var Code = require('code')
 var Hoek = require('hoek')
 

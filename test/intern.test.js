@@ -4,7 +4,7 @@
 
 var Util = require('util')
 
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var Code = require('code')
 var Ordu = require('ordu')
 

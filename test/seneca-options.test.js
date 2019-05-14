@@ -1,7 +1,7 @@
 /* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var Code = require('code')

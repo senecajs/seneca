@@ -4,7 +4,7 @@
 
 var Path = require('path')
 var Code = require('code')
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 
 var Print = require('../lib/print.js')
 
