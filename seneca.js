@@ -718,7 +718,7 @@ function make_seneca(initial_options) {
     var pattern_rules = {}
     Common.each(pattern, function(v, k) {
       if ('object' === typeof(v)) {
-        pattern_rules[k] = Common.deepextend({},v)
+        pattern_rules[k] = v.isJoi ? v : Common.deepextend({},v)
         delete pattern[k]
       }
     })
