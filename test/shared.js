@@ -3,7 +3,12 @@
 
 var Util = require('util')
 
+var Lolex = require('lolex')
+
 module.exports = {
+  clock: function() {
+    return Lolex.createClock()
+  },
   make_it: function(lab) {
     return function it(name, opts, func) {
       if ('function' === typeof opts) {

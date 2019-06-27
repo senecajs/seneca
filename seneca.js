@@ -989,7 +989,8 @@ function make_seneca(initial_options) {
           fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
           custom$: Object.assign({}, custom, args.pattern.custom$)
         })
-        .concat(args.rest)
+          .concat(args.rest)
+
       return self.add.apply(this, addargs)
     }
 

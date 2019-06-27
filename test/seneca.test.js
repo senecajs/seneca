@@ -17,6 +17,7 @@ var assert = Assert
 
 var Shared = require('./shared')
 var it = Shared.make_it(lab)
+var clock = Shared.clock()
 
 var Seneca = require('..')
 
@@ -116,44 +117,46 @@ describe('seneca', function() {
   it('ready-complex', function(done) {
     var mark = { ec: 0 }
 
-    timerstub.setTimeout(function() {
-      assert.ok(mark.r0, 'r0')
-      assert.ok(mark.r1, 'r1')
-      assert.ok(mark.p1, 'p1')
-      assert.ok(mark.p2, 'p2')
-      assert.equal(mark.ec, 2, 'ec')
-
-      done()
-    }, 555)
-
-    var si = Seneca(testopts)
+    var si = Seneca(testopts).test()
     si.ready(function() {
       mark.r0 = true
 
       si.use(function p1() {
         si.add({ init: 'p1' }, function(args, done) {
-          timerstub.setTimeout(function() {
+          setTimeout(function() {
             mark.p1 = true
+
             done()
-          }, 40)
+          }, 20)
         })
       })
 
       si.on('ready', function() {
         mark.ec++
       })
-
+      
       si.ready(function() {
         mark.r1 = true
 
         si.use(function p2() {
           si.add({ init: 'p2' }, function(args, done) {
-            timerstub.setTimeout(function() {
+            setTimeout(function() {
               mark.p2 = true
               done()
-            }, 40)
+            }, 20)
           })
         })
+      })
+      
+      si.ready(function() {
+        assert.ok(mark.r0, 'r0')
+        assert.ok(mark.p1, 'p1')
+
+        assert.ok(mark.r1, 'r1')
+        assert.ok(mark.p2, 'p2')
+        assert.equal(mark.ec, 2, 'ec')
+        
+        done()
       })
     })
   })

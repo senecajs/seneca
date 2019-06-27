@@ -77,23 +77,24 @@ describe('actions', function() {
   })
 
   it('info_fatal', function(fin) {
-    var si = Seneca({ log: 'silent', system: { exit: function noop() {} } })
-    setTimeout(function() {
-      si.close = function() {}
-      si.root.close = function() {}
+    Seneca({ log: 'silent', system: { exit: function noop() {} } })
+      .ready(function() {
+        this.close = function() {}
+        this.root.close = function() {}
 
-      si.add('role:seneca,cmd:close', function(msg, reply) {
-        reply()
+        this
+          .add('role:seneca,cmd:close', function(msg, reply) {
+            reply()
+          })
+          .sub('role:seneca,info:fatal', function(msg) {
+            expect(msg.err).exist()
+            fin()
+          })
+          .add('a:1', function() {
+            throw new Error('a:1')
+          })
+          .act('a:1,fatal$:true')
       })
-        .sub('role:seneca,info:fatal', function(msg) {
-          expect(msg.err).exist()
-          fin()
-        })
-        .add('a:1', function() {
-          throw new Error('a:1')
-        })
-        .act('a:1,fatal$:true')
-    }, 100)
   })
 
   it('get_options', function(fin) {

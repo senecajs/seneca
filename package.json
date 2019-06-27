@@ -108,6 +108,7 @@
     "coveralls": "^3.0.2",
     "handlebars": "^4.1.2",
     "hoek": "^5",
+    "lolex": "^4.1.0",
     "prettier": "^1.17.1",
     "seneca-entity": "^4.0.0",
     "seneca-error-test": "^0.2.2",
