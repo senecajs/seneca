@@ -229,7 +229,10 @@ const option_defaults = {
     actdef: false,
 
     // Use old fail method
-    fail: false
+    fail: false,
+
+    // Insert "[TIMEOUT]" into timeout error message
+    timeout_string: true,
   }
 }
 
@@ -939,37 +942,47 @@ function make_seneca(initial_options) {
       callpoint: callpoint()
     }
 
-    var execspec = {
-      dn: meta.id,
-      fn: function act_fn(done) {
-        try {
-          intern.execute_action(
-            instance,
-            opts,
-            actctxt,
-            actmsg,
-            meta,
-            function action_reply(err, out, reply_meta) {
-              if (!timedout) {
-                intern.handle_reply(meta, actctxt, actmsg, err, out, reply_meta)
-              }
-              done()
-            }
-          )
-        } catch (e) {
-          var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
-          intern.handle_reply(meta, actctxt, actmsg, ex)
-          done()
-        }
-      },
-      ontm: function act_tm() {
-        timedout = true
+    var execspec = {}
+    
+    execspec.dn = meta.id
 
-        // TODO: this should be a seneca error with useful details
-        intern.handle_reply(meta, actctxt, actmsg, new Error('[TIMEOUT]'))
-      },
-      tm: meta.timeout
+    execspec.fn = function act_fn(done) {
+      try {
+        intern.execute_action(
+          execspec,
+          instance,
+          opts,
+          actctxt,
+          actmsg,
+          meta,
+          function action_reply(err, out, reply_meta) {
+            if (!timedout) {
+              intern.handle_reply(meta, actctxt, actmsg, err, out, reply_meta)
+            }
+            done()
+          }
+        )
+      } catch (e) {
+        var ex = Util.isError(e) ? e : new Error(Util.inspect(e))
+        intern.handle_reply(meta, actctxt, actmsg, ex)
+        done()
+      }
     }
+    
+    execspec.ontm = function act_tm(timeout, start, end) {
+      timedout = true
+
+      var timeout_err = Common.error('action_timeout', {
+        timeout: timeout, start: start, end: end,
+        message: actmsg, pattern: execspec.ctxt.pattern,
+        legacy_string:actctxt.options.legacy.timeout_string?'[TIMEOUT] ':''
+      })
+      
+      // TODO: this should be a seneca error with useful details
+      intern.handle_reply(meta, actctxt, actmsg, timeout_err)
+    }
+
+    execspec.tm = meta.timeout
 
     instance.private$.ge.add(execspec)
   }
@@ -1245,6 +1258,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
 }
 
 intern.execute_action = function(
+  execspec,
   act_instance,
   opts,
   actctxt,
@@ -1258,7 +1272,8 @@ intern.execute_action = function(
 
   actctxt.seneca = delegate
   actctxt.actdef = actdef
-
+  execspec.ctxt.pattern = actdef ? actdef.pattern : null
+  
   var data = { meta: meta, msg: msg, reply: reply }
   var inward = private$.inward.process(actctxt, data)
 
