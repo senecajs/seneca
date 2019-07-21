@@ -1045,21 +1045,22 @@ describe('seneca', function() {
   })
 
   it('wrap', function(fin) {
-    var si = Seneca().test(fin)
+    var si = Seneca({legacy:{transport:false}}).test(fin)
 
-    si.add('a:1', function(msg, reply, meta) {
+    si.add('a:1', function a1(msg, reply, meta) {
       reply(null, { aa: msg.aa })
     })
-    si.add('b:2', function(msg, reply, meta) {
+    si.add('b:2', function b2(msg, reply, meta) {
       reply(null, { bb: msg.bb })
     })
-    si.add('a:1,c:3', function(msg, reply, meta) {
+    si.add('a:1,c:3', function a1c3(msg, reply, meta) {
       reply(null, { cc: msg.cc })
     })
-    si.add('a:1,d:4', function(msg, reply, meta) {
+    si.add('a:1,d:4', function a1d4(msg, reply, meta) {
       reply(null, { dd: msg.dd })
     })
 
+    
     si.wrap('a:1', function first(msg, reply) {
       this.prior(msg, function(err, out) {
         out.X = 1
@@ -1069,11 +1070,11 @@ describe('seneca', function() {
 
     function assertDefName(name, pattern) {
       var def = si.find(pattern)
-      //console.log(def.func.toString())
       assert.equal(name, def.func.name)
     }
 
     assertDefName('first', 'a:1')
+
 
     // existence predicate!! d must exist
     si.wrap('a:1,d:*', function second(msg, reply) {
@@ -1085,6 +1086,9 @@ describe('seneca', function() {
 
     assertDefName('second', 'a:1,d:4')
 
+    //console.dir(si.find('a:1'),{depth:null})
+    //console.dir(si.find('a:1,d:4'),{depth:null})
+    
     si.act('a:1,aa:1', function(err, out) {
       expect(out).contains({ aa: 1, X: 1 })
 

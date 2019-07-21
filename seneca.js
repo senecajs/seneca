@@ -631,8 +631,8 @@ function make_seneca(initial_options) {
         done.call(this, null, meta.dflt || null)
       }
 
-    var actdef = args.actdef || {}
-
+    var actdef = self.util.deepextend(args.actdef) || {}
+    
     actdef.raw = Common.deepextend({}, raw_pattern)
     actdef.plugin_name = actdef.plugin_name || 'root$'
     actdef.plugin_fullname =
@@ -800,16 +800,16 @@ function make_seneca(initial_options) {
     return self
   }
 
-  function api_wrap(pin, meta, wrapper) {
+  function api_wrap(pin, actdef, wrapper) {
     var pinthis = this
 
-    wrapper = 'function' === typeof meta ? meta : wrapper
-    meta = 'function' === typeof meta ? {} : meta
+    wrapper = 'function' === typeof actdef ? actdef : wrapper
+    actdef = 'function' === typeof actdef ? {} : actdef
 
     pin = Array.isArray(pin) ? pin : [pin]
     Common.each(pin, function(p) {
       Common.each(pinthis.list(p), function(actpattern) {
-        pinthis.add(actpattern, meta, wrapper)
+        pinthis.add(actpattern, wrapper, actdef)
       })
     })
 
