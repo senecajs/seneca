@@ -701,7 +701,8 @@ function make_seneca(initial_options) {
         ((priordef.client && actdef.client) ||
           (!priordef.client && !actdef.client))
       ) {
-        priordef.handle(args.pattern, action)
+        //priordef.handle(args.pattern, action)
+        priordef.handle(actdef)
         addroute = false
       } else {
         actdef.priordef = priordef
@@ -809,6 +810,7 @@ function make_seneca(initial_options) {
     pin = Array.isArray(pin) ? pin : [pin]
     Common.each(pin, function(p) {
       Common.each(pinthis.list(p), function(actpattern) {
+        // console.log('WRAP',p,actpattern,actdef)
         pinthis.add(actpattern, wrapper, actdef)
       })
     })

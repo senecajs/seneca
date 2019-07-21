@@ -1266,10 +1266,17 @@ describe('seneca', function() {
         f.call(this, msg, done)
       }
 
+      /*
       i0.handle = function(a, t) {
         fm[a.b$] = t
       }
+      */
 
+      i0.handle = function(actdef) {
+        fm[actdef.raw.b$] = actdef.func
+      }
+
+      
       si.add('a:1', i0)
 
       si.add('a:1,b$:1', function b1(msg, done) {

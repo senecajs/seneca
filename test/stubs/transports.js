@@ -100,9 +100,16 @@ function make_balance_transport () {
       transport: {
         balance: {
           makehandle: function () {
+            /*
             return function (pat, action) {
               targets.push(action)
             }
+            */
+
+            return function (actdef) {
+              targets.push(actdef.func)
+            }
+
           }
         }
       }
