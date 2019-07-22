@@ -2,7 +2,6 @@
 'use strict'
 
 // Node API modules.
-const Assert = require('assert')
 const Events = require('events')
 const Util = require('util')
 
@@ -11,7 +10,6 @@ const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
 const Nid = require('nid')
-const Norma = require('norma')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const Ordu = require('ordu')
@@ -449,14 +447,15 @@ function make_seneca(initial_options) {
   root$.error = API.error // Set global error handler, or generate Seneca Error
   root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail // Throw a Seneca error
   root$.explain = API.explain // Toggle top level explain capture
-
+  root$.decorate = API.decorate // Decorate seneca object with functions
+  
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
   root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
   root$.options = api_options // Get and set options.
-  root$.decorate = api_decorate // Decorate seneca object with functions
+
 
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
@@ -980,7 +979,6 @@ function make_seneca(initial_options) {
         legacy_string:actctxt.options.legacy.timeout_string?'[TIMEOUT] ':''
       })
       
-      // TODO: this should be a seneca error with useful details
       intern.handle_reply(meta, actctxt, actmsg, timeout_err)
     }
 
@@ -1039,25 +1037,6 @@ function make_seneca(initial_options) {
     // Allow chaining with seneca.options({...}, true)
     // see https://github.com/rjrodger/seneca/issues/80
     return chain ? self : opts.$
-  }
-
-  // Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
-  // TODO: convert to seneca errors
-  function api_decorate() {
-    var args = Norma('property:s value:.', arguments)
-
-    var property = args.property
-    Assert(property[0] !== '_', 'property cannot start with _')
-    Assert(
-      private$.decorations[property] === undefined,
-      'seneca is already decorated with the property: ' + property
-    )
-    Assert(
-      root$[property] === undefined,
-      'cannot override a core seneca property: ' + property
-    )
-
-    root$[property] = private$.decorations[property] = args.value
   }
 
   Actions(root$)
@@ -1515,13 +1494,16 @@ intern.process_outward = function(actctxt, data) {
   var outward = actctxt.seneca.private$.outward.process(actctxt, data)
 
   if (outward) {
-    if ('error' === outward.kind) {
-      data.res = outward.error || error(outward.code, outward.info)
-      data.meta.error = true
-    } else if ('result' === outward.kind) {
+    if ('result' === outward.kind) {
       data.res = outward.result
-    } else {
-      Assert.fail('unknown outward kind: ' + outward.kind)
+    }
+
+    // assume error
+    else {
+      data.res = outward.error ||
+        error(outward.code || 'invalid-process-outward-code', outward.info || {})
+      data.meta = data.meta || {}
+      data.meta.error = true
     }
   }
 }

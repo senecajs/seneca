@@ -21,24 +21,20 @@ describe('print', function() {
   it('init', function(fin) {
     var si = Seneca().test(fin)
     Print(si, ['', ''])
-    Print(si, ['', '', '--seneca.print.tree=1'])
     Print(si, ['', '', '--seneca.print.options'])
-    Print(si, ['', '', '--seneca.print.tree', '--seneca.print.options'])
     fin()
   })
 
-  it('options-and-tree', function(fin) {
+  it('options', function(fin) {
     var si = Seneca({ debug: { print: { options: true } } })
       .test(fin)
       .add('a:1', function(msg, reply) {
         reply({ x: 1 })
       })
-    Print.print_tree(si, { print: { tree: { all: false } } })
-    Print.print_tree(si, { print: { tree: { all: true } } })
     fin()
   })
 
-  it('options-and-tree', function(fin) {
+  it('print', function(fin) {
     Print.print(new Error('foo'))
     Print.print(null, { foo: 1 })
     fin()

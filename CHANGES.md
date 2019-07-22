@@ -1,3 +1,10 @@
+## 3.12.0 2019-07-22
+
+* Allow remote services to fully override local action patterns.
+* Moved --seneca.print.tree debug print out to @seneca/debug plugin.
+* Better action timeout log message.
+
+
 ## 3.11.0 2019-05-15
 
 * Fixed explain$ transport issues.

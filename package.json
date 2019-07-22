@@ -80,7 +80,6 @@
   },
   "dependencies": {
     "@hapi/joi": "^15.0.3",
-    "archy": "^1.0.0",
     "eraro": "^1.1.0",
     "gate-executor": "^2.0.1",
     "gex": "^0.3.0",

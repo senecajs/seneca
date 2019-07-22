@@ -97,21 +97,15 @@ describe('seneca', function() {
     expect(d2.meta.error).not.exists()
 
     var d3 = { d: 4 }
-    try {
-      intern.seneca.process_outward(actctxt, d3)
-    } catch (e) {
-      if (8 <= parseInt(process.versions.node.substring(0, 1), 10)) {
-        expect(e.code).equal('ERR_ASSERTION')
-      }
-
-      expect(e.message).contains('unknown outward kind: bad')
-      expect(d3.x).equals(1)
-      fin()
-    }
-
+    intern.seneca.process_outward(actctxt, d3)
+    expect(d3.res.code).equals('invalid-process-outward-code')
+    expect(d3.meta.error).exists()
+        
     var d4 = {}
     intern.seneca.process_outward(actctxt, d4)
     expect(d4.x).equals(1)
+
+    fin()
   })
 })
 
