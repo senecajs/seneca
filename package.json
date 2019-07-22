@@ -103,15 +103,15 @@
     "@hapi/hoek": "^8.0.2",
     "@hapi/lab": "^19.1.0",
     "@seneca/test-plugin": "0.0.1",
-    "async": "^2.6.2",
+    "async": "^3.1.0",
     "bench": "^0.3.6",
     "coveralls": "^3.0.2",
     "handlebars": "^4.1.2",
     "lolex": "^4.1.0",
     "prettier": "^1.17.1",
-    "seneca-entity": "^4.0.0",
+    "seneca-entity": "^4.1.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-joi": "^4.0.0",
+    "seneca-joi": "^4.1.0",
     "seneca-promisify": "^0.8.0"
   }
 }
