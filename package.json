@@ -95,7 +95,7 @@
     "qs": "^6.7.0",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^3.0.0",
-    "use-plugin": "^5.0.0",
+    "use-plugin": "^5.1.0",
     "wreck": "^12"
   },
   "devDependencies": {
