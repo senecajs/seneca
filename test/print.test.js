@@ -3,8 +3,8 @@
 'use strict'
 
 var Path = require('path')
-var Code = require('code')
-var Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
 
 var Print = require('../lib/print.js')
 

@@ -5,9 +5,8 @@ var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 var Util = require('util')
 
-var Lab = require('@hapi/lab')
-var Code = require('code')
-var Hoek = require('hoek')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe

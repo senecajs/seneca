@@ -2,8 +2,8 @@
 
 'use strict'
 
-var Code = require('code')
-var Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
 var Util = require('util')
 
 var testopts = { log: 'silent' }

@@ -1,10 +1,10 @@
 /* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
-var Lab = require('@hapi/lab')
+const Lab = require('@hapi/lab')
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var Code = require('code')
+const Code = require('@hapi/code')
 var expect = Code.expect
 var _ = require('lodash')
 

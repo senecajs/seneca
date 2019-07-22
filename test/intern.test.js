@@ -4,8 +4,8 @@
 
 var Util = require('util')
 
-var Lab = require('@hapi/lab')
-var Code = require('code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 var Ordu = require('ordu')
 
 var lab = (exports.lab = Lab.script())

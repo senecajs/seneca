@@ -2,8 +2,8 @@
 'use strict'
 
 var _ = require('lodash')
-var Code = require('code')
-var Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
 
 var Common = require('../lib/common')
 var Transport = require('../lib/api')

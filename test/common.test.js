@@ -2,8 +2,8 @@
 'use strict'
 
 var Assert = require('assert')
-var Lab = require('@hapi/lab')
-var Code = require('code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 var Common = require('../lib/common')
 
 var lab = (exports.lab = Lab.script())

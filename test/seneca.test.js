@@ -3,10 +3,10 @@
 
 var Assert = require('assert')
 var Util = require('util')
-var Code = require('code')
+const Code = require('@hapi/code')
 var Gex = require('gex')
 var _ = require('lodash')
-var Lab = require('@hapi/lab')
+const Lab = require('@hapi/lab')
 var Package = require('../package.json')
 var Common = require('../lib/common.js')
 

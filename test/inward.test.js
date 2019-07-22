@@ -1,8 +1,8 @@
 /* Copyright © 2016-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Lab = require('@hapi/lab')
-var Code = require('code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe

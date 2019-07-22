@@ -3,9 +3,9 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-var Lab = require('@hapi/lab')
-var Code = require('code')
-var Hoek = require('hoek')
+const Lab = require('@hapi/lab')
+var Hoek = require('@hapi/hoek')
+const Code = require('@hapi/code')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
@@ -20,7 +20,7 @@ var Transports = require('./stubs/transports.js')
 
 var parents = meta => meta.parents.map(x => x[0])
 
-var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
+var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true, part: true })
 
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 
