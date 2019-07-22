@@ -100,7 +100,7 @@ describe('seneca', function() {
     intern.seneca.process_outward(actctxt, d3)
     expect(d3.res.code).equals('invalid-process-outward-code')
     expect(d3.meta.error).exists()
-        
+
     var d4 = {}
     intern.seneca.process_outward(actctxt, d4)
     expect(d4.x).equals(1)

@@ -230,7 +230,7 @@ const option_defaults = {
     fail: false,
 
     // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: true,
+    timeout_string: true
   }
 }
 
@@ -448,14 +448,13 @@ function make_seneca(initial_options) {
   root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail // Throw a Seneca error
   root$.explain = API.explain // Toggle top level explain capture
   root$.decorate = API.decorate // Decorate seneca object with functions
-  
+
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
   root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
   root$.options = api_options // Get and set options.
-
 
   // Non-API methods.
   root$.register = Plugins.register(opts, callpoint)
@@ -631,7 +630,7 @@ function make_seneca(initial_options) {
       }
 
     var actdef = self.util.deepextend(args.actdef) || {}
-    
+
     actdef.raw = Common.deepextend({}, raw_pattern)
     actdef.plugin_name = actdef.plugin_name || 'root$'
     actdef.plugin_fullname =
@@ -944,7 +943,7 @@ function make_seneca(initial_options) {
     }
 
     var execspec = {}
-    
+
     execspec.dn = meta.id
 
     execspec.fn = function act_fn(done) {
@@ -969,16 +968,19 @@ function make_seneca(initial_options) {
         done()
       }
     }
-    
+
     execspec.ontm = function act_tm(timeout, start, end) {
       timedout = true
 
       var timeout_err = Common.error('action_timeout', {
-        timeout: timeout, start: start, end: end,
-        message: actmsg, pattern: execspec.ctxt.pattern,
-        legacy_string:actctxt.options.legacy.timeout_string?'[TIMEOUT] ':''
+        timeout: timeout,
+        start: start,
+        end: end,
+        message: actmsg,
+        pattern: execspec.ctxt.pattern,
+        legacy_string: actctxt.options.legacy.timeout_string ? '[TIMEOUT] ' : ''
       })
-      
+
       intern.handle_reply(meta, actctxt, actmsg, timeout_err)
     }
 
@@ -1002,7 +1004,7 @@ function make_seneca(initial_options) {
           fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
           custom$: Object.assign({}, custom, args.pattern.custom$)
         })
-          .concat(args.rest)
+        .concat(args.rest)
 
       return self.add.apply(this, addargs)
     }
@@ -1254,7 +1256,7 @@ intern.execute_action = function(
   actctxt.seneca = delegate
   actctxt.actdef = actdef
   execspec.ctxt.pattern = actdef ? actdef.pattern : null
-  
+
   var data = { meta: meta, msg: msg, reply: reply }
   var inward = private$.inward.process(actctxt, data)
 
@@ -1500,8 +1502,12 @@ intern.process_outward = function(actctxt, data) {
 
     // assume error
     else {
-      data.res = outward.error ||
-        error(outward.code || 'invalid-process-outward-code', outward.info || {})
+      data.res =
+        outward.error ||
+        error(
+          outward.code || 'invalid-process-outward-code',
+          outward.info || {}
+        )
       data.meta = data.meta || {}
       data.meta.error = true
     }

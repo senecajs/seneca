@@ -20,7 +20,8 @@ var Transports = require('./stubs/transports.js')
 
 var parents = meta => meta.parents.map(x => x[0])
 
-var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true, part: true })
+var partial_match = (obj, pat) =>
+  Hoek.contain(obj, pat, { deep: true, part: true })
 
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 

@@ -14,7 +14,7 @@ var Seneca = require('..')
 
 describe('timeout', function() {
   it('happy', function(fin) {
-    Seneca({ timeout: 100, legacy: {transport: false} })
+    Seneca({ timeout: 100, legacy: { transport: false } })
       .test()
       .quiet()
       .add('a:1', function(msg, done) {
@@ -28,13 +28,12 @@ describe('timeout', function() {
         expect(err.details).includes({
           timeout: 100,
           message: { a: 1 },
-          pattern: 'a:1',
+          pattern: 'a:1'
         })
         expect(out).to.not.exist()
         fin()
       })
   })
-
 
   it('error-handler', function(fin) {
     Seneca({ timeout: 100 })
@@ -51,7 +50,6 @@ describe('timeout', function() {
       })
       .act('a:1')
   })
-
 
   it('should accept a timeout value from options', function(fin) {
     var token = null // Token for clearing the setTimeout call.

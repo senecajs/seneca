@@ -134,7 +134,7 @@ describe('seneca', function() {
       si.on('ready', function() {
         mark.ec++
       })
-      
+
       si.ready(function() {
         mark.r1 = true
 
@@ -147,7 +147,7 @@ describe('seneca', function() {
           })
         })
       })
-      
+
       si.ready(function() {
         assert.ok(mark.r0, 'r0')
         assert.ok(mark.p1, 'p1')
@@ -155,7 +155,7 @@ describe('seneca', function() {
         assert.ok(mark.r1, 'r1')
         assert.ok(mark.p2, 'p2')
         assert.equal(mark.ec, 2, 'ec')
-        
+
         done()
       })
     })
@@ -1045,7 +1045,7 @@ describe('seneca', function() {
   })
 
   it('wrap', function(fin) {
-    var si = Seneca({legacy:{transport:false}}).test(fin)
+    var si = Seneca({ legacy: { transport: false } }).test(fin)
 
     si.add('a:1', function a1(msg, reply, meta) {
       reply(null, { aa: msg.aa })
@@ -1060,7 +1060,6 @@ describe('seneca', function() {
       reply(null, { dd: msg.dd })
     })
 
-    
     si.wrap('a:1', function first(msg, reply) {
       this.prior(msg, function(err, out) {
         out.X = 1
@@ -1075,7 +1074,6 @@ describe('seneca', function() {
 
     assertDefName('first', 'a:1')
 
-
     // existence predicate!! d must exist
     si.wrap('a:1,d:*', function second(msg, reply) {
       this.prior(msg, function(err, out) {
@@ -1088,7 +1086,7 @@ describe('seneca', function() {
 
     //console.dir(si.find('a:1'),{depth:null})
     //console.dir(si.find('a:1,d:4'),{depth:null})
-    
+
     si.act('a:1,aa:1', function(err, out) {
       expect(out).contains({ aa: 1, X: 1 })
 
@@ -1276,7 +1274,6 @@ describe('seneca', function() {
         fm[actdef.raw.b$] = actdef.func
       }
 
-      
       si.add('a:1', i0)
 
       si.add('a:1,b$:1', function b1(msg, done) {
