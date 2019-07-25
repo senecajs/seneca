@@ -57,6 +57,9 @@ const option_defaults = {
   // Test mode. Use for unit testing.
   test: false,
 
+  // Quiet mode. Moves log level to warn. Use for unit testing.
+  quiet: false,
+
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
@@ -358,8 +361,14 @@ module.exports.use = function top_use() {
 
 // Makes require('seneca').test() work.
 module.exports.test = function top_test() {
-  return module.exports().test(arguments[0], arguments[1])
+  return module.exports().test(...arguments)
 }
+
+// Makes require('seneca').quiet() work.
+module.exports.quiet = function top_quiet() {
+  return module.exports().quiet(...arguments)
+}
+
 
 module.exports.util = seneca_util
 module.exports.test$ = { intern: intern }
@@ -615,6 +624,11 @@ function make_seneca(initial_options) {
     root$.test('string' === typeof opts.$.test ? opts.$.test : 'print')
   }
 
+  if (opts.$.quiet) {
+    root$.quiet()
+  }
+
+  
   // See [`seneca.add`](#seneca.add)
   function api_add() {
     var self = this
