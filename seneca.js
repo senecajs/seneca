@@ -251,7 +251,7 @@ const seneca_util = {
   print: Common.print,
   error: error,
   deep: Common.deepextend,
-  
+
   // Legacy
   deepextend: Common.deepextend,
   recurse: Common.recurse,
@@ -370,7 +370,6 @@ module.exports.quiet = function top_quiet() {
   return module.exports().quiet(...arguments)
 }
 
-
 module.exports.util = seneca_util
 module.exports.test$ = { intern: intern }
 
@@ -407,7 +406,7 @@ function make_seneca(initial_options) {
   // Instance specific incrementing counters to create unique function names
   var next_action_id = Common.autoincr()
   var next_ready_id = Common.autoincr()
-  
+
   // These need to come from options as required during construction.
   opts.$.internal.actrouter = opts.$.internal.actrouter || Patrun({ gex: true })
   opts.$.internal.subrouter = opts.$.internal.subrouter || Patrun({ gex: true })
@@ -631,7 +630,6 @@ function make_seneca(initial_options) {
     root$.quiet()
   }
 
-  
   // See [`seneca.add`](#seneca.add)
   function api_add() {
     var self = this
@@ -690,8 +688,8 @@ function make_seneca(initial_options) {
       actdef.args = Common.deepextend(pattern)
     }
 
-    var action_name = (null == action.name || '' === action.name) ?
-        'action' : action.name
+    var action_name =
+      null == action.name || '' === action.name ? 'action' : action.name
     actdef.id = action_name + '_' + next_action_id()
     actdef.name = action_name
     actdef.func = action
@@ -922,18 +920,16 @@ function make_seneca(initial_options) {
 
     if ('function' === typeof ready) {
       setImmediate(function register_ready() {
-
         var ready_call = function() {
           ready.call(self)
         }
 
-        var ready_name = ( (
-          null == ready.name ||
-            '' === ready.name ||
-            'ready' === ready.name
-        ) ? 'ready_' : ready.name + '_ready_' ) + next_ready_id()
-        
-        Object.defineProperty(ready_call, "name", { value: ready_name })
+        var ready_name =
+          (null == ready.name || '' === ready.name || 'ready' === ready.name
+            ? 'ready_'
+            : ready.name + '_ready_') + next_ready_id()
+
+        Object.defineProperty(ready_call, 'name', { value: ready_name })
 
         if (root$.private$.ge.isclear()) {
           execute_ready(self, ready_call)
@@ -1123,7 +1119,7 @@ function make_seneca(initial_options) {
     if (null == ready_func) return
 
     try {
-      instance.log.debug({kind:'ready', case:'call', name: ready_func.name})
+      instance.log.debug({ kind: 'ready', case: 'call', name: ready_func.name })
       ready_func()
     } catch (ready_err) {
       var err = error(ready_err, 'ready_failed', { message: ready_err.message })

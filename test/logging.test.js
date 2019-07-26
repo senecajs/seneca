@@ -52,7 +52,11 @@ describe('logging', function() {
       .ready(function() {
         expect(loga.length).above(logb.length)
         var last_entry = logb[logb.length - 1]
-        expect(last_entry).contains({ kind: 'ready', case: 'call', name: 'ready_1' })
+        expect(last_entry).contains({
+          kind: 'ready',
+          case: 'call',
+          name: 'ready_1'
+        })
 
         var hello_entry = logb[logb.length - 2]
         expect(hello_entry.notice).startsWith('hello')
