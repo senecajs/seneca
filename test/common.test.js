@@ -80,6 +80,8 @@ describe('common', function() {
   })
 
   it('deepextend-empty', function(fin) {
+    assert.equal(1, Common.deep({ a: 1 }).a)
+
     assert.equal(null, Common.deepextend({}).a)
 
     assert.equal(1, Common.deepextend({ a: 1 }).a)

@@ -99,7 +99,7 @@
     "wreck": "^12"
   },
   "devDependencies": {
-    "@hapi/code": "^5.3.1",
+    "@hapi/code": "^6.0.0",
     "@hapi/hoek": "^8.0.2",
     "@hapi/lab": "^19.1.0",
     "@seneca/test-plugin": "0.0.1",

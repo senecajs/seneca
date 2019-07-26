@@ -1,3 +1,9 @@
+## 3.12.1 2019-07-25
+
+* Support --seneca.quiet command line argument
+* Give ready functions unique names to help debugging
+
+
 ## 3.12.0 2019-07-22
 
 * Allow remote services to fully override local action patterns.

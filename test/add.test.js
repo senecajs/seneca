@@ -14,9 +14,38 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('add', function() {
-  var si = Seneca().test()
 
+  it('name', function(fin) {
+    var si = Seneca().test()
+    
+    si
+      .add('n:0')
+      .add('n:1', function() {})
+      .add('n:2', function n2() {})
+
+    // NOTE: these may need to be updates if startup action call sequence changes.
+    
+    expect(si.find('n:0')).contains({
+      id: 'default_action_8',
+      name: 'default_action'
+    })
+
+    expect(si.find('n:1')).contains({
+      id: 'action_9',
+      name: 'action'
+    })
+
+    expect(si.find('n:2')).contains({
+      id: 'n2_10',
+      name: 'n2'
+    })
+
+    fin()
+  })
+  
   it('action_modifier', function(fin) {
+    var si = Seneca().test()
+
     si.private$.action_modifiers.push(function(actdef) {
       actdef.desc = actdef.func.desc
     })
