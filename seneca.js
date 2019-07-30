@@ -19,6 +19,7 @@ const Joi = require('@hapi/joi')
 
 // Internal modules.
 const API = require('./lib/api')
+const Ready = require('./lib/ready')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Common = require('./lib/common')
@@ -405,7 +406,6 @@ function make_seneca(initial_options) {
 
   // Instance specific incrementing counters to create unique function names
   var next_action_id = Common.autoincr()
-  var next_ready_id = Common.autoincr()
 
   // These need to come from options as required during construction.
   opts.$.internal.actrouter = opts.$.internal.actrouter || Patrun({ gex: true })
@@ -428,6 +428,8 @@ function make_seneca(initial_options) {
   Object.defineProperty(root$, 'root', { value: root$ })
 
   private$.history = Common.history(opts.$.history)
+
+  const ready = Ready(root$)
 
   // Seneca methods. Official API.
   root$.has = API.has // True if the given pattern has an action.
@@ -459,11 +461,13 @@ function make_seneca(initial_options) {
   root$.fail = opts.$.legacy.fail ? Legacy.make_legacy_fail(opts.$) : API.fail // Throw a Seneca error
   root$.explain = API.explain // Toggle top level explain capture
   root$.decorate = API.decorate // Decorate seneca object with functions
+  root$.seneca = API.seneca
+
+  root$.ready = ready.api_ready // Callback when plugins initialized.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
-  root$.ready = api_ready // Callback when plugins initialized.
   root$.close = api_close // Close and shutdown plugins.
   root$.options = api_options // Get and set options.
 
@@ -471,7 +475,7 @@ function make_seneca(initial_options) {
   root$.register = Plugins.register(opts, callpoint)
 
   root$.wrap = api_wrap
-  root$.seneca = api_seneca
+
   root$.fix = api_fix
 
   // DEPRECATE IN 4.x
@@ -539,7 +543,8 @@ function make_seneca(initial_options) {
   private$.ge = GateExecutor({
     timeout: opts.$.timeout
   })
-    .clear(action_queue_clear)
+    //.clear(action_queue_clear)
+    .clear(ready.clear_ready)
     .start()
 
   // TODO: this should be a plugin
@@ -594,8 +599,6 @@ function make_seneca(initial_options) {
   ]
 
   private$.sub = { handler: null, tracers: [] }
-
-  private$.ready_list = []
 
   private$.inward = Ordu({ name: 'inward' })
     .add(Inward.msg_modify)
@@ -912,41 +915,6 @@ function make_seneca(initial_options) {
     return seneca
   }
 
-  // useful when defining services!
-  // note: has EventEmitter.once semantics
-  // if using .on('ready',fn) it will be be called for each ready event
-  function api_ready(ready) {
-    var self = this
-
-    if ('function' === typeof ready) {
-      setImmediate(function register_ready() {
-        var ready_call = function() {
-          ready.call(self)
-        }
-
-        var ready_name =
-          (null == ready.name || '' === ready.name || 'ready' === ready.name
-            ? 'ready_'
-            : ready.name + '_ready_') + next_ready_id()
-
-        Object.defineProperty(ready_call, 'name', { value: ready_name })
-
-        if (root$.private$.ge.isclear()) {
-          execute_ready(self, ready_call)
-        } else {
-          root$.private$.ready_list.push(ready_call)
-        }
-      })
-    }
-
-    return self
-  }
-
-  // Return self. Mostly useful as a check that this is a Seneca instance.
-  function api_seneca() {
-    return this
-  }
-
   // Describe this instance using the form: Seneca/VERSION/ID
   function api_toString() {
     return this.fullname
@@ -1102,37 +1070,22 @@ function make_seneca(initial_options) {
     return log_plugin.preload.call(instance).extend.logger
   }
 
+  /*
   // NOTE: this could be called from an arbitrary GateExecutor task,
   // if the task queue is emptied.
   function action_queue_clear() {
+
     root$.emit('ready')
-    execute_ready(root$, root$.private$.ready_list.shift())
+    Ready.intern.execute_ready(root$, root$.private$.ready_list.shift())
 
     if (root$.private$.ge.isclear()) {
       while (0 < root$.private$.ready_list.length) {
-        execute_ready(root$, root$.private$.ready_list.shift())
+        Ready.intern.execute_ready(root$, root$.private$.ready_list.shift())
       }
     }
+
   }
-
-  function execute_ready(instance, ready_func) {
-    if (null == ready_func) return
-
-    try {
-      instance.log.debug({ kind: 'ready', case: 'call', name: ready_func.name })
-      ready_func()
-    } catch (ready_err) {
-      var err = error(ready_err, 'ready_failed', { message: ready_err.message })
-
-      if (opts.$.test) {
-        if (opts.$.errhandler) {
-          opts.$.errhandler.call(root$, err)
-        } else throw err
-      } else {
-        root$.die(err)
-      }
-    }
-  }
+      */
 
   return root$
 }

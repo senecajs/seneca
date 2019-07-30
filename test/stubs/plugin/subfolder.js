@@ -4,11 +4,11 @@ const Loader = require('./subfolder/loader')
 var seneca
 
 if(require.main === module) {
-  seneca = Seneca()
+  seneca = Seneca().test()
   subfolder(console.log)
 }
 else {
-  seneca = Seneca({internal:{module:Loader.module}})
+  seneca = Seneca({internal:{module:Loader.module}}).test()
   // seneca = Seneca()
 }
 

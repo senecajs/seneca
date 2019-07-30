@@ -19,6 +19,7 @@ describe('plugin', function() {
   it('standard-test-plugin', function(fin) {
     Seneca()
       .test(fin)
+      .quiet()
       .use('test-plugin')
       .ready(function() {
         this.act('role:test,cmd:foo,size:3', function(err, out) {
@@ -31,6 +32,7 @@ describe('plugin', function() {
   it('standard-test-plugin-full-ignore', function(fin) {
     Seneca()
       .test(fin)
+      .quiet()
       .ignore_plugin('@seneca/test-plugin')
       .use('@seneca/test-plugin')
       .ready(function() {
@@ -49,6 +51,7 @@ describe('plugin', function() {
   it('plugin-ignore-via-options', function(fin) {
     Seneca({ plugins: { foo: false } })
       .test(fin)
+      .quiet()
       .use(function foo() {})
       .ready(function() {
         expect(this.has_plugin('foo')).false()
@@ -59,6 +62,7 @@ describe('plugin', function() {
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)
+      .quiet()
       .use(
         function p0(opts) {
           var z
@@ -85,6 +89,7 @@ describe('plugin', function() {
   it('load-defaults', function(fin) {
     Seneca()
       .test(fin)
+      .quiet()
 
       // NOTE: the assertions are in the plugin
       .use('./stubs/bar-plugin', {
@@ -111,6 +116,7 @@ describe('plugin', function() {
 
     Seneca()
       .test(fin)
+      .quiet()
 
       .use(
         {
@@ -164,7 +170,7 @@ describe('plugin', function() {
 
   // REMOVE in 4.x
   it('legacy-options', function(fin) {
-    var si = Seneca({ log: 'silent' })
+    var si = Seneca({ log: 'silent' }).quiet()
 
     si.use('options', { a: 1 })
     expect(si.export('options').a).equal(1)
@@ -219,7 +225,7 @@ describe('plugin', function() {
   })
 
   it('works with exportmap', function(fin) {
-    var seneca = Seneca.test(fin)
+    var seneca = Seneca.test(fin).quiet()
 
     seneca.options({
       debug: {
@@ -252,7 +258,7 @@ describe('plugin', function() {
         undead: true
       },
       log: 'silent'
-    })
+    }).quiet()
 
     try {
       si.use({ foo: 1 })
@@ -284,13 +290,14 @@ describe('plugin', function() {
       },
       log: 'silent',
       errhandler: function(err) {
-        expect('plugin_define').equal(err.code)
+        expect('plugin_define_failed').equal(err.code)
+        expect(err.details.fullname).contains('bad_plugin_def')
         expect(err.details.message).contains('plugin-def')
         fin()
       }
-    })
+    }).quiet()
 
-    si.use(function() {
+    si.use(function bad_plugin_def() {
       throw new Error('plugin-def')
     })
   })
@@ -313,8 +320,13 @@ describe('plugin', function() {
   })
 
   it('plugin-error-add', function(fin) {
-    Seneca({ log: 'silent', debug: { undead: true } })
+    Seneca({
+      log: 'silent',
+      debug: { undead: true },
+      legacy: { transport: false }
+    })
       .error(function(err) {
+        expect('plugin_define_failed').to.equal(err.code)
         expect('invalid_arguments').to.equal(err.orig.code)
         fin()
       })
@@ -725,7 +737,7 @@ describe('plugin', function() {
   })
 
   it('plugin-init-error', function(fin) {
-    var si = Seneca({ debug: { undead: true } })
+    var si = Seneca({ log: 'silent', debug: { undead: true } })
       .error(function(err) {
         fin()
       })
@@ -783,17 +795,53 @@ describe('plugin', function() {
   })
 
   it('plugins-from-options', function(fin) {
+    var tmp = {}
     var si = Seneca({
       log: 'silent',
+      debug: { undead: true },
       legacy: { transport: false },
       plugins: {
-        foo: function() {},
-        bar: { name: 'bar', init: function() {} }
+        foo: function() {
+          tmp.foo = 1
+        },
+        bar: {
+          name: 'bar',
+          define: function() {
+            tmp.bar = 1
+          }
+        },
+        zed: {
+          name: 'zed',
+          init: function() {
+            tmp.zed = 1
+          }
+        }
       }
-    }).ready(function() {
-      expect(Object.keys(this.plugins()).length).equal(2)
-      fin()
     })
+      .test(fin)
+      .quiet()
+      .ready(function() {
+        expect(Object.keys(this.plugins()).length).equal(3)
+        expect(tmp).equal({ foo: 1, bar: 1, zed: 1 })
+        fin()
+      })
+  })
+
+  it('plugins-from-bad-options', function(fin) {
+    var si = Seneca({
+      debug: { undead: true },
+      legacy: { transport: false }
+    })
+      .test(function(err) {
+        // TODO: updated use-plugin should give error explaining that
+        // no `define` function exists in plugin spec
+        expect(err).exist()
+        fin()
+      })
+      .quiet()
+      .use({
+        name: 'bad'
+      })
   })
 
   it('plugins-options-precedence', function(fin) {

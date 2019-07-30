@@ -14,12 +14,6 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('sequence', function() {
-  it('ready-always-called', function(fin) {
-    Seneca.test(fin).ready(function() {
-      this.ready(fin)
-    })
-  })
-
   it('single-add-act', function(fin) {
     Seneca.test(fin)
       .add('a:1', function(msg, done) {

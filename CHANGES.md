@@ -1,3 +1,10 @@
+## 3.12.1 2019-07-30
+
+* Plugin loading directives: init$, defined$, inited$.
+* Started new API documentation: API.md (draft!).
+* Option `log` can be a function taking the log entry as first parameter.
+
+
 ## 3.12.1 2019-07-25
 
 * Support --seneca.quiet command line argument

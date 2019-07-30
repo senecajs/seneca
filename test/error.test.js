@@ -58,8 +58,6 @@ describe('error', function() {
 
   it('action_callback', action_callback_legacy)
 
-  it('ready_die', ready_die)
-
   it('legacy_fail', legacy_fail)
 
   it('types', types)
@@ -660,27 +658,6 @@ describe('error', function() {
           throw e
         })
       }, 40)
-    })
-  }
-
-  function ready_die(done) {
-    var si = Seneca({
-      log: 'silent',
-      debug: { undead: true },
-      errhandler: function(err) {
-        try {
-          assert.ok(err.foo)
-          done()
-        } catch (e) {
-          done(e)
-        }
-      }
-    })
-
-    si.ready(function() {
-      var e = new Error('EEE')
-      e.foo = true
-      throw e
     })
   }
 

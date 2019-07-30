@@ -21,6 +21,7 @@ describe('print', function() {
   it('init', function(fin) {
     var si = Seneca().test(fin)
     Print(si, ['', ''])
+    Print(si, ['', '', '--seneca.print'])
     Print(si, ['', '', '--seneca.print.options'])
     fin()
   })
