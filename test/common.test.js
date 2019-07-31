@@ -224,8 +224,8 @@ describe('common', function() {
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2 }))
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2, c$: 3 }))
     assert.equal('a:1,b:2', Common.pattern({ b: 2, c$: 3, a: 1 }))
-    assert.equal('a:1,b:2', Common.pattern({ b: 2, c: {x:1}, a: 1 }))
-    assert.equal('a:1,b:2', Common.pattern({ b: 2, c: ()=>{}, a: 1 }))
+    assert.equal('a:1,b:2', Common.pattern({ b: 2, c: { x: 1 }, a: 1 }))
+    assert.equal('a:1,b:2', Common.pattern({ b: 2, c: () => {}, a: 1 }))
     fin()
   })
 
