@@ -324,6 +324,7 @@ module.exports = function init(seneca_options, more_options) {
   }
 
   // Register plugins specified in options.
+  options.plugins = null == options.plugins ? {} : options.plugins
   var pluginkeys = Object.keys(options.plugins)
   for (var pkI = 0; pkI < pluginkeys.length; pkI++) {
     var pluginkey = pluginkeys[pkI]
@@ -432,6 +433,7 @@ function make_seneca(initial_options) {
   const ready = Ready(root$)
 
   // Seneca methods. Official API.
+  root$.toString = API.toString
   root$.has = API.has // True if the given pattern has an action.
   root$.find = API.find // Find the action definition for a pattern.
   root$.list = API.list // List the patterns added to this instance.
@@ -462,13 +464,14 @@ function make_seneca(initial_options) {
   root$.explain = API.explain // Toggle top level explain capture
   root$.decorate = API.decorate // Decorate seneca object with functions
   root$.seneca = API.seneca
-
+  root$.close = API.close(callpoint) // Close and shutdown plugins.
+  
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
 
-  root$.close = api_close // Close and shutdown plugins.
+
   root$.options = api_options // Get and set options.
 
   // Non-API methods.
@@ -585,8 +588,6 @@ function make_seneca(initial_options) {
 
   private$.actrouter = opts.$.internal.actrouter
   private$.subrouter = opts.$.internal.subrouter
-
-  root$.toString = api_toString
 
   // TODO: provide an api to add these
   private$.action_modifiers = [
@@ -846,6 +847,7 @@ function make_seneca(initial_options) {
     })
   }
 
+/*
   // close seneca instance
   // sets public seneca.closed property
   function api_close(done) {
@@ -915,10 +917,13 @@ function make_seneca(initial_options) {
     return seneca
   }
 
+  
   // Describe this instance using the form: Seneca/VERSION/ID
   function api_toString() {
     return this.fullname
   }
+
+*/
 
   function do_act(instance, origmsg, origreply) {
     var timedout = false

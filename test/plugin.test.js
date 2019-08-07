@@ -59,6 +59,17 @@ describe('plugin', function() {
       })
   })
 
+  it('plugin-ignore-null', function(fin) {
+    Seneca({ plugins: null })
+      .test(fin)
+      .quiet()
+      .use(function foo() {})
+      .ready(function() {
+        fin()
+      })
+  })
+
+  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)
