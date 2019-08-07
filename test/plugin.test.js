@@ -69,7 +69,6 @@ describe('plugin', function() {
       })
   })
 
-  
   it('plugin-delegate-init', function(fin) {
     Seneca()
       .test(fin)

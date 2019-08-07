@@ -465,12 +465,11 @@ function make_seneca(initial_options) {
   root$.decorate = API.decorate // Decorate seneca object with functions
   root$.seneca = API.seneca
   root$.close = API.close(callpoint) // Close and shutdown plugins.
-  
+
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
   root$.add = api_add // Add a pattern an associated action.
   root$.act = api_act // Submit a message and trigger the associated action.
-
 
   root$.options = api_options // Get and set options.
 
@@ -847,7 +846,7 @@ function make_seneca(initial_options) {
     })
   }
 
-/*
+  /*
   // close seneca instance
   // sets public seneca.closed property
   function api_close(done) {
