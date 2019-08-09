@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.13.1",
+  "version": "3.13.2",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -79,7 +79,7 @@
     "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run prettier && npm test && npm run repo-tag && npm publish && npm dist-tag add seneca@$REPO_VERSION next && npm dist-tag add seneca@$REPO_VERSION plugin"
   },
   "dependencies": {
-    "@hapi/joi": "^15.0.3",
+    "@hapi/joi": "^15.1.0",
     "eraro": "^1.1.0",
     "gate-executor": "^2.0.1",
     "gex": "^0.3.0",
@@ -100,15 +100,15 @@
   },
   "devDependencies": {
     "@hapi/code": "^6.0.0",
-    "@hapi/hoek": "^8.0.2",
-    "@hapi/lab": "^19.1.0",
+    "@hapi/hoek": "^8.2.0",
+    "@hapi/lab": "^20.0.0",
     "@seneca/test-plugin": "0.0.1",
     "async": "^3.1.0",
     "bench": "^0.3.6",
-    "coveralls": "^3.0.2",
+    "coveralls": "^3.0.6",
     "handlebars": "^4.1.2",
-    "lolex": "^4.1.0",
-    "prettier": "^1.17.1",
+    "lolex": "^4.2.0",
+    "prettier": "^1.18.2",
     "seneca-entity": "^4.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^4.1.0",

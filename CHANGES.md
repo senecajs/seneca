@@ -1,4 +1,14 @@
-## 3.12.1 2019-07-30
+## 3.13.2 2019-08-08
+
+* Include plugin returned meta data in the stored plugin definition (to be used by seneca-doc)
+
+
+## 3.13.1 2019-08-06
+
+* Minor fix to handle null options.plugins
+
+
+## 3.13.0 2019-07-30
 
 * Plugin loading directives: init$, defined$, inited$.
 * Started new API documentation: API.md (draft!).
