@@ -1,3 +1,8 @@
+## 3.13.3 2019-08-14
+
+* Resolve disagreement between seneca-doc and seneca on valid plugin names - $ is not allowed as it is a separator between plugin name and tag. 
+
+
 ## 3.13.2 2019-08-08
 
 * Include plugin returned meta data in the stored plugin definition (to be used by seneca-doc)
