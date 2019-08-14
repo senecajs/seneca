@@ -650,6 +650,8 @@ function make_seneca(initial_options) {
     var actdef = self.util.deepextend(args.actdef) || {}
 
     actdef.raw = Common.deepextend({}, raw_pattern)
+
+    // TODO: change root$ to root as plugin_name should not contain $
     actdef.plugin_name = actdef.plugin_name || 'root$'
     actdef.plugin_fullname =
       actdef.plugin_fullname ||
