@@ -19,6 +19,7 @@ const Joi = require('@hapi/joi')
 
 // Internal modules.
 const API = require('./lib/api')
+const Logging = require('./lib/logging')
 const Ready = require('./lib/ready')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
@@ -30,6 +31,7 @@ const Plugins = require('./lib/plugins')
 const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
+
 
 // Shortcuts.
 const errlog = Common.make_standard_err_log_entry
@@ -534,7 +536,7 @@ function make_seneca(initial_options) {
   private$.decorations = {}
 
   // Configure logging
-  private$.logger = load_logger(root$, opts.$.internal.logger)
+  private$.logger = Logging.load_logger(root$, opts.$.internal.logger)
   root$.make_log = make_log
   root$.log = make_log(root$, make_default_log_modifier(root$))
 
@@ -830,7 +832,6 @@ function make_seneca(initial_options) {
     pin = Array.isArray(pin) ? pin : [pin]
     Common.each(pin, function(p) {
       Common.each(pinthis.list(p), function(actpattern) {
-        // console.log('WRAP',p,actpattern,actdef)
         pinthis.add(actpattern, wrapper, actdef)
       })
     })
@@ -848,83 +849,6 @@ function make_seneca(initial_options) {
     })
   }
 
-  /*
-  // close seneca instance
-  // sets public seneca.closed property
-  function api_close(done) {
-    var seneca = this
-
-    var done_called = false
-    var safe_done = function safe_done(err) {
-      if (!done_called && 'function' === typeof done) {
-        done_called = true
-        return done.call(seneca, err)
-      }
-    }
-
-    // don't try to close twice
-    if (seneca.flags.closed) {
-      return safe_done()
-    }
-
-    seneca.ready(do_close)
-    var close_timeout = setTimeout(do_close, opts.$.close_delay)
-
-    function do_close() {
-      clearTimeout(close_timeout)
-
-      if (seneca.flags.closed) {
-        return safe_done()
-      }
-
-      // TODO: remove in 4.x
-      seneca.closed = true
-
-      seneca.flags.closed = true
-
-      // cleanup process event listeners
-      Common.each(opts.$.system.close_signals, function(active, signal) {
-        if (active) {
-          process.removeListener(signal, private$.handle_close)
-        }
-      })
-
-      seneca.log.debug({
-        kind: 'close',
-        notice: 'start',
-        callpoint: callpoint()
-      })
-
-      seneca.act('role:seneca,cmd:close,closing$:true', function(err) {
-        seneca.log.debug(errlog(err, { kind: 'close', notice: 'end' }))
-
-        seneca.removeAllListeners('act-in')
-        seneca.removeAllListeners('act-out')
-        seneca.removeAllListeners('act-err')
-        seneca.removeAllListeners('pin')
-        seneca.removeAllListeners('after-pin')
-        seneca.removeAllListeners('ready')
-
-        seneca.private$.history.close()
-
-        if (seneca.private$.status_interval) {
-          clearInterval(seneca.private$.status_interval)
-        }
-
-        return safe_done(err)
-      })
-    }
-
-    return seneca
-  }
-
-  
-  // Describe this instance using the form: Seneca/VERSION/ID
-  function api_toString() {
-    return this.fullname
-  }
-
-*/
 
   function do_act(instance, origmsg, origreply) {
     var timedout = false
@@ -1069,29 +993,6 @@ function make_seneca(initial_options) {
       process.once(signal, private$.handle_close)
     }
   })
-
-  function load_logger(instance, log_plugin) {
-    log_plugin = log_plugin || require('./lib/logging')
-
-    return log_plugin.preload.call(instance).extend.logger
-  }
-
-  /*
-  // NOTE: this could be called from an arbitrary GateExecutor task,
-  // if the task queue is emptied.
-  function action_queue_clear() {
-
-    root$.emit('ready')
-    Ready.intern.execute_ready(root$, root$.private$.ready_list.shift())
-
-    if (root$.private$.ge.isclear()) {
-      while (0 < root$.private$.ready_list.length) {
-        Ready.intern.execute_ready(root$, root$.private$.ready_list.shift())
-      }
-    }
-
-  }
-      */
 
   return root$
 }
