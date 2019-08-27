@@ -35,6 +35,29 @@ describe('logging', function() {
       })
   })
 
+
+  it('happy-ng', function(fin) {
+    var capture = make_log_capture({legacy:false})
+
+    Seneca({ log: 'all', internal: { logger: capture } })
+      .error(fin)
+      .add('a:1', function(m, r) {
+        r(null, { x: 1 })
+      })
+      .act('a:1', function() {
+        expect(this.seneca).to.exist()
+        this.log({ seen: 'a:1' })
+      })
+      .ready(function() {
+        var log = capture.log.filter(function(entry) {
+          return entry.seen
+        })
+        expect(log[0].seen).to.equal('a:1')
+        fin()
+      })
+  })
+
+  
   it('event', function(fin) {
     var loga = []
     var logb = []
@@ -222,7 +245,8 @@ function a1(msg, reply) {
   reply(null, { x: 1 })
 }
 
-function make_log_capture() {
+function make_log_capture(flags) {
+  flags = flags || {}
   var capture = function capture() {}
 
   capture.log = []
@@ -232,11 +256,20 @@ function make_log_capture() {
     var so = seneca.options()
     capture.spec = so.log
 
+    function legacy_logger(seneca, data) {
+      capture.log.push(data)
+    }
+
+    function nextgen_logger(data) {
+      capture.log.push(data)
+    }
+
+    var capture_logger = false === flags.legacy ? nextgen_logger : legacy_logger
+    //console.log(capture_logger)
+
     return {
       extend: {
-        logger: function(seneca, data) {
-          capture.log.push(data)
-        }
+        logger: capture_logger
       }
     }
   }

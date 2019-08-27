@@ -537,6 +537,7 @@ function make_seneca(initial_options) {
 
   // Configure logging
   private$.logger = Logging.load_logger(root$, opts.$.internal.logger)
+
   root$.make_log = make_log
   root$.log = make_log(root$, make_default_log_modifier(root$))
 
@@ -1038,7 +1039,8 @@ function make_log(instance, modifier) {
   var log =
     instance.log ||
     function log(data) {
-      instance.private$.logger(this, data)
+      //instance.private$.logger(this, data)
+      instance.private$.logger.call(instance, data)
       instance.emit('log', data)
     }
 
