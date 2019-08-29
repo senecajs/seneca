@@ -400,6 +400,8 @@ function make_seneca(initial_options) {
   private$.optioner = Options(module, option_defaults, initial_options)
   var opts = { $: private$.optioner.get() }
 
+  //console.log('S OPTS', option_defaults.log, initial_options.log, opts)
+
   /*
   // Handle legacy options
   if('string' === typeof(opts.$.log)) {
@@ -559,6 +561,7 @@ function make_seneca(initial_options) {
   // Configure logging
   // private$.logger = Logging.load_logger(root$, opts.$.internal.logger)
 
+  //console.log('S build_log', root$.options().log)
   Logging.build_log(root$)
 
   

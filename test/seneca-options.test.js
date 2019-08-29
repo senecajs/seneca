@@ -31,11 +31,16 @@ var Seneca = require('..')
 // --seneca.log=level:info,type:plugin,handler:print
 
 describe('seneca --seneca.log arguments tests: ', function() {
-  it('--seneca.log=level:warn', function(done) {
+  it('qqq --seneca.log=level:warn', function(done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
+
+    //console.log('QQQ EXPORT', si.export('options').log)
+    //console.log('QQQ OPTIONS', si.options().log)
+
+    // expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
+    expect(si.options().log).contains({ level: 'warn' })
 
     done()
   })

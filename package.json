@@ -81,6 +81,7 @@
   "dependencies": {
     "@hapi/joi": "^15.1.0",
     "eraro": "^1.1.0",
+    "fast-safe-stringify": "^2.0.6",
     "gate-executor": "^2.0.1",
     "gex": "^0.3.0",
     "json-stringify-safe": "^5.0.1",

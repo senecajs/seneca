@@ -1,3 +1,3 @@
 module.exports = {
-  log: 'all'
+  // log: 'all'
 }
