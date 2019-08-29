@@ -63,6 +63,12 @@ const option_defaults = {
   // Quiet mode. Moves log level to warn. Use for unit testing.
   quiet: false,
 
+  // Default logging specification - see lib/logging.js
+  log: Logging.default_logspec,
+
+  // Custom logger function, optional - see lib/logging.js
+  logger: null,
+  
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
@@ -394,8 +400,23 @@ function make_seneca(initial_options) {
   private$.optioner = Options(module, option_defaults, initial_options)
   var opts = { $: private$.optioner.get() }
 
+  /*
+  // Handle legacy options
+  if('string' === typeof(opts.$.log)) {
+    opts.$.logspec = opts.$.log
+    opts.$.log = Object.assign({},option_defaults.log)
+  }
+
+  // Allow log to be a logger function for convenience
+  else if('function' === typeof(opts.$.log)) {
+    opts.$.internal.logger = opts.$.log
+    opts.$.log = Object.assign({},opts.$.internal.logger,option_defaults.log)
+  }
+  */
+  
   // Setup event handlers, if defined
-  ;['log', 'act_in', 'act_out', 'act_err', 'ready', 'close'].forEach(function(
+  var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
+  event_names.forEach(function(
     event_name
   ) {
     if ('function' === typeof opts.$.events[event_name]) {
@@ -536,10 +557,13 @@ function make_seneca(initial_options) {
   private$.decorations = {}
 
   // Configure logging
-  private$.logger = Logging.load_logger(root$, opts.$.internal.logger)
+  // private$.logger = Logging.load_logger(root$, opts.$.internal.logger)
 
-  root$.make_log = make_log
-  root$.log = make_log(root$, make_default_log_modifier(root$))
+  Logging.build_log(root$)
+
+  
+  //root$.make_log = make_log
+  //root$.log = make_log(root$)//, make_default_log_modifier(root$))
 
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
@@ -942,7 +966,8 @@ function make_seneca(initial_options) {
   function api_options(options, chain) {
     var self = this
 
-    if (options != null) {
+    // self.log may not exist yet as .options() used during construction
+    if (options != null && self.log) {
       self.log.debug({
         kind: 'options',
         case: 'SET',
@@ -954,6 +979,7 @@ function make_seneca(initial_options) {
     opts.$ = private$.exports.options =
       options == null ? private$.optioner.get() : private$.optioner.set(options)
 
+    // DEPRECATED
     if (opts.$.legacy.logging) {
       if (options && options.log && Array.isArray(options.log.map)) {
         for (var i = 0; i < options.log.map.length; ++i) {
@@ -1035,7 +1061,9 @@ function make_callpoint(active) {
   return Common.noop
 }
 
+/*
 function make_log(instance, modifier) {
+  modifier = modifier || make_default_log_modifier(instance)
   var log =
     instance.log ||
     function log(data) {
@@ -1048,7 +1076,7 @@ function make_log(instance, modifier) {
   make_log_levels(instance, log)
 
   return log
-}
+//}
 
 function prepare_log(instance, log) {
   return function prepare_log_data() {
@@ -1090,7 +1118,9 @@ function make_default_log_modifier(instance) {
     data.when = null == data.when ? Date.now() : data.when
   }
 }
-
+}
+*/
+  
 intern.make_act_delegate = function(instance, opts, meta, actdef) {
   meta = meta || {}
   actdef = actdef || {}
@@ -1118,6 +1148,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
     delegate.fixedargs.tx$ = meta.tx
   }
 
+  /*
   // automate actid log insertion
 
   delegate.log = make_log(delegate, function act_delegate_log_modifier(data) {
@@ -1127,7 +1158,8 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
     data.plugin_tag = data.plugin_tag || actdef.plugin_tag
     data.pattern = data.pattern || actdef.pattern
   })
-
+  */
+  
   return delegate
 }
 

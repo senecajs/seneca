@@ -12,6 +12,8 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
+var Logging = require('../lib/logging')
+
 
 describe('logging', function() {
   it('happy', function(fin) {
@@ -35,7 +37,6 @@ describe('logging', function() {
       })
   })
 
-
   it('happy-ng', function(fin) {
     var capture = make_log_capture({legacy:false})
 
@@ -57,7 +58,55 @@ describe('logging', function() {
       })
   })
 
-  
+  it('level-text-values', function(fin) {
+    var capture = make_log_capture({legacy:false})
+
+    var options = Seneca()
+        .test(fin)
+        .options()
+
+    // ensure text-level mapping is reversible
+    Object.keys(options.log.text_level).forEach(text=>{
+      expect(options.log.level_text[options.log.text_level[text]]).equal(text)
+    })
+    
+    fin()
+  })
+
+
+  it('build_log_spec', function(fin) {
+    var msi = (opts)=>{return {options:()=>{return opts}}}
+    var out
+    
+    out = Logging.build_log_spec(msi({log:'test'}))
+    expect(out).contains({level:'warn', live_level:400})
+
+    out = Logging.build_log_spec(msi({log:'quiet'}))
+    expect(out).contains({level:'none', live_level:999})
+
+    out = Logging.build_log_spec(msi({log:'any'}))
+    expect(out).contains({level:'all', live_level:100})
+
+    out = Logging.build_log_spec(msi({log:'debug'}))
+    expect(out).contains({level:'debug', live_level:200})
+
+    out = Logging.build_log_spec(msi({log:'fatal'}))
+    expect(out).contains({level:'fatal', live_level:600})
+
+
+    out = Logging.build_log_spec(msi({log:'300'}))
+    expect(out).contains({level:'info', live_level:300})
+
+    out = Logging.build_log_spec(msi({log:300}))
+    expect(out).contains({level:'info', live_level:300})
+
+    out = Logging.build_log_spec(msi({log:301}))
+    expect(out).contains({level:'301', live_level:301})
+
+    fin()
+  })
+
+
   it('event', function(fin) {
     var loga = []
     var logb = []
@@ -73,6 +122,9 @@ describe('logging', function() {
         logb.push(data)
       })
       .ready(function() {
+        //console.log(loga)
+        //console.log(logb)
+
         expect(loga.length).above(logb.length)
         var last_entry = logb[logb.length - 1]
         expect(last_entry).contains({
@@ -88,6 +140,7 @@ describe('logging', function() {
       })
   })
 
+
   it('quiet', function(fin) {
     Seneca()
       .quiet()
@@ -95,6 +148,8 @@ describe('logging', function() {
       .ready(fin)
   })
 
+  
+  // DEPRECATED
   it('basic', function(fin) {
     var capture = make_log_capture()
 
@@ -105,7 +160,7 @@ describe('logging', function() {
       })
       .act('a:1', function() {
         expect(this.seneca).to.exist()
-        this.log({ seen: 'a:1' })
+        this.log({ seen: 'a:1', level:'info' })
       })
       .ready(function() {
         var log = capture.log.filter(function(entry) {
@@ -116,6 +171,7 @@ describe('logging', function() {
       })
   })
 
+
   it('shortcuts', function(fin) {
     var log
     var stdout_write = process.stdout.write
@@ -125,6 +181,11 @@ describe('logging', function() {
 
     function restore(err) {
       process.stdout.write = stdout_write
+
+      if(err) {
+        console.log('ERROR', log)
+      }
+      
       fin(err)
     }
 
@@ -239,6 +300,7 @@ describe('logging', function() {
       .act('a:1')
       .ready(fin)
   })
+
 })
 
 function a1(msg, reply) {

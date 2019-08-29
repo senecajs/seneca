@@ -86,7 +86,9 @@ describe('seneca --seneca.log arguments tests: ', function() {
     opts.debug.argv = ['', '', '--seneca.log=level:']
     var si = Seneca(opts)
     expect(_.isObject(si.export('options').log)).to.be.true()
-    expect(si.export('options').log.level).to.not.exist()
+
+    // info is the default
+    expect(si.export('options').log.level).to.equal('info')
 
     done()
   })
