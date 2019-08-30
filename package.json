@@ -103,6 +103,7 @@
     "@hapi/code": "^6.0.0",
     "@hapi/hoek": "^8.2.0",
     "@hapi/lab": "^20.0.0",
+    "@seneca/repl": "^1.4.0",
     "@seneca/test-plugin": "0.0.1",
     "async": "^3.1.0",
     "bench": "^0.3.6",

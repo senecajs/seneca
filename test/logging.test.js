@@ -134,7 +134,7 @@ describe('logging', function() {
         })
 
         var hello_entry = logb[logb.length - 2]
-        expect(hello_entry.notice).startsWith('hello')
+        expect(hello_entry.data).startsWith('hello')
 
         fin()
       })

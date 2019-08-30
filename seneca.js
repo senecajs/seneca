@@ -346,7 +346,7 @@ module.exports = function init(seneca_options, more_options) {
   }
 
   seneca.ready(function() {
-    this.log.info({ kind: 'notice', notice: 'hello seneca ' + seneca.id })
+    this.log.info({ kind: 'notice', data: 'hello' })
   })
 
   return seneca
@@ -782,10 +782,9 @@ function make_seneca(initial_options) {
       self.log.debug({
         kind: 'add',
         case: actdef.sub ? 'SUB' : 'ADD',
-        id: actdef.id,
+        action: actdef.id,
         pattern: actdef.pattern,
-        name: action.name,
-        callpoint: callpoint
+        callpoint: callpoint(true)
       })
 
       private$.actrouter.add(pattern, actdef)
@@ -970,17 +969,21 @@ function make_seneca(initial_options) {
     var self = this
 
     // self.log may not exist yet as .options() used during construction
-    if (options != null && self.log) {
+    if (null != options && self.log) {
       self.log.debug({
         kind: 'options',
         case: 'SET',
-        options: options,
-        callpoint: callpoint()
+        data: options
       })
     }
 
     opts.$ = private$.exports.options =
       options == null ? private$.optioner.get() : private$.optioner.set(options)
+
+    // Update logging configuration
+    if(null != options && options.log) {
+      Logging.build_log(self,{set_options:false})
+    }
 
     // DEPRECATED
     if (opts.$.legacy.logging) {
@@ -1051,17 +1054,18 @@ function make_private() {
 
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint(active) {
-  if (active) {
-    return function() {
+  return function callpoint(override) {
+    if(active || override) {
       return error.callpoint(new Error(), [
         '/seneca/seneca.js',
         '/seneca/lib/',
         '/lodash.js'
       ])
     }
+    else {
+      return void 0
+    }
   }
-
-  return Common.noop
 }
 
 /*
