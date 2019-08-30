@@ -31,15 +31,11 @@ var Seneca = require('..')
 // --seneca.log=level:info,type:plugin,handler:print
 
 describe('seneca --seneca.log arguments tests: ', function() {
-  it('qqq --seneca.log=level:warn', function(done) {
+  it('--seneca.log=level:warn', function(done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn']
     var si = Seneca(opts)
 
-    //console.log('QQQ EXPORT', si.export('options').log)
-    //console.log('QQQ OPTIONS', si.options().log)
-
-    // expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
     expect(si.options().log).contains({ level: 'warn' })
 
     done()
@@ -86,15 +82,19 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('incorrect arg --seneca.log=level:', function(done) {
+  it('incorrect arg --seneca.log=level:', function(fin) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:']
-    var si = Seneca(opts)
-    expect(_.isObject(si.export('options').log)).to.be.true()
-
-    // info is the default
-    expect(si.export('options').log.level).to.equal('info')
-
+    try {
+      Seneca(opts)
+      Code.fail()
+    }
+    catch(e) {
+      console.log(e)
+      expect(e.code).equal('bad-logspec-string')
+      fin()
+    }
+    
     done()
   })
 
