@@ -18,12 +18,14 @@ const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
 
 // Internal modules.
-const API = require('./lib/api')
+const Common = require('./lib/common')
 const Logging = require('./lib/logging')
+const API = require('./lib/api')
 const Ready = require('./lib/ready')
+const Add = require('./lib/add')
+const Act = require('./lib/act')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
-const Common = require('./lib/common')
 const Legacy = require('./lib/legacy')
 const Options = require('./lib/options')
 const Package = require('./package.json')
@@ -33,8 +35,8 @@ const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
 // Shortcuts.
-const errlog = Common.make_standard_err_log_entry
-const actlog = Common.make_standard_act_log_entry
+//const errlog = Common.make_standard_err_log_entry
+//const actlog = Common.make_standard_act_log_entry
 
 // Internal data and utilities.
 const error = Common.error
@@ -480,20 +482,17 @@ function make_seneca(initial_options) {
   root$.decorate = API.decorate // Decorate seneca object with functions
   root$.seneca = API.seneca
   root$.close = API.close(callpoint) // Close and shutdown plugins.
-
+  root$.options = API.options // Get and set options.
+  root$.fix = API.fix // fix pattern arguments, message arguments, and custom meta
+  root$.wrap = API.wrap // wrap each found pattern with a new action
+  root$.add = Add.api_add // Add a pattern an associated action.
+  root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
-  root$.add = api_add // Add a pattern an associated action.
-  root$.act = api_act // Submit a message and trigger the associated action.
 
-  root$.options = api_options // Get and set options.
-
+  
   // Non-API methods.
   root$.register = Plugins.register(callpoint)
-
-  root$.wrap = api_wrap
-
-  root$.fix = api_fix
 
   // DEPRECATE IN 4.x
   root$.findact = root$.find
@@ -700,166 +699,6 @@ function make_seneca(initial_options) {
   return root$
 }
 
-function api_add() {
-  var self = this
-  var private$ = self.private$
-  var opts = self.options()
-  var args = Common.parsePattern(self, arguments, 'action:f? actdef:o?')
-
-  var raw_pattern = args.pattern
-  var pattern = self.util.clean(raw_pattern)
-
-  var action =
-    args.action ||
-    function default_action(msg, done, meta) {
-      done.call(this, null, meta.dflt || null)
-    }
-
-  var actdef = self.util.deepextend(args.actdef) || {}
-
-  actdef.raw = Common.deepextend({}, raw_pattern)
-
-  // TODO: change root$ to root as plugin_name should not contain $
-  actdef.plugin_name = actdef.plugin_name || 'root$'
-  actdef.plugin_fullname =
-    actdef.plugin_fullname ||
-    actdef.plugin_name +
-      ((actdef.plugin_tag === '-'
-      ? void 0
-      : actdef.plugin_tag)
-        ? '$' + actdef.plugin_tag
-        : '')
-
-  actdef.plugin = {
-    name: actdef.plugin_name,
-    tag: actdef.plugin_tag,
-    fullname: actdef.plugin_fullname
-  }
-
-  var add_callpoint = private$.callpoint()
-  if (add_callpoint) {
-    actdef.callpoint = add_callpoint
-  }
-
-  actdef.sub = !!raw_pattern.sub$
-  actdef.client = !!raw_pattern.client$
-
-  // Deprecate a pattern by providing a string message using deprecate$ key.
-  actdef.deprecate = raw_pattern.deprecate$
-
-  actdef.fixed = Jsonic(raw_pattern.fixed$ || {})
-  actdef.custom = Jsonic(raw_pattern.custom$ || {})
-
-  var strict_add =
-    raw_pattern.strict$ && raw_pattern.strict$.add !== null
-      ? !!raw_pattern.strict$.add
-      : !!opts.strict.add
-
-  var addroute = true
-
-  if (opts.legacy.actdef) {
-    actdef.args = Common.deepextend(pattern)
-  }
-
-  var action_name =
-    null == action.name || '' === action.name ? 'action' : action.name
-  actdef.id = action_name + '_' + private$.next_action_id()
-  actdef.name = action_name
-  actdef.func = action
-
-  // Canonical string form of the action pattern.
-  actdef.pattern = Common.pattern(pattern)
-
-  // Canonical object form of the action pattern.
-  actdef.msgcanon = Jsonic(actdef.pattern)
-
-  var priordef = self.find(pattern)
-
-  if (priordef && strict_add && priordef.pattern !== actdef.pattern) {
-    // only exact action patterns are overridden
-    // use .wrap for pin-based patterns
-    priordef = null
-  }
-
-  if (priordef) {
-    // Clients needs special handling so that the catchall
-    // pattern does not submit all patterns into the handle
-    if (
-      'function' === typeof priordef.handle &&
-      ((priordef.client && actdef.client) ||
-        (!priordef.client && !actdef.client))
-    ) {
-      //priordef.handle(args.pattern, action)
-      priordef.handle(actdef)
-      addroute = false
-    } else {
-      actdef.priordef = priordef
-    }
-    actdef.priorpath = priordef.id + ';' + priordef.priorpath
-  } else {
-    actdef.priorpath = ''
-  }
-
-  if (action && actdef && 'function' === typeof action.handle) {
-    actdef.handle = action.handle
-  }
-
-  private$.stats.actmap[actdef.pattern] =
-    private$.stats.actmap[actdef.pattern] || make_action_stats(actdef)
-
-  var pattern_rules = {}
-  Common.each(pattern, function(v, k) {
-    if ('object' === typeof v) {
-      pattern_rules[k] = v && v.isJoi ? v : Common.deepextend({}, v)
-      delete pattern[k]
-    }
-  })
-  actdef.rules = pattern_rules
-
-  if (addroute) {
-    self.log.debug({
-      kind: 'add',
-      case: actdef.sub ? 'SUB' : 'ADD',
-      action: actdef.id,
-      pattern: actdef.pattern,
-      callpoint: private$.callpoint(true)
-    })
-
-    private$.actrouter.add(pattern, actdef)
-  }
-
-  private$.actdef[actdef.id] = actdef
-
-  deferred_modify_action(self, actdef)
-
-  return self
-}
-
-function make_action_stats(actdef) {
-  return {
-    id: actdef.id,
-    plugin: {
-      full: actdef.plugin_fullname,
-      name: actdef.plugin_name,
-      tag: actdef.plugin_tag
-    },
-    prior: actdef.priorpath,
-    calls: 0,
-    done: 0,
-    fails: 0,
-    time: {}
-  }
-}
-
-// NOTE: use setImmediate so that action annotations (such as .validate)
-// can be defined after call to seneca.add (for nicer plugin code order).
-function deferred_modify_action(seneca, actdef) {
-  setImmediate(function() {
-    Common.each(seneca.private$.action_modifiers, function(actmod) {
-      actmod.call(seneca, actdef)
-    })
-  })
-}
 
 // Private member variables of Seneca object.
 function make_private() {
@@ -899,6 +738,7 @@ function make_callpoint(active) {
   }
 }
 
+/*
 intern.make_act_delegate = function(instance, opts, meta, actdef) {
   meta = meta || {}
   actdef = actdef || {}
@@ -929,6 +769,7 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
   return delegate
 }
 
+/*
 // Perform an action. The properties of the first argument are matched against
 // known patterns, and the most specific one wins.
 function api_act() {
@@ -957,21 +798,6 @@ function api_act() {
   return self
 }
 
-function api_wrap(pin, actdef, wrapper) {
-  var pinthis = this
-
-  wrapper = 'function' === typeof actdef ? actdef : wrapper
-  actdef = 'function' === typeof actdef ? {} : actdef
-
-  pin = Array.isArray(pin) ? pin : [pin]
-  Common.each(pin, function(p) {
-    Common.each(pinthis.list(p), function(actpattern) {
-      pinthis.add(actpattern, wrapper, actdef)
-    })
-  })
-
-  return this
-}
 
 function do_act(instance, opts, origmsg, origreply) {
   var timedout = false
@@ -1038,69 +864,6 @@ function do_act(instance, opts, origmsg, origreply) {
   instance.private$.ge.add(execspec)
 }
 
-function api_fix(patargs, msgargs, custom) {
-  var self = this
-
-  patargs = Jsonic(patargs || {})
-
-  var fix_delegate = self.delegate(patargs)
-
-  fix_delegate.add = function fix_add() {
-    var args = Common.parsePattern(this, arguments, 'rest:.*', patargs)
-    var addargs = [args.pattern]
-      .concat({
-        fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
-        custom$: Object.assign({}, custom, args.pattern.custom$)
-      })
-      .concat(args.rest)
-
-    return self.add.apply(this, addargs)
-  }
-
-  return fix_delegate
-}
-
-function api_options(options, chain) {
-  var self = this
-  var private$ = self.private$
-
-  if (null == options) {
-    return private$.optioner.get()
-  }
-
-  // self.log may not exist yet as .options() used during construction
-  if (null != options && self.log) {
-    self.log.debug({
-      kind: 'options',
-      case: 'SET',
-      data: options
-    })
-  }
-
-  var out_opts = (private$.exports.options = private$.optioner.set(options))
-
-  // Update logging configuration
-  if (null != options && options.log) {
-    var logspec = private$.logging.build_log(self)
-    out_opts = private$.exports.options = private$.optioner.set({
-      log: logspec
-    })
-  }
-
-  // DEPRECATED
-  if (out_opts.legacy.logging) {
-    if (options && options.log && Array.isArray(options.log.map)) {
-      for (var i = 0; i < options.log.map.length; ++i) {
-        self.logroute(options.log.map[i])
-      }
-    }
-  }
-
-  // TODO: in 4.x, when given options, it should chain
-  // Allow chaining with seneca.options({...}, true)
-  // see https://github.com/rjrodger/seneca/issues/80
-  return chain ? self : out_opts
-}
 
 intern.execute_action = function(
   execspec,
@@ -1204,6 +967,7 @@ intern.handle_reply = function(meta, actctxt, actmsg, err, out, reply_meta) {
   }
 }
 
+
 intern.handle_inward_break = function(
   inward,
   act_instance,
@@ -1244,36 +1008,7 @@ intern.handle_inward_break = function(
   }
 }
 
-intern.make_actmsg = function(origmsg) {
-  var actmsg = Object.assign({}, origmsg)
 
-  if (actmsg.id$) {
-    delete actmsg.id$
-  }
-
-  if (actmsg.caller$) {
-    delete actmsg.caller$
-  }
-
-  if (actmsg.meta$) {
-    delete actmsg.meta$
-  }
-
-  if (actmsg.prior$) {
-    delete actmsg.prior$
-  }
-
-  if (actmsg.parents$) {
-    delete actmsg.parents$
-  }
-
-  // backwards compatibility for Seneca 3.x transports
-  if (origmsg.transport$) {
-    actmsg.transport$ = origmsg.transport$
-  }
-
-  return actmsg
-}
 
 intern.resolve_msg_id_tx = function(act_instance, origmsg) {
   var id_tx = (origmsg.id$ || origmsg.actid$ || act_instance.idgen()).split('/')
@@ -1354,27 +1089,7 @@ intern.Meta = function(instance, opts, origmsg, origreply) {
   this.empty = null
 }
 
-intern.process_outward = function(actctxt, data) {
-  var outward = actctxt.seneca.private$.outward.process(actctxt, data)
 
-  if (outward) {
-    if ('result' === outward.kind) {
-      data.res = outward.result
-    }
-
-    // assume error
-    else {
-      data.res =
-        outward.error ||
-        error(
-          outward.code || 'invalid-process-outward-code',
-          outward.info || {}
-        )
-      data.meta = data.meta || {}
-      data.meta.error = true
-    }
-  }
-}
 
 intern.callback_error = function(instance, thrown_obj, ctxt, data) {
   var duration = ctxt.duration
@@ -1426,3 +1141,4 @@ intern.callback_error = function(instance, thrown_obj, ctxt, data) {
     opts.errhandler.call(instance, err, err.meta$)
   }
 }
+*/

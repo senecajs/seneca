@@ -1335,7 +1335,7 @@ describe('seneca', function() {
       expect(end - start).below(1500 * tmx)
 
       var mem = process.memoryUsage()
-      expect(mem.rss).below(200000000)
+      expect(mem.rss).below(222222222)
 
       done()
     }
