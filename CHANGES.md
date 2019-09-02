@@ -1,3 +1,10 @@
+## 3.14.0 2019-09-02
+
+* New "flat" logger that will become default logger in 4.x. To use: `Seneca({logger:'flat'})`
+* Interactions between .test(), .quiet(), and `test` and `quiet` settings are now consistent.
+* The command line argument `--seneca.test` now correctly sets the test log level to `warn`. To print all logs, use `--seneca.test=all`
+
+
 ## 3.13.3 2019-08-14
 
 * Resolve disagreement between seneca-doc and seneca on valid plugin names - $ is not allowed as it is a separator between plugin name and tag. 
@@ -5,12 +12,12 @@
 
 ## 3.13.2 2019-08-08
 
-* Include plugin returned meta data in the stored plugin definition (to be used by seneca-doc)
+* Include plugin returned meta data in the stored plugin definition (to be used by seneca-doc).
 
 
 ## 3.13.1 2019-08-06
 
-* Minor fix to handle null options.plugins
+* Minor fix to handle null options.plugins.
 
 
 ## 3.13.0 2019-07-30
