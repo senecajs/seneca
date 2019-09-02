@@ -32,7 +32,6 @@ const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
-
 // Shortcuts.
 const errlog = Common.make_standard_err_log_entry
 const actlog = Common.make_standard_act_log_entry
@@ -68,7 +67,7 @@ const option_defaults = {
 
   // Custom logger function, optional - see lib/logging.js
   logger: null,
-  
+
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
@@ -405,9 +404,7 @@ function make_seneca(initial_options) {
 
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
-  event_names.forEach(function(
-    event_name
-  ) {
+  event_names.forEach(function(event_name) {
     if ('function' === typeof start_opts.events[event_name]) {
       root$.on(event_name, start_opts.events[event_name])
     }
@@ -421,10 +418,14 @@ function make_seneca(initial_options) {
   private$.next_action_id = Common.autoincr()
 
   // These need to come from options as required during construction.
-  start_opts.internal.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
-  start_opts.internal.subrouter = start_opts.internal.subrouter || Patrun({ gex: true })
+  start_opts.internal.actrouter =
+    start_opts.internal.actrouter || Patrun({ gex: true })
+  start_opts.internal.subrouter =
+    start_opts.internal.subrouter || Patrun({ gex: true })
 
-  var callpoint = private$.callpoint = make_callpoint(start_opts.debug.callpoint)
+  var callpoint = (private$.callpoint = make_callpoint(
+    start_opts.debug.callpoint
+  ))
 
   // Define public member variables.
   root$.start_time = Date.now()
@@ -472,7 +473,9 @@ function make_seneca(initial_options) {
   root$.inward = API.inward // Add a modifier function for messages inward
   root$.outward = API.outward // Add a modifier function for responses outward
   root$.error = API.error // Set global error handler, or generate Seneca Error
-  root$.fail = start_opts.legacy.fail ? Legacy.make_legacy_fail(start_opts) : API.fail // Throw a Seneca error
+  root$.fail = start_opts.legacy.fail
+    ? Legacy.make_legacy_fail(start_opts)
+    : API.fail // Throw a Seneca error
   root$.explain = API.explain // Toggle top level explain capture
   root$.decorate = API.decorate // Decorate seneca object with functions
   root$.seneca = API.seneca
@@ -506,7 +509,8 @@ function make_seneca(initial_options) {
   // Identifier generator.
   root$.idgen = Nid({ length: start_opts.idlen })
   start_opts.tag = start_opts.tag || option_defaults.tag
-  start_opts.tag = start_opts.tag === 'undefined' ? option_defaults.tag : start_opts.tag
+  start_opts.tag =
+    start_opts.tag === 'undefined' ? option_defaults.tag : start_opts.tag
 
   // Create a unique identifer for this instance.
   root$.id =
@@ -544,7 +548,7 @@ function make_seneca(initial_options) {
 
   private$.exports = { options: start_opts }
   private$.decorations = {}
-  
+
   //root$.make_log = make_log
   //root$.log = make_log(root$)//, make_default_log_modifier(root$))
 
@@ -635,18 +639,19 @@ function make_seneca(initial_options) {
     .add(Outward.announce)
     .add(Outward.act_error)
 
-
   // Configure logging
 
   // Mark logger as being externally defined from options
-  if(start_opts.logger && 'object' === typeof(start_opts.logger)) {
+  if (start_opts.logger && 'object' === typeof start_opts.logger) {
     start_opts.logger.from_options$ = true
   }
 
   // Load logger and update log options
   var logspec = private$.logging.build_log(root$)
-  start_opts = private$.exports.options = private$.optioner.set({log:logspec})
-  
+  start_opts = private$.exports.options = private$.optioner.set({
+    log: logspec
+  })
+
   if (start_opts.test) {
     root$.test('string' === typeof start_opts.test ? start_opts.test : null)
   }
@@ -695,7 +700,6 @@ function make_seneca(initial_options) {
   return root$
 }
 
-
 function api_add() {
   var self = this
   var private$ = self.private$
@@ -706,10 +710,10 @@ function api_add() {
   var pattern = self.util.clean(raw_pattern)
 
   var action =
-      args.action ||
-      function default_action(msg, done, meta) {
-        done.call(this, null, meta.dflt || null)
-      }
+    args.action ||
+    function default_action(msg, done, meta) {
+      done.call(this, null, meta.dflt || null)
+    }
 
   var actdef = self.util.deepextend(args.actdef) || {}
 
@@ -720,11 +724,11 @@ function api_add() {
   actdef.plugin_fullname =
     actdef.plugin_fullname ||
     actdef.plugin_name +
-    ((actdef.plugin_tag === '-'
+      ((actdef.plugin_tag === '-'
       ? void 0
       : actdef.plugin_tag)
-     ? '$' + actdef.plugin_tag
-     : '')
+        ? '$' + actdef.plugin_tag
+        : '')
 
   actdef.plugin = {
     name: actdef.plugin_name,
@@ -747,7 +751,7 @@ function api_add() {
   actdef.custom = Jsonic(raw_pattern.custom$ || {})
 
   var strict_add =
-      raw_pattern.strict$ && raw_pattern.strict$.add !== null
+    raw_pattern.strict$ && raw_pattern.strict$.add !== null
       ? !!raw_pattern.strict$.add
       : !!opts.strict.add
 
@@ -758,7 +762,7 @@ function api_add() {
   }
 
   var action_name =
-      null == action.name || '' === action.name ? 'action' : action.name
+    null == action.name || '' === action.name ? 'action' : action.name
   actdef.id = action_name + '_' + private$.next_action_id()
   actdef.name = action_name
   actdef.func = action
@@ -782,8 +786,8 @@ function api_add() {
     // pattern does not submit all patterns into the handle
     if (
       'function' === typeof priordef.handle &&
-        ((priordef.client && actdef.client) ||
-         (!priordef.client && !actdef.client))
+      ((priordef.client && actdef.client) ||
+        (!priordef.client && !actdef.client))
     ) {
       //priordef.handle(args.pattern, action)
       priordef.handle(actdef)
@@ -831,7 +835,6 @@ function api_add() {
   return self
 }
 
-
 function make_action_stats(actdef) {
   return {
     id: actdef.id,
@@ -857,8 +860,6 @@ function deferred_modify_action(seneca, actdef) {
     })
   })
 }
-
-
 
 // Private member variables of Seneca object.
 function make_private() {
@@ -886,19 +887,18 @@ function make_private() {
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint(active) {
   return function callpoint(override) {
-    if(active || override) {
+    if (active || override) {
       return error.callpoint(new Error(), [
         '/seneca/seneca.js',
         '/seneca/lib/',
         '/lodash.js'
       ])
-    }
-    else {
+    } else {
       return void 0
     }
   }
 }
-  
+
 intern.make_act_delegate = function(instance, opts, meta, actdef) {
   meta = meta || {}
   actdef = actdef || {}
@@ -925,10 +925,9 @@ intern.make_act_delegate = function(instance, opts, meta, actdef) {
   if (meta.tx) {
     delegate.fixedargs.tx$ = meta.tx
   }
-  
+
   return delegate
 }
-
 
 // Perform an action. The properties of the first argument are matched against
 // known patterns, and the most specific one wins.
@@ -948,10 +947,10 @@ function api_act() {
     msg.caller$ =
       '\n    Action call arguments and location: ' +
       (new Error(Util.inspect(msg).replace(/\n/g, '')).stack + '\n')
-      .replace(/Error: /, '')
-      .replace(/.*\/gate-executor\.js:.*\n/g, '')
-      .replace(/.*\/seneca\.js:.*\n/g, '')
-      .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
+        .replace(/Error: /, '')
+        .replace(/.*\/gate-executor\.js:.*\n/g, '')
+        .replace(/.*\/seneca\.js:.*\n/g, '')
+        .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
   }
 
   do_act(self, opts, msg, reply)
@@ -973,7 +972,6 @@ function api_wrap(pin, actdef, wrapper) {
 
   return this
 }
-
 
 function do_act(instance, opts, origmsg, origreply) {
   var timedout = false
@@ -1040,9 +1038,6 @@ function do_act(instance, opts, origmsg, origreply) {
   instance.private$.ge.add(execspec)
 }
 
-
-
-
 function api_fix(patargs, msgargs, custom) {
   var self = this
 
@@ -1053,11 +1048,11 @@ function api_fix(patargs, msgargs, custom) {
   fix_delegate.add = function fix_add() {
     var args = Common.parsePattern(this, arguments, 'rest:.*', patargs)
     var addargs = [args.pattern]
-        .concat({
-          fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
-          custom$: Object.assign({}, custom, args.pattern.custom$)
-        })
-        .concat(args.rest)
+      .concat({
+        fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
+        custom$: Object.assign({}, custom, args.pattern.custom$)
+      })
+      .concat(args.rest)
 
     return self.add.apply(this, addargs)
   }
@@ -1068,11 +1063,11 @@ function api_fix(patargs, msgargs, custom) {
 function api_options(options, chain) {
   var self = this
   var private$ = self.private$
-  
-  if(null == options) {
+
+  if (null == options) {
     return private$.optioner.get()
   }
-  
+
   // self.log may not exist yet as .options() used during construction
   if (null != options && self.log) {
     self.log.debug({
@@ -1082,12 +1077,14 @@ function api_options(options, chain) {
     })
   }
 
-  var out_opts = private$.exports.options = private$.optioner.set(options)
-  
+  var out_opts = (private$.exports.options = private$.optioner.set(options))
+
   // Update logging configuration
-  if(null != options && options.log) {
+  if (null != options && options.log) {
     var logspec = private$.logging.build_log(self)
-    out_opts = private$.exports.options = private$.optioner.set({log:logspec})
+    out_opts = private$.exports.options = private$.optioner.set({
+      log: logspec
+    })
   }
 
   // DEPRECATED
@@ -1104,8 +1101,6 @@ function api_options(options, chain) {
   // see https://github.com/rjrodger/seneca/issues/80
   return chain ? self : out_opts
 }
-
-
 
 intern.execute_action = function(
   execspec,

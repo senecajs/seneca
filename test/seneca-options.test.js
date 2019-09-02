@@ -88,13 +88,12 @@ describe('seneca --seneca.log arguments tests: ', function() {
     try {
       Seneca(opts)
       Code.fail()
-    }
-    catch(e) {
+    } catch (e) {
       console.log(e)
-      expect(e.code).equal('bad-logspec-string')
+      expect(e.code).equal('bad_logspec_string')
       fin()
     }
-    
+
     done()
   })
 

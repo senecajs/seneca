@@ -14,7 +14,6 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 var Logging = require('../lib/logging')
 
-
 describe('logging', function() {
   it('happy', function(fin) {
     var capture = make_log_capture()
@@ -38,7 +37,7 @@ describe('logging', function() {
   })
 
   it('happy-ng', function(fin) {
-    var capture = make_log_capture({legacy:false})
+    var capture = make_log_capture({ legacy: false })
 
     Seneca({ log: 'all', internal: { logger: capture } })
       .error(fin)
@@ -59,57 +58,60 @@ describe('logging', function() {
   })
 
   it('level-text-values', function(fin) {
-    var capture = make_log_capture({legacy:false})
+    var capture = make_log_capture({ legacy: false })
 
     var options = Seneca()
-        .test(fin)
-        .options()
+      .test(fin)
+      .options()
 
     // console.log('OPTS', options)
-    
+
     // ensure text-level mapping is reversible
-    Object.keys(options.log.text_level).forEach(text=>{
+    Object.keys(options.log.text_level).forEach(text => {
       expect(options.log.level_text[options.log.text_level[text]]).equal(text)
     })
-    
+
     fin()
   })
 
-
   it('build_log_spec', function(fin) {
-    var msi = (opts)=>{return {options:()=>{return opts}}}
+    var msi = opts => {
+      return {
+        options: () => {
+          return opts
+        }
+      }
+    }
     var out
 
     var logging = Logging()
-    
-    out = logging.build_log_spec(msi({log:'test'}))
-    expect(out).contains({level:'warn', live_level:400})
 
-    out = logging.build_log_spec(msi({log:'quiet'}))
-    expect(out).contains({level:'none', live_level:999})
+    out = logging.build_log_spec(msi({ log: 'test' }))
+    expect(out).contains({ level: 'warn', live_level: 400 })
 
-    out = logging.build_log_spec(msi({log:'any'}))
-    expect(out).contains({level:'all', live_level:100})
+    out = logging.build_log_spec(msi({ log: 'quiet' }))
+    expect(out).contains({ level: 'none', live_level: 999 })
 
-    out = logging.build_log_spec(msi({log:'debug'}))
-    expect(out).contains({level:'debug', live_level:200})
+    out = logging.build_log_spec(msi({ log: 'any' }))
+    expect(out).contains({ level: 'all', live_level: 100 })
 
-    out = logging.build_log_spec(msi({log:'fatal'}))
-    expect(out).contains({level:'fatal', live_level:600})
+    out = logging.build_log_spec(msi({ log: 'debug' }))
+    expect(out).contains({ level: 'debug', live_level: 200 })
 
+    out = logging.build_log_spec(msi({ log: 'fatal' }))
+    expect(out).contains({ level: 'fatal', live_level: 600 })
 
-    out = logging.build_log_spec(msi({log:'300'}))
-    expect(out).contains({level:'info', live_level:300})
+    out = logging.build_log_spec(msi({ log: '300' }))
+    expect(out).contains({ level: 'info', live_level: 300 })
 
-    out = logging.build_log_spec(msi({log:300}))
-    expect(out).contains({level:'info', live_level:300})
+    out = logging.build_log_spec(msi({ log: 300 }))
+    expect(out).contains({ level: 'info', live_level: 300 })
 
-    out = logging.build_log_spec(msi({log:301}))
-    expect(out).contains({level:'301', live_level:301})
+    out = logging.build_log_spec(msi({ log: 301 }))
+    expect(out).contains({ level: '301', live_level: 301 })
 
     fin()
   })
-
 
   it('event', function(fin) {
     var loga = []
@@ -144,7 +146,6 @@ describe('logging', function() {
       })
   })
 
-
   it('quiet', function(fin) {
     Seneca()
       .quiet()
@@ -152,7 +153,16 @@ describe('logging', function() {
       .ready(fin)
   })
 
-  
+  it('bad_logspec', function(fin) {
+    try {
+      Seneca({ log: true })
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equal('bad_logspec')
+      fin()
+    }
+  })
+
   // DEPRECATED
   it('basic', function(fin) {
     var capture = make_log_capture()
@@ -164,7 +174,7 @@ describe('logging', function() {
       })
       .act('a:1', function() {
         expect(this.seneca).to.exist()
-        this.log({ seen: 'a:1', level:'info' })
+        this.log({ seen: 'a:1', level: 'info' })
       })
       .ready(function() {
         var log = capture.log.filter(function(entry) {
@@ -175,10 +185,138 @@ describe('logging', function() {
       })
   })
 
+  it('logger-output', function(fin) {
+    var log
+
+    var stdout_write = process.stdout.write
+    // Note: comment out to see logs to debug test
+    process.stdout.write = function(data) {
+      log.push(data.toString())
+    }
+
+    function restore(err) {
+      console.log('RESTORE', err)
+      if (err && err.message && !err.message.includes('a1')) {
+        console.log('FLAT LOGGER ERROR', err, log)
+        process.stdout.write = stdout_write
+        fin(err)
+      } else if (true === err) {
+        process.stdout.write = stdout_write
+      }
+    }
+
+    // NOTE: call func directly to debug test
+    // NOTE: tests: [flat, test] (hardcoded in `error`)
+    basic('flat')
+
+    function basic(logger) {
+      log = []
+      Seneca({
+        log: { level: 'debug', logger: logger },
+        legacy: { transport: false }
+      })
+        .error(restore)
+        .add('a:1', a1)
+        .act('a:1')
+        .use(function foo() {
+          this.add('b:1', function b1(m, r) {
+            r({ x: 1 })
+          })
+        })
+        .act('b:1')
+        .ready(function() {
+          expect(log.length).above(20)
+
+          entry(logger)
+        })
+    }
+
+    function entry(logger) {
+      log = []
+      Seneca({
+        log: { level: 'debug', logger: logger },
+        legacy: { transport: false }
+      })
+        .error(restore)
+        .add('a:1', function a1(m, r) {
+          this.log({
+            maxlen$: 111,
+            depth$: 4,
+            a: { b: { c: { d: { e: { f: 1 } } } } }
+          })
+          this.log.debug(
+            'foo',
+            ['bar'],
+            { zed: 1 },
+            true,
+            101,
+            NaN,
+            /re/,
+            new Date(),
+            null,
+            void 0
+          )
+          this.log.info('eek!', m, r)
+          this.log({
+            isot: 1,
+            when: 2,
+            level_name: 3,
+            seneca_id: 4,
+            seneca_did: 5,
+            plugin_name: 6,
+            pugin_tag: 7,
+            kind: 8,
+            actid: 9,
+            pattern: 10,
+            action: 11,
+            idpath: 12
+          })
+          r({ x: 1 })
+        })
+        .act('a:1')
+        .use(function foo$t0() {
+          this.add('b:1', function b1(m, r) {
+            r({ y: 1 })
+          })
+        })
+        .act('b:1')
+        .ready(function() {
+          expect(log.length).above(20)
+
+          error(logger)
+        })
+    }
+
+    // TODO: why are there spurious lines to actual stdout?
+    function error(logger) {
+      log = []
+      Seneca({
+        log: { level: 'debug', logger: logger },
+        legacy: { transport: false }
+      })
+        .error(restore)
+        .add('a:1', function(m, r) {
+          r(new Error('a1'))
+        })
+        .act('a:1')
+        .ready(function() {
+          expect(log.length).above(10)
+
+          if ('flat' === logger) {
+            basic('test')
+          } else {
+            restore(true)
+            fin()
+          }
+        })
+    }
+  })
 
   it('shortcuts', function(fin) {
     var log
+
     var stdout_write = process.stdout.write
+    // Note: comment out to see logs to debug test
     process.stdout.write = function(data) {
       log.push(data.toString())
     }
@@ -186,13 +324,14 @@ describe('logging', function() {
     function restore(err) {
       process.stdout.write = stdout_write
 
-      if(err) {
-        console.log('ERROR', log)
+      if (err) {
+        console.log('SHORTCUTS ERROR', log)
       }
-      
+
       fin(err)
     }
 
+    // NOTE: call shortcut directly to debug test
     nothing()
 
     function nothing() {
@@ -281,6 +420,47 @@ describe('logging', function() {
           // remove legacy-transport entry in 4.x
           expect(log.length).to.equal(2)
 
+          json()
+        })
+    }
+
+    // DEPRECATED DEFAULT = 4.x will change to 'flat'
+    function json() {
+      log = []
+      Seneca()
+        // Seneca( {log:'json'}) - change to this in 4.x
+        .error(restore)
+        .add('a:1', a1)
+        .act('a:1')
+        .ready(function() {
+          expect(log.length).to.equal(2)
+
+          flat()
+        })
+    }
+
+    function flat() {
+      log = []
+      Seneca({ log: 'flat' }) // should not be needed in 4.x
+        .error(restore)
+        .add('a:1', a1)
+        .act('a:1')
+        .ready(function() {
+          expect(log.length).to.equal(2)
+
+          logger_test()
+        })
+    }
+
+    function logger_test() {
+      log = []
+      Seneca({ logger: 'test' })
+        .error(restore)
+        .add('a:1', a1)
+        .act('a:1')
+        .ready(function() {
+          expect(log.length).to.equal(2)
+
           do_test()
         })
     }
@@ -298,12 +478,11 @@ describe('logging', function() {
     }
   })
 
-
   it('test-mode-basic', function(fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
-    Seneca({logger:capture})
+    Seneca({ logger: capture })
       .test()
       .add('a:1', function a1(msg, reply) {
         // test mode log level is warn
@@ -313,17 +492,16 @@ describe('logging', function() {
       .act('a:1')
       .ready(function() {
         // only warn should appear
-        expect(capture.log.map(x=>x.data[0])).equal(['a1'])
+        expect(capture.log.map(x => x.data[0])).equal(['a1'])
         fin()
       })
   })
-
 
   it('test-mode-option', function(fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
-    Seneca({logger:capture, test:true})
+    Seneca({ logger: capture, test: true })
       .add('a:2', function a2(msg, reply) {
         // test mode log level is warn
         this.log.warn('a2')
@@ -332,50 +510,299 @@ describe('logging', function() {
       .act('a:2')
       .ready(function() {
         // only warn should appear
-        expect(capture.log.map(x=>x.data[0])).equal(['a2'])
+        expect(capture.log.map(x => x.data[0])).equal(['a2'])
         fin()
       })
   })
 
-
-
-
-
-
-  /* FIX
   it('test-mode-argv', function(fin) {
     var capture = make_log_capture()
-    Seneca({logger:capture, debug:{argv:['--seneca.test']}})
+    Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.test'] } })
       .add('a:1', function a1(msg, reply) {
         this.log.warn('a1')
         reply()
       })
       .act('a:1')
       .ready(function() {
-        console.log(capture.log)
-        expect(capture.log.map(x=>x.data[0])).equal(['a1'])
+        expect(capture.log.map(x => x.data[0])).equal(['a1'])
         fin()
       })
   })
-  */
-  
-  /*
+
+  // FIX: this should work
+  it('test-mode-argv-opts', function(fin) {
+    var capture = make_log_capture()
+    Seneca({
+      logger: capture,
+      debug: { argv: ['', '', '--seneca.options.test'] }
+    })
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        //console.log(this.options().log)
+        //console.log(capture.log)
+        expect(capture.log.map(x => x.data[0])).equal(['a1'])
+        fin()
+      })
+  })
+
   it('test-mode-env', function(fin) {
     var capture = make_log_capture()
-    Seneca({logger:capture, debug:{env:{SENECA_TEST:'true'}}})
+    Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'test' } } })
       .add('a:1', function a1(msg, reply) {
         this.log.warn('a1')
         reply()
       })
       .act('a:1')
       .ready(function() {
-        console.log(capture.log)
-        expect(capture.log.map(x=>x.data[0])).equal(['a1'])
+        expect(capture.log.map(x => x.data[0])).equal(['a1'])
         fin()
       })
   })
-  */
-  
+
+  it('quiet-mode-basic', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture })
+      .quiet()
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-mode-option', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture, quiet: true })
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-mode-argv', function(fin) {
+    var capture = make_log_capture()
+    Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.quiet'] } })
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-mode-argv-opts', function(fin) {
+    var capture = make_log_capture()
+    Seneca({
+      logger: capture,
+      debug: { argv: ['', '', '--seneca.options.quiet'] }
+    })
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-mode-env', function(fin) {
+    var capture = make_log_capture()
+    Seneca({ logger: capture, debug: { env: { SENECA_QUIET: 'true' } } })
+      .add('a:1', function a1(msg, reply) {
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('test-quiet-mode-basic', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture })
+      .test()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .quiet()
+      .act('a:1')
+      .ready(function() {
+        // NO LOGS - quiet called synchronously!
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-test-mode-basic', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture })
+      .quiet()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1')
+        reply()
+      })
+      .act('a:1')
+      .test()
+      .act('a:1')
+      .ready(function() {
+        // BOTH LOGGED - test called synchronously!
+        expect(capture.log.length).equal(2)
+        fin()
+      })
+  })
+
+  it('test-ready-quiet-mode-basic', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture })
+      .test()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        this.quiet().ready(function() {
+          this.act('a:1,x:2')
+
+          expect(capture.log.length).equal(1)
+          expect(capture.log[0].data).equal(['a1x1'])
+          fin()
+        })
+      })
+  })
+
+  it('quiet-ready-test-mode-basic', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture })
+      .quiet()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        this.test()
+
+        this.act('a:1,x:2').ready(function() {
+          expect(capture.log.length).equal(1)
+          expect(capture.log[0].data).equal(['a1x2'])
+
+          fin()
+        })
+      })
+  })
+
+  it('quiet-argv-override', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.test'] } })
+      .quiet()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        expect(capture.log.length).equal(1)
+        expect(capture.log[0].data).equal(['a1x1'])
+        fin()
+      })
+  })
+
+  it('test-argv-override', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.quiet'] } })
+      .test()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
+
+  it('quiet-env-override', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'true' } } })
+      .quiet()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        expect(capture.log.length).equal(1)
+        expect(capture.log[0].data).equal(['a1x1'])
+        fin()
+      })
+  })
+
+  it('test-env-override', function(fin) {
+    var capture = make_log_capture()
+
+    // Note: capture logger is marked from_options$ so overrides test_logger
+    Seneca({ logger: capture, debug: { env: { SENECA_QUIET: 'true' } } })
+      .test()
+      .add('a:1', function a1(msg, reply) {
+        // test mode log level is warn
+        this.log.warn('a1x' + msg.x)
+        reply()
+      })
+      .act('a:1,x:1')
+      .ready(function() {
+        expect(capture.log.length).equal(0)
+        fin()
+      })
+  })
 })
 
 function a1(msg, reply) {
@@ -390,30 +817,29 @@ function make_log_capture(flags) {
   return capture
 }
 
-
 function Capture(flags) {
   var self = this
   self.id = Math.random()
   self.log = []
-  
+
   self.preload = function() {
     var seneca = this
     var so = seneca.options()
     self.spec = so.log
-    
+
     var legacy_logger = function(seneca, entry) {
       self.log.push(entry)
     }
-    
+
     var nextgen_logger = function(entry) {
       self.log.push(entry)
     }
-    
+
     var capture_logger = false === flags.legacy ? nextgen_logger : legacy_logger
     //console.log(capture_logger)
 
     capture_logger.id = self.id
-    
+
     return {
       extend: {
         logger: capture_logger
