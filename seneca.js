@@ -350,7 +350,7 @@ module.exports = function init(seneca_options, more_options) {
   }
 
   seneca.ready(function() {
-    this.log.info({ kind: 'notice', data: 'hello '+this.id })
+    this.log.info({ kind: 'notice', data: 'hello ' + this.id })
   })
 
   return seneca
@@ -489,8 +489,6 @@ function make_seneca(initial_options) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
-
-  
   // Non-API methods.
   root$.register = Plugins.register(callpoint)
 
@@ -698,7 +696,6 @@ function make_seneca(initial_options) {
 
   return root$
 }
-
 
 // Private member variables of Seneca object.
 function make_private() {

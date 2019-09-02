@@ -1,7 +1,6 @@
 /* Copyright (c) 2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-
 const Util = require('util')
 
 const Ordu = require('ordu')
@@ -20,7 +19,6 @@ const Seneca = require('..')
 const Act = require('../lib/act.js')
 
 const intern = Act.intern
-
 
 describe('act', function() {
   it('make_actmsg', function(fin) {

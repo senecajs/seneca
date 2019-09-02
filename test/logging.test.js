@@ -478,25 +478,24 @@ describe('logging', function() {
     }
   })
 
-
   function a1x(msg, reply) {
     // test mode log level is warn
     this.log.warn('a1x' + msg.x)
     reply()
   }
-  
+
   function a1w(msg, reply) {
     this.log.warn('a1')
     reply()
   }
-  
+
   it('test-mode-basic', function(fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
     Seneca({ logger: capture })
       .test()
-      .add('a:1',   function a1(msg, reply) {
+      .add('a:1', function a1(msg, reply) {
         this.log.warn('a1')
         reply()
       })
