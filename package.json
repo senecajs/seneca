@@ -79,12 +79,12 @@
     "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run prettier && npm test && npm run repo-tag && npm publish && npm dist-tag add seneca@$REPO_VERSION next && npm dist-tag add seneca@$REPO_VERSION plugin"
   },
   "dependencies": {
-    "@hapi/joi": "^15.1.0",
+    "@hapi/joi": "^15.1.1",
+    "@hapi/wreck": "^15.0.2",
     "eraro": "^1.1.0",
     "fast-safe-stringify": "^2.0.6",
     "gate-executor": "^2.0.1",
     "gex": "^0.3.0",
-    "json-stringify-safe": "^5.0.1",
     "jsonic": "^0.3.1",
     "lodash": "^4.17.15",
     "minimist": "^1.2.0",
@@ -93,16 +93,15 @@
     "optioner": "^4.0.0",
     "ordu": "^0.1.1",
     "patrun": "^1.0.0",
-    "qs": "^6.7.0",
+    "qs": "^6.8.0",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^3.0.0",
-    "use-plugin": "^5.1.0",
-    "wreck": "^12"
+    "use-plugin": "^5.1.0"
   },
   "devDependencies": {
     "@hapi/code": "^6.0.0",
-    "@hapi/hoek": "^8.2.0",
-    "@hapi/lab": "^20.0.0",
+    "@hapi/hoek": "^8.2.2",
+    "@hapi/lab": "^20.2.2",
     "@seneca/repl": "^1.4.0",
     "@seneca/test-plugin": "0.0.1",
     "async": "^3.1.0",
