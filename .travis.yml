@@ -15,7 +15,7 @@ env:
     - TEST_SUITE=senecajs/seneca-joi
 
 install:
-  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
+  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm ci; fi
 
 
 
@@ -35,7 +35,7 @@ before_script:
       cd $TEST_SUITE_FOLDER;
       npm i;
       npm uninstall seneca;
-      npm install $SENECA_INSTALL;
+      npm ci $SENECA_INSTALL;
     fi
 
 script:
