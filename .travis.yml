@@ -35,7 +35,9 @@ before_script:
       cd $TEST_SUITE_FOLDER;
       npm i;
       npm uninstall seneca;
-      npm ci $SENECA_INSTALL;
+    fi
+  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
+      npm ci "$SENECA_INSTALL";
     fi
 
 script:
