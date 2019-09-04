@@ -759,32 +759,41 @@ describe('logging', function() {
 
   it('intern.build_act_entry', function(fin) {
     var entry0 = {}
-    var actA = { meta: {id:1, pattern:'p:1', tx:3,mi:4}, def:{id:2}, }
+    var actA = { meta: { id: 1, pattern: 'p:1', tx: 3, mi: 4 }, def: { id: 2 } }
 
     Logging.intern.build_act_entry(actA, entry0)
     //console.log(entry0)
 
-    expect(entry0)
-      .equal({ kind: 'act', actid: 1, pattern: 'p:1', action: 2, idpath: '3.4' })
-
+    expect(entry0).equal({
+      kind: 'act',
+      actid: 1,
+      pattern: 'p:1',
+      action: 2,
+      idpath: '3.4'
+    })
 
     var entry1 = {}
-    actA.meta.parents=[null,[],[null,null],[null,'foo'],[null,'bar/zed']]
+    actA.meta.parents = [
+      null,
+      [],
+      [null, null],
+      [null, 'foo'],
+      [null, 'bar/zed']
+    ]
     Logging.intern.build_act_entry(actA, entry1)
     //console.log(entry1)
 
-    expect(entry1)
-      .equal({ kind: 'act',
-               actid: 1,
-               pattern: 'p:1',
-               action: 2,
-               idpath: '3.-.-.-.foo.bar.4' })
-    
+    expect(entry1).equal({
+      kind: 'act',
+      actid: 1,
+      pattern: 'p:1',
+      action: 2,
+      idpath: '3.-.-.-.foo.bar.4'
+    })
+
     fin()
   })
 
-
-  
   // TODO: test --seneca.log arg and env - should override code
 })
 
