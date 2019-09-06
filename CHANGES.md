@@ -1,3 +1,8 @@
+## 3.15.0 2019-09-07
+
+* Update dependencies to @hapi
+
+
 ## 3.14.0 2019-09-02
 
 * New "flat" logger that will become default logger in 4.x. To use: `Seneca({logger:'flat'})`
