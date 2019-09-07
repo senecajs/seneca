@@ -110,9 +110,9 @@
     "handlebars": "^4.2.0",
     "lolex": "^4.2.0",
     "prettier": "^1.18.2",
-    "seneca-entity": "^5.0.0",
+    "seneca-entity": "^5.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^4.1.0",
-    "seneca-promisify": "^1.0.0"
+    "seneca-promisify": "^1.0.1"
   }
 }
