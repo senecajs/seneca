@@ -471,4 +471,31 @@ describe('message', function() {
       })
     })
   })
+
+
+  it('partial-patterns', test_opts, function(fin) {
+    var tmp = {a1:[],b2c3:[]}
+    Seneca()
+      .test(fin)
+      .add('a:1', function a1(msg, reply) {
+        tmp.a1.push(msg.x)
+        reply()
+      })
+      .add('a:1,b:2,c:3', function b2c3(msg, reply) {
+        tmp.b2c3.push(msg.x)
+        reply()
+      })
+      .act('a:1,x:100')
+
+    // Matches a:1
+      .act('a:1,b:2,x:200')
+
+      .act('a:1,b:2,c:3,x:300')
+      .ready(function(){
+        //console.log(tmp)
+        expect(tmp).equal({ a1: [ 100, 200 ], b2c3: [ 300 ] })
+        fin()
+      })
+  })
+
 })
