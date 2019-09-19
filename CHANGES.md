@@ -1,3 +1,8 @@
+## 3.15.2 2019-09-19
+
+* Update patrun to 2.x - fixes partial pattern match issue.
+
+
 ## 3.15.0 2019-09-07
 
 * Update dependencies to @hapi

@@ -472,9 +472,8 @@ describe('message', function() {
     })
   })
 
-
   it('partial-patterns', test_opts, function(fin) {
-    var tmp = {a1:[],b2c3:[]}
+    var tmp = { a1: [], b2c3: [] }
     Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply) {
@@ -487,15 +486,14 @@ describe('message', function() {
       })
       .act('a:1,x:100')
 
-    // Matches a:1
+      // Matches a:1
       .act('a:1,b:2,x:200')
 
       .act('a:1,b:2,c:3,x:300')
-      .ready(function(){
+      .ready(function() {
         //console.log(tmp)
-        expect(tmp).equal({ a1: [ 100, 200 ], b2c3: [ 300 ] })
+        expect(tmp).equal({ a1: [100, 200], b2c3: [300] })
         fin()
       })
   })
-
 })
