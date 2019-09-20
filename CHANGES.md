@@ -1,3 +1,8 @@
+## 3.15.3 2019-09-19
+
+* Support latest version of @hapi/joi 16.1.2
+
+
 ## 3.15.2 2019-09-19
 
 * Update patrun to 2.x - fixes partial pattern match issue.
