@@ -1,6 +1,11 @@
+## 3.16.0 2019-09-19
+
+* Reverting to @hapi/joi 15.1.1 and standardizing on that for now.
+
+
 ## 3.15.3 2019-09-19
 
-* Support latest version of @hapi/joi 16.1.2
+* Support latest version of @hapi/joi 16.1.2.
 
 
 ## 3.15.2 2019-09-19
