@@ -1,22 +1,22 @@
-/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
-
+/* Copyright © 2010-2019 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Path = require('path')
+const Path = require('path')
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
-var Print = require('../lib/print.js')
+const Print = require('../lib/print.js')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
-var Seneca = require('..')
+const Seneca = require('..')
 
+// TODO: capture STDOUT and verify
 describe('print', function() {
   it('init', function(fin) {
     var si = Seneca().test(fin)
@@ -40,4 +40,23 @@ describe('print', function() {
     Print.print(null, { foo: 1 })
     fin()
   })
+
+  it('custom-print', function(fin) {
+    var tmp = []
+    function print(prefix) {
+      return function(str) {
+        tmp.push(prefix+str)
+      }
+    }
+    var si = Seneca({ internal: { print: {log: print('LOG:'), err: print('ERR:')} }})
+    si.log.debug('aaa')
+    si.log.info('bbb')
+    si.private$.print.err('ccc')
+    
+    expect(tmp[0]).startsWith('LOG:{"data":["bbb"]')
+    expect(tmp[1]).equals('ERR:ccc')
+    
+    fin()
+  })
+
 })

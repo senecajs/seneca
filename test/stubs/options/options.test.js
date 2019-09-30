@@ -201,12 +201,4 @@ describe('options', function () {
     assert.equal(99, opts.a)
     si.close(done)
   })
-
-
-  it('options-internal', function (done) {
-    var si = Seneca().test(done)
-    var ar = si.options().internal.actrouter
-    assert.ok(ar)
-    si.close(done)
-  })
 })

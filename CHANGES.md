@@ -1,3 +1,8 @@
+## 3.16.1 2019-09-30
+
+* Option `internal.print.log|err` allows custom printing of console output.
+
+
 ## 3.16.0 2019-09-19
 
 * Reverting to @hapi/joi 15.1.1 and standardizing on that for now.

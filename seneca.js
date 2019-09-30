@@ -34,10 +34,6 @@ const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
-// Shortcuts.
-//const errlog = Common.make_standard_err_log_entry
-//const actlog = Common.make_standard_act_log_entry
-
 // Internal data and utilities.
 const error = Common.error
 
@@ -196,7 +192,18 @@ const option_defaults = {
   },
 
   // Internal functionality. Reserved for objects and functions only.
-  internal: {},
+  internal: {
+
+    // Console printing utilities
+    print: {
+
+      // Print to standard out
+      log: null,
+
+      // Print to standard err
+      err: null
+    }
+  },
 
   // Log status at periodic intervals.
   status: {
@@ -313,15 +320,15 @@ Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
 
 // Create a Seneca instance.
 module.exports = function init(seneca_options, more_options) {
-  var initial_options =
+  var initial_opts =
     'string' === typeof seneca_options
       ? Common.deepextend({}, { from: seneca_options }, more_options)
       : Common.deepextend({}, seneca_options, more_options)
 
   // Legacy options, remove in 4.x
-  initial_options.deathdelay = initial_options.death_delay
+  initial_opts.deathdelay = initial_opts.death_delay
 
-  var seneca = make_seneca(initial_options)
+  var seneca = make_seneca(initial_opts)
   var options = seneca.options()
 
   // The 'internal' key of options is reserved for objects and functions
@@ -388,8 +395,7 @@ module.exports.util = seneca_util
 module.exports.test$ = { intern: intern }
 
 // Create a new Seneca instance.
-// * _initial_options_ `o` &rarr; instance options
-function make_seneca(initial_options) {
+function make_seneca(initial_opts) {
   // Create a private context.
   var private$ = make_private()
   private$.error = error
@@ -399,10 +405,20 @@ function make_seneca(initial_options) {
 
   // Expose private data to plugins.
   root$.private$ = private$
-
+  
   // Resolve initial options.
-  private$.optioner = Options(module, option_defaults, initial_options)
+  private$.optioner = Options(module, option_defaults, initial_opts)
   var start_opts = private$.optioner.get()
+
+  // Console print utilities
+  private$.print = {
+    log: start_opts.internal.print.log || Print.internal_log,
+    err: start_opts.internal.print.err || Print.internal_err
+  }
+  
+  // These need to come from options as required during construction.
+  private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
+  private$.subrouter = start_opts.internal.subrouter || Patrun({ gex: true })
 
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
@@ -418,12 +434,6 @@ function make_seneca(initial_options) {
 
   // Instance specific incrementing counters to create unique function names
   private$.next_action_id = Common.autoincr()
-
-  // These need to come from options as required during construction.
-  start_opts.internal.actrouter =
-    start_opts.internal.actrouter || Patrun({ gex: true })
-  start_opts.internal.subrouter =
-    start_opts.internal.subrouter || Patrun({ gex: true })
 
   var callpoint = (private$.callpoint = make_callpoint(
     start_opts.debug.callpoint
@@ -546,9 +556,6 @@ function make_seneca(initial_options) {
   private$.exports = { options: start_opts }
   private$.decorations = {}
 
-  //root$.make_log = make_log
-  //root$.log = make_log(root$)//, make_default_log_modifier(root$))
-
   // Error events are fatal, unless you're undead.  These are not the
   // same as action errors, these are unexpected internal issues.
   root$.on('error', root$.die)
@@ -595,9 +602,6 @@ function make_seneca(initial_options) {
     builtin: '',
     merge_defaults: false
   })
-
-  private$.actrouter = start_opts.internal.actrouter
-  private$.subrouter = start_opts.internal.subrouter
 
   // TODO: provide an api to add these
   private$.action_modifiers = [
