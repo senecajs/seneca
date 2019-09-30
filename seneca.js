@@ -193,10 +193,8 @@ const option_defaults = {
 
   // Internal functionality. Reserved for objects and functions only.
   internal: {
-
     // Console printing utilities
     print: {
-
       // Print to standard out
       log: null,
 
@@ -405,7 +403,7 @@ function make_seneca(initial_opts) {
 
   // Expose private data to plugins.
   root$.private$ = private$
-  
+
   // Resolve initial options.
   private$.optioner = Options(module, option_defaults, initial_opts)
   var start_opts = private$.optioner.get()
@@ -415,7 +413,7 @@ function make_seneca(initial_opts) {
     log: start_opts.internal.print.log || Print.internal_log,
     err: start_opts.internal.print.err || Print.internal_err
   }
-  
+
   // These need to come from options as required during construction.
   private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
   private$.subrouter = start_opts.internal.subrouter || Patrun({ gex: true })

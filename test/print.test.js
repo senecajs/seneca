@@ -45,18 +45,19 @@ describe('print', function() {
     var tmp = []
     function print(prefix) {
       return function(str) {
-        tmp.push(prefix+str)
+        tmp.push(prefix + str)
       }
     }
-    var si = Seneca({ internal: { print: {log: print('LOG:'), err: print('ERR:')} }})
+    var si = Seneca({
+      internal: { print: { log: print('LOG:'), err: print('ERR:') } }
+    })
     si.log.debug('aaa')
     si.log.info('bbb')
     si.private$.print.err('ccc')
-    
+
     expect(tmp[0]).startsWith('LOG:{"data":["bbb"]')
     expect(tmp[1]).equals('ERR:ccc')
-    
+
     fin()
   })
-
 })
