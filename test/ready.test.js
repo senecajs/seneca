@@ -44,7 +44,7 @@ describe('ready', function() {
           fin()
         }
       },
-      
+
       debug: { undead: true }
     })
 

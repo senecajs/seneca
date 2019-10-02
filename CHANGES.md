@@ -1,3 +1,9 @@
+## 3.17.0 2019-10-01
+
+* Fix: use internal.print function fully throughout code base.
+* `close` method waits for one action execution interval before preceding to avoid missing pending actions.
+
+
 ## 3.16.1 2019-09-30
 
 * Option `internal.print.log|err` allows custom printing of console output.
