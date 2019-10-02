@@ -85,8 +85,8 @@ describe('seneca', function() {
         Package.version +
         '"}'
     )
-    expect(Util.inspect(si)).equal(
-      "{ isSeneca: true,\n  id: 'a',\n  did: undefined,\n  fixedargs: {},\n  fixedmeta: undefined,\n  start_time: 123,\n  version: '" +
+    expect(Util.inspect(si).replace(/\n */g,' ')).equal(
+      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: undefined, start_time: 123, version: '" +
         Package.version +
         "' }"
     )

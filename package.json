@@ -112,7 +112,7 @@
     "prettier": "^1.18.2",
     "seneca-entity": "^5.2.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-joi": "^5.1.0",
+    "seneca-joi": "^5.2.0",
     "seneca-promisify": "^1.1.0"
   }
 }
