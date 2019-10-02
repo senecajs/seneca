@@ -98,7 +98,7 @@ describe('close', function() {
       }
     })
       .test(fin)
-      .private$.handle_close()
+      .private$.exit_close()
   })
 
   it('error', function(fin) {

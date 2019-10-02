@@ -44,13 +44,12 @@ describe('ready', function() {
           fin()
         }
       },
+      
       debug: { undead: true }
     })
 
-    si.ready(function() {
-      const e = new Error('EEE')
-      e.foo = true
-      throw e
+    si.ready(function ready_die_no_errhandler_func() {
+      throw new Error('error:ready_die_no_errhandler')
     })
   })
 

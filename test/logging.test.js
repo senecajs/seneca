@@ -343,6 +343,8 @@ describe('logging', function() {
         .ready(function() {
           // hello entry, legacy-transport ready entry
           // remove legacy-transport entry in 4.x
+
+          //console.log('ZZZ', log)
           expect(log.length).to.equal(2)
 
           quiet()

@@ -659,10 +659,10 @@ function make_seneca(initial_opts) {
     root$.quiet()
   }
 
-  private$.handle_close = function() {
-    root$.close(function(err) {
+  private$.exit_close = function() {
+    root$.close(function root_exit_close(err) {
       if (err) {
-        Print.err(err)
+        private$.print.err(err)
       }
 
       start_opts.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
@@ -692,7 +692,7 @@ function make_seneca(initial_opts) {
 
   Common.each(start_opts.system.close_signals, function(active, signal) {
     if (active) {
-      process.once(signal, private$.handle_close)
+      process.once(signal, private$.exit_close)
     }
   })
 
