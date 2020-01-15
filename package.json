@@ -81,7 +81,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^15.1.1",
-    "@hapi/wreck": "^15.1.0",
+    "@hapi/wreck": "^17.0.0",
     "eraro": "^2.0.0",
     "fast-safe-stringify": "^2.0.7",
     "gate-executor": "^2.1.0",
@@ -108,7 +108,7 @@
     "async": "^3.1.0",
     "bench": "^0.3.6",
     "coveralls": "^3.0.9",
-    "handlebars": "^4.5.3",
+    "handlebars": "^4.7.2",
     "lolex": "^5.1.2",
     "prettier": "^1.19.1",
     "seneca-entity": "^6.0.0",

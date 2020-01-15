@@ -23,6 +23,7 @@ const Logging = require('./lib/logging')
 const API = require('./lib/api')
 const Ready = require('./lib/ready')
 const Add = require('./lib/add')
+const Sub = require('./lib/sub')
 const Act = require('./lib/act')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
@@ -462,7 +463,7 @@ function make_seneca(initial_opts) {
   root$.list = API.list // List the patterns added to this instance.
   root$.status = API.status // Get the status if this instance.
   root$.reply = API.reply // Reply to a submitted message.
-  root$.sub = API.sub // Subscribe to messages.
+  root$.sub = Sub.api_sub // Subscribe to messages.
   root$.list_plugins = API.list_plugins // List the registered plugins.
   root$.find_plugin = API.find_plugin // Find the plugin definition.
   root$.has_plugin = API.has_plugin // True if the plugin is registered.
