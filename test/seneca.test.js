@@ -793,6 +793,9 @@ describe('seneca', function() {
         expect(msg.in$).equal(true)
         expect(log).equal(['s1', 's2'])
       })
+      //.sub('a:1,x:1', function(msg) {
+      //  fin(new Error('subs should be exact!'))
+      //})
       .act({ a: 1 }, function(err, out) {
         log.push('r')
         expect(err).equal(null)
@@ -802,6 +805,69 @@ describe('seneca', function() {
       })
   })
 
+/*
+  it('specific-sub', function(fin) {
+    var log = []
+    Seneca()
+      .test(fin)
+      .add('a:1', function(msg, reply, meta) {
+        log.push('a')
+        //expect(log).equal(['s1', 's2', 'a'])
+        reply({ x: 1 })
+      })
+      .sub('a:1', function(msg) {
+        log.push('sa')
+        //expect(msg.a).equal(1)
+        //expect(msg.in$).equal(true)
+        //expect(log).equal(['s1', 's2'])
+      })
+      .sub('a:1,b:1', function(msg) {
+        log.push('sb')
+        //expect(msg.a).equal(1)
+        //expect(msg.in$).equal(true)
+        //expect(log).equal(['s1'])
+      })
+      .act({ a: 1 }, function(err, out) {
+        log.push('ca')
+        console.log(log)
+        //expect(err).equal(null)
+        //expect(out.x).equal(1)
+        //expect(log).equal(['s1', 's2', 'a', 'r'])
+      })
+      .act({ a: 1, b: 1 }, function(err, out) {
+        log.push('cb')
+        console.log(log)
+        //expect(err).equal(null)
+        //expect(out.x).equal(1)
+        //expect(log).equal(['s1', 's2', 'a', 'r'])
+      })
+  })
+*/
+
+  // TODO: fix and test sub errors
+  it('error-sub', function(fin) {
+    Seneca()
+      .test()
+/*
+      .error(function(err) {
+        console.log(err)
+        fin()
+      })
+*/
+      .add('a:1', function(msg, reply, meta) {
+        reply({ x: 1 })
+      })
+      .sub('a:1', function(msg) {
+        throw new Error('a1')
+      })
+      .act('a:1', function(err, out) {
+        // this is correct - it's a problem for the sub action
+        expect(err).not.exists()
+        fin()
+      })
+  })
+
+  
   it('mixed-sub', function(done) {
     var si = Seneca(testopts, { log: 'silent', errhandler: done })
 

@@ -1,4 +1,4 @@
-/* Copyright © 2010-2019 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 // Node API modules.
@@ -661,7 +661,7 @@ function make_seneca(initial_opts) {
 
   private$.exit_close = function() {
     root$.close(function root_exit_close(err) {
-      if (err) {
+      if (err && true != private$.optioner.get().quiet ) {
         private$.print.err(err)
       }
 

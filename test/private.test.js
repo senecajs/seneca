@@ -13,6 +13,7 @@ lab.describe('private', function() {
   lab.test('exit_close', async () => {
     var tmp = { exit: 0 }
     var opts = {
+      legacy: false, 
       system: {
         exit: () => {
           tmp.exit++
@@ -38,9 +39,11 @@ lab.describe('private', function() {
     await si1.ready()
     expect(tmp).equal({ exit: 2, si1: true })
 
+    
     var si2 = Seneca(opts)
-      .use('promisify')
-      .test()
+        .use('promisify')
+        .quiet()
+
     si2.add('role:seneca,cmd:close', function(msg, reply) {
       tmp.si2 = true
       throw new Error('si2')

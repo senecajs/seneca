@@ -93,15 +93,15 @@
     "norma": "^2.0.2",
     "optioner": "^4.2.0",
     "ordu": "^0.1.1",
-    "patrun": "^2.1.0",
+    "patrun": "^3.0.0",
     "qs": "^6.9.1",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^5.0.1",
     "use-plugin": "^6.0.2"
   },
   "devDependencies": {
-    "@hapi/code": "^7.0.0",
-    "@hapi/hoek": "^8.5.0",
+    "@hapi/code": "^8.0.1",
+    "@hapi/hoek": "^9.0.2",
     "@hapi/lab": "^21.0.0",
     "@seneca/test-plugin": "0.0.1",
     "acorn": "^7.1.0",
@@ -109,11 +109,11 @@
     "bench": "^0.3.6",
     "coveralls": "^3.0.9",
     "handlebars": "^4.5.3",
-    "lolex": "^5.1.1",
+    "lolex": "^5.1.2",
     "prettier": "^1.19.1",
-    "seneca-entity": "^5.2.0",
+    "seneca-entity": "^6.0.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-joi": "^5.2.0",
+    "seneca-joi": "^6.0.0",
     "seneca-promisify": "^1.1.0"
   }
 }

@@ -113,4 +113,51 @@ describe('close', function() {
         fin()
       })
   })
+
+
+  it('no-promise', function(fin) {
+
+    var si = Seneca()
+      .test(fin)
+
+    // false means do not return Promise
+    var si0 = si.close(false)
+    expect(si).equal(si0)
+
+    // waits for role:seneca,cmd:close to complete
+    si.ready(()=>{
+      expect(si.flags.closed).true()
+      fin()
+    })
+  })
+     
+
+  it('with-promise', function(fin) {
+    var si = Seneca()
+      .test(fin)
+
+    var p0 = si.close()
+
+    expect(p0).instanceof(Promise)
+
+    p0
+      .then(function() {
+        expect(si.flags.closed).true()
+        fin()
+      })
+      .catch(function(err) {
+        fin(err)
+      })
+  })
+
+
+  lab.it('with-async-await', async () => {
+    var si = Seneca()
+      .test()
+
+    await si.close()
+
+    expect(si.flags.closed).true()
+  })
+
 })
