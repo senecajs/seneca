@@ -390,28 +390,39 @@ describe('sub', function() {
     })
   })
 
-  /*
+
   it('sub-prior', function(fin) {
     var log = []
     var si = Seneca()
-      .test(fin)
-      .add('a:1')
-      .add('a:1', function(msg, reply, meta) {
-        this.prior(msg, reply)
-      })
-      .sub('a:1', function(msg, out, meta) {
-        //console.log('SUBCALL',msg,meta)
-        log.push(meta && meta.pattern)
-      })
-      .act('a:1')
-      .ready(function() {
-        // only entry msg of prior chain is published
-        expect(log).equal(['a:1'])
-        //console.log(log)
-        fin()
-      })
-  })
+        .test(fin)
+        .add('a:1')
+        .add('a:1', function(msg, reply, meta) {
+          this.prior(msg, reply)
+        })
+        .sub('a:1', function(msg, out, meta) {
+          //console.log('SUBCALL',msg,meta)
+          log.push(meta && meta.pattern)
+        })
+        .act('a:1')
 
+        .add('b:1')
+        .add('b:1', function(msg, reply, meta) {
+          this.prior(msg, reply)
+        })
+        .sub('b:1,out$:true', function(msg, out, meta) {
+          //console.log('SUBCALL',msg,meta)
+          log.push(meta && meta.pattern)
+        })
+        .act('b:1')
+
+
+        .ready(function() {
+          // only entry msg of prior chain is published
+          expect(log).equal(['a:1','b:1'])
+          //console.log(log)
+          fin()
+        })
+  })
 
   it('sub-close', function(fin) {
     var tmp = {}
@@ -425,5 +436,4 @@ describe('sub', function() {
         fin()
       })
   })
-*/
 })
