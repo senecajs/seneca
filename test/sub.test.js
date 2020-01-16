@@ -31,6 +31,7 @@ describe('sub', function() {
         log.push('s1')
         // Default case is inwards, in$:true
         expect(msg.in$).true()
+        expect(msg.out$).not.exists()
         expect(out).not.exists()
         expect(meta.pattern).equals('a:1')
         expect(msg.a).equal(1)
@@ -72,6 +73,133 @@ describe('sub', function() {
       })
   })
 
+  it('inwards-outwards-sub', function(fin) {
+    var log = []
+    Seneca()
+      .test(fin)
+
+      .add('a:1', function(msg, reply, meta) {
+        log.push('a')
+        reply({ x: 1 })
+      })
+
+      .sub({a:1,in$:true}, function(msg, out, meta) {
+        log.push('s1')
+        // Default case is inwards, in$:true
+        expect(msg.in$).true()
+        expect(msg.out$).not.exists()
+        expect(out).not.exists()
+        expect(meta.pattern).equals('a:1')
+        expect(msg.a).equal(1)
+      })
+
+      .add('b:1', function(msg, reply, meta) {
+        log.push('b')
+        reply({ x: 2 })
+      })
+
+      .sub({b:1,out$:true}, function(msg, out, meta) {
+        log.push('s2')
+        // Outwards alone forces inwards false, unless explicit
+        expect(msg.out$).true()
+        expect(msg.in$).not.exists()
+        expect(out).equal({x:2})
+        expect(meta.pattern).equals('b:1')
+        expect(msg.b).equal(1)
+      })
+
+    
+      .act({ a: 1 }, function(err, out) {
+        log.push('r1')
+        expect(err).equal(null)
+        expect(out.x).equal(1)
+        expect(log).equal(['s1', 'a', 'r1'])
+      })
+
+      .act({ b: 1 }, function(err, out) {
+        log.push('r2')
+        expect(err).equal(null)
+        expect(out.x).equal(2)
+        expect(log).equal(['s1', 'a', 'r1', 'b', 's2', 'r2'])
+      })
+
+      .add('c:1', function(msg, reply, meta) {
+        log.push('c')
+        reply({ x: 3 })
+      })
+
+    // Can do both together
+      .sub({c:1, in$:true, out$:true}, function(msg, out, meta) {
+        log.push('s3-'+(msg.in$?'in':msg.out$?'out':''))
+        if( msg.in$) {
+          expect(msg.out$).not.exists()
+        }
+        else if(msg.out$) {
+          expect(out).equal({x:3})
+          expect(msg.in$).not.exists()
+        }
+        else {
+          throw new Error('should never happen')
+        }
+
+        expect(meta.pattern).equals('c:1')
+        expect(msg.c).equal(1)
+      })
+
+      .act({ c: 1 }, function(err, out) {
+        log.push('r3')
+        expect(err).equal(null)
+        expect(out.x).equal(3)
+        expect(log).equal(['s1', 'a', 'r1', 'b', 's2', 'r2',
+                           's3-in', 'c', 's3-out', 'r3'])
+      })
+
+
+    // Can do both separately
+
+      .add('d:1', function(msg, reply, meta) {
+        log.push('d')
+        reply({ x: 4 })
+      })
+
+      .sub({d:1,in$:true}, function(msg, out, meta) {
+        log.push('s4')
+        // Default case is inwards, in$:true
+        expect(msg.in$).true()
+        expect(msg.out$).not.exists()
+        expect(out).not.exists()
+        expect(meta.pattern).equals('d:1')
+        expect(msg.d).equal(1)
+      })
+
+      .sub({d:1,out$:true}, function(msg, out, meta) {
+        log.push('s5')
+        // Outwards alone forces inwards false, unless explicit
+        expect(msg.out$).true()
+        expect(msg.in$).not.exists()
+        expect(out).equal({x:4})
+        expect(meta.pattern).equals('d:1')
+        expect(msg.d).equal(1)
+      })
+
+    
+      .act({ d: 1 }, function(err, out) {
+        log.push('r4')
+        expect(err).equal(null)
+        expect(out.x).equal(4)
+        expect(log).equal(['s1', 'a', 'r1', 'b', 's2', 'r2',
+                           's3-in', 'c', 's3-out', 'r3',
+                           's4',
+                           'd',
+                           's5',
+                           'r4'
+                          ])
+
+        fin()
+      })
+  })
+
+  
   it('specific-sub', function(fin) {
     var log = []
     Seneca()
@@ -88,14 +216,12 @@ describe('sub', function() {
       })
       .act({ a: 1 }, function(err, out) {
         log.push('ca')
-        //console.log('AAA',log)
         // Only sub(a:1) matches.
         expect(log).equal(['sa', 'a', 'ca'])
         expect(out).equal({ x: 1 })
       })
       .act({ a: 1, b: 1 }, function(err, out) {
         log.push('cb')
-        //console.log('BBB',log)
         // Both sub(a:1) and sub(a:1,b:1) match.
         expect(log).equal(['sa', 'a', 'ca', 'sa', 'sb', 'a', 'cb'])
         expect(out).equal({ x: 1 })
@@ -109,7 +235,6 @@ describe('sub', function() {
           })
           .act({ b: 1 }, function(err, out) {
             log.push('cB')
-            //console.log('CCC',log)
 
             // Only sub(b:1) matches.
             expect(log).equal([
@@ -128,7 +253,7 @@ describe('sub', function() {
           })
           .act({ a: 1 }, function(err, out) {
             log.push('ca')
-            ///console.log('DDD',log)
+
             // Only sub(a:1) matches.
             expect(log).equal([
               'sa',
@@ -149,7 +274,7 @@ describe('sub', function() {
           })
           .act({ a: 1, b: 1 }, function(err, out) {
             log.push('CB')
-            // console.log('EEE',log)
+
             // Now all of sub(a:1), sub(a:1,b:1), sub(b:1) match.
             // This is why you have to match partials.
             expect(log).equal([
@@ -178,32 +303,28 @@ describe('sub', function() {
       })
   })
 
-  /*
+
 
   // TODO: fix and test sub errors
   it('error-sub', function(fin) {
     Seneca()
       .test()
-      .error(function(err) {
-        console.log(err)
-        fin()
-      })
+      .quiet()
       .add('a:1', function(msg, reply, meta) {
         reply({ x: 1 })
       })
       .sub('a:1', function(msg) {
-        throw new Error('a1')
+        throw new Error('b1')
       })
       .act('a:1', function(err, out) {
-        // this is correct - it's a problem for the sub action
-        expect(err).not.exists()
+        expect(err.code).equal('sub_inward_action_failed')
         fin()
       })
   })
 
-  
-  it('mixed-sub', function(done) {
-    var si = Seneca(testopts, { log: 'silent', errhandler: done })
+
+  it('mixed-sub', function(fin) {
+    var si = Seneca().test()
 
     var tmp = { a: 0, as1: 0, as2: 0, as1_in: 0, as1_out: 0, all: 0 }
 
@@ -217,69 +338,59 @@ describe('sub', function() {
     })
 
     si.act({ a: 1 }, function(err, out) {
-      assert.ok(!err)
-      assert.equal(1, out.b)
-      assert.equal(1, tmp.a)
-      assert.equal(0, tmp.as1)
-      assert.equal(0, tmp.as2)
+      expect(err).not.exists()
+      expect(1).equal( out.b)
+      expect(1).equal( tmp.a)
+      expect(0).equal( tmp.as1)
+      expect(0).equal( tmp.as2)
 
       si.sub({ a: 1 }, function(args) {
-        assert.equal(1, args.a)
-        assert.equal(true, args.in$)
+        expect(1).equal( args.a)
+        expect(true).equal( args.in$)
         tmp.as1 = tmp.as1 + 1
       })
 
       si.sub({ a: 1, in$: true }, function(args) {
-        assert.equal(1, args.a)
-        assert.equal(true, args.in$)
+        expect(1).equal( args.a)
+        expect(true).equal( args.in$)
         tmp.as1_in = tmp.as1_in + 1
       })
 
       si.sub({ a: 1, out$: true }, function(args, result) {
-        assert.equal(1, args.a)
-        assert.equal(1, result.y)
-        assert.equal(true, args.out$)
+        expect(1).equal( args.a)
+        expect(1).equal( result.y)
+        expect(true).equal( args.out$)
         tmp.as1_out = tmp.as1_out + 1
       })
 
       si.act({ a: 1 }, function(err, out) {
-        assert.ok(!err)
-        assert.equal(1, out.b)
-        assert.equal(2, tmp.a)
-        assert.equal(1, tmp.as1)
+        expect(err).not.exists()
+        expect(1).equal( out.b)
+        expect(2).equal( tmp.a)
+        expect(1).equal( tmp.as1)
 
-        assert.equal(1, tmp.as1_in)
-        assert.equal(1, tmp.as1_out)
-        assert.equal(0, tmp.as2)
+        expect(1).equal( tmp.as1_in)
+        expect(1).equal( tmp.as1_out)
+        expect(0).equal( tmp.as2)
 
         si.sub({ a: 1 }, function() {
           tmp.as2 = tmp.as2 + 1
         })
 
         si.act({ a: 1, x: 1 }, function(err, out) {
-          assert.ok(!err)
-          assert.equal(1, out.b)
-          assert.equal(3, tmp.a)
-          assert.equal(2, tmp.as1)
-          assert.equal(1, tmp.as2)
-          assert.ok(tmp.all > 0)
+          expect(err).not.exists()
+          expect(1).equal( out.b)
+          expect(3).equal( tmp.a)
+          expect(2).equal( tmp.as1)
+          expect(1).equal( tmp.as2)
+          expect(tmp.all).above(0)
+          fin()
         })
       })
     })
-
-    // we should not panic when sub handler throws
-    si.sub({ fail: 1 }, function() {
-      throw Error('Sub failed')
-    })
-
-    si.add({ fail: 1 }, function(msg, done) {
-      done()
-    })
-    si.act({ fail: 1 }, function() {
-      done()
-    })
   })
 
+  /*
   it('sub-prior', function(fin) {
     var log = []
     var si = Seneca()

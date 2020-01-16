@@ -417,8 +417,14 @@ function make_seneca(initial_opts) {
 
   // These need to come from options as required during construction.
   private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
-  private$.subrouter = start_opts.internal.subrouter || Patrun({ gex: true })
 
+  var soi_subrouter = start_opts.internal.subrouter || {}
+  private$.subrouter = {
+    // Check for legacy inward router
+    inward: soi_subrouter.inward || Patrun({ gex: true }),
+    outward: soi_subrouter.outward || Patrun({ gex: true }),
+  }
+  
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
   event_names.forEach(function(event_name) {
@@ -637,6 +643,7 @@ function make_seneca(initial_opts) {
     .add(Outward.res_entity)
     .add(Outward.msg_meta)
     .add(Outward.trace)
+    .add(Outward.sub)
     .add(Outward.announce)
     .add(Outward.act_error)
 
