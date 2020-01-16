@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.17.0",
+  "version": "3.18.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -77,7 +77,7 @@
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "reset": "npm run clean && npm i && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run clean-npm && npm i --registry http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag --registry http://registry.npmjs.org && npm publish  --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION next --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION plugin --registry http://registry.npmjs.org"
+    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run clean && npm i --registry http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag --registry http://registry.npmjs.org && npm publish  --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION next --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION plugin --registry http://registry.npmjs.org"
   },
   "dependencies": {
     "@hapi/joi": "^15.1.1",

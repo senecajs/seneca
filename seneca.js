@@ -422,9 +422,9 @@ function make_seneca(initial_opts) {
   private$.subrouter = {
     // Check for legacy inward router
     inward: soi_subrouter.inward || Patrun({ gex: true }),
-    outward: soi_subrouter.outward || Patrun({ gex: true }),
+    outward: soi_subrouter.outward || Patrun({ gex: true })
   }
-  
+
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
   event_names.forEach(function(event_name) {
