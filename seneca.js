@@ -626,6 +626,7 @@ function make_seneca(initial_opts) {
     .add(Inward.msg_meta)
     .add(Inward.limit_msg)
     .add(Inward.prepare_delegate)
+    .add(Inward.sub)
     .add(Inward.announce)
 
   private$.outward = Ordu({ name: 'outward' })
@@ -662,7 +663,7 @@ function make_seneca(initial_opts) {
 
   private$.exit_close = function() {
     root$.close(function root_exit_close(err) {
-      if (err && true != private$.optioner.get().quiet ) {
+      if (err && true != private$.optioner.get().quiet) {
         private$.print.err(err)
       }
 
