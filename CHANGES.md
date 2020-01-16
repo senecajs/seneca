@@ -1,3 +1,8 @@
+## 3.18.0 2020-01-16
+
+* Action subscriptions now provide proper error messages.
+
+
 ## 3.17.0 2019-10-01
 
 * Fix: use internal.print function fully throughout code base.

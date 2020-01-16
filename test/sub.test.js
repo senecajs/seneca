@@ -436,4 +436,41 @@ describe('sub', function() {
         fin()
       })
   })
+
+
+  it('sub-fix', function(fin) {
+    var log = []
+    var si = Seneca()
+        .test(fin)
+
+        .add('a:1,b:1', function(msg, reply, meta) {
+          log.push('a')
+          expect(meta.pattern).equals('a:1,b:1')
+          reply({ x: 1 })
+        })
+
+    var sifix = si
+        .fix('a:1')
+    
+        .sub('b:1', function(msg, out, meta) {
+          log.push('s1')
+          // Default case is inwards, in$:true
+          expect(msg.in$).true()
+          expect(out).not.exists()
+          expect(meta.pattern).equals('a:1,b:1')
+          expect(msg.a).equal(1)
+          expect(msg.b).equal(1)
+        })
+
+    si
+      .act({ a: 1, b: 1 }, function(err, out) {
+        log.push('r1')
+        expect(err).equal(null)
+        expect(out.x).equal(1)
+        expect(log).equal(['s1', 'a', 'r1'])
+
+        fin()
+      })
+  })
+
 })
