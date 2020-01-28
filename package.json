@@ -97,7 +97,7 @@
     "qs": "^6.9.1",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^5.0.1",
-    "use-plugin": "^6.0.2"
+    "use-plugin": "^7.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
@@ -111,9 +111,9 @@
     "handlebars": "^4.7.2",
     "lolex": "^5.1.2",
     "prettier": "^1.19.1",
-    "seneca-entity": "^6.0.0",
+    "seneca-entity": "^7.0.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-joi": "^7.0.0",
-    "seneca-promisify": "^1.1.0"
+    "seneca-joi": "^7.0.1",
+    "seneca-promisify": "^1.2.0"
   }
 }
