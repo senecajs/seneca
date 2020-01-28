@@ -57,6 +57,12 @@ describe('seneca', function() {
       })
   })
 
+  it('require-abbrev', function(done) {
+    var si0 = require('..').test()
+    var si1 = require('..').quiet()
+    si0.ready(si1.ready.bind(si1,done))
+  })
+  
   it('version', function(done) {
     var start = Date.now()
     var si = Seneca({ log: 'test', legacy: { logging: false } })

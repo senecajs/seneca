@@ -1,3 +1,9 @@
+## 3.19.0 2020-01-28
+
+* Fix #784 by using Object.defineProperty to set delegate properties.
+* Upgrade optioner to support @hapi/joi@17.
+
+
 ## 3.18.0 2020-01-16
 
 * Action subscriptions now provide proper error messages.
