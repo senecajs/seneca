@@ -1212,7 +1212,7 @@ describe('seneca', function() {
       expect(end - start).below(1500 * tmx)
 
       var mem = process.memoryUsage()
-      expect(mem.rss).below(222222222)
+      expect(mem.rss).below(333333333)
 
       done()
     }
