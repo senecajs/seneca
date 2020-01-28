@@ -1,3 +1,9 @@
+## 3.20.0 2020-01-28
+
+* Upgrade all dependencies to support @hapi/joi@17.
+* Improve and document docs/example config-server/client.js to show use of promisify plugin.
+
+
 ## 3.19.0 2020-01-28
 
 * Fix #784 by using Object.defineProperty to set delegate properties.
