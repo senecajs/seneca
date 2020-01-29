@@ -1,3 +1,8 @@
+## 3.20.1 2020-01-29
+
+* Fix unwritable delegate properties
+
+
 ## 3.20.0 2020-01-28
 
 * Upgrade all dependencies to support @hapi/joi@17.
