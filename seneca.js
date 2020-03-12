@@ -504,7 +504,6 @@ function make_seneca(initial_opts) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
-  
   // Non-API methods.
   root$.register = Plugins.register(callpoint)
 
@@ -524,7 +523,7 @@ function make_seneca(initial_opts) {
 
   // Instance tag
   start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag
-  
+
   // Create a unique identifer for this instance.
   root$.id =
     start_opts.id$ ||

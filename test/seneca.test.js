@@ -81,17 +81,17 @@ describe('seneca', function() {
     expect(si.tag).to.equal('foo')
     expect(si.id).to.endWith('/foo')
 
-    si.options({tag:'bar'})
+    si.options({ tag: 'bar' })
     expect(si.tag).to.equal('bar')
     expect(si.id).to.endWith('/bar')
-    
+
     var d0 = si.delegate()
-    d0.options({tag:'zed'})
+    d0.options({ tag: 'zed' })
     expect(d0.tag).to.equal('zed')
     expect(d0.id).to.endWith('/zed')
     expect(si.tag).to.equal('zed')
     expect(si.id).to.endWith('/zed')
-    
+
     done()
   })
 

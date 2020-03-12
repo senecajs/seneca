@@ -1,3 +1,8 @@
+## 3.20.2 2020-03-12
+
+* Fixed empty string option failure.
+* Correctly implemented original behaviour for  https://github.com/senecajs/seneca/issues/773 
+
 ## 3.20.1 2020-01-29
 
 * Fix unwritable delegate properties
