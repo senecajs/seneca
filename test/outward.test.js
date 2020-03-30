@@ -16,8 +16,8 @@ var it = Shared.make_it(lab)
 var Outward = require('../lib/outward')
 var API = require('../lib/api')
 
-describe('outward', function() {
-  it('make_error', function(fin) {
+describe('outward', function () {
+  it('make_error', function (fin) {
     var err = { message: 'foo', meta$: { err: true } }
     var data = { meta: { error: true }, res: err }
 
@@ -33,10 +33,10 @@ describe('outward', function() {
     fin()
   })
 
-  it('act_stats', function(fin) {
+  it('act_stats', function (fin) {
     var private$ = {
       stats: { act: { done: 0 }, actmap: {} },
-      timestats: { point: function() {} }
+      timestats: { point: function () {} },
     }
     Outward.act_stats(
       { actdef: { pattern: 'foo:1' }, seneca: { private$: private$ } },
@@ -46,7 +46,7 @@ describe('outward', function() {
     fin()
   })
 
-  it('arg-check', function(fin) {
+  it('arg-check', function (fin) {
     try {
       API.outward()
       expect(false).true()

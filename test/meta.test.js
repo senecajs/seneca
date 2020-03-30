@@ -17,53 +17,53 @@ var Seneca = require('..')
 
 // TODO: test priors
 
-describe('meta', function() {
-  it('custom-parents', function(fin) {
+describe('meta', function () {
+  it('custom-parents', function (fin) {
     Seneca()
       .test(fin)
-      .add('a:1', function(msg, reply, meta) {
+      .add('a:1', function (msg, reply, meta) {
         expect(meta.custom.foo).equal(msg.t)
         reply({ x: 1, t: msg.t })
       })
 
       // tests calls: b -> a
-      .add('b:1', function(msg, reply, meta) {
+      .add('b:1', function (msg, reply, meta) {
         expect(meta.custom.foo).equal(msg.t)
         this.act('a:1', { t: msg.t }, reply)
       })
 
       // test calls: c -> b -> a
-      .add('c:1', function(msg, reply, meta) {
+      .add('c:1', function (msg, reply, meta) {
         expect(meta.custom.foo).equal(msg.t)
         this.act('b:1,t:' + msg.t, reply)
       })
 
-      .add('d:1', function(msg, reply, meta) {
+      .add('d:1', function (msg, reply, meta) {
         this.act('a:1,t:' + msg.t, { meta$: { custom: { foo: 11 } } }, reply)
       })
 
-      .act('a:1,t:0', { meta$: { custom: { foo: 0 } } }, function(
+      .act('a:1,t:0', { meta$: { custom: { foo: 0 } } }, function (
         ignore,
         out,
         meta
       ) {
         expect(meta.custom.foo).equal(0)
 
-        this.act({ b: 1, t: 1, meta$: { custom: { foo: 1 } } }, function(
+        this.act({ b: 1, t: 1, meta$: { custom: { foo: 1 } } }, function (
           ignore,
           out,
           meta
         ) {
           expect(meta.custom.foo).equal(1)
 
-          this.act({ c: 1, t: 2, meta$: { custom: { foo: 2 } } }, function(
+          this.act({ c: 1, t: 2, meta$: { custom: { foo: 2 } } }, function (
             ignore,
             out,
             meta
           ) {
             expect(meta.custom.foo).equal(2)
 
-            this.act({ d: 1, t: 11, meta$: { custom: { foo: 0 } } }, function(
+            this.act({ d: 1, t: 11, meta$: { custom: { foo: 0 } } }, function (
               ignore,
               out,
               meta
@@ -78,7 +78,7 @@ describe('meta', function() {
       })
   })
 
-  it('custom-priors', function(fin) {
+  it('custom-priors', function (fin) {
     Seneca()
       .test(fin)
       .add('a:1', function p0(msg, reply, meta) {
@@ -86,7 +86,7 @@ describe('meta', function() {
         reply({ x: 1, t: msg.t })
       })
 
-      .act('a:1,t:0', { meta$: { custom: { foo: 0 } } }, function(
+      .act('a:1,t:0', { meta$: { custom: { foo: 0 } } }, function (
         ignore,
         out,
         meta
@@ -97,7 +97,7 @@ describe('meta', function() {
         this.add('a:1', function p1(msg, reply, meta) {
           expect(meta.custom.foo).equal(msg.t)
           this.prior(msg, reply)
-        }).act({ a: 1, t: 1, meta$: { custom: { foo: 1 } } }, function(
+        }).act({ a: 1, t: 1, meta$: { custom: { foo: 1 } } }, function (
           ignore,
           out,
           meta
@@ -108,7 +108,7 @@ describe('meta', function() {
           this.add('a:1', function p2(msg, reply, meta) {
             expect(meta.custom.foo).equal(msg.t)
             this.prior(msg, reply)
-          }).act({ a: 1, t: 2, meta$: { custom: { foo: 2 } } }, function(
+          }).act({ a: 1, t: 2, meta$: { custom: { foo: 2 } } }, function (
             ignore,
             out,
             meta
@@ -117,7 +117,7 @@ describe('meta', function() {
 
             this.add('a:1', function p3(msg, reply, meta) {
               this.prior(msg, { meta$: { custom: { foo: 11 } } }, reply)
-            }).act({ a: 1, t: 11, meta$: { custom: { foo: 0 } } }, function(
+            }).act({ a: 1, t: 11, meta$: { custom: { foo: 0 } } }, function (
               ignore,
               out,
               meta
@@ -132,25 +132,25 @@ describe('meta', function() {
       })
   })
 
-  it('custom-fixed', function(fin) {
+  it('custom-fixed', function (fin) {
     var si = Seneca()
       .test(fin)
 
-      .add('a:1', function(msg, reply, meta) {
+      .add('a:1', function (msg, reply, meta) {
         reply({ x: 1, bar: meta.custom.bar })
       })
 
-      .add('b:1', function(msg, reply, meta) {
+      .add('b:1', function (msg, reply, meta) {
         this.act('a:1', reply)
       })
 
     var d0 = si.delegate(null, { custom: { bar: 1 } })
 
-    d0.act('a:1', function(ignore, out, meta) {
+    d0.act('a:1', function (ignore, out, meta) {
       expect(meta.custom.bar).equal(1)
       expect(out.bar).equal(1)
 
-      d0.act('a:1', { meta$: { custom: { bar: 2 } } }, function(
+      d0.act('a:1', { meta$: { custom: { bar: 2 } } }, function (
         ignore,
         out,
         meta
@@ -158,7 +158,7 @@ describe('meta', function() {
         expect(meta.custom.bar).equal(1)
         expect(out.bar).equal(1)
 
-        d0.act('b:1', function(ignore, out, meta) {
+        d0.act('b:1', function (ignore, out, meta) {
           expect(meta.custom.bar).equal(1)
           expect(out.bar).equal(1)
 

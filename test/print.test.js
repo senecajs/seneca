@@ -17,8 +17,8 @@ const it = Shared.make_it(lab)
 const Seneca = require('..')
 
 // TODO: capture STDOUT and verify
-describe('print', function() {
-  it('init', function(fin) {
+describe('print', function () {
+  it('init', function (fin) {
     var si = Seneca().test(fin)
     Print(si, ['', ''])
     Print(si, ['', '', '--seneca.print'])
@@ -26,30 +26,30 @@ describe('print', function() {
     fin()
   })
 
-  it('options', function(fin) {
+  it('options', function (fin) {
     var si = Seneca({ debug: { print: { options: true } } })
       .test(fin)
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function (msg, reply) {
         reply({ x: 1 })
       })
     fin()
   })
 
-  it('print', function(fin) {
+  it('print', function (fin) {
     Print.print(new Error('foo'))
     Print.print(null, { foo: 1 })
     fin()
   })
 
-  it('custom-print', function(fin) {
+  it('custom-print', function (fin) {
     var tmp = []
     function print(prefix) {
-      return function(str) {
+      return function (str) {
         tmp.push(prefix + str)
       }
     }
     var si = Seneca({
-      internal: { print: { log: print('LOG:'), err: print('ERR:') } }
+      internal: { print: { log: print('LOG:'), err: print('ERR:') } },
     })
     si.log.debug('aaa')
     si.log.info('bbb')

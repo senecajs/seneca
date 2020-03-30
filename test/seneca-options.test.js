@@ -30,8 +30,8 @@ var Seneca = require('..')
 // --seneca.log=plugin:foo bar // space works as val separator
 // --seneca.log=level:info,type:plugin,handler:print
 
-describe('seneca --seneca.log arguments tests: ', function() {
-  it('--seneca.log=level:warn', function(done) {
+describe('seneca --seneca.log arguments tests: ', function () {
+  it('--seneca.log=level:warn', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn']
     var si = Seneca(opts)
@@ -41,7 +41,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('--seneca.log=level:warn+', function(done) {
+  it('--seneca.log=level:warn+', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn+']
     var si = Seneca(opts)
@@ -50,7 +50,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('--seneca.log.level.warn', function(done) {
+  it('--seneca.log.level.warn', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.warn']
     var si = Seneca(opts)
@@ -59,7 +59,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('--seneca.log.level.warn+', function(done) {
+  it('--seneca.log.level.warn+', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.warn+']
     var si = Seneca(opts)
@@ -68,13 +68,13 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('duplicate param --seneca.log', function(done) {
+  it('duplicate param --seneca.log', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = [
       '',
       '',
       '--seneca.log=level:warn',
-      '--seneca.log=level:error'
+      '--seneca.log=level:error',
     ]
     var si = Seneca(opts)
     expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
@@ -82,7 +82,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('incorrect arg --seneca.log=level:', function(fin) {
+  it('incorrect arg --seneca.log=level:', function (fin) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:']
     try {
@@ -97,7 +97,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('incorrect arg --seneca.log.level.abc', function(done) {
+  it('incorrect arg --seneca.log.level.abc', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.abc']
     var si = Seneca(opts)
@@ -106,7 +106,7 @@ describe('seneca --seneca.log arguments tests: ', function() {
     done()
   })
 
-  it('incorrect arg --seneca.log.abc', function(done) {
+  it('incorrect arg --seneca.log.abc', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.abc']
     var si = Seneca(opts)
@@ -116,8 +116,8 @@ describe('seneca --seneca.log arguments tests: ', function() {
   })
 })
 
-describe('seneca --seneca.log aliases tests: ', function() {
-  it('--seneca.log.quiet', function(done) {
+describe('seneca --seneca.log aliases tests: ', function () {
+  it('--seneca.log.quiet', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.quiet']
     var si = Seneca(opts)
@@ -125,7 +125,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.silent', function(done) {
+  it('--seneca.log.silent', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.silent']
     var si = Seneca(opts)
@@ -135,7 +135,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.all', function(done) {
+  it('--seneca.log.all', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.all']
     var si = Seneca(opts)
@@ -143,7 +143,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.any', function(done) {
+  it('--seneca.log.any', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.any']
     var si = Seneca(opts)
@@ -151,7 +151,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.print', function(done) {
+  it('--seneca.log.print', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.print']
     var si = Seneca(opts)
@@ -159,7 +159,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.test', function(done) {
+  it('--seneca.log.test', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.test']
     var si = Seneca(opts)
@@ -167,7 +167,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.standard', function(done) {
+  it('--seneca.log.standard', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.standard']
     var si = Seneca(opts)
@@ -178,7 +178,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
     done()
   })
 
-  it('--seneca.log.level.quiet', function(done) {
+  it('--seneca.log.level.quiet', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.quiet']
     var si = Seneca(opts)
@@ -186,7 +186,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.silent', function(done) {
+  it('--seneca.log.level.silent', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.silent']
     var si = Seneca(opts)
@@ -196,7 +196,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.all', function(done) {
+  it('--seneca.log.level.all', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.all']
     var si = Seneca(opts)
@@ -204,7 +204,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.any', function(done) {
+  it('--seneca.log.level.any', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.any']
     var si = Seneca(opts)
@@ -212,7 +212,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.print', function(done) {
+  it('--seneca.log.level.print', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.print']
     var si = Seneca(opts)
@@ -220,7 +220,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.test', function(done) {
+  it('--seneca.log.level.test', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.test']
     var si = Seneca(opts)
@@ -228,7 +228,7 @@ describe('seneca --seneca.log aliases tests: ', function() {
 
     done()
   })
-  it('--seneca.log.level.standard', function(done) {
+  it('--seneca.log.level.standard', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.standard']
     var si = Seneca(opts)

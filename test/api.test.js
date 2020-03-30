@@ -13,14 +13,14 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-describe('api', function() {
+describe('api', function () {
   var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
     reply({ z: msg.z })
   }
 
-  it('error', function(fin) {
+  it('error', function (fin) {
     si = si.test()
 
     try {
@@ -38,7 +38,7 @@ describe('api', function() {
     var e0 = si.error('test_args', {
       arg0: 'foo',
       arg1: { bar: 1 },
-      not_an_arg: 1
+      not_an_arg: 1,
     })
     expect(e0.code).equal('test_args')
     expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
@@ -48,7 +48,7 @@ describe('api', function() {
     fin()
   })
 
-  it('fail', function(fin) {
+  it('fail', function (fin) {
     try {
       si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
     } catch (e0) {
@@ -61,7 +61,7 @@ describe('api', function() {
     fin()
   })
 
-  it('list', function(fin) {
+  it('list', function (fin) {
     si = si.test()
 
     expect(si.list().length).above(6)
@@ -70,14 +70,14 @@ describe('api', function() {
     expect(nump).above(6)
     expect(si.list('a:1')).to.equal([])
 
-    si.add('a:1', function() {})
+    si.add('a:1', function () {})
 
     expect(si.list({}).length).equal(nump + 1)
     expect(si.list('a:1')).equal([{ a: '1' }])
     expect(si.list({ a: 1 })).equal([{ a: '1' }])
     expect(si.list({ a: '1' })).equal([{ a: '1' }])
 
-    si.test().add('a:1,b:2', function() {})
+    si.test().add('a:1,b:2', function () {})
 
     expect(si.list('a:1')).equal([{ a: '1' }, { a: '1', b: '2' }])
     expect(si.list({ a: 1 })).equal([{ a: '1' }, { a: '1', b: '2' }])
@@ -90,21 +90,21 @@ describe('api', function() {
     fin()
   })
 
-  it('translate', function(fin) {
+  it('translate', function (fin) {
     si.test()
-      .add('a:2', function(msg, reply) {
+      .add('a:2', function (msg, reply) {
         reply(msg)
       })
-      .add('a:4', function(msg, reply) {
+      .add('a:4', function (msg, reply) {
         reply(msg)
       })
-      .add('b:3', function(msg, reply) {
+      .add('b:3', function (msg, reply) {
         reply(msg)
       })
-      .add('a:5', function(msg, reply) {
+      .add('a:5', function (msg, reply) {
         reply({ a: 5, x: msg.x, y: msg.y })
       })
-      .add('e:5,f:1', function(msg, reply) {
+      .add('e:5,f:1', function (msg, reply) {
         reply(msg)
       })
 
@@ -121,57 +121,57 @@ describe('api', function() {
       .translate('e:7,g:1', 'e:5,f:1', 'x,g')
 
     si.gate()
-      .act('a:1', function(err, out) {
+      .act('a:1', function (err, out) {
         expect(out).contains({ a: 2 })
       })
-      .act('a:3', function(err, out) {
+      .act('a:3', function (err, out) {
         expect(out).contains({ a: 4 })
       })
-      .act('c:3,d:4', function(err, out) {
+      .act('c:3,d:4', function (err, out) {
         expect(out).contains({ b: 3, c: 3, d: 4 })
       })
 
       // y is removed as not picked
-      .act('a:6,x:1,y:2', function(err, out) {
+      .act('a:6,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, x: 1 })
       })
       // x is removed as not picked
-      .act('a:7,x:1,y:2', function(err, out) {
+      .act('a:7,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, y: 2 })
       })
 
       // y is removed as not picked
-      .act('a:8,x:1,y:2', function(err, out) {
+      .act('a:8,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, x: 1 })
       })
       // x is removed as not picked
-      .act('a:9,x:1,y:2', function(err, out) {
+      .act('a:9,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, y: 2 })
       })
 
       // y is removed as not picked
-      .act('a:10,x:1,y:2', function(err, out) {
+      .act('a:10,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, x: 1 })
       })
       // x is removed as not picked
-      .act('a:11,x:1,y:2', function(err, out) {
+      .act('a:11,x:1,y:2', function (err, out) {
         expect(out).contains({ a: 5, y: 2 })
       })
 
       // with pick, unused from props are dropped
-      .act('e:6,g:1,x:1,y:2', function(err, out) {
+      .act('e:6,g:1,x:1,y:2', function (err, out) {
         expect(this.util.clean(out)).equals({ e: 5, x: 1, f: 1 })
       })
 
       // ... unless explicitly added
-      .act('e:7,g:1,x:1,y:2', function(err, out) {
+      .act('e:7,g:1,x:1,y:2', function (err, out) {
         expect(this.util.clean(out)).equals({ e: 5, g: 1, x: 1, f: 1 })
       })
 
       .ready(fin)
   })
 
-  it('test-mode', function(fin) {
+  it('test-mode', function (fin) {
     var si0 = Seneca({ id$: 'foo', tag: null, log: 'silent' })
     si0.error(console.log)
     si0.test()
@@ -189,12 +189,12 @@ describe('api', function() {
     fin()
   })
 
-  it('find_plugin', function(fin) {
+  it('find_plugin', function (fin) {
     var si = Seneca().test(fin)
     si.use(function foo() {})
     si.use({ tag: 't0', name: 'bar', init: function bar() {} })
 
-    si.ready(function() {
+    si.ready(function () {
       expect(si.find_plugin('foo').name).equals('foo')
       expect(si.find_plugin('bar', 't0').name).equals('bar')
 
@@ -205,13 +205,13 @@ describe('api', function() {
     })
   })
 
-  it('has_plugin', function(fin) {
+  it('has_plugin', function (fin) {
     var si = Seneca.test(fin)
 
     si.use(function foo() {})
-    si.use({ init: function() {}, name: 'bar', tag: 'aaa' })
+    si.use({ init: function () {}, name: 'bar', tag: 'aaa' })
 
-    si.ready(function() {
+    si.ready(function () {
       expect(si.has_plugin('foo')).true()
       expect(si.has_plugin('bar')).false()
       expect(si.has_plugin('bar', 'bbb')).false()
@@ -221,7 +221,7 @@ describe('api', function() {
     })
   })
 
-  it('ignore_plugin', function(fin) {
+  it('ignore_plugin', function (fin) {
     var si = Seneca.test(fin)
 
     var tmp = {}
@@ -239,10 +239,10 @@ describe('api', function() {
     si.use(function bar() {})
     si.use(zed)
     si.use(function qaz() {})
-    si.use({ tag: 't0', name: 'red', init: function() {} })
-    si.use({ tag: 't1', name: 'red', init: function() {} })
+    si.use({ tag: 't0', name: 'red', init: function () {} })
+    si.use({ tag: 't1', name: 'red', init: function () {} })
 
-    si.ready(function() {
+    si.ready(function () {
       expect(si.has_plugin('foo')).false()
       expect(si.has_plugin('bar')).true()
       expect(si.has_plugin('zed')).false()
@@ -252,7 +252,7 @@ describe('api', function() {
 
       si.ignore_plugin('zed', false)
       si.use(zed)
-      si.ready(function() {
+      si.ready(function () {
         expect(si.has_plugin('zed')).true()
         expect(tmp.a).equal(1)
         si.close(fin)
@@ -260,20 +260,20 @@ describe('api', function() {
     })
   })
 
-  it('has', function(fin) {
+  it('has', function (fin) {
     si = si.test()
 
     expect(si.has('h:1')).equal(false)
     expect(si.has('g:1')).equal(false)
 
-    si.add('h:1', function() {})
+    si.add('h:1', function () {})
 
     expect(si.has('h:1')).equal(true)
     expect(si.has('g:1')).equal(false)
 
     expect(si.has('h:1,x:1')).equal(false)
 
-    si.add('h:1,g:1', function() {})
+    si.add('h:1,g:1', function () {})
     expect(si.has('h:1')).equal(true)
     expect(si.has('g:1')).equal(false)
     expect(si.has('h:1,g:1')).equal(true)
@@ -282,7 +282,7 @@ describe('api', function() {
     fin()
   })
 
-  it('find', function(fin) {
+  it('find', function (fin) {
     var seneca = Seneca()
       .test(fin)
       .add('a:1', z)
@@ -307,27 +307,27 @@ describe('api', function() {
     expect(seneca.list('a:1')).to.equal([
       { a: '1' },
       { a: '1', b: '2' },
-      { a: '1', b: '2', c: '3' }
+      { a: '1', b: '2', c: '3' },
     ])
     expect(seneca.list('a:1,b:2')).to.equal([
       { a: '1', b: '2' },
-      { a: '1', b: '2', c: '3' }
+      { a: '1', b: '2', c: '3' },
     ])
     expect(seneca.list('a:1,b:2,c:3')).to.equal([{ a: '1', b: '2', c: '3' }])
     expect(seneca.list({ a: 1, b: 2, c: 3 })).to.equal([
-      { a: '1', b: '2', c: '3' }
+      { a: '1', b: '2', c: '3' },
     ])
 
     expect(seneca.list('a:*')).to.equal([
       { a: '1' },
       { a: '1', b: '2' },
       { a: '1', b: '2', c: '3' },
-      { a: '2' }
+      { a: '2' },
     ])
 
     expect(seneca.list('b:*')).to.equal([
       { a: '1', b: '2' },
-      { a: '1', b: '2', c: '3' }
+      { a: '1', b: '2', c: '3' },
     ])
 
     expect(seneca.list('c:*')).to.equal([{ a: '1', b: '2', c: '3' }])
@@ -347,13 +347,13 @@ describe('api', function() {
     fin()
   })
 
-  it('status', function(fin) {
+  it('status', function (fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
 
     expect(si.status().stats.act.calls).equal(0)
     expect(si.status({ stats: false }).stats.act.calls).equal(0)
 
-    si.ready(function() {
+    si.ready(function () {
       expect(si.status().stats.act.calls).equal(0)
       expect(si.status().stats.act.done).equal(0)
       expect(si.status().history.total).equal(0)
@@ -362,33 +362,33 @@ describe('api', function() {
     })
   })
 
-  it('reply', function(fin) {
+  it('reply', function (fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
     expect(si.reply()).equal(false)
     expect(si.reply({ out: { z: 1 } })).equal(false)
     expect(si.reply({ meta: { id: 'foo' }, out: { z: 2 } })).equal(false)
 
-    si.add('a:1', function() {}).act('a:1,id$:aa/bb', function(err, out) {
+    si.add('a:1', function () {}).act('a:1,id$:aa/bb', function (err, out) {
       expect(err).not.exist()
       expect(out.x).equal(1)
       fin()
     })
 
-    setImmediate(function() {
+    setImmediate(function () {
       si.reply({ meta: { id: 'aa/bb' }, out: { x: 1 } })
     })
   })
 
-  it('delegate', function(fin) {
+  it('delegate', function (fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
 
-    si.add('a:1', function(msg, reply) {
+    si.add('a:1', function (msg, reply) {
       this.context.bar = 2
       this.context.zed = 4
       this.act('b:1', reply)
     })
 
-    si.add('b:1', function(msg, reply) {
+    si.add('b:1', function (msg, reply) {
       expect(this.context).equal({ foo: 1, bar: 2, zed: 4 })
       reply()
     })

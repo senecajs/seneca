@@ -17,7 +17,7 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-describe('promise', function() {
+describe('promise', function () {
   /* TODO: enable for Seneca 4
   it('ready', function(fin) {
     (async function work() {

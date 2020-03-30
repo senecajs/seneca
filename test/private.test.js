@@ -9,7 +9,7 @@ const expect = Code.expect
 
 const Seneca = require('..')
 
-lab.describe('private', function() {
+lab.describe('private', function () {
   lab.test('exit_close', async () => {
     var tmp = { exit: 0 }
     var opts = {
@@ -17,21 +17,17 @@ lab.describe('private', function() {
       system: {
         exit: () => {
           tmp.exit++
-        }
-      }
+        },
+      },
     }
 
-    var si0 = Seneca(opts)
-      .use('promisify')
-      .test()
+    var si0 = Seneca(opts).use('promisify').test()
     si0.private$.exit_close()
     await si0.ready()
     expect(tmp.exit).equal(1)
 
-    var si1 = Seneca(opts)
-      .use('promisify')
-      .test()
-    si1.add('role:seneca,cmd:close', function(msg, reply) {
+    var si1 = Seneca(opts).use('promisify').test()
+    si1.add('role:seneca,cmd:close', function (msg, reply) {
       tmp.si1 = true
       this.prior(msg, reply)
     })
@@ -39,11 +35,9 @@ lab.describe('private', function() {
     await si1.ready()
     expect(tmp).equal({ exit: 2, si1: true })
 
-    var si2 = Seneca(opts)
-      .use('promisify')
-      .quiet()
+    var si2 = Seneca(opts).use('promisify').quiet()
 
-    si2.add('role:seneca,cmd:close', function(msg, reply) {
+    si2.add('role:seneca,cmd:close', function (msg, reply) {
       tmp.si2 = true
       throw new Error('si2')
     })

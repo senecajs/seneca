@@ -20,15 +20,15 @@ const Act = require('../lib/act.js')
 
 const intern = Act.intern
 
-describe('act', function() {
-  it('make_actmsg', function(fin) {
+describe('act', function () {
+  it('make_actmsg', function (fin) {
     var origmsg = {
       a: 1,
       b: { c: 11 },
       id$: 2,
       caller$: 3,
       meta$: 4,
-      transport$: 5
+      transport$: 5,
     }
 
     var actmsg = intern.make_actmsg(origmsg)
@@ -47,34 +47,34 @@ describe('act', function() {
     fin()
   })
 
-  it('process_outward', function(fin) {
+  it('process_outward', function (fin) {
     var outward = Ordu({ name: 'outward' })
-      .add(function(ctxt, data) {
+      .add(function (ctxt, data) {
         data.x = 1
       })
-      .add(function(ctxt, data) {
+      .add(function (ctxt, data) {
         if (data.a) {
           return { kind: 'error', error: new Error('a') }
         }
       })
-      .add(function(ctxt, data) {
+      .add(function (ctxt, data) {
         if (data.b) {
           return { kind: 'error', code: 'b', info: { b: 1 } }
         }
       })
-      .add(function(ctxt, data) {
+      .add(function (ctxt, data) {
         if (data.c) {
           return { kind: 'result', result: { c: 1 } }
         }
       })
-      .add(function(ctxt, data) {
+      .add(function (ctxt, data) {
         if (data.d) {
           return { kind: 'bad' }
         }
       })
 
     var actctxt = {
-      seneca: { private$: { outward: outward } }
+      seneca: { private$: { outward: outward } },
     }
 
     var d0 = { a: 1, meta: {} }

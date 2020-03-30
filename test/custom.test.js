@@ -17,14 +17,14 @@ var Seneca = require('..')
 
 var Transports = require('./stubs/transports.js')
 
-var parents = meta => meta.parents.map(x => x[0])
+var parents = (meta) => meta.parents.map((x) => x[0])
 
 var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
 
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 
-describe('custom', function() {
-  it('custom-basic', test_opts, function(fin) {
+describe('custom', function () {
+  it('custom-basic', test_opts, function (fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -41,13 +41,13 @@ describe('custom', function() {
     var bar = { z: 1 }
 
     si.gate()
-      .act({ a: 1, custom$: foo }, function(err, out, meta) {
+      .act({ a: 1, custom$: foo }, function (err, out, meta) {
         expect(err).equal(null)
         expect(out).includes({ x: 1 })
         expect(foo).equal({ y: 1, a1: 1 })
         expect(meta.custom).equal({ y: 1, a1: 1 })
       })
-      .act({ a: 2, custom$: bar }, function(err, out, meta) {
+      .act({ a: 2, custom$: bar }, function (err, out, meta) {
         expect(err).equal(null)
         expect(out).includes({ a: 2, x: 2 })
         expect(bar).equal({ z: 1, a2: 1 })
@@ -56,7 +56,7 @@ describe('custom', function() {
       })
   })
 
-  it('custom-deep', test_opts, function(fin) {
+  it('custom-deep', test_opts, function (fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -91,7 +91,11 @@ describe('custom', function() {
       .ready(do_a1)
 
     function do_a1() {
-      si.act({ a: 1, q: 1, custom$: { y: 1, z: 1 } }, function(err, out, meta) {
+      si.act({ a: 1, q: 1, custom$: { y: 1, z: 1 } }, function (
+        err,
+        out,
+        meta
+      ) {
         expect(out).includes({ a: 1, x1: 1 })
         expect(meta.custom).equal({ y: 1, z: 1, a1: 1 })
 
@@ -100,7 +104,11 @@ describe('custom', function() {
     }
 
     function do_a2() {
-      si.act({ a: 2, q: 2, custom$: { y: 2, z: 2 } }, function(err, out, meta) {
+      si.act({ a: 2, q: 2, custom$: { y: 2, z: 2 } }, function (
+        err,
+        out,
+        meta
+      ) {
         expect(out).includes({ a: 1, x1: 1, x2: 1 })
         expect(meta.custom).equal({ y: 2, z: 2, a1: 1, a2: 1 })
 
@@ -109,7 +117,11 @@ describe('custom', function() {
     }
 
     function do_a3() {
-      si.act({ a: 3, q: 3, custom$: { y: 3, z: 3 } }, function(err, out, meta) {
+      si.act({ a: 3, q: 3, custom$: { y: 3, z: 3 } }, function (
+        err,
+        out,
+        meta
+      ) {
         expect(out).includes({ a: 1, x1: 1, x2: 1, x3: 1 })
         expect(meta.custom).equal({ y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
 
@@ -118,7 +130,7 @@ describe('custom', function() {
     }
   })
 
-  it('custom-reply', test_opts, function(fin) {
+  it('custom-reply', test_opts, function (fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -128,13 +140,13 @@ describe('custom', function() {
       .add('b:1', function b1(msg, reply, meta) {
         meta.custom.b1q = 1
 
-        this.act('a:1', function(err, out, meta) {
+        this.act('a:1', function (err, out, meta) {
           meta.custom.b1w = 1
           reply({ g: out.g, h: 1 })
         })
       })
-      .ready(function() {
-        this.act('b:1', { custom$: { x: 1 } }, function(err, out, meta) {
+      .ready(function () {
+        this.act('b:1', { custom$: { x: 1 } }, function (err, out, meta) {
           expect(out).equal({ g: 2, h: 1 })
           expect(meta.custom).equal({ x: 1, b1q: 1, a1: 1, b1w: 1 })
           fin()
@@ -142,7 +154,7 @@ describe('custom', function() {
       })
   })
 
-  it('custom-entity', test_opts, function(fin) {
+  it('custom-entity', test_opts, function (fin) {
     var v8 = require('v8')
 
     var si = Seneca()
@@ -150,7 +162,7 @@ describe('custom', function() {
       .use('entity')
       .add('a:1', function a1(msg, reply, meta1) {
         meta1.custom.a1x = 1
-        this.make('foo', { id$: msg.id, q: msg.q }).save$(function(
+        this.make('foo', { id$: msg.id, q: msg.q }).save$(function (
           err,
           foo1,
           meta2
@@ -160,8 +172,8 @@ describe('custom', function() {
         })
       })
 
-      .ready(function() {
-        this.act('a:1,id:A,q:1', { custom$: { w: 1 } }, function(
+      .ready(function () {
+        this.act('a:1,id:A,q:1', { custom$: { w: 1 } }, function (
           err,
           out,
           meta
@@ -173,7 +185,7 @@ describe('custom', function() {
       })
   })
 
-  it('custom-prior', test_opts, function(fin) {
+  it('custom-prior', test_opts, function (fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -188,14 +200,14 @@ describe('custom', function() {
         meta.custom.q2 = 1
         this.prior({ x: msg.x, y: 1 }, reply)
       })
-      .act('a:1,x:1', { custom$: { q1: 1 } }, function(err, out, meta) {
+      .act('a:1,x:1', { custom$: { q1: 1 } }, function (err, out, meta) {
         expect(meta.custom).equal({ q1: 1, q2: 1, q3: 1, q4: 1 })
         expect(out).equal({ x: 1, y: 1, z: 1 })
         fin()
       })
   })
 
-  it('custom-simple-transport', test_opts, function(fin) {
+  it('custom-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
@@ -206,7 +218,7 @@ describe('custom', function() {
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false }
+      legacy: { transport: false },
     })
       .test(fin)
       .use(st)
@@ -217,8 +229,8 @@ describe('custom', function() {
       reply({ x: 1 })
     })
 
-    s0.ready(function() {
-      c0.act('a:1', { custom$: { q: 1 } }, function(err, out, meta) {
+    s0.ready(function () {
+      c0.act('a:1', { custom$: { q: 1 } }, function (err, out, meta) {
         expect(err).not.exist()
         expect(out).equal({ x: 1 })
         expect(meta.custom).equal({ q: 1 })
@@ -228,13 +240,13 @@ describe('custom', function() {
     })
   })
 
-  it('custom-bells-transport', test_opts, function(fin) {
+  it('custom-bells-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({
       id$: 's0',
       legacy: { transport: false },
-      limits: { maxparents: 111 }
+      limits: { maxparents: 111 },
     })
       .test(fin)
       .use(st)
@@ -244,7 +256,7 @@ describe('custom', function() {
       id$: 'c0',
       timeout: 22222 * tmx,
       legacy: { transport: false },
-      limits: { maxparents: 111 }
+      limits: { maxparents: 111 },
     })
       .test(fin)
       .use(st)
@@ -292,7 +304,7 @@ describe('custom', function() {
         })
       })
 
-    s0.ready(function() {
+    s0.ready(function () {
       c0.add('d:1', function q1A(msg, reply, meta) {
         // console.log('c0 q1A',meta.custom)
         meta.custom.q1A = 1
@@ -338,10 +350,10 @@ describe('custom', function() {
           this.act('h:1', msg, reply)
         })
 
-        .ready(function() {
+        .ready(function () {
           // Message pathway:
           // h:2->h:1->d:1->d:1-|->c:3->c:2->c:1->b:1->a:1->a:1-|->g:1->g2
-          this.act('h:2,p:1', { custom$: { v: 1 } }, function(err, out, meta) {
+          this.act('h:2,p:1', { custom$: { v: 1 } }, function (err, out, meta) {
             expect(this.util.clean(out)).equal({
               g: 22,
               x: 1,
@@ -359,7 +371,7 @@ describe('custom', function() {
               n3: 1,
               n4: 1,
               d: 11,
-              r: 1
+              r: 1,
             })
             expect(meta.custom).equal({
               v: 1,
@@ -376,7 +388,7 @@ describe('custom', function() {
               c3r: 1,
               b1: 1,
               a1B: 1,
-              a1A: 1
+              a1A: 1,
             })
             fin()
           })
@@ -402,7 +414,7 @@ describe('custom', function() {
     var out = await si.post('foo:true')
     expect(out).equal({ foo: true, bar: 1, custom_zed: 'a' })
 
-    si.message('foo:false', async function(msg) {
+    si.message('foo:false', async function (msg) {
       return msg
     })
 
@@ -433,7 +445,7 @@ describe('custom', function() {
       bar: 2,
       qaz: 3,
       custom_zed: 'b',
-      custom_dez: 'c'
+      custom_dez: 'c',
     })
   })
 
@@ -442,7 +454,7 @@ describe('custom', function() {
       .test()
       .use('promisify')
 
-    si.message('role:qaz,foo:false', async function(msg) {
+    si.message('role:qaz,foo:false', async function (msg) {
       return msg
     })
 

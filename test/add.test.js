@@ -13,38 +13,38 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-describe('add', function() {
-  it('name', function(fin) {
+describe('add', function () {
+  it('name', function (fin) {
     var si = Seneca().test()
 
     si.add('n:0')
-      .add('n:1', function() {})
+      .add('n:1', function () {})
       .add('n:2', function n2() {})
 
     // NOTE: these may need to be updates if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
       id: 'default_action_8',
-      name: 'default_action'
+      name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
       id: 'action_9',
-      name: 'action'
+      name: 'action',
     })
 
     expect(si.find('n:2')).contains({
       id: 'n2_10',
-      name: 'n2'
+      name: 'n2',
     })
 
     fin()
   })
 
-  it('action_modifier', function(fin) {
+  it('action_modifier', function (fin) {
     var si = Seneca().test()
 
-    si.private$.action_modifiers.push(function(actdef) {
+    si.private$.action_modifiers.push(function (actdef) {
       actdef.desc = actdef.func.desc
     })
 
@@ -56,7 +56,7 @@ describe('add', function() {
       r()
     }
 
-    si.ready(function() {
+    si.ready(function () {
       var actdef = si.find('a:1')
       expect(actdef.rules.b).equal(2)
       expect(actdef.desc).equal('The ubiquitous a1 action.')

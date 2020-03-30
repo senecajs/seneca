@@ -16,13 +16,13 @@ var Seneca = require('..')
 var Inward = require('../lib/inward')
 var API = require('../lib/api')
 
-describe('inward', function() {
-  it('announce', function(fin) {
+describe('inward', function () {
+  it('announce', function (fin) {
     var seneca = Seneca().test(fin)
     var seen = 0
 
-    seneca.ready(function() {
-      seneca.on('act-in', function(ev) {
+    seneca.ready(function () {
+      seneca.on('act-in', function (ev) {
         expect(ev.a).equal(2)
         fin()
       })
@@ -32,7 +32,7 @@ describe('inward', function() {
     })
   })
 
-  it('arg-check', function(fin) {
+  it('arg-check', function (fin) {
     try {
       API.inward()
       expect(false).true()

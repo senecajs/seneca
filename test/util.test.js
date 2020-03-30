@@ -16,10 +16,10 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-describe('util', function() {
+describe('util', function () {
   var si = Seneca(testopts)
 
-  it('seneca.util.deepextend.happy', function(done) {
+  it('seneca.util.deepextend.happy', function (done) {
     expect(
       si.util.deepextend({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
     ).to.include({ a: 1, b: { c: 3, d: 4 } })
@@ -34,7 +34,7 @@ describe('util', function() {
     done()
   })
 
-  it('seneca.util.deepextend.types with new', function(done) {
+  it('seneca.util.deepextend.types with new', function (done) {
     /* eslint no-new-wrappers: 0 */
     var t1 = {
       s: 's1',
@@ -44,10 +44,10 @@ describe('util', function() {
       b: true,
       bo: new Boolean(true),
       do: new Date(),
-      f: function() {
+      f: function () {
         return 'f'
       },
-      re: /a/
+      re: /a/,
     }
 
     var to = si.util.deepextend({}, t1)
@@ -64,7 +64,7 @@ describe('util', function() {
     done()
   })
 
-  it('seneca.util.deepextend.types', function(done) {
+  it('seneca.util.deepextend.types', function (done) {
     var t1 = {
       s: 's1',
       so: String('s2'),
@@ -73,10 +73,10 @@ describe('util', function() {
       b: true,
       bo: Boolean(true),
       do: Date(),
-      f: function() {
+      f: function () {
         return 'f'
       },
-      re: /a/
+      re: /a/,
     }
 
     var to = si.util.deepextend({}, t1)
@@ -93,7 +93,7 @@ describe('util', function() {
     done()
   })
 
-  it('seneca.util.deepextend.mixed', function(done) {
+  it('seneca.util.deepextend.mixed', function (done) {
     var obj = si.util.deepextend(
       {},
       { a: 1, b: { bb: 1 }, c: 's', d: 'ss', e: [2, 3], f: { fa: 1, fb: 2 } },
@@ -103,7 +103,7 @@ describe('util', function() {
         c: [1],
         d: { dd: 1 },
         e: { ee: 1 },
-        f: [4, 5, 6]
+        f: [4, 5, 6],
       }
     )
 
@@ -119,7 +119,7 @@ describe('util', function() {
     done()
   })
 
-  it('seneca.util.deepextend.entity', function(done) {
+  it('seneca.util.deepextend.entity', function (done) {
     var obj = si.util.deepextend(
       { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
       { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } }
@@ -128,7 +128,7 @@ describe('util', function() {
     expect(obj).to.include({
       a: { x: 1 },
       b: { y: 2, entity$: 'a/b/c' },
-      c: { z: 1 }
+      c: { z: 1 },
     })
     done()
   })

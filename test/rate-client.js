@@ -22,7 +22,7 @@ var stats = {
   sent: 0,
   err: 0,
   pass: 0,
-  fail: 0
+  fail: 0,
 }
 
 var calltimes = []
@@ -30,7 +30,7 @@ var memory = []
 
 var memI = 0
 var mem_start = Date.now()
-setInterval(function() {
+setInterval(function () {
   var when = Date.now() - mem_start
   if (0 == memI % 100) console.log(when)
 
@@ -46,7 +46,7 @@ function send(seneca, next) {
   stats.sent++
   var dur_start = process.hrtime()
 
-  seneca.act({ a: 1, x: y }, function(err, out) {
+  seneca.act({ a: 1, x: y }, function (err, out) {
     var dur_diff = process.hrtime(dur_start)
     calltimes.push(parseInt(dur_diff[0] * 1e9 + dur_diff[1], 10))
 
@@ -68,12 +68,12 @@ function finish(active) {
   stats.active = active
 
   stats.avgcall = Math.floor(
-    calltimes.reduce(function(acc, elm) {
+    calltimes.reduce(function (acc, elm) {
       return acc + elm
     }, 0) / calltimes.length
   )
 
-  calltimes.sort(function(a, b) {
+  calltimes.sort(function (a, b) {
     return a - b
   })
 
@@ -85,14 +85,15 @@ function finish(active) {
 
   fs.writeFileSync(
     './bench-memory.csv',
-    'w,r,t,u,e\n' + memory.map(x => x.join(',')).join('\n')
+    'w,r,t,u,e\n' + memory.map((x) => x.join(',')).join('\n')
   )
 
   fs.writeFileSync('./bench-calltimes.csv', 'ct\n' + calltimes.join('\n'))
 
-  si.close(function() {
+  si.close(function () {
     var ph =
-      'S,E\n' + si.private$.history._prunehist.map(x => x.join(',')).join('\n')
+      'S,E\n' +
+      si.private$.history._prunehist.map((x) => x.join(',')).join('\n')
     fs.writeFileSync('./bench-prune.csv', ph)
   })
 }
@@ -101,37 +102,37 @@ var si = Seneca({
   timeout: 1111,
   status: {
     running: false,
-    interval: 500
+    interval: 500,
   },
   legacy: {
-    transport: 'old' === version
-  }
+    transport: 'old' === version,
+  },
 })
 //.test('print')
 
 if (local) {
-  si.add({ a: 1 }, function(msg, reply) {
+  si.add({ a: 1 }, function (msg, reply) {
     reply({ x: msg.x })
   })
 } else {
   si.client()
 }
 
-si.ready(function() {
+si.ready(function () {
   var seneca = this
 
   var start = Date.now()
   var active = 0
   var finished = false
 
-  var next = function(isresponse) {
+  var next = function (isresponse) {
     if (finished) {
       return
     }
 
     active = active - (isresponse ? 1 : 0)
 
-    setImmediate(function() {
+    setImmediate(function () {
       if (!finished && duration <= Date.now() - start) {
         finished = true
         finish(active)

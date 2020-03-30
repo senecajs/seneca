@@ -19,15 +19,15 @@ var Seneca = require('..')
 
 // TODO: move all legacy functions here and isolate lack of test coverage
 
-describe('legacy', function() {
-  it('fail', function(fin) {
+describe('legacy', function () {
+  it('fail', function (fin) {
     var f0 = Legacy.make_legacy_fail({})
-    var e0 = f0.call({ log: { error: function() {} } }, { code: 'foo' })
+    var e0 = f0.call({ log: { error: function () {} } }, { code: 'foo' })
     expect(e0.code).equal('foo')
     fin()
   })
 
-  it('argprops', function(fin) {
+  it('argprops', function (fin) {
     var out = Seneca.util.argprops(
       { a: 1, b: 2, c: 3 },
       { b: 22, c: 33, d: 4 },
@@ -44,21 +44,21 @@ describe('legacy', function() {
     fin()
   })
 
-  it('router', function(fin) {
+  it('router', function (fin) {
     expect(Seneca.util.router()).exists()
     fin()
   })
 
-  it('no-default-transport', function(fin) {
+  it('no-default-transport', function (fin) {
     Seneca({ default_plugins: { transport: false } })
       .test()
-      .ready(function() {
+      .ready(function () {
         expect(this.list_plugins().transport).not.exists()
         fin()
       })
   })
 
-  it('actdef', function(fin) {
+  it('actdef', function (fin) {
     Seneca({ legacy: { actdef: true } })
       .test(fin)
       .add('a:1')

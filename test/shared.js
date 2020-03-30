@@ -6,10 +6,10 @@ var Util = require('util')
 var Lolex = require('lolex')
 
 module.exports = {
-  clock: function() {
+  clock: function () {
     return Lolex.createClock()
   },
-  make_it: function(lab) {
+  make_it: function (lab) {
     return function it(name, opts, func) {
       if ('function' === typeof opts) {
         func = opts
@@ -19,10 +19,10 @@ module.exports = {
       lab.it(
         name,
         opts,
-        Util.promisify(function(x, fin) {
+        Util.promisify(function (x, fin) {
           func(fin)
         })
       )
     }
-  }
+  },
 }

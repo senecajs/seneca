@@ -15,15 +15,15 @@ var Seneca = require('..')
 
 var test_opts = { xlog: 'test' }
 
-describe('smoke', function() {
+describe('smoke', function () {
   // Just one test - don't add anymore to this suite!
-  it('seneca-smoke', function(fin) {
+  it('seneca-smoke', function (fin) {
     Seneca(test_opts)
       .error(fin)
-      .add('a:1', function(msg, done) {
+      .add('a:1', function (msg, done) {
         done(null, { x: 1 })
       })
-      .act('a:1', function(err, out) {
+      .act('a:1', function (err, out) {
         expect(err).to.equal(null)
         expect(out.x).to.equal(1)
         fin()

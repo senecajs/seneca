@@ -4,10 +4,10 @@ var Seneca = require(version === 'old' ? '../../seneca-main' : '..')
 
 Seneca({
   legacy: {
-    transport: 'old' === version
-  }
+    transport: 'old' === version,
+  },
 })
-  .add('a:1', function(msg, reply) {
+  .add('a:1', function (msg, reply) {
     reply({ x: msg.x })
   })
   .listen()

@@ -16,11 +16,11 @@ const Shared = require('./shared')
 const it = Shared.make_it(lab)
 
 const intern = {
-  outward: require('../lib/outward').test$.intern
+  outward: require('../lib/outward').test$.intern,
 }
 
-describe('outward', function() {
-  it('act_error', function(fin) {
+describe('outward', function () {
+  it('act_error', function (fin) {
     expect(intern.outward.act_error.length).equal(3)
     fin()
   })

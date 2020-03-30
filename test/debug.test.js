@@ -13,9 +13,9 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-describe('debug', function() {
+describe('debug', function () {
   // REMOVE after Seneca 4.x
-  it('logroute', function(done) {
+  it('logroute', function (done) {
     var si = Seneca({ log: 'test' }).error(done)
 
     // test not applicable to new logging in Seneca 3.x
@@ -26,14 +26,14 @@ describe('debug', function() {
     var lr0 = si.logroute()
     assert.equal(lr0, 'level=error -> <print>\nlevel=fatal -> <print>')
 
-    si.ready(function() {
-      setImmediate(function() {
+    si.ready(function () {
+      setImmediate(function () {
         si.logroute({
           level: 'DEBUG',
-          handler: function() {
+          handler: function () {
             assert.equal('foo', arguments[3])
             done()
-          }
+          },
         })
 
         si.log.debug('foo')

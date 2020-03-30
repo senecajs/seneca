@@ -13,12 +13,12 @@ var it = lab.it
 
 var Seneca = require('..')
 
-describe('explain', function() {
+describe('explain', function () {
   it('explain-basic', async () => {
     var si = Seneca()
       .test()
       .use('promisify')
-      .message('a:1', async function(msg, meta) {
+      .message('a:1', async function (msg, meta) {
         var exp = meta.explain
         if (1 === msg.x) {
           expect(exp).not.exist()
@@ -26,7 +26,7 @@ describe('explain', function() {
         exp && exp.push({ z: 3 })
         return { x: msg.x }
       })
-      .message('b:1', async function(msg) {
+      .message('b:1', async function (msg) {
         var exp = this.explain()
         if (4 === msg.x) {
           expect(exp).not.exist()
@@ -34,7 +34,7 @@ describe('explain', function() {
         exp && exp({ z: 3 })
         return { x: msg.x }
       })
-      .message('c:1', async function(msg, meta) {
+      .message('c:1', async function (msg, meta) {
         var exp = meta.explain
         exp && exp.push({ z: 4 })
         return [msg.x]
@@ -53,7 +53,7 @@ describe('explain', function() {
 
     await new Promise((resolve, reject) => {
       exp = []
-      si.act('a:1,x:3', { explain$: exp }, function(err, out, meta) {
+      si.act('a:1,x:3', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
         expect(out.x).equal(3)
         expect(meta.explain[1]).includes({ z: 3 })
@@ -73,7 +73,7 @@ describe('explain', function() {
 
     await new Promise((resolve, reject) => {
       exp = []
-      si.act('b:1,x:6', { explain$: exp }, function(err, out, meta) {
+      si.act('b:1,x:6', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
         expect(out.x).equal(6)
         expect(meta.explain[1]).includes({ z: 3 })
@@ -93,7 +93,7 @@ describe('explain', function() {
 
     await new Promise((resolve, reject) => {
       exp = []
-      si.act('c:1,x:7', { explain$: exp }, function(err, out, meta) {
+      si.act('c:1,x:7', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
         expect(out).equal([7])
         expect(meta.explain[1]).includes({ z: 4 })
@@ -107,7 +107,7 @@ describe('explain', function() {
       .test()
       .use('promisify')
       .use('entity')
-      .message('a:1', async function(msg, meta) {
+      .message('a:1', async function (msg, meta) {
         var exp = this.explain()
         exp && exp({ z: 1, s: this, e: this.make('foo').data$({ d: 2 }) })
         return { x: msg.x }
@@ -125,7 +125,7 @@ describe('explain', function() {
     expect(exp_json[1].z).equal(1)
     expect(exp_json[1].s).includes({
       isSeneca: true,
-      id: 's01'
+      id: 's01',
     })
     expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
   })
@@ -134,29 +134,29 @@ describe('explain', function() {
     var si = Seneca()
       .test()
       .use('promisify')
-      .message('a:1', async function(msg) {
+      .message('a:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 3 })
         return { x: msg.x }
       })
-      .message('b:1', async function(msg) {
+      .message('b:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 4 })
         return { y: msg.y }
       })
-      .message('c:1', async function(msg) {
+      .message('c:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 5 })
         msg.a = 1
         return await this.post(msg)
       })
-      .message('d:1', async function(msg) {
+      .message('d:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 6 })
         msg.c = 1
         return await this.post(msg)
       })
-      .message('e:1', async function(msg) {
+      .message('e:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 7 })
         var msg_a = { a: 1, ...msg }
@@ -216,7 +216,7 @@ describe('explain', function() {
     var si = Seneca()
       .test()
       .use('promisify')
-      .message('a:1', async function(msg) {
+      .message('a:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: msg.z })
         return { x: msg.x }
@@ -259,7 +259,7 @@ describe('explain', function() {
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false }
+      legacy: { transport: false },
     }).test()
 
     await s0
@@ -300,7 +300,7 @@ describe('explain', function() {
       c0.error(reject)
       s0.error(reject)
 
-      c0.act('a:1,x:2', { explain$: exp }, function(ignore, out, meta) {
+      c0.act('a:1,x:2', { explain$: exp }, function (ignore, out, meta) {
         expect(out.x).equals(2)
 
         expect(exp[0].msg$).includes({ a: 1, x: 2 })
@@ -310,12 +310,12 @@ describe('explain', function() {
         expect(exp[2]).includes({ direct: 1 })
         expect(exp[3]).includes({ content: 'aaa' })
 
-        c0.act('b:1,x:1', function(ignore, out, meta) {
+        c0.act('b:1,x:1', function (ignore, out, meta) {
           expect(out.x).equals(1)
           expect(meta.explain).equal(void 0)
 
           exp = []
-          c0.act('b:1,x:2', { explain$: exp }, function(ignore, out, meta) {
+          c0.act('b:1,x:2', { explain$: exp }, function (ignore, out, meta) {
             expect(out.x).equals(2)
 
             expect(exp[0].msg$).includes({ b: 1, x: 2 })
@@ -329,7 +329,7 @@ describe('explain', function() {
             expect(meta.explain[1].explain$).includes({ instance: 's0' })
 
             exp = []
-            c0.act('c:1,x:3', { explain$: exp }, function(ignore, out, meta) {
+            c0.act('c:1,x:3', { explain$: exp }, function (ignore, out, meta) {
               expect(out).equals([3])
 
               expect(exp[0].msg$).includes({ c: 1, x: 3 })

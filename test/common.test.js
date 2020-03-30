@@ -14,8 +14,8 @@ var expect = Code.expect
 var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
-describe('common', function() {
-  it('misc', function(fin) {
+describe('common', function () {
+  it('misc', function (fin) {
     expect(Common.boolify(true)).to.equal(true)
     expect(Common.boolify(false)).to.equal(false)
     expect(Common.boolify('true')).to.equal(true)
@@ -52,7 +52,7 @@ describe('common', function() {
     expect(Common.copydata({ a: 1 })).to.equal({ a: 1 })
     expect(Common.copydata({ a: 1, b: { c: 2 } })).to.equal({
       a: 1,
-      b: { c: 2 }
+      b: { c: 2 },
     })
 
     var a = { a: 1 }
@@ -63,13 +63,13 @@ describe('common', function() {
     expect(Common.resolve_option(1)).equal(1)
     expect(Common.resolve_option('a')).equal('a')
     expect(
-      Common.resolve_option(function() {
+      Common.resolve_option(function () {
         return 'b'
       })
     ).equal('b')
     expect(
       Common.resolve_option(
-        function(opts) {
+        function (opts) {
           return opts.c
         },
         { c: 2 }
@@ -79,7 +79,7 @@ describe('common', function() {
     fin()
   })
 
-  it('deepextend-empty', function(fin) {
+  it('deepextend-empty', function (fin) {
     assert.equal(1, Common.deep({ a: 1 }).a)
 
     assert.equal(null, Common.deepextend({}).a)
@@ -169,7 +169,7 @@ describe('common', function() {
     fin()
   })
 
-  it('deepextend-dups', function(fin) {
+  it('deepextend-dups', function (fin) {
     var aa = { a: { aa: 1 } }
     var bb = { a: { bb: 2 } }
 
@@ -184,31 +184,31 @@ describe('common', function() {
     fin()
   })
 
-  it('deepextend-objs', function(fin) {
+  it('deepextend-objs', function (fin) {
     var d = {
       s: 's',
       n: 100,
       d: new Date(),
-      f: function() {},
+      f: function () {},
       a: arguments,
       r: /a/,
-      b: Buffer('b')
+      b: Buffer('b'),
     }
     var o = Common.deepextend({}, d)
     assert.equal('' + o, '' + d)
     fin()
   })
 
-  it('deepextend-objs with functions', function(fin) {
+  it('deepextend-objs with functions', function (fin) {
     function noop() {}
     function f1() {}
 
     var defaults = {
       a: noop,
-      b: noop
+      b: noop,
     }
     var options = {
-      a: f1
+      a: f1,
     }
 
     var out = Common.deepextend(defaults, options)
@@ -218,7 +218,7 @@ describe('common', function() {
     fin()
   })
 
-  it('pattern', function(fin) {
+  it('pattern', function (fin) {
     assert.equal('a:1', Common.pattern('a:1'))
     assert.equal('a:1', Common.pattern({ a: 1 }))
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2 }))
@@ -229,23 +229,23 @@ describe('common', function() {
     fin()
   })
 
-  it('nil', function(fin) {
+  it('nil', function (fin) {
     Common.nil({ msg: 1 }, function reply() {
       fin()
     })
   })
 
-  it('recurse', function(fin) {
+  it('recurse', function (fin) {
     Common.recurse(
       [1, 2, 3],
-      function(i, next) {
+      function (i, next) {
         next()
       },
       fin
     )
   })
 
-  it('pincanon', function(fin) {
+  it('pincanon', function (fin) {
     assert.equal('a:1', Common.pincanon({ a: 1 }))
     assert.equal('a:1', Common.pincanon([{ a: 1 }]))
     assert.equal('a:1', Common.pincanon('a:1'))
@@ -263,7 +263,7 @@ describe('common', function() {
     fin()
   })
 
-  it('history', function(fin) {
+  it('history', function (fin) {
     function itemlist(item) {
       return item.id + '~' + item.timelimit
     }
@@ -284,7 +284,7 @@ describe('common', function() {
       'a0~100',
       'a1~200',
       'a3~200',
-      'a2~300'
+      'a2~300',
     ])
 
     h0.add({ id: 'a4', timelimit: 300 })
@@ -293,7 +293,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.add({ id: 'a5', timelimit: 100 })
@@ -303,7 +303,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     expect(Object.keys(h0._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4', 'a5'])
@@ -316,7 +316,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.add({ id: 'a7', timelimit: 199 })
@@ -328,7 +328,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.prune(99)
@@ -340,7 +340,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.prune(100)
@@ -350,7 +350,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.prune(101)
@@ -359,7 +359,7 @@ describe('common', function() {
       'a1~200',
       'a3~200',
       'a2~300',
-      'a4~300'
+      'a4~300',
     ])
 
     h0.prune(299)
@@ -409,7 +409,7 @@ describe('common', function() {
       'a0~100',
       'a3~125',
       'a2~150',
-      'a1~200'
+      'a1~200',
     ])
 
     h2.add({ id: 'a4', timelimit: 175 })
@@ -418,7 +418,7 @@ describe('common', function() {
       'a3~125',
       'a2~150',
       'a4~175',
-      'a1~200'
+      'a1~200',
     ])
 
     expect(Object.keys(h2._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4'])
@@ -426,7 +426,7 @@ describe('common', function() {
     fin()
   })
 
-  it('clean', function(fin) {
+  it('clean', function (fin) {
     expect(Common.clean({})).equal({})
     expect(Common.clean({ a: 1 })).equal({ a: 1 })
     expect(Common.clean({ b$: 2, a: 1 })).equal({ a: 1 })
@@ -447,7 +447,7 @@ describe('common', function() {
     fin()
   })
 
-  it('parse_jsonic', function(fin) {
+  it('parse_jsonic', function (fin) {
     expect(Common.parse_jsonic('a:b')).equal({ a: 'b' })
     expect(Common.parse_jsonic('\na:b')).equal({ a: 'b' })
 
@@ -468,7 +468,7 @@ describe('common', function() {
     fin()
   })
 
-  it('make_plugin_key', function(fin) {
+  it('make_plugin_key', function (fin) {
     expect(Common.make_plugin_key('foo')).equal('foo')
     expect(Common.make_plugin_key('foo', '0')).equal('foo$0')
     expect(Common.make_plugin_key('foo', 0)).equal('foo$0')

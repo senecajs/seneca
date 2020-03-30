@@ -52,7 +52,7 @@ const option_defaults = {
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
   default_plugins: {
-    transport: true
+    transport: true,
   },
 
   // Test mode. Use for unit testing.
@@ -91,7 +91,7 @@ const option_defaults = {
 
       // Include environment when printing full crash report.
       // Default: false for security.
-      env: false
+      env: false,
     },
 
     // Trace action caller and place in args.caller$.
@@ -113,7 +113,7 @@ const option_defaults = {
     env: null,
 
     // Length of data description in logs
-    datalen: 111
+    datalen: 111,
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -135,7 +135,7 @@ const option_defaults = {
     maxloop: 11,
 
     // Exports must exist
-    exports: false
+    exports: false,
   },
 
   // Keep a transient time-ordered history of actions submitted
@@ -147,7 +147,7 @@ const option_defaults = {
     prune: true,
 
     // Prune the history only periodically.
-    interval: 100
+    interval: 100,
   },
 
   // Action executor tracing. See gate-executor module.
@@ -159,14 +159,14 @@ const option_defaults = {
     unknown: true,
 
     // Messages that have invalid content
-    invalid: false
+    invalid: false,
   },
 
   // Action statistics settings. See rolling-stats module.
   stats: {
     size: 1024,
     interval: 60000,
-    running: false
+    running: false,
   },
 
   // Plugin settings
@@ -184,12 +184,12 @@ const option_defaults = {
       SIGHUP: false,
       SIGTERM: false,
       SIGINT: false,
-      SIGBREAK: false
+      SIGBREAK: false,
     },
 
     plugin: {
-      load_once: false
-    }
+      load_once: false,
+    },
   },
 
   // Internal functionality. Reserved for objects and functions only.
@@ -200,8 +200,8 @@ const option_defaults = {
       log: null,
 
       // Print to standard err
-      err: null
-    }
+      err: null,
+    },
   },
 
   // Log status at periodic intervals.
@@ -209,17 +209,17 @@ const option_defaults = {
     interval: 60000,
 
     // By default, does not run.
-    running: false
+    running: false,
   },
 
   // Shared default transport configuration
   transport: {
     // Standard port for messages.
-    port: 10101
+    port: 10101,
   },
 
   limits: {
-    maxparents: 33
+    maxparents: 33,
   },
 
   // Setup event listeners before starting
@@ -252,8 +252,8 @@ const option_defaults = {
     fail: false,
 
     // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: true
-  }
+    timeout_string: true,
+  },
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.
@@ -283,12 +283,12 @@ const seneca_util = {
   },
   resolve_option: Common.resolve_option,
   flatten: Common.flatten,
-  argprops: Legacy.argprops
+  argprops: Legacy.argprops,
 }
 
 // Internal implementations.
 const intern = {
-  util: seneca_util
+  util: seneca_util,
 }
 
 // Seneca is an EventEmitter.
@@ -311,7 +311,7 @@ Seneca.prototype.toJSON = function toJSON() {
     fixedargs: this.fixedargs,
     fixedmeta: this.fixedmeta,
     start_time: this.start_time,
-    version: this.version
+    version: this.version,
   }
 }
 
@@ -355,7 +355,7 @@ module.exports = function init(seneca_options, more_options) {
     }
   }
 
-  seneca.ready(function() {
+  seneca.ready(function () {
     this.log.info({ kind: 'notice', data: 'hello ' + this.id })
   })
 
@@ -412,7 +412,7 @@ function make_seneca(initial_opts) {
   // Console print utilities
   private$.print = {
     log: start_opts.internal.print.log || Print.internal_log,
-    err: start_opts.internal.print.err || Print.internal_err
+    err: start_opts.internal.print.err || Print.internal_err,
   }
 
   // These need to come from options as required during construction.
@@ -422,12 +422,12 @@ function make_seneca(initial_opts) {
   private$.subrouter = {
     // Check for legacy inward router
     inward: soi_subrouter.inward || Patrun({ gex: true }),
-    outward: soi_subrouter.outward || Patrun({ gex: true })
+    outward: soi_subrouter.outward || Patrun({ gex: true }),
   }
 
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
-  event_names.forEach(function(event_name) {
+  event_names.forEach(function (event_name) {
     if ('function' === typeof start_opts.events[event_name]) {
       root$.on(event_name, start_opts.events[event_name])
     }
@@ -453,7 +453,7 @@ function make_seneca(initial_opts) {
   root$.fixedargs = {}
 
   root$.flags = {
-    closed: false
+    closed: false,
   }
 
   Object.defineProperty(root$, 'root', { value: root$ })
@@ -553,7 +553,7 @@ function make_seneca(initial_opts) {
     plugin: 'seneca',
     tag: root$.version,
     id: root$.id,
-    callpoint: callpoint
+    callpoint: callpoint,
   })
 
   root$.util = seneca_util
@@ -566,7 +566,7 @@ function make_seneca(initial_opts) {
   root$.on('error', root$.die)
 
   private$.ge = GateExecutor({
-    timeout: start_opts.timeout
+    timeout: start_opts.timeout,
   })
     //.clear(action_queue_clear)
     .clear(ready.clear_ready)
@@ -580,7 +580,7 @@ function make_seneca(initial_opts) {
       root$.log.info({
         kind: 'status',
         alive: Date.now() - private$.stats.start,
-        act: private$.stats.act
+        act: private$.stats.act,
       })
     }, start_opts.status.interval)
   }
@@ -605,7 +605,7 @@ function make_seneca(initial_opts) {
     module: start_opts.internal.module || module,
     msgprefix: false,
     builtin: '',
-    merge_defaults: false
+    merge_defaults: false,
   })
 
   // TODO: provide an api to add these
@@ -615,7 +615,7 @@ function make_seneca(initial_opts) {
         actdef.rules,
         Common.deepextend({}, actdef.func.validate || {})
       )
-    }
+    },
   ]
 
   private$.sub = { handler: null, tracers: [] }
@@ -657,7 +657,7 @@ function make_seneca(initial_opts) {
   // Load logger and update log options
   var logspec = private$.logging.build_log(root$)
   start_opts = private$.exports.options = private$.optioner.set({
-    log: logspec
+    log: logspec,
   })
 
   if (start_opts.test) {
@@ -668,7 +668,7 @@ function make_seneca(initial_opts) {
     root$.quiet()
   }
 
-  private$.exit_close = function() {
+  private$.exit_close = function () {
     root$.close(function root_exit_close(err) {
       if (err && true != private$.optioner.get().quiet) {
         private$.print.err(err)
@@ -689,7 +689,7 @@ function make_seneca(initial_opts) {
         port: 62345,
         host: '127.0.0.1',
         path: '/act',
-        protocol: 'http'
+        protocol: 'http',
       },
       start_opts.transport
     )
@@ -699,7 +699,7 @@ function make_seneca(initial_opts) {
 
   Print(root$, start_opts.debug.argv || process.argv)
 
-  Common.each(start_opts.system.close_signals, function(active, signal) {
+  Common.each(start_opts.system.close_signals, function (active, signal) {
     if (active) {
       process.once(signal, private$.exit_close)
     }
@@ -718,16 +718,16 @@ function make_private() {
         calls: 0,
         done: 0,
         fails: 0,
-        cache: 0
+        cache: 0,
       },
-      actmap: {}
+      actmap: {},
     },
     actdef: {},
     transport: {
-      register: []
+      register: [],
     },
     plugins: {},
-    ignore_plugins: {}
+    ignore_plugins: {},
   }
 }
 
@@ -738,7 +738,7 @@ function make_callpoint(active) {
       return error.callpoint(new Error(), [
         '/seneca/seneca.js',
         '/seneca/lib/',
-        '/lodash.js'
+        '/lodash.js',
       ])
     } else {
       return void 0
