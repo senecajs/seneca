@@ -1,3 +1,8 @@
+## 3.20.3 2020-03-20
+
+* Removed lodash as a dependency.
+
+
 ## 3.20.2 2020-03-12
 
 * Fixed empty string option failure.
