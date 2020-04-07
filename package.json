@@ -107,7 +107,7 @@
     "async": "^3.2.0",
     "bench": "^0.3.6",
     "coveralls": "^3.0.11",
-    "handlebars": "^4.7.3",
+    "handlebars": "^4.7.6",
     "lolex": "^6.0.0",
     "prettier": "^2.0.2",
     "seneca-entity": "^8.0.0",
