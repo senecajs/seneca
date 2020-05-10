@@ -36,7 +36,7 @@ before_script:
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
       git clone https://github.com/$TEST_SUITE;
       cd $TEST_SUITE_FOLDER;
-      npm i;
+      npm install --only=production;
       npm uninstall seneca;
     fi
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
@@ -44,6 +44,7 @@ before_script:
     fi
 
 script:
+  - npm list lodash
   - npm test
   - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
 
