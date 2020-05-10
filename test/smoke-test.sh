@@ -1,4 +1,5 @@
 
+# Validates seneca production install
 # Run from project root
 
 rm -rf smoke-test

@@ -17,5 +17,7 @@ script:
   - rm -rf node_modules
   - npm ci --only=production
   - ./test/smoke-test.sh
+  - ./test/entity-test.sh
+  - ./test/joi-test.sh
   
 
