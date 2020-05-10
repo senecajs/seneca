@@ -18,7 +18,7 @@ env:
 #    - TEST_SUITE=senecajs/seneca-joi
 
 install:
-  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@latest; npm ci; else npm ci; fi
+  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm install --only=production -g npm@latest; npm ci; else npm ci; fi
 
 
 
