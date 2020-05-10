@@ -12,10 +12,10 @@ env:
   global:
     - TIMEOUT_MULTIPLIER=8
   matrix:
-    - TEST_SUITE=senecajs/seneca
+#    - TEST_SUITE=senecajs/seneca
     - TEST_SUITE=senecajs/smoke-test
-    - TEST_SUITE=senecajs/seneca-entity
-    - TEST_SUITE=senecajs/seneca-joi
+#    - TEST_SUITE=senecajs/seneca-entity
+#    - TEST_SUITE=senecajs/seneca-joi
 
 install:
   - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@latest; npm ci; else npm ci; fi
