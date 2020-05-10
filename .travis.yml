@@ -42,9 +42,9 @@ before_script:
   - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
       npm install --only=production "$SENECA_INSTALL";
     fi
+  - npm list
 
 script:
-  - npm list lodash
   - npm test
   - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
 
