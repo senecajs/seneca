@@ -15,7 +15,7 @@ script:
   - npm audit
   - npm run coveralls
   - rm -rf node_modules
-  - npm ci --only=prodution
+  - npm ci --only=production
   - ./test/smoke-test.sh
   
 
