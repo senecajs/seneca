@@ -1,65 +1,19 @@
 language: node_js
-sudo: false
 
 node_js:
-  - '10'
-  - '11'
   - '12'
-  - '13'
-  - '14'
 
 env:
   global:
     - TIMEOUT_MULTIPLIER=8
-  matrix:
-#    - TEST_SUITE=senecajs/seneca
-    - TEST_SUITE=senecajs/smoke-test
-#    - TEST_SUITE=senecajs/seneca-entity
-#    - TEST_SUITE=senecajs/seneca-joi
-
+    
 install:
-#  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm install --only=production -g npm@latest; npm ci; else npm ci; fi
-
-
-
-before_script:
-  - export SENECA_REPO_NAME=${TRAVIS_REPO_SLUG%/*}
-  - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
-  - if [ "null" == "$BRANCH" ]; then BRANCH=""; else BRANCH="#$BRANCH"; fi
-  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-  - TEST_SUITE_FOLDER=$(basename $TEST_SUITE)
-  - echo "TEST_SUITE:$TEST_SUITE"
-  - echo "TEST_SUITE_FOLDER:$TEST_SUITE_FOLDER"
-  - SENECA_INSTALL=https://github.com/$SENECA_REPO_NAME/seneca$BRANCH;
-  - echo "SENECA_INSTALL:$SENECA_INSTALL";
-  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
-      git clone https://github.com/$TEST_SUITE;
-      cd $TEST_SUITE_FOLDER;
-      npm install --only=production;
-      npm uninstall seneca;
-    fi
-  - if [ $TEST_SUITE_FOLDER != 'seneca' ]; then
-      npm install --only=production "$SENECA_INSTALL";
-    fi
-  - npm list
+  - npm ci
 
 script:
   - npm test
-  - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
-
-cache:
-  directories:
-    - "$HOME/.npm"
-
+  - npm audit
+  
 after_script:
   - npm run coveralls
 
-
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/b98f41fd6ac7d5740632
-    on_success: change  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: false     # default: false
