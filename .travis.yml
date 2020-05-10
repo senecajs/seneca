@@ -13,7 +13,9 @@ install:
 script:
   - npm test
   - npm audit
-  
-after_script:
   - npm run coveralls
+  - rm -rf node_modules
+  - npm ci --only=prodution
+  - ./test/smoke-test.sh
+  
 
