@@ -128,9 +128,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.silent']
     var si = Seneca(opts)
-    expect(
-      si.export('options').log).includes({ level: 'silent' })
-    
+    expect(si.export('options').log).includes({ level: 'silent' })
 
     done()
   })
@@ -170,9 +168,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.standard']
     var si = Seneca(opts)
-    expect(
-      si.export('options').log).includes({ level: 'standard' })
-    
+    expect(si.export('options').log).includes({ level: 'standard' })
 
     done()
   })
@@ -189,9 +185,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.silent']
     var si = Seneca(opts)
-    expect(
-      si.export('options').log).includes({ level: 'silent' })
-    
+    expect(si.export('options').log).includes({ level: 'silent' })
 
     done()
   })
@@ -231,9 +225,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.standard']
     var si = Seneca(opts)
-    expect(
-      si.export('options').log).includes({ level: 'standard' })
-    
+    expect(si.export('options').log).includes({ level: 'standard' })
 
     done()
   })
