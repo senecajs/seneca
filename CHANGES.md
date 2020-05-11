@@ -1,3 +1,13 @@
+## 3.20.5 2020-05-11
+
+* Remove lodash from dependencies.
+
+
+## 3.20.4 2020-05-11
+
+* Actually remove lodash.
+
+
 ## 3.20.3 2020-03-20
 
 * Removed lodash as a dependency.
