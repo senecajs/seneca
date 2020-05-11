@@ -12,6 +12,7 @@
 [![Travis][BadgeTravis]][Travis]
 [![Coveralls][BadgeCoveralls]][Coveralls]
 [![DeepScan][BadgeDeepScan]][DeepScan]
+[![CodeClimate][BadgeCodeClimate]][CodeClimate]
 [![Gitter][BadgeGitter]][Gitter]
 
 - __Lead Maintainer:__ [Richard Rodger][Lead]
@@ -396,6 +397,7 @@ Licensed under __[MIT][Lic]__.
 
 [BadgeCoveralls]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
 [BadgeDeepScan]: https://deepscan.io/api/teams/5016/projects/6816/branches/59148/badge/grade.svg
+[BadgeCodeClimate]: https://api.codeclimate.com/v1/badges/3a95be9ab6432c620bea/maintainability
 [BadgeNpm]: https://badge.fury.io/js/seneca.svg
 [BadgeGitter]: https://badges.gitter.im/senecajs/seneca.svg
 [BadgeNpmFigs]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
@@ -404,6 +406,7 @@ Licensed under __[MIT][Lic]__.
 [Contrib]: http://senecajs.org/contribute
 [Coveralls]: https://coveralls.io/github/senecajs/seneca?branch=master
 [DeepScan]: https://deepscan.io/dashboard#view=project&tid=5016&pid=6816&bid=59148
+[CodeClimate]: https://codeclimate.com/github/senecajs/seneca/maintainability
 [Gitter]: https://gitter.im/senecajs/seneca
 [Issue]: https://github.com/senecajs/seneca/issues/new
 [Lead]: https://github.com/rjrodger
@@ -420,4 +423,5 @@ Licensed under __[MIT][Lic]__.
 [Lightning]: http://aws.amazon.com/message/67457/
 [Plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
 [taomicro]: https://bitly.com/rrtaomicro
+
 
