@@ -1,7 +1,6 @@
-/* Copyright (c) 2014-2018 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2014-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var _ = require('lodash')
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
@@ -27,7 +26,7 @@ var make_balance_transport = TransportStubs.make_balance_transport
 function testact(msg, reply) {
   var seneca = this
   setTimeout(function () {
-    var out = seneca.util.clean(_.clone(msg))
+    var out = seneca.util.clean(Object.assign({},msg))
     out.bar = out.bar + 1
 
     if (out.baz) {
@@ -390,16 +389,16 @@ describe('transport', function () {
 
   describe('listen()', function () {
     it('supports null options', test_opts, function (done) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {}
         },
-        act: _.noop,
+        act: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -412,18 +411,18 @@ describe('transport', function () {
     })
 
     it('supports type as tcp option', test_opts, function (done) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {
             type: 'tcp',
           }
         },
-        act: _.noop,
+        act: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -436,18 +435,18 @@ describe('transport', function () {
     })
 
     it('supports type as http option', test_opts, function (done) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {
             type: 'http',
           }
         },
-        act: _.noop,
+        act: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -460,16 +459,16 @@ describe('transport', function () {
     })
 
     it('supports the port number as an argument', test_opts, function (done) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {}
         },
-        act: _.noop,
+        act: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -484,16 +483,16 @@ describe('transport', function () {
     it('supports the port number and host as an argument', test_opts, function (
       done
     ) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {}
         },
-        act: _.noop,
+        act: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -509,17 +508,17 @@ describe('transport', function () {
       'supports the port number, host, and path as an argument',
       test_opts,
       function (done) {
-        var listen = Transport.listen(_.noop)
+        var listen = Transport.listen(()=>{})
         var seneca = {
-          private$: { error: _.noop },
+          private$: { error: ()=>{} },
           log: {
-            info: _.noop,
-            debug: _.noop,
+            info: ()=>{},
+            debug: ()=>{},
           },
           options: function () {
             return {}
           },
-          act: _.noop,
+          act: ()=>{},
           context: {},
           make_log: function () {},
         }
@@ -533,7 +532,7 @@ describe('transport', function () {
     )
 
     it('action-error', test_opts, function (fin) {
-      var listen = Transport.listen(_.noop)
+      var listen = Transport.listen(()=>{})
       var seneca = {
         private$: {
           error: function (err) {
@@ -542,8 +541,8 @@ describe('transport', function () {
           },
         },
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {}
@@ -551,7 +550,7 @@ describe('transport', function () {
         act: function (pattern, options, callback) {
           callback(new Error())
         },
-        die: _.noop,
+        die: ()=>{},
         context: {},
         make_log: function () {},
       }
@@ -562,25 +561,25 @@ describe('transport', function () {
 
   describe('client()', function () {
     it('supports null options', test_opts, function (done) {
-      var client = Transport.client(_.noop, function () {
-        return _.noop
+      var client = Transport.client(()=>{}, function () {
+        return ()=>{}
       })
       var seneca = {
         log: {
-          info: _.noop,
-          debug: _.noop,
+          info: ()=>{},
+          debug: ()=>{},
         },
         options: function () {
           return {}
         },
-        act: _.noop,
+        act: ()=>{},
         delegate: function () {
           return Object.create(this)
         },
-        add: _.noop,
+        add: ()=>{},
         context: {},
         make_log: function () {},
-        private$: { ge: { gate: function () {} }, error: _.noop },
+        private$: { ge: { gate: function () {} }, error: ()=>{} },
       }
 
       var fn = function () {
@@ -592,8 +591,8 @@ describe('transport', function () {
     })
 
     it('supports send to client queueing', test_opts, function (done) {
-      var client = Transport.client(_.noop, function () {
-        return _.noop
+      var client = Transport.client(()=>{}, function () {
+        return ()=>{}
       })
       var seneca = {
         log: function () {},
@@ -615,18 +614,18 @@ describe('transport', function () {
         },
         context: {},
         make_log: function () {},
-        private$: { ge: { gate: function () {} }, error: _.noop },
+        private$: { ge: { gate: function () {} }, error: ()=>{} },
       }
 
-      seneca.log.info = _.noop
-      seneca.log.debug = _.noop
+      seneca.log.info = ()=>{}
+      seneca.log.debug = ()=>{}
 
       client.call(seneca)
     })
 
     it('supports pins represented by strings', test_opts, function (done) {
-      var client = Transport.client(_.noop, function () {
-        return _.noop
+      var client = Transport.client(()=>{}, function () {
+        return ()=>{}
       })
       var seneca = {
         log: function () {},
@@ -651,8 +650,8 @@ describe('transport', function () {
         private$: { ge: { gate: function () {} } },
       }
 
-      seneca.log.info = _.noop
-      seneca.log.debug = _.noop
+      seneca.log.info = ()=>{}
+      seneca.log.debug = ()=>{}
 
       client.call(seneca)
     })

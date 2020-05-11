@@ -1,7 +1,6 @@
 /* Copyright © 2013-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var _ = require('lodash')
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
@@ -425,14 +424,14 @@ describe('plugin', function () {
     var si = Seneca.test(fin)
 
     function echo(args, cb) {
-      cb(null, _.extend({ t: Date.now() }, args))
+      cb(null, Object.assign({ t: Date.now() }, args))
     }
 
     var plugin_aaa = function aaa() {
       this.add({ a: 1 }, function (args, cb) {
         this.act('z:1', function (err, out) {
           expect(err).to.not.exist()
-          cb(null, _.extend({ a: 1 }, out))
+          cb(null, Object.assign({ a: 1 }, out))
         })
       })
     }
@@ -453,7 +452,7 @@ describe('plugin', function () {
         this.add({ a: 1 }, function (args, fin) {
           this.act('z:1', function (err, out) {
             expect(err).to.not.exist()
-            fin(null, _.extend({ a: 1, w: 1 }, out))
+            fin(null, Object.assign({ a: 1, w: 1 }, out))
           })
         })
       })

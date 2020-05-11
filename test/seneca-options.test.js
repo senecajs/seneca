@@ -6,7 +6,6 @@ var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 const Code = require('@hapi/code')
 var expect = Code.expect
-var _ = require('lodash')
 
 var Shared = require('./shared')
 var it = Shared.make_it(lab)
@@ -45,7 +44,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn+']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'warn+' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'warn+' })
 
     done()
   })
@@ -54,7 +53,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.warn']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'warn' })
 
     done()
   })
@@ -63,7 +62,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.warn+']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'warn+' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'warn+' })
 
     done()
   })
@@ -77,7 +76,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
       '--seneca.log=level:error',
     ]
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'warn' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'warn' })
 
     done()
   })
@@ -101,7 +100,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.abc']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'abc' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'abc' })
 
     done()
   })
@@ -110,7 +109,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.abc']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'abc' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'abc' })
 
     done()
   })
@@ -121,7 +120,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.quiet']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'quiet' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'quiet' })
 
     done()
   })
@@ -130,8 +129,8 @@ describe('seneca --seneca.log aliases tests: ', function () {
     opts.debug.argv = ['', '', '--seneca.log.silent']
     var si = Seneca(opts)
     expect(
-      _.isMatch(si.export('options').log, { level: 'silent' })
-    ).to.be.true()
+      si.export('options').log).includes({ level: 'silent' })
+    
 
     done()
   })
@@ -139,7 +138,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.all']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'all' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'all' })
 
     done()
   })
@@ -147,7 +146,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.any']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'any' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'any' })
 
     done()
   })
@@ -155,7 +154,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.print']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'print' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'print' })
 
     done()
   })
@@ -163,7 +162,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.test']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'test' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'test' })
 
     done()
   })
@@ -172,8 +171,8 @@ describe('seneca --seneca.log aliases tests: ', function () {
     opts.debug.argv = ['', '', '--seneca.log.standard']
     var si = Seneca(opts)
     expect(
-      _.isMatch(si.export('options').log, { level: 'standard' })
-    ).to.be.true()
+      si.export('options').log).includes({ level: 'standard' })
+    
 
     done()
   })
@@ -182,7 +181,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.quiet']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'quiet' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'quiet' })
 
     done()
   })
@@ -191,8 +190,8 @@ describe('seneca --seneca.log aliases tests: ', function () {
     opts.debug.argv = ['', '', '--seneca.log.level.silent']
     var si = Seneca(opts)
     expect(
-      _.isMatch(si.export('options').log, { level: 'silent' })
-    ).to.be.true()
+      si.export('options').log).includes({ level: 'silent' })
+    
 
     done()
   })
@@ -200,7 +199,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.all']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'all' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'all' })
 
     done()
   })
@@ -208,7 +207,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.any']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'any' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'any' })
 
     done()
   })
@@ -216,7 +215,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.print']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'print' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'print' })
 
     done()
   })
@@ -224,7 +223,7 @@ describe('seneca --seneca.log aliases tests: ', function () {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log.level.test']
     var si = Seneca(opts)
-    expect(_.isMatch(si.export('options').log, { level: 'test' })).to.be.true()
+    expect(si.export('options').log).includes({ level: 'test' })
 
     done()
   })
@@ -233,8 +232,8 @@ describe('seneca --seneca.log aliases tests: ', function () {
     opts.debug.argv = ['', '', '--seneca.log.level.standard']
     var si = Seneca(opts)
     expect(
-      _.isMatch(si.export('options').log, { level: 'standard' })
-    ).to.be.true()
+      si.export('options').log).includes({ level: 'standard' })
+    
 
     done()
   })

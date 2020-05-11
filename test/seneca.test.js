@@ -5,7 +5,6 @@ var Assert = require('assert')
 var Util = require('util')
 const Code = require('@hapi/code')
 var Gex = require('gex')
-var _ = require('lodash')
 const Lab = require('@hapi/lab')
 var Package = require('../package.json')
 var Common = require('../lib/common.js')
@@ -1086,7 +1085,7 @@ describe('seneca', function () {
   })
 
   it('supports a function to trace actions', function (done) {
-    var seneca = Seneca({ log: 'silent', trace: { act: _.noop } })
+    var seneca = Seneca({ log: 'silent', trace: { act: ()=>{} } })
     seneca.add({ a: 1 }, function (args, cb) {
       cb(null, { b: 2 })
     })
@@ -1099,7 +1098,7 @@ describe('seneca', function () {
 
   it('supports true to be passed as trace action option', function (done) {
     var stdout = process.stdout.write
-    process.stdout.write = _.noop
+    process.stdout.write = ()=>{}
 
     var seneca = Seneca({ log: 'silent', trace: { act: true } })
     seneca.add({ a: 1 }, function (args, cb) {

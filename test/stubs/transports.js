@@ -1,7 +1,6 @@
 /* Copyright (c) 2014-2017 Richard Rodger, MIT License */
 'use strict'
 
-var _ = require('lodash')
 var Async = require('async')
 var Util = require('util')
 
@@ -29,7 +28,7 @@ function make_test_transport () {
     function hook_listen_test (args, done) {
       var seneca = this
       var type = args.type
-      var listen_options = seneca.util.clean(_.extend({}, options[type], args))
+      var listen_options = seneca.util.clean(Object.assign({}, options[type], args))
 
       tu.listen_topics(seneca, seneca.util.clean(args), listen_options, function (topic) {
         seneca.log.debug('listen', 'subscribe', topic + '_act',
@@ -60,7 +59,7 @@ function make_test_transport () {
     function hook_client_test (args, clientdone) {
       var seneca = this
       var type = args.type
-      var client_options = seneca.util.clean(_.extend({}, options[type], args))
+      var client_options = seneca.util.clean(Object.assign({}, options[type], args))
 
       tu.make_client(make_send, client_options, clientdone)
 
@@ -130,7 +129,7 @@ function make_balance_transport () {
     function hook_client_test (args, clientdone) {
       var seneca = this
       var type = args.type
-      var client_options = seneca.util.clean(_.extend({}, options[type], args))
+      var client_options = seneca.util.clean(Object.assign({}, options[type], args))
 
       tu.make_client(make_send, client_options, clientdone)
 
