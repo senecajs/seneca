@@ -155,7 +155,7 @@ describe('custom', function () {
   })
 
   it('custom-entity', test_opts, function (fin) {
-    var v8 = require('v8')
+    // var v8 = require('v8')
 
     var si = Seneca()
       .test(fin)

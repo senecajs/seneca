@@ -1,11 +1,17 @@
 ![Logo][]
 > A Node.js toolkit for Microservice architectures
 
+
+| ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
+|---|---|
+
+
 # seneca
 [![Npm][BadgeNpm]][Npm]
 [![NpmFigs][BadgeNpmFigs]][Npm]
 [![Travis][BadgeTravis]][Travis]
 [![Coveralls][BadgeCoveralls]][Coveralls]
+[![DeepScan][BadgeDeepScan]][DeepScan]
 [![Gitter][BadgeGitter]][Gitter]
 
 - __Lead Maintainer:__ [Richard Rodger][Lead]
@@ -389,6 +395,7 @@ Licensed under __[MIT][Lic]__.
 
 
 [BadgeCoveralls]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
+[BadgeDeepScan]: https://deepscan.io/api/teams/5016/projects/6816/branches/59148/badge/grade.svg
 [BadgeNpm]: https://badge.fury.io/js/seneca.svg
 [BadgeGitter]: https://badges.gitter.im/senecajs/seneca.svg
 [BadgeNpmFigs]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
@@ -396,6 +403,7 @@ Licensed under __[MIT][Lic]__.
 [CoC]: http://senecajs.org/code-of-conduct
 [Contrib]: http://senecajs.org/contribute
 [Coveralls]: https://coveralls.io/github/senecajs/seneca?branch=master
+[DeepScan]: https://deepscan.io/dashboard#view=project&tid=5016&pid=6816&bid=59148
 [Gitter]: https://gitter.im/senecajs/seneca
 [Issue]: https://github.com/senecajs/seneca/issues/new
 [Lead]: https://github.com/rjrodger
@@ -407,8 +415,6 @@ Licensed under __[MIT][Lic]__.
 [Sponsor]: http://www.voxgig.com
 [Travis]: https://travis-ci.org/senecajs/seneca?branch=master
 [Tweet]: https://twitter.com/senecajs
-
-
 
 [Jsonic]: https//github.com/rjrodger/jsonic
 [Lightning]: http://aws.amazon.com/message/67457/
