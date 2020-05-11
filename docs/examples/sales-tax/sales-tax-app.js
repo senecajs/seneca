@@ -12,10 +12,20 @@ seneca.ready(function () {
   var app = Connect()
   app.use(Connect_query())
   app.use(Body_parser.json())
-  app.use(seneca.export('web'))
 
+  app.use(function(req, res) {
+    seneca.act(
+      {
+        role: 'shop',
+        cmd: 'salestax',
+        country: req.query.country,
+        net: req.query.net
+      },
+      function(err, out) {
+        res.end(JSON.stringify(err || out))
+      }
+    )
+  })
+  
   app.listen(3000)
 })
-// Uncomment these two lines to use the admin console
-// seneca.use('data-editor')
-// seneca.use('admin', {server: app, local: true})

@@ -1,0 +1,16 @@
+{
+  "name": "@seneca/sales-tax-example",
+  "version": "0.0.1",
+  "description": "A walkthrough of these examples is given in the github README: https://github.com/rjrodger/seneca",
+  "main": "sales-tax.js",
+  "scripts": {
+    "test": "./testrun.sh"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect": "^3.7.0",
+    "connect-query": "^1.0.0"
+  }
+}
