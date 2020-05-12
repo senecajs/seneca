@@ -69,7 +69,9 @@
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 90",
+    "watch": "tsc -w -d",
+    "build": "tsc -d",
+    "test": "lab -v -P test -L -t 90 --sourcemaps --transform node_modules/lab-transform-typescript  -r console -o stdout -r html -o test/coverage.html",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "smoke": "node test/stubs/launch.js",
@@ -110,11 +112,13 @@
     "bench": "^0.3.6",
     "coveralls": "^3.1.0",
     "handlebars": "^4.7.6",
+    "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.0.5",
     "seneca-entity": "^8.0.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
-    "seneca-promisify": "^1.2.0"
+    "seneca-promisify": "^1.2.0",
+    "typescript": "^3.8.3"
   }
 }
