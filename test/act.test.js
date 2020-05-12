@@ -3,7 +3,7 @@
 
 const Util = require('util')
 
-const Ordu = require('ordu')
+const { LegacyOrdu } = require('ordu')
 
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
@@ -48,7 +48,7 @@ describe('act', function () {
   })
 
   it('process_outward', function (fin) {
-    var outward = Ordu({ name: 'outward' })
+    var outward = LegacyOrdu({ name: 'outward' })
       .add(function (ctxt, data) {
         data.x = 1
       })

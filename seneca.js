@@ -12,7 +12,7 @@ const UsePlugin = require('use-plugin')
 const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
-const Ordu = require('ordu')
+const { LegacyOrdu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
@@ -25,6 +25,7 @@ const Ready = require('./lib/ready')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
 const Act = require('./lib/act')
+const Use = require('./lib/use')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
@@ -480,7 +481,7 @@ function make_seneca(initial_opts) {
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
-  root$.use = API.use // Define and load a plugin.
+  root$.use = Use.api_use // Define and load a plugin.
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
@@ -620,7 +621,7 @@ function make_seneca(initial_opts) {
 
   private$.sub = { handler: null, tracers: [] }
 
-  private$.inward = Ordu({ name: 'inward' })
+  private$.inward = LegacyOrdu({ name: 'inward' })
     .add(Inward.msg_modify)
     .add(Inward.closed)
     .add(Inward.act_cache)
@@ -635,7 +636,7 @@ function make_seneca(initial_opts) {
     .add(Inward.sub)
     .add(Inward.announce)
 
-  private$.outward = Ordu({ name: 'outward' })
+  private$.outward = LegacyOrdu({ name: 'outward' })
     .add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
