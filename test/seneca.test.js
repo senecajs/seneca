@@ -574,9 +574,7 @@ describe('seneca', function () {
   })
 
   it('loading-plugins', function (done) {
-    var si = Seneca({
-      log: 'silent',
-    })
+    var si = Seneca().test()
 
     function Mock1() {
       var self = this
@@ -584,33 +582,28 @@ describe('seneca', function () {
       self.plugin = function () {
         return self
       }
-      self.init = function () {
+      self.define = function () {
         this.add({ role: self.name, cmd: 'foo' }, function (msg, cb) {
-          cb(null, 'foo:' + msg.foo)
+          cb(null, {x:'foo:' + msg.foo})
         })
       }
     }
 
     si = Seneca(testopts)
-    si.register(new Mock1(), function (err) {
-      assert.equal(err, null)
+    si.use(new Mock1())
 
-      si.act({ role: 'mock1', cmd: 'foo', foo: 1 }, function (err, out) {
-        assert.equal(err, null)
-        assert.equal('foo:1', out)
-      })
+    si.act({ role: 'mock1', cmd: 'foo', foo: 1 }, function (err, out) {
+      assert.equal(err, null)
+      assert.equal('foo:1', out.x)
     })
 
     si = Seneca(testopts)
     var mock1a = new Mock1()
     mock1a.name = 'mock1a'
-    si.register(mock1a, function (err) {
+    si.use(mock1a)
+    si.act({ role: 'mock1a', cmd: 'foo', foo: 1 }, function (err, out) {
       assert.equal(err, null)
-
-      si.act({ role: 'mock1a', cmd: 'foo', foo: 1 }, function (err, out) {
-        assert.equal(err, null)
-        assert.equal('foo:1', out)
-      })
+      assert.equal('foo:1', out.x)
     })
 
     function Mock2() {
@@ -619,31 +612,26 @@ describe('seneca', function () {
       self.plugin = function () {
         return self
       }
-      self.init = function () {
+      self.define = function () {
         this.add({ role: 'mock1', cmd: 'foo' }, function (msg, cb) {
           this.prior(msg, function (err, out) {
             assert.equal(err, null)
-            cb(null, 'bar:' + out)
+            cb(null, {x:'bar:' + out.x})
           })
         })
       }
     }
 
     si = Seneca(testopts)
-    si.register(new Mock1(), function (err) {
+    si.use(new Mock1())
+    si.use(new Mock2())
+
+    si.act({ role: 'mock1', cmd: 'foo', foo: 2 }, function (err, out) {
       assert.equal(err, null)
-
-      si.register(new Mock2(), function (err) {
-        assert.equal(err, null)
-
-        si.act({ role: 'mock1', cmd: 'foo', foo: 2 }, function (err, out) {
-          assert.equal(err, null)
-          assert.equal('bar:foo:2', out)
-        })
-      })
+      assert.equal('bar:foo:2', out.x)
     })
 
-    done()
+    si.ready(done)
   })
 
   it('fire-and-forget', function (done) {

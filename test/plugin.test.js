@@ -14,6 +14,22 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('plugin', function () {
+  it('plugin-internal-ordu', (fin)=>{
+    var s = Seneca().test(fin)
+
+    var sin = s.internal()
+
+    var ordu_use = sin.ordu.use
+    expect(ordu_use.tasks().map(t=>t.name))
+      .equal(['args', 'load', 'normalize', 'preload', 'exports'])
+    expect(Object.keys(ordu_use.operators()))
+      .equal([ 'next', 'skip', 'stop', 'merge' ])
+    
+    fin()
+  })
+  
+
+
   // Validates that @seneca/ prefix can be dropped.
   it('standard-test-plugin', function (fin) {
     Seneca()

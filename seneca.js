@@ -463,6 +463,8 @@ function make_seneca(initial_opts) {
 
   const ready = Ready(root$)
 
+  const api_use = Use.api_use(callpoint)
+  
   // Seneca methods. Official API.
   root$.toString = API.toString
   root$.has = API.has // True if the given pattern has an action.
@@ -481,7 +483,7 @@ function make_seneca(initial_opts) {
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
-  root$.use = Use.api_use // Define and load a plugin.
+  root$.use = api_use.use // Define and load a plugin.
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
@@ -505,6 +507,15 @@ function make_seneca(initial_opts) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
+  root$.internal = function() {
+    return {
+      ordu: {
+        use: api_use.ordu
+      }
+    }
+  }
+
+  
   // Non-API methods.
   root$.register = Plugins.register(callpoint)
 
