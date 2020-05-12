@@ -24,6 +24,7 @@ function api_use(callpoint: any) {
   ordu.add(exec.normalize)
   ordu.add(exec.preload)
   ordu.add(exec.exports)
+  ordu.add(exec['legacy.extend'])
 
   return {
     use: make_use(ordu, callpoint),
@@ -44,7 +45,7 @@ interface UseCtx {
 interface UseData {
   args: string[]
   plugin: any
-  preload: any
+  meta: any
 }
 
 interface UseSpec {
@@ -68,7 +69,7 @@ function make_use(ordu: any, callpoint: any) {
     let data: UseData = {
       args: [],
       plugin: null,
-      preload: null,
+      meta: null,
     }
 
     // NOTE: don't wait for result!
@@ -195,20 +196,23 @@ function make_exec(): any {
       // TODO: how to handle this properly?
       seneca.private$.plugins[plugin.fullname] = plugin
 
-      let preload: any = {}
+      let meta: any = {}
 
       if ('function' === typeof plugin.define.preload) {
-        preload.meta = plugin.define.preload.call(seneca, plugin)
+        meta = plugin.define.preload.call(seneca, plugin) || {}
       }
 
-      preload.meta = preload.meta || {}
-      preload.name = preload.meta.name || plugin.name
-      preload.fullname = Common.make_plugin_key(preload.name, plugin.tag)
+      let name = meta.name || plugin.name
+      let fullname = Common.make_plugin_key(name, plugin.tag)
 
       return {
         op: 'merge',
         out: {
-          preload
+          meta,
+          plugin: {
+            name,
+            fullname
+          }
         }
       }
     },
@@ -218,11 +222,49 @@ function make_exec(): any {
       let seneca: any = spec.ctx.seneca
 
       let plugin: any = spec.data.plugin
-      let preload: any = spec.data.preload
+      let meta: any = spec.data.meta
 
-      seneca.private$.exports[preload.name] = preload.meta.export || plugin
+      // TODO: how to handle this properly?
+      seneca.private$.exports[plugin.name] = meta.export || plugin
+      seneca.private$.exports[plugin.fullname] = meta.export || plugin
 
-      seneca.register(plugin, preload)
+      let exportmap: any = meta.exportmap || meta.exports || {}
+
+      Object.keys(exportmap).forEach(k => {
+        let v: any = exportmap[k]
+        if (void 0 !== v) {
+          let exportname = plugin.fullname + '/' + k
+          seneca.private$.exports[exportname] = v
+        }
+      })
+    },
+
+
+    'legacy.extend': (spec: UseSpec) => {
+      let seneca: any = spec.ctx.seneca
+
+      let plugin: any = spec.data.plugin
+      let meta: any = spec.data.meta
+
+      if ('object' === typeof meta.extend) {
+        if ('function' === typeof meta.extend.action_modifier) {
+          seneca.private$.action_modifiers.push(meta.extend.action_modifier)
+        }
+
+        // FIX: needs to use logging.load_logger
+        if ('function' === typeof meta.extend.logger) {
+          if (
+            !meta.extend.logger.replace &&
+            'function' === typeof seneca.private$.logger.add
+          ) {
+            seneca.private$.logger.add(meta.extend.logger)
+          } else {
+            seneca.private$.logger = meta.extend.logger
+          }
+        }
+      }
+
+      seneca.register(plugin, meta)
     }
   }
 }

@@ -21,7 +21,14 @@ describe('plugin', function () {
 
     var ordu_use = sin.ordu.use
     expect(ordu_use.tasks().map(t=>t.name))
-      .equal(['args', 'load', 'normalize', 'preload', 'exports'])
+      .equal([
+        'args',
+        'load',
+        'normalize',
+        'preload',
+        'exports',
+        'legacy.extend'
+      ])
     expect(Object.keys(ordu_use.operators()))
       .equal([ 'next', 'skip', 'stop', 'merge' ])
     
