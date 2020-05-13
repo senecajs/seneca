@@ -96,7 +96,7 @@
     "nid": "^1.1.0",
     "norma": "^2.0.2",
     "optioner": "^5.0.1",
-    "ordu": "^1.1.1",
+    "ordu": "^1.2.0",
     "patrun": "^3.0.0",
     "qs": "^6.9.4",
     "rolling-stats": "^0.1.1",
@@ -119,6 +119,7 @@
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^1.2.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.2",
+    "@types/node": "^14.0.1"
   }
 }

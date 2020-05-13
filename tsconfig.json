@@ -6,7 +6,8 @@
     "noEmitOnError": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules"

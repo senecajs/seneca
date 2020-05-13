@@ -26,11 +26,20 @@ describe('plugin', function () {
         'load',
         'normalize',
         'preload',
-        'exports',
-        'legacy.extend'
+        'pre_exports',
+        'legacy_extend',
+        'delegate',
+        'define'
       ])
     expect(Object.keys(ordu_use.operators()))
-      .equal([ 'next', 'skip', 'stop', 'merge' ])
+      .equal([
+        'next',
+        'skip',
+        'stop',
+        'merge',
+        'seneca_plugin',
+        'seneca_export'
+      ])
     
     fin()
   })
@@ -322,9 +331,13 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
+        //console.log('AAA', err && err.details, err && err.seneca)
         expect('plugin_define_failed').equal(err.code)
+        //console.log('AAA1')
         expect(err.details.fullname).contains('bad_plugin_def')
+        //console.log('AAA2')
         expect(err.details.message).contains('plugin-def')
+        //console.log('AAA3')
         fin()
       },
     }).quiet()
@@ -915,8 +928,9 @@ describe('plugin', function () {
   })
 
   it('error-plugin-define', function (fin) {
-    var s0 = Seneca({ log: 'silent', debug: { undead: true } })
+    var s0 = Seneca({ legacy: false, log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
+      //console.log('BBB',err)
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')

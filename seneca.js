@@ -31,7 +31,7 @@ const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
 const Options = require('./lib/options')
 const Package = require('./package.json')
-const Plugins = require('./lib/plugins')
+//const Plugins = require('./lib/plugins')
 const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
@@ -517,7 +517,7 @@ function make_seneca(initial_opts) {
 
   
   // Non-API methods.
-  root$.register = Plugins.register(callpoint)
+  // root$.register = Plugins.register(callpoint)
 
   // DEPRECATE IN 4.x
   root$.findact = root$.find
