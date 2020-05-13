@@ -396,12 +396,14 @@ describe('custom', function () {
     })
   })
 
-  lab.it('custom-add', test_opts, async () => {
-    var si = await Seneca({ legacy: { transport: false } })
+  lab.it('custom-add-basic', test_opts, async () => {
+    var si = await Seneca({ legacy: false })
       .test()
       .use('promisify')
       // TODO: extend seneca.message in promisify to handle this form
-      .add(
+
+
+        .add(
         'foo:true',
         { fixed$: { bar: 1 }, custom$: { zed: 'a' } },
         function foo_true(msg, reply, meta) {
@@ -409,6 +411,7 @@ describe('custom', function () {
           reply(msg)
         }
       )
+
       .ready()
 
     var out = await si.post('foo:true')

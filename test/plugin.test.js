@@ -27,9 +27,12 @@ describe('plugin', function () {
         'normalize',
         'preload',
         'pre_exports',
-        'legacy_extend',
+        'pre_legacy_extend',
         'delegate',
-        'define'
+        'define',
+        'post_exports',
+        'post_legacy_extend',
+        'complete'
       ])
     expect(Object.keys(ordu_use.operators()))
       .equal([
@@ -796,7 +799,7 @@ describe('plugin', function () {
   })
 
   it('plugin-extend-action-modifier', function (fin) {
-    var si = Seneca({ log: 'silent' })
+    var si = Seneca({ legacy: false, xlog: 'silent' }).test()
       .use(function foo() {
         return {
           extend: {

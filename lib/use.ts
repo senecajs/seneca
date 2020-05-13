@@ -6,7 +6,7 @@ import * as Hoek from '@hapi/hoek'
 const Uniq: any = require('lodash.uniq')
 const Eraro: any = require('eraro')
 
-
+import Nua from 'nua'
 import { Ordu } from 'ordu'
 
 
@@ -20,7 +20,7 @@ exports.api_use = api_use
 
 function api_use(callpoint: any) {
   const intern = make_intern()
-  const ordu = new Ordu()
+  const ordu = new Ordu({ debug: true })
 
   ordu.operator('seneca_plugin', intern.op.seneca_plugin)
   ordu.operator('seneca_export', intern.op.seneca_export)
@@ -31,11 +31,15 @@ function api_use(callpoint: any) {
     intern.normalize,
     intern.preload,
     { name: 'pre_exports', exec: intern.exports },
-    intern.legacy_extend,
+    { name: 'pre_legacy_extend', exec: intern.legacy_extend },
     intern.delegate,
     //intern.options,
     intern.define,
-    //{ name: 'post_exports', exec: intern.exports },
+    { name: 'post_exports', exec: intern.exports },
+    { name: 'post_legacy_extend', exec: intern.legacy_extend },
+    function complete() {
+      //console.log('COMPLETE')
+    },
   ])
 
   return {
@@ -48,6 +52,7 @@ function api_use(callpoint: any) {
 
 
 interface UseCtx {
+  seq: { index: number }
   args: string[]
   seneca: any,
   callpoint: any
@@ -55,11 +60,13 @@ interface UseCtx {
 
 // TODO: not satisfactory
 interface UseData {
+  seq: number
   args: string[]
   plugin: any
   meta: any
   delegate: any
   plugin_done: any
+  exports: any
 }
 
 interface UseSpec {
@@ -72,34 +79,48 @@ interface UseSpec {
 
 
 function make_use(ordu: any, callpoint: any) {
+  let seq = { index: 0 }
+
   return function use() {
     var self = this
 
     let ctx: UseCtx = {
+      seq: seq,
       args: [...arguments],
       seneca: this,
       callpoint: callpoint(true)
     }
     let data: UseData = {
+      seq: -1,
       args: [],
       plugin: null,
       meta: null,
       delegate: null,
-      plugin_done: null
+      plugin_done: null,
+      exports: {}
     }
 
-    // NOTE: don't wait for result!
-    ordu.exec(ctx, data, {
-      done: function(res: any) {
-        // console.log('RES', res.err && res.err.details, res.err && res.err.seneca)
-        if (res.err) {
-          //self.die(self.private$.error(res.err, 'plugin_' + res.err.code))
-          var err = res.err.seneca ? res.err :
-            self.private$.error(res.err, res.err.code)
-          self.die(err)
+    async function run() {
+      // NOTE: don't wait for result!
+      //var resp =
+      await ordu.exec(ctx, data, {
+        done: function(res: any) {
+          //console.log('RES-ERR', res.err)
+
+          if (res.err) {
+            //self.die(self.private$.error(res.err, 'plugin_' + res.err.code))
+            var err = res.err.seneca ? res.err :
+              self.private$.error(res.err, res.err.code)
+            self.die(err)
+          }
         }
-      }
-    })
+      })
+
+      //console.log('RESP')
+      //console.dir((resp.tasklog as any[]).map((x): any => [x.name, x.op, x.result.err]), { depth: null })
+    }
+
+    run()
 
     return self
   }
@@ -109,13 +130,15 @@ function make_intern(): any {
   return {
     op: {
       seneca_plugin: (tr: any, ctx: any, data: any): any => {
-        Hoek.merge(data, tr.out.merge)
+        Nua(data, tr.out.merge, { preserve: true })
         ctx.seneca.private$.plugins[data.plugin.fullname] = tr.out.plugin
         return { stop: false }
       },
 
-      seneca_export: (_: any, ctx: any, data: any): any => {
-        Object.assign(ctx.seneca.private$.exports, data.exports)
+      // TODO: explicit test for exports needed
+      seneca_export: (tr: any, ctx: any, data: any): any => {
+        Object.assign(data.exports, tr.out.exports)
+        Object.assign(ctx.seneca.private$.exports, tr.out.exports)
         return { stop: false }
       }
     },
@@ -144,7 +167,7 @@ function make_intern(): any {
 
       return {
         op: 'merge',
-        out: { x: 1, args }
+        out: { args }
       }
     },
 
@@ -176,7 +199,7 @@ function make_intern(): any {
 
         return {
           op: 'merge',
-          out: { xx: 2, plugin }
+          out: { plugin }
         }
       }
     },
@@ -184,8 +207,6 @@ function make_intern(): any {
 
     normalize: (spec: UseSpec) => {
       let plugin: any = spec.data.plugin
-
-      //console.log('*** normalize', plugin)
 
       var modify: any = {}
 
@@ -208,7 +229,6 @@ function make_intern(): any {
       let seneca: any = spec.ctx.seneca
 
       let plugin: any = spec.data.plugin
-      //console.log('*** preload', plugin)
 
       let so: any = seneca.options()
 
@@ -230,6 +250,7 @@ function make_intern(): any {
       let meta: any = {}
 
       if ('function' === typeof plugin.define.preload) {
+        // TODO: need to capture errors
         meta = plugin.define.preload.call(seneca, plugin) || {}
       }
 
@@ -314,13 +335,16 @@ function make_intern(): any {
 
       var delegate = make_delegate(seneca, plugin)
 
-      // seq++
+      // FIX: mutating context!!!
+      var seq: number = spec.ctx.seq.index++
+      //console.log('DELEGATE', plugin.fullname, plugin.options, seq)
+
 
       var plugin_define_pattern: any = {
         role: 'seneca',
         plugin: 'define',
         name: plugin.name,
-        //seq: seq,
+        seq: seq,
       }
 
       if (plugin.tag !== null) {
@@ -333,7 +357,7 @@ function make_intern(): any {
         delegate.add(plugin_define_pattern, (msg: any, reply: any) => {
           resolve({
             op: 'merge',
-            out: { delegate, plugin_done: reply }
+            out: { seq, delegate, plugin_done: reply }
           })
         })
 
@@ -342,10 +366,12 @@ function make_intern(): any {
           plugin: 'define',
           name: plugin.name,
           tag: plugin.tag,
-          //seq: seq,
+          seq: seq,
           default$: {},
           fatal$: true,
           local$: true,
+        }, function() {
+          //console.log('SU DD', arguments)
         })
 
       })
@@ -359,139 +385,152 @@ function make_intern(): any {
       let plugin: any = spec.data.plugin
       let plugin_done: any = spec.data.plugin_done
 
-      return new Promise((resolve) => {
-        var plugin_seneca: any = spec.data.delegate
-        var plugin_options = resolve_options(plugin.fullname, plugin, seneca)
+      //return new Promise((resolve) => {
+      var plugin_seneca: any = spec.data.delegate
+      var plugin_options = resolve_options(plugin.fullname, plugin, seneca)
 
-        // Update stored plugin options (NOTE . != _ !!!)
-        plugin.options = { ...plugin.options, ...plugin_options }
+      // Update stored plugin options (NOTE . != _ !!!)
+      plugin.options = { ...plugin.options, ...plugin_options }
 
-        plugin.mark2 = Math.random()
-        //console.log('OOO', plugin)
+      plugin.mark2 = Math.random()
 
+      // Update plugin options data in Seneca options.
+      var seneca_options: any = { plugin: {} }
+      seneca_options.plugin[plugin.fullname] = plugin.options
+      seneca.options(seneca_options)
 
-
-        // Update plugin options data in Seneca options.
-        var seneca_options: any = { plugin: {} }
-        seneca_options.plugin[plugin.fullname] = plugin.options
-        seneca.options(seneca_options)
-
-        plugin_seneca.log.debug({
-          kind: 'plugin',
-          case: 'DEFINE',
-          name: plugin.name,
-          tag: plugin.tag,
-          options: plugin_options,
-          callpoint: spec.ctx.callpoint,
-        })
-
-        var meta = define_plugin(
-          plugin_seneca,
-          plugin,
-          seneca.util.clean(plugin_options)
-        )
-
-        plugin.meta = meta
-
-        // legacy api for service function
-        if ('function' === typeof meta) {
-          meta = { service: meta }
-        }
-
-        // Plugin may have changed its own name dynamically
-
-        plugin.name = meta.name || plugin.name
-        plugin.tag =
-          meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
-
-        plugin.fullname = Common.make_plugin_key(plugin)
-        plugin.service = meta.service || plugin.service
-
-        plugin_seneca.__update_plugin__(plugin)
-
-        seneca.private$.plugins[plugin.fullname] = plugin
-
-        seneca.private$.plugin_order.byname.push(plugin.name)
-        seneca.private$.plugin_order.byname = Uniq(
-          seneca.private$.plugin_order.byname
-        )
-        seneca.private$.plugin_order.byref.push(plugin.fullname)
-
-        var exports = resolve_plugin_exports(plugin_seneca, plugin.fullname, meta)
-
-        // 3.x Backwards compatibility - REMOVE in 4.x
-        if ('amqp-transport' === plugin.name) {
-          seneca.options({ legacy: { meta: true } })
-        }
-
-        if ('function' === typeof plugin_options.defined$) {
-          plugin_options.defined$(plugin)
-        }
-
-        // If init$ option false, do not execute init action.
-        if (false === plugin_options.init$) {
-          plugin_done()
-          return resolve()
-        }
-
-        plugin_seneca.log.debug({
-          kind: 'plugin',
-          case: 'INIT',
-          name: plugin.name,
-          tag: plugin.tag,
-          exports: exports,
-        })
-
-        plugin_seneca.act(
-          {
-            role: 'seneca',
-            plugin: 'init',
-            // seq: msg.seq,
-            init: plugin.name,
-            tag: plugin.tag,
-            default$: {},
-            fatal$: true,
-            local$: true,
-          },
-          function(err: any) {
-            if (err) {
-              var plugin_err_code = 'plugin_init'
-
-              plugin.plugin_error = err.message
-
-              if (err.code === 'action-timeout') {
-                plugin_err_code = 'plugin_init_timeout'
-                plugin.timeout = so.timeout
-              }
-
-              return plugin_seneca.die(
-                //internals.error(err, plugin_err_code, plugin)
-                seneca.error(err, plugin_err_code, plugin)
-              )
-            }
-
-            var fullname = plugin.name + (plugin.tag ? '$' + plugin.tag : '')
-
-            if (so.debug.print && so.debug.print.options) {
-              Print.plugin_options(seneca, fullname, plugin_options)
-            }
-
-            plugin_seneca.log.info({
-              kind: 'plugin',
-              case: 'READY',
-              name: plugin.name,
-              tag: plugin.tag,
-            })
-
-            if ('function' === typeof plugin_options.inited$) {
-              plugin_options.inited$(plugin)
-            }
-
-            plugin_done()
-            return resolve()
-          }
-        )
+      plugin_seneca.log.debug({
+        kind: 'plugin',
+        case: 'DEFINE',
+        name: plugin.name,
+        tag: plugin.tag,
+        options: plugin_options,
+        callpoint: spec.ctx.callpoint,
       })
+
+      var meta = define_plugin(
+        plugin_seneca,
+        plugin,
+        seneca.util.clean(plugin_options)
+      )
+
+      plugin.meta = meta
+
+      // legacy api for service function
+      if ('function' === typeof meta) {
+        meta = { service: meta }
+      }
+
+      // Plugin may have changed its own name dynamically
+
+      plugin.name = meta.name || plugin.name
+      plugin.tag =
+        meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
+
+      plugin.fullname = Common.make_plugin_key(plugin)
+      plugin.service = meta.service || plugin.service
+
+      plugin_seneca.__update_plugin__(plugin)
+
+      seneca.private$.plugins[plugin.fullname] = plugin
+
+      seneca.private$.plugin_order.byname.push(plugin.name)
+      seneca.private$.plugin_order.byname = Uniq(
+        seneca.private$.plugin_order.byname
+      )
+      seneca.private$.plugin_order.byref.push(plugin.fullname)
+
+      var exports = (spec.data as any).exports
+      //console.log('EXPORTS', exports)
+      //var exports = resolve_plugin_exports(plugin_seneca, plugin.fullname, meta)
+
+      // 3.x Backwards compatibility - REMOVE in 4.x
+      if ('amqp-transport' === plugin.name) {
+        seneca.options({ legacy: { meta: true } })
+      }
+
+      if ('function' === typeof plugin_options.defined$) {
+        plugin_options.defined$(plugin)
+      }
+
+      // If init$ option false, do not execute init action.
+      if (false === plugin_options.init$) {
+        plugin_done()
+        //return resolve()
+      }
+
+      plugin_seneca.log.debug({
+        kind: 'plugin',
+        case: 'INIT',
+        name: plugin.name,
+        tag: plugin.tag,
+        exports: exports,
+      })
+
+
+      plugin_seneca.act(
+        {
+          role: 'seneca',
+          plugin: 'init',
+          seq: spec.data.seq,
+          init: plugin.name,
+          tag: plugin.tag,
+          default$: {},
+          fatal$: true,
+          local$: true,
+        },
+        function(err: any) {
+          //try {
+          if (err) {
+            var plugin_err_code = 'plugin_init'
+
+            plugin.plugin_error = err.message
+
+            if (err.code === 'action-timeout') {
+              plugin_err_code = 'plugin_init_timeout'
+              plugin.timeout = so.timeout
+            }
+
+            return plugin_seneca.die(
+              //internals.error(err, plugin_err_code, plugin)
+              seneca.error(err, plugin_err_code, plugin)
+            )
+          }
+
+          var fullname = plugin.name + (plugin.tag ? '$' + plugin.tag : '')
+
+          if (so.debug.print && so.debug.print.options) {
+            Print.plugin_options(seneca, fullname, plugin_options)
+          }
+
+          plugin_seneca.log.info({
+            kind: 'plugin',
+            case: 'READY',
+            name: plugin.name,
+            tag: plugin.tag,
+          })
+
+          if ('function' === typeof plugin_options.inited$) {
+            plugin_options.inited$(plugin)
+          }
+
+          plugin_done()
+          //return resolve()
+
+          //} catch (e) {
+          //    console.log('QWE', e)
+          //  }
+        }
+      )
+
+      // TODO: test this, with preload, explicitly
+      return {
+        op: 'merge',
+        out: {
+          meta,
+        }
+      }
+
     },
   }
 }
@@ -582,7 +621,6 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   var meta
 
   try {
-    //console.log('WWW define_plugin', plugin, options)
     meta = plugin.define.call(delegate, options) || {}
   } catch (e) {
     Common.wrap_error(e, 'plugin_define_failed', {
@@ -605,7 +643,7 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   return meta
 }
 
-
+/*
 function resolve_plugin_exports(seneca: any, fullname: any, meta: any): any {
   var exports = []
 
@@ -647,7 +685,7 @@ function resolve_plugin_exports(seneca: any, fullname: any, meta: any): any {
 
   return exports
 }
-
+*/
 
 function make_delegate(instance: any, plugin: any): any {
   // Adjust Seneca API to be plugin specific.
