@@ -1,3 +1,8 @@
+## 3.20.6 2020-05-14
+
+* Fixes regression with `seneca.depends`: https://github.com/senecajs/seneca/issues/792
+
+
 ## 3.20.5 2020-05-11
 
 * Remove lodash from dependencies.

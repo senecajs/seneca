@@ -373,7 +373,7 @@ describe('plugin', function () {
       },
       log: 'silent',
     })
-    
+
     si.use(function () {
       return { name: 'aaa' }
     })
@@ -418,15 +418,14 @@ describe('plugin', function () {
       return { name: 'hhh' }
     })
 
-    
-    var si1 = Seneca({legacy:false}).test(fin)
-    
+    var si1 = Seneca({ legacy: false }).test(fin)
+
     si1.use(function () {
       this.depends('iii')
       return { name: 'iii' }
     })
 
-    si1.ready(function(){
+    si1.ready(function () {
       fin()
     })
   })
