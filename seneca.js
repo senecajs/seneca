@@ -12,7 +12,7 @@ const UsePlugin = require('use-plugin')
 const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
-const Ordu = require('ordu')
+const LegacyOrdu = require('ordu').LegacyOrdu
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
@@ -620,7 +620,7 @@ function make_seneca(initial_opts) {
 
   private$.sub = { handler: null, tracers: [] }
 
-  private$.inward = Ordu({ name: 'inward' })
+  private$.inward = LegacyOrdu({ name: 'inward' })
     .add(Inward.msg_modify)
     .add(Inward.closed)
     .add(Inward.act_cache)
@@ -635,7 +635,7 @@ function make_seneca(initial_opts) {
     .add(Inward.sub)
     .add(Inward.announce)
 
-  private$.outward = Ordu({ name: 'outward' })
+  private$.outward = LegacyOrdu({ name: 'outward' })
     .add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
