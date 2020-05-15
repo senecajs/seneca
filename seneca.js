@@ -463,7 +463,11 @@ function make_seneca(initial_opts) {
 
   const ready = Ready(root$)
 
+  root$.order = {}
+  
+  // TODO: rename back to plugins
   const api_use = Use.api_use(callpoint)
+  root$.order.plugin = api_use.ordu
   
   // Seneca methods. Official API.
   root$.toString = API.toString

@@ -1322,4 +1322,14 @@ describe('seneca', function () {
       })
       .ready(fin)
   })
+
+
+  it('order', function(fin) {
+    var si = Seneca().test(fin)
+
+    expect(si.order.plugin).exists()
+    expect(si.order.plugin.task).exists()
+
+    fin()
+  })
 })

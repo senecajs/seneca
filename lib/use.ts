@@ -19,24 +19,25 @@ exports.api_use = api_use
 
 
 function api_use(callpoint: any) {
-  const intern = make_intern()
+  const tasks = make_tasks()
   const ordu = new Ordu({ debug: true })
 
-  ordu.operator('seneca_plugin', intern.op.seneca_plugin)
-  ordu.operator('seneca_export', intern.op.seneca_export)
+  ordu.operator('seneca_plugin', tasks.op.seneca_plugin)
+  ordu.operator('seneca_export', tasks.op.seneca_export)
 
   ordu.add([
-    intern.args,
-    intern.load,
-    intern.normalize,
-    intern.preload,
-    { name: 'pre_exports', exec: intern.exports },
-    { name: 'pre_legacy_extend', exec: intern.legacy_extend },
-    intern.delegate,
+    tasks.args,
+    tasks.load,
+    tasks.normalize,
+    tasks.preload,
+    { name: 'pre_exports', exec: tasks.exports },
+    { name: 'pre_legacy_extend', exec: tasks.legacy_extend },
+    tasks.delegate,
     //intern.options,
-    intern.define,
-    { name: 'post_exports', exec: intern.exports },
-    { name: 'post_legacy_extend', exec: intern.legacy_extend },
+    tasks.call_define,
+    tasks.define,
+    { name: 'post_exports', exec: tasks.exports },
+    { name: 'post_legacy_extend', exec: tasks.legacy_extend },
     function complete() {
       //console.log('COMPLETE')
     },
@@ -45,7 +46,7 @@ function api_use(callpoint: any) {
   return {
     use: make_use(ordu, callpoint),
     ordu,
-    intern,
+    tasks,
   }
 }
 
@@ -126,7 +127,7 @@ function make_use(ordu: any, callpoint: any) {
   }
 }
 
-function make_intern(): any {
+function make_tasks(): any {
   return {
     op: {
       seneca_plugin: (tr: any, ctx: any, data: any): any => {
@@ -335,9 +336,21 @@ function make_intern(): any {
 
       var delegate = make_delegate(seneca, plugin)
 
+      return {
+        op: 'merge',
+        out: {
+          delegate
+        }
+      }
+    },
+
+
+    call_define: (spec: UseSpec) => {
+      let plugin: any = spec.data.plugin
+      let delegate: any = spec.data.delegate
+
       // FIX: mutating context!!!
       var seq: number = spec.ctx.seq.index++
-      //console.log('DELEGATE', plugin.fullname, plugin.options, seq)
 
 
       var plugin_define_pattern: any = {
@@ -354,10 +367,10 @@ function make_intern(): any {
       return new Promise(resolve => {
 
         // seneca
-        delegate.add(plugin_define_pattern, (msg: any, reply: any) => {
+        delegate.add(plugin_define_pattern, (_: any, reply: any) => {
           resolve({
             op: 'merge',
-            out: { seq, delegate, plugin_done: reply }
+            out: { seq, plugin_done: reply }
           })
         })
 
@@ -370,10 +383,7 @@ function make_intern(): any {
           default$: {},
           fatal$: true,
           local$: true,
-        }, function() {
-          //console.log('SU DD', arguments)
         })
-
       })
     },
 
@@ -645,49 +655,6 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   return meta
 }
 
-/*
-function resolve_plugin_exports(seneca: any, fullname: any, meta: any): any {
-  var exports = []
-
-  if (meta.export !== void 0) {
-    seneca.private$.exports[fullname] = meta.export
-    exports.push(fullname)
-  }
-
-  if ('object' === typeof meta.exportmap || 'object' === typeof meta.exports) {
-    meta.exportmap = meta.exportmap || meta.exports
-    Object.keys(meta.exportmap).forEach((k) => {
-      var v = meta.exportmap[k]
-      if (v !== void 0) {
-        var exportname = fullname + '/' + k
-        seneca.private$.exports[exportname] = v
-        exports.push(exportname)
-      }
-    })
-  }
-
-  // Specific Seneca extension points
-  if ('object' === typeof meta.extend) {
-    if ('function' === typeof meta.extend.action_modifier) {
-      seneca.private$.action_modifiers.push(meta.extend.action_modifier)
-    }
-
-    // FIX: needs to use logging.load_logger
-    if ('function' === typeof meta.extend.logger) {
-      if (
-        !meta.extend.logger.replace &&
-        'function' === typeof seneca.private$.logger.add
-      ) {
-        seneca.private$.logger.add(meta.extend.logger)
-      } else {
-        seneca.private$.logger = meta.extend.logger
-      }
-    }
-  }
-
-  return exports
-}
-*/
 
 function make_delegate(instance: any, plugin: any): any {
   // Adjust Seneca API to be plugin specific.

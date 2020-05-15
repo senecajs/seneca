@@ -29,6 +29,7 @@ describe('plugin', function () {
         'pre_exports',
         'pre_legacy_extend',
         'delegate',
+        'call_define',
         'define',
         'post_exports',
         'post_legacy_extend',
