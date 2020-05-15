@@ -385,94 +385,88 @@ function make_intern(): any {
       let plugin: any = spec.data.plugin
       let plugin_done: any = spec.data.plugin_done
 
-      try {
 
-        //return new Promise((resolve) => {
-        var plugin_seneca: any = spec.data.delegate
-        var plugin_options = resolve_options(plugin.fullname, plugin, seneca)
+      //return new Promise((resolve) => {
+      var plugin_seneca: any = spec.data.delegate
+      var plugin_options = resolve_options(plugin.fullname, plugin, seneca)
 
-        // Update stored plugin options (NOTE . != _ !!!)
-        plugin.options = { ...plugin.options, ...plugin_options }
+      // Update stored plugin options (NOTE . != _ !!!)
+      plugin.options = { ...plugin.options, ...plugin_options }
 
-        plugin.mark2 = Math.random()
+      plugin.mark2 = Math.random()
 
-        // Update plugin options data in Seneca options.
-        var seneca_options: any = { plugin: {} }
-        seneca_options.plugin[plugin.fullname] = plugin.options
-        seneca.options(seneca_options)
+      // Update plugin options data in Seneca options.
+      var seneca_options: any = { plugin: {} }
+      seneca_options.plugin[plugin.fullname] = plugin.options
+      seneca.options(seneca_options)
 
-        plugin_seneca.log.debug({
-          kind: 'plugin',
-          case: 'DEFINE',
-          name: plugin.name,
-          tag: plugin.tag,
-          options: plugin_options,
-          callpoint: spec.ctx.callpoint,
-        })
+      plugin_seneca.log.debug({
+        kind: 'plugin',
+        case: 'DEFINE',
+        name: plugin.name,
+        tag: plugin.tag,
+        options: plugin_options,
+        callpoint: spec.ctx.callpoint,
+      })
 
-        var meta = define_plugin(
-          plugin_seneca,
-          plugin,
-          seneca.util.clean(plugin_options)
-        )
+      var meta = define_plugin(
+        plugin_seneca,
+        plugin,
+        seneca.util.clean(plugin_options)
+      )
 
-        plugin.meta = meta
+      plugin.meta = meta
 
-        // legacy api for service function
-        if ('function' === typeof meta) {
-          meta = { service: meta }
-        }
-
-        // Plugin may have changed its own name dynamically
-
-        plugin.name = meta.name || plugin.name
-        plugin.tag =
-          meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
-
-        plugin.fullname = Common.make_plugin_key(plugin)
-        plugin.service = meta.service || plugin.service
-
-        plugin_seneca.__update_plugin__(plugin)
-
-        seneca.private$.plugins[plugin.fullname] = plugin
-
-        seneca.private$.plugin_order.byname.push(plugin.name)
-        seneca.private$.plugin_order.byname = Uniq(
-          seneca.private$.plugin_order.byname
-        )
-        seneca.private$.plugin_order.byref.push(plugin.fullname)
-
-        var exports = (spec.data as any).exports
-        //console.log('EXPORTS', exports)
-        //var exports = resolve_plugin_exports(plugin_seneca, plugin.fullname, meta)
-
-        // 3.x Backwards compatibility - REMOVE in 4.x
-        if ('amqp-transport' === plugin.name) {
-          seneca.options({ legacy: { meta: true } })
-        }
-
-        if ('function' === typeof plugin_options.defined$) {
-          plugin_options.defined$(plugin)
-        }
-
-        // If init$ option false, do not execute init action.
-        if (false === plugin_options.init$) {
-          plugin_done()
-          //return resolve()
-        }
-
-        plugin_seneca.log.debug({
-          kind: 'plugin',
-          case: 'INIT',
-          name: plugin.name,
-          tag: plugin.tag,
-          exports: exports,
-        })
-
-      } catch (ex) {
-        console.log('DDD', ex)
-        throw ex
+      // legacy api for service function
+      if ('function' === typeof meta) {
+        meta = { service: meta }
       }
+
+      // Plugin may have changed its own name dynamically
+
+      plugin.name = meta.name || plugin.name
+      plugin.tag =
+        meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
+
+      plugin.fullname = Common.make_plugin_key(plugin)
+      plugin.service = meta.service || plugin.service
+
+      plugin_seneca.__update_plugin__(plugin)
+
+      seneca.private$.plugins[plugin.fullname] = plugin
+
+      seneca.private$.plugin_order.byname.push(plugin.name)
+      seneca.private$.plugin_order.byname = Uniq(
+        seneca.private$.plugin_order.byname
+      )
+      seneca.private$.plugin_order.byref.push(plugin.fullname)
+
+      var exports = (spec.data as any).exports
+      //console.log('EXPORTS', exports)
+      //var exports = resolve_plugin_exports(plugin_seneca, plugin.fullname, meta)
+
+      // 3.x Backwards compatibility - REMOVE in 4.x
+      if ('amqp-transport' === plugin.name) {
+        seneca.options({ legacy: { meta: true } })
+      }
+
+      if ('function' === typeof plugin_options.defined$) {
+        plugin_options.defined$(plugin)
+      }
+
+      // If init$ option false, do not execute init action.
+      if (false === plugin_options.init$) {
+        plugin_done()
+        //return resolve()
+      }
+
+      plugin_seneca.log.debug({
+        kind: 'plugin',
+        case: 'INIT',
+        name: plugin.name,
+        tag: plugin.tag,
+        exports: exports,
+      })
 
       plugin_seneca.act(
         {
@@ -613,10 +607,8 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   // legacy plugins
   if (plugin.define.length > 1) {
     let fnstr = plugin.define.toString()
-    console.log('GGG', fnstr)
-    plugin.init_func_sig = (fnstr.match(/^(.*)\n/) || [])[1]
+    plugin.init_func_sig = (fnstr.match(/^(.*)\r*\n/) || [])[1]
     let ex = delegate.error('unsupported_legacy_plugin', plugin)
-    console.log('BBB', ex)
     throw ex
   }
 
