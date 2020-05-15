@@ -350,14 +350,16 @@ describe('plugin', function () {
     })
   })
 
+  
   it('plugin-error-deprecated', function (fin) {
+    try {
     var si = Seneca({
       debug: {
         undead: true,
       },
       log: 'silent',
       errhandler: function (err) {
-        console.log('AAA', err)
+        console.log('AAA', err && err.code)
         expect('unsupported_legacy_plugin').to.equal(err.code)
         fin()
       },
@@ -366,6 +368,10 @@ describe('plugin', function () {
     si.use(function (options, register) {
       return { name: 'OldPlugin' }
     })
+      
+    } catch(e) {
+      console.log('CCC', e)
+    }
   })
 
   it('plugin-error-add', function (fin) {
