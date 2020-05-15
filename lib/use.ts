@@ -612,7 +612,9 @@ function resolve_options(fullname: string, plugindef: any, seneca: any): any {
 function define_plugin(delegate: any, plugin: any, options: any): any {
   // legacy plugins
   if (plugin.define.length > 1) {
-    plugin.init_func_sig = plugin.define.toString().match(/^(.*)\n/)[1]
+    let fnstr = plugin.define.toString()
+    console.log('GGG', fnstr)
+    plugin.init_func_sig = (fnstr.match(/^(.*)\n/) || [])[1]
     let ex = delegate.error('unsupported_legacy_plugin', plugin)
     console.log('BBB', ex)
     throw ex
