@@ -15,13 +15,16 @@ install:
 
 script:
   - npm test
-  - npm audit
-  - npm run coveralls
-  - rm -rf node_modules
-  - npm ci --only=production
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./test/smoke-test.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./test/entity-test.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./test/joi-test.sh; fi
+  - >
+    if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+      npm audit
+      npm run coveralls
+      rm -rf node_modules
+      npm ci --only=production
+      ./test/smoke-test.sh;
+      ./test/entity-test.sh;
+      ./test/joi-test.sh;
+    fi
   
 
 os:
