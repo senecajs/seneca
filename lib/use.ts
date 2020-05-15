@@ -471,6 +471,7 @@ function make_intern(): any {
 
       } catch (ex) {
         console.log('DDD', ex)
+        throw ex
       }
 
       plugin_seneca.act(
