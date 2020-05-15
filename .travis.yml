@@ -1,7 +1,10 @@
 language: node_js
 
 node_js:
+  - '14'
+  - '13'
   - '12'
+  - '10'
 
 env:
   global:
@@ -21,3 +24,8 @@ script:
   - ./test/joi-test.sh
   
 
+os:
+  - "linux"
+  - "osx"
+  - "windows"
+  
