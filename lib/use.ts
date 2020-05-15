@@ -334,7 +334,90 @@ function make_tasks(): any {
       let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
 
-      var delegate = make_delegate(seneca, plugin)
+      //var delegate = make_delegate(seneca, plugin)
+
+
+      // Adjust Seneca API to be plugin specific.
+      var delegate = seneca.delegate({
+        plugin$: {
+          name: plugin.name,
+          tag: plugin.tag,
+        },
+
+        fatal$: true,
+      })
+
+      delegate.private$ = Object.create(seneca.private$)
+      delegate.private$.ge = delegate.private$.ge.gate()
+
+      delegate.die = Common.makedie(delegate, {
+        type: 'plugin',
+        plugin: plugin.name,
+      })
+
+      var actdeflist: any = []
+
+      delegate.add = function() {
+        var argsarr = new Array(arguments.length)
+        for (var l = 0; l < argsarr.length; ++l) {
+          argsarr[l] = arguments[l]
+        }
+
+        var actdef = argsarr[argsarr.length - 1] || {}
+
+        if ('function' === typeof actdef) {
+          actdef = {}
+          argsarr.push(actdef)
+        }
+
+        actdef.plugin_name = plugin.name || '-'
+        actdef.plugin_tag = plugin.tag || '-'
+        actdef.plugin_fullname = plugin.fullname
+
+        // TODO: is this necessary?
+        actdef.log = delegate.log
+
+        actdeflist.push(actdef)
+
+        seneca.add.apply(delegate, argsarr)
+
+        // FIX: should be this
+        return delegate
+      }
+
+      delegate.__update_plugin__ = function(plugin: any) {
+        delegate.context.name = plugin.name || '-'
+        delegate.context.tag = plugin.tag || '-'
+        delegate.context.full = plugin.fullname || '-'
+
+        actdeflist.forEach(function(actdef: any) {
+          actdef.plugin_name = plugin.name || actdef.plugin_name || '-'
+          actdef.plugin_tag = plugin.tag || actdef.plugin_tag || '-'
+          actdef.plugin_fullname = plugin.fullname || actdef.plugin_fullname || '-'
+        })
+      }
+
+      delegate.init = function(init: any) {
+        // TODO: validate init_action is function
+
+        var pat: any = {
+          role: 'seneca',
+          plugin: 'init',
+          init: plugin.name,
+        }
+
+        if (null != plugin.tag && '-' != plugin.tag) {
+          pat.tag = plugin.tag
+        }
+
+        delegate.add(pat, function(_: any, reply: any): any {
+          init.call(this, reply)
+        })
+      }
+
+      delegate.context.plugin = plugin
+      delegate.context.plugin.mark = Math.random()
+
 
       return {
         op: 'merge',
@@ -402,8 +485,6 @@ function make_tasks(): any {
 
       // Update stored plugin options (NOTE . != _ !!!)
       plugin.options = { ...plugin.options, ...plugin_options }
-
-      plugin.mark2 = Math.random()
 
       // Update plugin options data in Seneca options.
       var seneca_options: any = { plugin: {} }
@@ -656,6 +737,7 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
 }
 
 
+/*
 function make_delegate(instance: any, plugin: any): any {
   // Adjust Seneca API to be plugin specific.
   var delegate = instance.delegate({
@@ -741,3 +823,4 @@ function make_delegate(instance: any, plugin: any): any {
 
   return delegate
 }
+*/
