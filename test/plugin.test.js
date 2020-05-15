@@ -357,6 +357,7 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
+        console.log('AAA', err)
         expect('unsupported_legacy_plugin').to.equal(err.code)
         fin()
       },
