@@ -1,8 +1,8 @@
 /* Copyright © 2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-
 import * as Hoek from '@hapi/hoek'
+
 const Uniq: any = require('lodash.uniq')
 const Eraro: any = require('eraro')
 
@@ -553,6 +553,7 @@ function make_tasks(): any {
 
       let resolved_options: any = {}
 
+      /*
       try {
         resolved_options = delegate.util
           .Optioner(defaults, { allow_unknown: true })
@@ -564,6 +565,32 @@ function make_tasks(): any {
           options: outopts,
         })
       }
+      */
+
+
+      let joi_schema: any = prepare_spec(
+        delegate.util.Joi,
+        defaults,
+        { allow_unknown: true },
+        {}
+      )
+
+      let joi_out = joi_schema.validate(outopts)
+      //console.log('joi_out', joi_out)
+
+      // TODO: return this instead
+      if (joi_out.error) {
+        throw delegate.error('invalid_plugin_option', {
+          name: fullname,
+          err_msg: joi_out.error.message,
+          options: outopts,
+        })
+      }
+      else {
+        resolved_options = joi_out.value
+      }
+
+      //console.log('resolved_options', resolved_options)
 
       return {
         op: 'seneca_options',
@@ -765,3 +792,78 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   return meta
 }
 
+
+
+function prepare_spec(Joi: any, spec: any, opts: any, ctxt: any) {
+  var joiobj = Joi.object()
+
+  if (opts.allow_unknown) {
+    joiobj = joiobj.unknown()
+  }
+
+  var joi = walk(Joi, joiobj, spec, '', opts, ctxt, function(valspec: any) {
+    if (valspec && Joi.isSchema(valspec)) {
+      return valspec
+    } else {
+      var typecheck = typeof valspec
+      //typecheck = 'function' === typecheck ? 'func' : typecheck
+
+      if (opts.must_match_literals) {
+        return Joi.any()
+          .required()
+          .valid(valspec)
+      } else {
+        if (void 0 === valspec) {
+          return Joi.any().optional()
+        } else if (null == valspec) {
+          return Joi.any().default(null)
+        } else if ('number' === typecheck && Number.isInteger(valspec)) {
+          return Joi.number()
+            .integer()
+            .default(valspec)
+        } else if ('string' === typecheck) {
+          return Joi.string()
+            .empty('')
+            .default(() => valspec)
+        } else {
+          return Joi[typecheck]().default(() => valspec)
+        }
+      }
+    }
+  })
+
+  return joi
+}
+
+function walk(Joi: any, start_joiobj: any, obj: any, path: any, opts: any, ctxt: any, mod: any) {
+  if (Array.isArray(obj)) {
+    ctxt.arrpaths.push(path)
+  }
+
+  let joiobj = start_joiobj
+
+  for (var p in obj) {
+    var v = obj[p]
+    var t = typeof v
+
+    var kv: any = {}
+
+    if (null != v && !Joi.isSchema(v) && 'object' === t) {
+      var np = '' === path ? p : path + '.' + p
+
+      joiobj = joiobj.object().default()
+
+      if (opts.allow_unknown) {
+        joiobj = joiobj.unknown()
+      }
+
+      kv[p] = walk(Joi, joiobj, v, np, opts, ctxt, mod)
+    } else {
+      kv[p] = mod(v)
+    }
+
+    joiobj = joiobj.keys(kv)
+  }
+
+  return joiobj
+}
