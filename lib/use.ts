@@ -493,13 +493,11 @@ function make_tasks(): any {
 
 
     options: (spec: UseSpec) => {
-      let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
+      let delegate: any = spec.data.delegate
 
-      //let options = resolve_options(plugin.fullname, plugin, seneca)
+      let so = delegate.options()
 
-
-      let so = seneca.options()
       let fullname = plugin.fullname
       let defaults = plugin.defaults || {}
 
@@ -539,6 +537,7 @@ function make_tasks(): any {
       let base: any = {}
 
       // NOTE: plugin error codes are in their own namespaces
+      // TODO: test this!!!
       let errors = plugin.errors || (plugin.define && plugin.define.errors)
 
       if (errors) {
@@ -555,19 +554,16 @@ function make_tasks(): any {
       let resolved_options: any = {}
 
       try {
-        resolved_options = seneca.util
+        resolved_options = delegate.util
           .Optioner(defaults, { allow_unknown: true })
           .check(outopts)
       } catch (e) {
-        throw Common.error('invalid_plugin_option', {
+        throw delegate.error('invalid_plugin_option', {
           name: fullname,
           err_msg: e.message,
           options: outopts,
         })
       }
-
-      //let options = { ...plugin.options, ...resolved_options }
-
 
       return {
         op: 'seneca_options',
