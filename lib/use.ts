@@ -24,19 +24,23 @@ function api_use(callpoint: any) {
 
   ordu.operator('seneca_plugin', tasks.op.seneca_plugin)
   ordu.operator('seneca_export', tasks.op.seneca_export)
+  ordu.operator('seneca_options', tasks.op.seneca_options)
+
+
+  // TODO: exports -> meta and handle all meta processing
 
   ordu.add([
     tasks.args,
     tasks.load,
     tasks.normalize,
     tasks.preload,
-    { name: 'pre_exports', exec: tasks.exports },
+    { name: 'pre_meta', exec: tasks.meta },
     { name: 'pre_legacy_extend', exec: tasks.legacy_extend },
     tasks.delegate,
-    //intern.options,
     tasks.call_define,
+    tasks.options,
     tasks.define,
-    { name: 'post_exports', exec: tasks.exports },
+    { name: 'post_meta', exec: tasks.meta },
     { name: 'post_legacy_extend', exec: tasks.legacy_extend },
     function complete() {
       //console.log('COMPLETE')
@@ -68,6 +72,7 @@ interface UseData {
   delegate: any
   plugin_done: any
   exports: any
+  //options: any
 }
 
 interface UseSpec {
@@ -98,7 +103,8 @@ function make_use(ordu: any, callpoint: any) {
       meta: null,
       delegate: null,
       plugin_done: null,
-      exports: {}
+      exports: {},
+      //options: {}
     }
 
     async function run() {
@@ -129,6 +135,8 @@ function make_use(ordu: any, callpoint: any) {
 
 function make_tasks(): any {
   return {
+    // TODO: explicit tests for these operators
+
     op: {
       seneca_plugin: (tr: any, ctx: any, data: any): any => {
         Nua(data, tr.out.merge, { preserve: true })
@@ -136,12 +144,25 @@ function make_tasks(): any {
         return { stop: false }
       },
 
-      // TODO: explicit test for exports needed
       seneca_export: (tr: any, ctx: any, data: any): any => {
         Object.assign(data.exports, tr.out.exports)
         Object.assign(ctx.seneca.private$.exports, tr.out.exports)
         return { stop: false }
-      }
+      },
+
+      seneca_options: (tr: any, ctx: any, data: any): any => {
+        Nua(data.plugin.options, tr.out.plugin.options, { preserve: true })
+
+        let plugin_fullname: string = data.plugin.fullname
+        let plugin_options = data.plugin.options
+
+        let plugin_options_update: any = { plugin: {} }
+        plugin_options_update.plugin[plugin_fullname] = plugin_options
+
+        ctx.seneca.options(plugin_options_update)
+
+        return { stop: false }
+      },
     },
 
     args: (spec: UseSpec) => {
@@ -274,7 +295,7 @@ function make_tasks(): any {
     },
 
 
-    exports: (spec: UseSpec) => {
+    meta: (spec: UseSpec) => {
       let plugin: any = spec.data.plugin
       let meta: any = spec.data.meta
 
@@ -471,6 +492,94 @@ function make_tasks(): any {
     },
 
 
+    options: (spec: UseSpec) => {
+      let seneca: any = spec.ctx.seneca
+      let plugin: any = spec.data.plugin
+
+      //let options = resolve_options(plugin.fullname, plugin, seneca)
+
+
+      let so = seneca.options()
+      let fullname = plugin.fullname
+      let defaults = plugin.defaults || {}
+
+      let fullname_options = Object.assign(
+        {},
+
+        // DEPRECATED: remove in 4
+        so[fullname],
+
+        so.plugin[fullname],
+
+        // DEPRECATED: remove in 4
+        so[fullname + '$' + plugin.tag],
+
+        so.plugin[fullname + '$' + plugin.tag]
+      )
+
+      var shortname = fullname !== plugin.name ? plugin.name : null
+      if (!shortname && fullname.indexOf('seneca-') === 0) {
+        shortname = fullname.substring('seneca-'.length)
+      }
+
+      var shortname_options = Object.assign(
+        {},
+
+        // DEPRECATED: remove in 4
+        so[shortname],
+
+        so.plugin[shortname],
+
+        // DEPRECATED: remove in 4
+        so[shortname + '$' + plugin.tag],
+
+        so.plugin[shortname + '$' + plugin.tag]
+      )
+
+      let base: any = {}
+
+      // NOTE: plugin error codes are in their own namespaces
+      let errors = plugin.errors || (plugin.define && plugin.define.errors)
+
+      if (errors) {
+        base.errors = errors
+      }
+
+      let outopts = Object.assign(
+        base,
+        shortname_options,
+        fullname_options,
+        plugin.options || {}
+      )
+
+      let resolved_options: any = {}
+
+      try {
+        resolved_options = seneca.util
+          .Optioner(defaults, { allow_unknown: true })
+          .check(outopts)
+      } catch (e) {
+        throw Common.error('invalid_plugin_option', {
+          name: fullname,
+          err_msg: e.message,
+          options: outopts,
+        })
+      }
+
+      //let options = { ...plugin.options, ...resolved_options }
+
+
+      return {
+        op: 'seneca_options',
+        out: {
+          plugin: {
+            options: resolved_options
+          }
+        }
+      }
+    },
+
+
     define: (spec: UseSpec) => {
       let seneca: any = spec.ctx.seneca
       let so: any = seneca.options()
@@ -478,18 +587,8 @@ function make_tasks(): any {
       let plugin: any = spec.data.plugin
       let plugin_done: any = spec.data.plugin_done
 
-
-      //return new Promise((resolve) => {
       var plugin_seneca: any = spec.data.delegate
-      var plugin_options = resolve_options(plugin.fullname, plugin, seneca)
-
-      // Update stored plugin options (NOTE . != _ !!!)
-      plugin.options = { ...plugin.options, ...plugin_options }
-
-      // Update plugin options data in Seneca options.
-      var seneca_options: any = { plugin: {} }
-      seneca_options.plugin[plugin.fullname] = plugin.options
-      seneca.options(seneca_options)
+      var plugin_options: any = spec.data.plugin.options
 
       plugin_seneca.log.debug({
         kind: 'plugin',
@@ -505,6 +604,7 @@ function make_tasks(): any {
         plugin,
         seneca.util.clean(plugin_options)
       )
+
 
       plugin.meta = meta
 
@@ -626,73 +726,6 @@ function make_tasks(): any {
   }
 }
 
-function resolve_options(fullname: string, plugindef: any, seneca: any): any {
-  var so = seneca.options()
-
-  var defaults = plugindef.defaults || {}
-
-  var fullname_options = Object.assign(
-    {},
-
-    // DEPRECATED: remove in 4
-    so[fullname],
-
-    so.plugin[fullname],
-
-    // DEPRECATED: remove in 4
-    so[fullname + '$' + plugindef.tag],
-
-    so.plugin[fullname + '$' + plugindef.tag]
-  )
-
-  var shortname = fullname !== plugindef.name ? plugindef.name : null
-  if (!shortname && fullname.indexOf('seneca-') === 0) {
-    shortname = fullname.substring('seneca-'.length)
-  }
-
-  var shortname_options = Object.assign(
-    {},
-
-    // DEPRECATED: remove in 4
-    so[shortname],
-
-    so.plugin[shortname],
-
-    // DEPRECATED: remove in 4
-    so[shortname + '$' + plugindef.tag],
-
-    so.plugin[shortname + '$' + plugindef.tag]
-  )
-
-  var base: any = {}
-
-  // NOTE: plugin error codes are in their own namespaces
-  var errors = plugindef.errors || (plugindef.define && plugindef.define.errors)
-
-  if (errors) {
-    base.errors = errors
-  }
-
-  var outopts = Object.assign(
-    base,
-    shortname_options,
-    fullname_options,
-    plugindef.options || {}
-  )
-
-  try {
-    return seneca.util
-      .Optioner(defaults, { allow_unknown: true })
-      .check(outopts)
-  } catch (e) {
-    throw Common.error('invalid_plugin_option', {
-      name: fullname,
-      err_msg: e.message,
-      options: outopts,
-    })
-  }
-}
-
 
 function define_plugin(delegate: any, plugin: any, options: any): any {
   // legacy plugins
@@ -736,91 +769,3 @@ function define_plugin(delegate: any, plugin: any, options: any): any {
   return meta
 }
 
-
-/*
-function make_delegate(instance: any, plugin: any): any {
-  // Adjust Seneca API to be plugin specific.
-  var delegate = instance.delegate({
-    plugin$: {
-      name: plugin.name,
-      tag: plugin.tag,
-    },
-
-    fatal$: true,
-  })
-
-  delegate.private$ = Object.create(instance.private$)
-  delegate.private$.ge = delegate.private$.ge.gate()
-
-  delegate.die = Common.makedie(delegate, {
-    type: 'plugin',
-    plugin: plugin.name,
-  })
-
-  var actdeflist: any = []
-
-  delegate.add = function() {
-    var argsarr = new Array(arguments.length)
-    for (var l = 0; l < argsarr.length; ++l) {
-      argsarr[l] = arguments[l]
-    }
-
-    var actdef = argsarr[argsarr.length - 1] || {}
-
-    if ('function' === typeof actdef) {
-      actdef = {}
-      argsarr.push(actdef)
-    }
-
-    actdef.plugin_name = plugin.name || '-'
-    actdef.plugin_tag = plugin.tag || '-'
-    actdef.plugin_fullname = plugin.fullname
-
-    // TODO: is this necessary?
-    actdef.log = delegate.log
-
-    actdeflist.push(actdef)
-
-    instance.add.apply(delegate, argsarr)
-
-    return delegate
-  }
-
-  delegate.__update_plugin__ = function(plugin: any) {
-    delegate.context.name = plugin.name || '-'
-    delegate.context.tag = plugin.tag || '-'
-    delegate.context.full = plugin.fullname || '-'
-
-    actdeflist.forEach(function(actdef: any) {
-      actdef.plugin_name = plugin.name || actdef.plugin_name || '-'
-      actdef.plugin_tag = plugin.tag || actdef.plugin_tag || '-'
-      actdef.plugin_fullname = plugin.fullname || actdef.plugin_fullname || '-'
-    })
-  }
-
-  delegate.init = function(init: any) {
-    // TODO: validate init_action is function
-
-    var pat: any = {
-      role: 'seneca',
-      plugin: 'init',
-      init: plugin.name,
-    }
-
-    if (null != plugin.tag && '-' != plugin.tag) {
-      pat.tag = plugin.tag
-    }
-
-    delegate.add(pat, function(msg: any, reply: any): any {
-      init.call(this, reply)
-    })
-  }
-
-
-  delegate.context.plugin = plugin
-
-  delegate.context.plugin.mark = Math.random()
-
-  return delegate
-}
-*/

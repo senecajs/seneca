@@ -1,4 +1,4 @@
-/* Copyright © 2013-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2013-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 const Code = require('@hapi/code')
@@ -26,12 +26,13 @@ describe('plugin', function () {
         'load',
         'normalize',
         'preload',
-        'pre_exports',
+        'pre_meta',
         'pre_legacy_extend',
         'delegate',
         'call_define',
+        'options',
         'define',
-        'post_exports',
+        'post_meta',
         'post_legacy_extend',
         'complete'
       ])
@@ -42,7 +43,8 @@ describe('plugin', function () {
         'stop',
         'merge',
         'seneca_plugin',
-        'seneca_export'
+        'seneca_export',
+        'seneca_options',
       ])
     
     fin()
@@ -898,13 +900,13 @@ describe('plugin', function () {
 
   it('plugins-options-precedence', function (fin) {
     var si = Seneca({
-      log: 'silent',
-      legacy: { transport: false },
+      legacy: false,
+      debug: { undead: true },
       plugin: {
         foo: { a: 2, c: 2 },
         bar: { a: 2, c: 1 },
       },
-    })
+    }).test(fin)
 
     function bar(opts) {
       expect(opts).equal({ a: 3, b: 1, c: 1, d: 1 })
