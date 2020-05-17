@@ -101,7 +101,7 @@
     "qs": "^6.9.4",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^6.0.0",
-    "use-plugin": "^7.0.0"
+    "use-plugin": "^8.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",

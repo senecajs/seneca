@@ -18,6 +18,9 @@ const Print: any = require('./print')
 exports.api_use = api_use
 
 
+const intern = exports.intern = make_intern()
+
+
 function api_use(callpoint: any) {
   const tasks = make_tasks()
   const ordu = new Ordu({ debug: true })
@@ -72,7 +75,6 @@ interface UseData {
   delegate: any
   plugin_done: any
   exports: any
-  //options: any
 }
 
 interface UseSpec {
@@ -104,7 +106,6 @@ function make_use(ordu: any, callpoint: any) {
       delegate: null,
       plugin_done: null,
       exports: {},
-      //options: {}
     }
 
     async function run() {
@@ -221,7 +222,9 @@ function make_tasks(): any {
 
         return {
           op: 'merge',
-          out: { plugin }
+          out: {
+            plugin
+          }
         }
       }
     },
@@ -553,22 +556,7 @@ function make_tasks(): any {
 
       let resolved_options: any = {}
 
-      /*
-      try {
-        resolved_options = delegate.util
-          .Optioner(defaults, { allow_unknown: true })
-          .check(outopts)
-      } catch (e) {
-        throw delegate.error('invalid_plugin_option', {
-          name: fullname,
-          err_msg: e.message,
-          options: outopts,
-        })
-      }
-      */
-
-
-      let joi_schema: any = prepare_spec(
+      let joi_schema: any = intern.prepare_spec(
         delegate.util.Joi,
         defaults,
         { allow_unknown: true },
@@ -576,7 +564,6 @@ function make_tasks(): any {
       )
 
       let joi_out = joi_schema.validate(outopts)
-      //console.log('joi_out', joi_out)
 
       // TODO: return this instead
       if (joi_out.error) {
@@ -590,8 +577,6 @@ function make_tasks(): any {
         resolved_options = joi_out.value
       }
 
-      //console.log('resolved_options', resolved_options)
-
       return {
         op: 'seneca_options',
         out: {
@@ -603,6 +588,7 @@ function make_tasks(): any {
     },
 
 
+    // TODO: move data modification to returned operation
     define: (spec: UseSpec) => {
       let seneca: any = spec.ctx.seneca
       let so: any = seneca.options()
@@ -622,7 +608,7 @@ function make_tasks(): any {
         callpoint: spec.ctx.callpoint,
       })
 
-      var meta = define_plugin(
+      var meta = intern.define_plugin(
         plugin_seneca,
         plugin,
         seneca.util.clean(plugin_options)
@@ -656,8 +642,6 @@ function make_tasks(): any {
       seneca.private$.plugin_order.byref.push(plugin.fullname)
 
       var exports = (spec.data as any).exports
-      //console.log('EXPORTS', exports)
-      //var exports = resolve_plugin_exports(plugin_seneca, plugin.fullname, meta)
 
       // 3.x Backwards compatibility - REMOVE in 4.x
       if ('amqp-transport' === plugin.name) {
@@ -667,6 +651,8 @@ function make_tasks(): any {
       if ('function' === typeof plugin_options.defined$) {
         plugin_options.defined$(plugin)
       }
+
+      // TODO: split out form here into separate task: call_init
 
       // If init$ option false, do not execute init action.
       if (false === plugin_options.init$) {
@@ -681,6 +667,7 @@ function make_tasks(): any {
         tag: plugin.tag,
         exports: exports,
       })
+
 
       plugin_seneca.act(
         {
@@ -729,11 +716,6 @@ function make_tasks(): any {
           }
 
           plugin_done()
-          //return resolve()
-
-          //} catch (e) {
-          //    console.log('QWE', e)
-          //  }
         }
       )
 
@@ -750,120 +732,146 @@ function make_tasks(): any {
 }
 
 
-function define_plugin(delegate: any, plugin: any, options: any): any {
-  // legacy plugins
-  if (plugin.define.length > 1) {
-    let fnstr = plugin.define.toString()
-    plugin.init_func_sig = (fnstr.match(/^(.*)\r*\n/) || [])[1]
-    let ex = delegate.error('unsupported_legacy_plugin', plugin)
-    throw ex
-  }
-
-  if (options.errors) {
-    plugin.eraro = Eraro({
-      package: 'seneca',
-      msgmap: options.errors,
-      override: true,
-    })
-  }
-
-  var meta
-
-  try {
-    meta = plugin.define.call(delegate, options) || {}
-  } catch (e) {
-    Common.wrap_error(e, 'plugin_define_failed', {
-      fullname: plugin.fullname,
-      message: (
-        e.message + (' (' + e.stack.match(/\n.*?\n/)).replace(/\n.*\//g, '')
-      ).replace(/\n/g, ''),
-      options: options,
-      repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',
-    })
-  }
-
-  meta = 'string' === typeof meta ? { name: meta } : meta
-  meta.options = meta.options || options
-
-  var updated_options: any = {}
-  updated_options[plugin.fullname] = meta.options
-  delegate.options(updated_options)
-
-  return meta
-}
-
-
-
-function prepare_spec(Joi: any, spec: any, opts: any, ctxt: any) {
-  var joiobj = Joi.object()
-
-  if (opts.allow_unknown) {
-    joiobj = joiobj.unknown()
-  }
-
-  var joi = walk(Joi, joiobj, spec, '', opts, ctxt, function(valspec: any) {
-    if (valspec && Joi.isSchema(valspec)) {
-      return valspec
-    } else {
-      var typecheck = typeof valspec
-      //typecheck = 'function' === typecheck ? 'func' : typecheck
-
-      if (opts.must_match_literals) {
-        return Joi.any()
-          .required()
-          .valid(valspec)
-      } else {
-        if (void 0 === valspec) {
-          return Joi.any().optional()
-        } else if (null == valspec) {
-          return Joi.any().default(null)
-        } else if ('number' === typecheck && Number.isInteger(valspec)) {
-          return Joi.number()
-            .integer()
-            .default(valspec)
-        } else if ('string' === typecheck) {
-          return Joi.string()
-            .empty('')
-            .default(() => valspec)
-        } else {
-          return Joi[typecheck]().default(() => valspec)
-        }
+function make_intern() {
+  return {
+    define_plugin: function(delegate: any, plugin: any, options: any): any {
+      // legacy plugins
+      if (plugin.define.length > 1) {
+        let fnstr = plugin.define.toString()
+        plugin.init_func_sig = (fnstr.match(/^(.*)\r*\n/) || [])[1]
+        let ex = delegate.error('unsupported_legacy_plugin', plugin)
+        throw ex
       }
-    }
-  })
 
-  return joi
-}
+      if (options.errors) {
+        plugin.eraro = Eraro({
+          package: 'seneca',
+          msgmap: options.errors,
+          override: true,
+        })
+      }
 
-function walk(Joi: any, start_joiobj: any, obj: any, path: any, opts: any, ctxt: any, mod: any) {
-  if (Array.isArray(obj)) {
-    ctxt.arrpaths.push(path)
-  }
+      var meta
 
-  let joiobj = start_joiobj
+      try {
+        meta = plugin.define.call(delegate, options) || {}
+      } catch (e) {
+        Common.wrap_error(e, 'plugin_define_failed', {
+          fullname: plugin.fullname,
+          message: (
+            e.message + (' (' + e.stack.match(/\n.*?\n/)).replace(/\n.*\//g, '')
+          ).replace(/\n/g, ''),
+          options: options,
+          repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',
+        })
+      }
 
-  for (var p in obj) {
-    var v = obj[p]
-    var t = typeof v
+      meta = 'string' === typeof meta ? { name: meta } : meta
+      meta.options = meta.options || options
 
-    var kv: any = {}
+      var updated_options: any = {}
+      updated_options[plugin.fullname] = meta.options
+      delegate.options(updated_options)
 
-    if (null != v && !Joi.isSchema(v) && 'object' === t) {
-      var np = '' === path ? p : path + '.' + p
+      return meta
+    },
 
-      joiobj = joiobj.object().default()
+
+    // copied from https://github.com/rjrodger/optioner
+    // TODO: remove unnecessary vars+code
+    prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
+      if (Joi.isSchema(spec)) {
+        return spec
+      }
+
+      var joiobj = Joi.object()
 
       if (opts.allow_unknown) {
         joiobj = joiobj.unknown()
       }
 
-      kv[p] = walk(Joi, joiobj, v, np, opts, ctxt, mod)
-    } else {
-      kv[p] = mod(v)
-    }
+      var joi = intern.walk(
+        Joi,
+        joiobj,
+        spec,
+        '',
+        opts,
+        ctxt,
+        function(valspec: any) {
+          if (valspec && Joi.isSchema(valspec)) {
+            return valspec
+          } else {
+            var typecheck = typeof valspec
+            //typecheck = 'function' === typecheck ? 'func' : typecheck
 
-    joiobj = joiobj.keys(kv)
+            if (opts.must_match_literals) {
+              return Joi.any()
+                .required()
+                .valid(valspec)
+            } else {
+              if (void 0 === valspec) {
+                return Joi.any().optional()
+              } else if (null == valspec) {
+                return Joi.any().default(null)
+              } else if ('number' === typecheck && Number.isInteger(valspec)) {
+                return Joi.number()
+                  .integer()
+                  .default(valspec)
+              } else if ('string' === typecheck) {
+                return Joi.string()
+                  .empty('')
+                  .default(() => valspec)
+              } else {
+                return Joi[typecheck]().default(() => valspec)
+              }
+            }
+          }
+        })
+
+      return joi
+    },
+
+
+    // copied from https://github.com/rjrodger/optioner
+    // TODO: remove unnecessary vars+code
+    walk: function(
+      Joi: any,
+      start_joiobj: any,
+      obj: any,
+      path: any,
+      opts: any,
+      ctxt: any,
+      mod: any) {
+      if (Array.isArray(obj)) {
+        ctxt.arrpaths.push(path)
+      }
+
+      let joiobj = start_joiobj
+
+      for (var p in obj) {
+        var v = obj[p]
+        var t = typeof v
+
+        var kv: any = {}
+
+        if (null != v && !Joi.isSchema(v) && 'object' === t) {
+          var np = '' === path ? p : path + '.' + p
+
+          joiobj = joiobj.object().default()
+
+          if (opts.allow_unknown) {
+            joiobj = joiobj.unknown()
+          }
+
+          kv[p] = intern.walk(Joi, joiobj, v, np, opts, ctxt, mod)
+        } else {
+          kv[p] = mod(v)
+        }
+
+        joiobj = joiobj.keys(kv)
+      }
+
+      return joiobj
+    },
   }
-
-  return joiobj
 }

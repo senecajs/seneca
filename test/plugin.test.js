@@ -1023,4 +1023,57 @@ describe('plugin', function () {
       fin()
     })
   })
+
+
+  it('plugin-defaults-top-level-joi', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+    var Joi = s0.util.Joi
+
+    // no Joi
+    var p0 = {
+      defaults: {
+        a:1
+      },
+      define: function (options) {
+        expect(options).equal({
+          a: 1
+        })
+      }
+    }
+    
+    s0.use(Object.assign(p0,{name:'p0n0'}))
+    
+    // top Joi
+    var p1 = {
+      defaults: Joi.object({
+        a: Joi.number().default(2)
+      }).default(),
+      define: function (options) {
+        expect(options).equal({
+          a: 2
+        })
+      }
+    }
+
+    // console.log('test p1n0', Joi.isSchema(p1.defaults))
+    
+    s0.use(Object.assign(p1,{name:'p1n0'}))
+    
+    s0.ready(function () {
+      var po = this.options().plugin
+
+      expect(po.p0n0).equal({
+        a: 1
+      })
+      
+      expect(po.p1n0).equal({
+        a: 2
+      })
+      
+      fin()
+    })
+  })
+
+
+
 })
