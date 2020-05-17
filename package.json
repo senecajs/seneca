@@ -65,7 +65,7 @@
     "seneca.js"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10"
   },
   "main": "seneca.js",
   "scripts": {
