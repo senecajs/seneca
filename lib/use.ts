@@ -46,6 +46,7 @@ function api_use(callpoint: any) {
     tasks.define,
     { name: 'post_meta', exec: tasks.meta },
     { name: 'post_legacy_extend', exec: tasks.legacy_extend },
+    // TODO: prepare (init)
     function complete() {
       //console.log('COMPLETE')
     },
@@ -197,13 +198,13 @@ function make_tasks(): any {
 
       return {
         op: 'merge',
-        out: { args }
+        out: { plugin: { args } }
       }
     },
 
 
     load: (spec: TaskSpec) => {
-      let args: string[] = spec.data.args
+      let args: string[] = spec.data.plugin.args
       let seneca: any = spec.ctx.seneca
       let private$: any = seneca.private$
 
@@ -408,6 +409,7 @@ function make_tasks(): any {
       var actdeflist: any = []
 
       delegate.add = function() {
+        // TODO: modernize
         var argsarr = new Array(arguments.length)
         for (var l = 0; l < argsarr.length; ++l) {
           argsarr[l] = arguments[l]

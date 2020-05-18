@@ -1136,23 +1136,24 @@ describe('plugin', function () {
     expect(args_task.name).equals('args')
     
     var out = args_task.exec({ctx:{args:[]}})
-    expect(out).equal({ op: 'merge', out: { args: [] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: []} } })
 
     out = args_task.exec({ctx:{args:['foo']}})
-    expect(out).equal({ op: 'merge', out: { args: ['foo'] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: ['foo']} } })
 
     function a() {}
     out = args_task.exec({ctx:{args:[a]}})
-    expect(out).equal({ op: 'merge', out: { args: [a] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: [a]} } })
 
     var b = {}
     out = args_task.exec({ctx:{args:[b]}})
-    expect(out).equal({ op: 'merge', out: { args: [{init: void 0}] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: [{init: void 0}]} } })
 
 
     var b = {define:a}
     out = args_task.exec({ctx:{args:[b]}})
-    expect(out).equal({ op: 'merge', out: { args: [{init: a, define: a}] } })
+    expect(out)
+      .equal({ op: 'merge', out: { plugin: { args: [{init: a, define: a}]} } })
 
     fin()
   })
