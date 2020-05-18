@@ -25,7 +25,7 @@ const Ready = require('./lib/ready')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
 const Act = require('./lib/act')
-const Use = require('./lib/use')
+const Plugin = require('./lib/plugin')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
@@ -466,7 +466,7 @@ function make_seneca(initial_opts) {
   root$.order = {}
   
   // TODO: rename back to plugins
-  const api_use = Use.api_use(callpoint)
+  const api_use = Plugin.api_use(callpoint,{debug:!!start_opts.debug.ordu})
   root$.order.plugin = api_use.ordu
   
   // Seneca methods. Official API.

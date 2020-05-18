@@ -12,11 +12,11 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
-var Use = require('../lib/use')
+var Plugin = require('../lib/plugin')
 
 describe('plugin', function () {
   it('use.intern', (fin)=>{
-    expect(Use.intern).exists()
+    expect(Plugin.intern).exists()
 
     var Joi = Seneca.util.Joi
     
@@ -40,12 +40,12 @@ describe('plugin', function () {
       q: {u:[{v:[{w:7}]}]}
     }
 
-    var out = Use.intern.prepare_spec(Joi,spec,{allow_unknown:false})
+    var out = Plugin.intern.prepare_spec(Joi,spec,{allow_unknown:false})
     // console.dir(out.describe(),{depth:null})
     expect(out.validate(spec).error).not.exists()
 
 
-    out = Use.intern.prepare_spec(Joi,spec,{allow_unknown:true})
+    out = Plugin.intern.prepare_spec(Joi,spec,{allow_unknown:true})
     // console.dir(out.describe(),{depth:null})
 
     spec.z = 1
@@ -88,6 +88,7 @@ describe('plugin', function () {
         'define',
         'post_meta',
         'post_legacy_extend',
+        'call_prepare',
         'complete'
       ])
     expect(Object.keys(ordu_use.operators()))
@@ -99,6 +100,7 @@ describe('plugin', function () {
         'seneca_plugin',
         'seneca_export',
         'seneca_options',
+        'seneca_complete',
       ])
     
     fin()

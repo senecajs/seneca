@@ -74,7 +74,8 @@ describe('order', function () {
         'after-options',
         'define',
         'post_meta',
-        'post_legacy_extend',
+      'post_legacy_extend',
+      'call_prepare',
         'complete'
     ])
 

@@ -1,3 +1,9 @@
+## 3.21.0 2020-05-18
+
+* Starting port to TypeScript, see lib/plugin.ts
+* Well-defined plugin load lifecycle, see lib/plugin.ts use of https://github.com/rjrodger/ordu
+
+
 ## 3.20.5 2020-05-11
 
 * Remove lodash from dependencies.
