@@ -1,4 +1,4 @@
-## 3.21.0 2020-05-18
+## 3.21.0 2020-05-19
 
 * Starting port to TypeScript, see lib/plugin.ts
 * Well-defined plugin load lifecycle, see lib/plugin.ts use of https://github.com/rjrodger/ordu
