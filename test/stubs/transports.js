@@ -193,15 +193,11 @@ function make_simple_transport () {
         simple_transport.queuemap[config.pin+'~OUT'] = Async.queue(handle_reply)
 
         var msg = JSON.stringify(tu.externalize_msg(seneca, msg, meta))
-        //console.log('ST CS', msg)
-
         simple_transport.queuemap[config.pin+'~IN'].push(msg) 
       }
 
       function handle_reply(data, done) {
         var rep = tu.internalize_reply(seneca,JSON.parse(data))
-        //console.log('ST CR', rep)
-
         seneca.reply(rep)
         return done()
       }

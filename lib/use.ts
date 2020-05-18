@@ -1,18 +1,19 @@
 /* Copyright © 2020 Richard Rodger and other contributors, MIT License. */
+/* $lab:coverage:off$ */
 'use strict'
-
-import * as Hoek from '@hapi/hoek'
 
 const Uniq: any = require('lodash.uniq')
 const Eraro: any = require('eraro')
 
 import Nua from 'nua'
-import { Ordu } from 'ordu'
+import { Ordu, TaskSpec } from 'ordu'
 
 
 // TODO: refactor: use.js->plugin.js and contain *_plugin api methods too
 const Common: any = require('./common')
 const Print: any = require('./print')
+
+/* $lab:coverage:on$ */
 
 
 exports.api_use = api_use
@@ -77,11 +78,6 @@ interface UseData {
   exports: any
 }
 
-interface UseSpec {
-  ctx: UseCtx
-  data: UseData
-}
-
 
 
 
@@ -90,11 +86,16 @@ function make_use(ordu: any, callpoint: any) {
   let seq = { index: 0 }
 
   return function use() {
-    var self = this
+    let self = this
+    let args = [...arguments]
+
+    if (0 === args.length) {
+      throw self.error('use_no_args')
+    }
 
     let ctx: UseCtx = {
       seq: seq,
-      args: [...arguments],
+      args: args,
       seneca: this,
       callpoint: callpoint(true)
     }
@@ -110,10 +111,15 @@ function make_use(ordu: any, callpoint: any) {
 
     async function run() {
       // NOTE: don't wait for result!
+
+      //let pn: string = (ctx.args[0] as any).name
+
+      // TODO: set runid to indicate plugin fullname + time
+      //console.log('USE AAA', pn)//, ctx.seneca.order.plugin.tasks().length)
       //var resp =
       await ordu.exec(ctx, data, {
         done: function(res: any) {
-          //console.log('RES-ERR', res.err)
+          //console.log('RES-DONE', pn, res.err)
 
           if (res.err) {
             //self.die(self.private$.error(res.err, 'plugin_' + res.err.code))
@@ -124,7 +130,7 @@ function make_use(ordu: any, callpoint: any) {
         }
       })
 
-      //console.log('RESP')
+      //console.log('RESP', pn, resp.err)
       //console.dir((resp.tasklog as any[]).map((x): any => [x.name, x.op, x.result.err]), { depth: null })
     }
 
@@ -152,7 +158,7 @@ function make_tasks(): any {
       },
 
       seneca_options: (tr: any, ctx: any, data: any): any => {
-        Nua(data.plugin.options, tr.out.plugin.options, { preserve: true })
+        Nua(data.plugin, tr.out.plugin, { preserve: true })
 
         let plugin_fullname: string = data.plugin.fullname
         let plugin_options = data.plugin.options
@@ -166,7 +172,9 @@ function make_tasks(): any {
       },
     },
 
-    args: (spec: UseSpec) => {
+
+    // TODO: args validation?
+    args: (spec: TaskSpec) => {
       let args: any[] = [...spec.ctx.args]
 
       // DEPRECATED: Remove when Seneca >= 4.x
@@ -187,7 +195,6 @@ function make_tasks(): any {
         args[0].init = args[0].define || args[0].init
       }
 
-
       return {
         op: 'merge',
         out: { args }
@@ -195,7 +202,7 @@ function make_tasks(): any {
     },
 
 
-    load: (spec: UseSpec) => {
+    load: (spec: TaskSpec) => {
       let args: string[] = spec.data.args
       let seneca: any = spec.ctx.seneca
       let private$: any = seneca.private$
@@ -230,7 +237,7 @@ function make_tasks(): any {
     },
 
 
-    normalize: (spec: UseSpec) => {
+    normalize: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
 
       var modify: any = {}
@@ -250,7 +257,7 @@ function make_tasks(): any {
     },
 
 
-    preload: (spec: UseSpec) => {
+    preload: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
 
       let plugin: any = spec.data.plugin
@@ -298,7 +305,8 @@ function make_tasks(): any {
     },
 
 
-    meta: (spec: UseSpec) => {
+    meta: (spec: TaskSpec) => {
+      let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
       let meta: any = spec.data.meta
 
@@ -316,6 +324,24 @@ function make_tasks(): any {
         }
       })
 
+
+      if (meta.order) {
+        if (meta.order.plugin) {
+          let tasks: any[] =
+            Array.isArray(meta.order.plugin) ? meta.order.plugin :
+              [meta.order.plugin]
+
+          //console.log('AAA', spec.task.name, tasks)
+          //try {
+          seneca.order.plugin.add(tasks)
+          //}
+          //catch (e) {
+          //  console.log(e)
+          //}
+          delete meta.order.plugin
+        }
+      }
+
       return {
         op: 'seneca_export',
         out: {
@@ -326,7 +352,7 @@ function make_tasks(): any {
 
 
     // NOTE: mutates spec.ctx.seneca
-    legacy_extend: (spec: UseSpec) => {
+    legacy_extend: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
 
       // let plugin: any = spec.data.plugin
@@ -354,7 +380,7 @@ function make_tasks(): any {
     },
 
 
-    delegate: (spec: UseSpec) => {
+    delegate: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
 
@@ -452,7 +478,7 @@ function make_tasks(): any {
     },
 
 
-    call_define: (spec: UseSpec) => {
+    call_define: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
       let delegate: any = spec.data.delegate
 
@@ -495,7 +521,7 @@ function make_tasks(): any {
     },
 
 
-    options: (spec: UseSpec) => {
+    options: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
       let delegate: any = spec.data.delegate
 
@@ -556,6 +582,10 @@ function make_tasks(): any {
 
       let resolved_options: any = {}
 
+      //console.log('oAAA', delegate.util.Joi.isSchema(defaults))
+
+
+      // TODO: expose this on plugin
       let joi_schema: any = intern.prepare_spec(
         delegate.util.Joi,
         defaults,
@@ -563,15 +593,23 @@ function make_tasks(): any {
         {}
       )
 
+      //console.log('oBBB', joi_schema === defaults)
+
+
       let joi_out = joi_schema.validate(outopts)
 
-      // TODO: return this instead
+
+      //console.log('oCCC', joi_out)
+
+      let err: Error | undefined = void 0
+
       if (joi_out.error) {
-        throw delegate.error('invalid_plugin_option', {
+        err = delegate.error('invalid_plugin_option', {
           name: fullname,
           err_msg: joi_out.error.message,
           options: outopts,
         })
+        //console.log('oDDD', err)
       }
       else {
         resolved_options = joi_out.value
@@ -579,9 +617,11 @@ function make_tasks(): any {
 
       return {
         op: 'seneca_options',
+        err: err,
         out: {
           plugin: {
-            options: resolved_options
+            options: resolved_options,
+            options_schema: joi_schema
           }
         }
       }
@@ -589,7 +629,7 @@ function make_tasks(): any {
 
 
     // TODO: move data modification to returned operation
-    define: (spec: UseSpec) => {
+    define: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
       let so: any = seneca.options()
 
@@ -842,36 +882,39 @@ function make_intern() {
       opts: any,
       ctxt: any,
       mod: any) {
-      if (Array.isArray(obj)) {
-        ctxt.arrpaths.push(path)
-      }
 
       let joiobj = start_joiobj
 
-      for (var p in obj) {
-        var v = obj[p]
-        var t = typeof v
+      // NOTE: use explicit Joi construction for checking within arrays
+      if (Array.isArray(obj)) {
+        return Joi.array()
+      }
+      else {
+        for (var p in obj) {
+          var v = obj[p]
+          var t = typeof v
 
-        var kv: any = {}
+          var kv: any = {}
 
-        if (null != v && !Joi.isSchema(v) && 'object' === t) {
-          var np = '' === path ? p : path + '.' + p
+          if (null != v && !Joi.isSchema(v) && 'object' === t) {
+            var np = '' === path ? p : path + '.' + p
 
-          joiobj = joiobj.object().default()
+            let childjoiobj = Joi.object().default()
 
-          if (opts.allow_unknown) {
-            joiobj = joiobj.unknown()
+            if (opts.allow_unknown) {
+              childjoiobj = childjoiobj.unknown()
+            }
+
+            kv[p] = intern.walk(Joi, childjoiobj, v, np, opts, ctxt, mod)
+          } else {
+            kv[p] = mod(v)
           }
 
-          kv[p] = intern.walk(Joi, joiobj, v, np, opts, ctxt, mod)
-        } else {
-          kv[p] = mod(v)
+          joiobj = joiobj.keys(kv)
         }
 
-        joiobj = joiobj.keys(kv)
+        return joiobj
       }
-
-      return joiobj
-    },
+    }
   }
 }

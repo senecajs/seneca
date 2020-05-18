@@ -13,7 +13,7 @@ var Seneca = require('..')
 
 describe('exports', function () {
   it('happy', async ()=>{
-    var s0 = Seneca().test('print')
+    var s0 = Seneca().test()
 
     var p0 = function p0(options) {
       return {
@@ -35,7 +35,7 @@ describe('exports', function () {
 
 
   it('with-init', async ()=>{
-    var s0 = Seneca().test('print')
+    var s0 = Seneca().test()
 
     var p0 = function p0(options) {
 
@@ -70,7 +70,7 @@ describe('exports', function () {
 
 
   it('with-preload', async ()=>{
-    var s0 = Seneca().test('print')
+    var s0 = Seneca().test()
 
     var p0 = function p0(options) {
 
@@ -108,7 +108,7 @@ describe('exports', function () {
 
 
   it('with-preload-and-init', async ()=>{
-    var s0 = Seneca().test('print')
+    var s0 = Seneca().test()
 
     var p0 = function p0(options) {
 

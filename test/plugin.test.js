@@ -12,8 +12,62 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
+var Use = require('../lib/use')
 
 describe('plugin', function () {
+  it('use.intern', (fin)=>{
+    expect(Use.intern).exists()
+
+    var Joi = Seneca.util.Joi
+    
+    var spec = {
+      a: null,
+      b: void 0,
+      c: Joi.object(),
+      d: 1,
+      e: 'a',
+      f: {},
+      g: { h: 2 },
+      i: { j: { k: 3 } },
+
+      // NOTE: a simple array check is as good as it gets
+      // Use explicit Joi.array construction for detailed validation
+      
+      l: [],
+      m: [4],
+      n: [[5]],
+      o: {p:[6]},
+      q: {u:[{v:[{w:7}]}]}
+    }
+
+    var out = Use.intern.prepare_spec(Joi,spec,{allow_unknown:false})
+    // console.dir(out.describe(),{depth:null})
+    expect(out.validate(spec).error).not.exists()
+
+
+    out = Use.intern.prepare_spec(Joi,spec,{allow_unknown:true})
+    // console.dir(out.describe(),{depth:null})
+
+    spec.z = 1
+    expect(out.validate(spec).error).not.exists()
+
+    
+    fin()
+  })
+
+  it('plugin-edges', (fin)=>{
+    var s = Seneca({debug:{undead:true}}).test(fin)
+
+    try {
+      s.use()
+      Code.fail('empty-use-should-throw')
+    }
+    catch(e) {
+      expect(e.message).includes('seneca.use')
+      fin()
+    }
+  })
+
   it('plugin-internal-ordu', (fin)=>{
     var s = Seneca().test(fin)
 
@@ -1075,5 +1129,31 @@ describe('plugin', function () {
   })
 
 
+  it('plugin-order-task-args', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
 
+    var args_task = s0.order.plugin.task.args
+    expect(args_task.name).equals('args')
+    
+    var out = args_task.exec({ctx:{args:[]}})
+    expect(out).equal({ op: 'merge', out: { args: [] } })
+
+    out = args_task.exec({ctx:{args:['foo']}})
+    expect(out).equal({ op: 'merge', out: { args: ['foo'] } })
+
+    function a() {}
+    out = args_task.exec({ctx:{args:[a]}})
+    expect(out).equal({ op: 'merge', out: { args: [a] } })
+
+    var b = {}
+    out = args_task.exec({ctx:{args:[b]}})
+    expect(out).equal({ op: 'merge', out: { args: [{init: void 0}] } })
+
+
+    var b = {define:a}
+    out = args_task.exec({ctx:{args:[b]}})
+    expect(out).equal({ op: 'merge', out: { args: [{init: a, define: a}] } })
+
+    fin()
+  })
 })

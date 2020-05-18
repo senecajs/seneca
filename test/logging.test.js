@@ -307,6 +307,7 @@ describe('logging', function () {
     }
   })
 
+  // NOTE: spurious console.logs left in code with cause this to fail
   it('shortcuts', function (fin) {
     var log
 
