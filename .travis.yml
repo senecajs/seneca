@@ -24,6 +24,7 @@ script:
       ./test/smoke-test.sh;
       ./test/entity-test.sh;
       ./test/joi-test.sh;
+      ./test/doc-test.sh;
     fi
   
 
