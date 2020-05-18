@@ -4,7 +4,7 @@ var Seneca = require('../..')
 
 var start = Date.now()
 
-Seneca({tag:'launch'})
+Seneca({tag:'launch', legacy:false})
   .use('./foo-plugin.js')
   .add('a:1', function (msg, reply) {
     reply({x: 1})

@@ -1,3 +1,9 @@
+## 3.21.0 2020-05-18
+
+* Starting port to TypeScript, see lib/plugin.ts
+* Well-defined plugin load lifecycle, see lib/plugin.ts use of https://github.com/rjrodger/ordu
+
+
 ## 3.20.6 2020-05-14
 
 * Fixes regression with `seneca.depends`: https://github.com/senecajs/seneca/issues/792

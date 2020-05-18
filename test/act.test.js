@@ -1,9 +1,7 @@
-/* Copyright (c) 2019 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2019-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 const Util = require('util')
-
-const LegacyOrdu = require('ordu').LegacyOrdu
 
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
@@ -11,6 +9,8 @@ const Lab = require('@hapi/lab')
 const lab = (exports.lab = Lab.script())
 const describe = lab.describe
 const expect = Code.expect
+
+const { LegacyOrdu } = require('ordu')
 
 const Shared = require('./shared')
 const it = Shared.make_it(lab)

@@ -12,7 +12,7 @@ const UsePlugin = require('use-plugin')
 const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
-const LegacyOrdu = require('ordu').LegacyOrdu
+const { LegacyOrdu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
@@ -25,12 +25,13 @@ const Ready = require('./lib/ready')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
 const Act = require('./lib/act')
+const Plugin = require('./lib/plugin')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
 const Options = require('./lib/options')
 const Package = require('./package.json')
-const Plugins = require('./lib/plugins')
+//const Plugins = require('./lib/plugins')
 const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
@@ -462,6 +463,12 @@ function make_seneca(initial_opts) {
 
   const ready = Ready(root$)
 
+  root$.order = {}
+
+  // TODO: rename back to plugins
+  const api_use = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
+  root$.order.plugin = api_use.ordu
+
   // Seneca methods. Official API.
   root$.toString = API.toString
   root$.has = API.has // True if the given pattern has an action.
@@ -480,7 +487,7 @@ function make_seneca(initial_opts) {
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
-  root$.use = API.use // Define and load a plugin.
+  root$.use = api_use.use // Define and load a plugin.
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
@@ -504,8 +511,16 @@ function make_seneca(initial_opts) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
+  root$.internal = function () {
+    return {
+      ordu: {
+        use: api_use.ordu,
+      },
+    }
+  }
+
   // Non-API methods.
-  root$.register = Plugins.register(callpoint)
+  // root$.register = Plugins.register(callpoint)
 
   // DEPRECATE IN 4.x
   root$.findact = root$.find

@@ -252,7 +252,7 @@ describe('transport', function () {
   })
 
   it('nextgen-transport-local-override', test_opts, function (fin) {
-    Seneca({
+    var s0 = Seneca({
       tag: 's0',
       timeout: 22222 * tmx,
       transport: { web: { port: 62020 } },
@@ -264,7 +264,7 @@ describe('transport', function () {
       })
       .listen({ pin: 'foo:1' })
       .ready(function () {
-        Seneca({
+        var c0 = Seneca({
           tag: 'c0',
           timeout: 22222 * tmx,
           transport: { web: { port: 62020 } },
@@ -283,7 +283,7 @@ describe('transport', function () {
 
             // console.dir(this.find('foo:1'), { depth: null })
 
-            fin()
+            s0.close(c0.close.bind(c0, fin))
           })
       })
   })
@@ -379,7 +379,7 @@ describe('transport', function () {
           })
           .ready(function () {
             expect(i).equal(4)
-            fin()
+            s0.close(c0.close.bind(c0, fin))
           })
       })
   })
@@ -387,282 +387,104 @@ describe('transport', function () {
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
-  describe('listen()', function () {
-    it('supports null options', test_opts, function (done) {
+  describe('transport-listen', function () {
+    it('supports-null-options', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {}
-        },
-        act: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca)
       }
       expect(fn).to.not.throw()
-      done()
+      seneca.close(fin)
     })
 
-    it('supports type as tcp option', test_opts, function (done) {
+    it('supports type as tcp option', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {
-            type: 'tcp',
-          }
-        },
-        act: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
       }
       expect(fn).to.not.throw()
-      done()
+      seneca.close(fin)
     })
 
-    it('supports type as http option', test_opts, function (done) {
+    it('supports type as http option', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {
-            type: 'http',
-          }
-        },
-        act: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
       }
       expect(fn).to.not.throw()
-      done()
+      seneca.close(fin)
     })
 
-    it('supports the port number as an argument', test_opts, function (done) {
+    it('supports the port number as an argument', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {}
-        },
-        act: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080)
       }
       expect(fn).to.not.throw()
-      done()
+      seneca.close(fin)
     })
 
     it('supports the port number and host as an argument', test_opts, function (
-      done
+      fin
     ) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {}
-        },
-        act: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost')
       }
       expect(fn).to.not.throw()
-      done()
+      seneca.close(fin)
     })
 
     it(
       'supports the port number, host, and path as an argument',
       test_opts,
-      function (done) {
+      function (fin) {
         var listen = Transport.listen(() => {})
-        var seneca = {
-          private$: { error: () => {} },
-          log: {
-            info: () => {},
-            debug: () => {},
-          },
-          options: function () {
-            return {}
-          },
-          act: () => {},
-          context: {},
-          make_log: function () {},
-        }
+        var seneca = Seneca({ legacy: false }).test(fin)
 
         var fn = function () {
           listen.call(seneca, 8080, 'localhost', '/')
         }
         expect(fn).to.not.throw()
-        done()
+        seneca.close(fin)
       }
     )
 
     it('action-error', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = {
-        private$: {
-          error: function (err) {
-            expect(err).to.exist()
-            fin()
-          },
-        },
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {}
-        },
-        act: function (pattern, options, callback) {
-          callback(new Error())
-        },
-        die: () => {},
-        context: {},
-        make_log: function () {},
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       listen.call(seneca)
+      seneca.close(fin)
     })
   })
 
   describe('client()', function () {
-    it('supports null options', test_opts, function (done) {
+    it('supports null options', test_opts, function (fin) {
       var client = Transport.client(
         () => {},
         function () {
           return () => {}
         }
       )
-      var seneca = {
-        log: {
-          info: () => {},
-          debug: () => {},
-        },
-        options: function () {
-          return {}
-        },
-        act: () => {},
-        delegate: function () {
-          return Object.create(this)
-        },
-        add: () => {},
-        context: {},
-        make_log: function () {},
-        private$: { ge: { gate: function () {} }, error: () => {} },
-      }
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         client.call(seneca)
       }
 
       expect(fn).to.not.throw()
-      done()
-    })
-
-    it('supports send to client queueing', test_opts, function (done) {
-      var client = Transport.client(
-        () => {},
-        function () {
-          return () => {}
-        }
-      )
-      var seneca = {
-        log: function () {},
-        options: function () {
-          return {
-            transport: {
-              pin: { cmd: 'pin' },
-            },
-          }
-        },
-        act: function (pattern, options, callback) {
-          callback(null, {})
-        },
-        delegate: function () {
-          return Object.create(this)
-        },
-        add: function () {
-          done()
-        },
-        context: {},
-        make_log: function () {},
-        private$: { ge: { gate: function () {} }, error: () => {} },
-      }
-
-      seneca.log.info = () => {}
-      seneca.log.debug = () => {}
-
-      client.call(seneca)
-    })
-
-    it('supports pins represented by strings', test_opts, function (done) {
-      var client = Transport.client(
-        () => {},
-        function () {
-          return () => {}
-        }
-      )
-      var seneca = {
-        log: function () {},
-        options: function () {
-          return {
-            transport: {
-              pins: ['{ "cmd": "pin" }', null, { test: true }],
-            },
-          }
-        },
-        act: function (pattern, options, callback) {
-          callback(null, {})
-        },
-        delegate: function () {
-          return Object.create(this)
-        },
-        add: function () {
-          done()
-        },
-        context: {},
-        make_log: function () {},
-        private$: { ge: { gate: function () {} } },
-      }
-
-      seneca.log.info = () => {}
-      seneca.log.debug = () => {}
-
-      client.call(seneca)
+      seneca.close(fin)
     })
   })
 
@@ -1229,7 +1051,7 @@ describe('transport', function () {
         s3.ready.bind(s3, function () {
           s1.act('cmd:test1', function (err) {
             expect(err.message).equal('from-test3')
-            fin()
+            s1.close(s2.close.bind(s2, s3.close.bind(s3, fin)))
           })
         })
       )
@@ -1264,7 +1086,7 @@ describe('transport', function () {
                 expect(err).to.not.exist()
                 expect(message.result).to.equal('bar')
                 expect(execCount).to.equal(1)
-                server2.close(done)
+                server2.close(client.close.bind(client, done))
               })
             })
           })

@@ -1,4 +1,4 @@
-/* Copyright © 2013-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2013-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 const Code = require('@hapi/code')
@@ -12,8 +12,95 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
+var Plugin = require('../lib/plugin')
 
 describe('plugin', function () {
+  it('use.intern', (fin) => {
+    expect(Plugin.intern).exists()
+
+    var Joi = Seneca.util.Joi
+
+    var spec = {
+      a: null,
+      b: void 0,
+      c: Joi.object(),
+      d: 1,
+      e: 'a',
+      f: {},
+      g: { h: 2 },
+      i: { j: { k: 3 } },
+
+      // NOTE: a simple array check is as good as it gets
+      // Use explicit Joi.array construction for detailed validation
+
+      l: [],
+      m: [4],
+      n: [[5]],
+      o: { p: [6] },
+      q: { u: [{ v: [{ w: 7 }] }] },
+    }
+
+    var out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: false })
+    // console.dir(out.describe(),{depth:null})
+    expect(out.validate(spec).error).not.exists()
+
+    out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: true })
+    // console.dir(out.describe(),{depth:null})
+
+    spec.z = 1
+    expect(out.validate(spec).error).not.exists()
+
+    fin()
+  })
+
+  it('plugin-edges', (fin) => {
+    var s = Seneca({ debug: { undead: true } }).test(fin)
+
+    try {
+      s.use()
+      Code.fail('empty-use-should-throw')
+    } catch (e) {
+      expect(e.message).includes('seneca.use')
+      fin()
+    }
+  })
+
+  it('plugin-internal-ordu', (fin) => {
+    var s = Seneca().test(fin)
+
+    var sin = s.internal()
+
+    var ordu_use = sin.ordu.use
+    expect(ordu_use.tasks().map((t) => t.name)).equal([
+      'args',
+      'load',
+      'normalize',
+      'preload',
+      'pre_meta',
+      'pre_legacy_extend',
+      'delegate',
+      'call_define',
+      'options',
+      'define',
+      'post_meta',
+      'post_legacy_extend',
+      'call_prepare',
+      'complete',
+    ])
+    expect(Object.keys(ordu_use.operators())).equal([
+      'next',
+      'skip',
+      'stop',
+      'merge',
+      'seneca_plugin',
+      'seneca_export',
+      'seneca_options',
+      'seneca_complete',
+    ])
+
+    fin()
+  })
+
   // Validates that @seneca/ prefix can be dropped.
   it('standard-test-plugin', function (fin) {
     Seneca()
@@ -299,9 +386,13 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
+        //console.log('AAA', err && err.details, err && err.seneca)
         expect('plugin_define_failed').equal(err.code)
+        //console.log('AAA1')
         expect(err.details.fullname).contains('bad_plugin_def')
+        //console.log('AAA2')
         expect(err.details.message).contains('plugin-def')
+        //console.log('AAA3')
         fin()
       },
     }).quiet()
@@ -770,7 +861,8 @@ describe('plugin', function () {
   })
 
   it('plugin-extend-action-modifier', function (fin) {
-    var si = Seneca({ log: 'silent' })
+    var si = Seneca({ legacy: false, xlog: 'silent' })
+      .test()
       .use(function foo() {
         return {
           extend: {
@@ -867,13 +959,13 @@ describe('plugin', function () {
 
   it('plugins-options-precedence', function (fin) {
     var si = Seneca({
-      log: 'silent',
-      legacy: { transport: false },
+      legacy: false,
+      debug: { undead: true },
       plugin: {
         foo: { a: 2, c: 2 },
         bar: { a: 2, c: 1 },
       },
-    })
+    }).test(fin)
 
     function bar(opts) {
       expect(opts).equal({ a: 3, b: 1, c: 1, d: 1 })
@@ -902,8 +994,9 @@ describe('plugin', function () {
   })
 
   it('error-plugin-define', function (fin) {
-    var s0 = Seneca({ log: 'silent', debug: { undead: true } })
+    var s0 = Seneca({ legacy: false, log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
+      //console.log('BBB',err)
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')
@@ -988,5 +1081,87 @@ describe('plugin', function () {
       expect(Object.keys(s0.list_plugins())[0]).equal('joi')
       fin()
     })
+  })
+
+  it('plugin-defaults-top-level-joi', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+    var Joi = s0.util.Joi
+
+    // no Joi
+    var p0 = {
+      defaults: {
+        a: 1,
+      },
+      define: function (options) {
+        expect(options).equal({
+          a: 1,
+        })
+      },
+    }
+
+    s0.use(Object.assign(p0, { name: 'p0n0' }))
+
+    // top Joi
+    var p1 = {
+      defaults: Joi.object({
+        a: Joi.number().default(2),
+      }).default(),
+      define: function (options) {
+        expect(options).equal({
+          a: 2,
+        })
+      },
+    }
+
+    // console.log('test p1n0', Joi.isSchema(p1.defaults))
+
+    s0.use(Object.assign(p1, { name: 'p1n0' }))
+
+    s0.ready(function () {
+      var po = this.options().plugin
+
+      expect(po.p0n0).equal({
+        a: 1,
+      })
+
+      expect(po.p1n0).equal({
+        a: 2,
+      })
+
+      fin()
+    })
+  })
+
+  it('plugin-order-task-args', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+
+    var args_task = s0.order.plugin.task.args
+    expect(args_task.name).equals('args')
+
+    var out = args_task.exec({ ctx: { args: [] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: [] } } })
+
+    out = args_task.exec({ ctx: { args: ['foo'] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: ['foo'] } } })
+
+    function a() {}
+    out = args_task.exec({ ctx: { args: [a] } })
+    expect(out).equal({ op: 'merge', out: { plugin: { args: [a] } } })
+
+    var b = {}
+    out = args_task.exec({ ctx: { args: [b] } })
+    expect(out).equal({
+      op: 'merge',
+      out: { plugin: { args: [{ init: void 0 }] } },
+    })
+
+    var b = { define: a }
+    out = args_task.exec({ ctx: { args: [b] } })
+    expect(out).equal({
+      op: 'merge',
+      out: { plugin: { args: [{ init: a, define: a }] } },
+    })
+
+    fin()
   })
 })

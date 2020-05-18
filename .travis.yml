@@ -1,7 +1,10 @@
 language: node_js
 
 node_js:
+  - '14'
+  - '13'
   - '12'
+  - '10'
 
 env:
   global:
@@ -12,12 +15,21 @@ install:
 
 script:
   - npm test
-  - npm audit
-  - npm run coveralls
-  - rm -rf node_modules
-  - npm ci --only=production
-  - ./test/smoke-test.sh
-  - ./test/entity-test.sh
-  - ./test/joi-test.sh
+  - >
+    if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+      npm audit
+      npm run coveralls
+      rm -rf node_modules
+      npm ci --only=production
+      ./test/smoke-test.sh;
+      ./test/entity-test.sh;
+      ./test/joi-test.sh;
+      ./test/doc-test.sh;
+    fi
   
 
+os:
+  - "linux"
+  - "osx"
+  - "windows"
+  

@@ -65,19 +65,21 @@
     "seneca.js"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10"
   },
   "main": "seneca.js",
   "scripts": {
-    "test": "lab -v -P test -L -t 90",
+    "watch": "tsc -w -d",
+    "build": "tsc -d",
+    "test": "lab -v -P test -L -t 90 --sourcemaps --transform node_modules/lab-transform-typescript  -r console -o stdout -r html -o test/coverage.html",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
-    "reset": "npm run clean && npm i && npm test",
+    "reset": "npm run clean && npm i && npm run build && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run clean && npm i --registry http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag --registry http://registry.npmjs.org && npm publish  --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION next --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION plugin --registry http://registry.npmjs.org"
+    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run clean && npm i --registry http://registry.npmjs.org && npm run prettier && npm run build && npm test && npm run repo-tag --registry http://registry.npmjs.org && npm publish  --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION next --registry http://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION plugin --registry http://registry.npmjs.org"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -94,12 +96,12 @@
     "nid": "^1.1.0",
     "norma": "^2.0.2",
     "optioner": "^5.0.1",
-    "ordu": "^1.3.0",
+    "ordu": "^1.7.1",
     "patrun": "^3.0.0",
     "qs": "^6.9.4",
     "rolling-stats": "^0.1.1",
     "seneca-transport": "^6.0.0",
-    "use-plugin": "^7.0.0"
+    "use-plugin": "^8.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
@@ -110,11 +112,14 @@
     "bench": "^0.3.6",
     "coveralls": "^3.1.0",
     "handlebars": "^4.7.6",
+    "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.0.5",
     "seneca-entity": "^8.0.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
-    "seneca-promisify": "^1.3.0"
+    "seneca-promisify": "^1.3.0",
+    "typescript": "^3.9.2",
+    "@types/node": "^14.0.1"
   }
 }
