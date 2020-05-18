@@ -283,7 +283,7 @@ describe('transport', function () {
 
             // console.dir(this.find('foo:1'), { depth: null })
 
-            s0.close(c0.close.bind(c0,fin))
+            s0.close(c0.close.bind(c0, fin))
           })
       })
   })
@@ -379,7 +379,7 @@ describe('transport', function () {
           })
           .ready(function () {
             expect(i).equal(4)
-            s0.close(c0.close.bind(c0,fin))
+            s0.close(c0.close.bind(c0, fin))
           })
       })
   })
@@ -390,8 +390,8 @@ describe('transport', function () {
   describe('transport-listen', function () {
     it('supports-null-options', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
-      
+      var seneca = Seneca({ legacy: false }).test(fin)
+
       var fn = function () {
         listen.call(seneca)
       }
@@ -401,7 +401,7 @@ describe('transport', function () {
 
     it('supports type as tcp option', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
@@ -412,7 +412,7 @@ describe('transport', function () {
 
     it('supports type as http option', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
@@ -423,8 +423,8 @@ describe('transport', function () {
 
     it('supports the port number as an argument', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
-      
+      var seneca = Seneca({ legacy: false }).test(fin)
+
       var fn = function () {
         listen.call(seneca, 8080)
       }
@@ -436,7 +436,7 @@ describe('transport', function () {
       fin
     ) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         listen.call(seneca, 8080, 'localhost')
@@ -450,8 +450,8 @@ describe('transport', function () {
       test_opts,
       function (fin) {
         var listen = Transport.listen(() => {})
-        var seneca = Seneca({legacy:false}).test(fin)
-        
+        var seneca = Seneca({ legacy: false }).test(fin)
+
         var fn = function () {
           listen.call(seneca, 8080, 'localhost', '/')
         }
@@ -462,7 +462,7 @@ describe('transport', function () {
 
     it('action-error', test_opts, function (fin) {
       var listen = Transport.listen(() => {})
-      var seneca = Seneca({legacy:false}).test(fin)
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       listen.call(seneca)
       seneca.close(fin)
@@ -477,7 +477,7 @@ describe('transport', function () {
           return () => {}
         }
       )
-      var seneca = Seneca({legacy:false}).test(fin)
+      var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
         client.call(seneca)
@@ -487,7 +487,6 @@ describe('transport', function () {
       seneca.close(fin)
     })
   })
-
 
   it('transport-exact-single', test_opts, function (done) {
     var tt = make_test_transport()
@@ -1052,7 +1051,7 @@ describe('transport', function () {
         s3.ready.bind(s3, function () {
           s1.act('cmd:test1', function (err) {
             expect(err.message).equal('from-test3')
-            s1.close(s2.close.bind(s2,s3.close.bind(s3,fin)))
+            s1.close(s2.close.bind(s2, s3.close.bind(s3, fin)))
           })
         })
       )
@@ -1087,7 +1086,7 @@ describe('transport', function () {
                 expect(err).to.not.exist()
                 expect(message.result).to.equal('bar')
                 expect(execCount).to.equal(1)
-                server2.close(client.close.bind(client,done))
+                server2.close(client.close.bind(client, done))
               })
             })
           })

@@ -112,30 +112,18 @@ function make_use(ordu: any, callpoint: any) {
     }
 
     async function run() {
-      // NOTE: don't wait for result!
-
-      //let pn: string = (ctx.args[0] as any).name
-
-      // TODO: set runid to indicate plugin fullname + time
-      //console.log('USE AAA', pn)//, ctx.seneca.order.plugin.tasks().length)
-      //var resp =
       await ordu.exec(ctx, data, {
         done: function(res: any) {
-          //console.log('RES-DONE', pn, res.err)
-
           if (res.err) {
-            //self.die(self.private$.error(res.err, 'plugin_' + res.err.code))
             var err = res.err.seneca ? res.err :
               self.private$.error(res.err, res.err.code)
             self.die(err)
           }
         }
       })
-
-      //console.log('RESP', pn, resp.err)
-      //console.dir((resp.tasklog as any[]).map((x): any => [x.name, x.op, x.result.err]), { depth: null })
     }
 
+    // NOTE: don't wait for result!
     run()
 
     return self
@@ -179,7 +167,7 @@ function make_tasks(): any {
       let private$: any = seneca.private$
 
       // TODO: use-plugin needs better error message for malformed plugin desc
-      var desc = private$.use.build_plugin_desc(...args)
+      let desc = private$.use.build_plugin_desc(...args)
 
       if (private$.ignore_plugins[desc.full]) {
         seneca.log.info({
@@ -211,7 +199,7 @@ function make_tasks(): any {
     normalize: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
 
-      var modify: any = {}
+      let modify: any = {}
 
       // NOTE: `define` is the property for the plugin definition action.
       // The property `init` will be deprecated in 4.x
@@ -355,11 +343,8 @@ function make_tasks(): any {
       let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
 
-      //var delegate = make_delegate(seneca, plugin)
-
-
       // Adjust Seneca API to be plugin specific.
-      var delegate = seneca.delegate({
+      let delegate = seneca.delegate({
         plugin$: {
           name: plugin.name,
           tag: plugin.tag,
@@ -376,16 +361,11 @@ function make_tasks(): any {
         plugin: plugin.name,
       })
 
-      var actdeflist: any = []
+      let actdeflist: any = []
 
       delegate.add = function() {
-        // TODO: modernize
-        var argsarr = new Array(arguments.length)
-        for (var l = 0; l < argsarr.length; ++l) {
-          argsarr[l] = arguments[l]
-        }
-
-        var actdef = argsarr[argsarr.length - 1] || {}
+        let argsarr = [...arguments]
+        let actdef = argsarr[argsarr.length - 1] || {}
 
         if ('function' === typeof actdef) {
           actdef = {}
@@ -422,7 +402,7 @@ function make_tasks(): any {
       delegate.init = function(init: any) {
         // TODO: validate init_action is function
 
-        var pat: any = {
+        let pat: any = {
           role: 'seneca',
           plugin: 'init',
           init: plugin.name,
@@ -455,10 +435,10 @@ function make_tasks(): any {
       let delegate: any = spec.data.delegate
 
       // FIX: mutating context!!!
-      var seq: number = spec.ctx.seq.index++
+      let seq: number = spec.ctx.seq.index++
 
 
-      var plugin_define_pattern: any = {
+      let plugin_define_pattern: any = {
         role: 'seneca',
         plugin: 'define',
         name: plugin.name,
@@ -516,12 +496,12 @@ function make_tasks(): any {
         so.plugin[fullname + '$' + plugin.tag]
       )
 
-      var shortname = fullname !== plugin.name ? plugin.name : null
+      let shortname = fullname !== plugin.name ? plugin.name : null
       if (!shortname && fullname.indexOf('seneca-') === 0) {
         shortname = fullname.substring('seneca-'.length)
       }
 
-      var shortname_options = Object.assign(
+      let shortname_options = Object.assign(
         {},
 
         // DEPRECATED: remove in 4
@@ -605,8 +585,8 @@ function make_tasks(): any {
       let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
 
-      var delegate: any = spec.data.delegate
-      var plugin_options: any = spec.data.plugin.options
+      let delegate: any = spec.data.delegate
+      let plugin_options: any = spec.data.plugin.options
 
       delegate.log.debug({
         kind: 'plugin',
@@ -617,7 +597,7 @@ function make_tasks(): any {
         callpoint: spec.ctx.callpoint,
       })
 
-      var meta = intern.define_plugin(
+      let meta = intern.define_plugin(
         delegate,
         plugin,
         seneca.util.clean(plugin_options)
@@ -680,7 +660,7 @@ function make_tasks(): any {
       }
 
 
-      var exports = (spec.data as any).exports
+      let exports = (spec.data as any).exports
 
       delegate.log.debug({
         kind: 'plugin',
@@ -728,7 +708,7 @@ function make_tasks(): any {
 
       if (prepare) {
         if (prepare.err) {
-          var plugin_out: any = {}
+          let plugin_out: any = {}
           plugin_out.err_code = 'plugin_init'
 
           plugin_out.plugin_error = prepare.err.message
@@ -746,7 +726,7 @@ function make_tasks(): any {
           }
         }
 
-        var fullname = plugin.name + (plugin.tag ? '$' + plugin.tag : '')
+        let fullname = plugin.name + (plugin.tag ? '$' + plugin.tag : '')
 
         if (so.debug.print && so.debug.print.options) {
           Print.plugin_options(delegate, fullname, plugin_options)
@@ -840,7 +820,7 @@ function make_intern() {
         })
       }
 
-      var meta
+      let meta
 
       try {
         meta = plugin.define.call(delegate, options) || {}
@@ -858,7 +838,7 @@ function make_intern() {
       meta = 'string' === typeof meta ? { name: meta } : meta
       meta.options = meta.options || options
 
-      var updated_options: any = {}
+      let updated_options: any = {}
       updated_options[plugin.fullname] = meta.options
       delegate.options(updated_options)
 
@@ -873,13 +853,13 @@ function make_intern() {
         return spec
       }
 
-      var joiobj = Joi.object()
+      let joiobj = Joi.object()
 
       if (opts.allow_unknown) {
         joiobj = joiobj.unknown()
       }
 
-      var joi = intern.walk(
+      let joi = intern.walk(
         Joi,
         joiobj,
         spec,
@@ -890,7 +870,7 @@ function make_intern() {
           if (valspec && Joi.isSchema(valspec)) {
             return valspec
           } else {
-            var typecheck = typeof valspec
+            let typecheck = typeof valspec
             //typecheck = 'function' === typecheck ? 'func' : typecheck
 
             if (opts.must_match_literals) {
@@ -939,14 +919,14 @@ function make_intern() {
         return Joi.array()
       }
       else {
-        for (var p in obj) {
-          var v = obj[p]
-          var t = typeof v
+        for (let p in obj) {
+          let v = obj[p]
+          let t = typeof v
 
-          var kv: any = {}
+          let kv: any = {}
 
           if (null != v && !Joi.isSchema(v) && 'object' === t) {
-            var np = '' === path ? p : path + '.' + p
+            let np = '' === path ? p : path + '.' + p
 
             let childjoiobj = Joi.object().default()
 

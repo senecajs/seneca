@@ -206,7 +206,6 @@ describe('error', function () {
       })
       .listen({ type: 'test', pin: 'a:1' })
       .ready(function () {
-        
         Seneca({ tag: 'c0', legacy: { error: false }, log: 'silent' })
           .error(fail_assert(done))
           .use(tt)

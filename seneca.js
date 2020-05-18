@@ -464,11 +464,11 @@ function make_seneca(initial_opts) {
   const ready = Ready(root$)
 
   root$.order = {}
-  
+
   // TODO: rename back to plugins
-  const api_use = Plugin.api_use(callpoint,{debug:!!start_opts.debug.ordu})
+  const api_use = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
   root$.order.plugin = api_use.ordu
-  
+
   // Seneca methods. Official API.
   root$.toString = API.toString
   root$.has = API.has // True if the given pattern has an action.
@@ -511,15 +511,14 @@ function make_seneca(initial_opts) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
 
-  root$.internal = function() {
+  root$.internal = function () {
     return {
       ordu: {
-        use: api_use.ordu
-      }
+        use: api_use.ordu,
+      },
     }
   }
 
-  
   // Non-API methods.
   // root$.register = Plugins.register(callpoint)
 

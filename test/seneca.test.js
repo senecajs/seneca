@@ -584,7 +584,7 @@ describe('seneca', function () {
       }
       self.define = function () {
         this.add({ role: self.name, cmd: 'foo' }, function (msg, cb) {
-          cb(null, {x:'foo:' + msg.foo})
+          cb(null, { x: 'foo:' + msg.foo })
         })
       }
     }
@@ -616,7 +616,7 @@ describe('seneca', function () {
         this.add({ role: 'mock1', cmd: 'foo' }, function (msg, cb) {
           this.prior(msg, function (err, out) {
             assert.equal(err, null)
-            cb(null, {x:'bar:' + out.x})
+            cb(null, { x: 'bar:' + out.x })
           })
         })
       }
@@ -1323,8 +1323,7 @@ describe('seneca', function () {
       .ready(fin)
   })
 
-
-  it('order', function(fin) {
+  it('order', function (fin) {
     var si = Seneca().test(fin)
 
     expect(si.order.plugin).exists()

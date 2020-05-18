@@ -402,8 +402,7 @@ describe('custom', function () {
       .use('promisify')
       // TODO: extend seneca.message in promisify to handle this form
 
-
-        .add(
+      .add(
         'foo:true',
         { fixed$: { bar: 1 }, custom$: { zed: 'a' } },
         function foo_true(msg, reply, meta) {

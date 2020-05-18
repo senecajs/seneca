@@ -14,6 +14,8 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 var Logging = require('../lib/logging')
 
+var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
+
 describe('logging', function () {
   it('happy', function (fin) {
     var capture = make_log_capture()
@@ -308,7 +310,7 @@ describe('logging', function () {
   })
 
   // NOTE: spurious console.logs left in code with cause this to fail
-  it('shortcuts', function (fin) {
+  it('shortcuts', { timeout: 2222 * tmx }, function (fin) {
     var log
 
     var stdout_write = process.stdout.write
