@@ -1,6 +1,8 @@
 /* Copyright (c) 2010-2018 Richard Rodger, MIT License */
 'use strict'
 
+const Assert = require('assert')
+
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
@@ -48,17 +50,103 @@ describe('api', function () {
     fin()
   })
 
-  it('fail', function (fin) {
-    try {
-      si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-    } catch (e0) {
-      expect(e0.code).equal('test_args')
-      expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
-      expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-      expect(e0.seneca).true()
-    }
+  describe('fail', function () {
+    it('invoked with a code and details', function (fin) {
+      try {
+        si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+      } catch (e0) {
+        expect(e0.code).equal('test_args')
+        expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
+        expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+        expect(e0.seneca).true()
+      }
 
-    fin()
+      fin()
+    })
+
+    describe('invoked with a condition, code and details', function () {
+      describe('when the condition is true', function () {
+        it('throws', function (fin) {
+          try {
+            si.fail(true, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+          } catch (e0) {
+            expect(e0.code).equal('test_args')
+            expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
+            expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+            expect(e0.seneca).true()
+          }
+
+          return fin()
+        })
+      })
+
+      describe('when the condition is false', function () {
+        it('does not throw', function (fin) {
+          try {
+            si.fail(false, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+          } catch (err) {
+            return fin(new Error('Expected the "fail" method to not throw.'))
+          }
+
+          return fin()
+        })
+      })
+
+      describe('when the condition is not a boolean', function () {
+        it('throws an assertion error', function (fin) {
+          try {
+            si.fail(0, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+          } catch (err) {
+            expect(err).instanceOf(Assert.AssertionError)
+            expect(err.message).equal('Expected the `cond` param to be a boolean.')
+
+            return fin()
+          }
+
+          return fin(new Error('Expected an assertion to fail.'))
+        })
+      })
+    })
+
+    describe('when given no arguments', function () {
+      it('throws a seneca error', function (fin) {
+        try {
+          si.fail()
+        } catch (err) {
+          expect(err.code).equal('fail_wrong_number_of_args')
+
+          expect(err.message).equal(
+            'seneca: The Seneca.fail method was called with the wrong number of arguments: 0'
+          )
+
+          expect(err.seneca).true()
+
+          return fin()
+        }
+
+        return fin(new Error('Expected the "fail" method to throw.'))
+      })
+    })
+
+    describe('when given too many arguments', () => {
+      it('throws a seneca error', function (fin) {
+        try {
+          si.fail(true, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 }, 2)
+        } catch (err) {
+          expect(err.code).equal('fail_wrong_number_of_args')
+
+          expect(err.message).equal(
+            'seneca: The Seneca.fail method was called with the wrong number of arguments: 4'
+          )
+
+          expect(err.seneca).true()
+
+          return fin()
+        }
+
+        return fin(new Error('Expected the "fail" method to throw.'))
+      })
+    })
   })
 
   it('list', function (fin) {
