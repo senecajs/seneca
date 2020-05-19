@@ -97,17 +97,22 @@ describe('api', function () {
       })
 
       describe('when the condition is not a boolean', function () {
-        it('throws an assertion error', function (fin) {
+        it('throws informing the client of the wrong type', function (fin) {
           try {
             si.fail(0, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
           } catch (err) {
-            expect(err).instanceOf(Assert.AssertionError)
-            expect(err.message).equal('Expected the `cond` param to be a boolean.')
+            expect(err.code).equal('fail_cond_must_be_bool')
+
+            expect(err.message).equal(
+              'seneca: The Seneca.fail method expected the `cond` param to be a boolean.'
+            )
+
+            expect(err.seneca).true()
 
             return fin()
           }
 
-          return fin(new Error('Expected an assertion to fail.'))
+          return fin(new Error('Expected the "fail" method to throw.'))
         })
       })
     })
