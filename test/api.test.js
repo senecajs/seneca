@@ -54,14 +54,16 @@ describe('api', function () {
     it('invoked with a code and details', function (fin) {
       try {
         si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-      } catch (e0) {
-        expect(e0.code).equal('test_args')
-        expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
-        expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-        expect(e0.seneca).true()
+      } catch (err) {
+        expect(err.code).equal('test_args')
+        expect(err.message).equal('seneca: Test args foo { bar: 1 }.')
+        expect(err.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+        expect(err.seneca).true()
+
+        return fin()
       }
 
-      fin()
+      return fin(new Error('Expected the "fail" method to throw.'))
     })
 
     describe('invoked with a condition, code and details', function () {
@@ -69,14 +71,16 @@ describe('api', function () {
         it('throws', function (fin) {
           try {
             si.fail(true, 'test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-          } catch (e0) {
-            expect(e0.code).equal('test_args')
-            expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
-            expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
-            expect(e0.seneca).true()
+          } catch (err) {
+            expect(err.code).equal('test_args')
+            expect(err.message).equal('seneca: Test args foo { bar: 1 }.')
+            expect(err.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
+            expect(err.seneca).true()
+
+            return fin()
           }
 
-          return fin()
+          return fin(new Error('Expected the "fail" method to throw.'))
         })
       })
 
