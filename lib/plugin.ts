@@ -325,7 +325,7 @@ function make_tasks(): any {
       // let plugin: any = spec.data.plugin
       let meta: any = spec.data.meta
 
-      if ('object' === typeof meta.extend) {
+      if (meta.extend && 'object' === typeof meta.extend) {
         if ('function' === typeof meta.extend.action_modifier) {
           seneca.private$.action_modifiers.push(meta.extend.action_modifier)
         }

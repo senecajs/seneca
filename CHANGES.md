@@ -1,3 +1,8 @@
+## 3.21.2 2020-05-26
+
+* Handle 'object' === typeof(null) edge cases.
+
+
 ## 3.21.1 2020-05-26
 
 * Preserve default arrays in plugin options
