@@ -45,8 +45,27 @@ describe('plugin', function () {
     expect(out.validate(spec).error).not.exists()
 
     out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: true })
-    // console.dir(out.describe(),{depth:null})
+    //console.dir(out.describe(),{depth:null})
 
+    //console.dir(out.validate({}),{depth:null})
+    expect(out.validate({}).value).equals({
+      a: null,
+      d: 1,
+      e: 'a',
+      f: {},
+      g: { h: 2 },
+      i: { j: { k: 3 } },
+      l: [],
+      m: [ 4 ],
+      n: [ [ 5 ] ],
+      o: { p: [ 6 ] },
+      q: {
+        u: [
+          { v: [ { w: 7 } ] }
+        ]
+      }
+    })
+    
     spec.z = 1
     expect(out.validate(spec).error).not.exists()
 
@@ -1164,4 +1183,28 @@ describe('plugin', function () {
 
     fin()
   })
+
+
+  it('plugin-defaults-function', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+
+    s0.use({
+      defaults: (opts)=>{
+        return {
+          x: opts.Joi.number(),
+          y: opts.Joi.string().default('Y'),
+        }
+      },
+      define: function p0(options){
+        expect(options).equal({x:1,y:'Y'})
+      }
+    }, {x:1})
+
+    s0.ready(function() {
+      expect(s0.options().plugin.p0).equal({x:1,y:'Y'})
+      fin()
+    })
+  })
+
+  
 })

@@ -1,3 +1,8 @@
+## 3.21.1 2020-05-26
+
+* Preserve default arrays in plugin options
+* Accept older Joi schemas
+
 ## 3.21.0 2020-05-19
 
 * Starting port to TypeScript, see lib/plugin.ts

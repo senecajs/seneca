@@ -157,7 +157,7 @@ describe('custom', function () {
   it('custom-entity', test_opts, function (fin) {
     // var v8 = require('v8')
 
-    var si = Seneca()
+    var si = Seneca({legacy:false})
       .test(fin)
       .use('entity')
       .add('a:1', function a1(msg, reply, meta1) {
@@ -263,42 +263,35 @@ describe('custom', function () {
       .client({ type: 'simple' })
 
     s0.add('a:1', function a1A(msg, reply, meta) {
-      // console.log('s0 a1 A',meta.custom, msg)
       meta.custom.a1A = 1
       msg.r = 1
       msg.x = 1
       reply(msg)
     })
       .add('a:1', function a1B(msg, reply, meta) {
-        // console.log('s0 a1 A',meta.custom)
         meta.custom.a1B = 1
         msg.a = 11
         this.prior(msg, { y: 1 }, reply)
       })
       .add('b:1', function b1(msg, reply, meta) {
-        // console.log('s0 b1',meta.custom)
         meta.custom.b1 = 1
         msg.b = 11
         this.act(msg, { a: 1, z: 1 }, reply)
       })
       .add('c:1', function c1(msg, reply, meta) {
-        // console.log('s0 c1',meta.custom)
         meta.custom.c1 = 1
         msg.c = 11
         this.act(msg, { b: 1, k: 1 }, reply)
       })
       .add('c:2', function c2(msg, reply, meta) {
-        // console.log('s0 c2',meta.custom)
         meta.custom.c2 = 1
         msg.c = 22
         reply(msg)
       })
       .add('c:3', function c3(msg, reply, meta) {
-        //console.log('s0 c3',meta)
         meta.custom.c3 = 1
         msg.c = 2
         this.act(msg, function c3r(err, out, meta) {
-          // console.log('s0 c3r',meta.custom)
           meta.custom.c3r = 1
           this.act({ c: 1 }, out, reply)
         })
@@ -306,44 +299,37 @@ describe('custom', function () {
 
     s0.ready(function () {
       c0.add('d:1', function q1A(msg, reply, meta) {
-        // console.log('c0 q1A',meta.custom)
         meta.custom.q1A = 1
         this.act(msg, { c: 3 }, reply)
       })
         .add('d:1', function q1B(msg, reply, meta) {
-          // console.log('c0 q1B',meta.custom)
           meta.custom.q1B = 1
           msg.d = 11
 
           this.prior(msg, { m: 1 }, function q1Br1(err, out, meta) {
-            // console.log('c0 q1Br1',meta.custom)
             meta.custom.q1Br1 = 1
             this.act(out, { g: 1, n4: 1 }, reply)
           })
         })
         .add('g:1', function g1(msg, reply, meta) {
-          // console.log('c0 g1',meta.custom,msg)
           meta.custom.g1 = 1
           msg.n4 = 1
           msg.g = 2
           this.act(msg, reply)
         })
         .add('g:2', function g2(msg, reply, meta) {
-          // console.log('c0 g2',meta.custom,msg)
           meta.custom.g2 = 1
           msg.n3 = 1
           msg.g = 22
           reply(msg)
         })
         .add('h:1', function h1(msg, reply, meta) {
-          // console.log('c0 h1',meta.custom)
           meta.custom.h1 = 1
           msg.n2 = 1
           msg.h = 11
           this.act('d:1', msg, reply)
         })
         .add('h:2', function h2(msg, reply, meta) {
-          // console.log('c0 h2',meta.custom)
           meta.custom.h2 = 1
           delete msg.custom$
           msg.n1 = 1

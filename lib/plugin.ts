@@ -100,6 +100,7 @@ function make_use(ordu: any, callpoint: any) {
       seneca: this,
       callpoint: callpoint(true)
     }
+
     let data: UseData = {
       seq: -1,
       args: [],
@@ -117,6 +118,13 @@ function make_use(ordu: any, callpoint: any) {
           if (res.err) {
             var err = res.err.seneca ? res.err :
               self.private$.error(res.err, res.err.code)
+
+            err.plugin = err.plugin ||
+              (data.plugin ? (data.plugin.fullname || data.plugin.name) :
+                args.join(' '))
+
+            err.plugin_callpoint = err.plugin_callpoint || ctx.callpoint
+
             self.die(err)
           }
         }
@@ -533,26 +541,19 @@ function make_tasks(): any {
       )
 
       let resolved_options: any = {}
+      let Joi = delegate.util.Joi
 
-      //console.log('oAAA', delegate.util.Joi.isSchema(defaults))
+      let defaults_values = 'function' === typeof (defaults) ?
+        defaults({ Joi }) : defaults
 
-
-      // TODO: expose this on plugin
       let joi_schema: any = intern.prepare_spec(
-        delegate.util.Joi,
-        defaults,
+        Joi,
+        defaults_values,
         { allow_unknown: true },
         {}
       )
 
-      //console.log('oBBB', joi_schema === defaults)
-
-
       let joi_out = joi_schema.validate(outopts)
-
-
-      //console.log('oCCC', joi_out)
-
       let err: Error | undefined = void 0
 
       if (joi_out.error) {
@@ -561,7 +562,6 @@ function make_tasks(): any {
           err_msg: joi_out.error.message,
           options: outopts,
         })
-        //console.log('oDDD', err)
       }
       else {
         resolved_options = joi_out.value
@@ -849,7 +849,7 @@ function make_intern() {
     // copied from https://github.com/rjrodger/optioner
     // TODO: remove unnecessary vars+code
     prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
-      if (Joi.isSchema(spec)) {
+      if (Joi.isSchema(spec, { legacy: true })) {
         return spec
       }
 
@@ -867,7 +867,7 @@ function make_intern() {
         opts,
         ctxt,
         function(valspec: any) {
-          if (valspec && Joi.isSchema(valspec)) {
+          if (valspec && Joi.isSchema(valspec, { legacy: true })) {
             return valspec
           } else {
             let typecheck = typeof valspec
@@ -916,7 +916,7 @@ function make_intern() {
 
       // NOTE: use explicit Joi construction for checking within arrays
       if (Array.isArray(obj)) {
-        return Joi.array()
+        return Joi.array().default(obj)
       }
       else {
         for (let p in obj) {
@@ -925,7 +925,7 @@ function make_intern() {
 
           let kv: any = {}
 
-          if (null != v && !Joi.isSchema(v) && 'object' === t) {
+          if (null != v && !Joi.isSchema(v, { legacy: true }) && 'object' === t) {
             let np = '' === path ? p : path + '.' + p
 
             let childjoiobj = Joi.object().default()
