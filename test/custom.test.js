@@ -157,7 +157,7 @@ describe('custom', function () {
   it('custom-entity', test_opts, function (fin) {
     // var v8 = require('v8')
 
-    var si = Seneca({legacy:false})
+    var si = Seneca({ legacy: false })
       .test(fin)
       .use('entity')
       .add('a:1', function a1(msg, reply, meta1) {
