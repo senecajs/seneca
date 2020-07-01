@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Richard Rodger, MIT License */
+/* Copyright (c) 2017-202 Richard Rodger, MIT License */
 'use strict'
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)

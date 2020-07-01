@@ -304,9 +304,9 @@ describe('sub', function () {
               'sa',
               'a',
               'ca',
-              'sB',
               'sa',
               'sb',
+              'sB',
               'a',
               'CB',
             ])
@@ -478,4 +478,29 @@ describe('sub', function () {
       fin()
     })
   })
+
+
+
+  it('sub-once', function (fin) {
+    var log = []
+    Seneca()
+      .test(fin)
+
+      .add('c:1')
+
+      .sub('c:1,a:1,b:1', function (msg, out, meta) {
+        log.push('s1')
+      })
+      .sub('c:1', function (msg, out, meta) {
+        log.push('s2')
+      })
+
+      .act('c:1,a:1')
+
+      .ready(function() {
+        expect(log).equal(['s2'])
+        fin()
+      })
+  })
+
 })

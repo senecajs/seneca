@@ -681,6 +681,7 @@ describe('transport', function () {
       })
   })
 
+  // TODO: investigate sporadic travis timeout failures
   it('transport-single-wrap-and-star', test_opts, function (done) {
     var tt = make_test_transport()
 
