@@ -18,13 +18,12 @@ var Seneca = require('..')
 
 var Transports = require('./stubs/transports.js')
 
-var parents = (meta,i) => meta.parents.map((x) => x[null==i?0:i])
+var parents = (meta, i) => meta.parents.map((x) => x[null == i ? 0 : i])
 
 var partial_match = (obj, pat) =>
   Hoek.contain(obj, pat, { deep: true, part: true })
 
 var is_uniq = (arr) => arr.length === new Set(arr).size
-
 
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 
@@ -49,7 +48,7 @@ describe('message', function () {
         expect(parents(meta)).equal(['a:2', 'a:1'])
 
         // Ensure no duplicate message ids
-        expect(is_uniq(parents(meta,1))).true()
+        expect(is_uniq(parents(meta, 1))).true()
 
         expect(msg.x2).equal(2)
 
@@ -58,8 +57,8 @@ describe('message', function () {
       })
       .add('a:4', function a4(msg, reply, meta) {
         expect(parents(meta)).equal(['a:3', 'a:2', 'a:1'])
-        expect(is_uniq(parents(meta,1))).true()
-        
+        expect(is_uniq(parents(meta, 1))).true()
+
         expect(msg.x3).equal(3)
 
         var m4 = { x4: msg.x }
@@ -73,7 +72,6 @@ describe('message', function () {
       })
   })
 
-
   it('complex-parents', test_opts, function (fin) {
     var mark = {}
     Seneca({ tag: 'h0' })
@@ -82,62 +80,62 @@ describe('message', function () {
         //console.log('CP ', meta.action, meta.pattern, parents(meta), meta.trace)
         expect(parents(meta)).equal([])
 
-        mark.a1c=1
+        mark.a1c = 1
         this.act('a:2', msg)
         //console.log('CP t', meta.action, meta.trace)
-        
-        this.act('a:3', msg, function(err, out, meta) {
-          mark.a3r=1
+
+        this.act('a:3', msg, function (err, out, meta) {
+          mark.a3r = 1
 
           //console.log('CP tr', meta.action, meta.trace)
-          
+
           this.act('a:4', msg)
 
-          this.act('a:5', msg, function(err, out, meta) {
-            mark.a5r=1
+          this.act('a:5', msg, function (err, out, meta) {
+            mark.a5r = 1
 
             //console.log('CP trr', meta.action, meta.trace)
-            
+
             reply()
           })
         })
       })
       .add('a:2', function a2(msg, reply, meta) {
         //console.log('CP ', meta.action, meta.pattern, parents(meta), meta.trace)
-        
+
         //expect(parents(meta)).equal(['a:1'])
         //expect(msg.x1).equal(msg.x)
 
-        mark.a2c=1
+        mark.a2c = 1
         //this.act('a:3', msg, reply)
         reply(msg)
       })
       .add('a:3', function a3(msg, reply, meta) {
         //console.log('CP ', meta.action, meta.pattern, parents(meta), meta.trace)
-        
+
         //expect(parents(meta)).equal(['a:2', 'a:1'])
         //expect(msg.x2).equal(msg.x)
 
-        mark.a3c=1       
+        mark.a3c = 1
         //this.act('a:4', msg, reply)
         reply(msg)
       })
       .add('a:4', function a4(msg, reply, meta) {
         //console.log('CP ', meta.action, meta.pattern, parents(meta), meta.trace)
-        
+
         //expect(parents(meta)).equal(['a:3', 'a:2', 'a:1'])
         //expect(msg.x3).equal(msg.x)
 
-        mark.a4c=1       
+        mark.a4c = 1
         reply(msg)
       })
       .add('a:5', function a4(msg, reply, meta) {
         //console.log('CP ', meta.action, meta.pattern, parents(meta), meta.trace)
-        
+
         //expect(parents(meta)).equal(['a:3', 'a:2', 'a:1'])
         //expect(msg.x3).equal(msg.x)
 
-        mark.a5c=1       
+        mark.a5c = 1
         reply(msg)
       })
       .act('a:1,x:10,y:20', function (err, out, meta) {
@@ -148,22 +146,21 @@ describe('message', function () {
         */
 
         //console.log('CP mark', mark)
-        expect(JSON.stringify(mark))
-          .equal('{"a1c":1,"a2c":1,"a3c":1,"a3r":1,"a4c":1,"a5c":1,"a5r":1}')
+        expect(JSON.stringify(mark)).equal(
+          '{"a1c":1,"a2c":1,"a3c":1,"a3r":1,"a4c":1,"a5c":1,"a5r":1}'
+        )
 
         //console.dir(meta,{depth:null})
-        
+
         fin()
       })
   })
 
-
-  
   it('loop', test_opts, function (fin) {
     var i = 0
     Seneca({ id$: 'loop', idlen: 4, log: 'silent', limits: { maxparents: 3 } })
       .add('a:1', function a1(msg, reply, meta) {
-        expect(is_uniq(parents(meta,1))).true()        
+        expect(is_uniq(parents(meta, 1))).true()
 
         i++
         if (4 < i) {
@@ -185,7 +182,6 @@ describe('message', function () {
       })
   })
 
-  
   it('branch', test_opts, function (fin) {
     var log = []
     Seneca({ id$: 'branch', idlen: 4, limits: { maxparents: 3 } })
@@ -221,15 +217,15 @@ describe('message', function () {
       })
       .add('a:3', function a3(msg, reply, meta) {
         expect(parents(meta)).equal(['a:2', 'a:1'])
-        expect(is_uniq(parents(meta,1))).true()
+        expect(is_uniq(parents(meta, 1))).true()
 
         log.push('a3')
         this.act('a:4', { a3: 1 }, reply)
       })
       .add('a:4', function a3(msg, reply, meta) {
         expect(parents(meta)).equal(['a:3', 'a:2', 'a:1'])
-        expect(is_uniq(parents(meta,1))).true()
-        
+        expect(is_uniq(parents(meta, 1))).true()
+
         log.push('a4')
         reply({ a4: 1 })
       })
@@ -240,15 +236,15 @@ describe('message', function () {
       })
       .add('c:1', function c1(msg, reply, meta) {
         expect(parents(meta)).equal(['a:2', 'a:1'])
-        expect(is_uniq(parents(meta,1))).true()
-        
+        expect(is_uniq(parents(meta, 1))).true()
+
         log.push('c1')
         reply()
       })
       .add('c:2', function c2(msg, reply, meta) {
         expect(parents(meta)).equal(['a:3', 'a:2', 'a:1'])
-        expect(is_uniq(parents(meta,1))).true()
-        
+        expect(is_uniq(parents(meta, 1))).true()
+
         log.push('c2')
         reply()
       })

@@ -479,8 +479,6 @@ describe('sub', function () {
     })
   })
 
-
-
   it('sub-once', function (fin) {
     var log = []
     Seneca()
@@ -497,10 +495,9 @@ describe('sub', function () {
 
       .act('c:1,a:1')
 
-      .ready(function() {
+      .ready(function () {
         expect(log).equal(['s2'])
         fin()
       })
   })
-
 })

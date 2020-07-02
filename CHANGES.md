@@ -1,3 +1,9 @@
+## 3.22.0 2020-07-02
+
+* Update patrun module to fix sub multiple fires
+* PR #855 seneca.fail - allow the boolean first arg to trigger the error throw
+
+
 ## 3.21.2 2020-05-26
 
 * Handle 'object' === typeof(null) edge cases.
