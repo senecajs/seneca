@@ -142,12 +142,7 @@ describe('api', function () {
         try {
           si.fail()
         } catch (err) {
-          expect(err.code).equal('fail_wrong_number_of_args')
-
-          expect(err.message).equal(
-            'seneca: The Seneca.fail method was called with the wrong number of arguments: 0'
-          )
-
+          expect(err.code).equal('no_error_code')
           expect(err.seneca).true()
 
           return fin()
