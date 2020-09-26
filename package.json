@@ -93,10 +93,10 @@
     "lodash.flatten": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "minimist": "^1.2.5",
-    "nid": "^1.2.1",
+    "nid": "^1.3.3",
     "norma": "^2.0.2",
     "optioner": "^5.0.1",
-    "ordu": "^1.7.1",
+    "ordu": "^2.0.0",
     "patrun": "^6.0.1",
     "qs": "^6.9.4",
     "rolling-stats": "^0.1.1",
@@ -106,7 +106,7 @@
   "devDependencies": {
     "@hapi/code": "^8.0.2",
     "@hapi/hoek": "^9.1.0",
-    "@hapi/lab": "^23.0.0",
+    "@hapi/lab": "^24.0.0",
     "@seneca/test-plugin": "0.0.1",
     "async": "^3.2.0",
     "bench": "^0.3.6",
@@ -114,12 +114,12 @@
     "handlebars": "^4.7.6",
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
-    "prettier": "^2.1.1",
+    "prettier": "^2.1.2",
     "seneca-entity": "^10.0.2",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^2.0.0",
-    "typescript": "^4.0.2",
-    "@types/node": "^14.10.1"
+    "typescript": "^4.0.3",
+    "@types/node": "^14.11.2"
   }
 }
