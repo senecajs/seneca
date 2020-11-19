@@ -4,7 +4,7 @@
 var Assert = require('assert')
 var Util = require('util')
 const Code = require('@hapi/code')
-var Gex = require('gex')
+const { Gex } = require('gex')
 const Lab = require('@hapi/lab')
 var Package = require('../package.json')
 var Common = require('../lib/common.js')
