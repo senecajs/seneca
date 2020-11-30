@@ -139,4 +139,55 @@ describe('exports', function () {
       })
     })
   })
+
+
+  it('with-tags', async () => {
+    var s0 = Seneca({legacy:false})
+        .use('promisify')
+        .test()
+
+    var p0 = function p0(options) {
+      return {
+        exports: {
+          x: options.x,
+        },
+      }
+    }
+
+    s0.use({init:p0,tag:'a',options:{x:1}})
+    await s0.ready()    
+    expect(s0.export('p0/x')).equals(1)
+    expect(s0.export('p0$a/x')).equals(1)
+
+
+    // NOTE/plugin/774a
+    s0.use({init:p0,tag:'b',options:{x:2}})
+    await s0.ready()
+    expect(s0.export('p0/x')).equals(2)
+    expect(s0.export('p0$a/x')).equals(1)
+    expect(s0.export('p0$b/x')).equals(2)
+
+
+    var s1 = Seneca({legacy:false})
+        .use('promisify')
+        .test()
+
+    var p1 = function p1(options) {
+      return {
+        exports: {
+          x: options.x,
+        },
+      }
+    }
+
+    s1.use({init:p1,tag:'a',options:{x:11}})
+    s1.use({init:p1,tag:'b',options:{x:22}})
+    s1.use({init:p1,tag:'c',options:{x:33}})
+    await s1.ready()
+    expect(s1.export('p1/x')).equals(33)
+    expect(s1.export('p1$a/x')).equals(11)
+    expect(s1.export('p1$b/x')).equals(22)
+    expect(s1.export('p1$c/x')).equals(33)
+  })
+
 })

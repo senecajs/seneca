@@ -272,6 +272,7 @@ function make_tasks(): any {
     },
 
 
+    // Handle plugin meta data returned by plugin define function
     meta: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
       let plugin: any = spec.data.plugin
@@ -286,7 +287,12 @@ function make_tasks(): any {
       Object.keys(exportmap).forEach(k => {
         let v: any = exportmap[k]
         if (void 0 !== v) {
-          let exportname = plugin.fullname + '/' + k
+          let exportfullname = plugin.fullname + '/' + k
+          exports[exportfullname] = v
+
+          // Also provide exports on untagged plugin name. This is the
+          // standard name that other plugins use
+          let exportname = plugin.name + '/' + k
           exports[exportname] = v
         }
       })
@@ -298,13 +304,7 @@ function make_tasks(): any {
             Array.isArray(meta.order.plugin) ? meta.order.plugin :
               [meta.order.plugin]
 
-          //console.log('AAA', spec.task.name, tasks)
-          //try {
           seneca.order.plugin.add(tasks)
-          //}
-          //catch (e) {
-          //  console.log(e)
-          //}
           delete meta.order.plugin
         }
       }
@@ -771,6 +771,11 @@ function make_intern() {
       },
 
       seneca_export: (tr: any, ctx: any, data: any): any => {
+        // NOTE/plugin/774a: when loading multiple tagged plugins,
+        // last plugin wins the plugin name on the exports. This is
+        // consistent with general Seneca principal that plugin load
+        // order is significant, as later plugins override earlier
+        // action patterns. Thus later plugins override exports too.
         Object.assign(data.exports, tr.out.exports)
         Object.assign(ctx.seneca.private$.exports, tr.out.exports)
         return { stop: false }
