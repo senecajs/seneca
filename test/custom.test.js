@@ -91,42 +91,39 @@ describe('custom', function () {
       .ready(do_a1)
 
     function do_a1() {
-      si.act({ a: 1, q: 1, custom$: { y: 1, z: 1 } }, function (
-        err,
-        out,
-        meta
-      ) {
-        expect(out).includes({ a: 1, x1: 1 })
-        expect(meta.custom).equal({ y: 1, z: 1, a1: 1 })
+      si.act(
+        { a: 1, q: 1, custom$: { y: 1, z: 1 } },
+        function (err, out, meta) {
+          expect(out).includes({ a: 1, x1: 1 })
+          expect(meta.custom).equal({ y: 1, z: 1, a1: 1 })
 
-        do_a2()
-      })
+          do_a2()
+        }
+      )
     }
 
     function do_a2() {
-      si.act({ a: 2, q: 2, custom$: { y: 2, z: 2 } }, function (
-        err,
-        out,
-        meta
-      ) {
-        expect(out).includes({ a: 1, x1: 1, x2: 1 })
-        expect(meta.custom).equal({ y: 2, z: 2, a1: 1, a2: 1 })
+      si.act(
+        { a: 2, q: 2, custom$: { y: 2, z: 2 } },
+        function (err, out, meta) {
+          expect(out).includes({ a: 1, x1: 1, x2: 1 })
+          expect(meta.custom).equal({ y: 2, z: 2, a1: 1, a2: 1 })
 
-        do_a3()
-      })
+          do_a3()
+        }
+      )
     }
 
     function do_a3() {
-      si.act({ a: 3, q: 3, custom$: { y: 3, z: 3 } }, function (
-        err,
-        out,
-        meta
-      ) {
-        expect(out).includes({ a: 1, x1: 1, x2: 1, x3: 1 })
-        expect(meta.custom).equal({ y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
+      si.act(
+        { a: 3, q: 3, custom$: { y: 3, z: 3 } },
+        function (err, out, meta) {
+          expect(out).includes({ a: 1, x1: 1, x2: 1, x3: 1 })
+          expect(meta.custom).equal({ y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
 
-        fin()
-      })
+          fin()
+        }
+      )
     }
   })
 
@@ -173,15 +170,15 @@ describe('custom', function () {
       })
 
       .ready(function () {
-        this.act('a:1,id:A,q:1', { custom$: { w: 1 } }, function (
-          err,
-          out,
-          meta
-        ) {
-          expect('' + out.foo).equal('$-/-/foo;id=A;{q:1}')
-          expect(meta.custom).equals({ w: 1, a1x: 1, a1y: 1 })
-          fin()
-        })
+        this.act(
+          'a:1,id:A,q:1',
+          { custom$: { w: 1 } },
+          function (err, out, meta) {
+            expect('' + out.foo).equal('$-/-/foo;id=A;{q:1}')
+            expect(meta.custom).equals({ w: 1, a1x: 1, a1y: 1 })
+            fin()
+          }
+        )
       })
   })
 

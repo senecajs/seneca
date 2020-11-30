@@ -236,18 +236,18 @@ describe('transport', function () {
       })
 
     function do_entity() {
-      c0.act('b:1', { x: c0.make$('foo', { f: 1 }) }, function (
-        ignore,
-        out,
-        meta
-      ) {
-        expect(out.x.f).equals(1)
-        expect(out.x.g).equals(2)
-        expect(out.x.canon$()).equal('-/-/foo')
-        expect(meta.pattern).equal('')
+      c0.act(
+        'b:1',
+        { x: c0.make$('foo', { f: 1 }) },
+        function (ignore, out, meta) {
+          expect(out.x.f).equals(1)
+          expect(out.x.g).equals(2)
+          expect(out.x.canon$()).equal('-/-/foo')
+          expect(meta.pattern).equal('')
 
-        s0.close(c0.close.bind(c0, fin))
-      })
+          s0.close(c0.close.bind(c0, fin))
+        }
+      )
     }
   })
 
@@ -319,16 +319,16 @@ describe('transport', function () {
             expect(out.y).equals(33)
             expect(out.x).equals(2)
 
-            this.act('b:1,x:3,r:1', { meta$: { custom: { y: 44 } } }, function (
-              ignore,
-              out,
-              meta
-            ) {
-              expect(out.y).equals(44)
-              expect(out.x).equals(3)
+            this.act(
+              'b:1,x:3,r:1',
+              { meta$: { custom: { y: 44 } } },
+              function (ignore, out, meta) {
+                expect(out.y).equals(44)
+                expect(out.x).equals(3)
 
-              s0.close(c0.close.bind(c0, fin))
-            })
+                s0.close(c0.close.bind(c0, fin))
+              }
+            )
           }
         )
       })
@@ -432,18 +432,20 @@ describe('transport', function () {
       seneca.close(fin)
     })
 
-    it('supports the port number and host as an argument', test_opts, function (
-      fin
-    ) {
-      var listen = Transport.listen(() => {})
-      var seneca = Seneca({ legacy: false }).test(fin)
+    it(
+      'supports the port number and host as an argument',
+      test_opts,
+      function (fin) {
+        var listen = Transport.listen(() => {})
+        var seneca = Seneca({ legacy: false }).test(fin)
 
-      var fn = function () {
-        listen.call(seneca, 8080, 'localhost')
+        var fn = function () {
+          listen.call(seneca, 8080, 'localhost')
+        }
+        expect(fn).to.not.throw()
+        seneca.close(fin)
       }
-      expect(fn).to.not.throw()
-      seneca.close(fin)
-    })
+    )
 
     it(
       'supports the port number, host, and path as an argument',
@@ -1059,40 +1061,42 @@ describe('transport', function () {
     )
   })
 
-  it('server can be restarted without issues to clients', test_opts, function (
-    done
-  ) {
-    var execCount = 0
-    var server = Seneca({ log: 'silent' })
-    server.add({ cmd: 'foo' }, function (message, cb) {
-      execCount++
-      cb(null, { result: 'bar' })
-    })
-    server.listen({ port: 0 }, function (err, address) {
-      expect(err).to.not.exist()
-      var client = Seneca({ log: 'silent', timeout: 22222 * tmx })
-      client.client({ port: address.port })
-      client.ready(function () {
-        client.act({ cmd: 'foo' }, function (err, message) {
-          expect(err).to.not.exist()
-          expect(message.result).to.equal('bar')
-          server.close(function () {
-            var server2 = Seneca({ log: 'silent' })
-            server2.add({ cmd: 'foo' }, function (message, cb) {
-              cb(null, { result: 'bar' })
-            })
-            server2.listen({ port: address.port })
-            server2.ready(function () {
-              client.act({ cmd: 'foo' }, function (err, message) {
-                expect(err).to.not.exist()
-                expect(message.result).to.equal('bar')
-                expect(execCount).to.equal(1)
-                server2.close(client.close.bind(client, done))
+  it(
+    'server can be restarted without issues to clients',
+    test_opts,
+    function (done) {
+      var execCount = 0
+      var server = Seneca({ log: 'silent' })
+      server.add({ cmd: 'foo' }, function (message, cb) {
+        execCount++
+        cb(null, { result: 'bar' })
+      })
+      server.listen({ port: 0 }, function (err, address) {
+        expect(err).to.not.exist()
+        var client = Seneca({ log: 'silent', timeout: 22222 * tmx })
+        client.client({ port: address.port })
+        client.ready(function () {
+          client.act({ cmd: 'foo' }, function (err, message) {
+            expect(err).to.not.exist()
+            expect(message.result).to.equal('bar')
+            server.close(function () {
+              var server2 = Seneca({ log: 'silent' })
+              server2.add({ cmd: 'foo' }, function (message, cb) {
+                cb(null, { result: 'bar' })
+              })
+              server2.listen({ port: address.port })
+              server2.ready(function () {
+                client.act({ cmd: 'foo' }, function (err, message) {
+                  expect(err).to.not.exist()
+                  expect(message.result).to.equal('bar')
+                  expect(execCount).to.equal(1)
+                  server2.close(client.close.bind(client, done))
+                })
               })
             })
           })
         })
       })
-    })
-  })
+    }
+  )
 })

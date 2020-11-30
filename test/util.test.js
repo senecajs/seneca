@@ -111,7 +111,7 @@ describe('util', function () {
     expect(obj.b).to.equal({ bb: { bbb: 1 } })
     expect(obj.c).to.equal([1])
     expect(obj.d).to.equal({ dd: 1 })
-    expect(obj.e).to.equal({ '0': 2, '1': 3, ee: 1 })
+    expect(obj.e).to.equal({ 0: 2, 1: 3, ee: 1 })
     expect(obj.f).to.equal([4, 5, 6])
     expect(obj.f.fa).to.equal(1)
     expect(obj.f.fb).to.equal(2)

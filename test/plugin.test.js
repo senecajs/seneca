@@ -305,14 +305,14 @@ describe('plugin', function () {
         seneca.use('./stubs/plugin-error/tmpApi')
         seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
-        seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'false' }, function (
-          err,
-          res
-        ) {
-          expect(err).to.not.exist()
-          expect(res.message).to.contain('no errors created.')
-          s0.close(seneca.close.bind(seneca, fin))
-        })
+        seneca.act(
+          { role: 'api', cmd: 'tmpQuery', test: 'false' },
+          function (err, res) {
+            expect(err).to.not.exist()
+            expect(res.message).to.contain('no errors created.')
+            s0.close(seneca.close.bind(seneca, fin))
+          }
+        )
       })
   })
 
@@ -326,14 +326,14 @@ describe('plugin', function () {
         seneca.use('./stubs/plugin-error/tmpApi')
         seneca.client({ type: 'tcp', port: '30010', pin: 'role:tmp' })
 
-        seneca.act({ role: 'api', cmd: 'tmpQuery', test: 'true' }, function (
-          err,
-          res
-        ) {
-          expect(err).to.not.exist()
-          expect(res.message).to.contain('error caught!')
-          s0.close(seneca.close.bind(seneca, fin))
-        })
+        seneca.act(
+          { role: 'api', cmd: 'tmpQuery', test: 'true' },
+          function (err, res) {
+            expect(err).to.not.exist()
+            expect(res.message).to.contain('error caught!')
+            s0.close(seneca.close.bind(seneca, fin))
+          }
+        )
       })
   })
 
@@ -650,12 +650,12 @@ describe('plugin', function () {
   it('calling act from init actor is deprecated', function (fin) {
     var seneca = Seneca.test(fin)
 
-    seneca.add({ role: 'metrics', subscriptions: 'create' }, function (
-      data,
-      callback
-    ) {
-      callback()
-    })
+    seneca.add(
+      { role: 'metrics', subscriptions: 'create' },
+      function (data, callback) {
+        callback()
+      }
+    )
 
     seneca.add({ init: 'msgstats-metrics' }, function () {
       seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
@@ -681,13 +681,14 @@ describe('plugin', function () {
       var self = this
 
       this.ready(function () {
-        self.act({ role: 'plugin', cmd: 'throw', blah: 'blah' }, function (
-          err
-        ) {
-          expect(err).to.exist()
-          expect(err.msg).to.contain('from action')
-          fin()
-        })
+        self.act(
+          { role: 'plugin', cmd: 'throw', blah: 'blah' },
+          function (err) {
+            expect(err).to.exist()
+            expect(err.msg).to.contain('from action')
+            fin()
+          }
+        )
       })
     })
   })

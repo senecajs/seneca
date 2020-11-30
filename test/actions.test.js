@@ -45,14 +45,14 @@ describe('actions', function () {
         expect(out.act).exists()
         expect(out.actmap).exists()
 
-        this.act('role:seneca,cmd:stats,summary:false,pattern:"a:1"', function (
-          err,
-          out
-        ) {
-          expect(out.calls).equal(1)
+        this.act(
+          'role:seneca,cmd:stats,summary:false,pattern:"a:1"',
+          function (err, out) {
+            expect(out.calls).equal(1)
 
-          fin()
-        })
+            fin()
+          }
+        )
       })
     })
   })
@@ -108,15 +108,15 @@ describe('actions', function () {
         expect(out).exist()
         expect(out.zoo).equals(1)
 
-        this.act('role:seneca,get:options,base:not-there,key:bar', function (
-          err,
-          out
-        ) {
-          expect(err).not.exist()
-          expect(out).not.exist()
+        this.act(
+          'role:seneca,get:options,base:not-there,key:bar',
+          function (err, out) {
+            expect(err).not.exist()
+            expect(out).not.exist()
 
-          fin()
-        })
+            fin()
+          }
+        )
       })
     })
   })
