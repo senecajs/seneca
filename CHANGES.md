@@ -1,29 +1,39 @@
+## 3.22.1 2020-12-10
+
+* Flat logger shows Error callpoint.
+
+
+## 3.23.0 2020-11-30
+
+* Update dependencies that have been converted to typescript.
+
+
 ## 3.22.0 2020-07-02
 
-* Update patrun module to fix sub multiple fires
-* PR #855 seneca.fail - allow the boolean first arg to trigger the error throw
+* Update patrun module to fix sub multiple fires.
+* PR #855 seneca.fail - allow the boolean first arg to trigger the error throw.
 
 
 ## 3.21.2 2020-05-26
 
-* Handle 'object' === typeof(null) edge cases.
+* Handle 'object' === typeof(null) edge cases..
 
 
 ## 3.21.1 2020-05-26
 
-* Preserve default arrays in plugin options
-* Accept older Joi schemas
+* Preserve default arrays in plugin options.
+* Accept older Joi schemas.
 
 
 ## 3.21.0 2020-05-19
 
-* Starting port to TypeScript, see lib/plugin.ts
-* Well-defined plugin load lifecycle, see lib/plugin.ts use of https://github.com/rjrodger/ordu
+* Starting port to TypeScript, see lib/plugin.ts.
+* Well-defined plugin load lifecycle, see lib/plugin.ts use of https://github.com/rjrodger/ordu.
 
 
 ## 3.20.6 2020-05-14
 
-* Fixes regression with `seneca.depends`: https://github.com/senecajs/seneca/issues/792
+* Fixes regression with `seneca.depends`: https://github.com/senecajs/seneca/issues/792.
 
 
 ## 3.20.5 2020-05-11
