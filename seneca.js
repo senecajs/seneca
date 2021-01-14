@@ -93,6 +93,9 @@ const option_defaults = {
       // Include environment when printing full crash report.
       // Default: false for security.
       env: false,
+
+      // Regardless of logging, call `console.err` on errors
+      err: false
     },
 
     // Trace action caller and place in args.caller$.

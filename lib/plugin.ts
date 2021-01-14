@@ -31,9 +31,6 @@ function api_use(callpoint: any, opts: any) {
   ordu.operator('seneca_options', intern.op.seneca_options)
   ordu.operator('seneca_complete', intern.op.seneca_complete)
 
-
-  // TODO: exports -> meta and handle all meta processing
-
   ordu.add([
     tasks.args,
     tasks.load,
