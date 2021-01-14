@@ -95,7 +95,7 @@ const option_defaults = {
       env: false,
 
       // Regardless of logging, call `console.err` on errors
-      err: false
+      err: false,
     },
 
     // Trace action caller and place in args.caller$.

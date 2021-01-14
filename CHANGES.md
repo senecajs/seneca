@@ -1,6 +1,6 @@
 ## 3.22.2 2021-01-14
 
-* Debug option to print full error stacks regardless of logger
+* Debug option to print full error stacks regardless of logger.
 
 
 ## 3.22.1 2020-12-10
