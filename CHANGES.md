@@ -1,3 +1,8 @@
+## 3.24.0 2021-09-14
+
+* Avoid duplicate logging of errors and messages in log test mode.
+
+
 ## 3.23.3 2021-04-19
 
 * Update dependencies.

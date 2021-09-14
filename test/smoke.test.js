@@ -16,7 +16,7 @@ var Seneca = require('..')
 describe('smoke', function () {
   // Just one test - don't add anymore to this suite!
   it('seneca-smoke', function (fin) {
-    Seneca({log:'silent'})
+    Seneca({ log: 'silent' })
       .error(fin)
       .add('a:1', function (msg, done) {
         done(null, { x: 1 })
