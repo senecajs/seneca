@@ -444,7 +444,7 @@ function make_seneca(initial_opts) {
   // Instance specific incrementing counters to create unique function names
   private$.next_action_id = Common.autoincr()
 
-  var callpoint = (private$.callpoint = make_callpoint(
+  var callpoint = (private$.callpoint = Common.make_callpoint(
     start_opts.debug.callpoint
   ))
 
@@ -749,17 +749,3 @@ function make_private() {
   }
 }
 
-// Callpoint resolver. Indicates location in calling code.
-function make_callpoint(active) {
-  return function callpoint(override) {
-    if (active || override) {
-      return error.callpoint(new Error(), [
-        '/seneca/seneca.js',
-        '/seneca/lib/',
-        '/lodash.js',
-      ])
-    } else {
-      return void 0
-    }
-  }
-}

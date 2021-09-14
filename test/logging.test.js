@@ -64,8 +64,6 @@ describe('logging', function () {
 
     var options = Seneca().test(fin).options()
 
-    // console.log('OPTS', options)
-
     // ensure text-level mapping is reversible
     Object.keys(options.log.text_level).forEach((text) => {
       expect(options.log.level_text[options.log.text_level[text]]).equal(text)
@@ -128,9 +126,6 @@ describe('logging', function () {
         logb.push(data)
       })
       .ready(function () {
-        //console.log(loga)
-        //console.log(logb)
-
         expect(loga.length).above(logb.length)
         var last_entry = logb[logb.length - 1]
         expect(last_entry).contains({
@@ -192,9 +187,7 @@ describe('logging', function () {
     }
 
     function restore(err) {
-      console.log('RESTORE', err)
       if (err && err.message && !err.message.includes('a1')) {
-        console.log('FLAT LOGGER ERROR', err, log)
         process.stdout.write = stdout_write
         fin(err)
       } else if (true === err) {
@@ -342,7 +335,6 @@ describe('logging', function () {
           // hello entry, legacy-transport ready entry
           // remove legacy-transport entry in 4.x
 
-          //console.log('ZZZ', log)
           expect(log.length).to.equal(2)
 
           quiet()
@@ -545,8 +537,6 @@ describe('logging', function () {
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        //console.log(this.options().log)
-        //console.log(capture.log)
         expect(capture.log.map((x) => x.data[0])).equal(['a1'])
         fin()
       })
@@ -828,7 +818,6 @@ function Capture(flags) {
     }
 
     var capture_logger = false === flags.legacy ? nextgen_logger : legacy_logger
-    //console.log(capture_logger)
 
     capture_logger.id = self.id
 

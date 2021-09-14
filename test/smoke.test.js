@@ -13,12 +13,10 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-var test_opts = { xlog: 'test' }
-
 describe('smoke', function () {
   // Just one test - don't add anymore to this suite!
   it('seneca-smoke', function (fin) {
-    Seneca(test_opts)
+    Seneca({log:'silent'})
       .error(fin)
       .add('a:1', function (msg, done) {
         done(null, { x: 1 })

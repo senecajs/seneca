@@ -173,6 +173,7 @@ function make_tasks(): any {
 
       // TODO: use-plugin needs better error message for malformed plugin desc
       let desc = private$.use.build_plugin_desc(...args)
+      desc.callpoint = spec.ctx.callpoint
 
       if (private$.ignore_plugins[desc.full]) {
         seneca.log.info({

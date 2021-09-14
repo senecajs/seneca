@@ -1,31 +1,31 @@
-/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2021 Richard Rodger, MIT License */
 'use strict'
 
-var Assert = require('assert')
+const Assert = require('assert')
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
-var TransportStubs = require('./stubs/transports')
+const TransportStubs = require('./stubs/transports')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
-var assert = Assert
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
+const assert = Assert
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
-var Seneca = require('..')
+const Seneca = require('..')
 
-var testopts = { log: 'silent' }
+const testopts = { log: 'silent' }
 
-// Shortcuts
-var arrayify = Function.prototype.apply.bind(Array.prototype.slice)
+const make_test_transport = TransportStubs.make_test_transport
 
-var make_test_transport = TransportStubs.make_test_transport
+
+
 
 describe('error', function () {
   it('fail', function (fin) {
-    var si = Seneca({ tag: 'aaa' }).test()
+    const si = Seneca({ tag: 'aaa' }).test()
 
     try {
       si.fail('foo', 'Foo')
@@ -62,11 +62,73 @@ describe('error', function () {
 
   it('types', types)
 
+
+  it('prior-once-test-log', function(fin) {
+    let log = []
+    const si = Seneca({internal:{print:{log:(...args)=>log.push(args)}}}).test()
+
+    si
+      .add('foo:1', function p3(msg,reply) {
+        throw new Error('p3')
+      })
+      .add('foo:1', function p0(msg,reply) {
+        msg.p0=0
+        this.prior(msg, reply)
+      })
+      .add('foo:1', function p1(msg,reply) {
+        msg.p1=1
+        this.prior(msg, reply)
+      })
+      .add('foo:1', function p2(msg,reply) {
+        msg.p2=2
+        this.prior(msg, reply)
+      })
+
+    si.act('foo:1', function(err) {
+      expect(err.code).equals('act_execute')
+
+      // Should only print full error with stack once
+      expect((log.join('').match(/Error/g) || []).length).equals(1)
+      fin()
+    })
+  })
+
+
+  it('deep-once-test-log', function(fin) {
+    let log = []
+    const si = Seneca({internal:{print:{log:(...args)=>log.push(args)}}}).test()
+
+    si
+      .add('foo:1', function p0(msg,reply) {
+        throw new Error('p0')
+      })
+      .add('bar:2', function p1(msg,reply) {
+        this.act('foo:1', reply)
+      })
+      .add('zed:3', function p2(msg,reply) {
+        this.act('bar:2', reply)
+      })
+      .add('qaz:4', function p3(msg,reply) {
+        this.act('zed:3', reply)
+      })
+
+    si.act('qaz:4', function(err) {
+      expect(err.code).equals('act_execute')
+
+      // Should only print full error with stack once
+      expect((log.join('').match(/Error/g) || []).length).equals(1)
+      fin()
+    })
+  })
+
+  
+
+  
   function response_is_error(fin) {
-    var si = Seneca({ log: 'silent' })
+    const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
-      var foo = new Error('foo')
+      const foo = new Error('foo')
       foo.a = 1
       reply(null, foo)
     })
@@ -83,7 +145,7 @@ describe('error', function () {
   }
 
   function action_callback(fin) {
-    var si = Seneca({ log: 'silent' })
+    const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
       reply({ x: 1 })
@@ -141,7 +203,7 @@ describe('error', function () {
   }
 
   function plugin_load(fin) {
-    var si = Seneca({ log: 'silent', debug: { undead: true } })
+    const si = Seneca({ log: 'silent', debug: { undead: true } })
 
     si.error(function (err) {
       // TODO: validate
@@ -196,7 +258,7 @@ describe('error', function () {
   }
 
   function exec_remote_action_result(done) {
-    var tt = make_test_transport()
+    const tt = make_test_transport()
 
     Seneca({ tag: 's0', legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
@@ -237,8 +299,8 @@ describe('error', function () {
   }
 
   function act_not_found(done) {
-    var ctxt = { errlog: null }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null }
+    const si = make_seneca(ctxt)
 
     // ~~ CASE: fire-and-forget; err-logged
     si.act('a:1')
@@ -286,8 +348,8 @@ describe('error', function () {
   }
 
   function exec_action_throw_basic_legacy(done) {
-    var ctxt = { errlog: null, done: done, log: true, name: 'throw' }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null, done: done, log: true, name: 'throw' }
+    const si = make_seneca(ctxt)
 
     si.add('a:1', function () {
       throw new Error('AAA')
@@ -297,8 +359,8 @@ describe('error', function () {
   }
 
   function exec_action_result_legacy(done) {
-    var ctxt = { errlog: null, done: done, log: true, name: 'result' }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null, done: done, log: true, name: 'result' }
+    const si = make_seneca(ctxt)
 
     si.add('a:1', function (msg, done) {
       done(new Error('BBB'))
@@ -310,12 +372,12 @@ describe('error', function () {
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
   function exec_action_throw_nolog(done) {
-    var ctxt = { errlog: null, done: done, log: false, name: 'throw_nolog' }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null, done: done, log: false, name: 'throw_nolog' }
+    const si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
       si.add('a:1', function () {
-        var err = new Error('CCC')
+        const err = new Error('CCC')
         err.log = false
         throw err
       })
@@ -329,12 +391,12 @@ describe('error', function () {
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
   function exec_action_result_nolog(done) {
-    var ctxt = { errlog: null, done: done, log: false, name: 'result_nolog' }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null, done: done, log: false, name: 'result_nolog' }
+    const si = make_seneca(ctxt)
 
     if (si.options().legacy.logging) {
       si.add('a:1', function (msg, done) {
-        var err = new Error('CCC')
+        const err = new Error('CCC')
         err.log = false
         done(err)
       })
@@ -346,9 +408,9 @@ describe('error', function () {
   }
 
   function exec_action_errhandler_throw(done) {
-    var ctxt = { errlog: null }
-    var si = make_seneca(ctxt)
-    var aI = 0
+    const ctxt = { errlog: null }
+    const si = make_seneca(ctxt)
+    let aI = 0
 
     si.options({
       errhandler: function (err) {
@@ -427,9 +489,9 @@ describe('error', function () {
   }
 
   function exec_action_errhandler_result(done) {
-    var ctxt = { errlog: null }
-    var si = make_seneca(ctxt)
-    var aI = 0
+    const ctxt = { errlog: null }
+    const si = make_seneca(ctxt)
+    let aI = 0
 
     si.options({
       errhandler: function (err) {
@@ -507,15 +569,15 @@ describe('error', function () {
   }
 
   function make_seneca(ctxt) {
-    var si = Seneca(testopts)
+    const si = Seneca(testopts)
     if (si.options().legacy.logging) {
       si.options({
         log: {
           map: [
             {
               level: 'error+',
-              handler: function () {
-                ctxt.errlog = arrayify(arguments)
+              handler: function (...args) {
+                ctxt.errlog = args
               },
             },
           ],
@@ -525,7 +587,7 @@ describe('error', function () {
       })
       return si
     } else {
-      var logger = function () {}
+      const logger = function () {}
       logger.preload = function () {
         return {
           extend: {
@@ -605,10 +667,10 @@ describe('error', function () {
   }
 
   function action_callback_legacy(done) {
-    var ctxt = { errlog: null }
-    var si = make_seneca(ctxt)
+    const ctxt = { errlog: null }
+    const si = make_seneca(ctxt)
 
-    var log_it = true
+    let log_it = true
 
     si.options({
       errhandler: function (err) {
@@ -651,7 +713,7 @@ describe('error', function () {
         si.act('a:1', function (err, out) {
           assert.equal(err, null)
           assert.ok(out.x)
-          var e = new Error('DDD')
+          const e = new Error('DDD')
           e.log = false
           log_it = false
           ctxt.errlog = null
@@ -662,7 +724,7 @@ describe('error', function () {
   }
 
   function legacy_fail(done) {
-    var si = Seneca({
+    const si = Seneca({
       log: 'silent',
       legacy: { fail: true },
     })
@@ -678,7 +740,7 @@ describe('error', function () {
       },
     })
 
-    var err = si.fail('foo', { bar: 1 })
+    let err = si.fail('foo', { bar: 1 })
     assert.equal('foo', err.code)
     assert.deepEqual({ bar: 1 }, err.details)
 
@@ -704,7 +766,7 @@ describe('error', function () {
   }
 
   function types(fin) {
-    var si = Seneca({ log: 'silent' })
+    const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
       throw new TypeError('t0')
