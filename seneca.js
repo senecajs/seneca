@@ -96,6 +96,9 @@ const option_defaults = {
 
       // Regardless of logging, call `console.err` on errors
       err: false,
+
+      // Depth of object inspection
+      depth: 2,
     },
 
     // Trace action caller and place in args.caller$.

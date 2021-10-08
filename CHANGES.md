@@ -1,3 +1,8 @@
+## 3. TODO
+
+* Added option debug.print.depth=2 to control inspection depth in console output.
+
+
 ## 3.24.0 2021-09-14
 
 * Avoid duplicate logging of errors and messages in log test mode.
