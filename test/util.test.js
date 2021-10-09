@@ -19,12 +19,12 @@ var Seneca = require('..')
 describe('util', function () {
   var si = Seneca(testopts)
 
-  it('seneca.util.deepextend.happy', function (done) {
+  it('seneca.util.deep.happy', function (done) {
     expect(
-      si.util.deepextend({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
+      si.util.deep({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
     ).to.include({ a: 1, b: { c: 3, d: 4 } })
     expect(
-      si.util.deepextend(
+      si.util.deep(
         {},
         { a: 1 },
         { b: [11, 22] },
@@ -34,7 +34,7 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.deepextend.types with new', function (done) {
+  it('seneca.util.deep.types with new', function (done) {
     /* eslint no-new-wrappers: 0 */
     var t1 = {
       s: 's1',
@@ -50,7 +50,7 @@ describe('util', function () {
       re: /a/,
     }
 
-    var to = si.util.deepextend({}, t1)
+    var to = si.util.deep({}, t1)
 
     expect(to.s).to.equal(t1.s)
     expect(to.so).to.equal(t1.so)
@@ -64,7 +64,7 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.deepextend.types', function (done) {
+  it('seneca.util.deep.types', function (done) {
     var t1 = {
       s: 's1',
       so: String('s2'),
@@ -79,7 +79,7 @@ describe('util', function () {
       re: /a/,
     }
 
-    var to = si.util.deepextend({}, t1)
+    var to = si.util.deep({}, t1)
 
     expect(to.s).to.equal(t1.s)
     expect(to.so).to.equal(t1.so)
@@ -93,8 +93,8 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.deepextend.mixed', function (done) {
-    var obj = si.util.deepextend(
+  it('seneca.util.deep.mixed', function (done) {
+    var obj = si.util.deep(
       {},
       { a: 1, b: { bb: 1 }, c: 's', d: 'ss', e: [2, 3], f: { fa: 1, fb: 2 } },
       {
@@ -119,8 +119,8 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.deepextend.entity', function (done) {
-    var obj = si.util.deepextend(
+  it('seneca.util.deep.entity', function (done) {
+    var obj = si.util.deep(
       { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
       { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } }
     )

@@ -33,33 +33,6 @@ describe('common', function () {
     expect(Common.boolify('{')).to.equal(false)
     expect(Common.boolify('}')).to.equal(false)
 
-    expect(Common.copydata()).to.equal(void 0)
-    expect(Common.copydata(null)).to.equal(null)
-    expect(Common.copydata(NaN)).to.equal(NaN)
-    expect(Common.copydata(true)).to.equal(true)
-    expect(Common.copydata(false)).to.equal(false)
-    expect(Common.copydata(0)).to.equal(0)
-    expect(Common.copydata(1)).to.equal(1)
-
-    var d = new Date()
-    expect(Common.copydata(d).getTime()).to.equal(d.getTime())
-
-    expect(Common.copydata([])).to.equal([])
-    expect(Common.copydata([1, 2, 3])).to.equal([1, 2, 3])
-    expect(Common.copydata([1, ['a', 'b'], 3])).to.equal([1, ['a', 'b'], 3])
-
-    expect(Common.copydata({})).to.equal({})
-    expect(Common.copydata({ a: 1 })).to.equal({ a: 1 })
-    expect(Common.copydata({ a: 1, b: { c: 2 } })).to.equal({
-      a: 1,
-      b: { c: 2 },
-    })
-
-    var a = { a: 1 }
-    var b = Object.create(a)
-    b.b = 2
-    expect(Common.copydata(b)).to.equal({ b: 2 })
-
     expect(Common.resolve_option(1)).equal(1)
     expect(Common.resolve_option('a')).equal('a')
     expect(
@@ -79,112 +52,112 @@ describe('common', function () {
     fin()
   })
 
-  it('deepextend-empty', function (fin) {
+  it('deep-empty', function (fin) {
     assert.equal(1, Common.deep({ a: 1 }).a)
 
-    assert.equal(null, Common.deepextend({}).a)
+    assert.equal(null, Common.deep({}).a)
 
-    assert.equal(1, Common.deepextend({ a: 1 }).a)
+    assert.equal(1, Common.deep({ a: 1 }).a)
 
-    assert.equal(1, Common.deepextend({}, { a: 1 }).a)
-    assert.equal(1, Common.deepextend({ a: 1 }, {}).a)
+    assert.equal(1, Common.deep({}, { a: 1 }).a)
+    assert.equal(1, Common.deep({ a: 1 }, {}).a)
 
-    assert.equal(1, Common.deepextend({}, { a: 1 }, { b: 2 }).a)
-    assert.equal(2, Common.deepextend({}, { a: 1 }, { b: 2 }).b)
+    assert.equal(1, Common.deep({}, { a: 1 }, { b: 2 }).a)
+    assert.equal(2, Common.deep({}, { a: 1 }, { b: 2 }).b)
 
-    assert.equal(1, Common.deepextend({ a: 1 }, { b: 2 }, {}).a)
-    assert.equal(2, Common.deepextend({ a: 1 }, { b: 2 }, {}).b)
+    assert.equal(1, Common.deep({ a: 1 }, { b: 2 }, {}).a)
+    assert.equal(2, Common.deep({ a: 1 }, { b: 2 }, {}).b)
 
-    assert.equal(1, Common.deepextend({}, { a: 1 }, { b: 2 }, {}).a)
-    assert.equal(2, Common.deepextend({}, { a: 1 }, { b: 2 }, {}).b)
+    assert.equal(1, Common.deep({}, { a: 1 }, { b: 2 }, {}).a)
+    assert.equal(2, Common.deep({}, { a: 1 }, { b: 2 }, {}).b)
 
-    assert.equal(1, Common.deepextend({}, { a: 1 }, {}, { b: 2 }, {}).a)
-    assert.equal(2, Common.deepextend({}, { a: 1 }, {}, { b: 2 }, {}).b)
+    assert.equal(1, Common.deep({}, { a: 1 }, {}, { b: 2 }, {}).a)
+    assert.equal(2, Common.deep({}, { a: 1 }, {}, { b: 2 }, {}).b)
 
-    assert.equal(1, Common.deepextend({ a: { b: 1 } }, {}).a.b)
-    assert.equal(1, Common.deepextend({}, { a: { b: 1 } }).a.b)
+    assert.equal(1, Common.deep({ a: { b: 1 } }, {}).a.b)
+    assert.equal(1, Common.deep({}, { a: { b: 1 } }).a.b)
 
-    assert.equal(1, Common.deepextend({ a: { b: 1 } }, { c: { d: 2 } }, {}).a.b)
-    assert.equal(2, Common.deepextend({ a: { b: 1 } }, { c: { d: 2 } }, {}).c.d)
+    assert.equal(1, Common.deep({ a: { b: 1 } }, { c: { d: 2 } }, {}).a.b)
+    assert.equal(2, Common.deep({ a: { b: 1 } }, { c: { d: 2 } }, {}).c.d)
 
-    assert.equal(1, Common.deepextend({}, { a: { b: 1 } }, { c: { d: 2 } }).a.b)
-    assert.equal(2, Common.deepextend({}, { a: { b: 1 } }, { c: { d: 2 } }).c.d)
-
-    assert.equal(
-      1,
-      Common.deepextend({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).a.b
-    )
-    assert.equal(
-      2,
-      Common.deepextend({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).c.d
-    )
+    assert.equal(1, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }).a.b)
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }).c.d)
 
     assert.equal(
       1,
-      Common.deepextend({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).a.b
     )
     assert.equal(
       2,
-      Common.deepextend({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).c.d
-    )
-
-    assert.equal(1, Common.deepextend({ a: { b: 1 } }, { a: { c: 2 } }, {}).a.b)
-    assert.equal(2, Common.deepextend({ a: { b: 1 } }, { a: { c: 2 } }, {}).a.c)
-
-    assert.equal(1, Common.deepextend({}, { a: { b: 1 } }, { a: { c: 2 } }).a.b)
-    assert.equal(2, Common.deepextend({}, { a: { b: 1 } }, { a: { c: 2 } }).a.c)
-
-    assert.equal(
-      1,
-      Common.deepextend({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.b
-    )
-    assert.equal(
-      2,
-      Common.deepextend({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.c
+      Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).c.d
     )
 
     assert.equal(
       1,
-      Common.deepextend({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).a.b
     )
     assert.equal(
       2,
-      Common.deepextend({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.c
+      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).c.d
     )
 
-    assert.equal(1, Common.deepextend({ a: { b: 1 } }, { a: { b: 1 } }, {}).a.b)
+    assert.equal(1, Common.deep({ a: { b: 1 } }, { a: { c: 2 } }, {}).a.b)
+    assert.equal(2, Common.deep({ a: { b: 1 } }, { a: { c: 2 } }, {}).a.c)
 
-    assert.equal(2, Common.deepextend({}, { a: { b: 1 } }, { a: { b: 2 } }).a.b)
+    assert.equal(1, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }).a.b)
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }).a.c)
+
+    assert.equal(
+      1,
+      Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.b
+    )
+    assert.equal(
+      2,
+      Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.c
+    )
+
+    assert.equal(
+      1,
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.b
+    )
+    assert.equal(
+      2,
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.c
+    )
+
+    assert.equal(1, Common.deep({ a: { b: 1 } }, { a: { b: 1 } }, {}).a.b)
+
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { b: 2 } }).a.b)
 
     assert.equal(
       2,
-      Common.deepextend({}, { a: { b: 1 } }, { a: { b: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, { a: { b: 2 } }, {}).a.b
     )
 
     assert.equal(
       2,
-      Common.deepextend({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b
     )
 
     fin()
   })
 
-  it('deepextend-dups', function (fin) {
+  it('deep-dups', function (fin) {
     var aa = { a: { aa: 1 } }
     var bb = { a: { bb: 2 } }
 
-    var out = Common.deepextend(aa, bb, aa)
+    var out = Common.deep(aa, bb, aa)
 
     assert.equal(1, out.a.aa)
     assert.equal(2, out.a.bb)
 
-    out = Common.deepextend({}, aa, bb, aa)
+    out = Common.deep({}, aa, bb, aa)
     assert.equal(1, out.a.aa)
     assert.equal(2, out.a.bb)
     fin()
   })
 
-  it('deepextend-objs', function (fin) {
+  it('deep-objs', function (fin) {
     var d = {
       s: 's',
       n: 100,
@@ -194,12 +167,12 @@ describe('common', function () {
       r: /a/,
       b: Buffer('b'),
     }
-    var o = Common.deepextend({}, d)
+    var o = Common.deep({}, d)
     assert.equal('' + o, '' + d)
     fin()
   })
 
-  it('deepextend-objs with functions', function (fin) {
+  it('deep-objs with functions', function (fin) {
     function noop() {}
     function f1() {}
 
@@ -211,7 +184,7 @@ describe('common', function () {
       a: f1,
     }
 
-    var out = Common.deepextend(defaults, options)
+    var out = Common.deep(defaults, options)
 
     assert.strictEqual(out.a, f1)
     assert.strictEqual(out.b, noop)
@@ -227,22 +200,6 @@ describe('common', function () {
     assert.equal('a:1,b:2', Common.pattern({ b: 2, c: { x: 1 }, a: 1 }))
     assert.equal('a:1,b:2', Common.pattern({ b: 2, c: () => {}, a: 1 }))
     fin()
-  })
-
-  it('nil', function (fin) {
-    Common.nil({ msg: 1 }, function reply() {
-      fin()
-    })
-  })
-
-  it('recurse', function (fin) {
-    Common.recurse(
-      [1, 2, 3],
-      function (i, next) {
-        next()
-      },
-      fin
-    )
   })
 
   it('pincanon', function (fin) {

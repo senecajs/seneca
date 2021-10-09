@@ -1,9 +1,11 @@
 /* Copyright © 2010-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
+
 
 // External modules.
 const GateExecutor = require('gate-executor')
@@ -16,6 +18,7 @@ const { LegacyOrdu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
+
 
 // Internal modules.
 const Common = require('./lib/common')
@@ -31,13 +34,17 @@ const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
 const Options = require('./lib/options')
 const Package = require('./package.json')
-//const Plugins = require('./lib/plugins')
 const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
+
 // Internal data and utilities.
-const error = Common.error
+const {
+  error,
+  deep,
+} = Common
+
 
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
@@ -269,20 +276,20 @@ const seneca_util = {
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
-  Joi: Joi,
   Optioner: Optioner,
 
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,
   error: error,
-  deep: Common.deepextend,
+  deep: Common.deep,
 
   // Legacy
-  deepextend: Common.deepextend,
-  recurse: Common.recurse,
-  copydata: Common.copydata,
-  nil: Common.nil,
+  Joi: Joi,
+  deepextend: Common.deep,
+  recurse: Legacy.recurse,
+  copydata: Legacy.copydata,
+  nil: Legacy.nil,
   parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
   router: function router() {
@@ -328,8 +335,8 @@ Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
 module.exports = function init(seneca_options, more_options) {
   var initial_opts =
     'string' === typeof seneca_options
-      ? Common.deepextend({}, { from: seneca_options }, more_options)
-      : Common.deepextend({}, seneca_options, more_options)
+      ? deep({}, { from: seneca_options }, more_options)
+      : deep({}, seneca_options, more_options)
 
   // Legacy options, remove in 4.x
   initial_opts.deathdelay = initial_opts.death_delay
@@ -473,6 +480,20 @@ function make_seneca(initial_opts) {
 
   // TODO: rename back to plugins
   const api_use = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
+  root$.use = api_use.use // Define and load a plugin.
+
+  // const api_use_impl = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
+  // const api_use = function(...args) {
+  //   if('entity' === args[0]) {
+  //     console.trace()
+  //   }
+  //   return api_use_impl.use.apply(this, args)
+  // }
+  // root$.use = api_use
+  
+
+
+  
   root$.order.plugin = api_use.ordu
 
   // Seneca methods. Official API.
@@ -493,7 +514,6 @@ function make_seneca(initial_opts) {
   root$.ungate = API.ungate // Execute actions in parallel.
   root$.translate = API.translate // Translate message to new pattern.
   root$.ping = API.ping // Generate ping response.
-  root$.use = api_use.use // Define and load a plugin.
   root$.test = API.test // Set test mode.
   root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
   root$.export = API.export // Export plain objects from a plugin.
@@ -634,7 +654,7 @@ function make_seneca(initial_opts) {
     function add_rules_from_validate_annotation(actdef) {
       actdef.rules = Object.assign(
         actdef.rules,
-        Common.deepextend({}, actdef.func.validate || {})
+        deep({}, actdef.func.validate || {})
       )
     },
   ]
@@ -705,7 +725,7 @@ function make_seneca(initial_opts) {
     start_opts.legacy.error = false
 
     // TODO: move to static options in Seneca 4.x
-    start_opts.transport = root$.util.deepextend(
+    start_opts.transport = deep(
       {
         port: 62345,
         host: '127.0.0.1',

@@ -105,7 +105,7 @@
   },
   "devDependencies": {
     "@hapi/code": "^8.0.3",
-    "@hapi/hoek": "^9.2.0",
+    "@hapi/hoek": "^9.2.1",
     "@hapi/lab": "^24.3.2",
     "@seneca/test-plugin": "0.0.1",
     "async": "^3.2.1",
@@ -114,13 +114,13 @@
     "handlebars": "^4.7.7",
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
-    "prettier": "^2.4.0",
-    "seneca-entity": "^14.1.0",
+    "prettier": "^2.4.1",
+    "seneca-entity": "^15.0.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^2.0.0",
     "gex": "^3.1.0",
     "typescript": "^4.4.3",
-    "@types/node": "^16.9.1"
+    "@types/node": "^16.10.3"
   }
 }
