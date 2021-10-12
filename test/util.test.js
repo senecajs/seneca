@@ -24,12 +24,7 @@ describe('util', function () {
       si.util.deep({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
     ).to.include({ a: 1, b: { c: 3, d: 4 } })
     expect(
-      si.util.deep(
-        {},
-        { a: 1 },
-        { b: [11, 22] },
-        { b: [undefined, 222, 333] }
-      )
+      si.util.deep({}, { a: 1 }, { b: [11, 22] }, { b: [undefined, 222, 333] })
     ).to.include({ a: 1, b: [11, 222, 333] })
     done()
   })

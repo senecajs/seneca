@@ -1,6 +1,7 @@
-## 3. TODO
+## 3.24.1 2021-10-12
 
 * Added option debug.print.depth=2 to control inspection depth in console output.
+* Move some legacy util functions to lib/legacy.js - prep for deprecation.
 
 
 ## 3.24.0 2021-09-14

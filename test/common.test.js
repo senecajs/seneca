@@ -83,14 +83,8 @@ describe('common', function () {
     assert.equal(1, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }).a.b)
     assert.equal(2, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }).c.d)
 
-    assert.equal(
-      1,
-      Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).a.b
-    )
-    assert.equal(
-      2,
-      Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).c.d
-    )
+    assert.equal(1, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).a.b)
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { c: { d: 2 } }, {}).c.d)
 
     assert.equal(
       1,
@@ -107,14 +101,8 @@ describe('common', function () {
     assert.equal(1, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }).a.b)
     assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }).a.c)
 
-    assert.equal(
-      1,
-      Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.b
-    )
-    assert.equal(
-      2,
-      Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.c
-    )
+    assert.equal(1, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.b)
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { c: 2 } }, {}).a.c)
 
     assert.equal(
       1,
@@ -129,10 +117,7 @@ describe('common', function () {
 
     assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { b: 2 } }).a.b)
 
-    assert.equal(
-      2,
-      Common.deep({}, { a: { b: 1 } }, { a: { b: 2 } }, {}).a.b
-    )
+    assert.equal(2, Common.deep({}, { a: { b: 1 } }, { a: { b: 2 } }, {}).a.b)
 
     assert.equal(
       2,
@@ -165,7 +150,7 @@ describe('common', function () {
       f: function () {},
       a: arguments,
       r: /a/,
-      b: Buffer('b'),
+      b: Buffer.from('b'),
     }
     var o = Common.deep({}, d)
     assert.equal('' + o, '' + d)

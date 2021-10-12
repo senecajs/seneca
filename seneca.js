@@ -1,11 +1,9 @@
 /* Copyright © 2010-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
-
 
 // External modules.
 const GateExecutor = require('gate-executor')
@@ -18,7 +16,6 @@ const { LegacyOrdu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
-
 
 // Internal modules.
 const Common = require('./lib/common')
@@ -38,13 +35,8 @@ const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
-
 // Internal data and utilities.
-const {
-  error,
-  deep,
-} = Common
-
+const { error, deep } = Common
 
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
@@ -273,10 +265,10 @@ const option_defaults = {
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
   Eraro: Eraro,
+
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
-  Optioner: Optioner,
 
   clean: Common.clean,
   pattern: Common.pattern,
@@ -284,20 +276,23 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
-  // Legacy
+  // Legacy (make internal or rename)
+  Optioner: Optioner,
   Joi: Joi,
   deepextend: Common.deep,
-  recurse: Legacy.recurse,
-  copydata: Legacy.copydata,
-  nil: Legacy.nil,
   parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
   router: function router() {
     return Patrun()
   },
   resolve_option: Common.resolve_option,
-  flatten: Common.flatten,
+
+  // Legacy (deprecate and remove)
   argprops: Legacy.argprops,
+  recurse: Legacy.recurse,
+  copydata: Legacy.copydata,
+  nil: Legacy.nil,
+  flatten: Legacy.flatten,
 }
 
 // Internal implementations.
@@ -490,10 +485,7 @@ function make_seneca(initial_opts) {
   //   return api_use_impl.use.apply(this, args)
   // }
   // root$.use = api_use
-  
 
-
-  
   root$.order.plugin = api_use.ordu
 
   // Seneca methods. Official API.

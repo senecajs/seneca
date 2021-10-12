@@ -57,7 +57,6 @@ describe('legacy', function () {
     fin()
   })
 
-
   it('recurse', function (fin) {
     Legacy.recurse(
       [1, 2, 3],
