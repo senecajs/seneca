@@ -820,6 +820,7 @@ describe('seneca', function () {
     })
   })
 
+
   it('wrap', function (fin) {
     var si = Seneca({ legacy: { transport: false } }).test(fin)
 
@@ -904,6 +905,77 @@ describe('seneca', function () {
     })
   })
 
+
+  it('wrap-priors', async () => {
+    let s0 = Seneca({tag:'wrap-priors',legacy:false}).test().use('promisify').use('entity')
+    await s0.ready()
+
+
+    s0.message('foo:1',async function(msg) {
+      return {x:msg.x,w:msg.w}
+    })
+
+    // TODO add seneca-promisify support 
+    s0.wrap('foo:1', function(msg, reply) {
+      msg.w++
+      this.prior(msg, reply)
+    })
+
+    let o0 = await s0.post('foo:1,x:22,w:1')
+    expect(o0).equal({ x: 22, w: 2 })
+
+
+    
+    s0.message('bar:1,zed:1',async function(msg) {
+      return {x:msg.x,w:msg.w}
+    })
+
+    s0.message('bar:1,zed:2',async function(msg) {
+      return {y:msg.y,w:msg.w}
+    })
+
+    s0.wrap('bar:1', function(msg, reply) {
+      msg.w++
+      this.prior(msg, reply)
+    })
+
+    let o1 = await s0.post('bar:1,zed:1,x:22,w:1')
+    expect(o1).equal({ x: 22, w: 2 })
+    
+    let o2 = await s0.post('bar:1,zed:2,y:33,w:1')
+    expect(o2).equal({ y: 33, w: 2 })
+
+
+    s0.message('qaz:1',async function qaz1(msg) {
+      return {z:msg.z,w:msg.w}
+    })
+
+    s0.message('qaz:1,bez:2',async function qaz1bez1(msg) {
+      let out = await this.prior(msg)
+      out.w++
+      return out
+    })
+
+    let o3 = await s0.post('qaz:1,z:11,w:1')
+    expect(o3).equal({ z: 11, w: 1 })
+
+    let o4 = await s0.post('qaz:1,bez:2,z:22,w:1')
+    expect(o4).equal({ z: 22, w: 2 })
+
+
+    s0.wrap('qaz:1', function wrap_qaz1(msg, reply) {
+      msg.w *= 10
+      this.prior(msg, reply)
+    })
+
+    let o5 = await s0.post('qaz:1,z:33,w:1')
+    expect(o5).equal({ z: 33, w: 10 })
+
+    let o6 = await s0.post('qaz:1,bez:2,z:44,w:1')
+    expect(o6).equal({ z: 44, w: 11 })
+  })
+  
+  
   it('meta', function (fin) {
     var si = Seneca().test(fin)
     var tmp = {}
