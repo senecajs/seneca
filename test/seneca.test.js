@@ -1325,6 +1325,7 @@ describe('seneca', function () {
     })
   })
 
+  
   it('reply-seneca', function (fin) {
     Seneca()
       .test(fin)
@@ -1350,6 +1351,7 @@ describe('seneca', function () {
       .ready(fin)
   })
 
+  
   it('pattern-types', function (fin) {
     Seneca()
       .test(fin)

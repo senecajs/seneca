@@ -82,12 +82,14 @@ describe('delegation', function () {
     var si = Seneca().test(fin)
 
     si.add({ c: 'C' }, function c0(msg, reply) {
+      console.log('IN c0', arguments)
       msg.a = 1
       reply(msg)
     })
 
     si.add({ c: 'C' }, function c1(msg, reply) {
-      this.prior(msg, function (err, out) {
+      this.prior(msg, function c1r(err, out) {
+        console.log('PA', arguments)
         out.p = 2
         reply(err, out)
       })

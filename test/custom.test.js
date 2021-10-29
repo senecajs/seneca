@@ -186,14 +186,17 @@ describe('custom', function () {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
+        console.log('START a1', meta)
         meta.custom.q4 = 1
         reply({ x: msg.x, y: msg.y, z: msg.z })
       })
       .add('a:1', function a2(msg, reply, meta) {
+        console.log('START a2', meta)
         meta.custom.q3 = 1
         this.prior({ x: msg.x, y: msg.y, z: 1 }, reply)
       })
       .add('a:1', function a3(msg, reply, meta) {
+        console.log('START a3', meta)
         meta.custom.q2 = 1
         this.prior({ x: msg.x, y: 1 }, reply)
       })
