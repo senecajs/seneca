@@ -233,29 +233,33 @@ const option_defaults = {
 
   // Backwards compatibility settings.
   legacy: {
-    // Action callback must always have signature callback(error, result).
-    action_signature: false,
-
-    // Logger can be changed by options method.
-    logging: false,
-
-    // Use old error codes. REMOVE in Seneca 4.x
-    error_codes: false,
-
-    // Use old error handling.
-    error: true,
-
-    // Use seneca-transport plugin.
-    transport: true,
-
-    // Add meta$ property to messages.
-    meta: false,
 
     // Add legacy properties
     actdef: false,
 
+    // Action callback must always have signature callback(error, result).
+    action_signature: false,
+
+    // Use old error handling.
+    error: true,
+
+    // Use old error codes. REMOVE in Seneca 4.x
+    error_codes: false,
+
     // Use old fail method
     fail: false,
+
+    // Logger can be changed by options method.
+    logging: false,
+
+    // Add meta$ property to messages.
+    meta: false,
+
+    // Remove meta argument in action arguments and callbacks.
+    meta_arg_remove: false,
+
+    // Use seneca-transport plugin.
+    transport: true,
 
     // Insert "[TIMEOUT]" into timeout error message
     timeout_string: true,

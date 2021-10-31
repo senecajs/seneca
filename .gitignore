@@ -16,4 +16,5 @@ node_modules
 node_modules-*
 docs/annotated
 docs/coverage.html
+test/coverage.html
 *.csv
