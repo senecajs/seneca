@@ -12,7 +12,7 @@ const UsePlugin = require('use-plugin')
 const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
-const { LegacyOrdu } = require('ordu')
+const { Ordu, LegacyOrdu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
@@ -233,7 +233,6 @@ const option_defaults = {
 
   // Backwards compatibility settings.
   legacy: {
-
     // Add legacy properties
     actdef: false,
 
@@ -264,6 +263,24 @@ const option_defaults = {
     // Insert "[TIMEOUT]" into timeout error message
     timeout_string: true,
   },
+
+  // Processing task ordering.
+  order: {
+
+    // Action add task ordering.
+    add: {
+
+      // Print task execution log.
+      debug: false,
+    },
+
+    // Plugin load task ordering.
+    use: {
+
+      // Print task execution log.
+      debug: false,
+    }
+  }
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.
@@ -475,20 +492,14 @@ function make_seneca(initial_opts) {
 
   const ready = Ready(root$)
 
+  // API for Ordu-defined processes.
   root$.order = {}
 
   // TODO: rename back to plugins
-  const api_use = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
+  const api_use = Plugin.api_use(callpoint, {
+    debug: !!start_opts.debug.ordu || !!start_opts.order.use.debug 
+  })
   root$.use = api_use.use // Define and load a plugin.
-
-  // const api_use_impl = Plugin.api_use(callpoint, { debug: !!start_opts.debug.ordu })
-  // const api_use = function(...args) {
-  //   if('entity' === args[0]) {
-  //     console.trace()
-  //   }
-  //   return api_use_impl.use.apply(this, args)
-  // }
-  // root$.use = api_use
 
   root$.order.plugin = api_use.ordu
 
@@ -657,6 +668,20 @@ function make_seneca(initial_opts) {
 
   private$.sub = { handler: null, tracers: [] }
 
+  root$.order.add = new Ordu({
+    debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug
+  })
+    .add(Add.task.prepare)
+    .add(Add.task.plugin)
+    .add(Add.task.callpoint)
+    .add(Add.task.flags)
+    .add(Add.task.action)
+    .add(Add.task.prior)
+    .add(Add.task.rules)
+    .add(Add.task.register)
+    .add(Add.task.modify)
+
+  
   private$.inward = LegacyOrdu({ name: 'inward' })
     .add(Inward.msg_modify)
     .add(Inward.closed)

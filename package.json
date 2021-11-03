@@ -80,7 +80,8 @@
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "reset": "npm run clean && npm i && npm run build && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && npm run clean && npm i --registry https://registry.npmjs.org && npm run prettier && npm run build && npm test && npm run repo-tag --registry https://registry.npmjs.org && npm publish  --registry https://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION next --registry https://registry.npmjs.org && npm dist-tag add seneca@$REPO_VERSION plugin --registry https://registry.npmjs.org"
+    "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
+    "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org "
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -96,10 +97,10 @@
     "nid": "^1.3.3",
     "norma": "^2.0.2",
     "optioner": "^5.0.1",
-    "ordu": "^2.0.0",
+    "ordu": "^2.1.1",
     "patrun": "^7.1.0",
     "qs": "^6.10.1",
-    "rolling-stats": "^0.1.1",
+    "rolling-stats": "^0.2.1",
     "seneca-transport": "^6.0.0",
     "use-plugin": "^8.2.0"
   },

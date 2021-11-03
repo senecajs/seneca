@@ -19,10 +19,11 @@ module.exports = {
       lab.it(
         name,
         opts,
-        'AsyncFunction' === func.constructor.name ? func :
-          Util.promisify(function (x, fin) {
-            func(fin)
-          })
+        'AsyncFunction' === func.constructor.name
+          ? func
+          : Util.promisify(function (x, fin) {
+              func(fin)
+            })
       )
     }
   },
