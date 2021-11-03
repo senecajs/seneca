@@ -266,21 +266,18 @@ const option_defaults = {
 
   // Processing task ordering.
   order: {
-
     // Action add task ordering.
     add: {
-
       // Print task execution log.
       debug: false,
     },
 
     // Plugin load task ordering.
     use: {
-
       // Print task execution log.
       debug: false,
-    }
-  }
+    },
+  },
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.
@@ -497,7 +494,7 @@ function make_seneca(initial_opts) {
 
   // TODO: rename back to plugins
   const api_use = Plugin.api_use(callpoint, {
-    debug: !!start_opts.debug.ordu || !!start_opts.order.use.debug 
+    debug: !!start_opts.debug.ordu || !!start_opts.order.use.debug,
   })
   root$.use = api_use.use // Define and load a plugin.
 
@@ -669,7 +666,7 @@ function make_seneca(initial_opts) {
   private$.sub = { handler: null, tracers: [] }
 
   root$.order.add = new Ordu({
-    debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug
+    debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
   })
     .add(Add.task.prepare)
     .add(Add.task.plugin)
@@ -681,7 +678,6 @@ function make_seneca(initial_opts) {
     .add(Add.task.register)
     .add(Add.task.modify)
 
-  
   private$.inward = LegacyOrdu({ name: 'inward' })
     .add(Inward.msg_modify)
     .add(Inward.closed)

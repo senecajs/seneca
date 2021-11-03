@@ -1,3 +1,8 @@
+## 3.25.0 2021-11-03
+
+* Seneca.add now uses Ordu to run add-action tasks, thus easier to customize.
+
+
 ## 3.24.1 2021-10-12
 
 * Added option debug.print.depth=2 to control inspection depth in console output.
