@@ -17,8 +17,8 @@ describe('xward', function () {
   it('happy-inward', function (fin) {
     Seneca()
       .error(fin)
-      .inward(function (ctxt, data) {
-        data.msg.y = 3
+      .inward(function (spec) {
+        spec.data.msg.y = 3
       })
       .add('a:1', function (msg, done) {
         done(null, { x: 2, y: msg.y })
@@ -33,7 +33,7 @@ describe('xward', function () {
   it('happy-outward', function (fin) {
     Seneca()
       .error(fin)
-      .outward(function (ctxt, data) {
+      .outward(function (ctx, data) {
         if (data.res) {
           data.res.z = 4
         }

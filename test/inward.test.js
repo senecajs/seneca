@@ -27,8 +27,8 @@ describe('inward', function () {
         fin()
       })
 
-      Inward.announce({ seneca: seneca }, { msg: { a: 1 } })
-      Inward.announce({ seneca: seneca, actdef: {} }, { msg: { a: 2 } })
+      Inward.announce({ctx:{ seneca: seneca }, data:{ msg: { a: 1 } }})
+      Inward.announce({ctx:{ seneca: seneca, actdef: {} }, data:{ msg: { a: 2 } }})
     })
   })
 

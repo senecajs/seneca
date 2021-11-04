@@ -266,14 +266,24 @@ const option_defaults = {
 
   // Processing task ordering.
   order: {
+
     // Action add task ordering.
     add: {
+
       // Print task execution log.
       debug: false,
     },
 
+    // Action act inward task ordering.
+    inward: {
+
+      // Print task execution log.
+      debug: false,
+    },
+    
     // Plugin load task ordering.
     use: {
+
       // Print task execution log.
       debug: false,
     },
@@ -666,6 +676,7 @@ function make_seneca(initial_opts) {
   private$.sub = { handler: null, tracers: [] }
 
   root$.order.add = new Ordu({
+    name: 'add',
     debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
   })
     .add(Add.task.prepare)
@@ -678,7 +689,11 @@ function make_seneca(initial_opts) {
     .add(Add.task.register)
     .add(Add.task.modify)
 
-  private$.inward = LegacyOrdu({ name: 'inward' })
+  //private$.inward = LegacyOrdu({ name: 'inward' })
+  root$.order.inward = new Ordu({
+    name: 'inward',
+    debug: !!start_opts.debug.ordu || !!start_opts.order.inward.debug,
+  })
     .add(Inward.msg_modify)
     .add(Inward.closed)
     .add(Inward.act_cache)
@@ -738,6 +753,8 @@ function make_seneca(initial_opts) {
 
   Actions(root$)
 
+  // root$.act('role:seneca,cmd:pingx')
+  
   if (!start_opts.legacy.transport) {
     start_opts.legacy.error = false
 
