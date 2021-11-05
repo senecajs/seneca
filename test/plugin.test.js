@@ -647,26 +647,28 @@ describe('plugin', function () {
     })
   })
 
-  it('calling act from init actor is deprecated', function (fin) {
-    var seneca = Seneca.test(fin)
+  
+  // it('calling act from init actor is deprecated', function (fin) {
+  //   var seneca = Seneca.test(fin)
 
-    seneca.add(
-      { role: 'metrics', subscriptions: 'create' },
-      function (data, callback) {
-        callback()
-      }
-    )
+  //   seneca.add(
+  //     { role: 'metrics', subscriptions: 'create' },
+  //     function (data, callback) {
+  //       callback()
+  //     }
+  //   )
 
-    seneca.add({ init: 'msgstats-metrics' }, function () {
-      seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
-        expect(err).to.not.exist()
-        fin()
-      })
-    })
+  //   seneca.add({ init: 'msgstats-metrics' }, function () {
+  //     seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
+  //       expect(err).to.not.exist()
+  //       fin()
+  //     })
+  //   })
 
-    seneca.act({ init: 'msgstats-metrics' })
-  })
+  //   seneca.act({ init: 'msgstats-metrics' })
+  // })
 
+  
   it('plugin actions receive errors in callback function', function (fin) {
     var seneca = Seneca({ log: 'silent' })
     seneca.fixedargs['fatal$'] = false

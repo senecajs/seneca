@@ -33,9 +33,9 @@ describe('xward', function () {
   it('happy-outward', function (fin) {
     Seneca()
       .error(fin)
-      .outward(function (ctx, data) {
-        if (data.res) {
-          data.res.z = 4
+      .outward(function (spec) {
+        if (spec.data.res) {
+          spec.data.res.z = 4
         }
       })
       .add('a:1', function (msg, done) {

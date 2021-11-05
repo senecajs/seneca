@@ -10,7 +10,7 @@ const lab = (exports.lab = Lab.script())
 const describe = lab.describe
 const expect = Code.expect
 
-const { LegacyOrdu } = require('ordu')
+const { Ordu } = require('ordu')
 
 const Shared = require('./shared')
 const it = Shared.make_it(lab)
@@ -48,60 +48,54 @@ describe('act', function () {
   })
 
   it('process_outward', function (fin) {
-    var outward = LegacyOrdu({ name: 'outward' })
-      .add(function (ctxt, data) {
-        data.x = 1
+    var outward = new Ordu({ name: 'outward' })
+      .add(function (spec) {
+        spec.data.x = 1
       })
-      .add(function (ctxt, data) {
-        if (data.a) {
-          return { kind: 'error', error: new Error('a') }
+      .add(function (spec) {
+        if (spec.data.a) {
+          return { op: 'stop', out: { kind: 'error', error: new Error('a') } }
         }
       })
-      .add(function (ctxt, data) {
-        if (data.b) {
-          return { kind: 'error', code: 'b', info: { b: 1 } }
+      .add(function (spec) {
+        if (spec.data.b) {
+          return { op: 'stop', out: { kind: 'error', code: 'b', info: { b: 1 } } }
         }
       })
-      .add(function (ctxt, data) {
-        if (data.c) {
-          return { kind: 'result', result: { c: 1 } }
-        }
-      })
-      .add(function (ctxt, data) {
-        if (data.d) {
-          return { kind: 'bad' }
+      // .add(function (spec) {
+      //   if (spec.data.c) {
+      //     return { op: 'stop', out: { kind: 'result', result: { c: 1 } } }
+      //   }
+      // })
+      .add(function (spec) {
+        if (spec.data.d) {
+          return { op: 'stop', out: { kind: 'bad' } }
         }
       })
 
-    var actctxt = {
-      seneca: { private$: { outward: outward } },
-    }
+    var actctxt = { seneca: { order: { outward } } }
 
     var d0 = { a: 1, meta: {} }
     intern.process_outward(actctxt, d0)
     expect(d0.x).equals(1)
-    //expect(Util.isError(d0.res)).true()
     expect(Util.isError(d0.err)).true()
     expect(d0.meta.error).true()
 
     var d1 = { b: 2, meta: {} }
     intern.process_outward(actctxt, d1)
     expect(d1.x).equals(1)
-    //expect(Util.isError(d1.res)).true()
     expect(Util.isError(d1.err)).true()
-    //expect(d1.res.code).equal('b')
     expect(d1.err.code).equal('b')
     expect(d1.meta.error).true()
 
-    var d2 = { c: 3, meta: {} }
-    intern.process_outward(actctxt, d2)
-    expect(d2.x).equals(1)
-    expect(d2.res).equal({ c: 1 })
-    expect(d2.meta.error).not.exists()
+    // var d2 = { c: 3, meta: {} }
+    // intern.process_outward(actctxt, d2)
+    // expect(d2.x).equals(1)
+    // expect(d2.res).equal({ c: 1 })
+    // expect(d2.meta.error).not.exists()
 
     var d3 = { d: 4 }
     intern.process_outward(actctxt, d3)
-    //expect(d3.res.code).equals('invalid-process-outward-code')
     expect(d3.err.code).equals('invalid-process-outward-code')
     expect(d3.meta.error).exists()
 

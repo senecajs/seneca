@@ -12,7 +12,7 @@ const UsePlugin = require('use-plugin')
 const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
-const { Ordu, LegacyOrdu } = require('ordu')
+const { Ordu } = require('ordu')
 const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
@@ -274,8 +274,15 @@ const option_defaults = {
       debug: false,
     },
 
-    // Action act inward task ordering.
+    // Action inward task ordering.
     inward: {
+
+      // Print task execution log.
+      debug: false,
+    },
+    
+    // Action outward task ordering.
+    outward: {
 
       // Print task execution log.
       debug: false,
@@ -689,7 +696,6 @@ function make_seneca(initial_opts) {
     .add(Add.task.register)
     .add(Add.task.modify)
 
-  //private$.inward = LegacyOrdu({ name: 'inward' })
   root$.order.inward = new Ordu({
     name: 'inward',
     debug: !!start_opts.debug.ordu || !!start_opts.order.inward.debug,
@@ -708,7 +714,10 @@ function make_seneca(initial_opts) {
     .add(Inward.sub)
     .add(Inward.announce)
 
-  private$.outward = LegacyOrdu({ name: 'outward' })
+  root$.order.outward = new Ordu({
+    name: 'outward',
+    debug: !!start_opts.debug.ordu || !!start_opts.order.outward.debug,
+  })
     .add(Outward.make_error)
     .add(Outward.act_stats)
     .add(Outward.act_cache)
@@ -720,6 +729,7 @@ function make_seneca(initial_opts) {
     .add(Outward.announce)
     .add(Outward.act_error)
 
+  
   // Configure logging
 
   // Mark logger as being externally defined from options
