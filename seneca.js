@@ -1,9 +1,11 @@
 /* Copyright © 2010-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
+
 
 // External modules.
 const GateExecutor = require('gate-executor')
@@ -17,14 +19,16 @@ const Eraro = require('eraro')
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
 
+
 // Internal modules.
 const Common = require('./lib/common')
 const Logging = require('./lib/logging')
 const API = require('./lib/api')
 const Ready = require('./lib/ready')
+const Act = require('./lib/act')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
-const Act = require('./lib/act')
+const Prior = require('./lib/prior')
 const Plugin = require('./lib/plugin')
 const Inward = require('./lib/inward')
 const Outward = require('./lib/outward')
@@ -35,9 +39,12 @@ const Print = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
+
 // Internal data and utilities.
 const { error, deep } = Common
 
+
+// Seneca options.
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
   tag: '-',
@@ -295,6 +302,14 @@ const option_defaults = {
       debug: false,
     },
   },
+
+
+  // Prior actions.
+  prior: {
+
+    // Call prior actions directly (not as further messages).
+    direct: false
+  }
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.
@@ -540,7 +555,7 @@ function make_seneca(initial_opts) {
   root$.export = API.export // Export plain objects from a plugin.
   root$.depends = API.depends // Check for plugin dependencies.
   root$.delegate = API.delegate // Create an action-specific Seneca instance.
-  root$.prior = API.prior // Call the previous action definition for message pattern.
+  root$.prior = Prior.api_prior // Call the previous action definition for pattern.
   root$.inward = API.inward // Add a modifier function for messages inward
   root$.outward = API.outward // Add a modifier function for responses outward
   root$.error = API.error // Set global error handler, or generate Seneca Error

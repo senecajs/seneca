@@ -329,15 +329,19 @@ describe('seneca', function () {
         assert.ok(m.action.match(/foo/))
 
         si.add({ op: 'foo' }, bar)
+
         si.act('op:foo,a:1,i:2', function (e, o, m) {
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
           assert.ok(!o.bar.prior)
-          assert.ok(o.foo.prior)
           assert.ok(m.action.match(/bar/))
-          assert.ok(trace(m).match(/foo_/))
 
+          if(!this.options().prior.direct) {
+            assert.ok(o.foo.prior)
+            assert.ok(trace(m).match(/foo_/))
+          }
+          
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1,i:3', function (e, o, m) {
             assert.ok(
@@ -345,13 +349,16 @@ describe('seneca', function () {
                 '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
               )
             )
-            assert.ok(!o.zed.prior)
-            assert.ok(o.bar.prior)
-            assert.ok(o.foo.prior)
 
             assert.ok(m.action.match(/zed/))
-            assert.ok(trace(m).match(/bar_.*foo_/))
-
+            
+            if(!this.options().prior.direct) {
+              assert.ok(!o.zed.prior)
+              assert.ok(o.bar.prior)
+              assert.ok(o.foo.prior)
+              assert.ok(trace(m).match(/bar_.*foo_/))
+            }
+            
             fin()
           })
         })
@@ -412,17 +419,24 @@ describe('seneca', function () {
       si.act('op:foo,a:1', function (err, o) {
         assert.ok(!err)
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
-        assert.ok(o.foo.prior)
-        assert.ok(!o.bar.prior)
 
+        if(!this.options().prior.direct) {        
+          assert.ok(o.foo.prior)
+          assert.ok(!o.bar.prior)
+        }
+        
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
-          assert.ok(o.foo.prior)
-          assert.ok(o.bar.prior)
-          assert.ok(!o.zed.prior)
+
+          if(!this.options().prior.direct) {        
+            assert.ok(o.foo.prior)
+            assert.ok(o.bar.prior)
+            assert.ok(!o.zed.prior)
+          }
+          
           fin()
         })
       })
@@ -1323,14 +1337,16 @@ describe('seneca', function () {
   it('reply-seneca', function (fin) {
     Seneca()
       .test(fin)
-      .add('a:1', function (msg, reply) {
+      .add('a:1', function A1(msg, reply) {
         reply({ sid: reply.seneca.id })
       })
-      .add('b:1', function (msg, reply) {
+      .add('b:1', function B1(msg, reply) {
+        // console.log('REPLY B1', msg, reply)
         msg.id1 = reply.seneca.id
         reply(msg)
       })
-      .add('b:1', function (msg, reply) {
+      .add('b:1', function B2(msg, reply) {
+        // console.log('REPLY B2', msg, reply)
         msg.id0 = reply.seneca.id
         this.prior(msg, reply)
       })
