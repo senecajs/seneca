@@ -83,7 +83,7 @@ interface UseData {
 function make_use(ordu: any, callpoint: any) {
   let seq = { index: 0 }
 
-  return function use() {
+  return function use(this: any) {
     let self = this
     let args = [...arguments]
 
@@ -418,7 +418,7 @@ function make_tasks(): any {
           pat.tag = plugin.tag
         }
 
-        delegate.add(pat, function(_: any, reply: any): any {
+        delegate.add(pat, function(this: any, _: any, reply: any): any {
           init.call(this, reply)
         })
       }
@@ -838,7 +838,7 @@ function make_intern() {
 
       try {
         meta = plugin.define.call(delegate, options) || {}
-      } catch (e) {
+      } catch (e: any) {
         Common.wrap_error(e, 'plugin_define_failed', {
           fullname: plugin.fullname,
           message: (

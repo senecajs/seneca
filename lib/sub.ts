@@ -5,7 +5,7 @@ const Common = require('./common')
 
 
 // Subscribe to messages.
-exports.api_sub = function() {
+function api_sub(this: any) {
   const self = this
   const subargs = Common.parsePattern(self, arguments, 'action:f')
   const pattern = subargs.pattern
@@ -36,4 +36,8 @@ exports.api_sub = function() {
   })
 
   return self
+}
+
+export {
+  api_sub
 }
