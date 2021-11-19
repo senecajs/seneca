@@ -1,0 +1,36 @@
+declare class Meta {
+    start: number;
+    end?: number;
+    pattern?: string;
+    action?: any;
+    mi: string;
+    tx: string;
+    id: string;
+    instance: string;
+    tag: string;
+    seneca: string;
+    version: string;
+    gate: boolean;
+    fatal: boolean;
+    closing: boolean;
+    sync: boolean;
+    local: boolean;
+    remote: boolean;
+    timeout: number;
+    dflt: any;
+    custom: any;
+    plugin: any;
+    prior: any;
+    caller: any;
+    parents: any;
+    trace: any;
+    sub: any;
+    data: any;
+    err: any;
+    err_trace: any;
+    error: any;
+    empty: any;
+    constructor(instance: any, opts: any, origmsg: any, origreply: any);
+    static resolve_msg_id_tx(instance: any, origmsg: any): any;
+}
+export { Meta };
