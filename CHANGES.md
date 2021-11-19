@@ -1,3 +1,9 @@
+## 3.26.0 
+
+* Plugin definition can be async: https://github.com/senecajs/seneca/pull/891 - thanks https://github.com/lilsweetcaligula !
+
+
+
 ## 3.25.0 2021-11-03
 
 * Seneca.add now uses Ordu to run add-action tasks, thus easier to customize.
