@@ -35,7 +35,7 @@ const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy')
 const Options = require('./lib/options')
 const Package = require('./package.json')
-const Print = require('./lib/print')
+const { Print } = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 

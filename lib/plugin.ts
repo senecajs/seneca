@@ -11,7 +11,7 @@ import { Ordu, TaskSpec } from 'ordu'
 
 // TODO: refactor: use.js->plugin.js and contain *_plugin api methods too
 const Common: any = require('./common')
-const Print: any = require('./print')
+const { Print } = require('./print')
 
 /* $lab:coverage:on$ */
 

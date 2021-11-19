@@ -5,7 +5,7 @@ const Path = require('path')
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
-const Print = require('../lib/print.js')
+const { Print } = require('../lib/print.js')
 
 const lab = (exports.lab = Lab.script())
 const describe = lab.describe
