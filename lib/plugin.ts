@@ -595,53 +595,64 @@ function make_tasks(): any {
         callpoint: spec.ctx.callpoint,
       })
 
-      let meta = intern.define_plugin(
+
+      let meta
+
+      meta = intern.define_plugin(
         delegate,
         plugin,
         seneca.util.clean(plugin_options)
       )
 
-
-      plugin.meta = meta
-
-      // legacy api for service function
-      if ('function' === typeof meta) {
-        meta = { service: meta }
+      if (meta instanceof Promise) {
+        return meta.then(finalize_meta)
       }
 
-      // Plugin may have changed its own name dynamically
+      return finalize_meta(meta)
 
-      plugin.name = meta.name || plugin.name
-      plugin.tag =
-        meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
 
-      plugin.fullname = Common.make_plugin_key(plugin)
-      plugin.service = meta.service || plugin.service
+      function finalize_meta(meta: any) {
+        plugin.meta = meta
 
-      delegate.__update_plugin__(plugin)
+        // legacy api for service function
+        if ('function' === typeof meta) {
+          meta = { service: meta }
+        }
 
-      seneca.private$.plugins[plugin.fullname] = plugin
+        // Plugin may have changed its own name dynamically
 
-      seneca.private$.plugin_order.byname.push(plugin.name)
-      seneca.private$.plugin_order.byname = Uniq(
-        seneca.private$.plugin_order.byname
-      )
-      seneca.private$.plugin_order.byref.push(plugin.fullname)
+        plugin.name = meta.name || plugin.name
+        plugin.tag =
+          meta.tag || plugin.tag || (plugin.options && plugin.options.tag$)
 
-      // 3.x Backwards compatibility - REMOVE in 4.x
-      if ('amqp-transport' === plugin.name) {
-        seneca.options({ legacy: { meta: true } })
-      }
+        plugin.fullname = Common.make_plugin_key(plugin)
+        plugin.service = meta.service || plugin.service
 
-      if ('function' === typeof plugin_options.defined$) {
-        plugin_options.defined$(plugin)
-      }
+        delegate.__update_plugin__(plugin)
 
-      // TODO: test this, with preload, explicitly
-      return {
-        op: 'merge',
-        out: {
-          meta,
+        seneca.private$.plugins[plugin.fullname] = plugin
+
+        seneca.private$.plugin_order.byname.push(plugin.name)
+        seneca.private$.plugin_order.byname = Uniq(
+          seneca.private$.plugin_order.byname
+        )
+        seneca.private$.plugin_order.byref.push(plugin.fullname)
+
+        // 3.x Backwards compatibility - REMOVE in 4.x
+        if ('amqp-transport' === plugin.name) {
+          seneca.options({ legacy: { meta: true } })
+        }
+
+        if ('function' === typeof plugin_options.defined$) {
+          plugin_options.defined$(plugin)
+        }
+
+        // TODO: test this, with preload, explicitly
+        return {
+          op: 'merge',
+          out: {
+            meta,
+          }
         }
       }
     },
@@ -838,14 +849,28 @@ function make_intern() {
         })
       }
 
-      meta = 'string' === typeof meta ? { name: meta } : meta
-      meta.options = meta.options || options
+      if (meta instanceof Promise) {
+        return meta.then(finalize_meta)
+      }
 
-      let updated_options: any = {}
-      updated_options[plugin.fullname] = meta.options
-      delegate.options(updated_options)
+      return finalize_meta(meta)
 
-      return meta
+
+      function finalize_meta(base_meta: any) {
+        const meta = 'string' === typeof base_meta
+          ? { name: base_meta }
+          : base_meta
+
+        // NOTE: WARNING: in-place mutation of the object.
+        //
+        meta.options = meta.options || options
+
+        let updated_options: any = {}
+        updated_options[plugin.fullname] = meta.options
+        delegate.options(updated_options)
+
+        return meta
+      }
     },
 
 

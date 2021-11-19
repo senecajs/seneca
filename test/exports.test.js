@@ -33,6 +33,27 @@ describe('exports', function () {
     })
   })
 
+  it('happy async', async () => {
+    var s0 = Seneca().test()
+
+    var p0 = async function p0(options) {
+      return {
+        exports: {
+          x: options.x,
+        },
+      }
+    }
+
+    s0.use(p0, { x: 1 })
+
+    return new Promise((r) => {
+      s0.ready(function () {
+        expect(s0.export('p0/x')).equals(1)
+        r()
+      })
+    })
+  })
+
   it('with-init', async () => {
     var s0 = Seneca().test()
 
@@ -65,10 +86,77 @@ describe('exports', function () {
     })
   })
 
+  it('with-init async', async () => {
+    var s0 = Seneca().test()
+
+    var p0 = async function p0(options) {
+      var exp = {
+        x: { y: options.y },
+      }
+
+      // TODO: auto init reply feature to handle case where init is sync
+      // and reply forgotten?
+      this.init(function (reply) {
+        exp.x.z = 1
+        reply()
+      })
+
+      return {
+        exports: exp,
+      }
+    }
+
+    s0.use(p0, { y: 1 })
+
+    return new Promise((r) => {
+      s0.ready(function () {
+        // NOTE: Seneca maintains original object references and does not
+        // modify or clone exports
+        expect(s0.export('p0/x')).equals({ y: 1, z: 1 })
+        r()
+      })
+    })
+  })
+
   it('with-preload', async () => {
     var s0 = Seneca().test()
 
     var p0 = function p0(options) {
+      var exp = {
+        x: { y: options.y },
+      }
+
+      return {
+        exports: exp,
+      }
+    }
+
+    p0.preload = function () {
+      return {
+        exports: {
+          z: 1,
+        },
+      }
+    }
+
+    s0.use(p0, { y: 2 })
+    expect(s0.export('p0/z')).equals(1)
+
+    return new Promise((r) => {
+      s0.ready(function () {
+        // NOTE: Seneca maintains original object references and does not
+        // modify or clone exports
+        expect(s0.export('p0/z')).equals(1)
+        expect(s0.export('p0/x')).equals({ y: 2 })
+        r()
+      })
+    })
+  })
+
+  it('with-preload async', async () => {
+    var s0 = Seneca().test()
+
+    var p0 = async function p0(options) {
       var exp = {
         x: { y: options.y },
       }
@@ -140,6 +228,46 @@ describe('exports', function () {
     })
   })
 
+  it('with-preload-and-init async', async () => {
+    var s0 = Seneca().test()
+
+    var p0 = async function p0(options) {
+      var exp = {
+        x: { y: options.y },
+      }
+
+      this.init(function (reply) {
+        exp.x.q = 1
+        reply()
+      })
+
+      return {
+        exports: exp,
+      }
+    }
+
+    p0.preload = function () {
+      return {
+        exports: {
+          z: 1,
+        },
+      }
+    }
+
+    s0.use(p0, { y: 2 })
+    expect(s0.export('p0/z')).equals(1)
+
+    return new Promise((r) => {
+      s0.ready(function () {
+        // NOTE: Seneca maintains original object references and does not
+        // modify or clone exports
+        expect(s0.export('p0/z')).equals(1)
+        expect(s0.export('p0/x')).equals({ y: 2, q: 1 })
+        r()
+      })
+    })
+  })
+
   it('with-tags', async () => {
     var s0 = Seneca({ legacy: false }).use('promisify').test()
 
@@ -166,6 +294,49 @@ describe('exports', function () {
     var s1 = Seneca({ legacy: false }).use('promisify').test()
 
     var p1 = function p1(options) {
+      return {
+        exports: {
+          x: options.x,
+        },
+      }
+    }
+
+    s1.use({ init: p1, tag: 'a', options: { x: 11 } })
+    s1.use({ init: p1, tag: 'b', options: { x: 22 } })
+    s1.use({ init: p1, tag: 'c', options: { x: 33 } })
+    await s1.ready()
+    expect(s1.export('p1/x')).equals(33)
+    expect(s1.export('p1$a/x')).equals(11)
+    expect(s1.export('p1$b/x')).equals(22)
+    expect(s1.export('p1$c/x')).equals(33)
+  })
+
+  it('with-tags async', async () => {
+    var s0 = Seneca({ legacy: false }).use('promisify').test()
+
+    var p0 = async function p0(options) {
+      return {
+        exports: {
+          x: options.x,
+        },
+      }
+    }
+
+    s0.use({ init: p0, tag: 'a', options: { x: 1 } })
+    await s0.ready()
+    expect(s0.export('p0/x')).equals(1)
+    expect(s0.export('p0$a/x')).equals(1)
+
+    // NOTE/plugin/774a
+    s0.use({ init: p0, tag: 'b', options: { x: 2 } })
+    await s0.ready()
+    expect(s0.export('p0/x')).equals(2)
+    expect(s0.export('p0$a/x')).equals(1)
+    expect(s0.export('p0$b/x')).equals(2)
+
+    var s1 = Seneca({ legacy: false }).use('promisify').test()
+
+    var p1 = async function p1(options) {
       return {
         exports: {
           x: options.x,
