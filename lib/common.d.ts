@@ -1,3 +1,4 @@
+declare const error: any;
 declare function promiser(context: any, callback: any): Promise<unknown>;
 declare function stringify(): any;
 declare function wrap_error(err: any): void;
@@ -5,7 +6,7 @@ declare function make_plugin_key(plugin: any, origtag: any): string;
 declare function boolify(v: any): boolean;
 declare const tagnid: any;
 declare function parse_jsonic(str: any, code: any): any;
-declare function parse_pattern(instance: any, rawargs: any, normaspec: any, fixed: any): any;
+declare function parse_pattern(instance: any, rawargs: any, normaspec: any, fixed?: any): any;
 declare const parsePattern: typeof parse_pattern;
 declare function build_message(instance: any, rawargs: any, normaspec: any, fixed: any): any;
 declare function pattern(patobj: any): any;
@@ -20,6 +21,8 @@ declare function make_standard_act_log_entry(actdef: any, msg: any, meta: any, o
 declare function make_standard_err_log_entry(err: any, ctxt: any): any;
 declare function resolve_option(value: any, options: any): any;
 declare function autoincr(): () => number;
+declare function isError(x: any): any;
+declare function inspect(x: any): any;
 declare function make_callpoint(active: any): (override: any) => any;
 declare function make_trace_desc(meta: any): any[];
 declare const TRACE_PATTERN = 0;
@@ -49,4 +52,4 @@ declare class ActHistory {
     close(this: any): void;
     toString(this: any): any;
 }
-export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, isError, inspect, error, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };

@@ -269,6 +269,9 @@ const option_defaults = {
 
     // Insert "[TIMEOUT]" into timeout error message
     timeout_string: true,
+
+    // If false, use Gubu for message validation.
+    rules: false,
   },
 
   // Processing task ordering.

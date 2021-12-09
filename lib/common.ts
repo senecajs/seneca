@@ -133,7 +133,7 @@ function parse_pattern(
   instance: any,
   rawargs: any,
   normaspec: any,
-  fixed: any
+  fixed?: any
 ) {
   let args = Norma(
     '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
@@ -538,6 +538,16 @@ function autoincr() {
 }
 
 
+function isError(x: any) {
+  return Util.isError(x)
+}
+
+
+function inspect(x: any) {
+  return Util.inspect(x)
+}
+
+
 // Callpoint resolver. Indicates location in calling code.
 function make_callpoint(active: any) {
   return function callpoint(override: any) {
@@ -716,6 +726,9 @@ export {
   print,
   parsePattern,
   tagnid,
+  isError,
+  inspect,
+  error,
   TRACE_PATTERN,
   TRACE_ID,
   TRACE_INSTANCE,

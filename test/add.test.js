@@ -63,4 +63,52 @@ describe('add', function () {
       fin()
     })
   })
+
+
+  it('rules-basic', function (fin) {
+    const si = Seneca({log:'silent',legacy:false})
+    si.add({a:1,b:Number},function(m,r) {
+      r({b:m.b*2})
+    })
+    si.act({a:1,b:2},function(e,o) {
+      expect(e).not.exist()
+      expect(o).equal({b:4})
+
+      this.act({a:1,b:'x'},function(e,o) {
+        expect(e).exist()
+        expect(o).not.exist()
+        // console.log(e)
+        expect(e.code).equal('act_invalid_msg')
+        expect(e.message).equal('seneca: Action a:1 received an invalid message; Validation failed for path "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.')
+        fin()
+      })
+    })
+  })
+
+
+  it('rules-deep', function (fin) {
+    const si = Seneca({log:'silent',legacy:false})
+    si
+      .add({a:1,b:{c:2}},function(m,r) {
+        r({r:m.b.c*2})
+      })
+      .add({a:2,d:{f:Boolean}},function(m,r) {
+        r({r:m.b.c*2})
+      })
+    
+    si.act({a:1},function(e,o) {
+      expect(e).not.exist()
+      expect(o).equal({r:4})
+
+      this.act({a:2},function(e,o) {
+        expect(e).exist()
+        expect(o).not.exist()
+        // console.log(e)
+        expect(e.code).equal('act_invalid_msg')
+        expect(e.message).equal('seneca: Action a:2 received an invalid message; Validation failed for path "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.')
+        fin()
+      })
+    })
+  })
+
 })

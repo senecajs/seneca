@@ -737,7 +737,7 @@ describe('seneca', function () {
       done()
     }
 
-    var si = Seneca().test(done) //(testopts).error(done)
+    var si = Seneca({legacy:{rules:true}}).test(done) //(testopts).error(done)
 
     si.add('i:0,a:1,b:2', addFunction)
 
