@@ -265,7 +265,7 @@ const task = {
     if (!opts.legacy.rules && 0 < prN) {
       actdef.gubu = gubu(pattern_rules)
 
-      // console.log('GUBU', actdef.gubu.spec())
+      // console.log('GUBU', pattern_rules, actdef.gubu.spec())
     }
 
     return {

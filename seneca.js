@@ -15,8 +15,12 @@ const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
+const { gubu } = require('gubu')
+
 const Eraro = require('eraro')
 const Optioner = require('optioner')
+
+// TODO: deprecate
 const Joi = require('@hapi/joi')
 
 
@@ -329,6 +333,9 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
+  // Expose Gubu schema builders (Required, etc.).
+  gubu,
+  
   // Legacy (make internal or rename)
   Optioner: Optioner,
   Joi: Joi,
