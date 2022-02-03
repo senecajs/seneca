@@ -3,7 +3,7 @@
 
 import { TaskSpec } from 'ordu'
 
-import { gubu } from 'gubu'
+import { Gubu } from 'gubu'
 
 
 import {
@@ -263,10 +263,12 @@ const task = {
     actdef.rules = pattern_rules
 
     if (!opts.legacy.rules && 0 < prN) {
-      actdef.gubu = gubu(pattern_rules)
-
-      // console.log('GUBU', pattern_rules, actdef.gubu.spec())
+      actdef.gubu = Gubu(pattern_rules)
     }
+
+    // if (actdef.pattern === 'a:1') {
+    //   console.log(actdef)
+    // }
 
     return {
       // TODO: simple op:set would be faster

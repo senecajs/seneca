@@ -15,7 +15,7 @@ const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
-const { gubu } = require('gubu')
+const { Gubu } = require('gubu')
 
 const Eraro = require('eraro')
 const Optioner = require('optioner')
@@ -335,7 +335,7 @@ const seneca_util = {
 
   // TODO: expose directly for better DX - no need to namespace under gubu
   // Expose Gubu schema builders (Required, etc.).
-  gubu,
+  Gubu,
   
   // Legacy (make internal or rename)
   Optioner: Optioner,
