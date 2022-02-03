@@ -333,6 +333,7 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
+  // TODO: expose directly for better DX - no need to namespace under gubu
   // Expose Gubu schema builders (Required, etc.).
   gubu,
   

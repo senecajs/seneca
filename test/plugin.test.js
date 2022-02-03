@@ -728,6 +728,7 @@ describe('plugin', function () {
       })
   })
 
+  
   it('serial-load-sequence', function (fin) {
     var log = []
 
@@ -752,6 +753,51 @@ describe('plugin', function () {
       })
   })
 
+
+  it('define-load-sequence', function (fin) {
+    var log = []
+
+    Seneca.test(fin, 'silent')
+      .add('a:1', function(msg, reply) {
+        log.push('B')
+        reply({x:msg.x})
+      })
+      .use(function foo() {
+        log.push('A')
+        this.add('foo:1', function(msg, reply) {
+          log.push('G')
+          reply({y:msg.y})
+        })
+        this.act('a:1,x:2', function(err, out) {
+          log.push('C')
+          expect(err).not.exist()
+          expect(out.x).equals(2)
+        })
+        this.add('init:foo', function (msg, reply) {
+          log.push('D')
+          reply()
+        })
+      })
+      .use(function bar() {
+        log.push('E')
+        this.add('init:bar', function (msg, reply) {
+          log.push('F')
+          this.act('foo:1,y:3',function(err, out) {
+            log.push('H')
+            expect(err).not.exist()
+            expect(out.y).equals(3)
+            reply()
+          })
+        })
+      })
+      .ready(function () {
+        expect(log.join('')).to.equal('ABCDEFGH')
+        fin()
+      })
+  })
+
+
+  
   it('plugin options can be modified by plugins during load sequence', function (fin) {
     var seneca = Seneca({
       log: 'test',
