@@ -762,6 +762,11 @@ describe('plugin', function () {
         log.push('B')
         reply({x:msg.x})
       })
+      .act('a:1,x:4', function(err, out) {
+        log.push('I')
+        expect(err).not.exist()
+        expect(out.x).equals(4)
+      })
       .use(function foo() {
         log.push('A')
         this.add('foo:1', function(msg, reply) {
