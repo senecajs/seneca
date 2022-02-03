@@ -759,34 +759,34 @@ describe('plugin', function () {
 
     Seneca.test(fin, 'silent')
       .add('a:1', function(msg, reply) {
-        log.push('B')
+        log.push('A')
         reply({x:msg.x})
       })
       .act('a:1,x:4', function(err, out) {
-        log.push('I')
+        log.push('B')
         expect(err).not.exist()
         expect(out.x).equals(4)
       })
       .use(function foo() {
-        log.push('A')
+        log.push('C')
         this.add('foo:1', function(msg, reply) {
-          log.push('G')
+          log.push('I')
           reply({y:msg.y})
         })
         this.act('a:1,x:2', function(err, out) {
-          log.push('C')
+          log.push('D')
           expect(err).not.exist()
           expect(out.x).equals(2)
         })
         this.add('init:foo', function (msg, reply) {
-          log.push('D')
+          log.push('E')
           reply()
         })
       })
       .use(function bar() {
-        log.push('E')
+        log.push('F')
         this.add('init:bar', function (msg, reply) {
-          log.push('F')
+          log.push('G')
           this.act('foo:1,y:3',function(err, out) {
             log.push('H')
             expect(err).not.exist()
@@ -795,8 +795,14 @@ describe('plugin', function () {
           })
         })
       })
+      .act('a:1,x:5', function(err, out) {
+        log.push('J')
+        expect(err).not.exist()
+        expect(out.x).equals(5)
+      })
       .ready(function () {
-        expect(log.join('')).to.equal('ABCDEFGH')
+        log.push('K')
+        expect(log.join('')).to.equal('AB CADE FGIH AJ K'.replace(/ /g,''))
         fin()
       })
   })
