@@ -531,7 +531,8 @@ function make_tasks(): any {
         base.errors = errors
       }
 
-      let outopts = Object.assign(
+      // TODO: these should deep merge
+      let fullopts = Object.assign(
         base,
         shortname_options,
         fullname_options,
@@ -539,15 +540,24 @@ function make_tasks(): any {
       )
 
       let resolved_options: any = {}
+      let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
+
       let err: Error | undefined = void 0
       let joi_schema: any = null
+      let Joi = delegate.util.Joi
 
-      if (so.legacy.options) {
-        let Joi = delegate.util.Joi
+      let defaults_values =
+        ('function' === typeof (defaults) && !defaults.gubu) ?
+          defaults({ valid, Joi }) : defaults
 
-        let defaults_values = 'function' === typeof (defaults) ?
-          defaults({ Joi }) : defaults
-
+      if (!so.legacy.options) {
+        let optionShape =
+          // TODO: use Gubu.isShape
+          (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :
+            delegate.valid(defaults_values)
+        resolved_options = optionShape(fullopts)
+      }
+      else {
         let joi_schema: any = intern.prepare_spec(
           Joi,
           defaults_values,
@@ -555,14 +565,13 @@ function make_tasks(): any {
           {}
         )
 
-        let joi_out = joi_schema.validate(outopts)
-
+        let joi_out = joi_schema.validate(fullopts)
 
         if (joi_out.error) {
           err = delegate.error('invalid_plugin_option', {
             name: fullname,
             err_msg: joi_out.error.message,
-            options: outopts,
+            options: fullopts,
           })
         }
         else {

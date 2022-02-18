@@ -465,7 +465,10 @@ module.exports.quiet = function top_quiet() {
 }
 
 module.exports.util = seneca_util
+module.exports.valid = Gubu
+
 module.exports.test$ = { intern: intern }
+
 
 // Create a new Seneca instance.
 function make_seneca(initial_opts) {

@@ -1161,7 +1161,7 @@ describe('plugin', function () {
   })
 
   it('plugin-defaults-top-level-joi', function (fin) {
-    var s0 = Seneca({ legacy: false }).test(fin)
+    var s0 = Seneca({ xlegacy: false }).test(fin)
     var Joi = s0.util.Joi
 
     // no Joi
@@ -1243,7 +1243,7 @@ describe('plugin', function () {
   })
 
   it('plugin-defaults-function', function (fin) {
-    var s0 = Seneca({ legacy: false }).test(fin)
+    var s0 = Seneca({ xlegacy: false }).test(fin)
 
     s0.use(
       {
@@ -1265,4 +1265,52 @@ describe('plugin', function () {
       fin()
     })
   })
+
+
+  it('plugin-defaults-valid-plain', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+
+    s0.use(
+      {
+        defaults: {
+          x: Number,
+          y: 'Y',
+        },
+        define: function p0(options) {
+          expect(options).equal({ x: 1, y: 'Y' })
+        },
+      },
+      { x: 1 }
+    )
+
+    s0.ready(function () {
+      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      fin()
+    })    
+  })
+
+  
+  it('plugin-defaults-valid-prepared', function (fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+
+    s0.use(
+      {
+        defaults: Seneca.valid({
+          x: Number,
+          y: 'Y',
+        }),
+        define: function p0(options) {
+          expect(options).equal({ x: 1, y: 'Y' })
+        },
+      },
+      { x: 1 }
+    )
+
+    s0.ready(function () {
+      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      fin()
+    })
+    
+  })
+
 })
