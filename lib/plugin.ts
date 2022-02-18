@@ -539,30 +539,35 @@ function make_tasks(): any {
       )
 
       let resolved_options: any = {}
-      let Joi = delegate.util.Joi
-
-      let defaults_values = 'function' === typeof (defaults) ?
-        defaults({ Joi }) : defaults
-
-      let joi_schema: any = intern.prepare_spec(
-        Joi,
-        defaults_values,
-        { allow_unknown: true },
-        {}
-      )
-
-      let joi_out = joi_schema.validate(outopts)
       let err: Error | undefined = void 0
+      let joi_schema: any = null
 
-      if (joi_out.error) {
-        err = delegate.error('invalid_plugin_option', {
-          name: fullname,
-          err_msg: joi_out.error.message,
-          options: outopts,
-        })
-      }
-      else {
-        resolved_options = joi_out.value
+      if (so.legacy.options) {
+        let Joi = delegate.util.Joi
+
+        let defaults_values = 'function' === typeof (defaults) ?
+          defaults({ Joi }) : defaults
+
+        let joi_schema: any = intern.prepare_spec(
+          Joi,
+          defaults_values,
+          { allow_unknown: true },
+          {}
+        )
+
+        let joi_out = joi_schema.validate(outopts)
+
+
+        if (joi_out.error) {
+          err = delegate.error('invalid_plugin_option', {
+            name: fullname,
+            err_msg: joi_out.error.message,
+            options: outopts,
+          })
+        }
+        else {
+          resolved_options = joi_out.value
+        }
       }
 
       return {

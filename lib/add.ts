@@ -266,10 +266,6 @@ const task = {
       actdef.gubu = Gubu(pattern_rules)
     }
 
-    // if (actdef.pattern === 'a:1') {
-    //   console.log(actdef)
-    // }
-
     return {
       // TODO: simple op:set would be faster
       op: 'merge',

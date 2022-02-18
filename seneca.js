@@ -16,11 +16,11 @@ const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
 const { Gubu } = require('gubu')
-
 const Eraro = require('eraro')
-const Optioner = require('optioner')
 
-// TODO: deprecate
+
+// Deprecated Legacy modules. 
+const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
 
 
@@ -276,6 +276,9 @@ const option_defaults = {
 
     // If false, use Gubu for message validation.
     rules: false,
+    
+    // If false, use Gubu for option validation (including plugin defaults)
+    options: true,
   },
 
   // Processing task ordering.
@@ -337,7 +340,8 @@ const seneca_util = {
   // Expose Gubu schema builders (Required, etc.).
   Gubu,
   
-  // Legacy (make internal or rename)
+
+  // Deprecated Legacy (make internal or rename)
   Optioner: Optioner,
   Joi: Joi,
   deepextend: Common.deep,
@@ -583,7 +587,8 @@ function make_seneca(initial_opts) {
   root$.add = Add.api_add // Add a pattern an associated action.
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
-
+  root$.valid = Gubu // Expose Gubu shape builders
+  
   root$.internal = function () {
     return {
       ordu: {
