@@ -15,7 +15,7 @@ const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
-const { Gubu } = require('gubu')
+const { Gubu, Any, G$ } = require('gubu')
 const Eraro = require('eraro')
 
 
@@ -51,7 +51,7 @@ const { error, deep } = Common
 // Seneca options.
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
-  tag: '-',
+  tag: '-', // TODO: FIX: Gubu api.test.js#292
 
   // Standard timeout for actions.
   timeout: 22222,
@@ -73,10 +73,10 @@ const option_defaults = {
   quiet: false,
 
   // Default logging specification - see lib/logging.js
-  log: Logging().default_logspec,
+  log: Any(Logging().default_logspec),
 
   // Custom logger function, optional - see lib/logging.js
-  logger: null,
+  logger: Any(), // TODO: FIX: Gubu: null,
 
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
@@ -124,10 +124,10 @@ const option_defaults = {
     deprecation: true,
 
     // Set to array to force artificial argv and ignore process.argv
-    argv: null,
+    argv: Any(), // TODO Gubu FIX: null,
 
     // Set to object to force artificial env and ignore process.env
-    env: null,
+    env: Any(), // TODO Gubu FIX: null,
 
     // Length of data description in logs
     datalen: 111,
@@ -169,12 +169,15 @@ const option_defaults = {
 
   // Action executor tracing. See gate-executor module.
   trace: {
-    act: false,
+    act: Any(), // TODO: Gubu Fix: false,
+
     stack: false,
 
     // Messages that do not match a known pattern
-    unknown: true,
-
+    // TODO: Gubu fix
+    // unknown: One(String, true),
+    unknown: Any(),
+    
     // Messages that have invalid content
     invalid: false,
   },
@@ -190,11 +193,14 @@ const option_defaults = {
   plugin: {},
 
   // Plugins to load (will be passed to .use)
-  plugins: [],
+  plugins: Any(), // [],
 
   // System wide functionality.
   system: {
-    exit: process.exit,
+
+    // TODO: use Func shape
+    // Function to exit the process.
+    exit: G$({v:process.exit}),
 
     // Close instance on these signals, if true.
     close_signals: {
@@ -214,10 +220,11 @@ const option_defaults = {
     // Console printing utilities
     print: {
       // Print to standard out
-      log: null,
-
+      // TODO: Gubu fix: log: null,
+      log: Any(),
+      
       // Print to standard err
-      err: null,
+      err: Any(),
     },
   },
 

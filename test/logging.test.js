@@ -156,7 +156,7 @@ describe('logging', function () {
   })
 
   // DEPRECATED
-  it('basic', function (fin) {
+  it('logging-basic', function (fin) {
     var capture = make_log_capture()
 
     Seneca({ log: { basic: 'all' }, internal: { logger: capture } })
@@ -481,6 +481,7 @@ describe('logging', function () {
     reply()
   }
 
+
   it('test-mode-basic', function (fin) {
     var capture = make_log_capture()
 
@@ -495,9 +496,12 @@ describe('logging', function () {
       .ready(function () {
         // only warn should appear
         expect(capture.log.map((x) => x.data[0])).equal(['a1'])
+
+        // console.log('QQQ', capture)
         fin()
       })
   })
+
 
   it('test-mode-option', function (fin) {
     var capture = make_log_capture()
@@ -517,6 +521,7 @@ describe('logging', function () {
       })
   })
 
+
   it('test-mode-argv', function (fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.test'] } })
@@ -527,6 +532,7 @@ describe('logging', function () {
         fin()
       })
   })
+
 
   it('test-mode-argv-opts', function (fin) {
     var capture = make_log_capture()
@@ -542,9 +548,10 @@ describe('logging', function () {
       })
   })
 
+
   it('test-mode-env', function (fin) {
     var capture = make_log_capture()
-    Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'test' } } })
+    Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'true' } } })
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
@@ -553,6 +560,7 @@ describe('logging', function () {
       })
   })
 
+  
   it('quiet-mode-basic', function (fin) {
     var capture = make_log_capture()
 
@@ -738,7 +746,7 @@ describe('logging', function () {
 
     // Note: capture logger is marked from_options$ so overrides test_logger
     Seneca({ logger: capture, debug: { env: { SENECA_QUIET: 'true' } } })
-      .test()
+      // .test()
       .add('a:1', a1x)
       .act('a:1,x:1')
       .ready(function () {

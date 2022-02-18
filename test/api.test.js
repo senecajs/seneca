@@ -289,7 +289,8 @@ describe('api', function () {
   })
 
   it('test-mode', function (fin) {
-    var si0 = Seneca({ id$: 'foo', tag: null, log: 'silent' })
+    // var si0 = Seneca({ id$: 'foo', tag: null, log: 'silent' })
+    var si0 = Seneca({ id$: 'foo', log: 'silent' })
     si0.error(console.log)
     si0.test()
     expect(si0.id).equals('foo')
