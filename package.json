@@ -94,7 +94,7 @@
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
     "lodash.uniq": "^4.5.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "nid": "^1.3.3",
     "norma": "^2.0.2",
     "optioner": "^5.0.1",
