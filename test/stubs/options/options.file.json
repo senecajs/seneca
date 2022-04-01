@@ -1,4 +1,7 @@
-c:3,
-foo:{
-  cc:3
+
+internal:{
+  c:3,
+  foo:{
+    cc:3
+  }
 }

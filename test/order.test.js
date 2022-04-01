@@ -13,15 +13,7 @@ var Seneca = require('..')
 
 describe('order', function () {
   it('happy', async () => {
-    var s0 = Seneca({ xdebug: { undead: true } }).test()
-
-    /*
-    s0.order.plugin.addListener('xtask-end', function(ev) {
-      console.log(
-        ev.result.log.task.name
-      )
-    })
-    */
+    var s0 = Seneca({ legacy: false }).test()
 
     s0.order.plugin.add({
       name: 'before-options',
@@ -89,10 +81,14 @@ describe('order', function () {
 
     p0.defaults = {
       a: 1,
+      b: 1,
+      c: 1,
+      d: 1,
     }
-
+    
     s0.use(p0, { b: 2 })
 
+    
     return new Promise((r, j) => {
       s0.error(j)
       s0.ready(function () {
@@ -130,6 +126,14 @@ describe('order', function () {
 
         // console.log('TASKLIST',s0.order.plugin.tasks().map(t=>t.name).join('\n'))
 
+        let joidef = Joi.object({
+          e: Joi.string().default('v0'),
+          c: Joi.number(),
+          f: Joi.number(),
+        }).default()
+
+        // console.log(Joi.isSchema(joidef,{legacy:true}))
+        
         s0.use({
           name: 'p2',
           define: function (options) {
@@ -140,11 +144,7 @@ describe('order', function () {
             }
           },
 
-          defaults: Joi.object({
-            e: Joi.string().default('v0'),
-            c: Joi.number(),
-            f: Joi.number(),
-          }).default(),
+          defaults: joidef,
         })
 
         s0.ready(function () {

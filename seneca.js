@@ -1,4 +1,4 @@
-/* Copyright © 2010-2020 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 
@@ -15,7 +15,7 @@ const Nid = require('nid')
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
-const { Gubu, Any, G$ } = require('gubu')
+const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
 
@@ -60,6 +60,9 @@ const option_defaults = {
   idlen: 12,
   didlen: 4,
 
+  // Manually set instance identifier.
+  id$: Skip(String),
+  
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
   default_plugins: {
@@ -76,14 +79,26 @@ const option_defaults = {
   log: Any(Logging().default_logspec),
 
   // Custom logger function, optional - see lib/logging.js
-  logger: Any(), // TODO: FIX: Gubu: null,
+  logger: One(Function, Object, String, null),
 
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
+  // LEGACY: remove in 4.x
+  deathdelay: 11111,
+
   // Wait time for actions to complete before shutdown.
   close_delay: 22222,
 
+  // Legacy; specify general error handler
+  errhandler: Skip(One(Function,null)),
+
+  // Load options from a file path
+  from: Skip(String),
+
+  // Provide a module to base option require loading from
+  module: Skip(),
+  
   // Debug settings.
   debug: {
     // Throw (some) errors from seneca.act.
@@ -124,10 +139,10 @@ const option_defaults = {
     deprecation: true,
 
     // Set to array to force artificial argv and ignore process.argv
-    argv: Any(), // TODO Gubu FIX: null,
+    argv: One([], null),
 
     // Set to object to force artificial env and ignore process.env
-    env: Any(), // TODO Gubu FIX: null,
+    env: One({}, null),
 
     // Length of data description in logs
     datalen: 111,
@@ -169,14 +184,12 @@ const option_defaults = {
 
   // Action executor tracing. See gate-executor module.
   trace: {
-    act: Any(), // TODO: Gubu Fix: false,
+    act: One(Function, false),
 
     stack: false,
 
     // Messages that do not match a known pattern
-    // TODO: Gubu fix
-    // unknown: One(String, true),
-    unknown: Any(),
+    unknown: One(String, true),
     
     // Messages that have invalid content
     invalid: false,
@@ -193,14 +206,14 @@ const option_defaults = {
   plugin: {},
 
   // Plugins to load (will be passed to .use)
-  plugins: Any(), // [],
+  plugins: One({}, null),
 
   // System wide functionality.
   system: {
 
     // TODO: use Func shape
     // Function to exit the process.
-    exit: G$({v:process.exit}),
+    exit: ()=>process.exit,
 
     // Close instance on these signals, if true.
     close_signals: {
@@ -216,17 +229,16 @@ const option_defaults = {
   },
 
   // Internal functionality. Reserved for objects and functions only.
-  internal: {
+  internal: Open({
     // Console printing utilities
     print: {
       // Print to standard out
-      // TODO: Gubu fix: log: null,
-      log: Any(),
+      log: One(Function, null),
       
       // Print to standard err
-      err: Any(),
+      err: One(Function, null),
     },
-  },
+  }),
 
   // Log status at periodic intervals.
   status: {
@@ -237,10 +249,15 @@ const option_defaults = {
   },
 
   // Shared default transport configuration
-  transport: {
+  transport: Open({
+    
     // Standard port for messages.
     port: 10101,
-  },
+
+    host: Skip(String),
+    path: Skip(String),
+    protocol: Skip(String),
+  }),
 
   limits: {
     maxparents: 33,
@@ -250,7 +267,7 @@ const option_defaults = {
   events: {},
 
   // Backwards compatibility settings.
-  legacy: {
+  legacy: One(Boolean,{
     // Add legacy properties
     actdef: false,
 
@@ -286,7 +303,7 @@ const option_defaults = {
     
     // If false, use Gubu for option validation (including plugin defaults)
     options: true,
-  },
+  }),
 
   // Processing task ordering.
   order: {
@@ -326,7 +343,11 @@ const option_defaults = {
 
     // Call prior actions directly (not as further messages).
     direct: false
-  }
+  },
+
+
+  // Legacy
+  reload$: Skip(Boolean),
 }
 
 // Utility functions exposed by Seneca via `seneca.util`.

@@ -3,7 +3,7 @@
 
 import { TaskSpec } from 'ordu'
 
-import { Gubu } from 'gubu'
+import { Gubu, Open } from 'gubu'
 
 
 import {
@@ -48,7 +48,6 @@ function api_add(this: any) {
 const task = {
   prepare(spec: TaskSpec) {
     const args = spec.ctx.args
-
     let raw_pattern = args.pattern
     let pattern = clean(raw_pattern)
 
@@ -263,7 +262,8 @@ const task = {
     actdef.rules = pattern_rules
 
     if (!opts.legacy.rules && 0 < prN) {
-      actdef.gubu = Gubu(pattern_rules)
+      // TODO: how to make Closed if specified by user ?
+      actdef.gubu = Gubu(Open(pattern_rules))
     }
 
     return {

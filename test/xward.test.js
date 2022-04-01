@@ -4,19 +4,19 @@
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
-var Seneca = require('..')
+const Seneca = require('..')
 
 describe('xward', function () {
   it('happy-inward', function (fin) {
     Seneca()
-      .error(fin)
+      .test(fin)
       .inward(function (spec) {
         spec.data.msg.y = 3
       })
@@ -32,7 +32,7 @@ describe('xward', function () {
 
   it('happy-outward', function (fin) {
     Seneca()
-      .error(fin)
+      .test(fin)
       .outward(function (spec) {
         if (spec.data.res) {
           spec.data.res.z = 4

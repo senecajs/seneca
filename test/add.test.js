@@ -66,7 +66,7 @@ describe('add', function () {
 
 
   it('rules-basic', function (fin) {
-    const si = Seneca({log:'silent'}).test()
+    const si = Seneca({log:'silent',legacy:false})
     
     si
       .add({a:1,b:Number},function(m,r) {
@@ -85,7 +85,7 @@ describe('add', function () {
         expect(o).not.exist()
         // console.log(e)
         expect(e.code).equal('act_invalid_msg')
-        expect(e.message).equal('seneca: Action a:1 received an invalid message; Validation failed for path "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.')
+        expect(e.message).equal('seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.')
 
         si.act({a:2,b:3},function(e,o) {
           expect(e).not.exist()
@@ -94,10 +94,8 @@ describe('add', function () {
           this.act({a:2,b:'x'},function(e,o) {
             expect(e).exist()
             expect(o).not.exist()
-            // console.log(e)
             expect(e.code).equal('act_invalid_msg')
-            // TODO: Fix Gubu - adds b:undefined to message
-            // expect(e.message).equal('seneca: Action a:2 received an invalid message; Validation failed for path "b" with value "x" because the value is not of type number.; message content was: { a: 2, b: \'x\' }.')
+            expect(e.message).equal('seneca: Action a:2 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 2, b: \'x\' }.')
 
             fin()
           })
@@ -108,8 +106,8 @@ describe('add', function () {
 
 
   it('rules-builders', function (fin) {
-    const si = Seneca({log:'silent'}).test()
-    const { Required } = si.util.Gubu
+    const si = Seneca({log:'silent'})//.test()
+    const { Required } = si.valid
     
     si
       .add({a:1,b:Required({x:Number})},function(m,r) {
@@ -123,10 +121,8 @@ describe('add', function () {
       this.act({a:1},function(e,o) {
         expect(e).exist()
         expect(o).not.exist()
-        // console.log(e)
         expect(e.code).equal('act_invalid_msg')
-        // TODO: Fix Gubu - adds b:undefined to message
-        // expect(e.message).equal('seneca: Action a:1 received an invalid message; Validation failed for path "b" with value "" because the value is required.; message content was: { a: 1 }.')
+        expect(e.message).equal('seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "" because the value is required.; message content was: { a: 1 }.')
         fin()
       })
     })
@@ -135,7 +131,7 @@ describe('add', function () {
   
 
   it('rules-deep', function (fin) {
-    const si = Seneca({log:'silent',legacy:false}).test()
+    const si = Seneca({log:'silent',legacy:false})//.test()
     si
       .add({a:1,b:{c:2}},function(m,r) {
         r({r:m.b.c*2})
@@ -151,10 +147,8 @@ describe('add', function () {
       this.act({a:2},function(e,o) {
         expect(e).exist()
         expect(o).not.exist()
-        // console.log(e)
         expect(e.code).equal('act_invalid_msg')
-        // TODO: Fix Gubu - adds b:undefined to message
-        // expect(e.message).equal('seneca: Action a:2 received an invalid message; Validation failed for path "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.')
+        expect(e.message).equal('seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.')
         fin()
       })
     })

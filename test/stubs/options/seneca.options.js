@@ -1,6 +1,9 @@
 'use strict'
 
 module.exports = {
-  a: 1,
-  foo: { aa: 1 }
+  internal:
+  { 
+    a: 1,
+    foo: { aa: 1 }
+  }
 }

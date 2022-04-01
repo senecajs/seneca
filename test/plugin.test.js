@@ -938,7 +938,7 @@ describe('plugin', function () {
   })
 
   it('plugin-extend-action-modifier', function (fin) {
-    var si = Seneca({ legacy: false, xlog: 'silent' })
+    var si = Seneca({ legacy: false, log: 'silent' })
       .test()
       .use(function foo() {
         return {
@@ -1047,12 +1047,12 @@ describe('plugin', function () {
     function bar(opts) {
       expect(opts).equal({ a: 3, b: 1, c: 1, d: 1 })
     }
-    bar.defaults = { a: 1, b: 1 }
+    bar.defaults = { a: 1, b: 1, c: 1, d: 1 }
 
     si.use(
       {
         name: 'foo',
-        defaults: { a: 1, b: 1 },
+        defaults: { a: 1, b: 1, c: 1, d: 1 },
         init: function (opts) {
           expect(opts).equal({ a: 2, b: 2, c: 3, d: 1 })
         },
@@ -1161,7 +1161,7 @@ describe('plugin', function () {
   })
 
   it('plugin-defaults-top-level-joi', function (fin) {
-    var s0 = Seneca({ xlegacy: false }).test(fin)
+    var s0 = Seneca().test(fin)
     var Joi = s0.util.Joi
 
     // no Joi
@@ -1243,7 +1243,7 @@ describe('plugin', function () {
   })
 
   it('plugin-defaults-function', function (fin) {
-    var s0 = Seneca({ xlegacy: false }).test(fin)
+    var s0 = Seneca().test(fin)
 
     s0.use(
       {

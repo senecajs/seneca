@@ -550,7 +550,7 @@ function make_tasks(): any {
         ('function' === typeof (defaults) && !defaults.gubu) ?
           defaults({ valid, Joi }) : defaults
 
-      if (!so.legacy.options) {
+      if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
         let optionShape =
           // TODO: use Gubu.isShape
           (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :

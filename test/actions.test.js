@@ -1,19 +1,20 @@
 /* Copyright (c) 2017-2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var Util = require('util')
+const Util = require('util')
 
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
-var Seneca = require('..')
+const Seneca = require('..')
+
 
 describe('actions', function () {
   var si = Seneca({ log: 'silent' })
@@ -23,6 +24,7 @@ describe('actions', function () {
   }
 
   it('cmd_ping', function (fin) {
+
     var si = Seneca({ legacy: { transport: false } }).test(fin)
     expect(si.ping().id).equals(si.id)
 
@@ -96,14 +98,14 @@ describe('actions', function () {
   })
 
   it('get_options', function (fin) {
-    var si = Seneca({ tag: 'foo', zed: { bar: { zoo: 1 } } }).test(fin)
+    var si = Seneca({ tag: 'foo', internal: { bar: { zoo: 1 } } }).test(fin)
     si.act('role:seneca,get:options', function (err, out) {
       expect(err).not.exist()
       expect(out).exist()
       expect(out.tag).equals('foo')
       expect(si.tag).equals('foo')
 
-      this.act('role:seneca,get:options,base:zed,key:bar', function (err, out) {
+      this.act('role:seneca,get:options,base:internal,key:bar', function (err, out) {
         expect(err).not.exist()
         expect(out).exist()
         expect(out.zoo).equals(1)
