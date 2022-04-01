@@ -45,7 +45,7 @@ const Transport = require('./lib/transport')
 
 
 // Internal data and utilities.
-co nst { error, deep } = Common
+const { error, deep } = Common
 
 
 // Seneca options.
