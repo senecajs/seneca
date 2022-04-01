@@ -65,9 +65,9 @@ const option_defaults = {
   
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
-  default_plugins: {
+  default_plugins: Open({
     transport: true,
-  },
+  }),
 
   // Test mode. Use for unit testing.
   test: false,
