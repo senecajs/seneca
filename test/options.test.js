@@ -35,4 +35,11 @@ describe('options', function () {
       .act('foo:1')
       .ready()
   })
+
+  it('default_plugins', async () => {
+    await Seneca({ legacy: false, default_plugins: { foo:true } })
+      .test()
+      .ready()
+  })
+
 })
