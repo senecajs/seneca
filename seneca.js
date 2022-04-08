@@ -1,9 +1,11 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
+
 
 // External modules.
 const GateExecutor = require('gate-executor')
@@ -16,9 +18,11 @@ const { Ordu } = require('ordu')
 const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
+
 // Deprecated Legacy modules.
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
+
 
 // Internal modules.
 const Common = require('./lib/common')
@@ -36,11 +40,13 @@ const Legacy = require('./lib/legacy').default
 const Options = require('./lib/options')
 const Package = require('./package.json')
 const { Print } = require('./lib/print')
-const Actions = require('./lib/actions')
+const { addActions } = require('./lib/actions')
 const Transport = require('./lib/transport')
+
 
 // Internal data and utilities.
 const { error, deep } = Common
+
 
 // Seneca options.
 const option_defaults = {
@@ -804,7 +810,7 @@ function make_seneca(initial_opts) {
     })
   }
 
-  Actions(root$)
+  addActions(root$)
 
   // root$.act('role:seneca,cmd:pingx')
 
