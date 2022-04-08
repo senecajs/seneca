@@ -13,7 +13,7 @@ var it = Shared.make_it(lab)
 
 var Seneca = require('..')
 
-var Inward = require('../lib/inward')
+var { Inward } = require('../lib/inward')
 var API = require('../lib/api')
 
 describe('inward', function () {
@@ -27,8 +27,8 @@ describe('inward', function () {
         fin()
       })
 
-      Inward.announce({ ctx: { seneca: seneca }, data: { msg: { a: 1 } } })
-      Inward.announce({
+      Inward.inward_announce({ ctx: { seneca: seneca }, data: { msg: { a: 1 } } })
+      Inward.inward_announce({
         ctx: { seneca: seneca, actdef: {} },
         data: { msg: { a: 2 } },
       })
