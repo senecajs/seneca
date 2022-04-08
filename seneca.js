@@ -35,7 +35,7 @@ const Sub = require('./lib/sub')
 const Prior = require('./lib/prior')
 const Plugin = require('./lib/plugin')
 const { Inward } = require('./lib/inward')
-const Outward = require('./lib/outward')
+const { Outward } = require('./lib/outward')
 const Legacy = require('./lib/legacy').default
 const { resolve_options } = require('./lib/options')
 const Package = require('./package.json')
@@ -768,16 +768,16 @@ function make_seneca(initial_opts) {
     name: 'outward',
     debug: !!start_opts.debug.ordu || !!start_opts.order.outward.debug,
   })
-    .add(Outward.make_error)
-    .add(Outward.act_stats)
-    .add(Outward.act_cache)
-    .add(Outward.res_object)
-    .add(Outward.res_entity)
-    .add(Outward.msg_meta)
-    .add(Outward.trace)
-    .add(Outward.sub)
-    .add(Outward.announce)
-    .add(Outward.act_error)
+    .add(Outward.outward_make_error)
+    .add(Outward.outward_act_stats)
+    .add(Outward.outward_act_cache)
+    .add(Outward.outward_res_object)
+    .add(Outward.outward_res_entity)
+    .add(Outward.outward_msg_meta)
+    .add(Outward.outward_trace)
+    .add(Outward.outward_sub)
+    .add(Outward.outward_announce)
+    .add(Outward.outward_act_error)
 
   // Configure logging
 

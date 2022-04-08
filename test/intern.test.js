@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 Richard Rodger, MIT License */
+/* Copyright (c) 2018-2022 Richard Rodger, MIT License */
 
 'use strict'
 
@@ -15,8 +15,12 @@ const expect = Code.expect
 const Shared = require('./shared')
 const it = Shared.make_it(lab)
 
+
+const { Outward } = require('../lib/outward')
+
+
 const intern = {
-  outward: require('../lib/outward').test$.intern,
+  outward: Outward.test$.intern,
 }
 
 describe('outward', function () {
