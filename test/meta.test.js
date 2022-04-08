@@ -75,7 +75,6 @@ describe('meta', function () {
       )
   })
 
-
   function make_custom_meta_prior(opts) {
     return function custom_meta_prior_test(fin) {
       Seneca(opts)
@@ -130,11 +129,12 @@ describe('meta', function () {
     }
   }
 
-
   it('custom-meta-prior', make_custom_meta_prior({}))
-  it('custom-meta-prior-direct', make_custom_meta_prior({prior:{direct:true}}))
+  it(
+    'custom-meta-prior-direct',
+    make_custom_meta_prior({ prior: { direct: true } })
+  )
 
-  
   it('custom-fixed', function (fin) {
     var si = Seneca()
       .test(fin)

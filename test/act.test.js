@@ -59,7 +59,10 @@ describe('act', function () {
       })
       .add(function (spec) {
         if (spec.data.b) {
-          return { op: 'stop', out: { kind: 'error', code: 'b', info: { b: 1 } } }
+          return {
+            op: 'stop',
+            out: { kind: 'error', code: 'b', info: { b: 1 } },
+          }
         }
       })
       // .add(function (spec) {

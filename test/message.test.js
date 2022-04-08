@@ -300,7 +300,7 @@ describe('message', function () {
         expect(err).not.exist()
         expect(out).not.exist()
         expect(meta.pattern).equal('b:1')
-        if(!this.options().prior.direct) {
+        if (!this.options().prior.direct) {
           expect(meta.trace[0].desc[0]).equal('a:1')
         }
       })
@@ -313,7 +313,7 @@ describe('message', function () {
         expect(err).not.exist()
         expect(out).not.exist()
         expect(meta.pattern).equal('d:1')
-        if(!this.options().prior.direct) {
+        if (!this.options().prior.direct) {
           expect(meta.trace[0].desc[0]).equal('d:1')
         }
       })
@@ -364,7 +364,7 @@ describe('message', function () {
         expect(out.x).equal(1)
         expect(meta.pattern).equal('a:1')
 
-        if(!this.options().prior.direct) {
+        if (!this.options().prior.direct) {
           expect(meta.trace[0].desc[0]).equal('a:1')
         }
       })
@@ -527,7 +527,7 @@ describe('message', function () {
             expect(meta.pattern).equal('') // catchall pin
             expect(meta.instance).equal('c0')
 
-            if(!this.options().prior.direct) {
+            if (!this.options().prior.direct) {
               expect(meta.trace[0].desc[0]).equal('a:4')
               expect(meta.trace[0].trace[0].desc[0]).equal('a:4')
             }

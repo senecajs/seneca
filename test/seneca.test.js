@@ -337,11 +337,11 @@ describe('seneca', function () {
           assert.ok(!o.bar.prior)
           assert.ok(m.action.match(/bar/))
 
-          if(!this.options().prior.direct) {
+          if (!this.options().prior.direct) {
             assert.ok(o.foo.prior)
             assert.ok(trace(m).match(/foo_/))
           }
-          
+
           si.add({ op: 'foo' }, zed)
           si.act('op:foo,a:1,i:3', function (e, o, m) {
             assert.ok(
@@ -351,14 +351,14 @@ describe('seneca', function () {
             )
 
             assert.ok(m.action.match(/zed/))
-            
-            if(!this.options().prior.direct) {
+
+            if (!this.options().prior.direct) {
               assert.ok(!o.zed.prior)
               assert.ok(o.bar.prior)
               assert.ok(o.foo.prior)
               assert.ok(trace(m).match(/bar_.*foo_/))
             }
-            
+
             fin()
           })
         })
@@ -420,23 +420,23 @@ describe('seneca', function () {
         assert.ok(!err)
         assert.ok(Gex('1~Seneca/*' + '/*').on('' + o.a + '~' + o.s))
 
-        if(!this.options().prior.direct) {        
+        if (!this.options().prior.direct) {
           assert.ok(o.foo.prior)
           assert.ok(!o.bar.prior)
         }
-        
+
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
           assert.ok(
             Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
           )
 
-          if(!this.options().prior.direct) {        
+          if (!this.options().prior.direct) {
             assert.ok(o.foo.prior)
             assert.ok(o.bar.prior)
             assert.ok(!o.zed.prior)
           }
-          
+
           fin()
         })
       })
@@ -737,7 +737,7 @@ describe('seneca', function () {
       done()
     }
 
-    var si = Seneca({legacy:{rules:true}}).test(done) //(testopts).error(done)
+    var si = Seneca({ legacy: { rules: true } }).test(done) //(testopts).error(done)
 
     si.add('i:0,a:1,b:2', addFunction)
 

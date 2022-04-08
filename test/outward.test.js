@@ -21,12 +21,12 @@ describe('outward', function () {
     var err = { message: 'foo', meta$: { err: true } }
     var data = { meta: { error: true }, res: err }
 
-    Outward.make_error({ctx:{ options: { legacy: { error: false } } }, data})
+    Outward.make_error({ ctx: { options: { legacy: { error: false } } }, data })
     expect(data.res.message).equal('foo')
     expect(Util.isError(data.res)).false()
 
     data = { res: err }
-    Outward.make_error({ctx: { options: { legacy: { error: true } } }, data})
+    Outward.make_error({ ctx: { options: { legacy: { error: true } } }, data })
     expect(data.res.message).equal('foo')
     expect(!Util.isError(data.res)).true()
 
@@ -40,7 +40,7 @@ describe('outward', function () {
     }
     Outward.act_stats({
       ctx: { actdef: { pattern: 'foo:1' }, seneca: { private$: private$ } },
-      data: { meta: {} }
+      data: { meta: {} },
     })
     expect(private$.stats.act.done).equal(1)
     fin()

@@ -647,7 +647,6 @@ describe('plugin', function () {
     })
   })
 
-  
   // it('calling act from init actor is deprecated', function (fin) {
   //   var seneca = Seneca.test(fin)
 
@@ -668,7 +667,6 @@ describe('plugin', function () {
   //   seneca.act({ init: 'msgstats-metrics' })
   // })
 
-  
   it('plugin actions receive errors in callback function', function (fin) {
     var seneca = Seneca({ log: 'silent' })
     seneca.fixedargs['fatal$'] = false
@@ -728,7 +726,6 @@ describe('plugin', function () {
       })
   })
 
-  
   it('serial-load-sequence', function (fin) {
     var log = []
 
@@ -753,27 +750,26 @@ describe('plugin', function () {
       })
   })
 
-
   it('define-load-sequence', function (fin) {
     var log = []
 
     Seneca.test(fin, 'silent')
-      .add('a:1', function(msg, reply) {
+      .add('a:1', function (msg, reply) {
         log.push('A')
-        reply({x:msg.x})
+        reply({ x: msg.x })
       })
-      .act('a:1,x:4', function(err, out) {
+      .act('a:1,x:4', function (err, out) {
         log.push('B')
         expect(err).not.exist()
         expect(out.x).equals(4)
       })
       .use(function foo() {
         log.push('C')
-        this.add('foo:1', function(msg, reply) {
+        this.add('foo:1', function (msg, reply) {
           log.push('I')
-          reply({y:msg.y})
+          reply({ y: msg.y })
         })
-        this.act('a:1,x:2', function(err, out) {
+        this.act('a:1,x:2', function (err, out) {
           log.push('D')
           expect(err).not.exist()
           expect(out.x).equals(2)
@@ -787,7 +783,7 @@ describe('plugin', function () {
         log.push('F')
         this.add('init:bar', function (msg, reply) {
           log.push('G')
-          this.act('foo:1,y:3',function(err, out) {
+          this.act('foo:1,y:3', function (err, out) {
             log.push('H')
             expect(err).not.exist()
             expect(out.y).equals(3)
@@ -795,20 +791,18 @@ describe('plugin', function () {
           })
         })
       })
-      .act('a:1,x:5', function(err, out) {
+      .act('a:1,x:5', function (err, out) {
         log.push('J')
         expect(err).not.exist()
         expect(out.x).equals(5)
       })
       .ready(function () {
         log.push('K')
-        expect(log.join('')).to.equal('AB CADE FGIH AJ K'.replace(/ /g,''))
+        expect(log.join('')).to.equal('AB CADE FGIH AJ K'.replace(/ /g, ''))
         fin()
       })
   })
 
-
-  
   it('plugin options can be modified by plugins during load sequence', function (fin) {
     var seneca = Seneca({
       log: 'test',
@@ -1266,7 +1260,6 @@ describe('plugin', function () {
     })
   })
 
-
   it('plugin-defaults-valid-plain', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
@@ -1286,10 +1279,9 @@ describe('plugin', function () {
     s0.ready(function () {
       expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
       fin()
-    })    
+    })
   })
 
-  
   it('plugin-defaults-valid-prepared', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
@@ -1310,7 +1302,5 @@ describe('plugin', function () {
       expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
       fin()
     })
-    
   })
-
 })

@@ -33,7 +33,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('async-basic', async () => {
     var s0 = Seneca().test()
 
@@ -55,22 +54,20 @@ describe('exports', function () {
     })
   })
 
-
   it('async-basic-error', async () => {
-    // TODO: should async ready thow this? 
+    // TODO: should async ready thow this?
     return new Promise((r) => {
-      Seneca({log:'silent',debug:{undead:true}})
-        .error((err)=>{
+      Seneca({ log: 'silent', debug: { undead: true } })
+        .error((err) => {
           expect(err.message).includes('p0')
           r()
-        }).use(async function p0(options) {
+        })
+        .use(async function p0(options) {
           throw new Error('p0')
         })
     })
   })
 
-  
-  
   it('with-init', async () => {
     var s0 = Seneca().test()
 
@@ -103,7 +100,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('async-with-init', async () => {
     var s0 = Seneca().test()
 
@@ -136,7 +132,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('with-preload', async () => {
     var s0 = Seneca().test()
 
@@ -172,7 +167,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('async-with-preload', async () => {
     var s0 = Seneca().test()
 
@@ -207,7 +201,6 @@ describe('exports', function () {
       })
     })
   })
-
 
   it('with-preload-and-init', async () => {
     var s0 = Seneca().test()
@@ -249,7 +242,6 @@ describe('exports', function () {
     })
   })
 
-
   it('async-with-preload-and-init', async () => {
     var s0 = Seneca().test()
 
@@ -290,7 +282,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('with-tags', async () => {
     var s0 = Seneca({ legacy: false }).use('promisify').test()
 
@@ -334,7 +325,6 @@ describe('exports', function () {
     expect(s1.export('p1$c/x')).equals(33)
   })
 
-  
   it('async-with-tags', async () => {
     var s0 = Seneca({ legacy: false }).use('promisify').test()
 

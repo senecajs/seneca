@@ -481,7 +481,6 @@ describe('logging', function () {
     reply()
   }
 
-
   it('test-mode-basic', function (fin) {
     var capture = make_log_capture()
 
@@ -502,7 +501,6 @@ describe('logging', function () {
       })
   })
 
-
   it('test-mode-option', function (fin) {
     var capture = make_log_capture()
 
@@ -521,7 +519,6 @@ describe('logging', function () {
       })
   })
 
-
   it('test-mode-argv', function (fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.test'] } })
@@ -532,7 +529,6 @@ describe('logging', function () {
         fin()
       })
   })
-
 
   it('test-mode-argv-opts', function (fin) {
     var capture = make_log_capture()
@@ -548,7 +544,6 @@ describe('logging', function () {
       })
   })
 
-
   it('test-mode-env', function (fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'true' } } })
@@ -560,7 +555,6 @@ describe('logging', function () {
       })
   })
 
-  
   it('quiet-mode-basic', function (fin) {
     var capture = make_log_capture()
 

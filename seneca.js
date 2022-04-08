@@ -1,11 +1,9 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
-
 
 // External modules.
 const GateExecutor = require('gate-executor')
@@ -18,11 +16,9 @@ const { Ordu } = require('ordu')
 const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
-
-// Deprecated Legacy modules. 
+// Deprecated Legacy modules.
 const Optioner = require('optioner')
 const Joi = require('@hapi/joi')
-
 
 // Internal modules.
 const Common = require('./lib/common')
@@ -43,10 +39,8 @@ const { Print } = require('./lib/print')
 const Actions = require('./lib/actions')
 const Transport = require('./lib/transport')
 
-
 // Internal data and utilities.
 const { error, deep } = Common
-
 
 // Seneca options.
 const option_defaults = {
@@ -62,7 +56,7 @@ const option_defaults = {
 
   // Manually set instance identifier.
   id$: Skip(String),
-  
+
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
   default_plugins: Open({
@@ -91,14 +85,14 @@ const option_defaults = {
   close_delay: 22222,
 
   // Legacy; specify general error handler
-  errhandler: Skip(One(Function,null)),
+  errhandler: Skip(One(Function, null)),
 
   // Load options from a file path
   from: Skip(String),
 
   // Provide a module to base option require loading from
   module: Skip(),
-  
+
   // Debug settings.
   debug: {
     // Throw (some) errors from seneca.act.
@@ -190,7 +184,7 @@ const option_defaults = {
 
     // Messages that do not match a known pattern
     unknown: One(String, true),
-    
+
     // Messages that have invalid content
     invalid: false,
   },
@@ -210,10 +204,9 @@ const option_defaults = {
 
   // System wide functionality.
   system: {
-
     // TODO: use Func shape
     // Function to exit the process.
-    exit: ()=>process.exit,
+    exit: () => process.exit,
 
     // Close instance on these signals, if true.
     close_signals: {
@@ -234,7 +227,7 @@ const option_defaults = {
     print: {
       // Print to standard out
       log: One(Function, null),
-      
+
       // Print to standard err
       err: One(Function, null),
     },
@@ -250,7 +243,6 @@ const option_defaults = {
 
   // Shared default transport configuration
   transport: Open({
-    
     // Standard port for messages.
     port: 10101,
 
@@ -267,7 +259,7 @@ const option_defaults = {
   events: {},
 
   // Backwards compatibility settings.
-  legacy: One(Boolean,{
+  legacy: One(Boolean, {
     // Add legacy properties
     actdef: false,
 
@@ -300,51 +292,43 @@ const option_defaults = {
 
     // If false, use Gubu for message validation.
     rules: false,
-    
+
     // If false, use Gubu for option validation (including plugin defaults)
     options: true,
   }),
 
   // Processing task ordering.
   order: {
-
     // Action add task ordering.
     add: {
-
       // Print task execution log.
       debug: false,
     },
 
     // Action inward task ordering.
     inward: {
-
       // Print task execution log.
       debug: false,
     },
-    
+
     // Action outward task ordering.
     outward: {
-
       // Print task execution log.
       debug: false,
     },
-    
+
     // Plugin load task ordering.
     use: {
-
       // Print task execution log.
       debug: false,
     },
   },
-
 
   // Prior actions.
   prior: {
-
     // Call prior actions directly (not as further messages).
-    direct: false
+    direct: false,
   },
-
 
   // Legacy
   reload$: Skip(Boolean),
@@ -367,7 +351,6 @@ const seneca_util = {
   // TODO: expose directly for better DX - no need to namespace under gubu
   // Expose Gubu schema builders (Required, etc.).
   Gubu,
-  
 
   // Deprecated Legacy (make internal or rename)
   Optioner: Optioner,
@@ -497,7 +480,6 @@ module.exports.valid = Gubu
 
 module.exports.test$ = { intern: intern }
 
-
 // Create a new Seneca instance.
 function make_seneca(initial_opts) {
   // Create a private context.
@@ -619,7 +601,7 @@ function make_seneca(initial_opts) {
   root$.act = Act.api_act // Submit a message and trigger the associated action.
   root$.ready = ready.api_ready // Callback when plugins initialized.
   root$.valid = Gubu // Expose Gubu shape builders
-  
+
   root$.internal = function () {
     return {
       ordu: {
@@ -791,7 +773,6 @@ function make_seneca(initial_opts) {
     .add(Outward.announce)
     .add(Outward.act_error)
 
-  
   // Configure logging
 
   // Mark logger as being externally defined from options
@@ -826,7 +807,7 @@ function make_seneca(initial_opts) {
   Actions(root$)
 
   // root$.act('role:seneca,cmd:pingx')
-  
+
   if (!start_opts.legacy.transport) {
     start_opts.legacy.error = false
 

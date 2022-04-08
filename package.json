@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.26.0-rc.2",
+  "version": "3.26.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -81,7 +81,7 @@
     "reset": "npm run clean && npm i && npm run build && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org "
+    "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -108,7 +108,7 @@
   "devDependencies": {
     "@hapi/code": "^8.0.7",
     "@hapi/hoek": "^9.2.1",
-    "@hapi/lab": "^24.5.1",
+    "@hapi/lab": "^24.6.0",
     "@seneca/test-plugin": "0.0.1",
     "@types/node": "^17.0.23",
     "async": "^3.2.3",
@@ -118,7 +118,7 @@
     "handlebars": "^4.7.7",
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
-    "prettier": "^2.6.1",
+    "prettier": "^2.6.2",
     "seneca-entity": "^16.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",

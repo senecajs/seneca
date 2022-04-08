@@ -15,7 +15,6 @@ const it = Shared.make_it(lab)
 
 const Seneca = require('..')
 
-
 describe('actions', function () {
   var si = Seneca({ log: 'silent' })
 
@@ -24,7 +23,6 @@ describe('actions', function () {
   }
 
   it('cmd_ping', function (fin) {
-
     var si = Seneca({ legacy: { transport: false } }).test(fin)
     expect(si.ping().id).equals(si.id)
 
@@ -105,21 +103,24 @@ describe('actions', function () {
       expect(out.tag).equals('foo')
       expect(si.tag).equals('foo')
 
-      this.act('role:seneca,get:options,base:internal,key:bar', function (err, out) {
-        expect(err).not.exist()
-        expect(out).exist()
-        expect(out.zoo).equals(1)
+      this.act(
+        'role:seneca,get:options,base:internal,key:bar',
+        function (err, out) {
+          expect(err).not.exist()
+          expect(out).exist()
+          expect(out.zoo).equals(1)
 
-        this.act(
-          'role:seneca,get:options,base:not-there,key:bar',
-          function (err, out) {
-            expect(err).not.exist()
-            expect(out).not.exist()
+          this.act(
+            'role:seneca,get:options,base:not-there,key:bar',
+            function (err, out) {
+              expect(err).not.exist()
+              expect(out).not.exist()
 
-            fin()
-          }
-        )
-      })
+              fin()
+            }
+          )
+        }
+      )
     })
   })
 })

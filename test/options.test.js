@@ -37,9 +37,8 @@ describe('options', function () {
   })
 
   it('default_plugins', async () => {
-    await Seneca({ legacy: false, default_plugins: { foo:true } })
+    await Seneca({ legacy: false, default_plugins: { foo: true } })
       .test()
       .ready()
   })
-
 })

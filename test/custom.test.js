@@ -182,36 +182,37 @@ describe('custom', function () {
       })
   })
 
-
-
   function make_custom_prior_test(opts) {
     return function custom_prior_test(fin) {
       var si = Seneca(opts)
-          .test(fin)
-          .add('a:1', function a1(msg, reply, meta) {
-            meta.custom.q4 = 1
-            reply({ x: msg.x, y: msg.y, z: msg.z })
-          })
-          .add('a:1', function a2(msg, reply, meta) {
-            meta.custom.q3 = 1
-            this.prior({ x: msg.x, y: msg.y, z: 1 }, reply)
-          })
-          .add('a:1', function a3(msg, reply, meta) {
-            meta.custom.q2 = 1
-            this.prior({ x: msg.x, y: 1 }, reply)
-          })
-          .act('a:1,x:1', { custom$: { q1: 1 } }, function (err, out, meta) {
-            expect(meta.custom).equal({ q1: 1, q2: 1, q3: 1, q4: 1 })
-            expect(out).equal({ x: 1, y: 1, z: 1 })
-            fin()
-          })
+        .test(fin)
+        .add('a:1', function a1(msg, reply, meta) {
+          meta.custom.q4 = 1
+          reply({ x: msg.x, y: msg.y, z: msg.z })
+        })
+        .add('a:1', function a2(msg, reply, meta) {
+          meta.custom.q3 = 1
+          this.prior({ x: msg.x, y: msg.y, z: 1 }, reply)
+        })
+        .add('a:1', function a3(msg, reply, meta) {
+          meta.custom.q2 = 1
+          this.prior({ x: msg.x, y: 1 }, reply)
+        })
+        .act('a:1,x:1', { custom$: { q1: 1 } }, function (err, out, meta) {
+          expect(meta.custom).equal({ q1: 1, q2: 1, q3: 1, q4: 1 })
+          expect(out).equal({ x: 1, y: 1, z: 1 })
+          fin()
+        })
     }
   }
 
   it('custom-prior', test_opts, make_custom_prior_test({}))
-  it('custom-prior-direct', test_opts, make_custom_prior_test({prior:{direct:false}}))
-  
-  
+  it(
+    'custom-prior-direct',
+    test_opts,
+    make_custom_prior_test({ prior: { direct: false } })
+  )
+
   it('custom-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 

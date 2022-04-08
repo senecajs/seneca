@@ -85,10 +85,9 @@ describe('order', function () {
       c: 1,
       d: 1,
     }
-    
+
     s0.use(p0, { b: 2 })
 
-    
     return new Promise((r, j) => {
       s0.error(j)
       s0.ready(function () {
@@ -133,7 +132,7 @@ describe('order', function () {
         }).default()
 
         // console.log(Joi.isSchema(joidef,{legacy:true}))
-        
+
         s0.use({
           name: 'p2',
           define: function (options) {
