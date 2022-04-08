@@ -41,7 +41,7 @@ const { resolve_options } = require('./lib/options')
 const Package = require('./package.json')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
-const Transport = require('./lib/transport')
+const { transport } = require('./lib/transport')
 
 
 // Internal data and utilities.
@@ -828,7 +828,7 @@ function make_seneca(initial_opts) {
       start_opts.transport
     )
 
-    Transport(root$)
+    transport(root$)
   }
 
   Print(root$, start_opts.debug.argv || process.argv)
