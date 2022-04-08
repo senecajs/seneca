@@ -1,3 +1,5 @@
+/// <reference types="node" />
+import Util from 'util';
 declare const error: any;
 declare function promiser(context: any, callback: any): Promise<unknown>;
 declare function stringify(): any;
@@ -21,8 +23,8 @@ declare function make_standard_act_log_entry(actdef: any, msg: any, meta: any, o
 declare function make_standard_err_log_entry(err: any, ctxt: any): any;
 declare function resolve_option(value: any, options: any): any;
 declare function autoincr(): () => number;
-declare function isError(x: any): any;
-declare function inspect(x: any): any;
+declare function isError(x: any): boolean;
+declare function inspect(x: any): string;
 declare function make_callpoint(active: any): (override: any) => any;
 declare function make_trace_desc(meta: any): any[];
 declare const TRACE_PATTERN = 0;
@@ -50,6 +52,7 @@ declare class ActHistory {
     get(this: any, id: any): any;
     list(this: any): any;
     close(this: any): void;
-    toString(this: any): any;
+    toString(this: any): string;
+    [Util.inspect.custom](this: any): any;
 }
 export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, isError, inspect, error, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };

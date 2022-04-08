@@ -1,7 +1,11 @@
-/* Copyright © 2010-2021 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Util = require('util')
+
+import Util from 'util'
+
+
+import Errors from './errors'
 
 
 const Stringify = require('fast-safe-stringify')
@@ -11,8 +15,11 @@ const Nid = require('nid')
 const Norma = require('norma')
 const DefaultsDeep = require('lodash.defaultsdeep')
 
-const Errors = require('./errors')
 const { Print } = require('./print')
+
+
+
+
 
 const error =
   (exports.error =
