@@ -45,5 +45,9 @@ declare const _default: {
     action_timeout: string;
     use_no_args: string;
     act_invalid_args: string;
+    deprecation: {
+        seneca_parent: string;
+        seneca_next_act: string;
+    };
 };
 export default _default;

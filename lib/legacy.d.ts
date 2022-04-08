@@ -1,0 +1,23 @@
+declare function flatten(obj: any, prop: any): any[];
+declare function nil(): any;
+declare function copydata(obj: any): any;
+declare function recurse(this: any, list: any, work: any, done: any): void;
+declare function argprops(defaults: any, args: any, fixed: any, omits: any): any;
+declare function next_act(this: any): (next: any) => void;
+declare function findpins(this: any): any[];
+declare function act_if(this: any): any;
+declare function hasact(this: any, pattern: any): boolean;
+declare function make_legacy_fail(so: any): (this: any) => any;
+declare const _default: {
+    flatten: typeof flatten;
+    nil: typeof nil;
+    copydata: typeof copydata;
+    recurse: typeof recurse;
+    argprops: typeof argprops;
+    next_act: typeof next_act;
+    findpins: typeof findpins;
+    act_if: typeof act_if;
+    hasact: typeof hasact;
+    make_legacy_fail: typeof make_legacy_fail;
+};
+export default _default;

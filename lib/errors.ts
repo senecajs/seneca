@@ -159,11 +159,12 @@ export default {
   act_invalid_args:
     'Action <%=pattern%> has invalid arguments; <%=message%>; ' +
     'arguments were: <%=msg%>.',
+
+  deprecation: {
+    seneca_parent:
+      'Seneca.parent has been renamed to Seneca.prior. Seneca.parent will be removed in Seneca 4.x.',
+
+    seneca_next_act: 'Seneca.next_act will be removed in Seneca 3.x',
+  }
 }
 
-module.exports.deprecation = {
-  seneca_parent:
-    'Seneca.parent has been renamed to Seneca.prior. Seneca.parent will be removed in Seneca 4.x.',
-
-  seneca_next_act: 'Seneca.next_act will be removed in Seneca 3.x',
-}

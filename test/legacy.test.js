@@ -10,7 +10,7 @@ var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var expect = Code.expect
 
-var Legacy = require('../lib/legacy.js')
+var Legacy = require('../lib/legacy.js').default
 
 var Shared = require('./shared')
 var it = Shared.make_it(lab)
