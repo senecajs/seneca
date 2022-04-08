@@ -37,7 +37,7 @@ const Plugin = require('./lib/plugin')
 const { Inward } = require('./lib/inward')
 const Outward = require('./lib/outward')
 const Legacy = require('./lib/legacy').default
-const Options = require('./lib/options')
+const { resolve_options } = require('./lib/options')
 const Package = require('./package.json')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
@@ -499,7 +499,7 @@ function make_seneca(initial_opts) {
   root$.private$ = private$
 
   // Resolve initial options.
-  private$.optioner = Options(module, option_defaults, initial_opts)
+  private$.optioner = resolve_options(module, option_defaults, initial_opts)
   var start_opts = private$.optioner.get()
 
   // Console print utilities
