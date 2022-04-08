@@ -28,7 +28,7 @@ const Joi = require('@hapi/joi')
 const Common = require('./lib/common')
 const Logging = require('./lib/logging')
 const API = require('./lib/api')
-const Ready = require('./lib/ready')
+const { make_ready } = require('./lib/ready')
 const Act = require('./lib/act')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
@@ -565,7 +565,7 @@ function make_seneca(initial_opts) {
 
   private$.history = Common.history(start_opts.history)
 
-  const ready = Ready(root$)
+  const ready = make_ready(root$)
 
   // API for Ordu-defined processes.
   root$.order = {}
