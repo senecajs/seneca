@@ -1,21 +1,21 @@
-/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Util = require('util')
+const Util = require('util')
 
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
 
-var Legacy = require('../lib/legacy.js').default
+const { Legacy } = require('../lib/legacy.js')
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
-var Seneca = require('..')
+const Seneca = require('..')
 
 // TODO: move all legacy functions here and isolate lack of test coverage
 

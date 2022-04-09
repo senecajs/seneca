@@ -14,7 +14,7 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 var { Inward } = require('../lib/inward')
-var API = require('../lib/api')
+var { API } = require('../lib/api')
 
 describe('inward', function () {
   it('announce', function (fin) {

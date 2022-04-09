@@ -26,8 +26,8 @@ const Joi = require('@hapi/joi')
 
 // Internal modules.
 const Common = require('./lib/common')
-const Logging = require('./lib/logging')
-const API = require('./lib/api')
+const { make_logging } = require('./lib/logging')
+const { API } = require('./lib/api')
 const { make_ready } = require('./lib/ready')
 const Act = require('./lib/act')
 const Add = require('./lib/add')
@@ -36,7 +36,7 @@ const Prior = require('./lib/prior')
 const Plugin = require('./lib/plugin')
 const { Inward } = require('./lib/inward')
 const { Outward } = require('./lib/outward')
-const Legacy = require('./lib/legacy').default
+const { Legacy } = require('./lib/legacy')
 const { resolve_options } = require('./lib/options')
 const Package = require('./package.json')
 const { Print } = require('./lib/print')
@@ -76,7 +76,7 @@ const option_defaults = {
   quiet: false,
 
   // Default logging specification - see lib/logging.js
-  log: Any(Logging().default_logspec),
+  log: Any(make_logging().default_logspec),
 
   // Custom logger function, optional - see lib/logging.js
   logger: One(Function, Object, String, null),
@@ -845,7 +845,7 @@ function make_seneca(initial_opts) {
 // Private member variables of Seneca object.
 function make_private() {
   return {
-    logging: Logging(),
+    logging: make_logging(),
     stats: {
       start: Date.now(),
       act: {

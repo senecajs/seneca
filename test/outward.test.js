@@ -14,7 +14,7 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var { Outward } = require('../lib/outward')
-var API = require('../lib/api')
+var { API } = require('../lib/api')
 
 
 describe('outward', function () {

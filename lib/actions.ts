@@ -1,7 +1,7 @@
 /* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
 
 
-import Legacy from './legacy'
+import { Legacy } from './legacy'
 
 const Common = require('./common')
 

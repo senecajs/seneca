@@ -12,7 +12,7 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
-var Logging = require('../lib/logging')
+var { make_logging } = require('../lib/logging')
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
@@ -82,7 +82,7 @@ describe('logging', function () {
     }
     var out
 
-    var logging = Logging()
+    var logging = make_logging()
 
     out = logging.build_log_spec(msi({ log: 'test' }))
     expect(out).contains({ level: 'warn', live_level: 400 })
@@ -753,7 +753,7 @@ describe('logging', function () {
     var entry0 = {}
     var actA = { meta: { id: 1, pattern: 'p:1', tx: 3, mi: 4 }, def: { id: 2 } }
 
-    Logging.intern.build_act_entry(actA, entry0)
+    make_logging.intern.build_act_entry(actA, entry0)
     //console.log(entry0)
 
     expect(entry0).equal({
@@ -772,7 +772,7 @@ describe('logging', function () {
       [null, 'foo'],
       [null, 'bar/zed'],
     ]
-    Logging.intern.build_act_entry(actA, entry1)
+    make_logging.intern.build_act_entry(actA, entry1)
     //console.log(entry1)
 
     expect(entry1).equal({

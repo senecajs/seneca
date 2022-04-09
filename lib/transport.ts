@@ -11,7 +11,9 @@ const Url = require('url')
 const Jsonic = require('jsonic')
 const Wreck = require('@hapi/wreck')
 const Common = require('./common')
-const Legacy = require('./legacy').default
+
+import { Legacy } from './legacy'
+
 
 // THIS IS NOT A PLUGIN
 // DO NOT COPY TO CREATE TRANSPORT PLUGINS
@@ -77,7 +79,7 @@ function externalize_reply(seneca: any, err: any, out: any, meta: any) {
 
   rep.meta$ = meta
 
-  if (Util.isError(rep)) {
+  if (Util.types.isNativeError(rep)) {
     rep = Legacy.copydata(rep)
     rep.meta$.error = true
   }
@@ -287,7 +289,7 @@ function hook_listen_web(this: any, msg: any, reply: any) {
       const json = buf.join('')
       const body = parseJSON(json)
 
-      if (Util.isError(body)) {
+      if (Util.types.isNativeError(body)) {
         msg = {
           json: json,
           role: 'seneca',

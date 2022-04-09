@@ -241,7 +241,7 @@ function make_legacy_fail(so: any) {
 
 
 
-export default {
+const Legacy = {
   flatten,
   nil,
   copydata,
@@ -252,4 +252,9 @@ export default {
   act_if,
   hasact,
   make_legacy_fail,
+}
+
+
+export {
+  Legacy
 }

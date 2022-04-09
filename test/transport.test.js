@@ -5,7 +5,7 @@ const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
 var Common = require('../lib/common')
-var Transport = require('../lib/api')
+var { API } = require('../lib/api')
 var TransportStubs = require('./stubs/transports')
 
 // Test shortcuts
@@ -389,7 +389,7 @@ describe('transport', function () {
 
   describe('transport-listen', function () {
     it('supports-null-options', test_opts, function (fin) {
-      var listen = Transport.listen(() => {})
+      var listen = API.listen(() => {})
       var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
@@ -400,7 +400,7 @@ describe('transport', function () {
     })
 
     it('supports type as tcp option', test_opts, function (fin) {
-      var listen = Transport.listen(() => {})
+      var listen = API.listen(() => {})
       var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
@@ -411,7 +411,7 @@ describe('transport', function () {
     })
 
     it('supports type as http option', test_opts, function (fin) {
-      var listen = Transport.listen(() => {})
+      var listen = API.listen(() => {})
       var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
@@ -422,7 +422,7 @@ describe('transport', function () {
     })
 
     it('supports the port number as an argument', test_opts, function (fin) {
-      var listen = Transport.listen(() => {})
+      var listen = API.listen(() => {})
       var seneca = Seneca({ legacy: false }).test(fin)
 
       var fn = function () {
@@ -436,7 +436,7 @@ describe('transport', function () {
       'supports the port number and host as an argument',
       test_opts,
       function (fin) {
-        var listen = Transport.listen(() => {})
+        var listen = API.listen(() => {})
         var seneca = Seneca({ legacy: false }).test(fin)
 
         var fn = function () {
@@ -451,7 +451,7 @@ describe('transport', function () {
       'supports the port number, host, and path as an argument',
       test_opts,
       function (fin) {
-        var listen = Transport.listen(() => {})
+        var listen = API.listen(() => {})
         var seneca = Seneca({ legacy: false }).test(fin)
 
         var fn = function () {
@@ -463,7 +463,7 @@ describe('transport', function () {
     )
 
     it('action-error', test_opts, function (fin) {
-      var listen = Transport.listen(() => {})
+      var listen = API.listen(() => {})
       var seneca = Seneca({ legacy: false }).test(fin)
 
       listen.call(seneca)
@@ -473,7 +473,7 @@ describe('transport', function () {
 
   describe('client()', function () {
     it('supports null options', test_opts, function (fin) {
-      var client = Transport.client(
+      var client = API.client(
         () => {},
         function () {
           return () => {}

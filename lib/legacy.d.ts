@@ -8,7 +8,7 @@ declare function findpins(this: any): any[];
 declare function act_if(this: any): any;
 declare function hasact(this: any, pattern: any): boolean;
 declare function make_legacy_fail(so: any): (this: any) => any;
-declare const _default: {
+declare const Legacy: {
     flatten: typeof flatten;
     nil: typeof nil;
     copydata: typeof copydata;
@@ -20,4 +20,4 @@ declare const _default: {
     hasact: typeof hasact;
     make_legacy_fail: typeof make_legacy_fail;
 };
-export default _default;
+export { Legacy };
