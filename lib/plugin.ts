@@ -16,10 +16,7 @@ const { Print } = require('./print')
 /* $lab:coverage:on$ */
 
 
-exports.api_use = api_use
-
-
-const intern = exports.intern = make_intern()
+const intern = make_intern()
 
 
 function api_use(callpoint: any, opts: any) {
@@ -988,4 +985,15 @@ function make_intern() {
       }
     }
   }
+}
+
+
+const Plugin = {
+  api_use,
+  intern,
+}
+
+
+export {
+  Plugin
 }

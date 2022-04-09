@@ -12,7 +12,7 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 var Seneca = require('..')
-var Plugin = require('../lib/plugin')
+var { Plugin } = require('../lib/plugin')
 
 describe('plugin', function () {
   it('use.intern', (fin) => {
