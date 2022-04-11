@@ -139,7 +139,7 @@ function outward_announce(spec: any) {
     ctx.seneca.on_act_out(ctx.actdef, data.res, data.meta)
   }
 
-  ctx.seneca.emit('act-out', data.msg, data.res, data.meta)
+  ctx.seneca.emit && ctx.seneca.emit('act-out', data.msg, data.res, data.meta)
 
   ctx.seneca.log.debug(
     ctx.actlog(ctx.actdef, data.msg, data.meta, ctx.origmsg, {
@@ -355,7 +355,7 @@ intern.act_error = function(instance: any, ctx: any, data: any) {
   }
 
   instance.log.error(entry)
-  instance.emit('act-err', msg, err)
+  instance.emit && instance.emit('act-err', msg, err)
 
   // when fatal$ is set, prefer to die instead
   if ('function' === typeof opts.errhandler && (!msg || !meta.fatal)) {

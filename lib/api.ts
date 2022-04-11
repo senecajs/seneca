@@ -803,8 +803,6 @@ intern.parse_config = function(args: any) {
 
   var arglen = config.length
 
-  // TODO: use Joi for better error msgs
-
   if (arglen === 1) {
     if (config[0] && 'object' === typeof config[0]) {
       out = Object.assign({}, config[0])
@@ -905,12 +903,14 @@ intern.close = function(this: any, callpoint: any, done: any) {
     seneca.act('role:seneca,cmd:close,closing$:true', function(err: any) {
       seneca.log.debug(errlog(err, { kind: 'close', notice: 'end' }))
 
-      seneca.removeAllListeners('act-in')
-      seneca.removeAllListeners('act-out')
-      seneca.removeAllListeners('act-err')
-      seneca.removeAllListeners('pin')
-      seneca.removeAllListeners('after-pin')
-      seneca.removeAllListeners('ready')
+      if (seneca.removeAllListeners) {
+        seneca.removeAllListeners('act-in')
+        seneca.removeAllListeners('act-out')
+        seneca.removeAllListeners('act-err')
+        seneca.removeAllListeners('pin')
+        seneca.removeAllListeners('after-pin')
+        seneca.removeAllListeners('ready')
+      }
 
       seneca.private$.history.close()
 

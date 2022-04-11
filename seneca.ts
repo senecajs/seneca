@@ -2,9 +2,11 @@
 'use strict'
 
 
-// Node API modules.
-const Events = require('events')
-const Util = require('util')
+
+import type {
+  MakeSeneca,
+  Instance,
+} from './lib/types'
 
 
 // External modules.
@@ -19,9 +21,6 @@ const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
 
-// Deprecated Legacy modules.
-const Optioner = require('optioner')
-const Joi = require('@hapi/joi')
 
 
 // Internal modules.
@@ -359,8 +358,6 @@ const seneca_util = {
   Gubu,
 
   // Deprecated Legacy (make internal or rename)
-  Optioner: Optioner,
-  Joi: Joi,
   deepextend: Common.deep,
   parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
@@ -382,34 +379,422 @@ const intern = {
   util: seneca_util,
 }
 
-// Seneca is an EventEmitter.
-function Seneca(this: any) {
-  Events.EventEmitter.call(this)
-  this.setMaxListeners(0)
+
+
+class InstanceImpl implements Instance {
+
+  // Mark the Seneca object
+  isSeneca = true
+
+  version = ''
+  id = ''
+  did = ''
+  fixedargs = undefined
+  fixedmeta = undefined
+  start_time = -1
+
+
+  // Create a new Seneca instance.
+  constructor(initial_opts?: any) {
+    // Create a private context.
+    var private$: any = make_private()
+    private$.error = error
+
+    var root$: any = this
+
+    // Expose private data to plugins.
+    root$.private$ = private$
+
+    // Resolve initial options.
+    private$.optioner = resolve_options(module, option_defaults, initial_opts)
+    var start_opts = private$.optioner.get()
+
+    // Console print utilities
+    private$.print = {
+      log: start_opts.internal.print.log || Print.internal_log,
+      err: start_opts.internal.print.err || Print.internal_err,
+    }
+
+    // These need to come from options as required during construction.
+    private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
+
+    var soi_subrouter = start_opts.internal.subrouter || {}
+    private$.subrouter = {
+      // Check for legacy inward router
+      inward: soi_subrouter.inward || Patrun({ gex: true }),
+      outward: soi_subrouter.outward || Patrun({ gex: true }),
+    }
+
+    // Setup event handlers, if defined
+    var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
+    event_names.forEach(function(event_name) {
+      if ('function' === typeof start_opts.events[event_name]) {
+        root$.on && root$.on(event_name, start_opts.events[event_name])
+      }
+    })
+
+    // Create internal tools.
+    private$.actnid = Nid({ length: start_opts.idlen })
+    private$.didnid = Nid({ length: start_opts.didlen })
+
+    // Instance specific incrementing counters to create unique function names
+    private$.next_action_id = Common.autoincr()
+
+    var callpoint = (private$.callpoint = Common.make_callpoint(
+      start_opts.debug.callpoint
+    ))
+
+    // Define public member variables.
+    root$.start_time = Date.now()
+    root$.context = {}
+    root$.version = Package.version
+
+    // TODO: rename in 4.x as "args" terminology is legacy
+    root$.fixedargs = {}
+
+    root$.flags = {
+      closed: false,
+    }
+
+    Object.defineProperty(root$, 'root', { value: root$ })
+
+    private$.history = Common.history(start_opts.history)
+
+    const ready = make_ready(root$)
+
+    // API for Ordu-defined processes.
+    root$.order = {}
+
+    // TODO: rename back to plugins
+    const api_use = Plugin.api_use(callpoint, {
+      debug: !!start_opts.debug.ordu || !!start_opts.order.use.debug,
+    })
+    root$.use = api_use.use // Define and load a plugin.
+
+    root$.order.plugin = api_use.ordu
+
+    // Seneca methods. Official API.
+    root$.toString = API.toString
+    root$.has = API.has // True if the given pattern has an action.
+    root$.find = API.find // Find the action definition for a pattern.
+    root$.list = API.list // List the patterns added to this instance.
+    root$.status = API.status // Get the status if this instance.
+    root$.reply = API.reply // Reply to a submitted message.
+    root$.sub = Sub.api_sub // Subscribe to messages.
+    root$.list_plugins = API.list_plugins // List the registered plugins.
+    root$.find_plugin = API.find_plugin // Find the plugin definition.
+    root$.has_plugin = API.has_plugin // True if the plugin is registered.
+    root$.ignore_plugin = API.ignore_plugin // Ignore plugin and don't register it.
+    root$.listen = API.listen(callpoint) // Listen for inbound messages.
+    root$.client = API.client(callpoint) // Send outbound messages.
+    root$.gate = API.gate // Create a delegate that executes actions in sequence.
+    root$.ungate = API.ungate // Execute actions in parallel.
+    root$.translate = API.translate // Translate message to new pattern.
+    root$.ping = API.ping // Generate ping response.
+    root$.test = API.test // Set test mode.
+    root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
+    root$.export = API.export // Export plain objects from a plugin.
+    root$.depends = API.depends // Check for plugin dependencies.
+    root$.delegate = API.delegate // Create an action-specific Seneca instance.
+    root$.prior = Prior.api_prior // Call the previous action definition for pattern.
+    root$.inward = API.inward // Add a modifier function for messages inward
+    root$.outward = API.outward // Add a modifier function for responses outward
+    root$.error = API.error // Set global error handler, or generate Seneca Error
+    root$.fail = start_opts.legacy.fail
+      ? Legacy.make_legacy_fail(start_opts)
+      : API.fail // Throw a Seneca error
+    root$.explain = API.explain // Toggle top level explain capture
+    root$.decorate = API.decorate // Decorate seneca object with functions
+    root$.seneca = API.seneca
+    root$.close = API.close(callpoint) // Close and shutdown plugins.
+    root$.options = API.options // Get and set options.
+    root$.fix = API.fix // fix pattern arguments, message arguments, and custom meta
+    root$.wrap = API.wrap // wrap each found pattern with a new action
+    root$.add = Add.api_add // Add a pattern an associated action.
+    root$.act = Act.api_act // Submit a message and trigger the associated action.
+    root$.ready = ready.api_ready // Callback when plugins initialized.
+    root$.valid = Gubu // Expose Gubu shape builders
+
+    root$.internal = function() {
+      return {
+        ordu: {
+          use: api_use.ordu,
+        },
+      }
+    }
+
+    // Non-API methods.
+    // root$.register = Plugins.register(callpoint)
+
+    // DEPRECATE IN 4.x
+    root$.findact = root$.find
+    root$.plugins = API.list_plugins
+    root$.findplugin = API.find_plugin
+    root$.hasplugin = API.has_plugin
+    root$.hasact = Legacy.hasact
+    root$.act_if = Legacy.act_if
+    root$.findpins = Legacy.findpins
+    root$.pinact = Legacy.findpins
+    root$.next_act = Legacy.next_act
+
+    // Identifier generator.
+    root$.idgen = Nid({ length: start_opts.idlen })
+
+    // Instance tag
+    start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag
+
+    // Create a unique identifer for this instance.
+    root$.id =
+      start_opts.id$ ||
+      root$.idgen() +
+      '/' +
+      root$.start_time +
+      '/' +
+      process.pid +
+      '/' +
+      root$.version +
+      '/' +
+      start_opts.tag
+
+    // The instance tag, useful for grouping instances.
+    root$.tag = start_opts.tag
+
+    if (start_opts.debug.short_logs || start_opts.log.short) {
+      start_opts.idlen = 2
+      root$.idgen = Nid({ length: start_opts.idlen })
+      root$.id = root$.idgen() + '/' + start_opts.tag
+    }
+
+    root$.fullname = 'Seneca/' + root$.id
+
+    root$.die = Common.makedie(root$, {
+      type: 'sys',
+      plugin: 'seneca',
+      tag: root$.version,
+      id: root$.id,
+      callpoint: callpoint,
+    })
+
+    root$.util = seneca_util
+
+    private$.exports = { options: start_opts }
+    private$.decorations = {}
+
+    // Error events are fatal, unless you're undead.  These are not the
+    // same as action errors, these are unexpected internal issues.
+    root$.on && root$.on('error', root$.die)
+
+    private$.ge = GateExecutor({
+      timeout: start_opts.timeout,
+    })
+      //.clear(action_queue_clear)
+      .clear(ready.clear_ready)
+      .start()
+
+    // TODO: this should be a plugin
+    // setup status log
+    if (start_opts.status.interval > 0 && start_opts.status.running) {
+      private$.stats = private$.stats || {}
+      private$.status_interval = setInterval(function status() {
+        root$.log.info({
+          kind: 'status',
+          alive: Date.now() - private$.stats.start,
+          act: private$.stats.act,
+        })
+      }, start_opts.status.interval)
+    }
+
+    if (start_opts.stats) {
+      private$.timestats = new Stats.NamedStats(
+        start_opts.stats.size,
+        start_opts.stats.interval
+      )
+
+      if (start_opts.stats.running) {
+        setInterval(function stats() {
+          private$.timestats.calculate()
+        }, start_opts.stats.interval)
+      }
+    }
+
+    // private$.plugins = {}
+    private$.plugin_order = { byname: [], byref: [] }
+    private$.use = UsePlugin({
+      prefix: ['seneca-', '@seneca/'],
+      module: start_opts.internal.module || module,
+      msgprefix: false,
+      builtin: '',
+      merge_defaults: false,
+    })
+
+    // TODO: provide an api to add these
+    private$.action_modifiers = [
+      function add_rules_from_validate_annotation(actdef: any) {
+        actdef.rules = Object.assign(
+          actdef.rules,
+          deep({}, actdef.func.validate || {})
+        )
+      },
+    ]
+
+    private$.sub = { handler: null, tracers: [] }
+
+    root$.order.add = new Ordu({
+      name: 'add',
+      debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
+    })
+      .add(Add.task.prepare)
+      .add(Add.task.plugin)
+      .add(Add.task.callpoint)
+      .add(Add.task.flags)
+      .add(Add.task.action)
+      .add(Add.task.prior)
+      .add(Add.task.rules)
+      .add(Add.task.register)
+      .add(Add.task.modify)
+
+    root$.order.inward = new Ordu({
+      name: 'inward',
+      debug: !!start_opts.debug.ordu || !!start_opts.order.inward.debug,
+    })
+      .add(Inward.inward_msg_modify)
+      .add(Inward.inward_closed)
+      .add(Inward.inward_act_cache)
+      .add(Inward.inward_act_default)
+      .add(Inward.inward_act_not_found)
+      .add(Inward.inward_act_stats)
+      .add(Inward.inward_validate_msg)
+      .add(Inward.inward_warnings)
+      .add(Inward.inward_msg_meta)
+      .add(Inward.inward_limit_msg)
+      .add(Inward.inward_prepare_delegate)
+      .add(Inward.inward_sub)
+      .add(Inward.inward_announce)
+
+    root$.order.outward = new Ordu({
+      name: 'outward',
+      debug: !!start_opts.debug.ordu || !!start_opts.order.outward.debug,
+    })
+      .add(Outward.outward_make_error)
+      .add(Outward.outward_act_stats)
+      .add(Outward.outward_act_cache)
+      .add(Outward.outward_res_object)
+      .add(Outward.outward_res_entity)
+      .add(Outward.outward_msg_meta)
+      .add(Outward.outward_trace)
+      .add(Outward.outward_sub)
+      .add(Outward.outward_announce)
+      .add(Outward.outward_act_error)
+
+    // Configure logging
+
+    // Mark logger as being externally defined from options
+    if (start_opts.logger && 'object' === typeof start_opts.logger) {
+      start_opts.logger.from_options$ = true
+    }
+
+    // Load logger and update log options
+    var logspec = private$.logging.build_log(root$)
+    start_opts = private$.exports.options = private$.optioner.set({
+      log: logspec,
+    })
+
+    if (start_opts.test) {
+      root$.test('string' === typeof start_opts.test ? start_opts.test : null)
+    }
+
+    if (start_opts.quiet) {
+      root$.quiet()
+    }
+
+    private$.exit_close = function() {
+      root$.close(function root_exit_close(err: any) {
+        if (err && true != private$.optioner.get().quiet) {
+          private$.print.err(err)
+        }
+
+        start_opts.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
+      })
+    }
+
+    addActions(root$)
+
+    // root$.act('role:seneca,cmd:pingx')
+
+    if (!start_opts.legacy.transport) {
+      start_opts.legacy.error = false
+
+      // TODO: move to static options in Seneca 4.x
+      start_opts.transport = deep(
+        {
+          port: 62345,
+          host: '127.0.0.1',
+          path: '/act',
+          protocol: 'http',
+        },
+        start_opts.transport
+      )
+
+      transport(root$)
+    }
+
+    Print(root$, start_opts.debug.argv || process.argv)
+
+    Common.each(start_opts.system.close_signals, function(active: any, signal: any) {
+      if (active) {
+        process.once(signal, private$.exit_close)
+      }
+    })
+
+    return root$
+  }
+
+  // Provide useful description when convered to JSON.
+  // Cannot be instantiated from JSON.
+  toJSON() {
+    return {
+      isSeneca: true,
+      id: this.id,
+      did: this.did,
+      fixedargs: this.fixedargs,
+      fixedmeta: this.fixedmeta,
+      start_time: this.start_time,
+      version: this.version,
+    }
+  }
+
 }
-Util.inherits(Seneca, Events.EventEmitter)
 
-// Mark the Seneca object
-Seneca.prototype.isSeneca = true
 
-// Provide useful description when convered to JSON.
-// Cannot be instantiated from JSON.
-Seneca.prototype.toJSON = function toJSON() {
+// Private member variables of Seneca object.
+function make_private() {
   return {
-    isSeneca: true,
-    id: this.id,
-    did: this.did,
-    fixedargs: this.fixedargs,
-    fixedmeta: this.fixedmeta,
-    start_time: this.start_time,
-    version: this.version,
+    logging: make_logging(),
+    stats: {
+      start: Date.now(),
+      act: {
+        calls: 0,
+        done: 0,
+        fails: 0,
+        cache: 0,
+      },
+      actmap: {},
+    },
+    actdef: {},
+    transport: {
+      register: [],
+    },
+    plugins: {},
+    ignore_plugins: {},
   }
 }
 
-Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
+
+
+
 
 // Create a Seneca instance.
-module.exports = function init(seneca_options?: any, more_options?: any) {
+const makeSeneca = (seneca_options?: any, more_options?: any): Instance => {
   var initial_opts =
     'string' === typeof seneca_options
       ? deep({}, { from: seneca_options }, more_options)
@@ -418,7 +803,7 @@ module.exports = function init(seneca_options?: any, more_options?: any) {
   // Legacy options, remove in 4.x
   initial_opts.deathdelay = initial_opts.death_delay
 
-  var seneca = make_seneca(initial_opts)
+  var seneca: any = new InstanceImpl(initial_opts)
   var options = seneca.options()
 
   // The 'internal' key of options is reserved for objects and functions
@@ -454,413 +839,55 @@ module.exports = function init(seneca_options?: any, more_options?: any) {
 }
 
 // Expose Seneca prototype for easier monkey-patching
-module.exports.Seneca = Seneca
+// module.exports.Seneca = Seneca
 
 // To reference builtin loggers when defining logging options.
-module.exports.loghandler = Legacy.loghandler
+makeSeneca.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
-module.exports.use = function top_use() {
+const use = function top_use() {
   var argsarr = new Array(arguments.length)
   for (var l = 0; l < argsarr.length; ++l) {
     argsarr[l] = arguments[l]
   }
 
-  var instance = module.exports()
+  var instance: Instance = makeSeneca()
 
   return instance.use.apply(instance, argsarr)
 }
+makeSeneca.use = use
+
 
 // Makes require('seneca').test() work.
-module.exports.test = function top_test() {
+const test = function top_test() {
   return module.exports().test(...arguments)
 }
+makeSeneca.test = test
+
 
 // Makes require('seneca').quiet() work.
-module.exports.quiet = function top_quiet() {
+const quiet = function top_quiet() {
   return module.exports().quiet(...arguments)
 }
+makeSeneca.quiet = quiet
 
-module.exports.util = seneca_util
-module.exports.valid = Gubu
 
-module.exports.test$ = { intern: intern }
+makeSeneca.util = seneca_util
+makeSeneca.valid = Gubu
 
-// Create a new Seneca instance.
-function make_seneca(initial_opts?: any) {
-  // Create a private context.
-  var private$: any = make_private()
-  private$.error = error
+makeSeneca.test$ = { intern: intern }
 
-  // Create a new root Seneca instance.
-  var root$: any = new (Seneca as any)()
 
-  // Expose private data to plugins.
-  root$.private$ = private$
+const Seneca: MakeSeneca = makeSeneca
 
-  // Resolve initial options.
-  private$.optioner = resolve_options(module, option_defaults, initial_opts)
-  var start_opts = private$.optioner.get()
 
-  // Console print utilities
-  private$.print = {
-    log: start_opts.internal.print.log || Print.internal_log,
-    err: start_opts.internal.print.err || Print.internal_err,
-  }
-
-  // These need to come from options as required during construction.
-  private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
-
-  var soi_subrouter = start_opts.internal.subrouter || {}
-  private$.subrouter = {
-    // Check for legacy inward router
-    inward: soi_subrouter.inward || Patrun({ gex: true }),
-    outward: soi_subrouter.outward || Patrun({ gex: true }),
-  }
-
-  // Setup event handlers, if defined
-  var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
-  event_names.forEach(function(event_name) {
-    if ('function' === typeof start_opts.events[event_name]) {
-      root$.on(event_name, start_opts.events[event_name])
-    }
-  })
-
-  // Create internal tools.
-  private$.actnid = Nid({ length: start_opts.idlen })
-  private$.didnid = Nid({ length: start_opts.didlen })
-
-  // Instance specific incrementing counters to create unique function names
-  private$.next_action_id = Common.autoincr()
-
-  var callpoint = (private$.callpoint = Common.make_callpoint(
-    start_opts.debug.callpoint
-  ))
-
-  // Define public member variables.
-  root$.start_time = Date.now()
-  root$.context = {}
-  root$.version = Package.version
-
-  // TODO: rename in 4.x as "args" terminology is legacy
-  root$.fixedargs = {}
-
-  root$.flags = {
-    closed: false,
-  }
-
-  Object.defineProperty(root$, 'root', { value: root$ })
-
-  private$.history = Common.history(start_opts.history)
-
-  const ready = make_ready(root$)
-
-  // API for Ordu-defined processes.
-  root$.order = {}
-
-  // TODO: rename back to plugins
-  const api_use = Plugin.api_use(callpoint, {
-    debug: !!start_opts.debug.ordu || !!start_opts.order.use.debug,
-  })
-  root$.use = api_use.use // Define and load a plugin.
-
-  root$.order.plugin = api_use.ordu
-
-  // Seneca methods. Official API.
-  root$.toString = API.toString
-  root$.has = API.has // True if the given pattern has an action.
-  root$.find = API.find // Find the action definition for a pattern.
-  root$.list = API.list // List the patterns added to this instance.
-  root$.status = API.status // Get the status if this instance.
-  root$.reply = API.reply // Reply to a submitted message.
-  root$.sub = Sub.api_sub // Subscribe to messages.
-  root$.list_plugins = API.list_plugins // List the registered plugins.
-  root$.find_plugin = API.find_plugin // Find the plugin definition.
-  root$.has_plugin = API.has_plugin // True if the plugin is registered.
-  root$.ignore_plugin = API.ignore_plugin // Ignore plugin and don't register it.
-  root$.listen = API.listen(callpoint) // Listen for inbound messages.
-  root$.client = API.client(callpoint) // Send outbound messages.
-  root$.gate = API.gate // Create a delegate that executes actions in sequence.
-  root$.ungate = API.ungate // Execute actions in parallel.
-  root$.translate = API.translate // Translate message to new pattern.
-  root$.ping = API.ping // Generate ping response.
-  root$.test = API.test // Set test mode.
-  root$.quiet = API.quiet // Convenience method to set logging level to `warn+`.
-  root$.export = API.export // Export plain objects from a plugin.
-  root$.depends = API.depends // Check for plugin dependencies.
-  root$.delegate = API.delegate // Create an action-specific Seneca instance.
-  root$.prior = Prior.api_prior // Call the previous action definition for pattern.
-  root$.inward = API.inward // Add a modifier function for messages inward
-  root$.outward = API.outward // Add a modifier function for responses outward
-  root$.error = API.error // Set global error handler, or generate Seneca Error
-  root$.fail = start_opts.legacy.fail
-    ? Legacy.make_legacy_fail(start_opts)
-    : API.fail // Throw a Seneca error
-  root$.explain = API.explain // Toggle top level explain capture
-  root$.decorate = API.decorate // Decorate seneca object with functions
-  root$.seneca = API.seneca
-  root$.close = API.close(callpoint) // Close and shutdown plugins.
-  root$.options = API.options // Get and set options.
-  root$.fix = API.fix // fix pattern arguments, message arguments, and custom meta
-  root$.wrap = API.wrap // wrap each found pattern with a new action
-  root$.add = Add.api_add // Add a pattern an associated action.
-  root$.act = Act.api_act // Submit a message and trigger the associated action.
-  root$.ready = ready.api_ready // Callback when plugins initialized.
-  root$.valid = Gubu // Expose Gubu shape builders
-
-  root$.internal = function() {
-    return {
-      ordu: {
-        use: api_use.ordu,
-      },
-    }
-  }
-
-  // Non-API methods.
-  // root$.register = Plugins.register(callpoint)
-
-  // DEPRECATE IN 4.x
-  root$.findact = root$.find
-  root$.plugins = API.list_plugins
-  root$.findplugin = API.find_plugin
-  root$.hasplugin = API.has_plugin
-  root$.hasact = Legacy.hasact
-  root$.act_if = Legacy.act_if
-  root$.findpins = Legacy.findpins
-  root$.pinact = Legacy.findpins
-  root$.next_act = Legacy.next_act
-
-  // Identifier generator.
-  root$.idgen = Nid({ length: start_opts.idlen })
-
-  // Instance tag
-  start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag
-
-  // Create a unique identifer for this instance.
-  root$.id =
-    start_opts.id$ ||
-    root$.idgen() +
-    '/' +
-    root$.start_time +
-    '/' +
-    process.pid +
-    '/' +
-    root$.version +
-    '/' +
-    start_opts.tag
-
-  // The instance tag, useful for grouping instances.
-  root$.tag = start_opts.tag
-
-  if (start_opts.debug.short_logs || start_opts.log.short) {
-    start_opts.idlen = 2
-    root$.idgen = Nid({ length: start_opts.idlen })
-    root$.id = root$.idgen() + '/' + start_opts.tag
-  }
-
-  root$.fullname = 'Seneca/' + root$.id
-
-  root$.die = Common.makedie(root$, {
-    type: 'sys',
-    plugin: 'seneca',
-    tag: root$.version,
-    id: root$.id,
-    callpoint: callpoint,
-  })
-
-  root$.util = seneca_util
-
-  private$.exports = { options: start_opts }
-  private$.decorations = {}
-
-  // Error events are fatal, unless you're undead.  These are not the
-  // same as action errors, these are unexpected internal issues.
-  root$.on('error', root$.die)
-
-  private$.ge = GateExecutor({
-    timeout: start_opts.timeout,
-  })
-    //.clear(action_queue_clear)
-    .clear(ready.clear_ready)
-    .start()
-
-  // TODO: this should be a plugin
-  // setup status log
-  if (start_opts.status.interval > 0 && start_opts.status.running) {
-    private$.stats = private$.stats || {}
-    private$.status_interval = setInterval(function status() {
-      root$.log.info({
-        kind: 'status',
-        alive: Date.now() - private$.stats.start,
-        act: private$.stats.act,
-      })
-    }, start_opts.status.interval)
-  }
-
-  if (start_opts.stats) {
-    private$.timestats = new Stats.NamedStats(
-      start_opts.stats.size,
-      start_opts.stats.interval
-    )
-
-    if (start_opts.stats.running) {
-      setInterval(function stats() {
-        private$.timestats.calculate()
-      }, start_opts.stats.interval)
-    }
-  }
-
-  // private$.plugins = {}
-  private$.plugin_order = { byname: [], byref: [] }
-  private$.use = UsePlugin({
-    prefix: ['seneca-', '@seneca/'],
-    module: start_opts.internal.module || module,
-    msgprefix: false,
-    builtin: '',
-    merge_defaults: false,
-  })
-
-  // TODO: provide an api to add these
-  private$.action_modifiers = [
-    function add_rules_from_validate_annotation(actdef: any) {
-      actdef.rules = Object.assign(
-        actdef.rules,
-        deep({}, actdef.func.validate || {})
-      )
-    },
-  ]
-
-  private$.sub = { handler: null, tracers: [] }
-
-  root$.order.add = new Ordu({
-    name: 'add',
-    debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
-  })
-    .add(Add.task.prepare)
-    .add(Add.task.plugin)
-    .add(Add.task.callpoint)
-    .add(Add.task.flags)
-    .add(Add.task.action)
-    .add(Add.task.prior)
-    .add(Add.task.rules)
-    .add(Add.task.register)
-    .add(Add.task.modify)
-
-  root$.order.inward = new Ordu({
-    name: 'inward',
-    debug: !!start_opts.debug.ordu || !!start_opts.order.inward.debug,
-  })
-    .add(Inward.inward_msg_modify)
-    .add(Inward.inward_closed)
-    .add(Inward.inward_act_cache)
-    .add(Inward.inward_act_default)
-    .add(Inward.inward_act_not_found)
-    .add(Inward.inward_act_stats)
-    .add(Inward.inward_validate_msg)
-    .add(Inward.inward_warnings)
-    .add(Inward.inward_msg_meta)
-    .add(Inward.inward_limit_msg)
-    .add(Inward.inward_prepare_delegate)
-    .add(Inward.inward_sub)
-    .add(Inward.inward_announce)
-
-  root$.order.outward = new Ordu({
-    name: 'outward',
-    debug: !!start_opts.debug.ordu || !!start_opts.order.outward.debug,
-  })
-    .add(Outward.outward_make_error)
-    .add(Outward.outward_act_stats)
-    .add(Outward.outward_act_cache)
-    .add(Outward.outward_res_object)
-    .add(Outward.outward_res_entity)
-    .add(Outward.outward_msg_meta)
-    .add(Outward.outward_trace)
-    .add(Outward.outward_sub)
-    .add(Outward.outward_announce)
-    .add(Outward.outward_act_error)
-
-  // Configure logging
-
-  // Mark logger as being externally defined from options
-  if (start_opts.logger && 'object' === typeof start_opts.logger) {
-    start_opts.logger.from_options$ = true
-  }
-
-  // Load logger and update log options
-  var logspec = private$.logging.build_log(root$)
-  start_opts = private$.exports.options = private$.optioner.set({
-    log: logspec,
-  })
-
-  if (start_opts.test) {
-    root$.test('string' === typeof start_opts.test ? start_opts.test : null)
-  }
-
-  if (start_opts.quiet) {
-    root$.quiet()
-  }
-
-  private$.exit_close = function() {
-    root$.close(function root_exit_close(err: any) {
-      if (err && true != private$.optioner.get().quiet) {
-        private$.print.err(err)
-      }
-
-      start_opts.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0)
-    })
-  }
-
-  addActions(root$)
-
-  // root$.act('role:seneca,cmd:pingx')
-
-  if (!start_opts.legacy.transport) {
-    start_opts.legacy.error = false
-
-    // TODO: move to static options in Seneca 4.x
-    start_opts.transport = deep(
-      {
-        port: 62345,
-        host: '127.0.0.1',
-        path: '/act',
-        protocol: 'http',
-      },
-      start_opts.transport
-    )
-
-    transport(root$)
-  }
-
-  Print(root$, start_opts.debug.argv || process.argv)
-
-  Common.each(start_opts.system.close_signals, function(active: any, signal: any) {
-    if (active) {
-      process.once(signal, private$.exit_close)
-    }
-  })
-
-  return root$
+export type {
+  Instance,
+  MakeSeneca,
 }
 
-// Private member variables of Seneca object.
-function make_private() {
-  return {
-    logging: make_logging(),
-    stats: {
-      start: Date.now(),
-      act: {
-        calls: 0,
-        done: 0,
-        fails: 0,
-        cache: 0,
-      },
-      actmap: {},
-    },
-    actdef: {},
-    transport: {
-      register: [],
-    },
-    plugins: {},
-    ignore_plugins: {},
-  }
+
+export {
+  makeSeneca,
+  Seneca,
 }

@@ -39,7 +39,7 @@ function action_seneca_fatal(this: any, msg: any, reply: any) {
 }
 
 function action_seneca_close(this: any, msg: any, reply: any) {
-  this.emit('close')
+  this.emit && this.emit('close')
   reply()
 }
 

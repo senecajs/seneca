@@ -69,7 +69,7 @@ function inward_announce(spec: any) {
     ctx.seneca.on_act_in(ctx.actdef, data.msg, data.meta)
   }
 
-  ctx.seneca.emit('act-in', data.msg, null, data.meta)
+  ctx.seneca.emit && ctx.seneca.emit('act-in', data.msg, null, data.meta)
 }
 
 

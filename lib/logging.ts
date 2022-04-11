@@ -308,7 +308,7 @@ function build_log(self: any) {
     }
 
     // Log event is called on all logs - they are not filtered by level
-    instance.emit('log', entry)
+    instance.emit && instance.emit('log', entry)
 
     var level_match = logspec.live_level <= entry.level
 

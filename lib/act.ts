@@ -485,7 +485,7 @@ const intern = (module.exports.intern = {
       })
     )
 
-    instance.emit('act-err', msg, err, data.res)
+    instance.emit && instance.emit('act-err', msg, err, data.res)
 
     if (opts.errhandler) {
       opts.errhandler.call(instance, err, err.meta$)

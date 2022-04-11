@@ -3,6 +3,7 @@
   "description": "A Microservices Framework for Node.js",
   "version": "3.26.0",
   "license": "MIT",
+  "main": "node-seneca.js",
   "homepage": "http://senecajs.org",
   "keywords": [
     "micro",
@@ -67,7 +68,6 @@
   "engines": {
     "node": ">=10"
   },
-  "main": "seneca.js",
   "scripts": {
     "watch": "tsc -w -d",
     "build": "tsc -d",

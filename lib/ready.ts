@@ -59,7 +59,7 @@ function clear_ready(this: any) {
   const root = this
   var private$ = root.private$
 
-  root.emit('ready')
+  root.emit && root.emit('ready')
   execute_ready(root, private$.ready_list.shift())
 
   if (private$.ge.isclear()) {

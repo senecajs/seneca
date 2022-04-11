@@ -540,41 +540,17 @@ function make_tasks(): any {
       let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
 
       let err: Error | undefined = void 0
-      let joi_schema: any = null
-      let Joi = delegate.util.Joi
 
       let defaults_values =
         ('function' === typeof (defaults) && !defaults.gubu) ?
-          defaults({ valid, Joi }) : defaults
+          defaults({ valid }) : defaults
 
-      if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
-        let optionShape =
-          // TODO: use Gubu.isShape
-          (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :
-            delegate.valid(defaults_values)
-        resolved_options = optionShape(fullopts)
-      }
-      else {
-        let joi_schema: any = intern.prepare_spec(
-          Joi,
-          defaults_values,
-          { allow_unknown: true },
-          {}
-        )
+      let optionShape =
+        // TODO: use Gubu.isShape
+        (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :
+          delegate.valid(defaults_values)
 
-        let joi_out = joi_schema.validate(fullopts)
-
-        if (joi_out.error) {
-          err = delegate.error('invalid_plugin_option', {
-            name: fullname,
-            err_msg: joi_out.error.message,
-            options: fullopts,
-          })
-        }
-        else {
-          resolved_options = joi_out.value
-        }
-      }
+      resolved_options = optionShape(fullopts)
 
       return {
         op: 'seneca_options',
@@ -582,7 +558,6 @@ function make_tasks(): any {
         out: {
           plugin: {
             options: resolved_options,
-            options_schema: joi_schema
           }
         }
       }
@@ -885,6 +860,7 @@ function make_intern() {
     },
 
 
+    /*
     // copied from https://github.com/rjrodger/optioner
     // TODO: remove unnecessary vars+code
     prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
@@ -984,6 +960,8 @@ function make_intern() {
         return joiobj
       }
     }
+
+    */
   }
 }
 
