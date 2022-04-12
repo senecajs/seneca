@@ -9,6 +9,11 @@ import type {
 } from './lib/types'
 
 
+
+
+
+
+
 // External modules.
 const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
@@ -41,6 +46,8 @@ const Package = require('./package.json')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
 const { transport } = require('./lib/transport')
+
+const EventEmitter = require('./lib/ee3')
 
 
 // Internal data and utilities.
@@ -272,7 +279,7 @@ const option_defaults = {
     action_signature: false,
 
     // Use old error handling.
-    error: true,
+    error: false,
 
     // Use old error codes. REMOVE in Seneca 4.x
     error_codes: false,
@@ -290,16 +297,16 @@ const option_defaults = {
     meta_arg_remove: false,
 
     // Use seneca-transport plugin.
-    transport: true,
+    transport: false,
 
     // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: true,
+    timeout_string: false,
 
     // If false, use Gubu for message validation.
     rules: false,
 
     // If false, use Gubu for option validation (including plugin defaults)
-    options: true,
+    options: false,
   }),
 
   // Processing task ordering.
@@ -393,9 +400,11 @@ class InstanceImpl implements Instance {
   fixedmeta = undefined
   start_time = -1
 
+  private$: any
 
   // Create a new Seneca instance.
   constructor(initial_opts?: any) {
+
     // Create a private context.
     var private$: any = make_private()
     private$.error = error
@@ -719,24 +728,18 @@ class InstanceImpl implements Instance {
 
     addActions(root$)
 
-    // root$.act('role:seneca,cmd:pingx')
+    // TODO: move to static options in Seneca 4.x
+    start_opts.transport = deep(
+      {
+        port: 62345,
+        host: '127.0.0.1',
+        path: '/act',
+        protocol: 'http',
+      },
+      start_opts.transport
+    )
 
-    if (!start_opts.legacy.transport) {
-      start_opts.legacy.error = false
-
-      // TODO: move to static options in Seneca 4.x
-      start_opts.transport = deep(
-        {
-          port: 62345,
-          host: '127.0.0.1',
-          path: '/act',
-          protocol: 'http',
-        },
-        start_opts.transport
-      )
-
-      transport(root$)
-    }
+    transport(root$)
 
     Print(root$, start_opts.debug.argv || process.argv)
 
@@ -748,6 +751,20 @@ class InstanceImpl implements Instance {
 
     return root$
   }
+
+
+  // TODO: would Instance.prototype.on = eventer.on work?
+  on(eventname: string, fn: Function, context?: any) {
+    this.private$.eventer.on(eventname, fn, context)
+    return this
+  }
+
+  emit(eventname: any[], ...args: any[]) {
+    this.private$.eventer.emit(eventname, ...args)
+    return this
+  }
+
+
 
   // Provide useful description when convered to JSON.
   // Cannot be instantiated from JSON.
@@ -786,6 +803,7 @@ function make_private() {
     },
     plugins: {},
     ignore_plugins: {},
+    eventer: new EventEmitter()
   }
 }
 
@@ -811,11 +829,6 @@ const makeSeneca = (seneca_options?: any, more_options?: any): Instance => {
   seneca.log.debug({ kind: 'notice', options: { ...options, internal: null } })
 
   Print.print_options(seneca, options)
-
-  // Register default plugins, unless turned off by options.
-  if (options.legacy.transport && options.default_plugins.transport) {
-    seneca.use(require('seneca-transport'))
-  }
 
   // Register plugins specified in options.
   options.plugins = null == options.plugins ? {} : options.plugins
@@ -851,7 +864,7 @@ const use = function top_use() {
     argsarr[l] = arguments[l]
   }
 
-  var instance: Instance = makeSeneca()
+  let instance: Instance = makeSeneca()
 
   return instance.use.apply(instance, argsarr)
 }
@@ -860,14 +873,14 @@ makeSeneca.use = use
 
 // Makes require('seneca').test() work.
 const test = function top_test() {
-  return module.exports().test(...arguments)
+  return makeSeneca().test(...arguments)
 }
 makeSeneca.test = test
 
 
 // Makes require('seneca').quiet() work.
 const quiet = function top_quiet() {
-  return module.exports().quiet(...arguments)
+  return makeSeneca().quiet(...arguments)
 }
 makeSeneca.quiet = quiet
 

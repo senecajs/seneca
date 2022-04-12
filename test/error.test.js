@@ -18,7 +18,7 @@ const Seneca = require('..')
 
 const testopts = { log: 'silent' }
 
-const make_test_transport = TransportStubs.make_test_transport
+const make_simple_transport = TransportStubs.make_simple_transport
 
 describe('error', function () {
   it('fail', function (fin) {
@@ -41,21 +41,21 @@ describe('error', function () {
   it('act_not_found', act_not_found)
 
   it('exec_action_throw_basic', exec_action_throw_basic)
-  it('exec_action_throw_basic_legacy', exec_action_throw_basic_legacy)
+  // it('exec_action_throw_basic_legacy', exec_action_throw_basic_legacy)
   it('exec_action_throw_nolog', exec_action_throw_nolog)
-  it('exec_action_errhandler_throw', exec_action_errhandler_throw)
+  // it('exec_action_errhandler_throw', exec_action_errhandler_throw)
 
   it('exec_action_result', exec_action_result)
   it('exec_deep_action_result', exec_deep_action_result)
   it('exec_remote_action_result', exec_remote_action_result)
 
-  it('exec_action_result_legacy', exec_action_result_legacy)
+  // it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)
-  it('exec_action_errhandler_result', exec_action_errhandler_result)
+  // it('exec_action_errhandler_result', exec_action_errhandler_result)
 
-  it('action_callback', action_callback_legacy)
+  // it('action_callback', action_callback_legacy)
 
-  it('legacy_fail', legacy_fail)
+  // it('legacy_fail', legacy_fail)
 
   it('types', types)
 
@@ -82,7 +82,7 @@ describe('error', function () {
       })
 
     si.act('foo:1', function (err) {
-      expect(err.code).equals('act_execute')
+      expect(err.message).equals('p3')
 
       // Should only print full error with stack once
       expect((log.join('').match(/Error/g) || []).length).equals(1)
@@ -90,6 +90,7 @@ describe('error', function () {
     })
   })
 
+  
   it('deep-once-test-log', function (fin) {
     let log = []
     const si = Seneca({
@@ -110,7 +111,7 @@ describe('error', function () {
       })
 
     si.act('qaz:4', function (err) {
-      expect(err.code).equals('act_execute')
+      expect(err.message).equals('p0')
 
       // Should only print full error with stack once
       expect((log.join('').match(/Error/g) || []).length).equals(1)
@@ -252,20 +253,22 @@ describe('error', function () {
   }
 
   function exec_remote_action_result(done) {
-    const tt = make_test_transport()
+    const tt = make_simple_transport()
 
-    Seneca({ tag: 's0', legacy: { error: false }, log: 'silent' })
+    Seneca({ tag: 's0' })
+      .test()
+      .quiet()
       .error(fail_assert(done))
       .use(tt)
       .add('a:1', function (msg, reply) {
         reply(new Error('ERAR'))
       })
-      .listen({ type: 'test', pin: 'a:1' })
+      .listen({ type: 'simple', pin: 'a:1' })
       .ready(function () {
         Seneca({ tag: 'c0', legacy: { error: false }, log: 'silent' })
           .error(fail_assert(done))
           .use(tt)
-          .client({ type: 'test', pin: 'a:1' })
+          .client({ type: 'simple', pin: 'a:1' })
           .act('a:1', function (err) {
             assert.equal('ERAR', err.message)
             return done()
@@ -341,6 +344,7 @@ describe('error', function () {
     })
   }
 
+  /*
   function exec_action_throw_basic_legacy(done) {
     const ctxt = { errlog: null, done: done, log: true, name: 'throw' }
     const si = make_seneca(ctxt)
@@ -362,7 +366,9 @@ describe('error', function () {
 
     test_action(si, ctxt)
   }
+  */
 
+  
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
   function exec_action_throw_nolog(done) {
@@ -401,6 +407,7 @@ describe('error', function () {
     }
   }
 
+  /*
   function exec_action_errhandler_throw(done) {
     const ctxt = { errlog: null }
     const si = make_seneca(ctxt)
@@ -561,6 +568,7 @@ describe('error', function () {
       }
     })
   }
+  */
 
   function make_seneca(ctxt) {
     const si = Seneca(testopts)
@@ -660,6 +668,8 @@ describe('error', function () {
     }
   }
 
+  
+  /*
   function action_callback_legacy(done) {
     const ctxt = { errlog: null }
     const si = make_seneca(ctxt)
@@ -717,6 +727,7 @@ describe('error', function () {
     })
   }
 
+
   function legacy_fail(done) {
     const si = Seneca({
       log: 'silent',
@@ -758,22 +769,24 @@ describe('error', function () {
     assert.equal('FOO', err.code)
     assert.deepEqual({ BAR: 1 }, err.details)
   }
+  */
 
+  
   function types(fin) {
-    const si = Seneca({ log: 'silent' })
+    const si = Seneca().test().quiet() // ({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
       throw new TypeError('t0')
     })
 
     si.error(function (err) {
-      expect(err.code).equal('act_execute')
+      expect(err.meta$.err.code).equal('act_execute')
       fin()
     })
 
     si.act('a:1', function (err, out) {
       expect(out).not.exist()
-      expect(err.code).equal('act_execute')
+      expect(err.message).equal('t0')
     })
   }
 })

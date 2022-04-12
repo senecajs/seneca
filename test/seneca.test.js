@@ -98,12 +98,12 @@ describe('seneca', function () {
     var si = Seneca({ id$: 'a' }, testopts)
     si.start_time = 123
     expect(JSON.stringify(si)).equal(
-      '{"isSeneca":true,"id":"a","fixedargs":{},"start_time":123,"version":"' +
+      '{"isSeneca":true,"id":"a","did":"","fixedargs":{},"start_time":123,"version":"' +
         Package.version +
         '"}'
     )
     expect(Util.inspect(si).replace(/\n */g, ' ')).equal(
-      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: undefined, start_time: 123, version: '" +
+      "{ isSeneca: true, id: 'a', did: '', fixedargs: {}, fixedmeta: undefined, start_time: 123, version: '" +
         Package.version +
         "' }"
     )
@@ -131,21 +131,20 @@ describe('seneca', function () {
     })
   })
 
+  
   it('happy-error', function (done) {
-    Seneca({ log: 'silent' })
+    Seneca().test().quiet()
       .add('happy_error:1', function (args, done) {
         done(new Error('happy-error'))
       })
       .act('happy_error:1', function (err) {
         assert.ok(err)
-        assert.equal(
-          'seneca: Action happy_error:1 failed: happy-error.',
-          err.message
-        )
+        assert.equal('happy-error',err.message)
         done()
       })
   })
 
+  
   it('errhandler', function (done) {
     var tmp = {}
 

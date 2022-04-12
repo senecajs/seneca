@@ -121,6 +121,7 @@ describe('order', function () {
 
         s0.use(p1)
 
+        /*
         var Joi = s0.util.Joi
 
         // console.log('TASKLIST',s0.order.plugin.tasks().map(t=>t.name).join('\n'))
@@ -132,7 +133,9 @@ describe('order', function () {
         }).default()
 
         // console.log(Joi.isSchema(joidef,{legacy:true}))
+        */
 
+        
         s0.use({
           name: 'p2',
           define: function (options) {
@@ -143,7 +146,12 @@ describe('order', function () {
             }
           },
 
-          defaults: joidef,
+          // defaults: joidef,
+          defaults: {
+            e: 'v0',
+            c: Number,
+            f: Number,
+          }
         })
 
         s0.ready(function () {

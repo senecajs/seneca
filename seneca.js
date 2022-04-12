@@ -30,6 +30,7 @@ const Package = require('./package.json');
 const { Print } = require('./lib/print');
 const { addActions } = require('./lib/actions');
 const { transport } = require('./lib/transport');
+const EventEmitter = require('./lib/ee3');
 // Internal data and utilities.
 const { error, deep } = Common;
 // Seneca options.
@@ -199,7 +200,7 @@ const option_defaults = {
         // Action callback must always have signature callback(error, result).
         action_signature: false,
         // Use old error handling.
-        error: true,
+        error: false,
         // Use old error codes. REMOVE in Seneca 4.x
         error_codes: false,
         // Use old fail method
@@ -211,13 +212,13 @@ const option_defaults = {
         // Remove meta argument in action arguments and callbacks.
         meta_arg_remove: false,
         // Use seneca-transport plugin.
-        transport: true,
+        transport: false,
         // Insert "[TIMEOUT]" into timeout error message
-        timeout_string: true,
+        timeout_string: false,
         // If false, use Gubu for message validation.
         rules: false,
         // If false, use Gubu for option validation (including plugin defaults)
-        options: true,
+        options: false,
     }),
     // Processing task ordering.
     order: {
@@ -557,18 +558,14 @@ class InstanceImpl {
             });
         };
         addActions(root$);
-        // root$.act('role:seneca,cmd:pingx')
-        if (!start_opts.legacy.transport) {
-            start_opts.legacy.error = false;
-            // TODO: move to static options in Seneca 4.x
-            start_opts.transport = deep({
-                port: 62345,
-                host: '127.0.0.1',
-                path: '/act',
-                protocol: 'http',
-            }, start_opts.transport);
-            transport(root$);
-        }
+        // TODO: move to static options in Seneca 4.x
+        start_opts.transport = deep({
+            port: 62345,
+            host: '127.0.0.1',
+            path: '/act',
+            protocol: 'http',
+        }, start_opts.transport);
+        transport(root$);
         Print(root$, start_opts.debug.argv || process.argv);
         Common.each(start_opts.system.close_signals, function (active, signal) {
             if (active) {
@@ -576,6 +573,15 @@ class InstanceImpl {
             }
         });
         return root$;
+    }
+    // TODO: would Instance.prototype.on = eventer.on work?
+    on(eventname, fn, context) {
+        this.private$.eventer.on(eventname, fn, context);
+        return this;
+    }
+    emit(eventname, ...args) {
+        this.private$.eventer.emit(eventname, ...args);
+        return this;
     }
     // Provide useful description when convered to JSON.
     // Cannot be instantiated from JSON.
@@ -611,6 +617,7 @@ function make_private() {
         },
         plugins: {},
         ignore_plugins: {},
+        eventer: new EventEmitter()
     };
 }
 // Create a Seneca instance.
@@ -626,10 +633,6 @@ const makeSeneca = (seneca_options, more_options) => {
     // that provide functionality, and are thus not really printable
     seneca.log.debug({ kind: 'notice', options: { ...options, internal: null } });
     Print.print_options(seneca, options);
-    // Register default plugins, unless turned off by options.
-    if (options.legacy.transport && options.default_plugins.transport) {
-        seneca.use(require('seneca-transport'));
-    }
     // Register plugins specified in options.
     options.plugins = null == options.plugins ? {} : options.plugins;
     var pluginkeys = Object.keys(options.plugins);
@@ -659,18 +662,18 @@ const use = function top_use() {
     for (var l = 0; l < argsarr.length; ++l) {
         argsarr[l] = arguments[l];
     }
-    var instance = makeSeneca();
+    let instance = makeSeneca();
     return instance.use.apply(instance, argsarr);
 };
 makeSeneca.use = use;
 // Makes require('seneca').test() work.
 const test = function top_test() {
-    return module.exports().test(...arguments);
+    return makeSeneca().test(...arguments);
 };
 makeSeneca.test = test;
 // Makes require('seneca').quiet() work.
 const quiet = function top_quiet() {
-    return module.exports().quiet(...arguments);
+    return makeSeneca().quiet(...arguments);
 };
 makeSeneca.quiet = quiet;
 makeSeneca.util = seneca_util;

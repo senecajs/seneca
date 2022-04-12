@@ -332,11 +332,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          // hello entry, legacy-transport ready entry
-          // remove legacy-transport entry in 4.x
-
-          expect(log.length).to.equal(2)
-
+          expect(log.length).to.equal(1)
           quiet()
         })
     }
@@ -408,10 +404,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          // hello entry, legacy-transport ready entry
-          // remove legacy-transport entry in 4.x
-          expect(log.length).to.equal(2)
-
+          expect(log.length).to.equal(1)
           json()
         })
     }
@@ -425,8 +418,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(2)
-
+          expect(log.length).to.equal(1)
           flat()
         })
     }
@@ -438,8 +430,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(2)
-
+          expect(log.length).to.equal(1)
           logger_test()
         })
     }
@@ -451,8 +442,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(2)
-
+          expect(log.length).to.equal(1)
           do_test()
         })
     }

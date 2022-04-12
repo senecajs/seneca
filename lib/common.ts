@@ -20,7 +20,7 @@ const { Print } = require('./print')
 
 
 
-
+// TODO: make more useful by including more context - plugin, msg, etc
 const error =
   (exports.error =
     exports.eraro =

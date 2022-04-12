@@ -35,7 +35,7 @@ describe('actions', function () {
   })
 
   it('cmd_stats', function (fin) {
-    var si = Seneca().add('a:1').act('a:1')
+    var si = Seneca().test().add('a:1').act('a:1')
 
     si.test(fin).act('role:seneca,cmd:stats', function (err, out) {
       expect(out.act).exists()

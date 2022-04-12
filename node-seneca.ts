@@ -3,7 +3,7 @@
 
 
 // Node API modules.
-const Events = require('events')
+// const Events = require('events')
 const Util = require('util')
 
 
@@ -19,8 +19,8 @@ function makeNodeSeneca(seneca_options?: any, more_options?: any): Instance {
   instance[Util.inspect.custom] = instance.toJSON
 
   // FIX: does not work? events for browser?
-  Events.EventEmitter.call(instance)
-  instance.setMaxListeners && instance.setMaxListeners(0)
+  // Events.EventEmitter.call(instance)
+  // instance.setMaxListeners && instance.setMaxListeners(0)
 
   instance.private$.Util = Util
 

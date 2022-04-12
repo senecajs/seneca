@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Seneca = void 0;
 // Node API modules.
-const Events = require('events');
+// const Events = require('events')
 const Util = require('util');
 const seneca_1 = require("./seneca");
 // Seneca is an EventEmitter.
@@ -11,8 +11,8 @@ function makeNodeSeneca(seneca_options, more_options) {
     const instance = (0, seneca_1.makeSeneca)(seneca_options, more_options);
     instance[Util.inspect.custom] = instance.toJSON;
     // FIX: does not work? events for browser?
-    Events.EventEmitter.call(instance);
-    instance.setMaxListeners && instance.setMaxListeners(0);
+    // Events.EventEmitter.call(instance)
+    // instance.setMaxListeners && instance.setMaxListeners(0)
     instance.private$.Util = Util;
     return instance;
 }

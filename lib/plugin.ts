@@ -518,7 +518,8 @@ function make_tasks(): any {
         so.plugin[shortname + '$' + plugin.tag]
       )
 
-      let base: any = {}
+      let base: any = {
+      }
 
       // NOTE: plugin error codes are in their own namespaces
       // TODO: test this!!!
@@ -545,12 +546,28 @@ function make_tasks(): any {
         ('function' === typeof (defaults) && !defaults.gubu) ?
           defaults({ valid }) : defaults
 
-      let optionShape =
-        // TODO: use Gubu.isShape
-        (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :
-          delegate.valid(defaults_values)
+      let optionShape: any
 
-      resolved_options = optionShape(fullopts)
+      // TODO: use Gubu.isShape
+      if (defaults_values.gubu && defaults_values.gubu.gubu$) {
+        optionShape = defaults_values
+      }
+
+      // Only define a Gubu shape if defaults are provided.
+      else if (0 < Object.keys(defaults_values).length) {
+        defaults_values.errors = defaults_values.errors || delegate.valid.Skip({})
+        optionShape = delegate.valid(defaults_values)
+      }
+
+
+      if (optionShape) {
+        try {
+          resolved_options = optionShape(fullopts)
+        }
+        catch (ex: any) {
+          err = ex
+        }
+      }
 
       return {
         op: 'seneca_options',

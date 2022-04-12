@@ -5,11 +5,12 @@ var Async = require('async')
 var Util = require('util')
 
 
-exports.make_test_transport = make_test_transport
-exports.make_balance_transport = make_balance_transport
+// exports.make_test_transport = make_test_transport
+// exports.make_balance_transport = make_balance_transport
+
 exports.make_simple_transport = make_simple_transport
 
-
+/*
 // A simple transport that uses async.queue as the transport mechanism
 function make_test_transport () {
   test_transport.outmsgs = []
@@ -22,6 +23,10 @@ function make_test_transport () {
 
     var tu = seneca.export('transport/utils')
 
+    console.log('TU', tu)
+    console.log('EX', this.private$.exports)
+
+    
     seneca.add({role: 'transport', hook: 'listen', type: 'test'}, hook_listen_test)
     seneca.add({role: 'transport', hook: 'client', type: 'test'}, hook_client_test)
 
@@ -99,12 +104,6 @@ function make_balance_transport () {
       transport: {
         balance: {
           makehandle: function () {
-            /*
-            return function (pat, action) {
-              targets.push(action)
-            }
-            */
-
             return function (actdef) {
               targets.push(actdef.func)
             }
@@ -151,7 +150,7 @@ function make_balance_transport () {
     }
   }
 }
-
+*/
 
 
 // A simple transport that uses async.queue as the transport mechanism
