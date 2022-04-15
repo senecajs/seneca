@@ -51,7 +51,7 @@ function print_reply(this: any, err: any, out: any) {
 }
 
 function internal_log(...args: any) {
-  // ensure `console.log` does not appear in source code
+  // ensure `console[dot]log` does not appear in source code
   var konsole_log = console['log']
   konsole_log.apply(konsole_log, args)
 }

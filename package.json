@@ -109,7 +109,7 @@
     "@hapi/code": "^8.0.7",
     "@hapi/hoek": "^9.2.1",
     "@hapi/lab": "^24.6.0",
-    "@seneca/test-plugin": "0.0.1",
+    "@seneca/test-plugin": "0.1.0",
     "@types/node": "^17.0.23",
     "async": "^3.2.3",
     "bench": "^0.3.6",

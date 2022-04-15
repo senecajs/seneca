@@ -61,32 +61,6 @@ describe('options', function () {
   })
 
 
-  // DEPRECATED: Remove when Seneca >= 4.x
-  it('options-legacy', function (fin) {
-    var si = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
-    si.test(fin)
-
-    si.use('options', {internal:{e: 5, foo: {ee: 5}}})
-
-    var opts = si.options()
-    assert.equal(1, opts.internal.a)
-    assert.equal(4, opts.internal.d)
-    assert.equal(5, opts.internal.e)
-    assert.equal(1, opts.internal.foo.aa)
-    assert.equal(4, opts.internal.foo.dd)
-    assert.equal(5, opts.internal.foo.ee)
-
-    opts = si.export('options')
-    assert.equal(1, opts.internal.a)
-    assert.equal(4, opts.internal.d)
-    assert.equal(5, opts.internal.e)
-    assert.equal(1, opts.internal.foo.aa)
-    assert.equal(4, opts.internal.foo.dd)
-    assert.equal(5, opts.internal.foo.ee)
-    si.close(fin)
-  })
-
-
   it('options-file-js', function (fin) {
     var si0 = Seneca({from: __dirname + '/options.require.js'},
                      {internal:{d: 4, foo: {dd: 4}}, module: module})

@@ -233,10 +233,7 @@ const intern = (module.exports.intern = {
 
   process_outward: function(actctxt: any, data: any) {
     const act_instance = actctxt.seneca
-    // var outward = actctxt.seneca.private$.outward.process(actctxt, data)
-
     const outwardres = act_instance.order.outward.execSync(actctxt, data)
-    // console.log(outwardres)
 
     if (outwardres.err) {
       throw outwardres.err

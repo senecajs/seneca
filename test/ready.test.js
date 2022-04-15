@@ -66,7 +66,7 @@ describe('ready', function () {
     si.ready(null_ready)
   })
 
-  it('ready-complex', function (done) {
+  it('ready-complex', function (fin) {
     var mark = { ec: 0 }
 
     var si = Seneca().test()
@@ -107,7 +107,7 @@ describe('ready', function () {
         expect(mark.p2).exist()
         expect(mark.ec).equal(2)
 
-        done()
+        fin()
       })
     })
   })
@@ -132,15 +132,14 @@ describe('ready', function () {
     })
   })
 
-  it('ready-event', function (done) {
+  it('ready-event', function (fin) {
     var si = Seneca().test()
-
     si.on('ready', function () {
-      done()
+      fin()
     })
   })
 
-  it('ready-both', function (done) {
+  it('ready-both', function (fin) {
     var si = Seneca().test()
     var tmp = {}
 
@@ -156,8 +155,17 @@ describe('ready', function () {
 
     function complete() {
       if (tmp.a && tmp.b) {
-        done()
+        fin()
       }
     }
   })
+
+
+  it('lifecycle-point-start', function (fin) {
+    var si = Seneca().test().sub('sys:seneca,on:point',(msg)=>{
+      expect(msg.point).equal('start')
+      fin()
+    })
+  })
+
 })

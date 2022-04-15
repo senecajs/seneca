@@ -450,7 +450,6 @@ class InstanceImpl {
         private$.ge = GateExecutor({
             timeout: start_opts.timeout,
         })
-            //.clear(action_queue_clear)
             .clear(ready.clear_ready)
             .start();
         // TODO: this should be a plugin
@@ -558,6 +557,7 @@ class InstanceImpl {
             });
         };
         addActions(root$);
+        // LEGACY: move transport to @seneca/transport plugin
         // TODO: move to static options in Seneca 4.x
         start_opts.transport = deep({
             port: 62345,
@@ -572,6 +572,8 @@ class InstanceImpl {
                 process.once(signal, private$.exit_close);
             }
         });
+        // Emit start message (also ensures GateExecutor will trigger 'ready' event)
+        root$.act('sys:seneca,on:point,point:start');
         return root$;
     }
     // TODO: would Instance.prototype.on = eventer.on work?

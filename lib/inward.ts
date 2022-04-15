@@ -164,8 +164,6 @@ function inward_act_not_found(spec: any) {
   var so = ctx.options
   var msg = data.msg
 
-  // console.log('NO ACTDEF', ctx.actdef, msg, data)
-
   if (!ctx.actdef) {
     return {
       op: 'stop',

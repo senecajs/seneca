@@ -138,17 +138,6 @@ function make_tasks(): any {
     args: (spec: TaskSpec) => {
       let args: any[] = [...spec.ctx.args]
 
-      // DEPRECATED: Remove when Seneca >= 4.x
-      // Allow chaining with seneca.use('options', {...})
-      // see https://github.com/rjrodger/seneca/issues/80
-      if ('options' === args[0]) {
-        spec.ctx.seneca.options(args[1])
-        return {
-          op: 'stop',
-          why: 'legacy-options'
-        }
-      }
-
       // Plugin definition function is under property `define`.
       // `init` is deprecated from 4.x
       // TODO: use-plugin expects `init` - update use-plugin to make this customizable
@@ -537,6 +526,10 @@ function make_tasks(): any {
         plugin.options || {}
       )
 
+      // console.log('PN', fullname, shortname, base, shortname_options, fullname_options, plugin.options, fullopts)
+
+
+
       let resolved_options: any = {}
       let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
 
@@ -567,6 +560,9 @@ function make_tasks(): any {
         catch (ex: any) {
           err = ex
         }
+      }
+      else {
+        resolved_options = fullopts
       }
 
       return {

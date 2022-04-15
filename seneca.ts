@@ -596,7 +596,6 @@ class InstanceImpl implements Instance {
     private$.ge = GateExecutor({
       timeout: start_opts.timeout,
     })
-      //.clear(action_queue_clear)
       .clear(ready.clear_ready)
       .start()
 
@@ -728,6 +727,8 @@ class InstanceImpl implements Instance {
 
     addActions(root$)
 
+    // LEGACY: move transport to @seneca/transport plugin
+
     // TODO: move to static options in Seneca 4.x
     start_opts.transport = deep(
       {
@@ -748,6 +749,9 @@ class InstanceImpl implements Instance {
         process.once(signal, private$.exit_close)
       }
     })
+
+    // Emit start message (also ensures GateExecutor will trigger 'ready' event)
+    root$.act('sys:seneca,on:point,point:start')
 
     return root$
   }
