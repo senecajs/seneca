@@ -472,8 +472,9 @@ describe('api', function () {
     expect(si.status({ stats: false }).stats.act.calls).equal(0)
 
     si.ready(function () {
-      expect(si.status().stats.act.calls).equal(0)
-      expect(si.status().stats.act.done).equal(0)
+      // sys:seneca,on:point,point:start has run
+      expect(si.status().stats.act.calls).equal(1)
+      expect(si.status().stats.act.done).equal(1)
       expect(si.status().history.total).equal(0)
       expect(si.status().transport.register.length).equal(0)
       fin()
