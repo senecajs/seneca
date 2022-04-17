@@ -46,9 +46,7 @@ const option_defaults = {
     id$: Skip(String),
     // Register (true) default plugins. Set false to not register when
     // using custom versions.
-    default_plugins: Open({
-        transport: true,
-    }),
+    default_plugins: Open({}),
     // Test mode. Use for unit testing.
     test: false,
     // Quiet mode. Moves log level to warn. Use for unit testing.
@@ -147,7 +145,7 @@ const option_defaults = {
     // Plugin settings
     plugin: {},
     // Plugins to load (will be passed to .use)
-    plugins: One({}, null),
+    plugins: One({}, [], null),
     // System wide functionality.
     system: {
         // TODO: use Func shape

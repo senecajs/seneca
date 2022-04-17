@@ -526,10 +526,6 @@ function make_tasks(): any {
         plugin.options || {}
       )
 
-      // console.log('PN', fullname, shortname, base, shortname_options, fullname_options, plugin.options, fullopts)
-
-
-
       let resolved_options: any = {}
       let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
 
@@ -604,13 +600,13 @@ function make_tasks(): any {
       )
 
       if (meta instanceof Promise) {
-        return meta.then(finalize_meta)
+        return meta.then(define_finalize_meta)
       }
 
-      return finalize_meta(meta)
+      return define_finalize_meta(meta)
 
 
-      function finalize_meta(meta: any) {
+      function define_finalize_meta(meta: any) {
         plugin.meta = meta
 
         // legacy api for service function
@@ -636,11 +632,6 @@ function make_tasks(): any {
           seneca.private$.plugin_order.byname
         )
         seneca.private$.plugin_order.byref.push(plugin.fullname)
-
-        // 3.x Backwards compatibility - REMOVE in 4.x
-        if ('amqp-transport' === plugin.name) {
-          seneca.options({ legacy: { meta: true } })
-        }
 
         if ('function' === typeof plugin_options.defined$) {
           plugin_options.defined$(plugin)
@@ -860,121 +851,10 @@ function make_intern() {
           ? { name: base_meta }
           : base_meta
 
-        // NOTE: WARNING: in-place mutation of the object.
-        //
         meta.options = meta.options || options
-
-        let updated_options: any = {}
-        updated_options[plugin.fullname] = meta.options
-        delegate.options(updated_options)
-
         return meta
       }
     },
-
-
-    /*
-    // copied from https://github.com/rjrodger/optioner
-    // TODO: remove unnecessary vars+code
-    prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
-      if (Joi.isSchema(spec, { legacy: true })) {
-        return spec
-      }
-
-      let joiobj = Joi.object()
-
-      if (opts.allow_unknown) {
-        joiobj = joiobj.unknown()
-      }
-
-      let joi = intern.walk(
-        Joi,
-        joiobj,
-        spec,
-        '',
-        opts,
-        ctxt,
-        function(valspec: any) {
-          if (valspec && Joi.isSchema(valspec, { legacy: true })) {
-            return valspec
-          } else {
-            let typecheck = typeof valspec
-            //typecheck = 'function' === typecheck ? 'func' : typecheck
-
-            if (opts.must_match_literals) {
-              return Joi.any()
-                .required()
-                .valid(valspec)
-            } else {
-              if (void 0 === valspec) {
-                return Joi.any().optional()
-              } else if (null == valspec) {
-                return Joi.any().default(null)
-              } else if ('number' === typecheck && Number.isInteger(valspec)) {
-                return Joi.number()
-                  .integer()
-                  .default(valspec)
-              } else if ('string' === typecheck) {
-                return Joi.string()
-                  .empty('')
-                  .default(() => valspec)
-              } else {
-                return Joi[typecheck]().default(() => valspec)
-              }
-            }
-          }
-        })
-
-      return joi
-    },
-
-
-    // copied from https://github.com/rjrodger/optioner
-    // TODO: remove unnecessary vars+code
-    walk: function(
-      Joi: any,
-      start_joiobj: any,
-      obj: any,
-      path: any,
-      opts: any,
-      ctxt: any,
-      mod: any) {
-
-      let joiobj = start_joiobj
-
-      // NOTE: use explicit Joi construction for checking within arrays
-      if (Array.isArray(obj)) {
-        return Joi.array().default(obj)
-      }
-      else {
-        for (let p in obj) {
-          let v = obj[p]
-          let t = typeof v
-
-          let kv: any = {}
-
-          if (null != v && !Joi.isSchema(v, { legacy: true }) && 'object' === t) {
-            let np = '' === path ? p : path + '.' + p
-
-            let childjoiobj = Joi.object().default()
-
-            if (opts.allow_unknown) {
-              childjoiobj = childjoiobj.unknown()
-            }
-
-            kv[p] = intern.walk(Joi, childjoiobj, v, np, opts, ctxt, mod)
-          } else {
-            kv[p] = mod(v)
-          }
-
-          joiobj = joiobj.keys(kv)
-        }
-
-        return joiobj
-      }
-    }
-
-    */
   }
 }
 

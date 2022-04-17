@@ -71,9 +71,7 @@ const option_defaults = {
 
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
-  default_plugins: Open({
-    transport: true,
-  }),
+  default_plugins: Open({}),
 
   // Test mode. Use for unit testing.
   test: false,
@@ -212,7 +210,7 @@ const option_defaults = {
   plugin: {},
 
   // Plugins to load (will be passed to .use)
-  plugins: One({}, null),
+  plugins: One({}, [], null),
 
   // System wide functionality.
   system: {
