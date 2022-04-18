@@ -16,20 +16,23 @@ var it = Shared.make_it(lab)
 var { Outward } = require('../lib/outward')
 var { API } = require('../lib/api')
 
-
 describe('outward', function () {
   it('make_error', function (fin) {
     var err = { message: 'foo', meta$: { err: true } }
     var data = { meta: { error: true }, res: err }
 
     Outward.outward_make_error({
-      ctx: { options: { legacy: { error: false } } }, data })
+      ctx: { options: { legacy: { error: false } } },
+      data,
+    })
     expect(data.res.message).equal('foo')
     expect(Util.isError(data.res)).false()
 
     data = { res: err }
     Outward.outward_make_error({
-      ctx: { options: { legacy: { error: true } } }, data })
+      ctx: { options: { legacy: { error: true } } },
+      data,
+    })
     expect(data.res.message).equal('foo')
     expect(!Util.isError(data.res)).true()
 

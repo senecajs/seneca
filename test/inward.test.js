@@ -27,7 +27,10 @@ describe('inward', function () {
         fin()
       })
 
-      Inward.inward_announce({ ctx: { seneca: seneca }, data: { msg: { a: 1 } } })
+      Inward.inward_announce({
+        ctx: { seneca: seneca },
+        data: { msg: { a: 1 } },
+      })
       Inward.inward_announce({
         ctx: { seneca: seneca, actdef: {} },
         data: { msg: { a: 2 } },

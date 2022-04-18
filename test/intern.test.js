@@ -15,9 +15,7 @@ const expect = Code.expect
 const Shared = require('./shared')
 const it = Shared.make_it(lab)
 
-
 const { Outward } = require('../lib/outward')
-
 
 const intern = {
   outward: Outward.test$.intern,

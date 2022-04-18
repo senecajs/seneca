@@ -206,7 +206,7 @@ const option_defaults = {
   plugin: {},
 
   // Plugins to load (will be passed to .use)
-  plugins: One({}, null),
+  plugins: One({}, [], null),
 
   // System wide functionality.
   system: {
