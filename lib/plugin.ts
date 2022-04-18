@@ -872,13 +872,7 @@ function make_intern() {
           ? { name: base_meta }
           : base_meta
 
-        // NOTE: WARNING: in-place mutation of the object.
-        //
         meta.options = meta.options || options
-
-        let updated_options: any = {}
-        updated_options[plugin.fullname] = meta.options
-        delegate.options(updated_options)
 
         return meta
       }

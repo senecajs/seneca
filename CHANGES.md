@@ -1,4 +1,9 @@
 
+## 3.26.2 2022-04-18
+
+* Remove injection of plugin name at top level of options.
+
+
 ## 3.26.1 2022-04-18
 
 * Allow Plugin definition array in options.
