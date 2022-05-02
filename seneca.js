@@ -12,6 +12,7 @@ const Stats = require('rolling-stats');
 const { Ordu } = require('ordu');
 const { Gubu, One, Any, Skip, Open } = require('gubu');
 const Eraro = require('eraro');
+const transport_1 = require("./lib/transport");
 // Internal modules.
 const Common = require('./lib/common');
 const { make_logging } = require('./lib/logging');
@@ -29,7 +30,7 @@ const { resolve_options } = require('./lib/options');
 const Package = require('./package.json');
 const { Print } = require('./lib/print');
 const { addActions } = require('./lib/actions');
-const { transport } = require('./lib/transport');
+// const { transport } = require('./lib/transport')
 const EventEmitter = require('./lib/ee3');
 // Internal data and utilities.
 const { error, deep } = Common;
@@ -354,14 +355,11 @@ class InstanceImpl {
         root$.find = API.find; // Find the action definition for a pattern.
         root$.list = API.list; // List the patterns added to this instance.
         root$.status = API.status; // Get the status if this instance.
-        root$.reply = API.reply; // Reply to a submitted message.
         root$.sub = Sub.api_sub; // Subscribe to messages.
         root$.list_plugins = API.list_plugins; // List the registered plugins.
         root$.find_plugin = API.find_plugin; // Find the plugin definition.
         root$.has_plugin = API.has_plugin; // True if the plugin is registered.
         root$.ignore_plugin = API.ignore_plugin; // Ignore plugin and don't register it.
-        root$.listen = API.listen(callpoint); // Listen for inbound messages.
-        root$.client = API.client(callpoint); // Send outbound messages.
         root$.gate = API.gate; // Create a delegate that executes actions in sequence.
         root$.ungate = API.ungate; // Execute actions in parallel.
         root$.translate = API.translate; // Translate message to new pattern.
@@ -389,6 +387,9 @@ class InstanceImpl {
         root$.act = Act.api_act; // Submit a message and trigger the associated action.
         root$.ready = ready.api_ready; // Callback when plugins initialized.
         root$.valid = Gubu; // Expose Gubu shape builders
+        root$.reply = transport_1.Transport.reply; // Reply to a submitted message.
+        root$.listen = transport_1.Transport.listen(callpoint); // Listen for inbound messages.
+        root$.client = transport_1.Transport.client(callpoint); // Send outbound messages.
         root$.internal = function () {
             return {
                 ordu: {
@@ -563,7 +564,7 @@ class InstanceImpl {
             path: '/act',
             protocol: 'http',
         }, start_opts.transport);
-        transport(root$);
+        transport_1.Transport.init(root$);
         Print(root$, start_opts.debug.argv || process.argv);
         Common.each(start_opts.system.close_signals, function (active, signal) {
             if (active) {

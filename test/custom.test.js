@@ -216,17 +216,17 @@ describe('custom', function () {
   it('custom-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
+    var s0 = Seneca({ id$: 's0' })
       .test(fin)
-      .use(st)
-      .listen({ type: 'simple' })
+        .use(st)
+        .listen({ type: 'simple' })
 
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
       legacy: { transport: false },
     })
-      .test(fin)
+        .test(fin)
       .use(st)
       .client({ type: 'simple' })
 

@@ -38,9 +38,6 @@ declare function status(this: any, flags: any): {
     history: any;
     transport: any;
 };
-declare function reply(this: any, spec: any): boolean;
-declare function listen(this: any, callpoint: any): (this: any, ...argsarr: any[]) => any;
-declare function client(this: any, callpoint: any): (this: any) => any;
 declare function decorate(this: any): void;
 declare let API: {
     wrap: typeof wrap;
@@ -71,9 +68,6 @@ declare let API: {
     has: typeof has;
     list: typeof list;
     status: typeof status;
-    reply: typeof reply;
-    listen: typeof listen;
-    client: typeof client;
     decorate: typeof decorate;
 };
 export { API };

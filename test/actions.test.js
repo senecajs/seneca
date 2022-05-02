@@ -23,7 +23,7 @@ describe('actions', function () {
   }
 
   it('cmd_ping', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca().test(fin).use('transport')
     expect(si.ping().id).equals(si.id)
 
     si.listen().ready(function () {

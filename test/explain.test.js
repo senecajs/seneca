@@ -14,6 +14,7 @@ var it = lab.it
 var Seneca = require('..')
 
 describe('explain', function () {
+
   it('explain-basic', async () => {
     var si = Seneca()
       .test()
@@ -102,6 +103,7 @@ describe('explain', function () {
     })
   })
 
+  
   it('explain-data', async () => {
     var si = Seneca({ id$: 's01' })
       .test()
@@ -130,6 +132,7 @@ describe('explain', function () {
     expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
   })
 
+  
   it('explain-deep', async () => {
     var si = Seneca()
       .test()
@@ -212,6 +215,7 @@ describe('explain', function () {
     expect(exp[5]).includes({ z: 4 })
   })
 
+  
   it('explain-toplevel', async () => {
     var si = Seneca()
       .test()
@@ -254,13 +258,13 @@ describe('explain', function () {
     expect(topexp_off.length).equal(2)
   })
 
+  
   it('explain-transport', { timout: 22222 * tmx }, async () => {
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test()
+    var s0 = Seneca({ id$: 's0'}).test().use('transport')
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false },
-    }).test()
+    }).test().use('transport')
 
     await s0
       .add('a:1', function a1(msg, reply, meta) {

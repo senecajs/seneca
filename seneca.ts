@@ -3,10 +3,6 @@
 
 
 
-import type {
-  MakeSeneca,
-  Instance,
-} from './lib/types'
 
 
 
@@ -26,6 +22,13 @@ const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
 
+import type {
+  MakeSeneca,
+  Instance,
+} from './lib/types'
+
+
+import { Transport } from './lib/transport'
 
 
 // Internal modules.
@@ -45,7 +48,7 @@ const { resolve_options } = require('./lib/options')
 const Package = require('./package.json')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
-const { transport } = require('./lib/transport')
+// const { transport } = require('./lib/transport')
 
 const EventEmitter = require('./lib/ee3')
 
@@ -486,14 +489,11 @@ class InstanceImpl implements Instance {
     root$.find = API.find // Find the action definition for a pattern.
     root$.list = API.list // List the patterns added to this instance.
     root$.status = API.status // Get the status if this instance.
-    root$.reply = API.reply // Reply to a submitted message.
     root$.sub = Sub.api_sub // Subscribe to messages.
     root$.list_plugins = API.list_plugins // List the registered plugins.
     root$.find_plugin = API.find_plugin // Find the plugin definition.
     root$.has_plugin = API.has_plugin // True if the plugin is registered.
     root$.ignore_plugin = API.ignore_plugin // Ignore plugin and don't register it.
-    root$.listen = API.listen(callpoint) // Listen for inbound messages.
-    root$.client = API.client(callpoint) // Send outbound messages.
     root$.gate = API.gate // Create a delegate that executes actions in sequence.
     root$.ungate = API.ungate // Execute actions in parallel.
     root$.translate = API.translate // Translate message to new pattern.
@@ -521,6 +521,10 @@ class InstanceImpl implements Instance {
     root$.act = Act.api_act // Submit a message and trigger the associated action.
     root$.ready = ready.api_ready // Callback when plugins initialized.
     root$.valid = Gubu // Expose Gubu shape builders
+
+    root$.reply = Transport.reply // Reply to a submitted message.
+    root$.listen = Transport.listen(callpoint) // Listen for inbound messages.
+    root$.client = Transport.client(callpoint) // Send outbound messages.
 
     root$.internal = function() {
       return {
@@ -738,7 +742,7 @@ class InstanceImpl implements Instance {
       start_opts.transport
     )
 
-    transport(root$)
+    Transport.init(root$)
 
     Print(root$, start_opts.debug.argv || process.argv)
 

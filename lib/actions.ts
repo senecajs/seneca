@@ -9,7 +9,12 @@ function addActions(instance: any) {
   instance.stats = make_action_seneca_stats(instance.private$)
 
   // Add builtin actions.
-  instance.add('sys:seneca,on:point', on_point)
+  instance
+    .add('sys:seneca,on:point', on_point)
+    .add('role:transport,cmd:listen', action_listen)
+    .add('role:transport,cmd:client', action_client)
+
+
 
   // LEGACY
   instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
@@ -81,6 +86,52 @@ function action_options_get(this: any, msg: any, reply: any) {
   var val = msg.key ? top[msg.key] : top
 
   reply(Legacy.copydata(val))
+}
+
+
+
+function action_listen(this: any, msg: any, reply: any) {
+  const seneca = this
+
+  const config = Object.assign({}, msg.config, {
+    role: 'transport',
+    hook: 'listen',
+  })
+
+  delete config.cmd
+
+  const listen_msg = seneca.util.clean(config)
+
+  seneca.act(listen_msg, register(listen_msg, reply))
+}
+
+
+function action_client(this: any, msg: any, reply: any) {
+  const seneca = this
+
+  const config = Object.assign({}, msg.config, {
+    role: 'transport',
+    hook: 'client',
+  })
+
+  delete config.cmd
+
+  const client_msg = seneca.util.clean(config)
+
+  seneca.act(client_msg, register(client_msg, reply))
+}
+
+function register(config: any, reply: any) {
+  return function(this: any, err: any, out: any) {
+    this.private$.transport.register.push({
+      when: Date.now(),
+      config: config,
+      err: err,
+      res: out,
+    })
+
+    reply(err, out)
+  }
 }
 
 
