@@ -572,6 +572,19 @@ function make_callpoint(active: any) {
 }
 
 
+// Stringify message for logs, debugging and errors. 
+function msgstr(msg: any, len: number = 111): string {
+  let str =
+    inspect(clean(msg))
+      .replace(/\n/g, '')
+
+  str = str.substring(0, len) +
+    (len < str.length ? '...' : '')
+
+  return str
+}
+
+
 function make_trace_desc(meta: any) {
   return [
     meta.pattern,
@@ -736,6 +749,7 @@ export {
   isError,
   inspect,
   error,
+  msgstr,
   TRACE_PATTERN,
   TRACE_ID,
   TRACE_INSTANCE,

@@ -16,7 +16,7 @@ const Shared = require('./shared')
 const it = Shared.make_it(lab)
 
 const Seneca = require('..')
-const Act = require('../lib/act.js')
+const { Act } = require('../lib/act')
 
 const intern = Act.intern
 

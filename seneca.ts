@@ -29,6 +29,7 @@ import type {
 
 
 import { Transport } from './lib/transport'
+import { Act } from './lib/act'
 
 
 // Internal modules.
@@ -36,7 +37,6 @@ const Common = require('./lib/common')
 const { make_logging } = require('./lib/logging')
 const { API } = require('./lib/api')
 const { make_ready } = require('./lib/ready')
-const Act = require('./lib/act')
 const Add = require('./lib/add')
 const Sub = require('./lib/sub')
 import { Prior } from './lib/prior'
@@ -518,9 +518,14 @@ class InstanceImpl implements Instance {
     root$.fix = API.fix // fix pattern arguments, message arguments, and custom meta
     root$.wrap = API.wrap // wrap each found pattern with a new action
     root$.add = Add.api_add // Add a pattern an associated action.
-    root$.act = Act.api_act // Submit a message and trigger the associated action.
     root$.ready = ready.api_ready // Callback when plugins initialized.
     root$.valid = Gubu // Expose Gubu shape builders
+
+    // Submit a message and trigger the associated action, with result via callback.
+    root$.act = Act.act
+
+    // Submit a message and trigger the associated action, with result via promise.
+    root$.post = Act.post
 
     root$.reply = Transport.reply // Reply to a submitted message.
     root$.listen = Transport.listen(callpoint) // Listen for inbound messages.

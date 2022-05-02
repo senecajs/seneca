@@ -25,5 +25,13 @@ describe('promise', function () {
       fin()
     })()
   })
-*/
+  */
+
+
+  it('post', async function() {
+    let s0 = Seneca().test().add('a:1',(msg,reply)=>reply({x:msg.x}))
+    expect(await s0.post('a:1,x:1')).equal({x:1})
+    expect(await s0.post('a:1,x:2')).equal({x:2})
+    expect(await s0.post('a:1,x:3')).equal({x:3})
+  })
 })

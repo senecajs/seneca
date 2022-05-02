@@ -3,12 +3,15 @@
 
 import Util from 'util'
 
-const { Ordu } = require('ordu')
+import { Ordu } from 'ordu'
 
-const Common = require('./common')
-const { Inward } = require('./inward')
-const Act = require('./act')
-const { Meta } = require('./meta')
+import {
+  build_message,
+} from './common'
+
+import { Inward } from './inward'
+import { Act } from './act'
+import { Meta } from './meta'
 
 const prior_inward = new Ordu({
   name: 'prior_inward',
@@ -29,7 +32,7 @@ function api_prior(this: any) {
   // Get definition of prior action
   var priordef = this.private$.act.def.priordef
 
-  var spec = Common.build_message(this, arguments, 'reply:f?', this.fixedargs)
+  var spec = build_message(this, arguments, 'reply:f?', this.fixedargs)
 
   // TODO: clean sufficiently so that seneca.util.clean not needed
   var msg = spec.msg
@@ -73,7 +76,7 @@ function api_prior(this: any) {
 
       const data = { meta: prior_meta, msg: msg, reply: prior_reply }
 
-      const inwardres = prior_inward.execSync(ctx, data)
+      const inwardres = prior_inward.execSync(ctx, data, {})
 
       if (inwardres.err) {
         throw inwardres.err
