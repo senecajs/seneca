@@ -1,10 +1,11 @@
 import { TaskSpec } from 'ordu';
+import type { ActDef } from './types';
 declare function api_add(this: any): any;
 declare const task: {
     prepare(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
             action: any;
             pattern: any;
         };
@@ -12,39 +13,39 @@ declare const task: {
     plugin(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
         };
     };
     callpoint(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
         };
     };
     flags(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
             strict_add: boolean;
         };
     };
     action(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
         };
     };
     prior(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
             addroute: boolean;
         };
     };
     rules(spec: TaskSpec): {
         op: string;
         out: {
-            actdef: any;
+            actdef: ActDef;
         };
     };
     register(spec: TaskSpec): {

@@ -14,4 +14,32 @@ interface Instance extends Record<string, any> {
     fixedmeta: any;
     start_time: number;
 }
-export type { MakeSeneca, Instance, };
+interface ActDef {
+    id: string;
+    name: string;
+    pattern: string;
+    sub: boolean;
+    client: boolean;
+    deprecate: boolean;
+    fixed: any;
+    custom: any;
+    args: any;
+    msgcanon: any;
+    func: any;
+    raw: any;
+    handle: any;
+    priordef: ActDef;
+    priorpath: string;
+    rules: any[];
+    gubu?: any;
+    plugin_tag: string;
+    plugin_name: string;
+    plugin_fullname: string;
+    plugin: {
+        tag: string;
+        name: string;
+        fullname: string;
+    };
+    callpoint?: string;
+}
+export type { MakeSeneca, Instance, ActDef, };

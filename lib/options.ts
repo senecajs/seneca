@@ -191,7 +191,6 @@ function prepare(options: any, sourcemap: any, basemodule: any, optionShape: any
       meta: false,
       meta_arg_remove: false,
       transport: false,
-      timeout_string: false,
       rules: false,
       options: false,
     }

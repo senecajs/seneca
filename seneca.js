@@ -212,8 +212,6 @@ const option_defaults = {
         meta_arg_remove: false,
         // Use seneca-transport plugin.
         transport: false,
-        // Insert "[TIMEOUT]" into timeout error message
-        timeout_string: false,
         // If false, use Gubu for message validation.
         rules: false,
         // If false, use Gubu for option validation (including plugin defaults)

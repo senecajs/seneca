@@ -6,6 +6,11 @@ import { TaskSpec } from 'ordu'
 import { Gubu, Open } from 'gubu'
 
 
+import type {
+  ActDef
+} from './types'
+
+
 import {
   clean,
   deep,
@@ -61,7 +66,7 @@ const task = {
         }
       }
 
-    let actdef = deep(args.actdef) || {}
+    let actdef: ActDef = deep(args.actdef) || {}
 
     actdef.raw = deep({}, raw_pattern)
 
@@ -78,7 +83,7 @@ const task = {
 
 
   plugin(spec: TaskSpec) {
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
 
     // TODO: change root$ to root as plugin_name should not contain $
     actdef.plugin_name = actdef.plugin_name || 'root$'
@@ -107,7 +112,7 @@ const task = {
 
   callpoint(spec: TaskSpec) {
     const private$ = spec.ctx.private
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
 
     let add_callpoint = private$.callpoint()
     if (add_callpoint) {
@@ -125,7 +130,7 @@ const task = {
 
 
   flags(spec: TaskSpec) {
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
     const pat = spec.data.pattern
     const opts = spec.ctx.opts
 
@@ -171,7 +176,7 @@ const task = {
 
 
   action(spec: TaskSpec) {
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
     const action = spec.data.action
     const private$ = spec.ctx.private
 
@@ -196,7 +201,7 @@ const task = {
 
 
   prior(spec: TaskSpec) {
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
     const pattern = spec.data.pattern
     const strict_add = spec.data.strict_add
     const instance = spec.ctx.instance
@@ -243,7 +248,7 @@ const task = {
 
   rules(spec: TaskSpec) {
     const opts = spec.ctx.opts
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
     const pattern = spec.data.pattern
 
     let pattern_rules: any = {}
@@ -263,6 +268,7 @@ const task = {
 
     if (!opts.legacy.rules && 0 < prN) {
       // TODO: how to make Closed if specified by user ?
+      // TODO: Fix GubuShape (see lib/types)
       actdef.gubu = Gubu(Open(pattern_rules))
     }
 
@@ -277,7 +283,7 @@ const task = {
 
 
   register(spec: TaskSpec) {
-    const actdef = spec.data.actdef
+    const actdef: ActDef = spec.data.actdef
     const pattern = spec.data.pattern
     const addroute = spec.data.addroute
 
@@ -305,6 +311,7 @@ const task = {
       op: 'next',
     }
   },
+
 
   modify(spec: TaskSpec) {
     const actdef = spec.data.actdef

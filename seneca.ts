@@ -300,9 +300,6 @@ const option_defaults = {
     // Use seneca-transport plugin.
     transport: false,
 
-    // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: false,
-
     // If false, use Gubu for message validation.
     rules: false,
 

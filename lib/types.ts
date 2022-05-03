@@ -1,4 +1,6 @@
 
+import type { GubuShape } from 'gubu'
+
 
 type MakeSeneca = (() => Instance) & {
   use: any
@@ -22,8 +24,51 @@ interface Instance extends Record<string, any> {
 }
 
 
+interface ActDef {
+  id: string
+  name: string
+  pattern: string
+
+  sub: boolean
+  client: boolean
+  deprecate: boolean
+
+  fixed: any
+  custom: any
+
+  // TODO: remove
+  args: any
+
+  msgcanon: any
+
+  func: any
+  raw: any
+  handle: any
+
+  priordef: ActDef
+  priorpath: string
+
+  rules: any[]
+
+  // TODO: make this work (see lib/add)
+  // gubu?: GubuShape
+  gubu?: any
+
+  plugin_tag: string
+  plugin_name: string
+  plugin_fullname: string
+  plugin: {
+    tag: string
+    name: string
+    fullname: string
+  }
+  callpoint?: string
+}
+
+
 
 export type {
   MakeSeneca,
   Instance,
+  ActDef,
 }
