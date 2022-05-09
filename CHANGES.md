@@ -1,7 +1,18 @@
-## 3.26.0 
 
+## 3.26.2 2022-04-18
+
+* Remove injection of plugin name at top level of options.
+
+
+## 3.26.1 2022-04-18
+
+* Allow Plugin definition array in options.
+
+
+## 3.26.0 2022-04-08
+
+* Plugin defaults validated using https://github.com/rjrodger/gubu
 * Plugin definition can be async: https://github.com/senecajs/seneca/pull/891 - thanks https://github.com/lilsweetcaligula !
-
 
 
 ## 3.25.0 2021-11-03

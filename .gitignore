@@ -19,3 +19,4 @@ docs/coverage.html
 test/coverage.html
 *.csv
 package-lock.json
+yarn.lock

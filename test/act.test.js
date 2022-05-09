@@ -20,7 +20,6 @@ const { Act } = require('../lib/act')
 
 const intern = Act.intern
 
-
 describe('act', function () {
   it('make_actmsg', function (fin) {
     var origmsg = {
@@ -110,4 +109,3 @@ describe('act', function () {
     fin()
   })
 })
-
