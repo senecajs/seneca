@@ -40,7 +40,7 @@ function api_add(this: any) {
     addroute: null,
   }
 
-  // Senecca.order.add tasks are defined in main seneca file.
+  // Seneca.order.add tasks are defined in main seneca file.
   let res = this.order.add.execSync(ctx, data)
   if (res.err) {
     throw res.err

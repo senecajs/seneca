@@ -566,13 +566,6 @@ function list(this: any, pattern: any) {
   return this.private$.actrouter
     .list(null == pattern ? {} : Jsonic(pattern))
     .map((x: any) => x.match)
-
-  /*
-  return _.map(
-    this.private$.actrouter.list(null == pattern ? {} : Jsonic(pattern)),
-    'match'
-  )
-  */
 }
 
 
