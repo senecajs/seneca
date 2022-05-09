@@ -101,9 +101,14 @@ const intern = (module.exports.intern = {
           }
         )
       } catch (e) {
-        var ex = isError(e) ? e : new Error(inspect(e))
-        intern.handle_reply(opts, meta, actctxt, actmsg, ex)
-        done()
+        if (opts.error.capture.action) {
+          var ex = isError(e) ? e : new Error(inspect(e))
+          intern.handle_reply(opts, meta, actctxt, actmsg, ex)
+          done()
+        }
+        else {
+          throw e
+        }
       }
     }
 
@@ -221,7 +226,12 @@ const intern = (module.exports.intern = {
           reply.call(delegate, data.err, data.res, data.meta)
         }
       } catch (thrown_obj) {
-        intern.callback_error(delegate, thrown_obj, actctxt, data)
+        if (opts.error.capture.callback) {
+          intern.callback_error(delegate, thrown_obj, actctxt, data)
+        }
+        else {
+          throw thrown_obj
+        }
       }
     }
   },

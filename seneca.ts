@@ -99,6 +99,22 @@ const option_defaults = {
   // Provide a module to base option require loading from
   module: Skip(),
 
+
+  // Control error handling.
+  error: {
+
+    // Control capture of errors for logging.
+    capture: {
+
+      // Capture errors in action callbacks (false throws uncaught).
+      callback: true,
+
+      // Capture errors in actions and pass to callback (false throws uncaught).
+      action: true,
+    }
+  },
+
+
   // Debug settings.
   debug: {
     // Throw (some) errors from seneca.act.
