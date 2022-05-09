@@ -1005,7 +1005,7 @@ describe('plugin', function () {
       .test(fin)
       .quiet()
       .ready(function () {
-        expect(Object.keys(this.plugins()).length).equal(3)
+        expect(Object.keys(this.plugins()).length).equal(4)
         expect(tmp).equal({ foo: 1, bar: 1, zed: 1 })
         fin()
       })
@@ -1140,7 +1140,7 @@ describe('plugin', function () {
     s0.use('./stubs/plugin/no-name.js')
     s0.use(__dirname + '/stubs/plugin/no-name.js')
     s0.ready(function () {
-      expect(Object.keys(s0.list_plugins()).length).equal(3)
+      expect(Object.keys(s0.list_plugins()).length).equal(4)
       fin()
     })
   })
@@ -1149,7 +1149,7 @@ describe('plugin', function () {
     var s0 = Seneca({ legacy: { transport: false } }).test(fin)
     s0.use('joi')
     s0.ready(function () {
-      expect(Object.keys(s0.list_plugins())[0]).equal('joi')
+      expect(Object.keys(s0.list_plugins())[1]).equal('joi')
       fin()
     })
   })
@@ -1302,5 +1302,222 @@ describe('plugin', function () {
       expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
       fin()
     })
+  })
+
+
+  it('delegate-plugin-access', function (fin) {
+    function p1(opts) {
+      expect(opts.foo).equal(1)
+      expect(opts.ned).not.exist()
+      expect(this.plugin.name).equal('p1')
+      expect(this.context.qaz).equal(3)
+      this.shared.bar = 2
+
+      this.add('a:1', function a1(msg, reply) {
+        expect(this.shared.bar).equal(2)
+        expect(this.shared.bob).not.exist()
+        expect(this.plugin.name).equal('p1')
+        expect(this.plugin.options.foo).equal(1)
+        expect(this.plugin.options.ned).not.exist()
+        expect(this.context.qaz).equal(3)
+        return reply({x:1+msg.x})
+      })
+
+      this.add('b:1', function b1(msg, reply) {
+        expect(this.shared.bar).equal(2)
+        expect(this.plugin.name).equal('p1')
+        expect(this.plugin.options.foo).equal(1)
+        expect(this.plugin.options.ned).not.exist()
+        expect(this.context.qaz).equal(3)
+        this.act('a:1',{x:msg.x}, function(err,out) {
+          return reply({x:2*out.x})
+        })
+      })
+
+      this.add('c:1', function c1(msg, reply) {
+        expect(this.shared.bar).equal(2)
+        expect(this.plugin.name).equal('p1')
+        expect(this.plugin.options.foo).equal(1)
+        expect(this.plugin.options.ned).not.exist()
+        expect(this.context.qaz).equal(3)
+        return reply({x:2*msg.x})
+      })
+
+      this.add('c:1', function c1p(msg, reply) {
+        expect(this.shared.bar).equal(2)
+        expect(this.plugin.name).equal('p1')
+        expect(this.plugin.options.foo).equal(1)
+        expect(this.plugin.options.ned).not.exist()
+        expect(this.context.qaz).equal(3)
+        this.prior(msg,function(err,out) {
+          return reply({x:5*out.x})
+        })
+      })
+    }
+
+
+    // Should not overlap with p1
+    function p2(opts) {
+      expect(opts.foo).not.exist()
+      expect(opts.ned).equal(4)
+      expect(this.plugin.name).equal('p2')
+      expect(this.context.qaz).equal(3)
+      this.shared.bob = 5
+
+      this.add('d:1', function d1(msg, reply) {
+        expect(this.shared.bob).equal(5)
+        expect(this.shared.bar).not.exist()
+        expect(this.plugin.name).equal('p2')
+        expect(this.plugin.options.ned).equal(4)
+        expect(this.plugin.options.foo).not.exist()
+        expect(this.context.qaz).equal(3)
+        return reply({x:3*msg.x})
+      })
+
+
+      // Calls other plugin
+      this.add('e:1', function e1(msg,reply) {
+        expect(this.shared.bob).equal(5)
+        expect(this.shared.bar).not.exist()
+        expect(this.plugin.name).equal('p2')
+        expect(this.plugin.options.ned).equal(4)
+        expect(this.plugin.options.foo).not.exist()
+        expect(this.context.qaz).equal(3)
+
+        this.act('a:1', {x:msg.x}, function(err, out) {
+
+          // Back to p1 context
+          expect(this.shared.bar).equal(2)
+          expect(this.shared.bob).not.exist()
+          expect(this.plugin.name).equal('p1')
+          expect(this.plugin.options.foo).equal(1)
+          expect(this.plugin.options.ned).not.exist()
+          expect(this.context.qaz).equal(3)
+
+          reply({x:0.5+out.x})
+        })
+      })
+    }
+    
+    const s0 = Seneca({legacy:false}).test(fin)
+    s0.context.qaz=3
+    s0.use(p1,{foo:1})
+    s0.use(p2,{ned:4})
+
+    s0.add('q:1', function q1(msg, reply) {
+      expect(this.context.qaz).equal(3)
+      expect(this.plugin.name).equal('root$')
+      expect(this.plugin.options.foo).not.exist()
+      expect(this.plugin.options.ned).not.exist()
+      expect(this.shared.bob).not.exist()
+      expect(this.shared.bar).not.exist()
+      
+      reply({x:0.1+msg.x})
+    })
+
+    s0.add('w:1', function w1(msg, reply) {
+      expect(this.context.qaz).equal(3)
+      expect(this.plugin.name).equal('root$')
+      expect(this.plugin.options.foo).not.exist()
+      expect(this.plugin.options.ned).not.exist()
+      expect(this.shared.bob).not.exist()
+      expect(this.shared.bar).not.exist()
+
+      this.act('e:1',{x:msg.x}, function(err, out) {
+        reply({x:0.2+out.x})
+      })
+    })
+
+
+    p1_test()
+    
+    
+    function p1_test() {
+      
+      s0.act({a:1,x:2}, function(err, out) {
+        expect(out).equal({x:3})
+
+        // Callback has plugin action context
+        expect(this.shared.bar).equal(2)
+        expect(this.plugin.name).equal('p1')
+        expect(this.plugin.options.foo).equal(1)
+        expect(this.context.qaz).equal(3)
+
+        s0.act({b:1,x:2}, function(err, out) {
+          expect(out).equal({x:6})
+
+          expect(this.shared.bar).equal(2)
+          expect(this.plugin.name).equal('p1')
+          expect(this.plugin.options.foo).equal(1)
+          expect(this.context.qaz).equal(3)
+          
+          s0.act({c:1,x:2}, function(err, out) {
+            expect(out).equal({x:20})
+            
+            // Callback has plugin action context
+            expect(this.shared.bar).equal(2)
+            expect(this.plugin.name).equal('p1')
+            expect(this.plugin.options.foo).equal(1)
+            expect(this.context.qaz).equal(3)
+
+            p2_test()
+          })
+        })
+      })
+    }
+
+    function p2_test() {
+      s0.act({d:1,x:2}, function(err, out) {
+        expect(out).equal({x:6})
+
+        expect(this.shared.bob).equal(5)
+        expect(this.shared.bar).not.exist()
+        expect(this.plugin.name).equal('p2')
+        expect(this.plugin.options.ned).equal(4)
+        expect(this.plugin.options.foo).not.exist()
+        expect(this.context.qaz).equal(3)
+
+        s0.act({e:1,x:2}, function(err, out) {
+          expect(out).equal({x:3.5})
+
+          // p2 context!!!
+          expect(this.shared.bob).equal(5)
+          expect(this.shared.bar).not.exist()
+          expect(this.plugin.name).equal('p2')
+          expect(this.plugin.options.ned).equal(4)
+          expect(this.plugin.options.foo).not.exist()
+          expect(this.context.qaz).equal(3)
+
+          root$_test()
+        })
+      })
+    }
+
+
+    function root$_test() {
+      s0.act('q:1,x:2', function(err, out) {
+        expect(out.x).equal(2.1)
+        
+        expect(this.context.qaz).equal(3)
+        expect(this.plugin.name).equal('root$')
+        expect(this.plugin.options.foo).not.exist()
+        expect(this.plugin.options.ned).not.exist()
+        expect(this.shared.bob).not.exist()
+        expect(this.shared.bar).not.exist()
+        
+        s0.act('w:1,x:2', function(err, out) {
+          expect(out.x).equal(3.7)
+          
+          expect(this.context.qaz).equal(3)
+          expect(this.plugin.name).equal('root$')
+          expect(this.plugin.options.foo).not.exist()
+          expect(this.plugin.options.ned).not.exist()
+          expect(this.shared.bob).not.exist()
+          expect(this.shared.bar).not.exist()
+          
+          fin()
+        })
+      })
+    }
   })
 })
