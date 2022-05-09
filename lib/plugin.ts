@@ -345,6 +345,12 @@ function make_tasks(): any {
         fatal$: true,
       })
 
+      // Shared plugin resources.
+      plugin.shared = Object.create(null)
+
+      delegate.shared = plugin.shared
+      delegate.plugin = plugin
+
       delegate.private$ = Object.create(seneca.private$)
       delegate.private$.ge = delegate.private$.ge.gate()
 
@@ -355,7 +361,7 @@ function make_tasks(): any {
 
       let actdeflist: any = []
 
-      delegate.add = function() {
+      delegate.add = function plugin_add() {
         let argsarr = [...arguments]
         let actdef = argsarr[argsarr.length - 1] || {}
 
@@ -375,9 +381,9 @@ function make_tasks(): any {
 
         seneca.add.apply(delegate, argsarr)
 
-        // FIX: should be this
-        return delegate
+        return this
       }
+
 
       delegate.__update_plugin__ = function(plugin: any) {
         delegate.context.name = plugin.name || '-'
@@ -411,7 +417,6 @@ function make_tasks(): any {
 
       delegate.context.plugin = plugin
       delegate.context.plugin.mark = Math.random()
-
 
       return {
         op: 'merge',

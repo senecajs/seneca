@@ -809,7 +809,16 @@ function make_private() {
     transport: {
       register: [],
     },
-    plugins: {},
+    plugins: {
+      // Virtual "plugin" for top level actions.
+      root$: {
+        name: 'root$',
+        fullname: 'root$',
+        tag: '-',
+        options: Object.create(null),
+        shared: Object.create(null),
+      }
+    },
     ignore_plugins: {},
     eventer: new EventEmitter()
   }
