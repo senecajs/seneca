@@ -204,6 +204,7 @@ function inward_validate_msg(spec: any) {
     // TODO: gubu option to provide Error without throwing
     // TODO: how to expose gubu builders, Required, etc?
     // TODO: use original msg for error
+
     try {
       data.msg = ctx.actdef.gubu(msg)
     } catch (e) {

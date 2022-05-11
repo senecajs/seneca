@@ -164,9 +164,10 @@ const option_defaults = {
     plugins: One({}, [], null),
     // System wide functionality.
     system: {
-        // TODO: use Func shape
         // Function to exit the process.
-        exit: () => process.exit,
+        exit: (...args) => {
+            process.exit(...args);
+        },
         // Close instance on these signals, if true.
         close_signals: {
             SIGHUP: false,
@@ -323,7 +324,7 @@ Seneca.prototype.toJSON = function toJSON() {
 };
 Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON;
 // Create a Seneca instance.
-module.exports = function init(seneca_options, more_options) {
+function init(seneca_options, more_options) {
     var initial_opts = 'string' === typeof seneca_options
         ? deep({}, { from: seneca_options }, more_options)
         : deep({}, seneca_options, more_options);
@@ -356,9 +357,11 @@ module.exports = function init(seneca_options, more_options) {
         this.log.info({ kind: 'notice', data: 'hello ' + this.id });
     });
     return seneca;
-};
+}
+module.exports = init;
 // Expose Seneca prototype for easier monkey-patching
 module.exports.Seneca = Seneca;
+exports.default = init;
 // To reference builtin loggers when defining logging options.
 module.exports.loghandler = Legacy.loghandler;
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
