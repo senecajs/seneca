@@ -108,4 +108,21 @@ describe('act', function () {
 
     fin()
   })
+
+  it('validate-action-params', function (fin) {
+    let s0 = Seneca({legacy:false}).test().quiet()
+        .add('a:1',{x:Number}, function(msg, reply) {
+          reply({x:1+msg.x})
+        })
+
+    s0.act('a:1,x:2', function(err, out) {
+      expect(out.x).equal(3)
+
+      s0.act('a:1,x:s', function(err, out) {
+        expect(err.code).equal('act_invalid_msg')
+        expect(err.message).equal('seneca: Action a:1 received an invalid message; Validation failed for property "x" with value "s" because the value is not of type number.; message content was: { a: 1, x: \'s\' }.')
+        fin()
+      })
+    })
+  })
 })

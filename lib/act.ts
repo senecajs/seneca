@@ -17,7 +17,6 @@ import {
 } from './common'
 
 
-
 // Perform an action and optionally return the result by callback.
 // The properties of the combined arguments are matched against known
 // patterns, and the most specific one wins.
@@ -45,6 +44,7 @@ exports.api_act = function() {
   return instance
 }
 
+
 // TODO: write specific test cases for these
 const intern = (module.exports.intern = {
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
@@ -52,6 +52,7 @@ const intern = (module.exports.intern = {
     const actmsg = intern.make_actmsg(origmsg)
     const meta = new Meta(instance, opts, origmsg, origreply)
 
+    // Gated actions must complete before further actions can start.
     if (meta.gate) {
       instance = instance.delegate()
       instance.private$.ge = instance.private$.ge.gate()
@@ -69,7 +70,22 @@ const intern = (module.exports.intern = {
 
     execspec.dn = meta.id
 
-    execspec.fn = function act_fn(done: any) {
+    execspec.fn = function act_fn(complete: any) {
+      const action_reply = (err: any, out: any, reply_meta: any) => {
+        if (!timedout) {
+          intern.handle_reply(
+            opts,
+            meta,
+            actctxt,
+            actmsg,
+            err,
+            out,
+            reply_meta
+          )
+        }
+        complete()
+      }
+
       try {
         intern.execute_action(
           execspec,
@@ -78,26 +94,13 @@ const intern = (module.exports.intern = {
           actctxt,
           actmsg,
           meta,
-          function action_reply(err: any, out: any, reply_meta: any) {
-            if (!timedout) {
-              intern.handle_reply(
-                opts,
-                meta,
-                actctxt,
-                actmsg,
-                err,
-                out,
-                reply_meta
-              )
-            }
-            done()
-          }
+          action_reply
         )
       } catch (e) {
         if (opts.error.capture.action) {
           const ex = isError(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)
-          done()
+          complete()
         }
         else {
           throw e
@@ -127,31 +130,32 @@ const intern = (module.exports.intern = {
     instance.private$.ge.add(execspec)
   },
 
+
   make_actmsg: function(origmsg: any) {
     const actmsg = Object.assign({}, origmsg)
 
-    if (actmsg.id$) {
+    if (null != actmsg.id$) {
       delete actmsg.id$
     }
 
-    if (actmsg.caller$) {
+    if (null != actmsg.caller$) {
       delete actmsg.caller$
     }
 
-    if (actmsg.meta$) {
+    if (null != actmsg.meta$) {
       delete actmsg.meta$
     }
 
-    if (actmsg.prior$) {
+    if (null != actmsg.prior$) {
       delete actmsg.prior$
     }
 
-    if (actmsg.parents$) {
+    if (null != actmsg.parents$) {
       delete actmsg.parents$
     }
 
     // backwards compatibility for Seneca 3.x transports
-    if (origmsg.transport$) {
+    if (null != origmsg.transport$) {
       actmsg.transport$ = origmsg.transport$
     }
 
@@ -236,10 +240,7 @@ const intern = (module.exports.intern = {
 
   process_outward: function(actctxt: any, data: any) {
     const act_instance = actctxt.seneca
-    // const outward = actctxt.seneca.private$.outward.process(actctxt, data)
-
     const outwardres = act_instance.order.outward.execSync(actctxt, data)
-    // console.log(outwardres)
 
     if (outwardres.err) {
       throw outwardres.err
@@ -345,6 +346,7 @@ const intern = (module.exports.intern = {
     }
   },
 
+
   make_act_delegate: function(
     instance: any,
     _opts: any,
@@ -380,6 +382,7 @@ const intern = (module.exports.intern = {
     return delegate
   },
 
+
   handle_inward_break: function(
     inward: any,
     act_instance: any,
@@ -412,16 +415,7 @@ const intern = (module.exports.intern = {
 
       if (inward.log && inward.log.level) {
         act_instance.log[inward.log.level](
-          intern.errlog(
-            err,
-            intern.errlog(
-              actdef || {},
-              meta.prior,
-              // msg,
-              // origmsg,
-              // inward.log.data
-            )
-          )
+          intern.errlog(err, intern.errlog(actdef || {}, meta.prior))
         )
       }
 
