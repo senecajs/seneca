@@ -1,3 +1,8 @@
+## 3.27.0 2022-05-12
+
+* Error capture options: error.capture.callback,action
+* Plugin `shared` object space
+
 
 ## 3.26.2 2022-04-18
 

@@ -1304,7 +1304,6 @@ describe('plugin', function () {
     })
   })
 
-
   it('delegate-plugin-access', function (fin) {
     function p1(opts) {
       expect(opts.foo).equal(1)
@@ -1320,7 +1319,7 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).equal(1)
         expect(this.plugin.options.ned).not.exist()
         expect(this.context.qaz).equal(3)
-        return reply({x:1+msg.x})
+        return reply({ x: 1 + msg.x })
       })
 
       this.add('b:1', function b1(msg, reply) {
@@ -1329,8 +1328,8 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).equal(1)
         expect(this.plugin.options.ned).not.exist()
         expect(this.context.qaz).equal(3)
-        this.act('a:1',{x:msg.x}, function(err,out) {
-          return reply({x:2*out.x})
+        this.act('a:1', { x: msg.x }, function (err, out) {
+          return reply({ x: 2 * out.x })
         })
       })
 
@@ -1340,7 +1339,7 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).equal(1)
         expect(this.plugin.options.ned).not.exist()
         expect(this.context.qaz).equal(3)
-        return reply({x:2*msg.x})
+        return reply({ x: 2 * msg.x })
       })
 
       this.add('c:1', function c1p(msg, reply) {
@@ -1349,12 +1348,11 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).equal(1)
         expect(this.plugin.options.ned).not.exist()
         expect(this.context.qaz).equal(3)
-        this.prior(msg,function(err,out) {
-          return reply({x:5*out.x})
+        this.prior(msg, function (err, out) {
+          return reply({ x: 5 * out.x })
         })
       })
     }
-
 
     // Should not overlap with p1
     function p2(opts) {
@@ -1371,12 +1369,11 @@ describe('plugin', function () {
         expect(this.plugin.options.ned).equal(4)
         expect(this.plugin.options.foo).not.exist()
         expect(this.context.qaz).equal(3)
-        return reply({x:3*msg.x})
+        return reply({ x: 3 * msg.x })
       })
 
-
       // Calls other plugin
-      this.add('e:1', function e1(msg,reply) {
+      this.add('e:1', function e1(msg, reply) {
         expect(this.shared.bob).equal(5)
         expect(this.shared.bar).not.exist()
         expect(this.plugin.name).equal('p2')
@@ -1384,8 +1381,7 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).not.exist()
         expect(this.context.qaz).equal(3)
 
-        this.act('a:1', {x:msg.x}, function(err, out) {
-
+        this.act('a:1', { x: msg.x }, function (err, out) {
           // Back to p1 context
           expect(this.shared.bar).equal(2)
           expect(this.shared.bob).not.exist()
@@ -1394,15 +1390,15 @@ describe('plugin', function () {
           expect(this.plugin.options.ned).not.exist()
           expect(this.context.qaz).equal(3)
 
-          reply({x:0.5+out.x})
+          reply({ x: 0.5 + out.x })
         })
       })
     }
-    
-    const s0 = Seneca({legacy:false}).test(fin)
-    s0.context.qaz=3
-    s0.use(p1,{foo:1})
-    s0.use(p2,{ned:4})
+
+    const s0 = Seneca({ legacy: false }).test(fin)
+    s0.context.qaz = 3
+    s0.use(p1, { foo: 1 })
+    s0.use(p2, { ned: 4 })
 
     s0.add('q:1', function q1(msg, reply) {
       expect(this.context.qaz).equal(3)
@@ -1411,8 +1407,8 @@ describe('plugin', function () {
       expect(this.plugin.options.ned).not.exist()
       expect(this.shared.bob).not.exist()
       expect(this.shared.bar).not.exist()
-      
-      reply({x:0.1+msg.x})
+
+      reply({ x: 0.1 + msg.x })
     })
 
     s0.add('w:1', function w1(msg, reply) {
@@ -1423,19 +1419,16 @@ describe('plugin', function () {
       expect(this.shared.bob).not.exist()
       expect(this.shared.bar).not.exist()
 
-      this.act('e:1',{x:msg.x}, function(err, out) {
-        reply({x:0.2+out.x})
+      this.act('e:1', { x: msg.x }, function (err, out) {
+        reply({ x: 0.2 + out.x })
       })
     })
 
-
     p1_test()
-    
-    
+
     function p1_test() {
-      
-      s0.act({a:1,x:2}, function(err, out) {
-        expect(out).equal({x:3})
+      s0.act({ a: 1, x: 2 }, function (err, out) {
+        expect(out).equal({ x: 3 })
 
         // Callback has plugin action context
         expect(this.shared.bar).equal(2)
@@ -1443,17 +1436,17 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).equal(1)
         expect(this.context.qaz).equal(3)
 
-        s0.act({b:1,x:2}, function(err, out) {
-          expect(out).equal({x:6})
+        s0.act({ b: 1, x: 2 }, function (err, out) {
+          expect(out).equal({ x: 6 })
 
           expect(this.shared.bar).equal(2)
           expect(this.plugin.name).equal('p1')
           expect(this.plugin.options.foo).equal(1)
           expect(this.context.qaz).equal(3)
-          
-          s0.act({c:1,x:2}, function(err, out) {
-            expect(out).equal({x:20})
-            
+
+          s0.act({ c: 1, x: 2 }, function (err, out) {
+            expect(out).equal({ x: 20 })
+
             // Callback has plugin action context
             expect(this.shared.bar).equal(2)
             expect(this.plugin.name).equal('p1')
@@ -1467,8 +1460,8 @@ describe('plugin', function () {
     }
 
     function p2_test() {
-      s0.act({d:1,x:2}, function(err, out) {
-        expect(out).equal({x:6})
+      s0.act({ d: 1, x: 2 }, function (err, out) {
+        expect(out).equal({ x: 6 })
 
         expect(this.shared.bob).equal(5)
         expect(this.shared.bar).not.exist()
@@ -1477,8 +1470,8 @@ describe('plugin', function () {
         expect(this.plugin.options.foo).not.exist()
         expect(this.context.qaz).equal(3)
 
-        s0.act({e:1,x:2}, function(err, out) {
-          expect(out).equal({x:3.5})
+        s0.act({ e: 1, x: 2 }, function (err, out) {
+          expect(out).equal({ x: 3.5 })
 
           // p2 context!!!
           expect(this.shared.bob).equal(5)
@@ -1493,28 +1486,27 @@ describe('plugin', function () {
       })
     }
 
-
     function root$_test() {
-      s0.act('q:1,x:2', function(err, out) {
+      s0.act('q:1,x:2', function (err, out) {
         expect(out.x).equal(2.1)
-        
+
         expect(this.context.qaz).equal(3)
         expect(this.plugin.name).equal('root$')
         expect(this.plugin.options.foo).not.exist()
         expect(this.plugin.options.ned).not.exist()
         expect(this.shared.bob).not.exist()
         expect(this.shared.bar).not.exist()
-        
-        s0.act('w:1,x:2', function(err, out) {
+
+        s0.act('w:1,x:2', function (err, out) {
           expect(out.x).equal(3.7)
-          
+
           expect(this.context.qaz).equal(3)
           expect(this.plugin.name).equal('root$')
           expect(this.plugin.options.foo).not.exist()
           expect(this.plugin.options.ned).not.exist()
           expect(this.shared.bob).not.exist()
           expect(this.shared.bar).not.exist()
-          
+
           fin()
         })
       })
