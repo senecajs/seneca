@@ -1,3 +1,4 @@
+import Nid from 'nid';
 import type { MakeSeneca, Instance } from './lib/types';
 declare const makeSeneca: {
     (seneca_options?: any, more_options?: any): Instance;
@@ -8,7 +9,7 @@ declare const makeSeneca: {
     util: {
         Eraro: any;
         Jsonic: any;
-        Nid: any;
+        Nid: typeof Nid;
         Patrun: any;
         clean: any;
         pattern: any;
@@ -33,7 +34,7 @@ declare const makeSeneca: {
             util: {
                 Eraro: any;
                 Jsonic: any;
-                Nid: any;
+                Nid: typeof Nid;
                 Patrun: any;
                 clean: any;
                 pattern: any;

@@ -10,7 +10,7 @@
     "target": "ES2019"
   },
   "exclude": [
-    "dsit",
+    "dist",
     "node_modules"
   ]
 }

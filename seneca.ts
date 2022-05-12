@@ -14,7 +14,7 @@
 const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
-const Nid = require('nid')
+import Nid from 'nid'
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
@@ -105,6 +105,22 @@ const option_defaults = {
 
   // Provide a module to base option require loading from
   module: Skip(),
+
+
+  // Control error handling.
+  error: {
+
+    // Control capture of errors for logging.
+    capture: {
+
+      // Capture errors in action callbacks (false throws uncaught).
+      callback: true,
+
+      // Capture errors in actions and pass to callback (false throws uncaught).
+      action: true,
+    }
+  },
+
 
   // Debug settings.
   debug: {
@@ -217,9 +233,11 @@ const option_defaults = {
 
   // System wide functionality.
   system: {
-    // TODO: use Func shape
+
     // Function to exit the process.
-    exit: () => process.exit,
+    exit: (...args: any[]) => {
+      process.exit(...args)
+    },
 
     // Close instance on these signals, if true.
     close_signals: {

@@ -1,5 +1,5 @@
 import { make_standard_err_log_entry, make_standard_act_log_entry } from './common';
-declare function act(this: any, ...args: any[]): any;
+declare function act(this: any): any;
 declare function post(this: any, ...args: any[]): Promise<unknown>;
 declare function do_act(instance: any, opts: any, origmsg: any, origreply: any): void;
 declare function make_actmsg(origmsg: any): any;

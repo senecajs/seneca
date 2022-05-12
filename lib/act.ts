@@ -1,5 +1,4 @@
-/* Copyright © 2019-2021 Richard Rodger and other contributors, MIT License. */
-'use strict'
+/* Copyright © 2019-2022 Richard Rodger and other contributors, MIT License. */
 
 
 import type {
@@ -23,16 +22,20 @@ import {
 } from './common'
 
 
-
-// Perform an action. The properties of the first argument are matched against
-// known patterns, and the most specific pattern wins.
-function act(this: any, ...args: any[]) {
+// Perform an action and optionally return the result by callback.
+// The properties of the combined arguments are matched against known
+// patterns, and the most specific one wins.
+function act(this: any) {
   const instance = this
   const opts = instance.options()
-  const spec = build_message(instance, args, 'reply:f?', instance.fixedargs)
+
+  const spec =
+    build_message(instance, [...arguments], 'reply:f?', instance.fixedargs)
+
   const msg = spec.msg
   const reply = spec.reply
 
+  // Capture caller code point if debugging.
   if (opts.debug.act_caller || opts.test) {
     msg.caller$ =
       '\n    Action call arguments and location: ' +
@@ -46,7 +49,6 @@ function act(this: any, ...args: any[]) {
   intern.do_act(instance, opts, msg, reply)
   return instance
 }
-
 
 // Promisified act.
 function post(this: any, ...args: any[]) {
@@ -389,13 +391,7 @@ function handle_inward_break(
 
     if (inward.log && inward.log.level) {
       act_instance.log[inward.log.level](
-        intern.errlog(
-          err,
-          intern.errlog(
-            actdef || {},
-            meta.prior,
-          )
-        )
+        intern.errlog(err, intern.errlog(actdef || {}, meta.prior))
       )
     }
 

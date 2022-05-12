@@ -11,7 +11,7 @@ import Errors from './errors'
 const Stringify = require('fast-safe-stringify')
 const Eraro = require('eraro')
 const Jsonic = require('jsonic')
-const Nid = require('nid')
+import Nid from 'nid'
 const Norma = require('norma')
 const DefaultsDeep = require('lodash.defaultsdeep')
 
@@ -598,6 +598,7 @@ function make_trace_desc(meta: any) {
     meta.action,
   ]
 }
+
 
 const TRACE_PATTERN = 0
 const TRACE_ID = 1
