@@ -11,7 +11,7 @@ import {
   noop,
   error,
   deep,
-  msgdesc,
+  msgstr,
   make_standard_err_log_entry,
   make_standard_act_log_entry,
 } from './common'
@@ -33,7 +33,7 @@ exports.api_act = function() {
   if (opts.debug.act_caller || opts.test) {
     msg.caller$ =
       '\n    Action call arguments and location: ' +
-      (new Error(msgdesc(msg, opts.debug.datalen)).stack + '\n')
+      (new Error(msgstr(msg, opts.debug.datalen)).stack + '\n')
         .replace(/Error: /, '')
         .replace(/.*\/gate-executor\.js:.*\n/g, '')
         .replace(/.*\/seneca\.js:.*\n/g, '')

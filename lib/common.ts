@@ -587,14 +587,16 @@ function make_trace_desc(meta: any) {
 }
 
 
-function msgdesc(msg: any, maxlen: number = 111): string {
-  let desc =
+// Stringify message for logs, debugging and errors. 
+function msgstr(msg: any, len: number = 111): string {
+  let str =
     inspect(clean(msg))
       .replace(/\n/g, '')
 
-  desc = desc.substring(0, maxlen) + (maxlen < desc.length ? '...' : '')
+  str = str.substring(0, len) +
+    (len < str.length ? '...' : '')
 
-  return desc
+  return str
 }
 
 
@@ -748,7 +750,7 @@ export {
   isError,
   inspect,
   error,
-  msgdesc,
+  msgstr,
   TRACE_PATTERN,
   TRACE_ID,
   TRACE_INSTANCE,
