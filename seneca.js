@@ -1,5 +1,8 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 'use strict';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // Node API modules.
 const Events = require('events');
@@ -8,7 +11,7 @@ const Util = require('util');
 const GateExecutor = require('gate-executor');
 const Jsonic = require('jsonic');
 const UsePlugin = require('use-plugin');
-const Nid = require('nid');
+const nid_1 = __importDefault(require("nid"));
 const Patrun = require('patrun');
 const Stats = require('rolling-stats');
 const { Ordu } = require('ordu');
@@ -270,7 +273,7 @@ const option_defaults = {
 const seneca_util = {
     Eraro: Eraro,
     Jsonic: Jsonic,
-    Nid: Nid,
+    Nid: nid_1.default,
     Patrun: Patrun,
     clean: Common.clean,
     pattern: Common.pattern,
@@ -417,8 +420,8 @@ function make_seneca(initial_opts) {
         }
     });
     // Create internal tools.
-    private$.actnid = Nid({ length: start_opts.idlen });
-    private$.didnid = Nid({ length: start_opts.didlen });
+    private$.actnid = (0, nid_1.default)({ length: start_opts.idlen });
+    private$.didnid = (0, nid_1.default)({ length: start_opts.didlen });
     // Instance specific incrementing counters to create unique function names
     private$.next_action_id = Common.autoincr();
     var callpoint = (private$.callpoint = Common.make_callpoint(start_opts.debug.callpoint));
@@ -503,7 +506,7 @@ function make_seneca(initial_opts) {
     root$.pinact = Legacy.findpins;
     root$.next_act = Legacy.next_act;
     // Identifier generator.
-    root$.idgen = Nid({ length: start_opts.idlen });
+    root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
     // Instance tag
     start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag;
     // Create a unique identifer for this instance.
@@ -522,7 +525,7 @@ function make_seneca(initial_opts) {
     root$.tag = start_opts.tag;
     if (start_opts.debug.short_logs || start_opts.log.short) {
         start_opts.idlen = 2;
-        root$.idgen = Nid({ length: start_opts.idlen });
+        root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
         root$.id = root$.idgen() + '/' + start_opts.tag;
     }
     root$.fullname = 'Seneca/' + root$.id;

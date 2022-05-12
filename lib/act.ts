@@ -1,5 +1,4 @@
-/* Copyright © 2019-2021 Richard Rodger and other contributors, MIT License. */
-'use strict'
+/* Copyright © 2019-2022 Richard Rodger and other contributors, MIT License. */
 
 
 import { Meta } from './meta'
@@ -12,59 +11,53 @@ import {
   noop,
   error,
   deep,
+  msgdesc,
   make_standard_err_log_entry,
   make_standard_act_log_entry,
 } from './common'
 
 
 
-// Perform an action. The properties of the first argument are matched against
-// known patterns, and the most specific one wins.
+// Perform an action and optionally return the result by callback.
+// The properties of the combined arguments are matched against known
+// patterns, and the most specific one wins.
 exports.api_act = function() {
-  var argsarr = new Array(arguments.length)
-  for (var l = 0; l < argsarr.length; ++l) {
-    argsarr[l] = arguments[l]
-  }
+  const instance = this
+  const opts = instance.options()
 
-  var self = this
-  var opts = self.options()
-  var spec = build_message(self, argsarr, 'reply:f?', self.fixedargs)
-  var msg = spec.msg
-  var reply = spec.reply
+  const spec =
+    build_message(instance, [...arguments], 'reply:f?', instance.fixedargs)
+  const msg = spec.msg
+  const reply = spec.reply
 
+  // Capture caller code point if debugging.
   if (opts.debug.act_caller || opts.test) {
-    let msgdesc = inspect(this.util.clean(msg)).replace(/\n/g, '')
-
-    msgdesc =
-      msgdesc.substring(0, opts.debug.datalen) +
-      (opts.debug.datalen < msgdesc.length ? '...' : '')
-
     msg.caller$ =
       '\n    Action call arguments and location: ' +
-      (new Error(msgdesc).stack + '\n')
+      (new Error(msgdesc(msg, opts.debug.datalen)).stack + '\n')
         .replace(/Error: /, '')
         .replace(/.*\/gate-executor\.js:.*\n/g, '')
         .replace(/.*\/seneca\.js:.*\n/g, '')
         .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
   }
 
-  intern.do_act(self, opts, msg, reply)
-  return self
+  intern.do_act(instance, opts, msg, reply)
+  return instance
 }
 
 // TODO: write specific test cases for these
 const intern = (module.exports.intern = {
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
-    var timedout = false
-    var actmsg = intern.make_actmsg(origmsg)
-    var meta = new Meta(instance, opts, origmsg, origreply)
+    let timedout = false
+    const actmsg = intern.make_actmsg(origmsg)
+    const meta = new Meta(instance, opts, origmsg, origreply)
 
     if (meta.gate) {
       instance = instance.delegate()
       instance.private$.ge = instance.private$.ge.gate()
     }
 
-    var actctxt = {
+    const actctxt = {
       seneca: instance,
       origmsg: origmsg,
       reply: origreply || noop,
@@ -72,7 +65,7 @@ const intern = (module.exports.intern = {
       callpoint: instance.private$.callpoint(),
     }
 
-    var execspec: any = {}
+    const execspec: any = {}
 
     execspec.dn = meta.id
 
@@ -102,7 +95,7 @@ const intern = (module.exports.intern = {
         )
       } catch (e) {
         if (opts.error.capture.action) {
-          var ex = isError(e) ? e : new Error(inspect(e))
+          const ex = isError(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)
           done()
         }
@@ -115,7 +108,7 @@ const intern = (module.exports.intern = {
     execspec.ontm = function act_tm(timeout: any, start: any, end: any) {
       timedout = true
 
-      var timeout_err = error('action_timeout', {
+      const timeout_err = error('action_timeout', {
         timeout: timeout,
         start: start,
         end: end,
@@ -135,7 +128,7 @@ const intern = (module.exports.intern = {
   },
 
   make_actmsg: function(origmsg: any) {
-    var actmsg = Object.assign({}, origmsg)
+    const actmsg = Object.assign({}, origmsg)
 
     if (actmsg.id$) {
       delete actmsg.id$
@@ -177,10 +170,10 @@ const intern = (module.exports.intern = {
   ) {
     meta.end = Date.now()
 
-    var delegate = actctxt.seneca
-    var reply = actctxt.reply
+    const delegate = actctxt.seneca
+    const reply = actctxt.reply
 
-    var data = {
+    const data = {
       meta: meta,
       msg: actmsg,
       res: err || out,
@@ -209,7 +202,7 @@ const intern = (module.exports.intern = {
       reply_meta.explain &&
       meta.explain.length < reply_meta.explain.length
     ) {
-      for (var i = meta.explain.length; i < reply_meta.explain.length; i++) {
+      for (let i = meta.explain.length; i < reply_meta.explain.length; i++) {
         meta.explain.push(reply_meta.explain[i])
       }
     }
@@ -243,7 +236,7 @@ const intern = (module.exports.intern = {
 
   process_outward: function(actctxt: any, data: any) {
     const act_instance = actctxt.seneca
-    // var outward = actctxt.seneca.private$.outward.process(actctxt, data)
+    // const outward = actctxt.seneca.private$.outward.process(actctxt, data)
 
     const outwardres = act_instance.order.outward.execSync(actctxt, data)
     // console.log(outwardres)
@@ -256,7 +249,7 @@ const intern = (module.exports.intern = {
 
     if (null != outward.kind) {
       if ('sub_outward_action_failed' === outward.code) {
-        var info = {
+        const info = {
           pattern: actctxt.actdef.pattern,
           msg: data.msg,
           ...(outward.info || {}),
@@ -289,18 +282,18 @@ const intern = (module.exports.intern = {
     meta: any,
     reply: any
   ) {
-    var private$ = act_instance.private$
-    var actdef = meta.prior
+    const private$ = act_instance.private$
+    const actdef = meta.prior
       ? private$.actdef[meta.prior]
       : act_instance.find(msg)
-    var delegate = intern.make_act_delegate(act_instance, opts, meta, actdef)
+    const delegate = intern.make_act_delegate(act_instance, opts, meta, actdef)
 
     actctxt.seneca = delegate
     actctxt.actdef = actdef
     execspec.ctxt.pattern = actdef ? actdef.pattern : null
 
     // TODO: move to a process_inward function
-    var data: any = { meta: meta, msg: msg, reply: reply }
+    const data: any = { meta: meta, msg: msg, reply: reply }
 
     const inwardres = act_instance.order.inward.execSync(actctxt, data)
 
@@ -361,7 +354,7 @@ const intern = (module.exports.intern = {
     meta = meta || {}
     actdef = actdef || {}
 
-    var delegate_args = {
+    const delegate_args = {
       plugin$: {
         full: actdef.plugin_fullname,
         name: actdef.plugin_name,
@@ -369,9 +362,9 @@ const intern = (module.exports.intern = {
       },
     }
 
-    var delegate = instance.delegate(delegate_args)
+    const delegate = instance.delegate(delegate_args)
 
-    var parent_act = instance.private$.act || meta.parent
+    const parent_act = instance.private$.act || meta.parent
 
     delegate.private$.act = {
       parent: parent_act && parent_act.meta,
@@ -396,16 +389,16 @@ const intern = (module.exports.intern = {
   ) {
     if (!inward) return false
 
-    var msg = data.msg
-    var reply = data.reply
-    var meta = data.meta
+    const msg = data.msg
+    const reply = data.reply
+    const meta = data.meta
 
     if ('error' === inward.kind) {
-      var err = inward.error
+      let err = inward.error
 
       // DESIGN: new contract - migrate to this for all inward functions
       if ('sub_inward_action_failed' === inward.code) {
-        var info = {
+        const info = {
           pattern: actdef.pattern,
           msg: data.msg,
           ...(inward.info || {}),
@@ -452,20 +445,20 @@ const intern = (module.exports.intern = {
     ctxt: any,
     data: any
   ) {
-    var duration = ctxt.duration
-    var act_callpoint = ctxt.callpoint
-    var actdef = ctxt.actdef || {}
-    var origmsg = ctxt.origmsg
-    var reply = ctxt.reply
+    const duration = ctxt.duration
+    const act_callpoint = ctxt.callpoint
+    const actdef = ctxt.actdef || {}
+    const origmsg = ctxt.origmsg
+    const reply = ctxt.reply
 
-    var meta = data.meta
-    var msg = data.msg
+    const meta = data.meta
+    const msg = data.msg
 
-    var err = isError(thrown_obj)
+    let err = isError(thrown_obj)
       ? thrown_obj
       : new Error(inspect(thrown_obj))
 
-    var opts = instance.options()
+    const opts = instance.options()
 
     if (!err.seneca) {
       err = error(

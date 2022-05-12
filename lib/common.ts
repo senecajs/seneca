@@ -11,7 +11,7 @@ import Errors from './errors'
 const Stringify = require('fast-safe-stringify')
 const Eraro = require('eraro')
 const Jsonic = require('jsonic')
-const Nid = require('nid')
+import Nid from 'nid'
 const Norma = require('norma')
 const DefaultsDeep = require('lodash.defaultsdeep')
 
@@ -586,6 +586,18 @@ function make_trace_desc(meta: any) {
   ]
 }
 
+
+function msgdesc(msg: any, maxlen: number = 111): string {
+  let desc =
+    inspect(clean(msg))
+      .replace(/\n/g, '')
+
+  desc = desc.substring(0, maxlen) + (maxlen < desc.length ? '...' : '')
+
+  return desc
+}
+
+
 const TRACE_PATTERN = 0
 const TRACE_ID = 1
 const TRACE_INSTANCE = 2
@@ -736,6 +748,7 @@ export {
   isError,
   inspect,
   error,
+  msgdesc,
   TRACE_PATTERN,
   TRACE_ID,
   TRACE_INSTANCE,

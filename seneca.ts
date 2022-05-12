@@ -11,7 +11,7 @@ const Util = require('util')
 const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
-const Nid = require('nid')
+import Nid from 'nid'
 const Patrun = require('patrun')
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')

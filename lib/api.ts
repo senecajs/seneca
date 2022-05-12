@@ -1,9 +1,5 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 
-
-// TODO: remove usage
-const Assert = require('assert')
-
 var Jsonic = require('jsonic')
 var Norma = require('norma')
 
@@ -782,15 +778,15 @@ function decorate(this: any) {
   var args = Norma('property:s value:.', arguments)
 
   var property = args.property
-  Assert(property[0] !== '_', 'property cannot start with _')
-  Assert(
-    this.private$.decorations[property] === undefined,
-    'seneca is already decorated with the property: ' + property
-  )
-  Assert(
-    this.root[property] === undefined,
-    'cannot override a core seneca property: ' + property
-  )
+  if ('_' === property[0]) {
+    throw new Error('property cannot start with _')
+  }
+  if (this.private$.decorations[property]) {
+    throw new Error('seneca is already decorated with the property: ' + property)
+  }
+  if (this.root[property]) {
+    throw new Error('cannot override a core seneca property: ' + property)
+  }
 
   this.root[property] = this.private$.decorations[property] = args.value
 }

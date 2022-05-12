@@ -27,6 +27,7 @@ declare function isError(x: any): boolean;
 declare function inspect(x: any): string;
 declare function make_callpoint(active: any): (override: any) => any;
 declare function make_trace_desc(meta: any): any[];
+declare function msgdesc(msg: any, maxlen?: number): string;
 declare const TRACE_PATTERN = 0;
 declare const TRACE_ID = 1;
 declare const TRACE_INSTANCE = 2;
@@ -55,4 +56,4 @@ declare class ActHistory {
     toString(this: any): string;
     [Util.inspect.custom](this: any): any;
 }
-export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, isError, inspect, error, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, isError, inspect, error, msgdesc, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
