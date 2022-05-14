@@ -1,3 +1,8 @@
+## 3.27.1 2022-05-15
+
+* Adjust dependency versions to ensure node >= 10 support.
+
+
 ## 3.27.0 2022-05-12
 
 * Error capture options: error.capture.callback,action
