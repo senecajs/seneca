@@ -73,7 +73,7 @@
     "build": "tsc -d",
     "test": "lab -v -P test -L -t 90 --sourcemaps --transform node_modules/lab-transform-typescript  -r console -o stdout -r html -o test/coverage.html",
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
-    "coveralls": "lab -s -P test -r lcov | coveralls",
+    "coveralls": "lab -s -P test -r lcov > ./coverage/lcov.info",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
