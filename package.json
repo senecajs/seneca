@@ -73,7 +73,7 @@
     "build": "tsc -d",
     "test": "lab -v -P test -L -t 90 --sourcemaps --transform node_modules/lab-transform-typescript  -r console -o stdout -r html -o test/coverage.html",
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
-    "coveralls": "lab -s -P test -r lcov > ./coverage/lcov.info",
+    "coveralls": "lab -s -P test -I AggregateError,atob,btoa,DOMException,AbortController,AbortSignal,EventTarget,Event,MessageChannel,MessagePort,MessageEvent,performance,structuredClone -r lcov > ./coverage/lcov.info",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@hapi/wreck": "^18.0.0",
+    "@hapi/wreck": "17",
     "eraro": "^2.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
