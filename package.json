@@ -102,13 +102,13 @@
     "patrun": "^7.1.0",
     "qs": "^6.10.3",
     "rolling-stats": "^0.2.1",
-    "seneca-transport": "^7.1.0",
+    "seneca-transport": "^7.2.0",
     "use-plugin": "^9.1.0"
   },
   "devDependencies": {
-    "@hapi/code": "^9.0.0",
-    "@hapi/hoek": "^10.0.0",
-    "@hapi/lab": "^25.0.1",
+    "@hapi/code": "8",
+    "@hapi/joi": "17",
+    "@hapi/lab": "23",
     "@seneca/test-plugin": "0.1.0",
     "@types/node": "^17.0.33",
     "async": "^3.2.3",
