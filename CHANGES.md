@@ -1,3 +1,8 @@
+## 3.27.2 2022-05-16
+
+* Accept legacy non-functional option properties to maintain compatibility with old configs.
+
+
 ## 3.27.1 2022-05-15
 
 * Adjust dependency versions to ensure node >= 10 support.

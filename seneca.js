@@ -268,6 +268,8 @@ const option_defaults = {
     },
     // Legacy
     reload$: Skip(Boolean),
+    actcache: Any(),
+    seneca: Any(),
 };
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
