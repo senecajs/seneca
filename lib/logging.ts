@@ -394,7 +394,9 @@ function build_test_log(seneca: any, data: any) {
         (!obj.$$logged$$ && (!data.err || !data.err.$$logged$$))
       ) {
         logb.push(objstr)
-        obj.$$logged$$ = () => { }
+        if ('object' === typeof obj) {
+          obj.$$logged$$ = () => { }
+        }
       } else {
         logb.push(objstr.substring(0, 22)) + '...'
       }
@@ -421,7 +423,9 @@ function build_test_log(seneca: any, data: any) {
         data.caller +
         '\n'
       )
-      data.err.$$logged$$ = () => { }
+      if ('object' === typeof data.err) {
+        data.err.$$logged$$ = () => { }
+      }
     }
   } else if ('add' === data.kind) {
     logb.push(data.pattern)
@@ -450,7 +454,9 @@ function build_test_log(seneca: any, data: any) {
     )
   } else if (!data.$$logged$$) {
     logb.push(Util.inspect(data).replace(/\n/g, ' ').substring(0, datalen))
-    data.$$logged$$ = () => { }
+    if ('object' === typeof data) {
+      data.$$logged$$ = () => { }
+    }
   }
 
   if (data.did) {
