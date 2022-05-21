@@ -1067,7 +1067,6 @@ describe('plugin', function () {
   it('error-plugin-define', function (fin) {
     var s0 = Seneca({ legacy: false, log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
-      //console.log('BBB',err)
       try {
         expect(err.code).equal('e0')
         expect(err.message).contains('a is 1')
@@ -1511,5 +1510,16 @@ describe('plugin', function () {
         })
       })
     }
+  })
+
+  it('plugin-options-no-validate-if-no-defaults', function (fin) {
+    const tmp = {}
+    const p0 = (opts)=>{
+      Object.assign(tmp,opts)
+    }
+    Seneca({legacy:false}).test().use(p0,{x:1}).ready(function() {
+      expect(tmp.x).equals(1)
+      fin()
+    })
   })
 })

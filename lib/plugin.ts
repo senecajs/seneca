@@ -488,7 +488,7 @@ function make_tasks(): any {
       let so = delegate.options()
 
       let fullname = plugin.fullname
-      let defaults = plugin.defaults || {}
+      let defaults = plugin.defaults
 
       let fullname_options = Object.assign(
         {},
@@ -553,11 +553,31 @@ function make_tasks(): any {
           defaults({ valid, Joi }) : defaults
 
       if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
-        let optionShape =
+        if (null == defaults_values || 0 === Object.keys(defaults_values).length) {
+          resolved_options = fullopts
+        }
+        else {
           // TODO: use Gubu.isShape
-          (defaults_values.gubu && defaults_values.gubu.gubu$) ? defaults_values :
-            delegate.valid(defaults_values)
-        resolved_options = optionShape(fullopts)
+          let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
+
+          // TODO: when Gubu supports merge, also merge if isShape
+          if (!isShape && null == defaults_values.errors && null != errors) {
+            defaults_values.errors = {}
+          }
+
+          let optionShape =
+            isShape ? defaults_values : delegate.valid(defaults_values)
+          let shapeErrors: any[] = []
+          resolved_options = optionShape(fullopts, { err: shapeErrors })
+
+          if (0 < shapeErrors.length) {
+            err = delegate.error('invalid_plugin_option', {
+              name: fullname,
+              err_msg: shapeErrors.map((se: any) => se.t).join('; '),
+              options: fullopts,
+            })
+          }
+        }
       }
       else {
         let joi_schema: any = intern.prepare_spec(
