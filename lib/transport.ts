@@ -421,7 +421,9 @@ function hook_client_web(this: any, msg: any, hook_reply: any) {
               }
             }
 
-            seneca.reply(internalize_reply(sending_instance, res))
+            // seneca.reply(internalize_reply(sending_instance, res))
+            let replySpec = internalize_reply(sending_instance, res)
+            reply(replySpec.err, replySpec.out, replySpec.meta)
           }
 
           const wreck_read = Wreck.read(res, spec.wreck.read)

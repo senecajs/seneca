@@ -165,12 +165,19 @@ function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
         options: false,
       }
     }
+    else if (true === initial.legacy) {
+      adjusted.legacy = {}
+    }
+
+    const validate =
+      false !== initial.valid?.active &&
+      false !== initial.valid?.option
 
     // This is the list of option sources.
     // The list is in reverse precedence order,
     // i.e. command line arguments (argv) win
     var out = Common.deep(
-      {},
+      validate ? {} : optionShape(),
       // defaults,
       sourcemap.default_file,
       options,
@@ -181,7 +188,9 @@ function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
       sourcemap.argv
     )
 
-    out = optionShape(out)
+    if (validate) {
+      out = optionShape(out)
+    }
 
     // Legacy log settings.
     out.log = out.log || out.logger || out.logging || {}

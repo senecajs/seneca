@@ -1,9 +1,13 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 
 
-import Util from 'util'
-
-const Common = require('./common')
+import {
+  TRACE_PATTERN,
+  TRACE_ACTION,
+  clean,
+  make_trace_desc,
+  inspect,
+} from './common'
 
 
 const intern: any = {}
@@ -48,9 +52,9 @@ function inward_limit_msg(spec: any) {
           maxparents: so.limits.maxparents,
           numparents: meta.parents.length,
           parents: meta.parents.map(
-            (p: any) => p[Common.TRACE_PATTERN] + ' ' + p[Common.TRACE_ACTION]
+            (p: any) => p[TRACE_PATTERN] + ' ' + p[TRACE_ACTION]
           ),
-          args: Util.inspect(Common.clean(data.msg)).replace(/\n/g, ''),
+          args: inspect(clean(data.msg)).replace(/\n/g, ''),
         },
       },
     }
@@ -85,7 +89,7 @@ function inward_closed(spec: any) {
         kind: 'error',
         code: 'closed',
         info: {
-          args: Util.inspect(Common.clean(data.msg)).replace(/\n/g, ''),
+          args: inspect(clean(data.msg)).replace(/\n/g, ''),
         },
       },
     }
@@ -110,6 +114,7 @@ function inward_act_stats(spec: any) {
 
   ++actstats.calls
 }
+
 
 function inward_act_default(spec: any) {
   const ctx = spec.ctx
@@ -148,14 +153,15 @@ function inward_act_default(spec: any) {
           kind: 'error',
           code: 'act_default_bad',
           info: {
-            args: Util.inspect(Common.clean(msg)).replace(/\n/g, ''),
-            xdefault: Util.inspect(default$),
+            args: inspect(clean(msg)).replace(/\n/g, ''),
+            xdefault: inspect(default$),
           },
         },
       }
     }
   }
 }
+
 
 function inward_act_not_found(spec: any) {
   const ctx = spec.ctx
@@ -172,7 +178,7 @@ function inward_act_not_found(spec: any) {
       out: {
         kind: 'error',
         code: 'act_not_found',
-        info: { args: Util.inspect(Common.clean(msg)).replace(/\n/g, '') },
+        info: { args: inspect(clean(msg)).replace(/\n/g, '') },
         log: {
           level: so.trace.unknown ? 'warn' : 'debug',
           data: {
@@ -185,6 +191,7 @@ function inward_act_not_found(spec: any) {
   }
 }
 
+
 function inward_validate_msg(spec: any) {
   const ctx = spec.ctx
   const data = spec.data
@@ -194,21 +201,23 @@ function inward_validate_msg(spec: any) {
 
   var err: any = null
 
-  if ('function' === typeof ctx.actdef.validate) {
-    // FIX: this is assumed to be synchronous
-    // seneca-parambulator and seneca-joi need to be updated
-    ctx.actdef.validate(msg, function(verr: any) {
-      err = verr
-    })
-  } else if (ctx.actdef.gubu) {
-    // TODO: gubu option to provide Error without throwing
-    // TODO: how to expose gubu builders, Required, etc?
-    // TODO: use original msg for error
-
-    try {
-      data.msg = ctx.actdef.gubu(msg)
-    } catch (e) {
-      err = e
+  if (so.valid.active && so.valid.message) {
+    if (ctx.actdef.gubu) {
+      // TODO: gubu option to provide Error without throwing
+      // TODO: how to expose gubu builders, Required, etc?
+      // TODO: use original msg for error
+      try {
+        data.msg = ctx.actdef.gubu(msg)
+      } catch (e) {
+        err = e
+      }
+    }
+    else if ('function' === typeof ctx.actdef.validate) {
+      // FIX: this is assumed to be synchronous
+      // seneca-parambulator and seneca-joi need to be updated
+      ctx.actdef.validate(msg, function(verr: any) {
+        err = verr
+      })
     }
   }
 
@@ -221,7 +230,7 @@ function inward_validate_msg(spec: any) {
         info: {
           pattern: ctx.actdef.pattern,
           message: err.message,
-          msg: Common.clean(msg),
+          msg: clean(msg),
           error: err,
         },
         log: {
@@ -299,6 +308,7 @@ function inward_warnings(spec: any) {
   }
 }
 
+
 function inward_msg_meta(spec: any) {
   const ctx = spec.ctx
   const data = spec.data
@@ -323,7 +333,7 @@ function inward_msg_meta(spec: any) {
 
   if (parent) {
     meta.parents = meta.parents.concat(parent.parents || [])
-    meta.parents.unshift(Common.make_trace_desc(parent))
+    meta.parents.unshift(make_trace_desc(parent))
   }
 
   meta.custom = Object.assign(
@@ -386,7 +396,7 @@ function inward_prepare_delegate(spec: any) {
 
   ctx.seneca.explain = intern.explain.bind(ctx.seneca, meta)
   if (meta.explain) {
-    ctx.seneca.explain({ explain$: true, msg$: Common.clean(data.msg) })
+    ctx.seneca.explain({ explain$: true, msg$: clean(data.msg) })
   }
 }
 
@@ -432,6 +442,7 @@ function inward_sub(spec: any) {
     }
   }
 }
+
 
 intern.explain = function(meta: any, entry: any) {
   var orig_explain = this.explain
@@ -482,7 +493,6 @@ intern.explain = function(meta: any, entry: any) {
 
   return explain && this.explain
 }
-
 
 
 let Inward = {

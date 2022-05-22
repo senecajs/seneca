@@ -24,7 +24,7 @@ declare function make_standard_err_log_entry(err: any, ctxt: any): any;
 declare function resolve_option(value: any, options: any): any;
 declare function autoincr(): () => number;
 declare function isError(x: any): boolean;
-declare function inspect(x: any): string;
+declare function inspect(val: any, opts?: any): string;
 declare function make_callpoint(active: any): (override: any) => any;
 declare function make_trace_desc(meta: any): any[];
 declare function msgstr(msg: any, len?: number): string;

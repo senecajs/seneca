@@ -99,7 +99,6 @@ const option_defaults = {
   // Provide a module to base option require loading from
   module: Skip(),
 
-
   // Control error handling.
   error: {
 
@@ -114,6 +113,21 @@ const option_defaults = {
     }
   },
 
+  // Validate messages and options.
+  valid: {
+
+    // If false disables all validation.
+    active: true,
+
+    // Validate message parameters.
+    message: true,
+
+    // Validate main Seneca instance options.
+    option: true,
+
+    // Validate plugin options.
+    plugin: true,
+  },
 
   // Debug settings.
   debug: {

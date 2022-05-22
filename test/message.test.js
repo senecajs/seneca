@@ -568,4 +568,79 @@ describe('message', function () {
         fin()
       })
   })
+
+  
+  it('validate-active', (fin) => {
+    let s0 = Seneca({
+      legacy:false,
+      error:{capture:{callback:false}}
+    })
+        .test()
+        .quiet()
+        .add('a:1',{b:Number,c:{d:String}}, function(msg, reply) {
+          reply({b:msg.b,cd:msg.c.d})
+        })
+        .act('a:1', {b:22, c:{d:'AA'}}, function(err, out) {
+          expect(err).not.exist()
+          expect(out).equal({b:22,cd:'AA'})
+        })
+        .act('a:1', function(err, out) {
+          expect(err.code).equal('act_invalid_msg')
+          expect(err.msg).match(/required/)
+        })
+        .ready(function() {
+          fin()
+        })
+  })
+
+
+  it('validate-general-inactive', (fin) => {
+    let s0 = Seneca({
+      legacy:false,
+      valid:{active:false},
+      error:{capture:{callback:false}}
+    })
+        .test()
+        .quiet()
+        .add('a:1',{b:Number,c:{d:String}}, function(msg, reply) {
+          reply({b:msg.b,cd:msg.c.d})
+        })
+        .act('a:1', {b:22, c:{d:'AA'}}, function(err, out) {
+          expect(err).not.exist()
+          expect(out).equal({b:22,cd:'AA'})
+        })
+        .act('a:1', {c:{}}, function(err, out) {
+          expect(err).not.exist()
+          expect(out).equal({b:undefined,cd:undefined})
+        })
+        .ready(function() {
+          fin()
+        })
+  })
+
+
+  it('validate-message-inactive', (fin) => {
+    let s0 = Seneca({
+      legacy:false,
+      valid:{message:false},
+      error:{capture:{callback:false}}
+    })
+        .test()
+        .quiet()
+        .add('a:1',{b:Number,c:{d:String}}, function(msg, reply) {
+          reply({b:msg.b,cd:msg.c.d})
+        })
+        .act('a:1', {b:22, c:{d:'AA'}}, function(err, out) {
+          expect(err).not.exist()
+          expect(out).equal({b:22,cd:'AA'})
+        })
+        .act('a:1', {c:{}}, function(err, out) {
+          expect(err).not.exist()
+          expect(out).equal({b:undefined,cd:undefined})
+        })
+        .ready(function() {
+          fin()
+        })
+  })
+
 })

@@ -552,11 +552,15 @@ function make_tasks(): any {
         ('function' === typeof (defaults) && !defaults.gubu) ?
           defaults({ valid, Joi }) : defaults
 
-      if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
-        if (null == defaults_values || 0 === Object.keys(defaults_values).length) {
-          resolved_options = fullopts
-        }
-        else {
+      if (null == defaults_values ||
+        0 === Object.keys(defaults_values).length ||
+        !so.valid.active ||
+        !so.valid.plugin
+      ) {
+        resolved_options = fullopts
+      }
+      else {
+        if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
           // TODO: use Gubu.isShape
           let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
 
@@ -578,26 +582,26 @@ function make_tasks(): any {
             })
           }
         }
-      }
-      else {
-        let joi_schema: any = intern.prepare_spec(
-          Joi,
-          defaults_values,
-          { allow_unknown: true },
-          {}
-        )
-
-        let joi_out = joi_schema.validate(fullopts)
-
-        if (joi_out.error) {
-          err = delegate.error('invalid_plugin_option', {
-            name: fullname,
-            err_msg: joi_out.error.message,
-            options: fullopts,
-          })
-        }
         else {
-          resolved_options = joi_out.value
+          let joi_schema: any = intern.prepare_spec(
+            Joi,
+            defaults_values,
+            { allow_unknown: true },
+            {}
+          )
+
+          let joi_out = joi_schema.validate(fullopts)
+
+          if (joi_out.error) {
+            err = delegate.error('invalid_plugin_option', {
+              name: fullname,
+              err_msg: joi_out.error.message,
+              options: fullopts,
+            })
+          }
+          else {
+            resolved_options = joi_out.value
+          }
         }
       }
 

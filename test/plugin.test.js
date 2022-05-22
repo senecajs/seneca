@@ -1512,7 +1512,7 @@ describe('plugin', function () {
     }
   })
 
-  it('plugin-options-no-validate-if-no-defaults', function (fin) {
+  it('plugin-options-no-defaults', function (fin) {
     const tmp = {}
     const p0 = (opts)=>{
       Object.assign(tmp,opts)
@@ -1522,4 +1522,31 @@ describe('plugin', function () {
       fin()
     })
   })
+
+  it('plugin-options-valid-general-inactive', function (fin) {
+    const tmp = {}
+    const p0 = (opts)=>{
+      Object.assign(tmp,opts)
+    }
+    p0.defaults = { x: String }
+    Seneca({legacy:false,valid:{active:false}})
+      .test().use(p0,{x:1}).ready(function() {
+      expect(tmp.x).equals(1)
+      fin()
+    })
+  })
+
+  it('plugin-options-valid-plugin-inactive', function (fin) {
+    const tmp = {}
+    const p0 = (opts)=>{
+      Object.assign(tmp,opts)
+    }
+    p0.defaults = { x: String }
+    Seneca({legacy:false,valid:{plugin:false}})
+      .test().use(p0,{x:1}).ready(function() {
+      expect(tmp.x).equals(1)
+      fin()
+    })
+  })
+
 })

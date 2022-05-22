@@ -41,4 +41,11 @@ describe('options', function () {
       .test()
       .ready()
   })
+
+  it('validate', async () => {
+    expect(()=>Seneca({ prior: { direct: 'BAD' } })).throws(/type/)
+    expect(Seneca({ valid: { active: false }, prior: { direct: 'BAD' } })).exist()
+    expect(Seneca({ valid: { option: false }, prior: { direct: 'BAD' } })).exist()
+  })
+
 })

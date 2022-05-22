@@ -86,6 +86,17 @@ const option_defaults = {
             action: true,
         }
     },
+    // Validate messages and options.
+    valid: {
+        // If false disables all validation.
+        active: true,
+        // Validate message parameters.
+        message: true,
+        // Validate main Seneca instance options.
+        option: true,
+        // Validate plugin options.
+        plugin: true,
+    },
     // Debug settings.
     debug: {
         // Throw (some) errors from seneca.act.

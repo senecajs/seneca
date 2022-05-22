@@ -96,8 +96,8 @@ const intern = (module.exports.intern = {
           meta,
           action_reply
         )
-      } catch (e) {
-        if (opts.error.capture.action) {
+      } catch (e: any) {
+        if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
           const ex = isError(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)
           complete()
@@ -211,7 +211,6 @@ const intern = (module.exports.intern = {
       }
     }
 
-    // intern.process_outward(actctxt, data, delegate)
     intern.process_outward(actctxt, data)
 
     if (data.has_callback) {
@@ -222,11 +221,14 @@ const intern = (module.exports.intern = {
         } else {
           reply.call(delegate, data.err, data.res, data.meta)
         }
-      } catch (thrown_obj) {
+      } catch (thrown_obj: any) {
         if (opts.error.capture.callback) {
           intern.callback_error(delegate, thrown_obj, actctxt, data)
         }
         else {
+          if ('object' === typeof thrown_obj) {
+            thrown_obj.$$seneca_callback_error$$ = true
+          }
           throw thrown_obj
         }
       }

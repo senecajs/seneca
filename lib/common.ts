@@ -301,7 +301,7 @@ function makedie(instance: any, ctxt: any) {
       if (!err) {
         err = new Error('unknown')
       } else if (!Util.isError(err)) {
-        err = new Error('string' === typeof err ? err : Util.inspect(err))
+        err = new Error('string' === typeof err ? err : inspect(err))
       }
 
       err.fatal$ = true
@@ -334,12 +334,12 @@ function makedie(instance: any, ctxt: any) {
         process.platform +
         (!full ? '' : ', path=' + process.execPath) +
         ', argv=' +
-        Util.inspect(process.argv).replace(/\n/g, '') +
+        inspect(process.argv).replace(/\n/g, '') +
         (!full
           ? ''
           : !print_env
             ? ''
-            : ', env=' + Util.inspect(process.env).replace(/\n/g, ''))
+            : ', env=' + inspect(process.env).replace(/\n/g, ''))
 
       let when = new Date()
 
@@ -355,7 +355,7 @@ function makedie(instance: any, ctxt: any) {
         '\nINSTANCE  :::  ' +
         instance.toString() +
         '\nDETAILS   :::  ' +
-        Util.inspect(
+        inspect(
           full
             ? err.details
             : ((clean_details = clean(err.details) || {}),
@@ -378,11 +378,11 @@ function makedie(instance: any, ctxt: any) {
         (!full
           ? ''
           : ', ' +
-          Util.inspect(process.versions).replace(/\s+/g, ' ') +
+          inspect(process.versions).replace(/\s+/g, ' ') +
           ', ' +
-          Util.inspect(process.features).replace(/\s+/g, ' ') +
+          inspect(process.features).replace(/\s+/g, ' ') +
           ', ' +
-          Util.inspect((process as any).moduleLoadList).replace(/\s+/g, ' ')) +
+          inspect((process as any).moduleLoadList).replace(/\s+/g, ' ')) +
         '\nPROCESS   :::  ' +
         procdesc +
         '\nFOLDER    :::  ' +
@@ -407,7 +407,7 @@ function makedie(instance: any, ctxt: any) {
                 if (close_err) {
                   instance.log.fatal({
                     kind: 'close',
-                    err: Util.inspect(close_err),
+                    err: inspect(close_err),
                   })
                 }
 
@@ -455,7 +455,7 @@ function makedie(instance: any, ctxt: any) {
     } catch (panic: any) {
       this.log.fatal({
         kind: 'panic',
-        panic: Util.inspect(panic),
+        panic: inspect(panic),
         orig: arguments[0],
       })
 
@@ -546,12 +546,12 @@ function autoincr() {
 
 
 function isError(x: any) {
-  return Util.isError(x)
+  return Util.types.isNativeError(x)
 }
 
 
-function inspect(x: any) {
-  return Util.inspect(x)
+function inspect(val: any, opts?: any) {
+  return Util.inspect(val, opts)
 }
 
 
@@ -708,7 +708,7 @@ class ActHistory {
   }
 
   toString(this: any) {
-    return Util.inspect({
+    return inspect({
       total: this._total,
       map: this._map,
       list: this._list,
