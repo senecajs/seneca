@@ -1,3 +1,8 @@
+## 3.28.0 2022-05-23
+
+* Validation control options: valid.active|message|option|plugin
+
+
 ## 3.27.2 2022-05-16
 
 * Accept legacy non-functional option properties to maintain compatibility with old configs.
