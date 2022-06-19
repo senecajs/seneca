@@ -1,3 +1,9 @@
+## 4.0.0-rc.1 2022-06-19
+
+* Node >= 14
+* Remove Joi
+
+
 ## 3.28.0 2022-05-23
 
 * Validation control options: valid.active|message|option|plugin
