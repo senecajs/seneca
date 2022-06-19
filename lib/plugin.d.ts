@@ -14,8 +14,6 @@ declare const Plugin: {
             seneca_complete: (tr: any, _ctx: any, data: any) => any;
         };
         define_plugin: (delegate: any, plugin: any, options: any) => any;
-        prepare_spec: (Joi: any, spec: any, opts: any, ctxt: any) => any;
-        walk: (Joi: any, start_joiobj: any, obj: any, path: any, opts: any, ctxt: any, mod: any) => any;
     };
 };
 export { Plugin };

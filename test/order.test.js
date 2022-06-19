@@ -121,15 +121,15 @@ describe('order', function () {
 
         s0.use(p1)
 
-        var Joi = s0.util.Joi
+        // var Joi = s0.util.Joi
 
         // console.log('TASKLIST',s0.order.plugin.tasks().map(t=>t.name).join('\n'))
 
-        let joidef = Joi.object({
-          e: Joi.string().default('v0'),
-          c: Joi.number(),
-          f: Joi.number(),
-        }).default()
+        // let joidef = Joi.object({
+        //   e: Joi.string().default('v0'),
+        //   c: Joi.number(),
+        //   f: Joi.number(),
+        // }).default()
 
         // console.log(Joi.isSchema(joidef,{legacy:true}))
 
@@ -143,7 +143,11 @@ describe('order', function () {
             }
           },
 
-          defaults: joidef,
+          defaults: {
+            e: 'v0',
+            c: Number,
+            f: Number,
+          },
         })
 
         s0.ready(function () {

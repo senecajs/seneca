@@ -799,7 +799,7 @@ intern.parse_config = function(args: any) {
 
   var arglen = config.length
 
-  // TODO: use Joi for better error msgs
+  // TODO: use Gubu for better error msgs
 
   if (arglen === 1) {
     if (config[0] && 'object' === typeof config[0]) {

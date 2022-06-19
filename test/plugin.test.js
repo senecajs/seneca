@@ -15,6 +15,9 @@ var Seneca = require('..')
 var { Plugin } = require('../lib/plugin')
 
 describe('plugin', function () {
+
+  // TODO: move to seneca-joi
+  /*
   it('use.intern', (fin) => {
     expect(Plugin.intern).exists()
 
@@ -23,7 +26,7 @@ describe('plugin', function () {
     var spec = {
       a: null,
       b: void 0,
-      c: Joi.object(),
+      c: {}, // Joi.object(),
       d: 1,
       e: 'a',
       f: {},
@@ -69,7 +72,8 @@ describe('plugin', function () {
 
     fin()
   })
-
+  */
+  
   it('plugin-edges', (fin) => {
     var s = Seneca({ debug: { undead: true } }).test(fin)
 
@@ -200,8 +204,19 @@ describe('plugin', function () {
   })
 
   it('load-defaults', function (fin) {
-    Seneca()
+    let s0 = Seneca()
       .test(fin)
+
+    s0.use({
+      define: function(options) {
+        expect(options).equal({a:1,b:1})
+      },
+      defaults: {
+        a:1
+      }
+    }, {b:1})
+    
+    s0
       .quiet()
 
       // NOTE: the assertions are in the plugin
@@ -257,8 +272,9 @@ describe('plugin', function () {
       .ready(fin)
   })
 
+  
   it('bad-default-options', function (fin) {
-    Seneca({ debug: { undead: true } })
+    Seneca({ legacy:false, debug: { undead: true } })
       .test(function (err) {
         expect(err.code).equals('invalid_plugin_option')
         fin()
@@ -271,7 +287,7 @@ describe('plugin', function () {
             Code.fail()
           },
           defaults: {
-            a: Seneca.util.Joi.string(),
+            a: String // Seneca.util.Joi.string(),
           },
         },
         {
@@ -281,6 +297,7 @@ describe('plugin', function () {
       )
   })
 
+  
   // REMOVE in 4.x
   it('legacy-options', function (fin) {
     var si = Seneca({ log: 'silent' }).quiet()
@@ -1144,6 +1161,8 @@ describe('plugin', function () {
     })
   })
 
+  // TODO: seneca-joi won over joi - use another plugin to test
+  /*
   it('seneca-prefix-wins', function (fin) {
     var s0 = Seneca({ legacy: { transport: false } }).test(fin)
     s0.use('joi')
@@ -1152,56 +1171,9 @@ describe('plugin', function () {
       fin()
     })
   })
-
-  it('plugin-defaults-top-level-joi', function (fin) {
-    var s0 = Seneca().test(fin)
-    var Joi = s0.util.Joi
-
-    // no Joi
-    var p0 = {
-      defaults: {
-        a: 1,
-      },
-      define: function (options) {
-        expect(options).equal({
-          a: 1,
-        })
-      },
-    }
-
-    s0.use(Object.assign(p0, { name: 'p0n0' }))
-
-    // top Joi
-    var p1 = {
-      defaults: Joi.object({
-        a: Joi.number().default(2),
-      }).default(),
-      define: function (options) {
-        expect(options).equal({
-          a: 2,
-        })
-      },
-    }
-
-    // console.log('test p1n0', Joi.isSchema(p1.defaults))
-
-    s0.use(Object.assign(p1, { name: 'p1n0' }))
-
-    s0.ready(function () {
-      var po = this.options().plugin
-
-      expect(po.p0n0).equal({
-        a: 1,
-      })
-
-      expect(po.p1n0).equal({
-        a: 2,
-      })
-
-      fin()
-    })
-  })
-
+  */
+  
+  
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
@@ -1242,8 +1214,8 @@ describe('plugin', function () {
       {
         defaults: (opts) => {
           return {
-            x: opts.Joi.number(),
-            y: opts.Joi.string().default('Y'),
+            x: Number,
+            y: 'Y',
           }
         },
         define: function p0(options) {

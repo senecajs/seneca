@@ -246,7 +246,10 @@ const task = {
     const actdef = spec.data.actdef
     const pattern = spec.data.pattern
 
+    // TODO: provide option for seneca-joi etc to disable Gubu
+
     let pattern_rules: any = {}
+    let external = false // external rule engine
     let prN = 0
     each(actdef.raw, function(v: any, k: string) {
       if (
@@ -257,11 +260,16 @@ const task = {
         pattern_rules[k] = v
         prN++
         delete pattern[k]
+
+        // Recognize joi
+        if (v.$_root) {
+          external = true
+        }
       }
     })
     actdef.rules = pattern_rules
 
-    if (!opts.legacy.rules && 0 < prN) {
+    if (!opts.legacy.rules && !external && 0 < prN) {
       // TODO: how to make Closed if specified by user ?
       actdef.gubu = Gubu(Open(pattern_rules))
     }

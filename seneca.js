@@ -12,14 +12,14 @@ const GateExecutor = require('gate-executor');
 const Jsonic = require('jsonic');
 const UsePlugin = require('use-plugin');
 const nid_1 = __importDefault(require("nid"));
-const Patrun = require('patrun');
+const patrun_1 = require("patrun");
 const Stats = require('rolling-stats');
 const { Ordu } = require('ordu');
 const { Gubu, One, Any, Skip, Open } = require('gubu');
 const Eraro = require('eraro');
 // Deprecated Legacy modules.
-const Optioner = require('optioner');
-const Joi = require('@hapi/joi');
+// const Optioner = require('optioner')
+// const Joi = require('@hapi/joi')
 // Internal modules.
 const Common = require('./lib/common');
 const { make_logging } = require('./lib/logging');
@@ -287,7 +287,8 @@ const seneca_util = {
     Eraro: Eraro,
     Jsonic: Jsonic,
     Nid: nid_1.default,
-    Patrun: Patrun,
+    Patrun: patrun_1.Patrun,
+    Gex: patrun_1.Gex,
     clean: Common.clean,
     pattern: Common.pattern,
     print: Common.print,
@@ -297,13 +298,13 @@ const seneca_util = {
     // Expose Gubu schema builders (Required, etc.).
     Gubu,
     // Deprecated Legacy (make internal or rename)
-    Optioner: Optioner,
-    Joi: Joi,
+    // Optioner: Optioner,
+    // Joi: Joi,
     deepextend: Common.deep,
     parsepattern: Common.parsePattern,
     pincanon: Common.pincanon,
     router: function router() {
-        return Patrun();
+        return (0, patrun_1.Patrun)();
     },
     resolve_option: Common.resolve_option,
     // Legacy (deprecate and remove)
@@ -418,12 +419,12 @@ function make_seneca(initial_opts) {
         err: start_opts.internal.print.err || Print.internal_err,
     };
     // These need to come from options as required during construction.
-    private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true });
+    private$.actrouter = start_opts.internal.actrouter || (0, patrun_1.Patrun)({ gex: true });
     var soi_subrouter = start_opts.internal.subrouter || {};
     private$.subrouter = {
         // Check for legacy inward router
-        inward: soi_subrouter.inward || Patrun({ gex: true }),
-        outward: soi_subrouter.outward || Patrun({ gex: true }),
+        inward: soi_subrouter.inward || (0, patrun_1.Patrun)({ gex: true }),
+        outward: soi_subrouter.outward || (0, patrun_1.Patrun)({ gex: true }),
     };
     // Setup event handlers, if defined
     var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close'];

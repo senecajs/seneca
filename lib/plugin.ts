@@ -560,7 +560,10 @@ function make_tasks(): any {
         resolved_options = fullopts
       }
       else {
-        if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
+        if (
+          !so.legacy.options &&
+          !defaults_values.$_root // check for legacy Joi schema
+        ) { // !Joi.isSchema(defaults_values, { legacy: true })) {
           // TODO: use Gubu.isShape
           let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
 
@@ -583,6 +586,9 @@ function make_tasks(): any {
           }
         }
         else {
+          resolved_options = delegate.util.deep(defaults_values, fullopts)
+
+          /* TODO: move to seneca-joi
           let joi_schema: any = intern.prepare_spec(
             Joi,
             defaults_values,
@@ -602,6 +608,7 @@ function make_tasks(): any {
           else {
             resolved_options = joi_out.value
           }
+          */
         }
       }
 
@@ -908,6 +915,7 @@ function make_intern() {
     },
 
 
+    /* TODO: move to seneca-joi
     // copied from https://github.com/rjrodger/optioner
     // TODO: remove unnecessary vars+code
     prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
@@ -1007,6 +1015,8 @@ function make_intern() {
         return joiobj
       }
     }
+    */
+
   }
 }
 

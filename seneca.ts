@@ -12,7 +12,7 @@ const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
 import Nid from 'nid'
-const Patrun = require('patrun')
+import { Patrun, Gex } from 'patrun'
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
 const { Gubu, One, Any, Skip, Open } = require('gubu')
@@ -20,8 +20,8 @@ const Eraro = require('eraro')
 
 
 // Deprecated Legacy modules.
-const Optioner = require('optioner')
-const Joi = require('@hapi/joi')
+// const Optioner = require('optioner')
+// const Joi = require('@hapi/joi')
 
 
 // Internal modules.
@@ -381,6 +381,7 @@ const seneca_util = {
   Jsonic: Jsonic,
   Nid: Nid,
   Patrun: Patrun,
+  Gex: Gex,
 
   clean: Common.clean,
   pattern: Common.pattern,
@@ -393,8 +394,8 @@ const seneca_util = {
   Gubu,
 
   // Deprecated Legacy (make internal or rename)
-  Optioner: Optioner,
-  Joi: Joi,
+  // Optioner: Optioner,
+  // Joi: Joi,
   deepextend: Common.deep,
   parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
