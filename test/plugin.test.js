@@ -15,7 +15,6 @@ var Seneca = require('..')
 var { Plugin } = require('../lib/plugin')
 
 describe('plugin', function () {
-
   // TODO: move to seneca-joi
   /*
   it('use.intern', (fin) => {
@@ -73,7 +72,7 @@ describe('plugin', function () {
     fin()
   })
   */
-  
+
   it('plugin-edges', (fin) => {
     var s = Seneca({ debug: { undead: true } }).test(fin)
 
@@ -204,20 +203,21 @@ describe('plugin', function () {
   })
 
   it('load-defaults', function (fin) {
-    let s0 = Seneca()
-      .test(fin)
+    let s0 = Seneca().test(fin)
 
-    s0.use({
-      define: function(options) {
-        expect(options).equal({a:1,b:1})
+    s0.use(
+      {
+        define: function (options) {
+          expect(options).equal({ a: 1, b: 1 })
+        },
+        defaults: {
+          a: 1,
+        },
       },
-      defaults: {
-        a:1
-      }
-    }, {b:1})
-    
-    s0
-      .quiet()
+      { b: 1 }
+    )
+
+    s0.quiet()
 
       // NOTE: the assertions are in the plugin
       .use('./stubs/bar-plugin', {
@@ -272,9 +272,8 @@ describe('plugin', function () {
       .ready(fin)
   })
 
-  
   it('bad-default-options', function (fin) {
-    Seneca({ legacy:false, debug: { undead: true } })
+    Seneca({ legacy: false, debug: { undead: true } })
       .test(function (err) {
         expect(err.code).equals('invalid_plugin_option')
         fin()
@@ -287,7 +286,7 @@ describe('plugin', function () {
             Code.fail()
           },
           defaults: {
-            a: String // Seneca.util.Joi.string(),
+            a: String, // Seneca.util.Joi.string(),
           },
         },
         {
@@ -297,7 +296,6 @@ describe('plugin', function () {
       )
   })
 
-  
   // REMOVE in 4.x
   it('legacy-options', function (fin) {
     var si = Seneca({ log: 'silent' }).quiet()
@@ -311,8 +309,11 @@ describe('plugin', function () {
     fin()
   })
 
+  // TODO: move to transport
+  /*
   it('should return "no errors created." when passing test false', function (fin) {
-    Seneca({ tag: 's0', log: 'silent' })
+    Seneca({ tag: 's0' })
+      .test(fin)
       .use('./stubs/plugin-error/tmp.js')
       .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
       .ready(function () {
@@ -334,7 +335,8 @@ describe('plugin', function () {
   })
 
   it('should return "error caught!" when passing test true', function (fin) {
-    Seneca({ tag: 's0', log: 'silent' })
+    Seneca({ tag: 's0' })
+      .test('fin')
       .use('./stubs/plugin-error/tmp.js')
       .listen({ type: 'tcp', port: '30010', pin: 'role:tmp' })
       .ready(function () {
@@ -353,7 +355,8 @@ describe('plugin', function () {
         )
       })
   })
-
+  */
+  
   it('works with exportmap', function (fin) {
     var seneca = Seneca.test(fin).quiet()
 
@@ -1172,8 +1175,7 @@ describe('plugin', function () {
     })
   })
   */
-  
-  
+
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 

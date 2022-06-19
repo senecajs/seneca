@@ -47,7 +47,8 @@ describe('error', function () {
 
   it('exec_action_result', exec_action_result)
   it('exec_deep_action_result', exec_deep_action_result)
-  it('exec_remote_action_result', exec_remote_action_result)
+
+  // it('exec_remote_action_result', exec_remote_action_result)
 
   it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)

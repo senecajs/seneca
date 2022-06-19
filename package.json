@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-t.1",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -99,7 +99,6 @@
     "patrun": "^7.2.4",
     "qs": "^6.10.5",
     "rolling-stats": "^0.2.1",
-    "seneca-transport": "^7.2.0",
     "use-plugin": "^10.0.0"
   },
   "devDependencies": {

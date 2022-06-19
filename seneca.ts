@@ -462,11 +462,6 @@ function init(seneca_options?: any, more_options?: any) {
 
   Print.print_options(seneca, options)
 
-  // Register default plugins, unless turned off by options.
-  if (options.legacy.transport && options.default_plugins.transport) {
-    seneca.use(require('seneca-transport'))
-  }
-
   // Register plugins specified in options.
   options.plugins = null == options.plugins ? {} : options.plugins
   var pluginkeys = Object.keys(options.plugins)
@@ -877,6 +872,9 @@ function make_seneca(initial_opts?: any) {
       process.once(signal, private$.exit_close)
     }
   })
+
+  // Emit start message (also ensures GateExecutor will trigger 'ready' event)
+  root$.act('sys:seneca,on:point,point:start')
 
   return root$
 }

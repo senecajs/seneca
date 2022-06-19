@@ -181,10 +181,10 @@ describe('api', function () {
   it('list', function (fin) {
     si = si.test()
 
-    expect(si.list().length).above(6)
+    expect(si.list().length).above(5)
 
     var nump = si.list({}).length
-    expect(nump).above(6)
+    expect(nump).above(5)
     expect(si.list('a:1')).to.equal([])
 
     si.add('a:1', function () {})
@@ -472,8 +472,8 @@ describe('api', function () {
     expect(si.status({ stats: false }).stats.act.calls).equal(0)
 
     si.ready(function () {
-      expect(si.status().stats.act.calls).equal(0)
-      expect(si.status().stats.act.done).equal(0)
+      expect(si.status().stats.act.calls).equal(1)
+      expect(si.status().stats.act.done).equal(1)
       expect(si.status().history.total).equal(0)
       expect(si.status().transport.register.length).equal(0)
       fin()

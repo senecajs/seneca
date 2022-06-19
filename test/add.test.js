@@ -24,17 +24,17 @@ describe('add', function () {
     // NOTE: these may need to be updates if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
-      id: 'default_action_8',
+      id: 'default_action_6',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'action_9',
+      id: 'action_7',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'n2_10',
+      id: 'n2_8',
       name: 'n2',
     })
 

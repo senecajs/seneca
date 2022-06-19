@@ -2,6 +2,7 @@
 
 * Node >= 14
 * Remove Joi
+* Remove seneca-transport
 
 
 ## 3.28.0 2022-05-23
