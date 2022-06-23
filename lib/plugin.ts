@@ -189,6 +189,9 @@ function make_tasks(): any {
       else {
         let plugin: any = private$.use.use_plugin_desc(desc)
 
+        // Shared plugin resources.
+        plugin.shared = Object.create(null)
+
         return {
           op: 'merge',
           out: {
@@ -221,8 +224,10 @@ function make_tasks(): any {
 
     preload: (spec: TaskSpec) => {
       let seneca: any = spec.ctx.seneca
-
       let plugin: any = spec.data.plugin
+
+      seneca.shared = plugin.shared
+
 
       let so: any = seneca.options()
 
@@ -355,9 +360,6 @@ function make_tasks(): any {
 
         fatal$: true,
       })
-
-      // Shared plugin resources.
-      plugin.shared = Object.create(null)
 
       delegate.shared = plugin.shared
       delegate.plugin = plugin

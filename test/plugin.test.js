@@ -1529,4 +1529,22 @@ describe('plugin', function () {
         fin()
       })
   })
+
+  it("makes the shared object available to the plugin's preload hook", function (fin) {
+    function plugin_with_preload() {
+      this.add('hello:world', function (_msg, reply) {
+        expect(this.shared.foo).equals(37)
+        return reply()
+      })
+    }
+
+    plugin_with_preload.preload = function () {
+      this.shared.foo = 37
+    }
+
+    Seneca({ legacy: false })
+      .test()
+      .use(plugin_with_preload)
+      .act('hello:world', fin)
+  })
 })
