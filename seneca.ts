@@ -12,7 +12,7 @@ const GateExecutor = require('gate-executor')
 const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
 import Nid from 'nid'
-const Patrun = require('patrun')
+import { Patrun, Gex } from 'patrun'
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
 const { Gubu, One, Any, Skip, Open } = require('gubu')
@@ -376,21 +376,19 @@ const option_defaults = {
 
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
-  Eraro: Eraro,
+  Eraro,
 
-  Jsonic: Jsonic,
-  Nid: Nid,
-  Patrun: Patrun,
+  Jsonic,
+  Nid,
+  Patrun,
+  Gex,
+  Gubu,
 
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,
   error: error,
   deep: Common.deep,
-
-  // TODO: expose directly for better DX - no need to namespace under gubu
-  // Expose Gubu schema builders (Required, etc.).
-  Gubu,
 
   // Deprecated Legacy (make internal or rename)
   Optioner: Optioner,

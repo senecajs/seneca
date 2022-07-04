@@ -127,4 +127,10 @@ describe('util', function () {
     })
     done()
   })
+
+  it('seneca.util.gex', function (done) {
+    expect(Seneca.util.Gex).exist()
+    expect(Seneca.util.Gex('a*').match('ab')).equal(true)
+    done()
+  })
 })

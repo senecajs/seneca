@@ -2,6 +2,9 @@
 /* $lab:coverage:off$ */
 'use strict'
 
+// TODO: replace `seneca-` prefix with `plugin-` for unnamed plugins
+
+
 const Uniq: any = require('lodash.uniq')
 const Eraro: any = require('eraro')
 
