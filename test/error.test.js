@@ -119,7 +119,7 @@ describe('error', function () {
     })
   })
   */
-  
+
   function response_is_error(fin) {
     const si = Seneca({ log: 'silent' })
 

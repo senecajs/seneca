@@ -1,3 +1,9 @@
+## 3.29.0 2022-09-01
+
+* Removed duplicate logging marker as it pollutes result values.
+* Gubu update allows for top level scalar validation in messages.
+
+
 ## 3.28.0 2022-05-23
 
 * Validation control options: valid.active|message|option|plugin

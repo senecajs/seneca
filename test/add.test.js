@@ -105,7 +105,6 @@ describe('add', function () {
     })
   })
 
-
   it('rules-builders', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required } = si.valid
@@ -130,7 +129,6 @@ describe('add', function () {
     })
   })
 
-
   it('rules-scalars', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required, Default } = si.valid
@@ -141,7 +139,7 @@ describe('add', function () {
 
     si.act({ a: 1 }, function (e, o) {
       expect(e).not.exist()
-      expect(o).equal({ x:4 })
+      expect(o).equal({ x: 4 })
 
       this.act({ a: 1, b: 'q' }, function (e, o) {
         expect(e).exist()
@@ -155,7 +153,6 @@ describe('add', function () {
     })
   })
 
-  
   it('rules-deep', function (fin) {
     const si = Seneca({ log: 'silent', legacy: false }) //.test()
     si.add({ a: 1, b: { c: 2 } }, function (m, r) {
