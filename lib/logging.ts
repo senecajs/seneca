@@ -390,13 +390,13 @@ function build_test_log(seneca: any, data: any) {
         .substring(0, datalen)
 
       if (
-        objstr.length <= 22 ||
-        (!obj.$$logged$$ && (!data.err || !data.err.$$logged$$))
+        objstr.length <= 22 || !data.err
+        // (!obj.$$logged$$ && (!data.err || !data.err.$$logged$$))
       ) {
         logb.push(objstr)
-        if ('object' === typeof obj) {
-          obj.$$logged$$ = () => { }
-        }
+        // if ('object' === typeof obj) {
+        //   obj.$$logged$$ = () => { }
+        // }
       } else {
         logb.push(objstr.substring(0, 22)) + '...'
       }
@@ -414,7 +414,7 @@ function build_test_log(seneca: any, data: any) {
       logb.push(data.data)
     }
 
-    if ('ERR' === data.case && data.err && !data.err.$$logged$$) {
+    if ('ERR' === data.case && data.err) { // && !data.err.$$logged$$) {
       logb.push(
         (data.err.code ? '\n\n' + data.err.code : '') +
         '\n\n' +
@@ -423,9 +423,9 @@ function build_test_log(seneca: any, data: any) {
         data.caller +
         '\n'
       )
-      if ('object' === typeof data.err) {
-        data.err.$$logged$$ = () => { }
-      }
+      // if ('object' === typeof data.err) {
+      //   data.err.$$logged$$ = () => { }
+      // }
     }
   } else if ('add' === data.kind) {
     logb.push(data.pattern)
@@ -452,11 +452,11 @@ function build_test_log(seneca: any, data: any) {
         'function' === typeof config.port ? '' : config.port,
       ].join(';')
     )
-  } else if (!data.$$logged$$) {
-    logb.push(Util.inspect(data).replace(/\n/g, ' ').substring(0, datalen))
-    if ('object' === typeof data) {
-      data.$$logged$$ = () => { }
-    }
+    // } else if (!data.$$logged$$) {
+    //   logb.push(Util.inspect(data).replace(/\n/g, ' ').substring(0, datalen))
+    //   if ('object' === typeof data) {
+    //     data.$$logged$$ = () => { }
+    //   }
   }
 
   if (data.did) {

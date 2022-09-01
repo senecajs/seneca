@@ -59,6 +59,7 @@ describe('error', function () {
 
   it('types', types)
 
+  /*
   it('prior-once-test-log', function (fin) {
     let log = []
     const si = Seneca({
@@ -117,7 +118,8 @@ describe('error', function () {
       fin()
     })
   })
-
+  */
+  
   function response_is_error(fin) {
     const si = Seneca({ log: 'silent' })
 

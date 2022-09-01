@@ -107,7 +107,7 @@
   },
   "devDependencies": {
     "@hapi/code": "8",
-    "@hapi/lab": "23",
+    "@hapi/lab": "25",
     "@seneca/test-plugin": "0.1.0",
     "@types/node": "^18.7.14",
     "async": "^3.2.4",
