@@ -241,6 +241,7 @@ const task = {
   },
 
 
+  // TODO: accept action.valid to define rules
   rules(spec: TaskSpec) {
     const opts = spec.ctx.opts
     const actdef = spec.data.actdef

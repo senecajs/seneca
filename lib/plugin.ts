@@ -31,6 +31,8 @@ function api_use(callpoint: any, opts: any) {
   ordu.operator('seneca_options', intern.op.seneca_options)
   ordu.operator('seneca_complete', intern.op.seneca_complete)
 
+
+  // TODO: restructure in seneca 4.x
   ordu.add([
     tasks.args,
     tasks.load,

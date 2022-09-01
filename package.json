@@ -89,7 +89,7 @@
     "eraro": "^2.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
-    "gubu": "^3.1.0",
+    "gubu": "^4.0.0",
     "jsonic": "^1.0.1",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
@@ -109,7 +109,7 @@
     "@hapi/code": "8",
     "@hapi/lab": "23",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^18.0.1",
+    "@types/node": "^18.7.14",
     "async": "^3.2.4",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
@@ -118,11 +118,11 @@
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.7.1",
-    "seneca-entity": "^18.2.0",
+    "seneca-entity": "^18.4.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
-    "seneca-promisify": "^3.2.0",
+    "seneca-promisify": "^3.4.0",
     "summary": "^2.1.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.2"
   }
 }
