@@ -173,6 +173,13 @@ function make_tasks(): any {
       let seneca: any = spec.ctx.seneca
       let private$: any = seneca.private$
 
+      // Special cases for short plugin names
+      // TODO: plugin loading should check for @seneca and seneca first!
+      // 1. Avoid conflict with the OG request module!
+      if ('request' === args[0]) {
+        args[0] = '@seneca/request'
+      }
+
       // TODO: use-plugin needs better error message for malformed plugin desc
       let desc = private$.use.build_plugin_desc(...args)
       desc.callpoint = spec.ctx.callpoint
