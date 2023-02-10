@@ -692,7 +692,6 @@ function client(this: any, callpoint: any) {
       return 'string' === typeof pin ? Jsonic(pin) : pin
     })
 
-    //var sd = Plugins.make_delegate(self, {
     // TODO: review - this feels like a hack
     // perhaps we should instantiate a virtual plugin to represent the client?
     // ... but is this necessary at all?

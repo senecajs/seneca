@@ -342,8 +342,6 @@ function make_tasks(): any {
           }
         }
       }
-
-      //seneca.register(plugin, meta)
     },
 
 
@@ -499,12 +497,12 @@ function make_tasks(): any {
         {},
 
         // DEPRECATED: remove in 4
-        so[fullname],
+        so.legacy.top_plugins ? so[fullname] : {},
 
         so.plugin[fullname],
 
         // DEPRECATED: remove in 4
-        so[fullname + '$' + plugin.tag],
+        so.legacy.top_plugins ? so[fullname + '$' + plugin.tag] : {},
 
         so.plugin[fullname + '$' + plugin.tag]
       )
@@ -518,12 +516,12 @@ function make_tasks(): any {
         {},
 
         // DEPRECATED: remove in 4
-        so[shortname],
+        so.legacy.top_plugins ? so[fullname] : {},
 
         so.plugin[shortname],
 
         // DEPRECATED: remove in 4
-        so[shortname + '$' + plugin.tag],
+        so.legacy.top_plugins ? so[shortname + '$' + plugin.tag] : {},
 
         so.plugin[shortname + '$' + plugin.tag]
       )

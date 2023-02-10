@@ -2,7 +2,8 @@
 
 * Error intercept customization hook.
 * Rebind decoration functions to current delegate.
-* Custom error identification.
+* Custom error identification, default now just instanceof Error.
+* Plugin options at top level moved to legacy option.
 
 
 ## 3.29.0 2022-09-01

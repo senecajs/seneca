@@ -337,6 +337,9 @@ const option_defaults = {
 
     // If false, use Gubu for option validation (including plugin defaults)
     options: true,
+
+    // If true, look for plugin options by name at the top level of options
+    top_plugins: false,
   }),
 
   // Processing task ordering.
