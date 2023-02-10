@@ -97,6 +97,18 @@ const intern = (module.exports.intern = {
           action_reply
         )
       } catch (e: any) {
+        for (let intercept of instance.private$.intercept.act_error) {
+          intercept.call(instance, {
+            error: e,
+            execspec,
+            opts,
+            actctxt,
+            actmsg,
+            meta,
+            action_reply
+          })
+        }
+
         if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
           const ex = isError(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)

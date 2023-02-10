@@ -714,6 +714,7 @@ function make_private() {
             }
         },
         ignore_plugins: {},
+        intercept: { act_error: [] }
     };
 }
 //# sourceMappingURL=seneca.js.map
