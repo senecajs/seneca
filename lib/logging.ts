@@ -391,12 +391,8 @@ function build_test_log(seneca: any, data: any) {
 
       if (
         objstr.length <= 22 || !data.err
-        // (!obj.$$logged$$ && (!data.err || !data.err.$$logged$$))
       ) {
         logb.push(objstr)
-        // if ('object' === typeof obj) {
-        //   obj.$$logged$$ = () => { }
-        // }
       } else {
         logb.push(objstr.substring(0, 22)) + '...'
       }
@@ -452,11 +448,15 @@ function build_test_log(seneca: any, data: any) {
         'function' === typeof config.port ? '' : config.port,
       ].join(';')
     )
-    // } else if (!data.$$logged$$) {
-    //   logb.push(Util.inspect(data).replace(/\n/g, ' ').substring(0, datalen))
-    //   if ('object' === typeof data) {
-    //     data.$$logged$$ = () => { }
-    //   }
+  }
+
+  // Just plain data
+  else {
+    // TODO: use jsonic util
+    let datastr = Util.inspect(seneca.util.clean(data.data || data))
+      .replace(/\s+/g, '')
+      .substring(0, datalen)
+    logb.push(datastr.length <= 111 ? datastr : datastr.substring(0, 111) + '...')
   }
 
   if (data.did) {

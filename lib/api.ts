@@ -300,6 +300,17 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
     context: { value: delegate_context, writable: true },
   })
 
+  // Rebind function decorations to the delegate instance.
+  // In particular, this makes the seneca.entity API methods work correctly.
+  const decorations = self.private$.decorations
+  for (let decorationName in decorations) {
+    if ('function' === typeof decorations[decorationName]) {
+      let orig_decoration = decorations[decorationName]
+      delegate[decorationName] = delegate[decorationName].bind(delegate)
+      Object.assign(delegate[decorationName], orig_decoration)
+    }
+  }
+
   return delegate
 }
 
