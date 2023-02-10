@@ -18,7 +18,7 @@ let s0 = Seneca({
   //   this.private$.intercept.act_error.push(function foo_interceptor(actcall) {
   //     console.log('FOO_INTERCEPTOR', actcall)
   //   })
-    
+
   // })
 
   // .act('sys:entity,hook:intercept,intercept:act_error', {
