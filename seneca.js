@@ -84,7 +84,9 @@ const option_defaults = {
             callback: true,
             // Capture errors in actions and pass to callback (false throws uncaught).
             action: true,
-        }
+        },
+        // Custom function to identify thrown errors.
+        identify: (e) => e instanceof Error,
     },
     // Validate messages and options.
     valid: {

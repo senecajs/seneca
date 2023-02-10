@@ -300,7 +300,8 @@ function makedie(instance: any, ctxt: any) {
     try {
       if (!err) {
         err = new Error('unknown')
-      } else if (!Util.isError(err)) {
+        // } else if (!Util.isError(err)) {
+      } else if (!so.error.identify(err)) {
         err = new Error('string' === typeof err ? err : inspect(err))
       }
 
@@ -545,11 +546,6 @@ function autoincr() {
 }
 
 
-function isError(x: any) {
-  return Util.types.isNativeError(x)
-}
-
-
 function inspect(val: any, opts?: any) {
   return Util.inspect(val, opts)
 }
@@ -747,7 +743,6 @@ export {
   print,
   parsePattern,
   tagnid,
-  isError,
   inspect,
   error,
   msgstr,

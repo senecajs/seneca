@@ -5,7 +5,6 @@ import { Meta } from './meta'
 
 
 import {
-  isError,
   build_message,
   inspect,
   noop,
@@ -110,7 +109,7 @@ const intern = (module.exports.intern = {
         }
 
         if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
-          const ex = isError(e) ? e : new Error(inspect(e))
+          const ex = opts.error.identify(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)
           complete()
         }
@@ -204,7 +203,7 @@ const intern = (module.exports.intern = {
     actctxt.errlog = intern.errlog
     actctxt.error = error
 
-    meta.error = isError(data.res)
+    meta.error = opts.error.identify(data.res)
 
     // A nasty edge case
     if (!meta.error && data.res === data.err) {
@@ -462,7 +461,7 @@ const intern = (module.exports.intern = {
     const meta = data.meta
     const msg = data.msg
 
-    let err = isError(thrown_obj)
+    let err = instance.options().error.identify(thrown_obj)
       ? thrown_obj
       : new Error(inspect(thrown_obj))
 

@@ -1,3 +1,10 @@
+## 3.30.0 2022-02-10
+
+* Error intercept customization hook.
+* Rebind decoration functions to current delegate.
+* Custom error identification.
+
+
 ## 3.29.0 2022-09-01
 
 * Removed duplicate logging marker as it pollutes result values.
