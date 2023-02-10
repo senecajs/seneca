@@ -5,9 +5,9 @@ name: build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, 3.x ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, 3.x ]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [lts/*, 17.x, 16.x, 14.x, 12.x, 10.x]
+        node-version: [lts/*, 19.x, 18.x, 16.x, 14.x, 12.x, 10.x]
 
     runs-on: ${{ matrix.os }} 
         
