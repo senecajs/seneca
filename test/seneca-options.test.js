@@ -83,7 +83,7 @@ describe('seneca --seneca.log arguments tests: ', function () {
 
   it('incorrect arg --seneca.log=level:', function (fin) {
     var opts = { debug: {} }
-    opts.debug.argv = ['', '', '--seneca.log=level:']
+    opts.debug.argv = ['', '', '--seneca.log=level::']
     try {
       Seneca(opts)
       Code.fail()

@@ -5,6 +5,9 @@ import { TaskSpec } from 'ordu'
 
 import { Gubu, Open } from 'gubu'
 
+const Jsonic = require('@jsonic/jsonic-next')
+
+
 
 import {
   clean,
@@ -16,7 +19,7 @@ import {
 
 
 
-const Jsonic = require('jsonic')
+
 
 
 function api_add(this: any) {

@@ -394,14 +394,14 @@ describe('common', function () {
     expect(Common.parse_jsonic('\na:b')).equal({ a: 'b' })
 
     try {
-      Common.parse_jsonic('a')
+      Common.parse_jsonic('a::')
       expect(false).true()
     } catch (e) {
       expect(e.code).equals('bad_jsonic')
     }
 
     try {
-      Common.parse_jsonic('\n\na:\n\n  x}')
+      Common.parse_jsonic('\n\na::\n\n  x}')
       expect(false).true()
     } catch (e) {
       expect(e.code).equals('bad_jsonic')

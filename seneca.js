@@ -9,7 +9,7 @@ const Events = require('events');
 const Util = require('util');
 // External modules.
 const GateExecutor = require('gate-executor');
-const Jsonic = require('jsonic');
+const Jsonic = require('@jsonic/jsonic-next');
 const UsePlugin = require('use-plugin');
 const nid_1 = __importDefault(require("nid"));
 const patrun_1 = require("patrun");

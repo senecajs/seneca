@@ -688,14 +688,14 @@ describe('seneca', function () {
           assert.equal(2, out)
 
           try {
-            si.add('a:,b:2', function (args, cb) {
+            si.add('a::2', function (args, cb) {
               cb()
             })
           } catch (e) {
             assert.equal(e.code, 'add_string_pattern_syntax')
 
             try {
-              si.act('a:,b:2', { c: 3 }, function () {
+              si.act('a::2', { c: 3 }, function () {
                 assert.fail()
               })
             } catch (e) {

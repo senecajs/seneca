@@ -1,6 +1,6 @@
 /* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
 
-var Jsonic = require('jsonic')
+// var Jsonic = require('jsonic')
 var Norma = require('norma')
 
 var Common = require('./common')
@@ -30,7 +30,7 @@ function wrap(this: any, pin: any, actdef: any, wrapper: any) {
 function fix(this: any, patargs: any, msgargs: any, custom: any) {
   var self = this
 
-  patargs = Jsonic(patargs || {})
+  patargs = self.util.Jsonic(patargs || {})
 
   var fix_delegate = self.delegate(patargs)
 
@@ -263,7 +263,7 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
 
     strdesc =
       self.toString() +
-      (Object.keys(vfa).length ? '/' + Jsonic.stringify(vfa) : '')
+      (Object.keys(vfa).length ? '/' + Common.jsonic_stringify(vfa) : '')
 
     return strdesc
   }
@@ -450,8 +450,8 @@ function ping(this: any) {
 
 
 function translate(this: any, from_in: any, to_in: any, pick_in: any) {
-  var from = 'string' === typeof from_in ? Jsonic(from_in) : from_in
-  var to = 'string' === typeof to_in ? Jsonic(to_in) : to_in
+  var from = 'string' === typeof from_in ? this.util.Jsonic(from_in) : from_in
+  var to = 'string' === typeof to_in ? this.util.Jsonic(to_in) : to_in
 
   var pick: any = {}
 
@@ -548,7 +548,7 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
 function find(this: any, pattern: any, flags: any) {
   var seneca = this
 
-  var pat = 'string' === typeof pattern ? Jsonic(pattern) : pattern
+  var pat = 'string' === typeof pattern ? seneca.util.Jsonic(pattern) : pattern
   pat = seneca.util.clean(pat)
   pat = pat || {}
 
@@ -571,15 +571,8 @@ function has(this: any, pattern: any) {
 // List all actions that match the pattern.
 function list(this: any, pattern: any) {
   return this.private$.actrouter
-    .list(null == pattern ? {} : Jsonic(pattern))
+    .list(null == pattern ? {} : this.util.Jsonic(pattern))
     .map((x: any) => x.match)
-
-  /*
-  return _.map(
-    this.private$.actrouter.list(null == pattern ? {} : Jsonic(pattern)),
-    'match'
-  )
-  */
 }
 
 
@@ -689,7 +682,7 @@ function client(this: any, callpoint: any) {
       (Array.isArray(config.pin) ? config.pin : [config.pin || ''])
 
     pins = pins.map((pin: any) => {
-      return 'string' === typeof pin ? Jsonic(pin) : pin
+      return 'string' === typeof pin ? self.util.Jsonic(pin) : pin
     })
 
     // TODO: review - this feels like a hack

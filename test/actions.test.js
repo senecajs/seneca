@@ -75,7 +75,9 @@ describe('actions', function () {
   })
 
   it('info_fatal', function (fin) {
-    Seneca({ log: 'silent', system: { exit: function noop() {} } }).ready(
+    Seneca({
+      log: 'silent',
+      system: { exit: function noop() {} } }).ready(
       function () {
         this.close = function () {}
         this.root.close = function () {}
