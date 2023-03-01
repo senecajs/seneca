@@ -1,13 +1,24 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-// var Jsonic = require('jsonic')
-var Norma = require('norma')
+const Norma = require('norma')
 
-var Common = require('./common')
+import {
+  each,
+  make_standard_err_log_entry,
+  make_callpoint,
+  promiser,
+  error as common_error,
+  jsonic_stringify,
+  make_plugin_key,
+  pincanon,
+  pattern,
+  clean,
+  parsePattern,
+} from './common'
 
-var errlog = Common.make_standard_err_log_entry
+const errlog = make_standard_err_log_entry
 
-var intern: any = {}
+const intern: any = {}
 
 
 function wrap(this: any, pin: any, actdef: any, wrapper: any) {
@@ -17,8 +28,8 @@ function wrap(this: any, pin: any, actdef: any, wrapper: any) {
   actdef = 'function' === typeof actdef ? {} : actdef
 
   pin = Array.isArray(pin) ? pin : [pin]
-  Common.each(pin, function(p: any) {
-    Common.each(pinthis.list(p), function(actpattern: any) {
+  each(pin, function(p: any) {
+    each(pinthis.list(p), function(actpattern: any) {
       pinthis.add(actpattern, wrapper, actdef)
     })
   })
@@ -92,7 +103,7 @@ function options(this: any, options: any, chain: any) {
 
   // Update callpoint
   if (out_opts.debug.callpoint) {
-    private$.callpoint = Common.make_callpoint(out_opts.debug.callpoint)
+    private$.callpoint = make_callpoint(out_opts.debug.callpoint)
   }
 
   // DEPRECATED
@@ -118,7 +129,7 @@ function close(callpoint: any) {
     var seneca = this
 
     if (false !== done && null == done) {
-      return Common.promiser(intern.close.bind(seneca, callpoint))
+      return promiser(intern.close.bind(seneca, callpoint))
     }
 
     return intern.close.call(seneca, callpoint, done)
@@ -171,7 +182,7 @@ function error(this: any, first: any) {
     if (plugin && plugin.eraro && plugin.eraro.has(first)) {
       error = plugin.eraro.apply(this, arguments)
     } else {
-      error = Common.eraro.apply(this, arguments)
+      error = common_error.apply(this, arguments)
     }
 
     return error
@@ -263,7 +274,7 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
 
     strdesc =
       self.toString() +
-      (Object.keys(vfa).length ? '/' + Common.jsonic_stringify(vfa) : '')
+      (Object.keys(vfa).length ? '/' + jsonic_stringify(vfa) : '')
 
     return strdesc
   }
@@ -513,13 +524,13 @@ function list_plugins(this: any) {
 
 
 function find_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   return this.private$.plugins[plugin_key]
 }
 
 
 function has_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   return !!this.private$.plugins[plugin_key]
 }
 
@@ -529,7 +540,7 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
     ignore = tag
     tag = null
   }
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   var resolved_ignore = (this.private$.ignore_plugins[plugin_key] =
     null == ignore ? true : !!ignore)
 
@@ -671,11 +682,11 @@ function client(this: any, callpoint: any) {
     var raw_config = intern.parse_config(argsarr)
 
     // pg: pin group
-    raw_config.pg = Common.pincanon(raw_config.pin || raw_config.pins)
+    raw_config.pg = pincanon(raw_config.pin || raw_config.pins)
 
     var config = intern.resolve_config(raw_config, opts)
 
-    config.id = config.id || Common.pattern(raw_config)
+    config.id = config.id || pattern(raw_config)
 
     var pins =
       config.pins ||
@@ -762,7 +773,7 @@ function client(this: any, callpoint: any) {
 
         if (null == liveclient) {
           return sd.die(
-            private$.error('transport_client_null', Common.clean(config))
+            private$.error('transport_client_null', clean(config))
           )
         }
 
@@ -889,7 +900,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
     seneca.flags.closed = true
 
     // cleanup process event listeners
-    Common.each(options.system.close_signals, function(active: any, signal: any) {
+    each(options.system.close_signals, function(active: any, signal: any) {
       if (active) {
         process.removeListener(signal, seneca.private$.exit_close)
       }
@@ -926,7 +937,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 intern.fix_args =
   function(this: any, origargs: any, patargs: any, msgargs: any, custom: any) {
-    var args = Common.parsePattern(this, origargs, 'rest:.*', patargs)
+    var args = parsePattern(this, origargs, 'rest:.*', patargs)
     var fixargs = [args.pattern]
       .concat({
         fixed$: Object.assign({}, msgargs, args.pattern.fixed$),

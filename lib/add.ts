@@ -5,8 +5,6 @@ import { TaskSpec } from 'ordu'
 
 import { Gubu, Open } from 'gubu'
 
-const Jsonic = require('@jsonic/jsonic-next')
-
 
 
 import {
@@ -131,6 +129,7 @@ const task = {
     const actdef = spec.data.actdef
     const pat = spec.data.pattern
     const opts = spec.ctx.opts
+    const Jsonic = spec.ctx.instance.util.Jsonic
 
     actdef.sub = !!actdef.raw.sub$
     actdef.client = !!actdef.raw.client$

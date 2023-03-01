@@ -31,7 +31,7 @@ const error =
     }))
 
 
-function promiser(context: any, callback: any) {
+function promiser(context: any, callback?: any) {
   if ('function' === typeof context && null == callback) {
     callback = context
   } else {
@@ -122,14 +122,11 @@ function parse_jsonic(str: any, code: any) {
   try {
     return null == str ? null : Jsonic(str)
   } catch (e: any) {
-    // let col = 1 === e.line ? e.column - 1 : e.column
     throw error(code, {
       argstr: str,
       syntax: e.message,
       line: e.lineNumber,
       col: e.columnNumber,
-      // line: e.line,
-      // col: col,
     })
   }
 }
@@ -139,7 +136,7 @@ function parse_jsonic(str: any, code: any) {
 // TODO: fix name
 
 function parse_pattern(
-  instance: any,
+  _instance: any,
   rawargs: any,
   normaspec: any,
   fixed?: any

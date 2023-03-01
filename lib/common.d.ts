@@ -1,14 +1,14 @@
 /// <reference types="node" />
 import Util from 'util';
 declare const error: any;
-declare function promiser(context: any, callback: any): Promise<unknown>;
+declare function promiser(context: any, callback?: any): Promise<unknown>;
 declare function stringify(): any;
 declare function wrap_error(err: any): void;
 declare function make_plugin_key(plugin: any, origtag: any): string;
 declare function boolify(v: any): boolean;
 declare const tagnid: any;
 declare function parse_jsonic(str: any, code: any): any;
-declare function parse_pattern(instance: any, rawargs: any, normaspec: any, fixed?: any): any;
+declare function parse_pattern(_instance: any, rawargs: any, normaspec: any, fixed?: any): any;
 declare const parsePattern: typeof parse_pattern;
 declare function build_message(instance: any, rawargs: any, normaspec: any, fixed: any): any;
 declare function pattern(patobj: any): any;
