@@ -1,4 +1,4 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 
@@ -34,14 +34,15 @@ const Add = require('./lib/add')
 const Sub = require('./lib/sub')
 import { Prior } from './lib/prior'
 import { Plugin } from './lib/plugin'
-const { Inward } = require('./lib/inward')
-const { Outward } = require('./lib/outward')
+import { Inward } from './lib/inward'
+import { Outward } from './lib/outward'
 const { Legacy } = require('./lib/legacy')
 const { resolve_options } = require('./lib/options')
-const Package = require('./package.json')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
 const { transport } = require('./lib/transport')
+
+import Pkg from './package.json'
 
 
 // Internal data and utilities.
@@ -583,10 +584,12 @@ function make_seneca(initial_opts?: any) {
   // Define public member variables.
   root$.start_time = Date.now()
   root$.context = {}
-  root$.version = Package.version
+  root$.version = Pkg.version
 
   // TODO: rename in 4.x as "args" terminology is legacy
   root$.fixedargs = {}
+
+  root$.fixedmeta = {}
 
   root$.flags = {
     closed: false,

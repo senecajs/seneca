@@ -98,12 +98,12 @@ describe('seneca', function () {
     var si = Seneca({ id$: 'a' }, testopts)
     si.start_time = 123
     expect(JSON.stringify(si)).equal(
-      '{"isSeneca":true,"id":"a","fixedargs":{},"start_time":123,"version":"' +
+      '{"isSeneca":true,"id":"a","fixedargs":{},"fixedmeta":{},"start_time":123,"version":"' +
         Package.version +
         '"}'
     )
     expect(Util.inspect(si).replace(/\n */g, ' ')).equal(
-      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: undefined, start_time: 123, version: '" +
+      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: {}, start_time: 123, version: '" +
         Package.version +
         "' }"
     )
@@ -1109,46 +1109,38 @@ describe('seneca', function () {
     done()
   })
 
-  describe('#intercept', function () {
-    it('intercept', function (done) {
-      var si = Seneca({ log: 'silent' }).error(done)
-      var fm = {}
+  it('add-handle', function (done) {
+    var si = Seneca({ log: 'silent' }).error(done)
+    var fm = {}
+    
+    var i0 = function i0(msg, done) {
+      msg.z = 1
+      var f = fm[msg.b]
 
-      var i0 = function i0(msg, done) {
-        msg.z = 1
-        var f = fm[msg.b]
+      f.call(this, msg, done)
+    }
 
-        f.call(this, msg, done)
-      }
+    i0.handle = function (actdef) {
+      fm[actdef.raw.b$] = actdef.func
+    }
 
-      /*
-      i0.handle = function(a, t) {
-        fm[a.b$] = t
-      }
-      */
+    si.add('a:1', i0)
 
-      i0.handle = function (actdef) {
-        fm[actdef.raw.b$] = actdef.func
-      }
+    si.add('a:1,b$:1', function b1(msg, done) {
+      done(null, { z: msg.z, b: 1 })
+    })
 
-      si.add('a:1', i0)
+    si.add('a:1,b$:2', function b2(msg, done) {
+      done(null, { z: msg.z, b: 2 })
+    })
 
-      si.add('a:1,b$:1', function b1(msg, done) {
-        done(null, { z: msg.z, b: 1 })
-      })
+    si.act('a:1,b:1', function (e, o) {
+      assert.equal(1, o.b)
 
-      si.add('a:1,b$:2', function b2(msg, done) {
-        done(null, { z: msg.z, b: 2 })
-      })
+      si.act('a:1,b:2', function (e, o) {
+        assert.equal(2, o.b)
 
-      si.act('a:1,b:1', function (e, o) {
-        assert.equal(1, o.b)
-
-        si.act('a:1,b:2', function (e, o) {
-          assert.equal(2, o.b)
-
-          done()
-        })
+        done()
       })
     })
   })

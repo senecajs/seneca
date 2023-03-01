@@ -96,6 +96,8 @@ const intern = (module.exports.intern = {
           action_reply
         )
       } catch (e: any) {
+
+        // TODO: review, needs better test for when this actually happens
         for (let intercept of instance.private$.intercept.act_error) {
           intercept.call(instance, {
             error: e,
@@ -310,6 +312,7 @@ const intern = (module.exports.intern = {
     const data: any = { meta: meta, msg: msg, reply: reply }
 
     const inwardres = act_instance.order.inward.execSync(actctxt, data)
+
 
     if (inwardres.err) {
       throw inwardres.err

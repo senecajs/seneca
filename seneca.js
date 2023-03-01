@@ -1,4 +1,4 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 'use strict';
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -30,14 +30,14 @@ const Add = require('./lib/add');
 const Sub = require('./lib/sub');
 const prior_1 = require("./lib/prior");
 const plugin_1 = require("./lib/plugin");
-const { Inward } = require('./lib/inward');
-const { Outward } = require('./lib/outward');
+const inward_1 = require("./lib/inward");
+const outward_1 = require("./lib/outward");
 const { Legacy } = require('./lib/legacy');
 const { resolve_options } = require('./lib/options');
-const Package = require('./package.json');
 const { Print } = require('./lib/print');
 const { addActions } = require('./lib/actions');
 const { transport } = require('./lib/transport');
+const package_json_1 = __importDefault(require("./package.json"));
 // Internal data and utilities.
 const { error, deep } = Common;
 // Seneca options.
@@ -444,9 +444,10 @@ function make_seneca(initial_opts) {
     // Define public member variables.
     root$.start_time = Date.now();
     root$.context = {};
-    root$.version = Package.version;
+    root$.version = package_json_1.default.version;
     // TODO: rename in 4.x as "args" terminology is legacy
     root$.fixedargs = {};
+    root$.fixedmeta = {};
     root$.flags = {
         closed: false,
     };
@@ -617,33 +618,33 @@ function make_seneca(initial_opts) {
         name: 'inward',
         debug: !!start_opts.debug.ordu || !!start_opts.order.inward.debug,
     })
-        .add(Inward.inward_msg_modify)
-        .add(Inward.inward_closed)
-        .add(Inward.inward_act_cache)
-        .add(Inward.inward_act_default)
-        .add(Inward.inward_act_not_found)
-        .add(Inward.inward_act_stats)
-        .add(Inward.inward_validate_msg)
-        .add(Inward.inward_warnings)
-        .add(Inward.inward_msg_meta)
-        .add(Inward.inward_limit_msg)
-        .add(Inward.inward_prepare_delegate)
-        .add(Inward.inward_sub)
-        .add(Inward.inward_announce);
+        .add(inward_1.Inward.inward_msg_modify)
+        .add(inward_1.Inward.inward_closed)
+        .add(inward_1.Inward.inward_act_cache)
+        .add(inward_1.Inward.inward_act_default)
+        .add(inward_1.Inward.inward_act_not_found)
+        .add(inward_1.Inward.inward_act_stats)
+        .add(inward_1.Inward.inward_validate_msg)
+        .add(inward_1.Inward.inward_warnings)
+        .add(inward_1.Inward.inward_msg_meta)
+        .add(inward_1.Inward.inward_limit_msg)
+        .add(inward_1.Inward.inward_prepare_delegate)
+        .add(inward_1.Inward.inward_sub)
+        .add(inward_1.Inward.inward_announce);
     root$.order.outward = new Ordu({
         name: 'outward',
         debug: !!start_opts.debug.ordu || !!start_opts.order.outward.debug,
     })
-        .add(Outward.outward_make_error)
-        .add(Outward.outward_act_stats)
-        .add(Outward.outward_act_cache)
-        .add(Outward.outward_res_object)
-        .add(Outward.outward_res_entity)
-        .add(Outward.outward_msg_meta)
-        .add(Outward.outward_trace)
-        .add(Outward.outward_sub)
-        .add(Outward.outward_announce)
-        .add(Outward.outward_act_error);
+        .add(outward_1.Outward.outward_make_error)
+        .add(outward_1.Outward.outward_act_stats)
+        .add(outward_1.Outward.outward_act_cache)
+        .add(outward_1.Outward.outward_res_object)
+        .add(outward_1.Outward.outward_res_entity)
+        .add(outward_1.Outward.outward_msg_meta)
+        .add(outward_1.Outward.outward_trace)
+        .add(outward_1.Outward.outward_sub)
+        .add(outward_1.Outward.outward_announce)
+        .add(outward_1.Outward.outward_act_error);
     // Configure logging
     // Mark logger as being externally defined from options
     if (start_opts.logger && 'object' === typeof start_opts.logger) {
