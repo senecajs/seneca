@@ -114,9 +114,9 @@
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.7.1",
-    "seneca-entity": "^17.0.1",
+    "seneca-entity": "22.0.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-promisify": "^2.4.1",
+    "seneca-promisify": "3.4.0",
     "summary": "^2.1.0",
     "typescript": "^4.7.4"
   }
