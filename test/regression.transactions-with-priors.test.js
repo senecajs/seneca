@@ -1,11 +1,12 @@
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 const Util = require('util')
+const Shared = require('./shared')
 
 const lab = (exports.lab = Lab.script())
 const describe = lab.describe
 const expect = Code.expect
-const it = lab.it
+const it = Shared.make_it(lab)
 
 const Seneca = require('..')
 
@@ -18,7 +19,7 @@ describe('regression test, prior stack on a db trx instance', () => {
     })
   }
 
-  it('db trx instance does not lose the prior stack', test((fin) => {
+  it('db trx instance does not lose the prior stack', (fin) => {
     const si = Seneca()
 
     si.use('entity', {
@@ -47,16 +48,6 @@ describe('regression test, prior stack on a db trx instance', () => {
     si.ready(() => {
       si.act('hello:world', fin)
     })
-  }))
-})
-
-
-function test(t) {
-  return () => new Promise((resolve, reject) => {
-    Util.promisify(t)()
-      .then(resolve)
-      .catch(reject)
   })
-}
-
+})
 
