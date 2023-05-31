@@ -2,7 +2,6 @@ const Jsonic = require('@jsonic/jsonic-next')
 
 Jsonic('a::')
 
-
 const Seneca = require('../seneca')
 
 console.log(Seneca.util.Gex('a*'))

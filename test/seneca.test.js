@@ -1112,7 +1112,7 @@ describe('seneca', function () {
   it('add-handle', function (done) {
     var si = Seneca({ log: 'silent' }).error(done)
     var fm = {}
-    
+
     var i0 = function i0(msg, done) {
       msg.z = 1
       var f = fm[msg.b]

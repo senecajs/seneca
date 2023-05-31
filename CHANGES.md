@@ -1,3 +1,9 @@
+## 3.30.1 2022-05-31
+
+* Remove rebind decoration as not needed - seneca-entity handles own special case
+* Option debnug.datalen applies to test logs in all cases
+
+
 ## 3.30.0 2022-02-10
 
 * Error intercept customization hook.
