@@ -455,8 +455,9 @@ function build_test_log(seneca: any, data: any) {
     // TODO: use jsonic util
     let datastr = Util.inspect(seneca.util.clean(data.data || data))
       .replace(/\s+/g, '')
-      .substring(0, datalen)
-    logb.push(datastr.length <= 111 ? datastr : datastr.substring(0, 111) + '...')
+    // .substring(0, datalen)
+    logb.push(datastr.length <= datalen ?
+      datastr : datastr.substring(0, datalen) + '...')
   }
 
   if (data.did) {
