@@ -92,6 +92,7 @@ describe('plugin', function () {
       'args',
       'load',
       'normalize',
+      'pre_options',
       'preload',
       'pre_meta',
       'pre_legacy_extend',

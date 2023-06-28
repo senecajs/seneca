@@ -1,3 +1,8 @@
+## 
+
+* Provide merged plugin options to the plugin preload function.
+
+
 ## 3.30.1 2022-05-31
 
 * Remove rebind decoration as not needed - seneca-entity handles own special case
