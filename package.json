@@ -121,7 +121,7 @@
     "seneca-entity": "^22.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
-    "seneca-promisify": "^3.4.0",
+    "seneca-promisify": "^3.5.0",
     "summary": "^2.1.0",
     "typescript": "^5.1.6"
   }
