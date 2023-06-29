@@ -14,7 +14,7 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('add', function () {
-  it('name', function (fin) {
+  it('action-name', function (fin) {
     var si = Seneca().test()
 
     si.add('n:0')
@@ -24,21 +24,32 @@ describe('add', function () {
     // NOTE: these may need to be updates if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
-      id: 'default_action_8',
+      id: 'root$/default_action/8',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'action_9',
+      id: 'root$/action/9',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'n2_10',
+      id: 'root$/n2/10',
       name: 'n2',
     })
 
-    fin()
+    si.use(function p0() {
+      this.add('p:0', function f0(msg, reply) {
+        reply({ x: 1 })
+      })
+    }).ready(function () {
+      expect(si.find('p:0')).contains({
+        id: 'p0/f0/23',
+        name: 'f0',
+      })
+
+      fin()
+    })
   })
 
   it('action_modifier', function (fin) {

@@ -171,11 +171,12 @@ describe('message', function () {
       .act('a:1', function (err, out) {
         expect(i).equal(4)
         expect(err.code).equal('maxparents')
+        // console.log(err.details.parents)
         expect(err.details.parents).equal([
-          'a:1 a1_8',
-          'a:1 a1_8',
-          'a:1 a1_8',
-          'a:1 a1_8',
+          'a:1 root$/a1/8',
+          'a:1 root$/a1/8',
+          'a:1 root$/a1/8',
+          'a:1 root$/a1/8',
         ])
 
         fin()

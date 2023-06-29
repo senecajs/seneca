@@ -422,7 +422,9 @@ function make_seneca(initial_opts) {
     };
     // These need to come from options as required during construction.
     private$.actrouter = start_opts.internal.actrouter || (0, patrun_1.Patrun)({ gex: true });
-    var soi_subrouter = start_opts.internal.subrouter || {};
+    private$.translationrouter =
+        start_opts.internal.translationrouter || (0, patrun_1.Patrun)({ gex: true });
+    let soi_subrouter = start_opts.internal.subrouter || {};
     private$.subrouter = {
         // Check for legacy inward router
         inward: soi_subrouter.inward || (0, patrun_1.Patrun)({ gex: true }),
@@ -605,6 +607,7 @@ function make_seneca(initial_opts) {
         name: 'add',
         debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
     })
+        .add(Add.task.translate)
         .add(Add.task.prepare)
         .add(Add.task.plugin)
         .add(Add.task.callpoint)

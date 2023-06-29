@@ -567,12 +567,16 @@ function make_seneca(initial_opts?: any) {
   // These need to come from options as required during construction.
   private$.actrouter = start_opts.internal.actrouter || Patrun({ gex: true })
 
-  var soi_subrouter = start_opts.internal.subrouter || {}
+  private$.translationrouter =
+    start_opts.internal.translationrouter || Patrun({ gex: true })
+
+  let soi_subrouter = start_opts.internal.subrouter || {}
   private$.subrouter = {
     // Check for legacy inward router
     inward: soi_subrouter.inward || Patrun({ gex: true }),
     outward: soi_subrouter.outward || Patrun({ gex: true }),
   }
+
 
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
@@ -794,6 +798,7 @@ function make_seneca(initial_opts?: any) {
     name: 'add',
     debug: !!start_opts.debug.ordu || !!start_opts.order.add.debug,
   })
+    .add(Add.task.translate)
     .add(Add.task.prepare)
     .add(Add.task.plugin)
     .add(Add.task.callpoint)

@@ -1,31 +1,31 @@
 /* Copyright (c) 2010-2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var Assert = require('assert')
-var Util = require('util')
+const Assert = require('assert')
+const Util = require('util')
 const Code = require('@hapi/code')
 const { Gex } = require('gex')
 const Lab = require('@hapi/lab')
-var Package = require('../package.json')
-var Common = require('../lib/common.js')
+const Package = require('../package.json')
+const Common = require('../lib/common.js')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
-var assert = Assert
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
+const assert = Assert
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
-var clock = Shared.clock()
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
+const clock = Shared.clock()
 
-var Seneca = require('..')
+const Seneca = require('..')
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
+const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 console.log('TEST transport tmx=' + tmx)
 
 // timerstub broken on node 0.11
-// var timerstub = require('timerstub')
-var timerstub = {
+// const timerstub = require('timerstub')
+const timerstub = {
   setTimeout: setTimeout,
   setInterval: setInterval,
   Date: Date,
@@ -34,7 +34,7 @@ var timerstub = {
   },
 }
 
-var testopts = { log: 'test' }
+const testopts = { log: 'test' }
 
 describe('seneca', function () {
   it('happy', function (fin) {
@@ -339,7 +339,7 @@ describe('seneca', function () {
 
           if (!this.options().prior.direct) {
             assert.ok(o.foo.prior)
-            assert.ok(trace(m).match(/foo_/))
+            assert.ok(trace(m).match(/foo/))
           }
 
           si.add({ op: 'foo' }, zed)
@@ -356,7 +356,7 @@ describe('seneca', function () {
               assert.ok(!o.zed.prior)
               assert.ok(o.bar.prior)
               assert.ok(o.foo.prior)
-              assert.ok(trace(m).match(/bar_.*foo_/))
+              assert.ok(trace(m).match(/bar.*foo/))
             }
 
             fin()

@@ -1,3 +1,9 @@
+## 3.32.0 2023-06-29
+
+* Translation also operates on message add and sub.
+* Action id reformated to include plugin full name: https://github.com/senecajs/seneca/issues/905
+
+
 ## 3.31.2 2023-06-29
 
 * Translation action function has meaningful name.

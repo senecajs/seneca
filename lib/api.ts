@@ -449,11 +449,19 @@ function ping(this: any) {
 }
 
 
-function translate(this: any, from_in: any, to_in: any, pick_in: any) {
-  var from = 'string' === typeof from_in ? this.util.Jsonic(from_in) : from_in
-  var to = 'string' === typeof to_in ? this.util.Jsonic(to_in) : to_in
+function translate(
+  this: any,
+  from_in: any,
+  to_in: any,
+  pick_in?: any,
+  flags?: {
+    add?: boolean
+  }
+) {
+  const from = 'string' === typeof from_in ? this.util.Jsonic(from_in) : from_in
+  const to = 'string' === typeof to_in ? this.util.Jsonic(to_in) : to_in
 
-  var pick: any = {}
+  let pick: any = {}
 
   if ('string' === typeof pick_in) {
     pick_in = pick_in.split(/\s*,\s*/)
@@ -473,8 +481,8 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
     pick = null
   }
 
-  let translation = function(this: any, msg: any, reply: any) {
-    var pick_msg: any
+  let translate = function(msg: any) {
+    let pick_msg: any
 
     if (pick) {
       pick_msg = {}
@@ -483,19 +491,39 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
           pick_msg[prop] = msg[prop]
         }
       })
-    } else {
-      pick_msg = this.util.clean(msg)
+    }
+    else {
+      pick_msg = clean(msg)
     }
 
-    var transmsg = Object.assign(pick_msg, to)
+    let transmsg = Object.assign(pick_msg, to)
+
+    for (let pn in transmsg) {
+      if (null == transmsg[pn]) {
+        delete transmsg[pn]
+      }
+    }
+
+    return transmsg
+  }
+
+  this.private$.translationrouter.add(from, translate)
+
+  // console.log('TTT', translate({ c: 3, q: 9 }))
+  // console.log(this.private$.translationrouter + '')
+
+  let translation_action = function(this: any, msg: any, reply: any) {
+    let transmsg = translate(msg)
+    // console.log('ACT T', msg, transmsg)
     this.act(transmsg, reply)
   }
 
-  Object.defineProperty(translation, 'name', {
+  Object.defineProperty(translation_action, 'name', {
     value: 'translation__' + jsonic_stringify(from) + '__' + jsonic_stringify(to)
   })
 
-  this.add(from, translation)
+  from.translate$ = false
+  this.add(from, translation_action)
 
   return this
 }

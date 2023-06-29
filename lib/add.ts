@@ -47,9 +47,39 @@ function api_add(this: any) {
 
 
 const task = {
-  prepare(spec: TaskSpec) {
+  translate(spec: TaskSpec) {
     const args = spec.ctx.args
     let raw_pattern = args.pattern
+
+    // console.log('ADD TRANSLATE', raw_pattern)
+
+    let pattern = null
+
+    if (false !== raw_pattern.translate$) {
+
+      // Must be exact match to ensure consistent translation
+      let translation = spec.ctx.private.translationrouter.find(raw_pattern)
+
+      if (translation) {
+        pattern = translation(raw_pattern)
+
+        // console.log('ADD T', raw_pattern, pattern)
+      }
+    }
+
+    return {
+      // TODO: simple op:set would be faster
+      op: 'merge',
+      out: {
+        pattern,
+      },
+    }
+  },
+
+
+  prepare(spec: TaskSpec) {
+    const args = spec.ctx.args
+    let raw_pattern = spec.data.pattern || args.pattern
     let pattern = clean(raw_pattern)
 
     let action =
@@ -177,9 +207,17 @@ const task = {
     const action = spec.data.action
     const private$ = spec.ctx.private
 
-    var action_name =
-      null == action.name || '' === action.name ? 'action' : action.name
-    actdef.id = action_name + '_' + private$.next_action_id()
+    const plugin = actdef.plugin || {}
+
+    const action_name =
+      ((null == action.name || '' === action.name) ?
+        'action' : action.name)
+
+    actdef.id =
+      ((null == plugin.fullname || '' === plugin.fullname) ?
+        '' : plugin.fullname + '/') +
+      action_name + '/' + private$.next_action_id()
+
     actdef.name = action_name
     actdef.func = action
 
@@ -221,7 +259,6 @@ const task = {
         ((priordef.client && actdef.client) ||
           (!priordef.client && !actdef.client))
       ) {
-        //priordef.handle(args.pattern, action)
         priordef.handle(actdef)
         addroute = false
       } else {
