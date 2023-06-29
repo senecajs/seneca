@@ -118,10 +118,10 @@
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.8.8",
-    "seneca-entity": "^23.0.1",
+    "seneca-entity": "^24.0.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
-    "seneca-promisify": "^3.5.0",
+    "seneca-promisify": "^3.6.0",
     "summary": "^2.1.0",
     "typescript": "^5.1.6"
   }
