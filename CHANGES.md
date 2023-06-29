@@ -1,3 +1,8 @@
+## 3.31.1 2023-06-29
+
+* Include Typescript type definitions.
+
+
 ## 3.31.0 2023-06-29
 
 * Provide merged plugin options to the plugin preload function.
