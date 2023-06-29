@@ -1,3 +1,8 @@
+## 3.31.2 2023-06-29
+
+* Translation action function has meaningful name.
+
+
 ## 3.31.1 2023-06-29
 
 * Include Typescript type definitions.

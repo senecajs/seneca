@@ -8,12 +8,12 @@ import {
   make_callpoint,
   promiser,
   error as common_error,
-  jsonic_stringify,
   make_plugin_key,
   pincanon,
   pattern,
   clean,
   parsePattern,
+  jsonic_stringify,
 } from './common'
 
 const errlog = make_standard_err_log_entry
@@ -473,7 +473,7 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
     pick = null
   }
 
-  this.add(from, function(this: any, msg: any, reply: any) {
+  let translation = function(this: any, msg: any, reply: any) {
     var pick_msg: any
 
     if (pick) {
@@ -489,7 +489,13 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
 
     var transmsg = Object.assign(pick_msg, to)
     this.act(transmsg, reply)
+  }
+
+  Object.defineProperty(translation, 'name', {
+    value: 'translation__' + jsonic_stringify(from) + '__' + jsonic_stringify(to)
   })
+
+  this.add(from, translation)
 
   return this
 }
