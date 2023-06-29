@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.30.1",
+  "version": "3.31.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -86,7 +86,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@hapi/wreck": "17",
-    "@jsonic/jsonic-next": "2.9.1",
+    "@jsonic/jsonic-next": "2.10.0",
     "eraro": "^2.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
@@ -96,7 +96,7 @@
     "lodash.uniq": "^4.5.0",
     "minimist": "^1.2.8",
     "nid": "^2.0.1",
-    "norma": "^2.0.2",
+    "norma": "^3.0.0",
     "optioner": "^5.0.1",
     "ordu": "^2.2.0",
     "patrun": "^7.2.5",
@@ -109,7 +109,7 @@
     "@hapi/code": "8",
     "@hapi/lab": "25",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.2.5",
+    "@types/node": "^20.3.2",
     "async": "^3.2.4",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
@@ -118,11 +118,11 @@
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
     "prettier": "^2.8.8",
-    "seneca-entity": "^22.0.0",
+    "seneca-entity": "^22.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^3.4.0",
     "summary": "^2.1.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   }
 }

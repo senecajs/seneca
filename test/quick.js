@@ -16,7 +16,7 @@ let s0 = Seneca({
   // },
 })
   .test()
-    // .use('entity')
+  // .use('entity')
   // .use(function interceptor() {
   //   let seneca = this
   //   this.private$.intercept.act_error.push(function foo_interceptor(actcall) {
@@ -47,7 +47,7 @@ let s0 = Seneca({
     //   console.log(out)
     // })
 
-    this.act('a:1,x:2', function(err, out) {
+    this.act('a:1,x:2', function (err, out) {
       console.log(out)
       // throw new Error('AA')
     })

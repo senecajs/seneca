@@ -377,32 +377,32 @@ function init(seneca_options, more_options) {
     });
     return seneca;
 }
-module.exports = init;
 // Expose Seneca prototype for easier monkey-patching
-module.exports.Seneca = Seneca;
-exports.default = init;
+init.Seneca = Seneca;
 // To reference builtin loggers when defining logging options.
-module.exports.loghandler = Legacy.loghandler;
+init.loghandler = Legacy.loghandler;
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
-module.exports.use = function top_use() {
+init.use = function top_use() {
     var argsarr = new Array(arguments.length);
     for (var l = 0; l < argsarr.length; ++l) {
         argsarr[l] = arguments[l];
     }
-    var instance = module.exports();
+    var instance = init();
     return instance.use.apply(instance, argsarr);
 };
 // Makes require('seneca').test() work.
-module.exports.test = function top_test() {
-    return module.exports().test(...arguments);
+init.test = function top_test() {
+    return init().test(...arguments);
 };
 // Makes require('seneca').quiet() work.
-module.exports.quiet = function top_quiet() {
-    return module.exports().quiet(...arguments);
+init.quiet = function top_quiet() {
+    return init().quiet(...arguments);
 };
-module.exports.util = seneca_util;
-module.exports.valid = Gubu;
-module.exports.test$ = { intern: intern };
+init.util = seneca_util;
+init.valid = Gubu;
+init.test$ = { intern: intern };
+exports.default = init;
+module.exports = init;
 // Create a new Seneca instance.
 function make_seneca(initial_opts) {
     // Create a private context.
