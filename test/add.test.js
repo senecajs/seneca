@@ -24,17 +24,17 @@ describe('add', function () {
     // NOTE: these may need to be updated if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
-      id: 'root$/default_action/8',
+      id: 'root$/default_action/6',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'root$/action/9',
+      id: 'root$/action/7',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'root$/n2/10',
+      id: 'root$/n2/8',
       name: 'n2',
     })
 
@@ -44,7 +44,7 @@ describe('add', function () {
       })
     }).ready(function () {
       expect(si.find('p:0')).contains({
-        id: 'p0/f0/23',
+        id: 'p0/f0/10',
         name: 'f0',
       })
 
@@ -116,8 +116,6 @@ describe('add', function () {
     })
   })
 
-
-  
   it('rules-builders', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required } = si.valid
@@ -142,7 +140,6 @@ describe('add', function () {
     })
   })
 
-
   it('rules-scalars', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required, Default } = si.valid
@@ -166,7 +163,6 @@ describe('add', function () {
       })
     })
   })
-
 
   it('rules-deep', function (fin) {
     const si = Seneca({ log: 'silent', legacy: false }) //.test()

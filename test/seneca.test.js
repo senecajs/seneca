@@ -1,7 +1,6 @@
 /* Copyright (c) 2010-2023 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-
 const Assert = require('assert')
 const Util = require('util')
 const Code = require('@hapi/code')
@@ -1110,18 +1109,17 @@ describe('seneca', function () {
     done()
   })
 
-
   it('add-handle', function (done) {
     var si = Seneca({ log: 'silent' }).error(done)
     var fm = {}
-    
+
     var i0 = function i0(msg, done) {
       msg.z = 1
       var f = fm[msg.b]
 
       f.call(this, msg, done)
     }
-    
+
     i0.handle = function (actdef) {
       fm[actdef.raw.b$] = actdef.func
     }
@@ -1147,7 +1145,6 @@ describe('seneca', function () {
     })
   })
 
-  
   it('supports a function to trace actions', function (done) {
     var seneca = Seneca({ log: 'silent', trace: { act: () => {} } })
     seneca.add({ a: 1 }, function (args, cb) {

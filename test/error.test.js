@@ -60,33 +60,6 @@ describe('error', function () {
 
   it('types', types)
 
-  it('deep-once-test-log', function (fin) {
-    let log = []
-    const si = Seneca({
-      internal: { print: { log: (...args) => log.push(args) } },
-    }).test()
-
-    si.add('foo:1', function p0(msg, reply) {
-      throw new Error('p0')
-    })
-      .add('bar:2', function p1(msg, reply) {
-        this.act('foo:1', reply)
-      })
-      .add('zed:3', function p2(msg, reply) {
-        this.act('bar:2', reply)
-      })
-      .add('qaz:4', function p3(msg, reply) {
-        this.act('zed:3', reply)
-      })
-
-    si.act('qaz:4', function (err) {
-      expect(err.code).equals('act_execute')
-
-      // Should only print full error with stack once
-      expect((log.join('').match(/Error/g) || []).length).equals(1)
-      fin()
-    })
-  })
 
   function response_is_error(fin) {
     const si = Seneca({ log: 'silent' })

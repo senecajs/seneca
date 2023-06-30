@@ -34,7 +34,6 @@ const inward_1 = require("./lib/inward");
 const outward_1 = require("./lib/outward");
 const { Legacy } = require('./lib/legacy');
 const { resolve_options } = require('./lib/options');
-const Package = require('./package.json');
 const { Print } = require('./lib/print');
 const { addActions } = require('./lib/actions');
 const { transport } = require('./lib/transport');

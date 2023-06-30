@@ -77,11 +77,11 @@ describe('actions', function () {
   it('info_fatal', function (fin) {
     Seneca({
       log: 'silent',
-      system: { exit: function noop() {} }
+      system: { exit: function noop() {} },
     }).ready(function () {
       this.close = function () {}
       this.root.close = function () {}
-      
+
       this.add('role:seneca,cmd:close', function (msg, reply) {
         reply()
       })
@@ -93,8 +93,7 @@ describe('actions', function () {
           throw new Error('a:1')
         })
         .act('a:1,fatal$:true')
-      }
-    )
+    })
   })
 
   it('get_options', function (fin) {

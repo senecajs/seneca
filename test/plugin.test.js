@@ -94,8 +94,8 @@ describe('plugin', function () {
     expect(ordu_use.tasks().map((t) => t.name)).equal([
       'args',
       'load',
-      'pre_options',
       'normalize',
+      'pre_options',
       'preload',
       'pre_meta',
       'pre_legacy_extend',
@@ -357,7 +357,7 @@ describe('plugin', function () {
       })
   })
   */
-  
+
   it('works with exportmap', function (fin) {
     var seneca = Seneca.test(fin).quiet()
 

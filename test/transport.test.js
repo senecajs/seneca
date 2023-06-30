@@ -42,7 +42,6 @@ var test_opts = { parallel: false, timeout: 5555 * tmx }
 
 describe('transport', function () {
   // TODO: test top level qaz:* : def and undef other pats
-
   // TODO: move to seneca-transport
   /*
   it('happy-nextgen', test_opts, function (fin) {
