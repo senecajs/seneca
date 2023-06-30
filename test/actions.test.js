@@ -75,22 +75,24 @@ describe('actions', function () {
   })
 
   it('info_fatal', function (fin) {
-    Seneca({ log: 'silent', system: { exit: function noop() {} } }).ready(
-      function () {
-        this.close = function () {}
-        this.root.close = function () {}
-
-        this.add('role:seneca,cmd:close', function (msg, reply) {
-          reply()
+    Seneca({
+      log: 'silent',
+      system: { exit: function noop() {} }
+    }).ready(function () {
+      this.close = function () {}
+      this.root.close = function () {}
+      
+      this.add('role:seneca,cmd:close', function (msg, reply) {
+        reply()
+      })
+        .sub('role:seneca,info:fatal', function (msg) {
+          expect(msg.err).exist()
+          fin()
         })
-          .sub('role:seneca,info:fatal', function (msg) {
-            expect(msg.err).exist()
-            fin()
-          })
-          .add('a:1', function () {
-            throw new Error('a:1')
-          })
-          .act('a:1,fatal$:true')
+        .add('a:1', function () {
+          throw new Error('a:1')
+        })
+        .act('a:1,fatal$:true')
       }
     )
   })

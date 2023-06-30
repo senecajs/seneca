@@ -1,6 +1,9 @@
-/* Copyright © 2020 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2020-2023 Richard Rodger and other contributors, MIT License. */
 /* $lab:coverage:off$ */
 'use strict'
+
+
+// TODO: replace `seneca-` prefix with `plugin-` for unnamed plugins
 
 const Uniq: any = require('lodash.uniq')
 const Eraro: any = require('eraro')
@@ -32,6 +35,13 @@ function api_use(callpoint: any, opts: any) {
     tasks.args,
     tasks.load,
     tasks.normalize,
+    {
+      name: 'pre_options', exec: (spec: TaskSpec) => {
+        if ('function' === typeof spec.data.plugin.define.preload) {
+          return tasks.options(spec)
+        }
+      }
+    },
     tasks.preload,
     { name: 'pre_meta', exec: tasks.meta },
     { name: 'pre_legacy_extend', exec: tasks.legacy_extend },
@@ -167,6 +177,13 @@ function make_tasks(): any {
       let args: string[] = spec.data.plugin.args
       let seneca: any = spec.ctx.seneca
       let private$: any = seneca.private$
+
+      // Special cases for short plugin names
+      // TODO: plugin loading should check for @seneca and seneca first!
+      // 1. Avoid conflict with the OG request module!
+      if ('request' === args[0]) {
+        args[0] = '@seneca/request'
+      }
 
       // TODO: use-plugin needs better error message for malformed plugin desc
       let desc = private$.use.build_plugin_desc(...args)
@@ -483,7 +500,9 @@ function make_tasks(): any {
 
     options: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
-      let delegate: any = spec.data.delegate
+      let delegate: any =
+        spec.data.delegate ||
+        spec.ctx.seneca // for preload
 
       let so = delegate.options()
 
@@ -492,15 +511,7 @@ function make_tasks(): any {
 
       let fullname_options = Object.assign(
         {},
-
-        // DEPRECATED: remove in 4
-        so[fullname],
-
         so.plugin[fullname],
-
-        // DEPRECATED: remove in 4
-        so[fullname + '$' + plugin.tag],
-
         so.plugin[fullname + '$' + plugin.tag]
       )
 
@@ -511,15 +522,7 @@ function make_tasks(): any {
 
       let shortname_options = Object.assign(
         {},
-
-        // DEPRECATED: remove in 4
-        so[shortname],
-
         so.plugin[shortname],
-
-        // DEPRECATED: remove in 4
-        so[shortname + '$' + plugin.tag],
-
         so.plugin[shortname + '$' + plugin.tag]
       )
 

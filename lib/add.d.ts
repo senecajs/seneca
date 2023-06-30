@@ -1,6 +1,12 @@
 import { TaskSpec } from 'ordu';
 declare function api_add(this: any): any;
 declare const task: {
+    translate(spec: TaskSpec): {
+        op: string;
+        out: {
+            pattern: any;
+        };
+    };
     prepare(spec: TaskSpec): {
         op: string;
         out: {

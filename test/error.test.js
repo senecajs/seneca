@@ -60,37 +60,6 @@ describe('error', function () {
 
   it('types', types)
 
-  it('prior-once-test-log', function (fin) {
-    let log = []
-    const si = Seneca({
-      internal: { print: { log: (...args) => log.push(args) } },
-    }).test()
-
-    si.add('foo:1', function p3(msg, reply) {
-      throw new Error('p3')
-    })
-      .add('foo:1', function p0(msg, reply) {
-        msg.p0 = 0
-        this.prior(msg, reply)
-      })
-      .add('foo:1', function p1(msg, reply) {
-        msg.p1 = 1
-        this.prior(msg, reply)
-      })
-      .add('foo:1', function p2(msg, reply) {
-        msg.p2 = 2
-        this.prior(msg, reply)
-      })
-
-    si.act('foo:1', function (err) {
-      expect(err.code).equals('act_execute')
-
-      // Should only print full error with stack once
-      expect((log.join('').match(/Error/g) || []).length).equals(1)
-      fin()
-    })
-  })
-
   it('deep-once-test-log', function (fin) {
     let log = []
     const si = Seneca({

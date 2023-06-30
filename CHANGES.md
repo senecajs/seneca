@@ -5,6 +5,47 @@
 * Remove seneca-transport
 
 
+## 3.32.0 2023-06-29
+
+* Translation also operates on message add and sub.
+* Action id reformated to include plugin full name: https://github.com/senecajs/seneca/issues/905
+
+
+## 3.31.2 2023-06-29
+
+* Translation action function has meaningful name.
+
+
+## 3.31.1 2023-06-29
+
+* Include Typescript type definitions.
+
+
+## 3.31.0 2023-06-29
+
+* Provide merged plugin options to the plugin preload function.
+
+
+## 3.30.1 2023-05-31
+
+* Remove rebind decoration as not needed - seneca-entity handles own special case
+* Option debnug.datalen applies to test logs in all cases
+
+
+## 3.30.0 2023-02-10
+
+* Error intercept customization hook.
+* Rebind decoration functions to current delegate.
+* Custom error identification, default now just instanceof Error.
+* Plugin options at top level moved to legacy option.
+
+
+## 3.29.0 2022-09-01
+
+* Removed duplicate logging marker as it pollutes result values.
+* Gubu update allows for top level scalar validation in messages.
+
+
 ## 3.28.0 2022-05-23
 
 * Validation control options: valid.active|message|option|plugin

@@ -94,6 +94,7 @@ describe('plugin', function () {
     expect(ordu_use.tasks().map((t) => t.name)).equal([
       'args',
       'load',
+      'pre_options',
       'normalize',
       'preload',
       'pre_meta',

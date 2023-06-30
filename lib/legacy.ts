@@ -9,7 +9,7 @@ import Errors from './errors'
 const Flatten = require('lodash.flatten')
 const Eraro = require('eraro')
 const Norma = require('norma')
-const Jsonic = require('jsonic')
+const Jsonic = require('@jsonic/jsonic-next')
 
 const Common = require('./common')
 

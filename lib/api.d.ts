@@ -23,7 +23,9 @@ declare function ping(this: any): {
     act: any;
     tr: any;
 };
-declare function translate(this: any, from_in: any, to_in: any, pick_in: any): any;
+declare function translate(this: any, from_in: any, to_in: any, pick_in?: any, flags?: {
+    add?: boolean;
+}): any;
 declare function gate(this: any): any;
 declare function ungate(this: any): any;
 declare function list_plugins(this: any): any;

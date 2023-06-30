@@ -14,31 +14,42 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('add', function () {
-  it('name', function (fin) {
+  it('action-name', function (fin) {
     var si = Seneca().test()
 
     si.add('n:0')
       .add('n:1', function () {})
       .add('n:2', function n2() {})
 
-    // NOTE: these may need to be updates if startup action call sequence changes.
+    // NOTE: these may need to be updated if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
-      id: 'default_action_6',
+      id: 'root$/default_action/8',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'action_7',
+      id: 'root$/action/9',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'n2_8',
+      id: 'root$/n2/10',
       name: 'n2',
     })
 
-    fin()
+    si.use(function p0() {
+      this.add('p:0', function f0(msg, reply) {
+        reply({ x: 1 })
+      })
+    }).ready(function () {
+      expect(si.find('p:0')).contains({
+        id: 'p0/f0/23',
+        name: 'f0',
+      })
+
+      fin()
+    })
   })
 
   it('action_modifier', function (fin) {
@@ -105,6 +116,8 @@ describe('add', function () {
     })
   })
 
+
+  
   it('rules-builders', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required } = si.valid
@@ -128,6 +141,32 @@ describe('add', function () {
       })
     })
   })
+
+
+  it('rules-scalars', function (fin) {
+    const si = Seneca({ log: 'silent' }) //.test()
+    const { Required, Default } = si.valid
+
+    si.add({ a: 1, b: Default(2) }, function (m, r) {
+      r({ x: m.b * 2 })
+    })
+
+    si.act({ a: 1 }, function (e, o) {
+      expect(e).not.exist()
+      expect(o).equal({ x: 4 })
+
+      this.act({ a: 1, b: 'q' }, function (e, o) {
+        expect(e).exist()
+        expect(o).not.exist()
+        expect(e.code).equal('act_invalid_msg')
+        expect(e.message).equal(
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "q" because the value is not of type number.; message content was: { a: 1, b: \'q\' }.'
+        )
+        fin()
+      })
+    })
+  })
+
 
   it('rules-deep', function (fin) {
     const si = Seneca({ log: 'silent', legacy: false }) //.test()

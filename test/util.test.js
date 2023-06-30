@@ -114,6 +114,7 @@ describe('util', function () {
     done()
   })
 
+  
   it('seneca.util.deep.entity', function (done) {
     var obj = si.util.deep(
       { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
@@ -125,6 +126,13 @@ describe('util', function () {
       b: { y: 2, entity$: 'a/b/c' },
       c: { z: 1 },
     })
+    done()
+  })
+
+
+  it('seneca.util.gex', function (done) {
+    expect(Seneca.util.Gex).exist()
+    expect(Seneca.util.Gex('a*').match('ab')).equal(true)
     done()
   })
 })

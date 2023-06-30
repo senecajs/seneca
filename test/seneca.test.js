@@ -1,31 +1,32 @@
-/* Copyright (c) 2010-2019 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2023 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var Assert = require('assert')
-var Util = require('util')
+
+const Assert = require('assert')
+const Util = require('util')
 const Code = require('@hapi/code')
 const { Gex } = require('gex')
 const Lab = require('@hapi/lab')
-var Package = require('../package.json')
-var Common = require('../lib/common.js')
+const Package = require('../package.json')
+const Common = require('../lib/common.js')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var expect = Code.expect
-var assert = Assert
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const expect = Code.expect
+const assert = Assert
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
-var clock = Shared.clock()
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
+const clock = Shared.clock()
 
-var Seneca = require('..')
+const Seneca = require('..')
 
-var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
+const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 console.log('TEST transport tmx=' + tmx)
 
 // timerstub broken on node 0.11
-// var timerstub = require('timerstub')
-var timerstub = {
+// const timerstub = require('timerstub')
+const timerstub = {
   setTimeout: setTimeout,
   setInterval: setInterval,
   Date: Date,
@@ -34,7 +35,7 @@ var timerstub = {
   },
 }
 
-var testopts = { log: 'test' }
+const testopts = { log: 'test' }
 
 describe('seneca', function () {
   it('happy', function (fin) {
@@ -98,12 +99,12 @@ describe('seneca', function () {
     var si = Seneca({ id$: 'a' }, testopts)
     si.start_time = 123
     expect(JSON.stringify(si)).equal(
-      '{"isSeneca":true,"id":"a","fixedargs":{},"start_time":123,"version":"' +
+      '{"isSeneca":true,"id":"a","fixedargs":{},"fixedmeta":{},"start_time":123,"version":"' +
         Package.version +
         '"}'
     )
     expect(Util.inspect(si).replace(/\n */g, ' ')).equal(
-      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: undefined, start_time: 123, version: '" +
+      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: {}, start_time: 123, version: '" +
         Package.version +
         "' }"
     )
@@ -339,7 +340,7 @@ describe('seneca', function () {
 
           if (!this.options().prior.direct) {
             assert.ok(o.foo.prior)
-            assert.ok(trace(m).match(/foo_/))
+            assert.ok(trace(m).match(/foo/))
           }
 
           si.add({ op: 'foo' }, zed)
@@ -356,7 +357,7 @@ describe('seneca', function () {
               assert.ok(!o.zed.prior)
               assert.ok(o.bar.prior)
               assert.ok(o.foo.prior)
-              assert.ok(trace(m).match(/bar_.*foo_/))
+              assert.ok(trace(m).match(/bar.*foo/))
             }
 
             fin()
@@ -688,14 +689,14 @@ describe('seneca', function () {
           assert.equal(2, out)
 
           try {
-            si.add('a:,b:2', function (args, cb) {
+            si.add('a::2', function (args, cb) {
               cb()
             })
           } catch (e) {
             assert.equal(e.code, 'add_string_pattern_syntax')
 
             try {
-              si.act('a:,b:2', { c: 3 }, function () {
+              si.act('a::2', { c: 3 }, function () {
                 assert.fail()
               })
             } catch (e) {
@@ -1109,50 +1110,44 @@ describe('seneca', function () {
     done()
   })
 
-  describe('#intercept', function () {
-    it('intercept', function (done) {
-      var si = Seneca({ log: 'silent' }).error(done)
-      var fm = {}
 
-      var i0 = function i0(msg, done) {
-        msg.z = 1
-        var f = fm[msg.b]
+  it('add-handle', function (done) {
+    var si = Seneca({ log: 'silent' }).error(done)
+    var fm = {}
+    
+    var i0 = function i0(msg, done) {
+      msg.z = 1
+      var f = fm[msg.b]
 
-        f.call(this, msg, done)
-      }
+      f.call(this, msg, done)
+    }
+    
+    i0.handle = function (actdef) {
+      fm[actdef.raw.b$] = actdef.func
+    }
 
-      /*
-      i0.handle = function(a, t) {
-        fm[a.b$] = t
-      }
-      */
+    si.add('a:1', i0)
 
-      i0.handle = function (actdef) {
-        fm[actdef.raw.b$] = actdef.func
-      }
+    si.add('a:1,b$:1', function b1(msg, done) {
+      done(null, { z: msg.z, b: 1 })
+    })
 
-      si.add('a:1', i0)
+    si.add('a:1,b$:2', function b2(msg, done) {
+      done(null, { z: msg.z, b: 2 })
+    })
 
-      si.add('a:1,b$:1', function b1(msg, done) {
-        done(null, { z: msg.z, b: 1 })
-      })
+    si.act('a:1,b:1', function (e, o) {
+      assert.equal(1, o.b)
 
-      si.add('a:1,b$:2', function b2(msg, done) {
-        done(null, { z: msg.z, b: 2 })
-      })
+      si.act('a:1,b:2', function (e, o) {
+        assert.equal(2, o.b)
 
-      si.act('a:1,b:1', function (e, o) {
-        assert.equal(1, o.b)
-
-        si.act('a:1,b:2', function (e, o) {
-          assert.equal(2, o.b)
-
-          done()
-        })
+        done()
       })
     })
   })
 
+  
   it('supports a function to trace actions', function (done) {
     var seneca = Seneca({ log: 'silent', trace: { act: () => {} } })
     seneca.add({ a: 1 }, function (args, cb) {

@@ -15,10 +15,6 @@ import {
 } from './common'
 
 
-
-const Jsonic = require('jsonic')
-
-
 function api_add(this: any) {
   let ctx = {
     opts: this.options(),
@@ -46,9 +42,35 @@ function api_add(this: any) {
 
 
 const task = {
-  prepare(spec: TaskSpec) {
+  translate(spec: TaskSpec) {
     const args = spec.ctx.args
     let raw_pattern = args.pattern
+
+    let pattern = null
+
+    if (false !== raw_pattern.translate$) {
+
+      // Must be exact match to ensure consistent translation
+      let translation = spec.ctx.private.translationrouter.find(raw_pattern)
+
+      if (translation) {
+        pattern = translation(raw_pattern)
+      }
+    }
+
+    return {
+      // TODO: simple op:set would be faster
+      op: 'merge',
+      out: {
+        pattern,
+      },
+    }
+  },
+
+
+  prepare(spec: TaskSpec) {
+    const args = spec.ctx.args
+    let raw_pattern = spec.data.pattern || args.pattern
     let pattern = clean(raw_pattern)
 
     let action =
@@ -128,6 +150,7 @@ const task = {
     const actdef = spec.data.actdef
     const pat = spec.data.pattern
     const opts = spec.ctx.opts
+    const Jsonic = spec.ctx.instance.util.Jsonic
 
     actdef.sub = !!actdef.raw.sub$
     actdef.client = !!actdef.raw.client$
@@ -175,9 +198,17 @@ const task = {
     const action = spec.data.action
     const private$ = spec.ctx.private
 
-    var action_name =
-      null == action.name || '' === action.name ? 'action' : action.name
-    actdef.id = action_name + '_' + private$.next_action_id()
+    const plugin = actdef.plugin || {}
+
+    const action_name =
+      ((null == action.name || '' === action.name) ?
+        'action' : action.name)
+
+    actdef.id =
+      ((null == plugin.fullname || '' === plugin.fullname) ?
+        '' : plugin.fullname + '/') +
+      action_name + '/' + private$.next_action_id()
+
     actdef.name = action_name
     actdef.func = action
 
@@ -241,6 +272,7 @@ const task = {
   },
 
 
+  // TODO: accept action.valid to define rules
   rules(spec: TaskSpec) {
     const opts = spec.ctx.opts
     const actdef = spec.data.actdef

@@ -1,13 +1,24 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-var Jsonic = require('jsonic')
-var Norma = require('norma')
+const Norma = require('norma')
 
-var Common = require('./common')
+import {
+  each,
+  make_standard_err_log_entry,
+  make_callpoint,
+  promiser,
+  error as common_error,
+  make_plugin_key,
+  pincanon,
+  pattern,
+  clean,
+  parsePattern,
+  jsonic_stringify,
+} from './common'
 
-var errlog = Common.make_standard_err_log_entry
+const errlog = make_standard_err_log_entry
 
-var intern: any = {}
+const intern: any = {}
 
 
 function wrap(this: any, pin: any, actdef: any, wrapper: any) {
@@ -17,8 +28,8 @@ function wrap(this: any, pin: any, actdef: any, wrapper: any) {
   actdef = 'function' === typeof actdef ? {} : actdef
 
   pin = Array.isArray(pin) ? pin : [pin]
-  Common.each(pin, function(p: any) {
-    Common.each(pinthis.list(p), function(actpattern: any) {
+  each(pin, function(p: any) {
+    each(pinthis.list(p), function(actpattern: any) {
       pinthis.add(actpattern, wrapper, actdef)
     })
   })
@@ -30,7 +41,7 @@ function wrap(this: any, pin: any, actdef: any, wrapper: any) {
 function fix(this: any, patargs: any, msgargs: any, custom: any) {
   var self = this
 
-  patargs = Jsonic(patargs || {})
+  patargs = self.util.Jsonic(patargs || {})
 
   var fix_delegate = self.delegate(patargs)
 
@@ -92,7 +103,7 @@ function options(this: any, options: any, chain: any) {
 
   // Update callpoint
   if (out_opts.debug.callpoint) {
-    private$.callpoint = Common.make_callpoint(out_opts.debug.callpoint)
+    private$.callpoint = make_callpoint(out_opts.debug.callpoint)
   }
 
   // DEPRECATED
@@ -118,7 +129,7 @@ function close(callpoint: any) {
     var seneca = this
 
     if (false !== done && null == done) {
-      return Common.promiser(intern.close.bind(seneca, callpoint))
+      return promiser(intern.close.bind(seneca, callpoint))
     }
 
     return intern.close.call(seneca, callpoint, done)
@@ -171,7 +182,7 @@ function error(this: any, first: any) {
     if (plugin && plugin.eraro && plugin.eraro.has(first)) {
       error = plugin.eraro.apply(this, arguments)
     } else {
-      error = Common.eraro.apply(this, arguments)
+      error = common_error.apply(this, arguments)
     }
 
     return error
@@ -263,7 +274,7 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
 
     strdesc =
       self.toString() +
-      (Object.keys(vfa).length ? '/' + Jsonic.stringify(vfa) : '')
+      (Object.keys(vfa).length ? '/' + jsonic_stringify(vfa) : '')
 
     return strdesc
   }
@@ -438,16 +449,23 @@ function ping(this: any) {
 }
 
 
-function translate(this: any, from_in: any, to_in: any, pick_in: any) {
-  var from = 'string' === typeof from_in ? Jsonic(from_in) : from_in
-  var to = 'string' === typeof to_in ? Jsonic(to_in) : to_in
+function translate(
+  this: any,
+  from_in: any,
+  to_in: any,
+  pick_in?: any,
+  flags?: {
+    add?: boolean
+  }
+) {
+  const from = 'string' === typeof from_in ? this.util.Jsonic(from_in) : from_in
+  const to = 'string' === typeof to_in ? this.util.Jsonic(to_in) : to_in
 
-  var pick: any = {}
+  let pick: any = {}
 
   if ('string' === typeof pick_in) {
     pick_in = pick_in.split(/\s*,\s*/)
   }
-
   if (Array.isArray(pick_in)) {
     pick_in.forEach(function(prop) {
       if (prop.startsWith('-')) {
@@ -462,8 +480,8 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
     pick = null
   }
 
-  this.add(from, function(this: any, msg: any, reply: any) {
-    var pick_msg: any
+  let translate = function(msg: any) {
+    let pick_msg: any
 
     if (pick) {
       pick_msg = {}
@@ -472,13 +490,39 @@ function translate(this: any, from_in: any, to_in: any, pick_in: any) {
           pick_msg[prop] = msg[prop]
         }
       })
-    } else {
-      pick_msg = this.util.clean(msg)
+    }
+    else {
+      pick_msg = clean(msg)
     }
 
-    var transmsg = Object.assign(pick_msg, to)
+    let transmsg = Object.assign(pick_msg, to)
+
+    for (let pn in transmsg) {
+      if (null == transmsg[pn]) {
+        delete transmsg[pn]
+      }
+    }
+
+    return transmsg
+  }
+
+  this.private$.translationrouter.add(from, translate)
+
+  // console.log('TTT', translate({ c: 3, q: 9 }))
+  // console.log(this.private$.translationrouter + '')
+
+  let translation_action = function(this: any, msg: any, reply: any) {
+    let transmsg = translate(msg)
+    // console.log('ACT T', msg, transmsg)
     this.act(transmsg, reply)
+  }
+
+  Object.defineProperty(translation_action, 'name', {
+    value: 'translation__' + jsonic_stringify(from) + '__' + jsonic_stringify(to)
   })
+
+  from.translate$ = false
+  this.add(from, translation_action)
 
   return this
 }
@@ -502,13 +546,13 @@ function list_plugins(this: any) {
 
 
 function find_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   return this.private$.plugins[plugin_key]
 }
 
 
 function has_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   return !!this.private$.plugins[plugin_key]
 }
 
@@ -518,7 +562,7 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
     ignore = tag
     tag = null
   }
-  var plugin_key = Common.make_plugin_key(plugindesc, tag)
+  var plugin_key = make_plugin_key(plugindesc, tag)
   var resolved_ignore = (this.private$.ignore_plugins[plugin_key] =
     null == ignore ? true : !!ignore)
 
@@ -537,7 +581,7 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
 function find(this: any, pattern: any, flags: any) {
   var seneca = this
 
-  var pat = 'string' === typeof pattern ? Jsonic(pattern) : pattern
+  var pat = 'string' === typeof pattern ? seneca.util.Jsonic(pattern) : pattern
   pat = seneca.util.clean(pat)
   pat = pat || {}
 
@@ -560,15 +604,8 @@ function has(this: any, pattern: any) {
 // List all actions that match the pattern.
 function list(this: any, pattern: any) {
   return this.private$.actrouter
-    .list(null == pattern ? {} : Jsonic(pattern))
+    .list(null == pattern ? {} : this.util.Jsonic(pattern))
     .map((x: any) => x.match)
-
-  /*
-  return _.map(
-    this.private$.actrouter.list(null == pattern ? {} : Jsonic(pattern)),
-    'match'
-  )
-  */
 }
 
 
@@ -667,18 +704,18 @@ function client(this: any, callpoint: any) {
     var raw_config = intern.parse_config(argsarr)
 
     // pg: pin group
-    raw_config.pg = Common.pincanon(raw_config.pin || raw_config.pins)
+    raw_config.pg = pincanon(raw_config.pin || raw_config.pins)
 
     var config = intern.resolve_config(raw_config, opts)
 
-    config.id = config.id || Common.pattern(raw_config)
+    config.id = config.id || pattern(raw_config)
 
     var pins =
       config.pins ||
       (Array.isArray(config.pin) ? config.pin : [config.pin || ''])
 
     pins = pins.map((pin: any) => {
-      return 'string' === typeof pin ? Jsonic(pin) : pin
+      return 'string' === typeof pin ? self.util.Jsonic(pin) : pin
     })
 
     //var sd = Plugins.make_delegate(self, {
@@ -759,7 +796,7 @@ function client(this: any, callpoint: any) {
 
         if (null == liveclient) {
           return sd.die(
-            private$.error('transport_client_null', Common.clean(config))
+            private$.error('transport_client_null', clean(config))
           )
         }
 
@@ -886,7 +923,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
     seneca.flags.closed = true
 
     // cleanup process event listeners
-    Common.each(options.system.close_signals, function(active: any, signal: any) {
+    each(options.system.close_signals, function(active: any, signal: any) {
       if (active) {
         process.removeListener(signal, seneca.private$.exit_close)
       }
@@ -923,7 +960,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 intern.fix_args =
   function(this: any, origargs: any, patargs: any, msgargs: any, custom: any) {
-    var args = Common.parsePattern(this, origargs, 'rest:.*', patargs)
+    var args = parsePattern(this, origargs, 'rest:.*', patargs)
     var fixargs = [args.pattern]
       .concat({
         fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
