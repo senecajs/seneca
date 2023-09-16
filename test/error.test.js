@@ -570,8 +570,9 @@ describe('error', function () {
           ctxt.errlog = null
 
           // ~~ CASE: action; no-callback; no-errhandler
-          si.on('act-err', function (msg, err) {
+          si.on('act-err', function (whence, msg, meta, err) {
             try {
+              assert.equal('action', whence)
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code, ctxt.name + '-D')
               assert.equal('a:1', err.details.pattern, ctxt.name + '-E')

@@ -355,7 +355,7 @@ intern.act_error = function(instance: any, ctx: any, data: any) {
   }
 
   instance.log.error(entry)
-  instance.emit('act-err', msg, err)
+  instance.emit('act-err', 'action', msg, meta, err)
 
   // when fatal$ is set, prefer to die instead
   if ('function' === typeof opts.errhandler && (!msg || !meta.fatal)) {
