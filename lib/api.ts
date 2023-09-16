@@ -945,6 +945,9 @@ intern.close = function(this: any, callpoint: any, done: any) {
       seneca.removeAllListeners('after-pin')
       seneca.removeAllListeners('ready')
 
+      // Seneca 4 variant
+      seneca.removeAllListeners('act-err-4')
+
       seneca.private$.history.close()
 
       if (seneca.private$.status_interval) {

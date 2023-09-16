@@ -500,6 +500,9 @@ const intern = (module.exports.intern = {
 
     instance.emit('act-err', msg, err, data.res)
 
+    // Seneca 4 arguments
+    instance.emit('act-err-4', 'callback', msg, meta, err, data.res)
+
     if (opts.errhandler) {
       opts.errhandler.call(instance, err, err.meta$)
     }

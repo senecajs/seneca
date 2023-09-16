@@ -1,3 +1,8 @@
+## 3.32.1 2023-09-16
+
+* Provide Seneca 4 act-err argument variants via `act-err-4` temporary event.
+
+
 ## 3.32.0 2023-06-29
 
 * Translation also operates on message add and sub.

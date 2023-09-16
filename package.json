@@ -86,7 +86,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@hapi/wreck": "17",
-    "@jsonic/jsonic-next": "2.10.0",
+    "@jsonic/jsonic-next": "2.12.1",
     "eraro": "^2.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
@@ -109,20 +109,20 @@
     "@hapi/code": "8",
     "@hapi/lab": "25",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.3.2",
+    "@types/node": "^20.6.2",
     "async": "^3.2.4",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
     "gex": "^4.0.1",
-    "handlebars": "^4.7.7",
+    "handlebars": "^4.7.8",
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
-    "prettier": "^2.8.8",
-    "seneca-entity": "^24.0.0",
+    "prettier": "^3.0.3",
+    "seneca-entity": "^24.0.1",
     "seneca-error-test": "^0.2.2",
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^3.6.0",
     "summary": "^2.1.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   }
 }
