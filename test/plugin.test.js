@@ -190,7 +190,7 @@ describe('plugin', function () {
             done()
           })
         },
-        { y: 3 }
+        { y: 3 },
       )
       .ready(function () {
         this.act('a:1,x:2', function (err, out) {
@@ -242,7 +242,7 @@ describe('plugin', function () {
         },
         {
           b: 2,
-        }
+        },
       )
 
       .use(
@@ -252,7 +252,7 @@ describe('plugin', function () {
         },
         {
           d: 2,
-        }
+        },
       )
 
       .ready(fin)
@@ -278,7 +278,7 @@ describe('plugin', function () {
         {
           a: 1,
           b: 2,
-        }
+        },
       )
   })
 
@@ -312,7 +312,7 @@ describe('plugin', function () {
             expect(err).to.not.exist()
             expect(res.message).to.contain('no errors created.')
             s0.close(seneca.close.bind(seneca, fin))
-          }
+          },
         )
       })
   })
@@ -333,7 +333,7 @@ describe('plugin', function () {
             expect(err).to.not.exist()
             expect(res.message).to.contain('error caught!')
             s0.close(seneca.close.bind(seneca, fin))
-          }
+          },
         )
       })
   })
@@ -688,7 +688,7 @@ describe('plugin', function () {
             expect(err).to.exist()
             expect(err.msg).to.contain('from action')
             fin()
-          }
+          },
         )
       })
     })
@@ -1052,7 +1052,7 @@ describe('plugin', function () {
           expect(opts).equal({ a: 2, b: 2, c: 3, d: 1 })
         },
       },
-      { b: 2, c: 3, d: 1 }
+      { b: 2, c: 3, d: 1 },
     )
       .use(bar, { a: 3, d: 1 })
 
@@ -1251,7 +1251,7 @@ describe('plugin', function () {
           expect(options).equal({ x: 1, y: 'Y' })
         },
       },
-      { x: 1 }
+      { x: 1 },
     )
 
     s0.ready(function () {
@@ -1273,7 +1273,7 @@ describe('plugin', function () {
           expect(options).equal({ x: 1, y: 'Y' })
         },
       },
-      { x: 1 }
+      { x: 1 },
     )
 
     s0.ready(function () {
@@ -1295,7 +1295,7 @@ describe('plugin', function () {
           expect(options).equal({ x: 1, y: 'Y' })
         },
       },
-      { x: 1 }
+      { x: 1 },
     )
 
     s0.ready(function () {

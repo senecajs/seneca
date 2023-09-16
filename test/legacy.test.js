@@ -63,7 +63,7 @@ describe('legacy', function () {
       function (i, next) {
         next()
       },
-      fin
+      fin,
     )
   })
 
@@ -79,7 +79,7 @@ describe('legacy', function () {
       { a: 1, b: 2, c: 3 },
       { b: 22, c: 33, d: 4 },
       { c: 333 },
-      ['d']
+      ['d'],
     )
     expect(out).to.include({ a: 1, b: 22, c: 333 })
 

@@ -21,10 +21,10 @@ describe('util', function () {
 
   it('seneca.util.deep.happy', function (done) {
     expect(
-      si.util.deep({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } })
+      si.util.deep({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } }),
     ).to.include({ a: 1, b: { c: 3, d: 4 } })
     expect(
-      si.util.deep({}, { a: 1 }, { b: [11, 22] }, { b: [undefined, 222, 333] })
+      si.util.deep({}, { a: 1 }, { b: [11, 22] }, { b: [undefined, 222, 333] }),
     ).to.include({ a: 1, b: [11, 222, 333] })
     done()
   })
@@ -99,7 +99,7 @@ describe('util', function () {
         d: { dd: 1 },
         e: { ee: 1 },
         f: [4, 5, 6],
-      }
+      },
     )
 
     expect(obj.a).to.equal({ aa: 1 })
@@ -117,7 +117,7 @@ describe('util', function () {
   it('seneca.util.deep.entity', function (done) {
     var obj = si.util.deep(
       { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
-      { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } }
+      { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } },
     )
 
     expect(obj).to.include({

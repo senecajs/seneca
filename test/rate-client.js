@@ -70,7 +70,7 @@ function finish(active) {
   stats.avgcall = Math.floor(
     calltimes.reduce(function (acc, elm) {
       return acc + elm
-    }, 0) / calltimes.length
+    }, 0) / calltimes.length,
   )
 
   calltimes.sort(function (a, b) {
@@ -85,7 +85,7 @@ function finish(active) {
 
   fs.writeFileSync(
     './bench-memory.csv',
-    'w,r,t,u,e\n' + memory.map((x) => x.join(',')).join('\n')
+    'w,r,t,u,e\n' + memory.map((x) => x.join(',')).join('\n'),
   )
 
   fs.writeFileSync('./bench-calltimes.csv', 'ct\n' + calltimes.join('\n'))

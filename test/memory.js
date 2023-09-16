@@ -25,6 +25,6 @@ function report(start) {
   var end = Date.now()
   var mem = process.memoryUsage()
   console.log(
-    [SIZE, end - start, mem.rss, mem.heapTotal, mem.heapUsed].join('\t')
+    [SIZE, end - start, mem.rss, mem.heapTotal, mem.heapUsed].join('\t'),
   )
 }

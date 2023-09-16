@@ -65,13 +65,13 @@ describe('meta', function () {
                       expect(meta.custom.foo).equal(11)
 
                       fin()
-                    }
+                    },
                   )
-                }
+                },
               )
-            }
+            },
           )
-        }
+        },
       )
   })
 
@@ -118,13 +118,13 @@ describe('meta', function () {
                         expect(meta.custom.foo).equal(11)
 
                         fin()
-                      }
+                      },
                     )
-                  }
+                  },
                 )
-              }
+              },
             )
-          }
+          },
         )
     }
   }
@@ -132,7 +132,7 @@ describe('meta', function () {
   it('custom-meta-prior', make_custom_meta_prior({}))
   it(
     'custom-meta-prior-direct',
-    make_custom_meta_prior({ prior: { direct: true } })
+    make_custom_meta_prior({ prior: { direct: true } }),
   )
 
   it('custom-fixed', function (fin) {
@@ -166,7 +166,7 @@ describe('meta', function () {
 
             fin()
           })
-        }
+        },
       )
     })
   })

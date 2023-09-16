@@ -51,7 +51,7 @@ describe('actions', function () {
             expect(out.calls).equal(1)
 
             fin()
-          }
+          },
         )
       })
     })
@@ -118,9 +118,9 @@ describe('actions', function () {
               expect(out).not.exist()
 
               fin()
-            }
+            },
           )
-        }
+        },
       )
     })
   })

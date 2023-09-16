@@ -244,7 +244,7 @@ describe('logging', function () {
             /re/,
             new Date(),
             null,
-            void 0
+            void 0,
           )
           this.log.info('eek!', m, r)
           this.log({

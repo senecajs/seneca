@@ -100,12 +100,12 @@ describe('seneca', function () {
     expect(JSON.stringify(si)).equal(
       '{"isSeneca":true,"id":"a","fixedargs":{},"fixedmeta":{},"start_time":123,"version":"' +
         Package.version +
-        '"}'
+        '"}',
     )
     expect(Util.inspect(si).replace(/\n */g, ' ')).equal(
       "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: {}, start_time: 123, version: '" +
         Package.version +
-        "' }"
+        "' }",
     )
     done()
   })
@@ -140,7 +140,7 @@ describe('seneca', function () {
         assert.ok(err)
         assert.equal(
           'seneca: Action happy_error:1 failed: happy-error.',
-          err.message
+          err.message,
         )
         done()
       })
@@ -332,7 +332,7 @@ describe('seneca', function () {
 
         si.act('op:foo,a:1,i:2', function (e, o, m) {
           assert.ok(
-            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
+            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s),
           )
           assert.ok(!o.bar.prior)
           assert.ok(m.action.match(/bar/))
@@ -346,8 +346,8 @@ describe('seneca', function () {
           si.act('op:foo,a:1,i:3', function (e, o, m) {
             assert.ok(
               Gex('1~2~3~Seneca/*' + '/*').on(
-                '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
-              )
+                '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s,
+              ),
             )
 
             assert.ok(m.action.match(/zed/))
@@ -428,7 +428,7 @@ describe('seneca', function () {
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
           assert.ok(
-            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
+            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s),
           )
 
           if (!this.options().prior.direct) {
@@ -750,12 +750,12 @@ describe('seneca', function () {
               si.add(
                 'i:2,a:1',
                 { b: 2, c: { required$: true } },
-                addFunction
+                addFunction,
               ).act('i:2,a:1,b:2,c:3', function (err, out) {
                 checkFunction(err, out, done)
               })
             })
-          }
+          },
         )
       })
     })
@@ -825,7 +825,7 @@ describe('seneca', function () {
             // sensitive to changes in plugin init and internal action calls
             assert.equal(
               '{ calls: 8, done: 8, fails: 0, cache: 1 }',
-              Util.inspect(stats.act)
+              Util.inspect(stats.act),
             )
             fin()
           })

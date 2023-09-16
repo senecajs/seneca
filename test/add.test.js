@@ -94,7 +94,7 @@ describe('add', function () {
         // console.log(e)
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.'
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.',
         )
 
         si.act({ a: 2, b: 3 }, function (e, o) {
@@ -106,7 +106,7 @@ describe('add', function () {
             expect(o).not.exist()
             expect(e.code).equal('act_invalid_msg')
             expect(e.message).equal(
-              'seneca: Action a:2 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 2, b: \'x\' }.'
+              'seneca: Action a:2 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 2, b: \'x\' }.',
             )
 
             fin()
@@ -133,7 +133,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "" because the value is required.; message content was: { a: 1 }.'
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "" because the value is required.; message content was: { a: 1 }.',
         )
         fin()
       })
@@ -157,7 +157,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "q" because the value is not of type number.; message content was: { a: 1, b: \'q\' }.'
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "q" because the value is not of type number.; message content was: { a: 1, b: \'q\' }.',
         )
         fin()
       })
@@ -181,7 +181,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.'
+          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.',
         )
         fin()
       })

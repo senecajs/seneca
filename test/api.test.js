@@ -124,7 +124,7 @@ describe('api', function () {
             expect(err.code).equal('fail_cond_must_be_bool')
 
             expect(err.message).equal(
-              'seneca: The Seneca.fail method expected the `cond` param to be a boolean.'
+              'seneca: The Seneca.fail method expected the `cond` param to be a boolean.',
             )
 
             expect(err.seneca).true()
@@ -159,13 +159,13 @@ describe('api', function () {
             true,
             'test_args',
             { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 },
-            2
+            2,
           )
         } catch (err) {
           expect(err.code).equal('fail_wrong_number_of_args')
 
           expect(err.message).equal(
-            'seneca: The Seneca.fail method was called with the wrong number of arguments: 4'
+            'seneca: The Seneca.fail method was called with the wrong number of arguments: 4',
           )
 
           expect(err.seneca).true()

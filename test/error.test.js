@@ -642,7 +642,7 @@ describe('error', function () {
                   assert.equal(
                     'act_execute',
                     ctxt.errlog.code,
-                    ctxt.name + '-F'
+                    ctxt.name + '-F',
                   )
                 }
               }
