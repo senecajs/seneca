@@ -1048,53 +1048,33 @@ describe('seneca', function () {
       })
   })
 
-  describe('#decorate', function () {
-    it('can add a property to seneca', function (done) {
-      var si = Seneca({ log: 'silent' })
-      si.decorate('foo', function () {
-        assert(this === si)
-        return 'bar'
-      })
-
-      assert.equal(si.foo(), 'bar')
-      done()
+  it('decorate-basic', async ()=> {
+    const si = Seneca().test().quiet()
+    si.decorate('foo', function () {
+      expect(this === si)
+      return 'bar'
     })
 
-    it('cannot override core property', function (done) {
-      var si = Seneca({ log: 'silent' })
+    expect(si.foo()).equals('bar')
+  })
 
-      var fn = function () {
-        si.decorate('use', 'foo')
-      }
+  it('decorate-core-property', async ()=> {
+    const si = Seneca().test().quiet()
+    expect(()=>si.decorate('add',()=>{}))
+      .throws('seneca: Decoration overrides core property:add')
+  })
 
-      assert.throws(fn)
-      done()
-    })
+  it('decorate-overwrite', async ()=>{
+    const si = Seneca().test().quiet()
+    si.decorate('foo', ()=>{})
+    expect(()=>si.decorate('foo',()=>{}))
+      .throws('seneca: Decoration already exists: foo')
+  })
 
-    it('cannot overwrite a decorated property', function (done) {
-      var si = Seneca({ log: 'silent' })
-      si.decorate('foo', function () {
-        return 'bar'
-      })
-
-      var fn = function () {
-        si.decorate('foo', 'bar')
-      }
-
-      assert.throws(fn)
-      done()
-    })
-
-    it('cannot prefix a property with an underscore', function (done) {
-      var si = Seneca({ log: 'silent' })
-
-      var fn = function () {
-        si.decorate('_use', 'foo')
-      }
-
-      assert.throws(fn)
-      done()
-    })
+  it('decorate-underscore-prefix', async ()=>{
+    const si = Seneca().test().quiet()
+    expect(()=>si.decorate('_use'))
+      .throws('seneca: Decorate property cannot start with underscore (was _use)')
   })
 
   it('supports jsonic params to has', function (done) {

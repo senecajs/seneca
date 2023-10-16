@@ -1,6 +1,6 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-const Norma = require('norma')
+import { MakeArgu, Any, Check, Rest, Ignore } from 'gubu'
 
 import {
   each,
@@ -15,6 +15,9 @@ import {
   parsePattern,
   jsonic_stringify,
 } from './common'
+
+
+const Argu = MakeArgu('seneca')
 
 const errlog = make_standard_err_log_entry
 
@@ -222,17 +225,14 @@ function fail(this: any, ...args: any[]) {
 
 
 function inward(this: any) {
-  // TODO: norma should support f/x where x = # args
-  var args = Norma('inward:f', arguments)
-  // this.private$.inward.add(args.inward)
+  const args = Argu(arguments, { inward: Function })
   this.root.order.inward.add(args.inward)
   return this
 }
 
 
 function outward(this: any) {
-  var args = Norma('outward:f', arguments)
-  // this.private$.outward.add(args.outward)
+  const args = Argu(arguments, { outward: Function })
   this.root.order.outward.add(args.outward)
   return this
 }
@@ -320,7 +320,13 @@ function depends(this: any) {
   var self = this
   var private$ = this.private$
   var error = this.util.error
-  var args = Norma('{pluginname:s deps:a? moredeps:s*}', arguments)
+  // var args = Norma('{pluginname:s deps:a? moredeps:s*}', arguments)
+
+  const args = Argu(arguments, {
+    pluginname: String,
+    deps: Ignore([String]),
+    moredeps: Rest(String),
+  })
 
   var deps = args.deps || args.moredeps || []
 
@@ -809,24 +815,25 @@ function client(this: any, callpoint: any) {
 }
 
 
-// Inspired by https://github.com/hapijs/hapi/blob/master/lib/plugin.js decorate
-// TODO: convert to plugin configuration, with standard errors
 function decorate(this: any) {
-  var args = Norma('property:s value:.', arguments)
+  let args = Argu(arguments, {
+    property: Check(/^[^_]/, String)
+      .Fault('Decorate property cannot start with underscore (was $VALUE)'),
+    value: Any()
+  })
 
-  var property = args.property
-  if ('_' === property[0]) {
-    throw new Error('property cannot start with _')
-  }
+  let property = args.property
+
   if (this.private$.decorations[property]) {
-    throw new Error('seneca is already decorated with the property: ' + property)
+    throw new Error('seneca: Decoration already exists: ' + property)
   }
   if (this.root[property]) {
-    throw new Error('cannot override a core seneca property: ' + property)
+    throw new Error('seneca: Decoration overrides core property:' + property)
   }
 
   this.root[property] = this.private$.decorations[property] = args.value
 }
+
 
 
 intern.parse_config = function(args: any) {
