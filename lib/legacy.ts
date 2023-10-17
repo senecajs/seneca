@@ -1,4 +1,4 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
 
 import Util from 'util'
@@ -8,11 +8,14 @@ import Errors from './errors'
 
 const Flatten = require('lodash.flatten')
 const Eraro = require('eraro')
-const Norma = require('norma')
 const Jsonic = require('@jsonic/jsonic-next')
 
 const Common = require('./common')
 
+import { MakeArgu, Rest, Any } from 'gubu'
+
+
+const Argu = MakeArgu('seneca')
 
 const internals = {
   error: Eraro({
@@ -185,7 +188,12 @@ function findpins(this: any) {
 
 function act_if(this: any) {
   var self = this
-  var args = Norma('{execute:b actargs:.*}', arguments)
+  // const args = Norma('{execute:b actargs:.*}', arguments)
+
+  const args = Argu(arguments, {
+    execute: Boolean,
+    actargs: Rest(Any()),
+  })
 
   if (args.execute) {
     return self.act.apply(self, args.actargs)

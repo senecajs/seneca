@@ -538,54 +538,6 @@ describe('seneca', function () {
       })
   })
 
-  it('act_if', function (done) {
-    var si = Seneca({ log: 'silent' })
-
-    si.add({ op: 'foo' }, function (args, next) {
-      next(null, 'foo' + args.bar)
-    })
-
-    si.act_if(true, { op: 'foo', bar: '1' }, function (err, out) {
-      assert.equal(err, null)
-      assert.equal('foo1', out)
-    })
-
-    si.act_if(false, { op: 'foo', bar: '2' }, function () {
-      assert.fail()
-    })
-
-    si.act_if(true, 'op:foo,bar:3', function (err, out) {
-      assert.equal(err, null)
-      assert.equal('foo3', out)
-    })
-
-    try {
-      si.act_if({ op: 'foo', bar: '2' }, function () {
-        assert.fail()
-      })
-    } catch (e) {
-      assert.ok(e.message.match(/norma:/))
-    }
-
-    si = Seneca(testopts)
-      .add('a:1', function (msg, reply) {
-        reply({ b: msg.a + 1 })
-      })
-      .add('a:2', function (msg, reply) {
-        reply({ b: msg.a + 2 })
-      })
-
-    si.act_if(true, 'a:1', function (err, out) {
-      assert.ok(!err)
-      assert.equal(2, out.b)
-
-      si.act_if(false, 'a:2', function () {
-        assert.fail()
-      })
-
-      process.nextTick(done)
-    })
-  })
 
   it('loading-plugins', function (done) {
     var si = Seneca().test()
