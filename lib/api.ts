@@ -25,7 +25,7 @@ const intern: any = {}
 
 
 function wrap(this: any, pin: any, actdef: any, wrapper: any) {
-  var pinthis = this
+  const pinthis = this
 
   wrapper = 'function' === typeof actdef ? actdef : wrapper
   actdef = 'function' === typeof actdef ? {} : actdef
@@ -42,11 +42,11 @@ function wrap(this: any, pin: any, actdef: any, wrapper: any) {
 
 
 function fix(this: any, patargs: any, msgargs: any, custom: any) {
-  var self = this
+  const self = this
 
   patargs = self.util.Jsonic(patargs || {})
 
-  var fix_delegate = self.delegate(patargs)
+  const fix_delegate = self.delegate(patargs)
 
   // TODO: attach msgargs and custom to delegate.private$ in some way for debugging
 
@@ -69,8 +69,8 @@ function fix(this: any, patargs: any, msgargs: any, custom: any) {
 
 
 function options(this: any, options: any, chain: any) {
-  var self = this
-  var private$ = self.private$
+  const self = this
+  const private$ = self.private$
 
   if (null == options) {
     return private$.optioner.get()
@@ -85,10 +85,10 @@ function options(this: any, options: any, chain: any) {
     })
   }
 
-  var out_opts = (private$.exports.options = private$.optioner.set(options))
+  let out_opts = (private$.exports.options = private$.optioner.set(options))
 
   if ('string' === typeof options.tag) {
-    var oldtag = self.root.tag
+    const oldtag = self.root.tag
     self.root.tag = options.tag
     self.root.id =
       self.root.id.substring(0, self.root.id.indexOf('/' + oldtag)) +
@@ -98,7 +98,7 @@ function options(this: any, options: any, chain: any) {
 
   // Update logging configuration
   if (options.log) {
-    var logspec = private$.logging.build_log(self)
+    const logspec = private$.logging.build_log(self)
     out_opts = private$.exports.options = private$.optioner.set({
       log: logspec,
     })
@@ -112,7 +112,7 @@ function options(this: any, options: any, chain: any) {
   // DEPRECATED
   if (out_opts.legacy.logging) {
     if (options && options.log && Array.isArray(options.log.map)) {
-      for (var i = 0; i < options.log.map.length; ++i) {
+      for (let i = 0; i < options.log.map.length; ++i) {
         self.logroute(options.log.map[i])
       }
     }
@@ -129,7 +129,7 @@ function options(this: any, options: any, chain: any) {
 // sets public seneca.closed property
 function close(callpoint: any) {
   return function api_close(this: any, done: any) {
-    var seneca = this
+    const seneca = this
 
     if (false !== done && null == done) {
       return promiser(intern.close.bind(seneca, callpoint))
@@ -156,7 +156,7 @@ function explain(this: any, toggle: any) {
   if (true === toggle) {
     return (this.private$.explain = [])
   } else if (false === toggle) {
-    var out = this.private$.explain
+    const out = this.private$.explain
     delete this.private$.explain
     return out
   }
@@ -168,29 +168,32 @@ function error(this: any, first: any) {
   if ('function' === typeof first) {
     this.options({ errhandler: first })
     return this
-  } else {
+  }
+  else {
     if (null == first) {
       throw this.util.error('no_error_code')
     }
 
-    var plugin_fullname =
+    const plugin_fullname =
       this.fixedargs && this.fixedargs.plugin$ && this.fixedargs.plugin$.full
 
-    var plugin =
+    const plugin =
       null != plugin_fullname
         ? this.private$.plugins[plugin_fullname]
         : this.context.plugin
 
-    var error = null
+    let err = null
     if (plugin && plugin.eraro && plugin.eraro.has(first)) {
-      error = plugin.eraro.apply(this, arguments)
-    } else {
-      error = common_error.apply(this, arguments)
+      err = plugin.eraro.apply(this, arguments)
+    }
+    else {
+      err = common_error.apply(this, arguments)
     }
 
-    return error
+    return err
   }
 }
+
 
 // NOTE: plugin error codes are in their own namespaces
 function fail(this: any, ...args: any[]) {
@@ -240,14 +243,14 @@ function outward(this: any) {
 
 // TODO: rename fixedargs
 function delegate(this: any, fixedargs: any, fixedmeta: any) {
-  var self = this
-  var root = this.root
-  var opts = this.options()
+  const self = this
+  const root = this.root
+  const opts = this.options()
 
   fixedargs = fixedargs || {}
   fixedmeta = fixedmeta || {}
 
-  var delegate = Object.create(self)
+  const delegate = Object.create(self)
 
   delegate.private$ = Object.create(self.private$)
 
@@ -261,13 +264,13 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
   Object.assign(delegate_log, root.log)
   delegate_log.self = () => delegate
 
-  var strdesc: any
+  let strdesc: any
 
   function delegate_toString() {
     if (strdesc) return strdesc
-    var vfa: any = {}
+    const vfa: any = {}
     Object.keys(fixedargs).forEach((k) => {
-      var v = fixedargs[k]
+      const v = fixedargs[k]
       if (~k.indexOf('$')) return
       vfa[k] = v
     })
@@ -279,11 +282,11 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
     return strdesc
   }
 
-  var delegate_fixedargs = opts.strict.fixedargs
+  const delegate_fixedargs = opts.strict.fixedargs
     ? Object.assign({}, fixedargs, self.fixedargs)
     : Object.assign({}, self.fixedargs, fixedargs)
 
-  var delegate_fixedmeta = opts.strict.fixedmeta
+  const delegate_fixedmeta = opts.strict.fixedmeta
     ? Object.assign({}, fixedmeta, self.fixedmeta)
     : Object.assign({}, self.fixedmeta, fixedmeta)
 
@@ -292,14 +295,14 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
     further_fixedargs: any,
     further_fixedmeta: any
   ) {
-    var args = Object.assign({}, delegate.fixedargs, further_fixedargs || {})
-    var meta = Object.assign({}, delegate.fixedmeta, further_fixedmeta || {})
+    const args = Object.assign({}, delegate.fixedargs, further_fixedargs || {})
+    const meta = Object.assign({}, delegate.fixedmeta, further_fixedmeta || {})
     return self.delegate.call(this, args, meta)
   }
 
   // Somewhere to put contextual data for this delegate.
   // For example, data for individual web requests.
-  var delegate_context = Object.assign({}, self.context)
+  const delegate_context = Object.assign({}, self.context)
 
   // Prevents incorrect prototype properties in mocha test contexts
   Object.defineProperties(delegate, {
@@ -317,10 +320,9 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
 
 // TODO: should be a configuration param so we can handle plugin name resolution
 function depends(this: any) {
-  var self = this
-  var private$ = this.private$
-  var error = this.util.error
-  // var args = Norma('{pluginname:s deps:a? moredeps:s*}', arguments)
+  const self = this
+  const private$ = this.private$
+  const error = this.util.error
 
   const args = Argu(arguments, {
     pluginname: String,
@@ -328,10 +330,10 @@ function depends(this: any) {
     moredeps: Rest(String),
   })
 
-  var deps = args.deps || args.moredeps || []
+  const deps = args.deps || args.moredeps || []
 
-  for (var i = 0; i < deps.length; i++) {
-    var depname = deps[i]
+  for (let i = 0; i < deps.length; i++) {
+    const depname = deps[i]
 
     if (
       !private$.plugin_order.byname.includes(depname) &&
@@ -350,17 +352,17 @@ function depends(this: any) {
 
 
 function export$(this: any, key: any) {
-  var self = this
-  var private$ = this.private$
-  var error = this.util.error
-  var opts = this.options()
+  const self = this
+  const private$ = this.private$
+  const error = this.util.error
+  const opts = this.options()
 
   // Legacy aliases
   if (key === 'util') {
     key = 'basic'
   }
 
-  var exportval = private$.exports[key]
+  const exportval = private$.exports[key]
 
   if (!exportval && opts.strict.exports) {
     return self.die(error('export_not_found', { key: key }))
@@ -373,14 +375,14 @@ function export$(this: any, key: any) {
 function quiet(this: any, flags: any) {
   flags = flags || {}
 
-  var quiet_opts = {
+  const quiet_opts = {
     test: false,
     quiet: true,
     log: 'none',
     reload$: true, // TODO: obsolete?
   }
 
-  var opts = this.options(quiet_opts)
+  const opts = this.options(quiet_opts)
 
   // An override from env or args is possible.
   // Only flip to test mode if called from test() method
@@ -395,7 +397,7 @@ function quiet(this: any, flags: any) {
 
 
 function test(this: any, errhandler: any, logspec: any) {
-  var opts = this.options()
+  const opts = this.options()
 
   if ('-' != opts.tag) {
     this.root.id =
@@ -411,7 +413,7 @@ function test(this: any, errhandler: any, logspec: any) {
 
   logspec = true === logspec || 'true' === logspec ? 'test' : logspec
 
-  var test_opts = {
+  const test_opts = {
     errhandler: null == errhandler ? null : errhandler,
     test: true,
     quiet: false,
@@ -420,7 +422,7 @@ function test(this: any, errhandler: any, logspec: any) {
     debug: { callpoint: true },
   }
 
-  var set_opts = this.options(test_opts)
+  const set_opts = this.options(test_opts)
 
   // An override from env or args is possible.
   if (set_opts.quiet) {
@@ -440,7 +442,7 @@ function test(this: any, errhandler: any, logspec: any) {
 
 
 function ping(this: any) {
-  var now = Date.now()
+  const now = Date.now()
   return {
     now: now,
     uptime: now - this.private$.stats.start,
@@ -553,13 +555,13 @@ function list_plugins(this: any) {
 
 
 function find_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = make_plugin_key(plugindesc, tag)
+  const plugin_key = make_plugin_key(plugindesc, tag)
   return this.private$.plugins[plugin_key]
 }
 
 
 function has_plugin(this: any, plugindesc: any, tag: any) {
-  var plugin_key = make_plugin_key(plugindesc, tag)
+  const plugin_key = make_plugin_key(plugindesc, tag)
   return !!this.private$.plugins[plugin_key]
 }
 
@@ -569,8 +571,8 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
     ignore = tag
     tag = null
   }
-  var plugin_key = make_plugin_key(plugindesc, tag)
-  var resolved_ignore = (this.private$.ignore_plugins[plugin_key] =
+  const plugin_key = make_plugin_key(plugindesc, tag)
+  const resolved_ignore = (this.private$.ignore_plugins[plugin_key] =
     null == ignore ? true : !!ignore)
 
   this.log.info({
@@ -586,13 +588,13 @@ function ignore_plugin(this: any, plugindesc: any, tag: any, ignore: any) {
 
 // Find the action metadata for a given pattern, if it exists.
 function find(this: any, pattern: any, flags: any) {
-  var seneca = this
+  const seneca = this
 
-  var pat = 'string' === typeof pattern ? seneca.util.Jsonic(pattern) : pattern
+  let pat = 'string' === typeof pattern ? seneca.util.Jsonic(pattern) : pattern
   pat = seneca.util.clean(pat)
   pat = pat || {}
 
-  var actdef = seneca.private$.actrouter.find(pat, flags && flags.exact)
+  let actdef = seneca.private$.actrouter.find(pat, flags && flags.exact)
 
   if (!actdef) {
     actdef = seneca.private$.actrouter.find({})
@@ -620,10 +622,10 @@ function list(this: any, pattern: any) {
 function status(this: any, flags: any) {
   flags = flags || {}
 
-  var hist = this.private$.history.stats()
+  const hist = this.private$.history.stats()
   hist.log = this.private$.history.list()
 
-  var status = {
+  const status = {
     stats: this.stats(flags.stats),
     history: hist,
     transport: this.private$.transport,
@@ -636,8 +638,8 @@ function status(this: any, flags: any) {
 // Reply to an action that is waiting for a result.
 // Used by transports to decouple sending messages from receiving responses.
 function reply(this: any, spec: any) {
-  var instance = this
-  var actctxt = null
+  const instance = this
+  let actctxt = null
 
   if (spec && spec.meta) {
     actctxt = instance.private$.history.get(spec.meta.id)
@@ -653,13 +655,14 @@ function reply(this: any, spec: any) {
 // Listen for inbound messages.
 function listen(this: any, callpoint: any) {
   return function api_listen(this: any, ...argsarr: any[]) {
-    var private$ = this.private$
-    var self = this
+    const private$ = this.private$
+    const self = this
 
-    var done = argsarr[argsarr.length - 1]
+    let done = argsarr[argsarr.length - 1]
     if (typeof done === 'function') {
       argsarr.pop()
-    } else {
+    }
+    else {
       done = () => { }
     }
 
@@ -670,8 +673,8 @@ function listen(this: any, callpoint: any) {
       callpoint: callpoint(true),
     })
 
-    var opts = self.options().transport || {}
-    var config = intern.resolve_config(intern.parse_config(argsarr), opts)
+    const opts = self.options().transport || {}
+    const config = intern.resolve_config(intern.parse_config(argsarr), opts)
 
     self.act(
       'role:transport,cmd:listen',
@@ -694,9 +697,9 @@ function listen(this: any, callpoint: any) {
 // Send outbound messages.
 function client(this: any, callpoint: any) {
   return function api_client(this: any) {
-    var private$ = this.private$
-    var argsarr = Array.prototype.slice.call(arguments)
-    var self = this
+    const private$ = this.private$
+    const argsarr = Array.prototype.slice.call(arguments)
+    const self = this
 
     self.log.info({
       kind: 'client',
@@ -705,19 +708,19 @@ function client(this: any, callpoint: any) {
       callpoint: callpoint(true),
     })
 
-    var legacy = self.options().legacy || {}
-    var opts = self.options().transport || {}
+    const legacy = self.options().legacy || {}
+    const opts = self.options().transport || {}
 
-    var raw_config = intern.parse_config(argsarr)
+    const raw_config = intern.parse_config(argsarr)
 
     // pg: pin group
     raw_config.pg = pincanon(raw_config.pin || raw_config.pins)
 
-    var config = intern.resolve_config(raw_config, opts)
+    const config = intern.resolve_config(raw_config, opts)
 
     config.id = config.id || pattern(raw_config)
 
-    var pins =
+    let pins =
       config.pins ||
       (Array.isArray(config.pin) ? config.pin : [config.pin || ''])
 
@@ -728,7 +731,7 @@ function client(this: any, callpoint: any) {
     // TODO: review - this feels like a hack
     // perhaps we should instantiate a virtual plugin to represent the client?
     // ... but is this necessary at all?
-    var task_res = self.order.plugin.task.delegate.exec({
+    const task_res = self.order.plugin.task.delegate.exec({
       ctx: {
         seneca: self,
       },
@@ -741,11 +744,11 @@ function client(this: any, callpoint: any) {
       },
     })
 
-    var sd = task_res.out.delegate
+    const sd = task_res.out.delegate
 
-    var sendclient: any
+    let sendclient: any
 
-    var transport_client: any =
+    const transport_client: any =
       function transport_client(this: any, msg: any, reply: any, meta: any) {
         if (legacy.meta) {
           meta = meta || msg.meta$
@@ -837,11 +840,11 @@ function decorate(this: any) {
 
 
 intern.parse_config = function(args: any) {
-  var out: any = {}
+  let out: any = {}
 
-  var config = args.filter((x: any) => null != x)
+  const config = args.filter((x: any) => null != x)
 
-  var arglen = config.length
+  const arglen = config.length
 
   // TODO: use Joi for better error msgs
 
@@ -865,10 +868,10 @@ intern.parse_config = function(args: any) {
 
 
 intern.resolve_config = function(config: any, options: any) {
-  var out = Object.assign({}, config)
+  let out = Object.assign({}, config)
 
   Object.keys(options).forEach((key) => {
-    var value = options[key]
+    const value = options[key]
     if (value && 'object' === typeof value) {
       return
     }
@@ -883,7 +886,7 @@ intern.resolve_config = function(config: any, options: any) {
     out.type = 'web'
   }
 
-  var base = options[out.type] || {}
+  const base = options[out.type] || {}
 
   out = Object.assign({}, base, out)
 
@@ -898,11 +901,11 @@ intern.resolve_config = function(config: any, options: any) {
 
 
 intern.close = function(this: any, callpoint: any, done: any) {
-  var seneca = this
-  var options = seneca.options()
+  const seneca = this
+  const options = seneca.options()
 
-  var done_called = false
-  var safe_done: any = function safe_done(err: any) {
+  let done_called = false
+  const safe_done: any = function safe_done(err: any) {
     if (!done_called && 'function' === typeof done) {
       done_called = true
       return done.call(seneca, err)
@@ -915,7 +918,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
   }
 
   seneca.ready(do_close)
-  var close_timeout = setTimeout(do_close, options.close_delay)
+  const close_timeout = setTimeout(do_close, options.close_delay)
 
   function do_close() {
     clearTimeout(close_timeout)
@@ -970,8 +973,8 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 intern.fix_args =
   function(this: any, origargs: any, patargs: any, msgargs: any, custom: any) {
-    var args = parsePattern(this, origargs, 'rest:.*', patargs)
-    var fixargs = [args.pattern]
+    const args = parsePattern(this, origargs, 'rest:.*', patargs)
+    const fixargs = [args.pattern]
       .concat({
         fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
         custom$: Object.assign({}, custom, args.pattern.custom$),
