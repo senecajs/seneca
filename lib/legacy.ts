@@ -188,7 +188,6 @@ function findpins(this: any) {
 
 function act_if(this: any) {
   var self = this
-  // const args = Norma('{execute:b actargs:.*}', arguments)
 
   const args = Argu(arguments, {
     execute: Boolean,

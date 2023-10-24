@@ -46,7 +46,7 @@ describe('inward', function () {
     catch (e) {
       expect(e.message)
         .equal('seneca: Validation failed for property "inward"'+
-               ' with value "" because the value is required.')
+               ' with value "undefined" because the value is required.')
       expect({...e}).includes({
         gubu: true,
         code: 'shape',

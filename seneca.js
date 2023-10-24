@@ -194,6 +194,11 @@ const option_defaults = {
         plugin: {
             load_once: false,
         },
+        // System actions.
+        action: {
+            // Add system actions.
+            add: true
+        },
     },
     // Internal functionality. Reserved for objects and functions only.
     internal: Open({
@@ -672,7 +677,9 @@ function make_seneca(initial_opts) {
             start_opts.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0);
         });
     };
-    addActions(root$);
+    if (start_opts.system.action.add) {
+        addActions(root$);
+    }
     // root$.act('role:seneca,cmd:pingx')
     if (!start_opts.legacy.transport) {
         start_opts.legacy.error = false;

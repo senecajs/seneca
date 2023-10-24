@@ -239,24 +239,30 @@ describe('seneca', function () {
       })
   })
 
+  
   it('action-act-invalid-args', function (done) {
-    var si = Seneca(testopts, { log: 'silent' })
+    const si = Seneca(testopts).test().quiet()
 
     si.act({ op: 'bad', a1: 100 }, function (e) {
-      assert.equal(e.code, 'act_not_found')
+      expect('act_not_found').equal(e.code)
 
       // default is not an object
       si.act({ op: 'bad', a1: 100, default$: 'qaz' }, function (e) {
-        assert.equal(e.code, 'act_default_bad')
+        expect('act_default_bad').equal(e.code)
 
-        si.act(null, function (e) {
-          assert.equal(e.code, 'act_not_found')
+        try {
+          si.act(null, function (e) {})
+          expect(true).false()
+        }
+        catch(e) {
+          expect('shape').equal(e.code)
           done()
-        })
+        }
       })
     })
   })
 
+  
   it('action-default', function (done) {
     var si = Seneca(testopts).error(done)
 
@@ -620,55 +626,63 @@ describe('seneca', function () {
     done()
   })
 
+  
   it('strargs', function (done) {
-    var si = Seneca({ strict: { result: false } })
+    const si = Seneca({ strict: { result: false } })
       .test(done)
-      .add({ a: 1, b: 2 }, function (args, cb) {
-        cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
+      .add({ a: 1, b: 2 }, function (msg, reply) {
+        reply(null, (msg.c || -1) + parseInt(msg.b, 10) + parseInt(msg.a, 10))
       })
 
     si.act({ a: 1, b: 2, c: 3 }, function (err, out) {
-      assert.ok(!err)
-      assert.equal(6, out)
+      expect(!err).true()
+      expect(out).equal(6)
 
       si.act('a:1,b:2,c:3', function (err, out) {
-        assert.ok(!err)
-        assert.equal(6, out)
-
+        expect(!err).true()
+        expect(out).equal(6)
+        
         si.act('a:1,b:2', function (err, out) {
-          assert.ok(!err)
-          assert.equal(2, out)
+          expect(!err).true()
+          expect(out).equal(2)
 
           try {
             si.add('a::2', function (args, cb) {
               cb()
             })
-          } catch (e) {
-            assert.equal(e.code, 'add_string_pattern_syntax')
-
+          }
+          catch (e) {
+            expect('add_string_pattern_syntax', e.code)
+            
             try {
               si.act('a::2', { c: 3 }, function () {
-                assert.fail()
+                expect(true).false()
               })
-            } catch (e) {
-              assert.equal(e.code, 'msg_jsonic_syntax')
+            }
+            catch (e) {
+              expect(e.code).equal('msg_jsonic_syntax')
 
               try {
                 si.add('a:1,b:2', 'bad-arg', function (args, cb) {
                   cb()
                 })
-              } catch (e) {
-                assert.ok(e.message.match(/norma:/))
-
+              }
+              catch (e) {
+                expect(e.message)
+                  .equal('seneca (add): Validation failed for property "actdef" '+
+                         'with string "bad-arg" because the string is not of type object.')
+                
                 try {
                   si.add(123, function (args, cb) {
                     cb()
                   })
-                } catch (e) {
-                  assert.ok(e.message.match(/norma:/))
+                }
+                catch (e) {
+                  expect(e.message).equal('seneca (add): Value "123" for property "props" does not satisfy one of: string, Object')
                   done()
                 }
               }
+              return done(new Error('bad-arg not caught'))
             }
           }
         })

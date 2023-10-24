@@ -409,7 +409,6 @@ function hook_client_web(this: any, msg: any, hook_reply: any) {
       }
 
       spec = config.modify_request(seneca, spec)
-
       const wreck_req = config.wreck.request(spec.method, spec.url, spec.wreck)
       wreck_req
         .then(function(res: any) {
@@ -450,7 +449,8 @@ function hook_client_web(this: any, msg: any, hook_reply: any) {
 }
 
 function web_modify_request(seneca: any, spec: any) {
-  spec.body = stringifyJSON(externalize_msg(seneca, spec.msg, spec.meta))
+  let extmsg = externalize_msg(seneca, spec.msg, spec.meta)
+  spec.body = stringifyJSON(extmsg)
   spec.headers['Content-Length'] = Buffer.byteLength(spec.body)
 
   spec.wreck = {

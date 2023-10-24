@@ -1,6 +1,6 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-import { MakeArgu, Any, Check, Rest, Ignore } from 'gubu'
+import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'gubu'
 
 import {
   each,
@@ -12,8 +12,9 @@ import {
   pincanon,
   pattern,
   clean,
-  parsePattern,
+  // parsePattern,
   jsonic_stringify,
+  parse_jsonic,
 } from './common'
 
 
@@ -50,6 +51,7 @@ function fix(this: any, patargs: any, msgargs: any, custom: any) {
 
   // TODO: attach msgargs and custom to delegate.private$ in some way for debugging
 
+  // TODO: this is very brittle. Use a directive instead. 
   fix_delegate.add = function fix_add() {
     return self.add.apply(
       this,
@@ -326,7 +328,7 @@ function depends(this: any) {
 
   const args = Argu(arguments, {
     pluginname: String,
-    deps: Ignore([String]),
+    deps: Skip([String]),
     moredeps: Rest(String),
   })
 
@@ -517,12 +519,8 @@ function translate(
 
   this.private$.translationrouter.add(from, translate)
 
-  // console.log('TTT', translate({ c: 3, q: 9 }))
-  // console.log(this.private$.translationrouter + '')
-
   let translation_action = function(this: any, msg: any, reply: any) {
     let transmsg = translate(msg)
-    // console.log('ACT T', msg, transmsg)
     this.act(transmsg, reply)
   }
 
@@ -971,15 +969,38 @@ intern.close = function(this: any, callpoint: any, done: any) {
   return seneca
 }
 
+
+const FixArgu: any = Argu('fix', {
+  props: One(Empty(String), Object),
+  moreprops: Skip(Object),
+  rest: Rest(Any()),
+})
+
+
+// TODO; this should happen inside .add using a directive
 intern.fix_args =
   function(this: any, origargs: any, patargs: any, msgargs: any, custom: any) {
-    const args = parsePattern(this, origargs, 'rest:.*', patargs)
+
+    // const args = parsePattern(this, origargs, { rest: Rest(Any()) }, patargs)
+    // const args = parsePattern(this, origargs, 'rest:.*', patargs)
+    const args = FixArgu(origargs)
+
+    args.pattern = Object.assign(
+      {},
+      args.moreprops ? args.moreprops : null,
+      'string' === typeof args.props ?
+        parse_jsonic(args.props, 'add_string_pattern_syntax') :
+        args.props,
+      patargs,
+    )
+
     const fixargs = [args.pattern]
       .concat({
         fixed$: Object.assign({}, msgargs, args.pattern.fixed$),
         custom$: Object.assign({}, custom, args.pattern.custom$),
       })
       .concat(args.rest)
+
     return fixargs
   }
 

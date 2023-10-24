@@ -16,18 +16,19 @@ const it = Shared.make_it(lab)
 const Seneca = require('..')
 
 describe('actions', function () {
-  var si = Seneca({ log: 'silent' })
+  // var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
     reply({ z: msg.z })
   }
 
   it('cmd_ping', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca({ legacy: false }).test(fin)
     expect(si.ping().id).equals(si.id)
 
     si.listen().ready(function () {
       this.act('role:seneca,cmd:ping', function (err, out) {
+        // console.log(err, 'out', out, this.id)
         expect(out.id).equals(this.id)
         si.close(fin)
       })

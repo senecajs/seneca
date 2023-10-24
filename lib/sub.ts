@@ -1,15 +1,45 @@
-/* Copyright © 2020 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2020-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Common = require('./common')
+import { MakeArgu, Skip, One, Empty } from 'gubu'
+
+
+import {
+  pattern as common_pattern,
+  parse_jsonic,
+} from './common'
+
+
+const Argu = MakeArgu('seneca')
+
+
+const SubArgu: any = Argu('sub', {
+  props: One(Empty(String), Object),
+  moreprops: Skip(Object),
+  action: Function,
+})
 
 
 // Subscribe to messages.
 function api_sub(this: any) {
   const self = this
-  const subargs = Common.parsePattern(self, arguments, 'action:f')
-  const raw_pattern = subargs.pattern
-  const action = subargs.action
+
+  // const subargs = Common.parsePattern(self, arguments, 'action:f')
+
+  const args = SubArgu(arguments)
+
+  // TODO: this is duplicated - need to be a util
+  args.pattern = Object.assign(
+    {},
+    args.moreprops ? args.moreprops : null,
+    'string' === typeof args.props ?
+      parse_jsonic(args.props, 'add_string_pattern_syntax') :
+      args.props,
+  )
+
+
+  const raw_pattern = args.pattern
+  const action = args.action
 
   let is_inward = !!raw_pattern.in$
   let is_outward = !!raw_pattern.out$
@@ -42,7 +72,7 @@ function api_sub(this: any) {
     let sub_actions = router.find(sub_pattern, true)
     if (!sub_actions) {
       router.add(sub_pattern, (sub_actions = []))
-      sub_actions.pattern = Common.pattern(sub_pattern)
+      sub_actions.pattern = common_pattern(sub_pattern)
     }
     sub_actions.push(action)
   })

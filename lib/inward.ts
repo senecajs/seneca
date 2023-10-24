@@ -1,4 +1,4 @@
-/* Copyright © 2010-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
 
 import {
@@ -232,6 +232,7 @@ function inward_validate_msg(spec: any) {
           message: err.message,
           msg: clean(msg),
           error: err,
+          props: err.gubu ? err.props : [],
         },
         log: {
           level: so.trace.invalid ? 'warn' : null,

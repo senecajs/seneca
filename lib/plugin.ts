@@ -394,6 +394,9 @@ function make_tasks(): any {
 
       delegate.add = function plugin_add() {
         let argsarr = [...arguments]
+
+        // TODO: this is very brittle.
+        // Instead pass in plugin details using a directive.
         let actdef = argsarr[argsarr.length - 1] || {}
 
         if ('function' === typeof actdef) {
@@ -401,14 +404,16 @@ function make_tasks(): any {
           argsarr.push(actdef)
         }
 
-        actdef.plugin_name = plugin.name || '-'
-        actdef.plugin_tag = plugin.tag || '-'
-        actdef.plugin_fullname = plugin.fullname
+        if (null != actdef && 'object' === typeof actdef) {
+          actdef.plugin_name = plugin.name || '-'
+          actdef.plugin_tag = plugin.tag || '-'
+          actdef.plugin_fullname = plugin.fullname
 
-        // TODO: is this necessary?
-        actdef.log = delegate.log
+          // TODO: is this necessary?
+          actdef.log = delegate.log
 
-        actdeflist.push(actdef)
+          actdeflist.push(actdef)
+        }
 
         seneca.add.apply(delegate, argsarr)
 

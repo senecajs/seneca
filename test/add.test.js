@@ -14,6 +14,107 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('add', function () {
+  it('args', function (fin) {
+    const si = Seneca().test()
+    si
+    // First can be jsonic
+      .add({a:1}, function a1(msg,reply){reply({x:1})})
+      .add('a:2', function a2(msg,reply){reply({x:2})})
+
+    // Second is always an object.
+      .add({a:3}, {b:1}, function a3b1(msg,reply){reply({x:3})})
+      .add('a:4', {b:2}, function a4b2(msg,reply){reply({x:4})})
+
+    // Sub patterns don't need an action.
+      .add({a:5})
+      .add('a:6')
+      .add({a:7})
+      .add('a:8', {b:5})
+
+      .add({a:9},
+           function a9(msg,reply){reply({x:9})},{plugin_name:'p9'})
+      .add('a:10',
+           function a10(msg,reply){reply({x:10})},{plugin_name:'p10'})
+      .add({a:11}, {b:6},
+           function a11b6(msg,reply){reply({x:11})},{plugin_name:'p11'})
+      .add('a:12', {b:7},
+           function a12b7(msg,reply){reply({x:12})},{plugin_name:'p12'})
+    
+    let pats = si.list('a:*')
+    // console.log(pats)
+    expect(pats).equal([
+      { a: '1' },
+      { a: '2' },
+      { a: '3', b: '1' },
+      { a: '4', b: '2' },
+      { a: '5' },
+      { a: '6' },
+      { a: '7' },
+      { a: '8', b: '5' },
+      { a: '9' },
+      { a: '10' },
+      { a: '11', b: '6' },
+      { a: '12', b: '7' }
+    ])
+    
+    si.act('a:1', function(err, out) {
+      expect(err).equal(null)
+      expect(out).equal({x:1})
+
+      si.act('a:2', function(err, out) {
+        expect(err).equal(null)
+        expect(out).equal({x:2})
+
+        si.act('a:3,b:1', function(err, out) {
+          expect(err).equal(null)
+          expect(out).equal({x:3})
+
+          si.act('a:4,b:2', function(err, out) {
+            expect(err).equal(null)
+            expect(out).equal({x:4})
+
+            si.act('a:9', function(err, out, meta) {
+              expect(err).equal(null)
+              expect(out).equal({x:9})
+              expect(meta.plugin.name).equal('p9')
+
+              si.act('a:10', function(err, out, meta) {
+                expect(err).equal(null)
+                expect(out).equal({x:10})
+                expect(meta.plugin.name).equal('p10')
+
+                si.act('a:11,b:6', function(err, out, meta) {
+                  expect(err).equal(null)
+                  expect(out).equal({x:11})
+                  expect(meta.plugin.name).equal('p11')
+
+                  si.act('a:12,b:7', function(err, out, meta) {
+                    expect(err).equal(null)
+                    expect(out).equal({x:12})
+                    expect(meta.plugin.name).equal('p12')
+
+                    fin()
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+  it('args-error', function (fin) {
+    const si = Seneca().test()
+
+    expect(()=>si.add('a','b'))
+      .throw('seneca (add): Validation failed for property "actdef"'+
+             ' with string "b" because the string is not of type object.')
+
+    fin()
+  })
+  
+  
   it('action-name', function (fin) {
     var si = Seneca().test()
 
@@ -76,7 +177,7 @@ describe('add', function () {
   })
 
   it('rules-basic', function (fin) {
-    const si = Seneca({ log: 'silent', legacy: false })
+    const si = Seneca({ legacy: false }).test().quiet()
 
     si.add({ a: 1, b: Number }, function (m, r) {
       r({ b: m.b * 2 })
@@ -91,12 +192,10 @@ describe('add', function () {
       this.act({ a: 1, b: 'x' }, function (e, o) {
         expect(e).exist()
         expect(o).not.exist()
-        // console.log(e)
         expect(e.code).equal('act_invalid_msg')
-        expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 1, b: \'x\' }.',
-        )
-
+        expect(e.details.props)
+          .equal([{ path: 'b', what: 'type', type: 'number', value: 'x' }])
+        
         si.act({ a: 2, b: 3 }, function (e, o) {
           expect(e).not.exist()
           expect(o).equal({ b: 9 })
@@ -105,9 +204,8 @@ describe('add', function () {
             expect(e).exist()
             expect(o).not.exist()
             expect(e.code).equal('act_invalid_msg')
-            expect(e.message).equal(
-              'seneca: Action a:2 received an invalid message; Validation failed for property "b" with value "x" because the value is not of type number.; message content was: { a: 2, b: \'x\' }.',
-            )
+            expect(e.details.props)
+              .equal([{ path: 'b', what: 'type', type: 'number', value: 'x' }])
 
             fin()
           })
@@ -133,7 +231,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "" because the value is required.; message content was: { a: 1 }.',
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "undefined" because the value is required.; message content was: { a: 1 }.',
         )
         fin()
       })
@@ -157,7 +255,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "q" because the value is not of type number.; message content was: { a: 1, b: \'q\' }.',
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with string "q" because the string is not of type number.; message content was: { a: 1, b: \'q\' }.',
         )
         fin()
       })
@@ -181,7 +279,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "" because the value is required.; message content was: { a: 2, d: {} }.',
+          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "undefined" because the value is required.; message content was: { a: 2, d: {} }.',
         )
         fin()
       })

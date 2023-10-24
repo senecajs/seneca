@@ -14,6 +14,7 @@ let s0 = Seneca({
   //     action: false,
   //   },
   // },
+  system:{action:{add:false}},
 })
   .test()
   // .use('entity')
@@ -30,7 +31,7 @@ let s0 = Seneca({
   //     console.log('FOO_INTERCEPTOR', actcall)
   //   }
   // }, Seneca.util.print)
-  .add('a:1', function a1(msg, reply) {
+    .add({a:1}, function a1(msg, reply) {
     reply({ x: msg.x })
   })
   // .add('b:1', function a1(msg, reply) {

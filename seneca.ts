@@ -262,6 +262,13 @@ const option_defaults = {
     plugin: {
       load_once: false,
     },
+
+    // System actions.
+    action: {
+
+      // Add system actions.
+      add: true
+    },
   },
 
   // Internal functionality. Reserved for objects and functions only.
@@ -873,7 +880,9 @@ function make_seneca(initial_opts?: any) {
     })
   }
 
-  addActions(root$)
+  if (start_opts.system.action.add) {
+    addActions(root$)
+  }
 
   // root$.act('role:seneca,cmd:pingx')
 

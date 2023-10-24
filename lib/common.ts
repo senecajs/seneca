@@ -4,21 +4,21 @@
 
 import Util from 'util'
 
+import Stringify from 'fast-safe-stringify'
+import Jsonic from '@jsonic/jsonic-next'
+import Nid from 'nid'
+// const Norma = require('norma')
+// import { MakeArgu, Skip } from 'gubu'
+
+const Eraro = require('eraro')
+const DefaultsDeep = require('lodash.defaultsdeep')
+const { Print } = require('./print')
 
 import Errors from './errors'
 
 
-const Stringify = require('fast-safe-stringify')
-const Eraro = require('eraro')
-const Jsonic = require('@jsonic/jsonic-next')
-import Nid from 'nid'
-const Norma = require('norma')
-const DefaultsDeep = require('lodash.defaultsdeep')
 
-const { Print } = require('./print')
-
-
-
+// const Argu = MakeArgu('seneca')
 
 
 const error =
@@ -47,7 +47,7 @@ function promiser(context: any, callback?: any) {
 
 
 function stringify() {
-  return Stringify(...arguments)
+  return (Stringify as any)(...arguments)
 }
 
 
@@ -135,9 +135,11 @@ function parse_jsonic(str: any, code: any) {
 // string args override object args
 // TODO: fix name
 
+/*
 function parse_pattern(
   _instance: any,
   rawargs: any,
+  // gubuspec: any,
   normaspec: any,
   fixed?: any
 ) {
@@ -145,6 +147,17 @@ function parse_pattern(
     '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
     rawargs
   )
+
+
+  // console.log('PP', rawargs, gubuspec)
+
+  // let args = Argu(rawargs, {
+  //   strargs: Skip(String),
+  //   objargs: Skip(Object),
+  //   moreobjargs: Skip(Object),
+  //   ...(gubuspec || {})
+  // })
+
 
   // Precedence of arguments in add,act is left-to-right
   args.pattern = Object.assign(
@@ -159,10 +172,11 @@ function parse_pattern(
 }
 
 const parsePattern = parse_pattern
+*/
 
-
+/*
 function build_message(
-  instance: any,
+  _instance: any,
   rawargs: any,
   normaspec: any,
   fixed: any
@@ -183,6 +197,7 @@ function build_message(
 
   return args
 }
+*/
 
 // Convert pattern object into a normalized jsonic String.
 function pattern(patobj: any) {
@@ -827,8 +842,8 @@ export {
   make_plugin_key,
   boolify,
   parse_jsonic,
-  parse_pattern,
-  build_message,
+  // parse_pattern,
+  // build_message,
   pattern,
   pincanon,
   noop,
@@ -844,7 +859,7 @@ export {
   make_trace_desc,
   history,
   print,
-  parsePattern,
+  // parsePattern,
   tagnid,
   inspect,
   error,

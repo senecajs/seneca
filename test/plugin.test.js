@@ -439,17 +439,17 @@ describe('plugin', function () {
 
   it('plugin-error-add', function (fin) {
     Seneca({
-      log: 'silent',
       debug: { undead: true },
       legacy: { transport: false },
     })
+      .quiet()
       .error(function (err) {
         expect('plugin_define_failed').to.equal(err.code)
-        expect('invalid_arguments').to.equal(err.orig.code)
+        expect('shape').to.equal(err.orig.code)
         fin()
       })
       .use(function foo() {
-        this.add(new Error())
+        this.add('a','b')
       })
   })
 
