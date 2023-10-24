@@ -7,8 +7,6 @@ import Util from 'util'
 import Stringify from 'fast-safe-stringify'
 import Jsonic from '@jsonic/jsonic-next'
 import Nid from 'nid'
-// const Norma = require('norma')
-// import { MakeArgu, Skip } from 'gubu'
 
 const Eraro = require('eraro')
 const DefaultsDeep = require('lodash.defaultsdeep')
@@ -132,72 +130,6 @@ function parse_jsonic(str: any, code: any) {
 }
 
 
-// string args override object args
-// TODO: fix name
-
-/*
-function parse_pattern(
-  _instance: any,
-  rawargs: any,
-  // gubuspec: any,
-  normaspec: any,
-  fixed?: any
-) {
-  let args = Norma(
-    '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
-    rawargs
-  )
-
-
-  // console.log('PP', rawargs, gubuspec)
-
-  // let args = Argu(rawargs, {
-  //   strargs: Skip(String),
-  //   objargs: Skip(Object),
-  //   moreobjargs: Skip(Object),
-  //   ...(gubuspec || {})
-  // })
-
-
-  // Precedence of arguments in add,act is left-to-right
-  args.pattern = Object.assign(
-    {},
-    args.moreobjargs ? args.moreobjargs : null,
-    args.objargs ? args.objargs : null,
-    parse_jsonic(args.strargs, 'add_string_pattern_syntax'),
-    fixed
-  )
-
-  return args
-}
-
-const parsePattern = parse_pattern
-*/
-
-/*
-function build_message(
-  _instance: any,
-  rawargs: any,
-  normaspec: any,
-  fixed: any
-) {
-  let args = Norma(
-    '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
-    rawargs
-  )
-
-  // Precedence of arguments in add,act is left-to-right
-  args.msg = Object.assign(
-    {},
-    args.moreobjargs,
-    args.objargs,
-    parse_jsonic(args.strargs, 'msg_jsonic_syntax'),
-    fixed
-  )
-
-  return args
-}
-*/
 
 // Convert pattern object into a normalized jsonic String.
 function pattern(patobj: any) {
