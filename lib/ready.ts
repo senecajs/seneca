@@ -20,6 +20,8 @@ function make_ready(root: any) {
   }
 }
 
+// TODO should callback with plugin errs, or throw them!
+
 function api_ready(this: any, ready_func: any) {
   var self = this
 
