@@ -239,7 +239,6 @@ describe('seneca', function () {
       })
   })
 
-  
   it('action-act-invalid-args', function (done) {
     const si = Seneca(testopts).test().quiet()
 
@@ -253,8 +252,7 @@ describe('seneca', function () {
         try {
           si.act(null, function (e) {})
           expect(true).false()
-        }
-        catch(e) {
+        } catch (e) {
           expect('shape').equal(e.code)
           done()
         }
@@ -262,7 +260,6 @@ describe('seneca', function () {
     })
   })
 
-  
   it('action-default', function (done) {
     var si = Seneca(testopts).error(done)
 
@@ -544,7 +541,6 @@ describe('seneca', function () {
       })
   })
 
-
   it('loading-plugins', function (done) {
     var si = Seneca().test()
 
@@ -626,7 +622,6 @@ describe('seneca', function () {
     done()
   })
 
-  
   it('strargs', function (done) {
     const si = Seneca({ strict: { result: false } })
       .test(done)
@@ -641,7 +636,7 @@ describe('seneca', function () {
       si.act('a:1,b:2,c:3', function (err, out) {
         expect(!err).true()
         expect(out).equal(6)
-        
+
         si.act('a:1,b:2', function (err, out) {
           expect(!err).true()
           expect(out).equal(2)
@@ -650,35 +645,34 @@ describe('seneca', function () {
             si.add('a::2', function (args, cb) {
               cb()
             })
-          }
-          catch (e) {
+          } catch (e) {
             expect('add_string_pattern_syntax', e.code)
-            
+
             try {
               si.act('a::2', { c: 3 }, function () {
                 expect(true).false()
               })
-            }
-            catch (e) {
+            } catch (e) {
               expect(e.code).equal('msg_jsonic_syntax')
 
               try {
                 si.add('a:1,b:2', 'bad-arg', function (args, cb) {
                   cb()
                 })
-              }
-              catch (e) {
-                expect(e.message)
-                  .equal('seneca (add): Validation failed for property "actdef" '+
-                         'with string "bad-arg" because the string is not of type object.')
-                
+              } catch (e) {
+                expect(e.message).equal(
+                  'seneca (add): Validation failed for property "actdef" ' +
+                    'with string "bad-arg" because the string is not of type object.',
+                )
+
                 try {
                   si.add(123, function (args, cb) {
                     cb()
                   })
-                }
-                catch (e) {
-                  expect(e.message).equal('seneca (add): Value "123" for property "props" does not satisfy one of: string, Object')
+                } catch (e) {
+                  expect(e.message).equal(
+                    'seneca (add): Value "123" for property "props" does not satisfy one of: string, Object',
+                  )
                   done()
                 }
               }
@@ -1014,7 +1008,7 @@ describe('seneca', function () {
       })
   })
 
-  it('decorate-basic', async ()=> {
+  it('decorate-basic', async () => {
     const si = Seneca().test().quiet()
     si.decorate('foo', function () {
       expect(this === si)
@@ -1024,23 +1018,26 @@ describe('seneca', function () {
     expect(si.foo()).equals('bar')
   })
 
-  it('decorate-core-property', async ()=> {
+  it('decorate-core-property', async () => {
     const si = Seneca().test().quiet()
-    expect(()=>si.decorate('add',()=>{}))
-      .throws('seneca: Decoration overrides core property:add')
+    expect(() => si.decorate('add', () => {})).throws(
+      'seneca: Decoration overrides core property:add',
+    )
   })
 
-  it('decorate-overwrite', async ()=>{
+  it('decorate-overwrite', async () => {
     const si = Seneca().test().quiet()
-    si.decorate('foo', ()=>{})
-    expect(()=>si.decorate('foo',()=>{}))
-      .throws('seneca: Decoration already exists: foo')
+    si.decorate('foo', () => {})
+    expect(() => si.decorate('foo', () => {})).throws(
+      'seneca: Decoration already exists: foo',
+    )
   })
 
-  it('decorate-underscore-prefix', async ()=>{
+  it('decorate-underscore-prefix', async () => {
     const si = Seneca().test().quiet()
-    expect(()=>si.decorate('_use'))
-      .throws('seneca: Decorate property cannot start with underscore (was _use)')
+    expect(() => si.decorate('_use')).throws(
+      'seneca: Decorate property cannot start with underscore (was _use)',
+    )
   })
 
   it('supports jsonic params to has', function (done) {

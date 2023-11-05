@@ -1,3 +1,8 @@
+## 3.33.0 2023-11-05
+
+* Remove norma library, replace functionality with update gubu library.
+
+
 ## 3.32.1 2023-09-16
 
 * Provide Seneca 4 act-err argument variants via `act-err-4` temporary event.

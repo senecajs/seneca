@@ -17,10 +17,10 @@ var it = Shared.make_it(lab)
 describe('common', function () {
   it('stringify', function (fin) {
     expect(Common.stringify({})).equal('{}')
-    expect(Common.stringify({a:1})).equal('{"a":1}')
+    expect(Common.stringify({ a: 1 })).equal('{"a":1}')
     fin()
   })
-  
+
   it('misc', function (fin) {
     expect(Common.boolify(true)).to.equal(true)
     expect(Common.boolify(false)).to.equal(false)

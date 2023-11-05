@@ -131,7 +131,6 @@ describe('legacy', function () {
       })
   })
 
-
   it('act_if', function (done) {
     var si = Seneca({ log: 'silent' })
 
@@ -158,12 +157,11 @@ describe('legacy', function () {
         expect(true).equal(false)
       })
       expect(true).equal(false)
-    }
-    catch (e) {
+    } catch (e) {
       expect(e.message).match(/not of type boolean/)
     }
 
-    si = Seneca({log:'test'})
+    si = Seneca({ log: 'test' })
       .add('a:1', function (msg, reply) {
         reply({ b: msg.a + 1 })
       })
@@ -182,5 +180,4 @@ describe('legacy', function () {
       process.nextTick(done)
     })
   })
-
 })

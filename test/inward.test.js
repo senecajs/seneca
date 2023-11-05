@@ -42,18 +42,18 @@ describe('inward', function () {
     try {
       API.inward()
       expect(false).true()
-    }
-    catch (e) {
-      expect(e.message)
-        .equal('seneca: Validation failed for property "inward"'+
-               ' with value "undefined" because the value is required.')
-      expect({...e}).includes({
+    } catch (e) {
+      expect(e.message).equal(
+        'seneca: Validation failed for property "inward"' +
+          ' with value "undefined" because the value is required.',
+      )
+      expect({ ...e }).includes({
         gubu: true,
         code: 'shape',
       })
       expect(e.props[0]).includes({
-        path:'inward',
-        type:'function'
+        path: 'inward',
+        type: 'function',
       })
     }
 

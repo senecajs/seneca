@@ -56,18 +56,18 @@ describe('outward', function () {
     try {
       API.outward()
       expect(false).true()
-    }
-    catch (e) {
-      expect(e.message)
-        .equal('seneca: Validation failed for property "outward"'+
-               ' with value "undefined" because the value is required.')
-      expect({...e}).includes({
+    } catch (e) {
+      expect(e.message).equal(
+        'seneca: Validation failed for property "outward"' +
+          ' with value "undefined" because the value is required.',
+      )
+      expect({ ...e }).includes({
         gubu: true,
         code: 'shape',
       })
       expect(e.props[0]).includes({
-        path:'outward',
-        type:'function'
+        path: 'outward',
+        type: 'function',
       })
     }
 

@@ -449,7 +449,7 @@ describe('plugin', function () {
         fin()
       })
       .use(function foo() {
-        this.add('a','b')
+        this.add('a', 'b')
       })
   })
 
