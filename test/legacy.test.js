@@ -63,7 +63,7 @@ describe('legacy', function () {
       function (i, next) {
         next()
       },
-      fin
+      fin,
     )
   })
 
@@ -79,7 +79,7 @@ describe('legacy', function () {
       { a: 1, b: 2, c: 3 },
       { b: 22, c: 33, d: 4 },
       { c: 333 },
-      ['d']
+      ['d'],
     )
     expect(out).to.include({ a: 1, b: 22, c: 333 })
 
@@ -129,5 +129,55 @@ describe('legacy', function () {
         expect(meta).not.exists()
         fin()
       })
+  })
+
+  it('act_if', function (done) {
+    var si = Seneca({ log: 'silent' })
+
+    si.add({ op: 'foo' }, function (args, next) {
+      next(null, 'foo' + args.bar)
+    })
+
+    si.act_if(true, { op: 'foo', bar: '1' }, function (err, out) {
+      expect(err).equal(null)
+      expect('foo1').equal(out)
+    })
+
+    si.act_if(false, { op: 'foo', bar: '2' }, function () {
+      expect(true).equal(false)
+    })
+
+    si.act_if(true, 'op:foo,bar:3', function (err, out) {
+      expect(err).equal(null)
+      expect('foo3').equal(out)
+    })
+
+    try {
+      si.act_if({ op: 'foo', bar: '2' }, function () {
+        expect(true).equal(false)
+      })
+      expect(true).equal(false)
+    } catch (e) {
+      expect(e.message).match(/not of type boolean/)
+    }
+
+    si = Seneca({ log: 'test' })
+      .add('a:1', function (msg, reply) {
+        reply({ b: msg.a + 1 })
+      })
+      .add('a:2', function (msg, reply) {
+        reply({ b: msg.a + 2 })
+      })
+
+    si.act_if(true, 'a:1', function (err, out) {
+      expect(!err).true()
+      expect(2).equal(out.b)
+
+      si.act_if(false, 'a:2', function () {
+        expect(true).equal(false)
+      })
+
+      process.nextTick(done)
+    })
   })
 })

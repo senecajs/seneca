@@ -357,6 +357,9 @@ intern.act_error = function(instance: any, ctx: any, data: any) {
   instance.log.error(entry)
   instance.emit('act-err', 'action', msg, meta, err)
 
+  // Seneca 4 arguments
+  instance.emit('act-err-4', 'callback', msg, meta, err)
+
   // when fatal$ is set, prefer to die instead
   if ('function' === typeof opts.errhandler && (!msg || !meta.fatal)) {
     call_cb = !opts.errhandler.call(instance, err, err.meta$ || meta)

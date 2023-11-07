@@ -389,11 +389,10 @@ function build_test_log(seneca: any, data: any) {
         .replace(/\s+/g, '')
         .substring(0, datalen)
 
-      if (objstr.length <= 22) {
+      if (
+        objstr.length <= 22 || !data.err
+      ) {
         logb.push(objstr)
-        if ('object' === typeof obj) {
-          obj.$$logged$$ = () => { }
-        }
       }
       else {
         logb.push(objstr.substring(0, 22)) + '...'

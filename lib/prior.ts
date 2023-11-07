@@ -1,14 +1,33 @@
-/* Copyright © 2019-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
 
 import Util from 'util'
 
+import { Gubu, MakeArgu, Open, Skip, One, Empty } from 'gubu'
+
+
 const { Ordu } = require('ordu')
 
-const Common = require('./common')
+// const Common = require('./common')
 const { Inward } = require('./inward')
 const Act = require('./act')
 const { Meta } = require('./meta')
+
+import {
+  parse_jsonic,
+} from './common'
+
+
+const Argu = MakeArgu('seneca')
+
+
+const ActArgu: any = Argu('prior', {
+  props: One(Empty(String), Object),
+  moreprops: Skip(Object),
+  reply: Skip(Function),
+})
+
+
 
 const prior_inward = new Ordu({
   name: 'prior_inward',
@@ -29,7 +48,19 @@ function api_prior(this: any) {
   // Get definition of prior action
   var priordef = this.private$.act.def.priordef
 
-  var spec = Common.build_message(this, arguments, 'reply:f?', this.fixedargs)
+
+  // var spec = Common.build_message(this, arguments, 'reply:f?', this.fixedargs)
+  const spec = ActArgu(arguments)
+
+  // TODO: duplicated, should be utility
+  spec.msg = Object.assign(
+    {},
+    spec.moreprops ? spec.moreprops : null,
+    'string' === typeof spec.props ?
+      parse_jsonic(spec.props, 'msg_jsonic_syntax') :
+      spec.props,
+  )
+
 
   // TODO: clean sufficiently so that seneca.util.clean not needed
   var msg = spec.msg

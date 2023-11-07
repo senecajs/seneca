@@ -66,7 +66,7 @@ describe('message', function () {
       })
       .act('a:1,x:1', function (err, out, meta) {
         expect(
-          this.util.flatten(meta.trace, 'trace').map((x) => x.desc[0])
+          this.util.flatten(meta.trace, 'trace').map((x) => x.desc[0]),
         ).equal(['a:2', 'a:3', 'a:4'])
         fin()
       })
@@ -147,7 +147,7 @@ describe('message', function () {
 
         //console.log('CP mark', mark)
         expect(JSON.stringify(mark)).equal(
-          '{"a1c":1,"a2c":1,"a3c":1,"a3r":1,"a4c":1,"a5c":1,"a5r":1}'
+          '{"a1c":1,"a2c":1,"a3c":1,"a3r":1,"a4c":1,"a5c":1,"a5r":1}',
         )
 
         //console.dir(meta,{depth:null})
@@ -172,6 +172,7 @@ describe('message', function () {
       .act('a:1', function (err, out) {
         expect(i).equal(4)
         expect(err.code).equal('maxparents')
+        // console.log(err.details.parents)
         expect(err.details.parents).equal([
           'a:1 root$/a1/6',
           'a:1 root$/a1/6',
@@ -206,7 +207,7 @@ describe('message', function () {
                 desc: ['a:4'],
                 trace: [],
               },
-            ])
+            ]),
           ).true()
 
           log.push('a2r')
@@ -267,7 +268,7 @@ describe('message', function () {
                 },
               ],
             },
-          ])
+          ]),
         ).true()
 
         fin()

@@ -44,6 +44,7 @@ const { transport } = require('./lib/transport')
 
 import Pkg from './package.json'
 
+
 // Internal data and utilities.
 const { error, deep } = Common
 
@@ -260,6 +261,13 @@ const option_defaults = {
     plugin: {
       load_once: false,
     },
+
+    // System actions.
+    action: {
+
+      // Add system actions.
+      add: true
+    },
   },
 
   // Internal functionality. Reserved for objects and functions only.
@@ -336,6 +344,9 @@ const option_defaults = {
 
     // If false, use Gubu for option validation (including plugin defaults)
     options: true,
+
+    // If true, look for plugin options by name at the top level of options
+    top_plugins: false,
   }),
 
   // Processing task ordering.
@@ -385,16 +396,13 @@ const seneca_util = {
   Nid,
   Patrun,
   Gex,
+  Gubu,
 
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,
   error: error,
   deep: Common.deep,
-
-  // TODO: expose directly for better DX - no need to namespace under gubu
-  // Expose Gubu schema builders (Required, etc.).
-  Gubu,
 
   // Deprecated Legacy (make internal or rename)
   // Optioner: Optioner,
@@ -490,7 +498,6 @@ function init(seneca_options?: any, more_options?: any) {
 // Expose Seneca prototype for easier monkey-patching
 init.Seneca = Seneca
 
-
 // To reference builtin loggers when defining logging options.
 init.loghandler = Legacy.loghandler
 
@@ -561,11 +568,13 @@ function make_seneca(initial_opts?: any) {
     start_opts.internal.translationrouter || Patrun({ gex: true })
 
   const soi_subrouter = start_opts.internal.subrouter || {}
+
   private$.subrouter = {
     // Check for legacy inward router
     inward: soi_subrouter.inward || Patrun({ gex: true }),
     outward: soi_subrouter.outward || Patrun({ gex: true }),
   }
+
 
   // Setup event handlers, if defined
   var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
@@ -593,6 +602,8 @@ function make_seneca(initial_opts?: any) {
 
   // TODO: rename in 4.x as "args" terminology is legacy
   root$.fixedargs = {}
+  root$.fixedmeta = {}
+
   root$.fixedmeta = {}
 
   root$.flags = {
@@ -861,7 +872,9 @@ function make_seneca(initial_opts?: any) {
     })
   }
 
-  addActions(root$)
+  if (start_opts.system.action.add) {
+    addActions(root$)
+  }
 
   // root$.act('role:seneca,cmd:pingx')
 
@@ -925,5 +938,6 @@ function make_private() {
       }
     },
     ignore_plugins: {},
+    intercept: { act_error: [] }
   }
 }

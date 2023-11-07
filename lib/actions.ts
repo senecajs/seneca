@@ -30,18 +30,23 @@ function on_point(this: any, msg: any, reply: any) {
   reply()
 }
 
-function cmd_ping(this: any, msg: any, reply: any) {
-  reply(this.ping())
+
+function cmd_ping(this: any, _msg: any, reply: any) {
+  let ping = this.ping()
+  reply(ping)
 }
 
-function action_seneca_fatal(this: any, msg: any, reply: any) {
+
+function action_seneca_fatal(this: any, _msg: any, reply: any) {
   reply()
 }
 
-function action_seneca_close(this: any, msg: any, reply: any) {
+
+function action_seneca_close(this: any, _msg: any, reply: any) {
   this.emit('close')
   reply()
 }
+
 
 function make_action_seneca_stats(private$: any) {
   return function action_seneca_stats(this: any, msg: any, reply: any) {

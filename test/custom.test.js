@@ -98,7 +98,7 @@ describe('custom', function () {
           expect(meta.custom).equal({ y: 1, z: 1, a1: 1 })
 
           do_a2()
-        }
+        },
       )
     }
 
@@ -110,7 +110,7 @@ describe('custom', function () {
           expect(meta.custom).equal({ y: 2, z: 2, a1: 1, a2: 1 })
 
           do_a3()
-        }
+        },
       )
     }
 
@@ -122,7 +122,7 @@ describe('custom', function () {
           expect(meta.custom).equal({ y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
 
           fin()
-        }
+        },
       )
     }
   })
@@ -159,14 +159,12 @@ describe('custom', function () {
       .use('entity')
       .add('a:1', function a1(msg, reply, meta1) {
         meta1.custom.a1x = 1
-        this.make('foo', { id$: msg.id, q: msg.q }).save$(function (
-          err,
-          foo1,
-          meta2
-        ) {
-          meta2.custom.a1y = 1
-          reply({ foo: foo1 })
-        })
+        this.make('foo', { id$: msg.id, q: msg.q }).save$(
+          function (err, foo1, meta2) {
+            meta2.custom.a1y = 1
+            reply({ foo: foo1 })
+          },
+        )
       })
 
       .ready(function () {
@@ -177,7 +175,7 @@ describe('custom', function () {
             expect('' + out.foo).equal('$-/-/foo;id=A;{q:1}')
             expect(meta.custom).equals({ w: 1, a1x: 1, a1y: 1 })
             fin()
-          }
+          },
         )
       })
   })
@@ -210,7 +208,7 @@ describe('custom', function () {
   it(
     'custom-prior-direct',
     test_opts,
-    make_custom_prior_test({ prior: { direct: false } })
+    make_custom_prior_test({ prior: { direct: false } }),
   )
 
   it('custom-simple-transport', test_opts, function (fin) {
@@ -400,7 +398,7 @@ describe('custom', function () {
         function foo_true(msg, reply, meta) {
           msg.custom_zed = meta.custom.zed
           reply(msg)
-        }
+        },
       )
 
       .ready()
@@ -430,7 +428,7 @@ describe('custom', function () {
         msg.custom_zed = meta.custom.zed
         msg.custom_dez = meta.custom.dez
         reply(msg)
-      }
+      },
     )
 
     var out = await si.post('foo:true')

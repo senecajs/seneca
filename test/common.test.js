@@ -15,6 +15,12 @@ var Shared = require('./shared')
 var it = Shared.make_it(lab)
 
 describe('common', function () {
+  it('stringify', function (fin) {
+    expect(Common.stringify({})).equal('{}')
+    expect(Common.stringify({ a: 1 })).equal('{"a":1}')
+    fin()
+  })
+
   it('misc', function (fin) {
     expect(Common.boolify(true)).to.equal(true)
     expect(Common.boolify(false)).to.equal(false)
@@ -38,15 +44,15 @@ describe('common', function () {
     expect(
       Common.resolve_option(function () {
         return 'b'
-      })
+      }),
     ).equal('b')
     expect(
       Common.resolve_option(
         function (opts) {
           return opts.c
         },
-        { c: 2 }
-      )
+        { c: 2 },
+      ),
     ).equal(2)
 
     fin()
@@ -88,11 +94,11 @@ describe('common', function () {
 
     assert.equal(
       1,
-      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).a.b,
     )
     assert.equal(
       2,
-      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).c.d
+      Common.deep({}, { a: { b: 1 } }, {}, { c: { d: 2 } }, {}).c.d,
     )
 
     assert.equal(1, Common.deep({ a: { b: 1 } }, { a: { c: 2 } }, {}).a.b)
@@ -106,11 +112,11 @@ describe('common', function () {
 
     assert.equal(
       1,
-      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.b,
     )
     assert.equal(
       2,
-      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.c
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { c: 2 } }, {}).a.c,
     )
 
     assert.equal(1, Common.deep({ a: { b: 1 } }, { a: { b: 1 } }, {}).a.b)
@@ -121,7 +127,7 @@ describe('common', function () {
 
     assert.equal(
       2,
-      Common.deep({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b
+      Common.deep({}, { a: { b: 1 } }, {}, { a: { b: 2 } }, {}).a.b,
     )
 
     fin()
@@ -418,7 +424,7 @@ describe('common', function () {
     expect(Common.make_plugin_key({ name: 'foo' }, '0')).equal('foo$0')
     expect(Common.make_plugin_key({ name: 'foo', tag: '0' })).equal('foo$0')
     expect(Common.make_plugin_key({ name: 'foo', tag: '0' }, 'a')).equal(
-      'foo$0'
+      'foo$0',
     )
 
     expect(Common.make_plugin_key('foo.1~2-3$_')).equal('foo.1~2-3$_')

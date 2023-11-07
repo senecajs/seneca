@@ -23,7 +23,7 @@ module.exports = {
           ? func
           : Util.promisify(function (x, fin) {
               func(fin)
-            })
+            }),
       )
     }
   },

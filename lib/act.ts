@@ -1,11 +1,12 @@
-/* Copyright © 2019-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
+
+import { Gubu, MakeArgu, Open, Skip, One, Empty } from 'gubu'
 
 
 import { Meta } from './meta'
 
 
 import {
-  build_message,
   inspect,
   noop,
   error,
@@ -13,7 +14,18 @@ import {
   msgstr,
   make_standard_err_log_entry,
   make_standard_act_log_entry,
+  parse_jsonic,
 } from './common'
+
+
+const Argu = MakeArgu('seneca')
+
+
+const ActArgu: any = Argu('act', {
+  props: One(Empty(String), Object),
+  moreprops: Skip(Object),
+  reply: Skip(Function),
+})
 
 
 // Perform an action and optionally return the result by callback.
@@ -24,7 +36,18 @@ exports.api_act = function() {
   const opts = instance.options()
 
   const spec =
-    build_message(instance, [...arguments], 'reply:f?', instance.fixedargs)
+    // build_message(instance, [...arguments], 'reply:f?', instance.fixedargs)
+    ActArgu(arguments)
+
+  spec.msg = Object.assign(
+    {},
+    spec.moreprops ? spec.moreprops : null,
+    'string' === typeof spec.props ?
+      parse_jsonic(spec.props, 'msg_jsonic_syntax') :
+      spec.props,
+    instance.fixedargs,
+  )
+
   const msg = spec.msg
   const reply = spec.reply
 
@@ -96,6 +119,20 @@ const intern = (module.exports.intern = {
           action_reply
         )
       } catch (e: any) {
+
+        // TODO: review, needs better test for when this actually happens
+        for (let intercept of instance.private$.intercept.act_error) {
+          intercept.call(instance, {
+            error: e,
+            execspec,
+            opts,
+            actctxt,
+            actmsg,
+            meta,
+            action_reply
+          })
+        }
+
         if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
           const ex = opts.error.identify(e) ? e : new Error(inspect(e))
           intern.handle_reply(opts, meta, actctxt, actmsg, ex)
@@ -299,6 +336,7 @@ const intern = (module.exports.intern = {
 
     const inwardres = act_instance.order.inward.execSync(actctxt, data)
 
+
     if (inwardres.err) {
       throw inwardres.err
     }
@@ -485,6 +523,9 @@ const intern = (module.exports.intern = {
     )
 
     instance.emit('act-err', 'callback', msg, meta, err, data.res)
+
+    // Seneca 4 arguments
+    instance.emit('act-err-4', 'callback', msg, meta, err, data.res)
 
     if (opts.errhandler) {
       opts.errhandler.call(instance, err, err.meta$)

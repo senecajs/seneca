@@ -8,9 +8,6 @@ declare function make_plugin_key(plugin: any, origtag: any): string;
 declare function boolify(v: any): boolean;
 declare const tagnid: any;
 declare function parse_jsonic(str: any, code: any): any;
-declare function parse_pattern(_instance: any, rawargs: any, normaspec: any, fixed?: any): any;
-declare const parsePattern: typeof parse_pattern;
-declare function build_message(_instance: any, rawargs: any, normaspec: any, fixed: any): any;
 declare function pattern(patobj: any): any;
 declare function pincanon(inpin: any): any;
 declare function noop(): void;
@@ -23,7 +20,6 @@ declare function make_standard_act_log_entry(actdef: any, msg: any, meta: any, o
 declare function make_standard_err_log_entry(err: any, ctxt: any): any;
 declare function resolve_option(value: any, options: any): any;
 declare function autoincr(): () => number;
-declare function isError(x: any): boolean;
 declare function inspect(val: any, opts?: any): string;
 declare function make_callpoint(active: any): (override: any) => any;
 declare function make_trace_desc(meta: any): any[];
@@ -57,4 +53,4 @@ declare class ActHistory {
     toString(this: any): string;
     [Util.inspect.custom](this: any): any;
 }
-export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, parse_pattern, build_message, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, parsePattern, tagnid, isError, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { promiser, stringify, wrap_error, make_plugin_key, boolify, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };

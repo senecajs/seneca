@@ -192,7 +192,7 @@ describe('transport', function () {
             fin()
           })
         })
-      })
+      }),
     )
   })
 
@@ -247,7 +247,7 @@ describe('transport', function () {
           expect(meta.pattern).equal('')
 
           s0.close(c0.close.bind(c0, fin))
-        }
+        },
       )
     }
   })
@@ -328,9 +328,9 @@ describe('transport', function () {
                 expect(out.x).equals(3)
 
                 s0.close(c0.close.bind(c0, fin))
-              }
+              },
             )
-          }
+          },
         )
       })
   })
@@ -445,7 +445,7 @@ describe('transport', function () {
         }
         expect(fn).to.not.throw()
         seneca.close(fin)
-      }
+      },
     )
 
     it(
@@ -460,7 +460,7 @@ describe('transport', function () {
         }
         expect(fn).to.not.throw()
         seneca.close(fin)
-      }
+      },
     )
 
     it('action-error', test_opts, function (fin) {
@@ -478,7 +478,7 @@ describe('transport', function () {
         () => {},
         function () {
           return () => {}
-        }
+        },
       )
       var seneca = Seneca({ legacy: false }).test(fin)
 
@@ -1057,8 +1057,8 @@ describe('transport', function () {
             expect(err.message).equal('from-test3')
             s1.close(s2.close.bind(s2, s3.close.bind(s3, fin)))
           })
-        })
-      )
+        }),
+      ),
     )
   })
 
@@ -1098,7 +1098,7 @@ describe('transport', function () {
           })
         })
       })
-    }
+    },
   )
   */
 })

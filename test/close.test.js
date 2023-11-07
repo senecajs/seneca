@@ -95,7 +95,7 @@ describe('close', function () {
       })
       .close(function (err) {
         expect(err.message).equal(
-          'seneca: Action cmd:close,role:seneca failed: bad-close.'
+          'seneca: Action cmd:close,role:seneca failed: bad-close.',
         )
         fin()
       })

@@ -194,6 +194,11 @@ const option_defaults = {
         plugin: {
             load_once: false,
         },
+        // System actions.
+        action: {
+            // Add system actions.
+            add: true
+        },
     },
     // Internal functionality. Reserved for objects and functions only.
     internal: Open({
@@ -250,6 +255,8 @@ const option_defaults = {
         rules: false,
         // If false, use Gubu for option validation (including plugin defaults)
         options: true,
+        // If true, look for plugin options by name at the top level of options
+        top_plugins: false,
     }),
     // Processing task ordering.
     order: {
@@ -291,14 +298,12 @@ const seneca_util = {
     Nid: nid_1.default,
     Patrun: patrun_1.Patrun,
     Gex: patrun_1.Gex,
+    Gubu,
     clean: Common.clean,
     pattern: Common.pattern,
     print: Common.print,
     error: error,
     deep: Common.deep,
-    // TODO: expose directly for better DX - no need to namespace under gubu
-    // Expose Gubu schema builders (Required, etc.).
-    Gubu,
     // Deprecated Legacy (make internal or rename)
     // Optioner: Optioner,
     // Joi: Joi,
@@ -445,6 +450,7 @@ function make_seneca(initial_opts) {
     root$.version = package_json_1.default.version;
     // TODO: rename in 4.x as "args" terminology is legacy
     root$.fixedargs = {};
+    root$.fixedmeta = {};
     root$.fixedmeta = {};
     root$.flags = {
         closed: false,
@@ -668,7 +674,9 @@ function make_seneca(initial_opts) {
             start_opts.system.exit(err ? (err.exit === null ? 1 : err.exit) : 0);
         });
     };
-    addActions(root$);
+    if (start_opts.system.action.add) {
+        addActions(root$);
+    }
     // root$.act('role:seneca,cmd:pingx')
     if (!start_opts.legacy.transport) {
         start_opts.legacy.error = false;
@@ -720,6 +728,7 @@ function make_private() {
             }
         },
         ignore_plugins: {},
+        intercept: { act_error: [] }
     };
 }
 //# sourceMappingURL=seneca.js.map

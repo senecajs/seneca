@@ -100,12 +100,12 @@ describe('seneca', function () {
     expect(JSON.stringify(si)).equal(
       '{"isSeneca":true,"id":"a","fixedargs":{},"fixedmeta":{},"start_time":123,"version":"' +
         Package.version +
-        '"}'
+        '"}',
     )
     expect(Util.inspect(si).replace(/\n */g, ' ')).equal(
       "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: {}, start_time: 123, version: '" +
         Package.version +
-        "' }"
+        "' }",
     )
     done()
   })
@@ -140,7 +140,7 @@ describe('seneca', function () {
         assert.ok(err)
         assert.equal(
           'seneca: Action happy_error:1 failed: happy-error.',
-          err.message
+          err.message,
         )
         done()
       })
@@ -240,19 +240,22 @@ describe('seneca', function () {
   })
 
   it('action-act-invalid-args', function (done) {
-    var si = Seneca(testopts, { log: 'silent' })
+    const si = Seneca(testopts).test().quiet()
 
     si.act({ op: 'bad', a1: 100 }, function (e) {
-      assert.equal(e.code, 'act_not_found')
+      expect('act_not_found').equal(e.code)
 
       // default is not an object
       si.act({ op: 'bad', a1: 100, default$: 'qaz' }, function (e) {
-        assert.equal(e.code, 'act_default_bad')
+        expect('act_default_bad').equal(e.code)
 
-        si.act(null, function (e) {
-          assert.equal(e.code, 'act_not_found')
+        try {
+          si.act(null, function (e) {})
+          expect(true).false()
+        } catch (e) {
+          expect('shape').equal(e.code)
           done()
-        })
+        }
       })
     })
   })
@@ -332,7 +335,7 @@ describe('seneca', function () {
 
         si.act('op:foo,a:1,i:2', function (e, o, m) {
           assert.ok(
-            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
+            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s),
           )
           assert.ok(!o.bar.prior)
           assert.ok(m.action.match(/bar/))
@@ -346,8 +349,8 @@ describe('seneca', function () {
           si.act('op:foo,a:1,i:3', function (e, o, m) {
             assert.ok(
               Gex('1~2~3~Seneca/*' + '/*').on(
-                '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s
-              )
+                '' + o.a + '~' + o.b + '~' + o.z + '~' + o.s,
+              ),
             )
 
             assert.ok(m.action.match(/zed/))
@@ -428,7 +431,7 @@ describe('seneca', function () {
         si.act('op:foo,a:1,b:2', function (err, o) {
           assert.ok(!err)
           assert.ok(
-            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s)
+            Gex('1~2~Seneca/*' + '/*').on('' + o.a + '~' + o.b + '~' + o.s),
           )
 
           if (!this.options().prior.direct) {
@@ -538,55 +541,6 @@ describe('seneca', function () {
       })
   })
 
-  it('act_if', function (done) {
-    var si = Seneca({ log: 'silent' })
-
-    si.add({ op: 'foo' }, function (args, next) {
-      next(null, 'foo' + args.bar)
-    })
-
-    si.act_if(true, { op: 'foo', bar: '1' }, function (err, out) {
-      assert.equal(err, null)
-      assert.equal('foo1', out)
-    })
-
-    si.act_if(false, { op: 'foo', bar: '2' }, function () {
-      assert.fail()
-    })
-
-    si.act_if(true, 'op:foo,bar:3', function (err, out) {
-      assert.equal(err, null)
-      assert.equal('foo3', out)
-    })
-
-    try {
-      si.act_if({ op: 'foo', bar: '2' }, function () {
-        assert.fail()
-      })
-    } catch (e) {
-      assert.ok(e.message.match(/norma:/))
-    }
-
-    si = Seneca(testopts)
-      .add('a:1', function (msg, reply) {
-        reply({ b: msg.a + 1 })
-      })
-      .add('a:2', function (msg, reply) {
-        reply({ b: msg.a + 2 })
-      })
-
-    si.act_if(true, 'a:1', function (err, out) {
-      assert.ok(!err)
-      assert.equal(2, out.b)
-
-      si.act_if(false, 'a:2', function () {
-        assert.fail()
-      })
-
-      process.nextTick(done)
-    })
-  })
-
   it('loading-plugins', function (done) {
     var si = Seneca().test()
 
@@ -669,54 +623,60 @@ describe('seneca', function () {
   })
 
   it('strargs', function (done) {
-    var si = Seneca({ strict: { result: false } })
+    const si = Seneca({ strict: { result: false } })
       .test(done)
-      .add({ a: 1, b: 2 }, function (args, cb) {
-        cb(null, (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10))
+      .add({ a: 1, b: 2 }, function (msg, reply) {
+        reply(null, (msg.c || -1) + parseInt(msg.b, 10) + parseInt(msg.a, 10))
       })
 
     si.act({ a: 1, b: 2, c: 3 }, function (err, out) {
-      assert.ok(!err)
-      assert.equal(6, out)
+      expect(!err).true()
+      expect(out).equal(6)
 
       si.act('a:1,b:2,c:3', function (err, out) {
-        assert.ok(!err)
-        assert.equal(6, out)
+        expect(!err).true()
+        expect(out).equal(6)
 
         si.act('a:1,b:2', function (err, out) {
-          assert.ok(!err)
-          assert.equal(2, out)
+          expect(!err).true()
+          expect(out).equal(2)
 
           try {
             si.add('a::2', function (args, cb) {
               cb()
             })
           } catch (e) {
-            assert.equal(e.code, 'add_string_pattern_syntax')
+            expect('add_string_pattern_syntax', e.code)
 
             try {
               si.act('a::2', { c: 3 }, function () {
-                assert.fail()
+                expect(true).false()
               })
             } catch (e) {
-              assert.equal(e.code, 'msg_jsonic_syntax')
+              expect(e.code).equal('msg_jsonic_syntax')
 
               try {
                 si.add('a:1,b:2', 'bad-arg', function (args, cb) {
                   cb()
                 })
               } catch (e) {
-                assert.ok(e.message.match(/norma:/))
+                expect(e.message).equal(
+                  'seneca (add): Validation failed for property "actdef" ' +
+                    'with string "bad-arg" because the string is not of type object.',
+                )
 
                 try {
                   si.add(123, function (args, cb) {
                     cb()
                   })
                 } catch (e) {
-                  assert.ok(e.message.match(/norma:/))
+                  expect(e.message).equal(
+                    'seneca (add): Value "123" for property "props" does not satisfy one of: string, Object',
+                  )
                   done()
                 }
               }
+              return done(new Error('bad-arg not caught'))
             }
           }
         })
@@ -750,12 +710,12 @@ describe('seneca', function () {
               si.add(
                 'i:2,a:1',
                 { b: 2, c: { required$: true } },
-                addFunction
+                addFunction,
               ).act('i:2,a:1,b:2,c:3', function (err, out) {
                 checkFunction(err, out, done)
               })
             })
-          }
+          },
         )
       })
     })
@@ -825,7 +785,7 @@ describe('seneca', function () {
             // sensitive to changes in plugin init and internal action calls
             assert.equal(
               '{ calls: 8, done: 8, fails: 0, cache: 1 }',
-              Util.inspect(stats.act)
+              Util.inspect(stats.act),
             )
             fin()
           })
@@ -1048,53 +1008,36 @@ describe('seneca', function () {
       })
   })
 
-  describe('#decorate', function () {
-    it('can add a property to seneca', function (done) {
-      var si = Seneca({ log: 'silent' })
-      si.decorate('foo', function () {
-        assert(this === si)
-        return 'bar'
-      })
-
-      assert.equal(si.foo(), 'bar')
-      done()
+  it('decorate-basic', async () => {
+    const si = Seneca().test().quiet()
+    si.decorate('foo', function () {
+      expect(this === si)
+      return 'bar'
     })
 
-    it('cannot override core property', function (done) {
-      var si = Seneca({ log: 'silent' })
+    expect(si.foo()).equals('bar')
+  })
 
-      var fn = function () {
-        si.decorate('use', 'foo')
-      }
+  it('decorate-core-property', async () => {
+    const si = Seneca().test().quiet()
+    expect(() => si.decorate('add', () => {})).throws(
+      'seneca: Decoration overrides core property:add',
+    )
+  })
 
-      assert.throws(fn)
-      done()
-    })
+  it('decorate-overwrite', async () => {
+    const si = Seneca().test().quiet()
+    si.decorate('foo', () => {})
+    expect(() => si.decorate('foo', () => {})).throws(
+      'seneca: Decoration already exists: foo',
+    )
+  })
 
-    it('cannot overwrite a decorated property', function (done) {
-      var si = Seneca({ log: 'silent' })
-      si.decorate('foo', function () {
-        return 'bar'
-      })
-
-      var fn = function () {
-        si.decorate('foo', 'bar')
-      }
-
-      assert.throws(fn)
-      done()
-    })
-
-    it('cannot prefix a property with an underscore', function (done) {
-      var si = Seneca({ log: 'silent' })
-
-      var fn = function () {
-        si.decorate('_use', 'foo')
-      }
-
-      assert.throws(fn)
-      done()
-    })
+  it('decorate-underscore-prefix', async () => {
+    const si = Seneca().test().quiet()
+    expect(() => si.decorate('_use')).throws(
+      'seneca: Decorate property cannot start with underscore (was _use)',
+    )
   })
 
   it('supports jsonic params to has', function (done) {

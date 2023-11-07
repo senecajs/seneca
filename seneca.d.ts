@@ -13,12 +13,12 @@ declare namespace init {
         Nid: typeof Nid;
         Patrun: typeof Patrun;
         Gex: typeof Gex;
+        Gubu: any;
         clean: any;
         pattern: any;
         print: any;
         error: any;
         deep: any;
-        Gubu: any;
         deepextend: any;
         parsepattern: any;
         pincanon: any;
@@ -39,12 +39,12 @@ declare namespace init {
                 Nid: typeof Nid;
                 Patrun: typeof Patrun;
                 Gex: typeof Gex;
+                Gubu: any;
                 clean: any;
                 pattern: any;
                 print: any;
                 error: any;
                 deep: any;
-                Gubu: any;
                 deepextend: any;
                 parsepattern: any;
                 pincanon: any;

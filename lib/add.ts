@@ -1,24 +1,45 @@
-/* Copyright © 2019-2021 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
 
 import { TaskSpec } from 'ordu'
 
-import { Gubu, Open } from 'gubu'
+import { Gubu, MakeArgu, Open, Skip, One, Empty } from 'gubu'
 
 
 import {
   clean,
   deep,
   each,
-  parsePattern,
   pattern,
+  parse_jsonic,
 } from './common'
 
 
+const Argu = MakeArgu('seneca')
+
+
+const AddArgu: any = Argu('add', {
+  props: One(Empty(String), Object),
+  moreprops: Skip(Object),
+  action: Skip(Function),
+  actdef: Skip(Object),
+})
+
+
 function api_add(this: any) {
+  let args = AddArgu(arguments)
+
+  args.pattern = Object.assign(
+    {},
+    args.moreprops ? args.moreprops : null,
+    'string' === typeof args.props ?
+      parse_jsonic(args.props, 'add_string_pattern_syntax') :
+      args.props,
+  )
+
   let ctx = {
     opts: this.options(),
-    args: parsePattern(this, arguments, 'action:f? actdef:o?'),
+    args,
     private: this.private$,
     instance: this,
   }
@@ -250,7 +271,6 @@ const task = {
         ((priordef.client && actdef.client) ||
           (!priordef.client && !actdef.client))
       ) {
-        //priordef.handle(args.pattern, action)
         priordef.handle(actdef)
         addroute = false
       } else {

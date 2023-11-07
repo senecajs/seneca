@@ -4,21 +4,20 @@
 
 import Util from 'util'
 
+import Stringify from 'fast-safe-stringify'
+import Jsonic from '@jsonic/jsonic-next'
+import Nid from 'nid'
+
+const Eraro = require('eraro')
+
+const DefaultsDeep = require('lodash.defaultsdeep')
+const { Print } = require('./print')
 
 import Errors from './errors'
 
 
-const Stringify = require('fast-safe-stringify')
-const Eraro = require('eraro')
-const Jsonic = require('@jsonic/jsonic-next')
-import Nid from 'nid'
-const Norma = require('norma')
-const DefaultsDeep = require('lodash.defaultsdeep')
 
-const { Print } = require('./print')
-
-
-
+// const Argu = MakeArgu('seneca')
 
 
 const error =
@@ -47,7 +46,7 @@ function promiser(context: any, callback?: any) {
 
 
 function stringify() {
-  return Stringify(...arguments)
+  return (Stringify as any)(...arguments)
 }
 
 
@@ -121,8 +120,8 @@ function parse_jsonic(str: any, code: any) {
 
   try {
     return null == str ? null : Jsonic(str)
-  } catch (e: any) {
-    // let col = 1 === e.line ? e.column - 1 : e.column
+  }
+  catch (e: any) {
     throw error(code, {
       argstr: str,
       syntax: e.message,
@@ -132,58 +131,6 @@ function parse_jsonic(str: any, code: any) {
   }
 }
 
-
-// string args override object args
-// TODO: fix name
-
-function parse_pattern(
-  _instance: any,
-  rawargs: any,
-  normaspec: any,
-  fixed?: any
-) {
-  let args = Norma(
-    '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
-    rawargs
-  )
-
-  // Precedence of arguments in add,act is left-to-right
-  args.pattern = Object.assign(
-    {},
-    args.moreobjargs ? args.moreobjargs : null,
-    args.objargs ? args.objargs : null,
-    parse_jsonic(args.strargs, 'add_string_pattern_syntax'),
-    fixed
-  )
-
-  return args
-}
-
-const parsePattern = parse_pattern
-
-
-function build_message(
-  _instance: any,
-  rawargs: any,
-  normaspec: any,
-  fixed: any
-) {
-  let args = Norma(
-    '{strargs:s? objargs:o? moreobjargs:o? ' + (normaspec || '') + '}',
-    rawargs
-  )
-
-  // Precedence of arguments in add,act is left-to-right
-  args.msg = Object.assign(
-    {},
-    args.moreobjargs,
-    args.objargs,
-    parse_jsonic(args.strargs, 'msg_jsonic_syntax'),
-    fixed
-  )
-
-  return args
-}
 
 // Convert pattern object into a normalized jsonic String.
 function pattern(patobj: any) {
@@ -300,7 +247,8 @@ function makedie(instance: any, ctxt: any) {
     try {
       if (!err) {
         err = new Error('unknown')
-      } else if (!Util.isError(err)) {
+        // } else if (!Util.isError(err)) {
+      } else if (!so.error.identify(err)) {
         err = new Error('string' === typeof err ? err : inspect(err))
       }
 
@@ -542,11 +490,6 @@ function autoincr() {
   return function() {
     return counter++
   }
-}
-
-
-function isError(x: any) {
-  return Util.types.isNativeError(x)
 }
 
 
@@ -831,8 +774,8 @@ export {
   make_plugin_key,
   boolify,
   parse_jsonic,
-  parse_pattern,
-  build_message,
+  // parse_pattern,
+  // build_message,
   pattern,
   pincanon,
   noop,
@@ -848,9 +791,8 @@ export {
   make_trace_desc,
   history,
   print,
-  parsePattern,
+  // parsePattern,
   tagnid,
-  isError,
   inspect,
   error,
   msgstr,
