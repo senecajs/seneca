@@ -130,4 +130,25 @@ describe('act', function () {
       })
     })
   })
+
+
+  it('direct', async () => {
+    let si = await Seneca({legacy:true}).test().ready()
+    let log = []
+
+    si.add('a:1', function a1(msg, reply) {
+      log.push('msg-exec')
+      reply({x:msg.x+1})
+    })
+    
+    log.push('pre-msg')
+    si.act('a:1,x:1,direct$:true', function (err, out) {
+      expect(err).null()
+      log.push('reply:'+JSON.stringify(out))
+    })
+    log.push('post-msg')
+
+    // console.log('log', log)
+    expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg' ])
+  })
 })

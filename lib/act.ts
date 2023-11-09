@@ -36,7 +36,6 @@ exports.api_act = function() {
   const opts = instance.options()
 
   const spec =
-    // build_message(instance, [...arguments], 'reply:f?', instance.fixedargs)
     ActArgu(arguments)
 
   spec.msg = Object.assign(
@@ -71,6 +70,7 @@ exports.api_act = function() {
 const intern = (module.exports.intern = {
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
     let timedout = false
+    let direct = true === origmsg.direct$
     const actmsg = intern.make_actmsg(origmsg)
     const meta = new Meta(instance, opts, origmsg, origreply)
 
@@ -120,7 +120,7 @@ const intern = (module.exports.intern = {
         )
       } catch (e: any) {
 
-        // TODO: review, needs better test for when this actually happens
+        // TODO: remove
         for (let intercept of instance.private$.intercept.act_error) {
           intercept.call(instance, {
             error: e,
@@ -163,7 +163,13 @@ const intern = (module.exports.intern = {
 
     execspec.tm = meta.timeout
 
-    instance.private$.ge.add(execspec)
+    if (direct) {
+      execspec.ctxt = {}
+      execspec.fn(function complete() { })
+    }
+    else {
+      instance.private$.ge.add(execspec)
+    }
   },
 
 

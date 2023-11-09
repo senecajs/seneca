@@ -19,10 +19,6 @@ const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
 
 
-// Deprecated Legacy modules.
-// const Optioner = require('optioner')
-// const Joi = require('@hapi/joi')
-
 
 // Internal modules.
 const Common = require('./lib/common')
