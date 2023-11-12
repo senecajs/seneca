@@ -480,7 +480,8 @@ describe('plugin', function () {
       },
       log: 'silent',
       errhandler: function (err) {
-        expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
+        // expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
+        expect('act-cb').to.equal(err.message)
         fin()
       },
     })
@@ -689,7 +690,10 @@ describe('plugin', function () {
   // })
 
   it('plugin actions receive errors in callback function', function (fin) {
-    var seneca = Seneca({ log: 'silent' })
+    var seneca = Seneca()
+        .test()
+        .quiet()
+    
     seneca.fixedargs['fatal$'] = false
 
     seneca.use(function service() {
@@ -706,7 +710,7 @@ describe('plugin', function () {
           { role: 'plugin', cmd: 'throw', blah: 'blah' },
           function (err) {
             expect(err).to.exist()
-            expect(err.msg).to.contain('from action')
+            expect(err.message).to.contain('from action')
             fin()
           },
         )

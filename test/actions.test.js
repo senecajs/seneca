@@ -22,6 +22,7 @@ describe('actions', function () {
     reply({ z: msg.z })
   }
 
+  /* TODO:move to @seneca/transport
   it('cmd_ping', function (fin) {
     var si = Seneca({ legacy: false }).test(fin)
     expect(si.ping().id).equals(si.id)
@@ -34,7 +35,8 @@ describe('actions', function () {
       })
     })
   })
-
+  */
+  
   it('cmd_stats', function (fin) {
     var si = Seneca().add('a:1').act('a:1')
 

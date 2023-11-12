@@ -154,19 +154,20 @@ describe('add', function () {
       .add('n:2', function n2() {})
 
     // NOTE: these may need to be updated if startup action call sequence changes.
-
+    // console.log(si.list().map(x=>si.find(x).id))
+    
     expect(si.find('n:0')).contains({
-      id: 'root$/default_action/6',
+      id: 'root$/default_action/8',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'root$/action/7',
+      id: 'root$/action/9',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'root$/n2/8',
+      id: 'root$/n2/10',
       name: 'n2',
     })
 
@@ -176,7 +177,7 @@ describe('add', function () {
       })
     }).ready(function () {
       expect(si.find('p:0')).contains({
-        id: 'p0/f0/10',
+        id: 'p0/f0/12',
         name: 'f0',
       })
 

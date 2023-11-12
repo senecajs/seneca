@@ -15,8 +15,8 @@ const nid_1 = __importDefault(require("nid"));
 const patrun_1 = require("patrun");
 const Stats = require('rolling-stats');
 const { Ordu } = require('ordu');
-const { Gubu, One, Any, Skip, Open } = require('gubu');
 const Eraro = require('eraro');
+const gubu_1 = require("gubu");
 // Internal modules.
 const Common = require('./lib/common');
 const { make_logging } = require('./lib/logging');
@@ -37,6 +37,7 @@ const { transport } = require('./lib/transport');
 const package_json_1 = __importDefault(require("./package.json"));
 // Internal data and utilities.
 const { error, deep } = Common;
+const { One, Any, Skip, Open } = gubu_1.Gubu;
 // Seneca options.
 const option_defaults = {
     // Tag this Seneca instance, will be appended to instance identifier.
@@ -50,9 +51,7 @@ const option_defaults = {
     id$: Skip(String),
     // Register (true) default plugins. Set false to not register when
     // using custom versions.
-    default_plugins: Open({
-        transport: true,
-    }),
+    default_plugins: Open({}),
     // Test mode. Use for unit testing.
     test: false,
     // Quiet mode. Moves log level to warn. Use for unit testing.
@@ -295,7 +294,7 @@ const seneca_util = {
     Nid: nid_1.default,
     Patrun: patrun_1.Patrun,
     Gex: patrun_1.Gex,
-    Gubu,
+    Gubu: gubu_1.Gubu,
     clean: Common.clean,
     pattern: Common.pattern,
     print: Common.print,
@@ -397,7 +396,7 @@ init.quiet = function top_quiet() {
     return init().quiet(...arguments);
 };
 init.util = seneca_util;
-init.valid = Gubu;
+init.valid = gubu_1.Gubu;
 init.test$ = { intern: intern };
 exports.default = init;
 module.exports = init;
@@ -503,7 +502,7 @@ function make_seneca(initial_opts) {
     root$.add = Add.api_add; // Add a pattern an associated action.
     root$.act = Act.api_act; // Submit a message and trigger the associated action.
     root$.ready = ready.api_ready; // Callback when plugins initialized.
-    root$.valid = Gubu; // Expose Gubu shape builders
+    root$.valid = gubu_1.Gubu; // Expose Gubu shape builders
     root$.internal = function () {
         return {
             ordu: {
@@ -674,18 +673,15 @@ function make_seneca(initial_opts) {
     if (start_opts.system.action.add) {
         addActions(root$);
     }
-    // root$.act('role:seneca,cmd:pingx')
-    if (!start_opts.legacy.transport) {
-        start_opts.legacy.error = false;
-        // TODO: move to static options in Seneca 4.x
-        start_opts.transport = deep({
-            port: 62345,
-            host: '127.0.0.1',
-            path: '/act',
-            protocol: 'http',
-        }, start_opts.transport);
-        transport(root$);
-    }
+    start_opts.legacy.error = false;
+    // TODO: move to static options in Seneca 4.x
+    start_opts.transport = deep({
+        port: 62345,
+        host: '127.0.0.1',
+        path: '/act',
+        protocol: 'http',
+    }, start_opts.transport);
+    transport(root$);
     Print(root$, start_opts.debug.argv || process.argv);
     Common.each(start_opts.system.close_signals, function (active, signal) {
         if (active) {

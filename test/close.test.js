@@ -89,13 +89,16 @@ describe('close', function () {
   })
 
   it('error', function (fin) {
-    Seneca({ log: 'silent' })
+    Seneca()
+      .test()
+      .quiet()
       .add('role:seneca,cmd:close', function (msg, reply) {
         reply(new Error('bad-close'))
       })
       .close(function (err) {
         expect(err.message).equal(
-          'seneca: Action cmd:close,role:seneca failed: bad-close.',
+          // 'seneca: Action cmd:close,role:seneca failed: bad-close.',
+          'bad-close',
         )
         fin()
       })

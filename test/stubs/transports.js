@@ -10,6 +10,7 @@ exports.make_balance_transport = make_balance_transport
 exports.make_simple_transport = make_simple_transport
 
 
+// TODO: update from legacy
 // A simple transport that uses async.queue as the transport mechanism
 function make_test_transport () {
   test_transport.outmsgs = []

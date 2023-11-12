@@ -132,14 +132,17 @@ describe('seneca', function () {
   })
 
   it('happy-error', function (done) {
-    Seneca({ log: 'silent' })
+    Seneca()
+      .test()
+      .quiet()
       .add('happy_error:1', function (args, done) {
         done(new Error('happy-error'))
       })
       .act('happy_error:1', function (err) {
         assert.ok(err)
         assert.equal(
-          'seneca: Action happy_error:1 failed: happy-error.',
+          // 'seneca: Action happy_error:1 failed: happy-error.',
+          'happy-error',
           err.message,
         )
         done()

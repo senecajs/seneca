@@ -254,99 +254,101 @@ describe('explain', function () {
     expect(topexp_off.length).equal(2)
   })
 
-  it('explain-transport', { timout: 22222 * tmx }, async () => {
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test()
-    var c0 = Seneca({
-      id$: 'c0',
-      timeout: 22222 * tmx,
-      legacy: { transport: false },
-    }).test()
 
-    await s0
-      .add('a:1', function a1(msg, reply, meta) {
-        meta.explain.push({ direct: 1 })
+  // TODO: move to @seneca/transport
+  // it('explain-transport', { timout: 22222 * tmx }, async () => {
+  //   var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test()
+  //   var c0 = Seneca({
+  //     id$: 'c0',
+  //     timeout: 22222 * tmx,
+  //     legacy: { transport: false },
+  //   }).test()
 
-        var exp = this.explain()
-        exp && exp('aaa')
+  //   await s0
+  //     .add('a:1', function a1(msg, reply, meta) {
+  //       meta.explain.push({ direct: 1 })
 
-        reply({ x: msg.x })
-      })
-      .add('b:1', function b1(msg, reply, meta) {
-        var exp = this.explain()
+  //       var exp = this.explain()
+  //       exp && exp('aaa')
 
-        if (1 === msg.x) {
-          expect(exp).not.exist()
-          exp && exp('bbb')
-        } else {
-          expect(exp).exist()
-          exp && exp('ccc')
-        }
-        //reply([1, 2, 3])
-        reply({ x: msg.x })
-      })
-      .add('c:1', function c1(msg, reply, meta) {
-        var exp = this.explain()
-        exp && exp('ccc')
+  //       reply({ x: msg.x })
+  //     })
+  //     .add('b:1', function b1(msg, reply, meta) {
+  //       var exp = this.explain()
 
-        reply([msg.x])
-      })
-      .listen(62110)
-      .ready()
+  //       if (1 === msg.x) {
+  //         expect(exp).not.exist()
+  //         exp && exp('bbb')
+  //       } else {
+  //         expect(exp).exist()
+  //         exp && exp('ccc')
+  //       }
+  //       //reply([1, 2, 3])
+  //       reply({ x: msg.x })
+  //     })
+  //     .add('c:1', function c1(msg, reply, meta) {
+  //       var exp = this.explain()
+  //       exp && exp('ccc')
 
-    await c0.client(62110).ready()
+  //       reply([msg.x])
+  //     })
+  //     .listen(62110)
+  //     .ready()
 
-    var exp = []
-    await new Promise((resolve, reject) => {
-      c0.error(reject)
-      s0.error(reject)
+  //   await c0.client(62110).ready()
 
-      c0.act('a:1,x:2', { explain$: exp }, function (ignore, out, meta) {
-        expect(out.x).equals(2)
+  //   var exp = []
+  //   await new Promise((resolve, reject) => {
+  //     c0.error(reject)
+  //     s0.error(reject)
 
-        expect(exp[0].msg$).includes({ a: 1, x: 2 })
-        expect(exp[0].explain$).includes({ instance: 'c0' })
-        expect(exp[1].msg$).includes({ a: 1, x: 2 })
-        expect(exp[1].explain$).includes({ instance: 's0' })
-        expect(exp[2]).includes({ direct: 1 })
-        expect(exp[3]).includes({ content: 'aaa' })
+  //     c0.act('a:1,x:2', { explain$: exp }, function (ignore, out, meta) {
+  //       expect(out.x).equals(2)
 
-        c0.act('b:1,x:1', function (ignore, out, meta) {
-          expect(out.x).equals(1)
-          expect(meta.explain).equal(void 0)
+  //       expect(exp[0].msg$).includes({ a: 1, x: 2 })
+  //       expect(exp[0].explain$).includes({ instance: 'c0' })
+  //       expect(exp[1].msg$).includes({ a: 1, x: 2 })
+  //       expect(exp[1].explain$).includes({ instance: 's0' })
+  //       expect(exp[2]).includes({ direct: 1 })
+  //       expect(exp[3]).includes({ content: 'aaa' })
 
-          exp = []
-          c0.act('b:1,x:2', { explain$: exp }, function (ignore, out, meta) {
-            expect(out.x).equals(2)
+  //       c0.act('b:1,x:1', function (ignore, out, meta) {
+  //         expect(out.x).equals(1)
+  //         expect(meta.explain).equal(void 0)
 
-            expect(exp[0].msg$).includes({ b: 1, x: 2 })
-            expect(exp[0].explain$).includes({ instance: 'c0' })
-            expect(exp[1].msg$).includes({ b: 1, x: 2 })
-            expect(exp[1].explain$).includes({ instance: 's0' })
+  //         exp = []
+  //         c0.act('b:1,x:2', { explain$: exp }, function (ignore, out, meta) {
+  //           expect(out.x).equals(2)
 
-            expect(meta.explain[0].msg$).includes({ b: 1, x: 2 })
-            expect(meta.explain[0].explain$).includes({ instance: 'c0' })
-            expect(meta.explain[1].msg$).includes({ b: 1, x: 2 })
-            expect(meta.explain[1].explain$).includes({ instance: 's0' })
+  //           expect(exp[0].msg$).includes({ b: 1, x: 2 })
+  //           expect(exp[0].explain$).includes({ instance: 'c0' })
+  //           expect(exp[1].msg$).includes({ b: 1, x: 2 })
+  //           expect(exp[1].explain$).includes({ instance: 's0' })
 
-            exp = []
-            c0.act('c:1,x:3', { explain$: exp }, function (ignore, out, meta) {
-              expect(out).equals([3])
+  //           expect(meta.explain[0].msg$).includes({ b: 1, x: 2 })
+  //           expect(meta.explain[0].explain$).includes({ instance: 'c0' })
+  //           expect(meta.explain[1].msg$).includes({ b: 1, x: 2 })
+  //           expect(meta.explain[1].explain$).includes({ instance: 's0' })
 
-              expect(exp[0].msg$).includes({ c: 1, x: 3 })
-              expect(exp[0].explain$).includes({ instance: 'c0' })
-              expect(exp[1].msg$).includes({ c: 1, x: 3 })
-              expect(exp[1].explain$).includes({ instance: 's0' })
+  //           exp = []
+  //           c0.act('c:1,x:3', { explain$: exp }, function (ignore, out, meta) {
+  //             expect(out).equals([3])
 
-              expect(meta.explain[0].msg$).includes({ c: 1, x: 3 })
-              expect(meta.explain[0].explain$).includes({ instance: 'c0' })
-              expect(meta.explain[1].msg$).includes({ c: 1, x: 3 })
-              expect(meta.explain[1].explain$).includes({ instance: 's0' })
+  //             expect(exp[0].msg$).includes({ c: 1, x: 3 })
+  //             expect(exp[0].explain$).includes({ instance: 'c0' })
+  //             expect(exp[1].msg$).includes({ c: 1, x: 3 })
+  //             expect(exp[1].explain$).includes({ instance: 's0' })
 
-              s0.close(c0.close.bind(c0, resolve))
-            })
-          })
-        })
-      })
-    })
-  })
+  //             expect(meta.explain[0].msg$).includes({ c: 1, x: 3 })
+  //             expect(meta.explain[0].explain$).includes({ instance: 'c0' })
+  //             expect(meta.explain[1].msg$).includes({ c: 1, x: 3 })
+  //             expect(meta.explain[1].explain$).includes({ instance: 's0' })
+
+  //             s0.close(c0.close.bind(c0, resolve))
+  //           })
+  //         })
+  //       })
+  //     })
+  //   })
+  // })
 })

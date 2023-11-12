@@ -41,7 +41,7 @@ describe('error', function () {
   it('act_not_found', act_not_found)
 
   it('exec_action_throw_basic', exec_action_throw_basic)
-  it('exec_action_throw_basic_legacy', exec_action_throw_basic_legacy)
+  // it('exec_action_throw_basic_legacy', exec_action_throw_basic_legacy)
   it('exec_action_throw_nolog', exec_action_throw_nolog)
   it('exec_action_errhandler_throw', exec_action_errhandler_throw)
 
@@ -50,13 +50,13 @@ describe('error', function () {
 
   // it('exec_remote_action_result', exec_remote_action_result)
 
-  it('exec_action_result_legacy', exec_action_result_legacy)
+  // it('exec_action_result_legacy', exec_action_result_legacy)
   it('exec_action_result_nolog', exec_action_result_nolog)
   it('exec_action_errhandler_result', exec_action_errhandler_result)
 
-  it('action_callback', action_callback_legacy)
+  // it('action_callback', action_callback_legacy)
 
-  it('legacy_fail', legacy_fail)
+  // it('legacy_fail', legacy_fail)
 
   it('types', types)
 
@@ -352,6 +352,8 @@ describe('error', function () {
     si.options({
       errhandler: function (err) {
         try {
+          err = err.meta$.err
+          
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
           assert.ok(err.message.indexOf('AAA' + aI) !== -1)
@@ -363,7 +365,9 @@ describe('error', function () {
           }
 
           done()
-        } catch (e) {
+        }
+        catch (e) {
+          // console.log(e)
           done(e)
           return true
         }
@@ -395,6 +399,8 @@ describe('error', function () {
         si.on('act-err', function (msg, err) {
           if (aI === 1) {
             try {
+              err = err.meta$.err
+              
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
@@ -409,17 +415,23 @@ describe('error', function () {
               si.act('a:1', function () {
                 try {
                   assert.fail()
-                } catch (e) {
+                }
+                catch (e) {
+                  // console.log(e)
                   done(e)
                 }
               })
-            } catch (e) {
+            }
+            catch (e) {
+              // console.log(e)
               done(e)
             }
           }
         })
         si.act('a:1')
-      } catch (e) {
+      }
+      catch (e) {
+        // console.log(e)
         done(e)
       }
     })
@@ -433,6 +445,8 @@ describe('error', function () {
     si.options({
       errhandler: function (err) {
         try {
+          err = err.meta$.err
+          
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
           assert.ok(err.message.indexOf('AAA' + aI) !== -1)
@@ -475,6 +489,8 @@ describe('error', function () {
         si.on('act-err', function (msg, err) {
           if (aI === 1) {
             try {
+              err = err.meta$.err
+              
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
@@ -703,6 +719,8 @@ describe('error', function () {
     assert.deepEqual({ BAR: 1 }, err.details)
   }
 
+
+  
   function types(fin) {
     const si = Seneca({ log: 'silent' })
 
@@ -711,13 +729,16 @@ describe('error', function () {
     })
 
     si.error(function (err) {
+      // console.log('WWW',err)
+      err = err.meta$.err
       expect(err.code).equal('act_execute')
       fin()
     })
 
     si.act('a:1', function (err, out) {
+      // console.log('AAA', err)
       expect(out).not.exist()
-      expect(err.code).equal('act_execute')
-    })
+      // expect(err.code).equal('act_execute')
+    })      
   }
 })

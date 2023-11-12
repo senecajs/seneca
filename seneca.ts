@@ -2,6 +2,7 @@
 'use strict'
 
 
+
 // Node API modules.
 const Events = require('events')
 const Util = require('util')
@@ -15,9 +16,8 @@ import Nid from 'nid'
 import { Patrun, Gex } from 'patrun'
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
-const { Gubu, One, Any, Skip, Open } = require('gubu')
 const Eraro = require('eraro')
-
+import { Gubu } from 'gubu'
 
 
 // Internal modules.
@@ -45,6 +45,8 @@ import Pkg from './package.json'
 const { error, deep } = Common
 
 
+const { One, Any, Skip, Open } = Gubu
+
 // Seneca options.
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
@@ -62,9 +64,7 @@ const option_defaults = {
 
   // Register (true) default plugins. Set false to not register when
   // using custom versions.
-  default_plugins: Open({
-    transport: true,
-  }),
+  default_plugins: Open({}),
 
   // Test mode. Use for unit testing.
   test: false,
@@ -383,6 +383,7 @@ const option_defaults = {
   actcache: Any(),
   seneca: Any(),
 }
+
 
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
@@ -872,24 +873,22 @@ function make_seneca(initial_opts?: any) {
     addActions(root$)
   }
 
-  // root$.act('role:seneca,cmd:pingx')
 
-  if (!start_opts.legacy.transport) {
-    start_opts.legacy.error = false
+  start_opts.legacy.error = false
 
-    // TODO: move to static options in Seneca 4.x
-    start_opts.transport = deep(
-      {
-        port: 62345,
-        host: '127.0.0.1',
-        path: '/act',
-        protocol: 'http',
-      },
-      start_opts.transport
-    )
+  // TODO: move to static options in Seneca 4.x
+  start_opts.transport = deep(
+    {
+      port: 62345,
+      host: '127.0.0.1',
+      path: '/act',
+      protocol: 'http',
+    },
+    start_opts.transport
+  )
 
-    transport(root$)
-  }
+  transport(root$)
+
 
   Print(root$, start_opts.debug.argv || process.argv)
 
@@ -937,3 +936,4 @@ function make_private() {
     intercept: { act_error: [] }
   }
 }
+
