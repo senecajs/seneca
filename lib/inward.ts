@@ -466,6 +466,7 @@ intern.explain = function(meta: any, entry: any) {
           gate: meta.gate,
           fatal: meta.fatal,
           local: meta.local,
+          direct: meta.direct,
           closing: meta.closing,
           timeout: meta.timeout,
           dflt: meta.dflt,

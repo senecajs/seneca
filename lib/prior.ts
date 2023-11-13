@@ -67,6 +67,7 @@ function api_prior(this: any) {
   var reply = spec.reply
 
   if (priordef) {
+    // TODO: remove
     if (opts.prior.direct) {
       let prior_reply: any = function(err: any, out: any, meta: any) {
         // First arg may be out, not err.

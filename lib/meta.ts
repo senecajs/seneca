@@ -1,4 +1,4 @@
-/* Copyright © 2021 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2021-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 
@@ -26,6 +26,9 @@ class Meta {
   sync: boolean = true
   local: boolean = true
   remote: boolean = false
+
+  // Direct calls execute synchronously without entering the event loop.
+  direct: boolean = false
 
   timeout: number = 0
 
@@ -66,6 +69,7 @@ class Meta {
     this.gate = !!origmsg.gate$ || fixedmeta.gate
     this.fatal = !!origmsg.fatal$ || fixedmeta.fatal
     this.local = !!origmsg.local$ || fixedmeta.local
+    this.direct = !!origmsg.direct$ || fixedmeta.direct
 
     this.closing = !!origmsg.closing$ || (origmeta && origmeta.closing)
 

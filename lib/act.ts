@@ -1,7 +1,6 @@
 /* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
-import { Gubu, MakeArgu, Open, Skip, One, Empty } from 'gubu'
-
+import { Gubu } from 'gubu'
 
 import { Meta } from './meta'
 
@@ -17,6 +16,8 @@ import {
   parse_jsonic,
 } from './common'
 
+
+const { MakeArgu, Skip, One, Empty } = Gubu
 
 const Argu = MakeArgu('seneca')
 
@@ -70,7 +71,6 @@ exports.api_act = function() {
 const intern = (module.exports.intern = {
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
     let timedout = false
-    let direct = true === origmsg.direct$
     const actmsg = intern.make_actmsg(origmsg)
     const meta = new Meta(instance, opts, origmsg, origreply)
 
@@ -109,7 +109,7 @@ const intern = (module.exports.intern = {
       }
 
       try {
-        intern.execute_action(
+        return intern.execute_action(
           execspec,
           instance,
           opts,
@@ -163,9 +163,22 @@ const intern = (module.exports.intern = {
 
     execspec.tm = meta.timeout
 
-    if (direct) {
+    if (meta.direct) {
       execspec.ctxt = {}
-      execspec.fn(function complete() { })
+      let out = execspec.fn(function complete() { })
+
+      // If reply not called inside direct action,
+      // we still need to execute the outward handling.
+      if (null == meta.end) {
+        intern.handle_reply(
+          opts,
+          meta,
+          actctxt,
+          actmsg,
+          null,
+          out
+        )
+      }
     }
     else {
       instance.private$.ge.add(execspec)
@@ -342,7 +355,6 @@ const intern = (module.exports.intern = {
 
     const inwardres = act_instance.order.inward.execSync(actctxt, data)
 
-
     if (inwardres.err) {
       throw inwardres.err
     }
@@ -385,9 +397,10 @@ const intern = (module.exports.intern = {
 
     if (opts.legacy.meta_arg_remove) {
       // Non-existence != undefined, so must be a separate call.
-      actdef.func.call(delegate, data.msg, data.reply)
-    } else {
-      actdef.func.call(delegate, data.msg, data.reply, data.meta)
+      return actdef.func.call(delegate, data.msg, data.reply)
+    }
+    else {
+      return actdef.func.call(delegate, data.msg, data.reply, data.meta)
     }
   },
 
@@ -409,7 +422,13 @@ const intern = (module.exports.intern = {
       },
     }
 
-    const delegate = instance.delegate(delegate_args)
+    const delegate_meta: any = {}
+
+    if (meta.direct) {
+      delegate_meta.direct = meta.direct
+    }
+
+    const delegate = instance.delegate(delegate_args, delegate_meta)
 
     const parent_act = instance.private$.act || meta.parent
 

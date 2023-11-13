@@ -16,6 +16,7 @@ declare class Meta {
     sync: boolean;
     local: boolean;
     remote: boolean;
+    direct: boolean;
     timeout: number;
     dflt: any;
     custom: any;
