@@ -158,7 +158,7 @@ function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
         fail: false,
         logging: false,
         meta: false,
-        meta_arg_remove: false,
+        // meta_arg_remove: false,
         transport: false,
         timeout_string: false,
         rules: false,

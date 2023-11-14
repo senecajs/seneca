@@ -76,10 +76,10 @@ const option_defaults = {
     error: {
         // Control capture of errors for logging.
         capture: {
-            // Capture errors in action callbacks (false throws uncaught).
-            callback: true,
-            // Capture errors in actions and pass to callback (false throws uncaught).
-            action: true,
+        // Capture errors in action callbacks (false throws uncaught).
+        // callback: true,
+        // Capture errors in actions and pass to callback (false throws uncaught).
+        // action: true,
         },
         // Custom function to identify thrown errors.
         identify: (e) => e instanceof Error,
@@ -242,7 +242,7 @@ const option_defaults = {
         // Add meta$ property to messages.
         meta: false,
         // Remove meta argument in action arguments and callbacks.
-        meta_arg_remove: false,
+        // meta_arg_remove: false,
         // Use seneca-transport plugin.
         transport: true,
         // Insert "[TIMEOUT]" into timeout error message
@@ -284,8 +284,8 @@ const option_defaults = {
     },
     // Legacy
     reload$: Skip(Boolean),
-    actcache: Any(),
-    seneca: Any(),
+    // actcache: Any(),
+    // seneca: Any(),
 };
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
@@ -300,9 +300,6 @@ const seneca_util = {
     print: Common.print,
     error: error,
     deep: Common.deep,
-    // Deprecated Legacy (make internal or rename)
-    // Optioner: Optioner,
-    // Joi: Joi,
     deepextend: Common.deep,
     parsepattern: Common.parsePattern,
     pincanon: Common.pincanon,
@@ -311,10 +308,10 @@ const seneca_util = {
     },
     resolve_option: Common.resolve_option,
     // Legacy (deprecate and remove)
-    argprops: Legacy.argprops,
-    recurse: Legacy.recurse,
-    copydata: Legacy.copydata,
-    nil: Legacy.nil,
+    // argprops: Legacy.argprops,
+    // recurse: Legacy.recurse,
+    // copydata: Legacy.copydata,
+    // nil: Legacy.nil,
     flatten: Legacy.flatten,
 };
 // Internal implementations.
@@ -721,7 +718,7 @@ function make_private() {
             }
         },
         ignore_plugins: {},
-        intercept: { act_error: [] }
+        // intercept: { act_error: [] }
     };
 }
 //# sourceMappingURL=seneca.js.map

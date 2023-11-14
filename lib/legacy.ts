@@ -142,25 +142,27 @@ function argprops(defaults: any, args: any, fixed: any, omits: any) {
   return usedargs
 }
 
-function next_act(this: any) {
-  var argsarr = new Array(arguments.length)
-  for (var l = 0; l < argsarr.length; ++l) {
-    argsarr[l] = arguments[l]
-  }
 
-  var si = this
+// function next_act(this: any) {
+//   var argsarr = new Array(arguments.length)
+//   for (var l = 0; l < argsarr.length; ++l) {
+//     argsarr[l] = arguments[l]
+//   }
 
-  si.log.warn({
-    kind: 'notice',
-    case: 'DEPRECATION',
-    notice: Errors.deprecation.seneca_next_act,
-  })
+//   var si = this
 
-  return function(next: any) {
-    argsarr.push(next)
-    si.act.apply(si, argsarr)
-  }
-}
+//   si.log.warn({
+//     kind: 'notice',
+//     case: 'DEPRECATION',
+//     notice: Errors.deprecation.seneca_next_act,
+//   })
+
+//   return function(next: any) {
+//     argsarr.push(next)
+//     si.act.apply(si, argsarr)
+//   }
+// }
+
 
 function findpins(this: any) {
   var self = this
@@ -254,7 +256,7 @@ const Legacy = {
   copydata,
   recurse,
   argprops,
-  next_act,
+  // next_act,
   findpins,
   act_if,
   hasact,

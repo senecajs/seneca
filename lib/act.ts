@@ -67,7 +67,6 @@ exports.api_act = function() {
 }
 
 
-// TODO: write specific test cases for these
 const intern = (module.exports.intern = {
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
     let timedout = false
@@ -118,29 +117,20 @@ const intern = (module.exports.intern = {
           meta,
           action_reply
         )
-      } catch (e: any) {
+      }
+      catch (e: any) {
+        const ex = opts.error.identify(e) ? e : new Error(inspect(e))
+        intern.handle_reply(opts, meta, actctxt, actmsg, ex)
+        complete()
 
-        // TODO: remove
-        for (let intercept of instance.private$.intercept.act_error) {
-          intercept.call(instance, {
-            error: e,
-            execspec,
-            opts,
-            actctxt,
-            actmsg,
-            meta,
-            action_reply
-          })
-        }
-
-        if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
-          const ex = opts.error.identify(e) ? e : new Error(inspect(e))
-          intern.handle_reply(opts, meta, actctxt, actmsg, ex)
-          complete()
-        }
-        else {
-          throw e
-        }
+        // if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
+        //   const ex = opts.error.identify(e) ? e : new Error(inspect(e))
+        //   intern.handle_reply(opts, meta, actctxt, actmsg, ex)
+        //   complete()
+        // }
+        // else {
+        //   throw e
+        // }
       }
     }
 
@@ -210,9 +200,9 @@ const intern = (module.exports.intern = {
     }
 
     // backwards compatibility for Seneca 3.x transports
-    if (null != origmsg.transport$) {
-      actmsg.transport$ = origmsg.transport$
-    }
+    // if (null != origmsg.transport$) {
+    //   actmsg.transport$ = origmsg.transport$
+    // }
 
     return actmsg
   },
@@ -270,22 +260,24 @@ const intern = (module.exports.intern = {
 
     if (data.has_callback) {
       try {
-        if (opts.legacy.meta_arg_remove) {
-          // Non-existence != undefined, so must be a separate call.
-          reply.call(delegate, data.err, data.res)
-        } else {
-          reply.call(delegate, data.err, data.res, data.meta)
-        }
+        // if (opts.legacy.meta_arg_remove) {
+        //   // Non-existence != undefined, so must be a separate call.
+        //   reply.call(delegate, data.err, data.res)
+        // } else {
+        reply.call(delegate, data.err, data.res, data.meta)
+        //}
       } catch (thrown_obj: any) {
-        if (opts.error.capture.callback) {
-          intern.callback_error(delegate, thrown_obj, actctxt, data)
-        }
-        else {
-          if ('object' === typeof thrown_obj) {
-            thrown_obj.$$seneca_callback_error$$ = true
-          }
-          throw thrown_obj
-        }
+        intern.callback_error(delegate, thrown_obj, actctxt, data)
+
+        // if (opts.error.capture.callback) {
+        //   intern.callback_error(delegate, thrown_obj, actctxt, data)
+        // }
+        // else {
+        //   if ('object' === typeof thrown_obj) {
+        //     thrown_obj.$$seneca_callback_error$$ = true
+        //   }
+        //   throw thrown_obj
+        // }
       }
     }
   },
@@ -395,13 +387,13 @@ const intern = (module.exports.intern = {
       data.msg.meta$ = meta
     }
 
-    if (opts.legacy.meta_arg_remove) {
-      // Non-existence != undefined, so must be a separate call.
-      return actdef.func.call(delegate, data.msg, data.reply)
-    }
-    else {
-      return actdef.func.call(delegate, data.msg, data.reply, data.meta)
-    }
+    // if (opts.legacy.meta_arg_remove) {
+    //   // Non-existence != undefined, so must be a separate call.
+    //   return actdef.func.call(delegate, data.msg, data.reply)
+    // }
+    // else {
+    return actdef.func.call(delegate, data.msg, data.reply, data.meta)
+    //}
   },
 
 

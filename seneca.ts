@@ -103,10 +103,10 @@ const option_defaults = {
     capture: {
 
       // Capture errors in action callbacks (false throws uncaught).
-      callback: true,
+      // callback: true,
 
       // Capture errors in actions and pass to callback (false throws uncaught).
-      action: true,
+      // action: true,
     },
 
     // Custom function to identify thrown errors.
@@ -327,7 +327,7 @@ const option_defaults = {
     meta: false,
 
     // Remove meta argument in action arguments and callbacks.
-    meta_arg_remove: false,
+    // meta_arg_remove: false,
 
     // Use seneca-transport plugin.
     transport: true,
@@ -380,8 +380,8 @@ const option_defaults = {
 
   // Legacy
   reload$: Skip(Boolean),
-  actcache: Any(),
-  seneca: Any(),
+  // actcache: Any(),
+  // seneca: Any(),
 }
 
 
@@ -401,9 +401,6 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
-  // Deprecated Legacy (make internal or rename)
-  // Optioner: Optioner,
-  // Joi: Joi,
   deepextend: Common.deep,
   parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
@@ -413,10 +410,10 @@ const seneca_util = {
   resolve_option: Common.resolve_option,
 
   // Legacy (deprecate and remove)
-  argprops: Legacy.argprops,
-  recurse: Legacy.recurse,
-  copydata: Legacy.copydata,
-  nil: Legacy.nil,
+  // argprops: Legacy.argprops,
+  // recurse: Legacy.recurse,
+  // copydata: Legacy.copydata,
+  // nil: Legacy.nil,
   flatten: Legacy.flatten,
 }
 
@@ -933,7 +930,7 @@ function make_private() {
       }
     },
     ignore_plugins: {},
-    intercept: { act_error: [] }
+    // intercept: { act_error: [] }
   }
 }
 

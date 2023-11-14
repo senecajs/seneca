@@ -25,7 +25,6 @@ declare const _default: {
     plugin_init_timeout: string;
     export_not_found: string;
     store_cmd_missing: string;
-    sub_function_catch: string;
     sub_inward_action_failed: string;
     sub_outward_action_failed: string;
     ready_failed: string;
@@ -45,9 +44,6 @@ declare const _default: {
     action_timeout: string;
     use_no_args: string;
     act_invalid_args: string;
-    deprecation: {
-        seneca_parent: string;
-        seneca_next_act: string;
-    };
+    deprecation: {};
 };
 export default _default;

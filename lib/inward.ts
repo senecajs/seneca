@@ -375,21 +375,21 @@ function inward_prepare_delegate(spec: any) {
   data.reply = data.reply.bind(ctx.seneca)
   data.reply.seneca = ctx.seneca
 
-  const reply = data.reply
+  // const reply = data.reply
 
-  // DEPRECATE
-  ctx.seneca.good = function good(out: any) {
-    ctx.seneca.log.warn(
-      'seneca.good is deprecated and will be removed in 4.0.0'
-    )
-    reply(null, out)
-  }
+  // // DEPRECATE
+  // ctx.seneca.good = function good(out: any) {
+  //   ctx.seneca.log.warn(
+  //     'seneca.good is deprecated and will be removed in 4.0.0'
+  //   )
+  //   reply(null, out)
+  // }
 
-  // DEPRECATE
-  ctx.seneca.bad = function bad(err: any) {
-    ctx.seneca.log.warn('seneca.bad is deprecated and will be removed in 4.0.0')
-    reply(err)
-  }
+  // // DEPRECATE
+  // ctx.seneca.bad = function bad(err: any) {
+  //   ctx.seneca.log.warn('seneca.bad is deprecated and will be removed in 4.0.0')
+  //   reply(err)
+  // }
 
   ctx.seneca.reply = function reply(err: any, out: any) {
     reply(err, out)

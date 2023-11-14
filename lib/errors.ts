@@ -94,9 +94,9 @@ export default {
     '"<%=cmd%>": "<%=store%>".',
 
   // TODO: remove
-  sub_function_catch:
-    'Pattern subscription function threw: <%=message%> on ' +
-    'message: <%=msg%>, result: <%=result%>.',
+  // sub_function_catch:
+  //   'Pattern subscription function threw: <%=message%> on ' +
+  //   'message: <%=msg%>, result: <%=result%>.',
 
   sub_inward_action_failed:
     'Subscription action on inward pattern <%=pattern%>' +
@@ -161,10 +161,10 @@ export default {
     'arguments were: <%=msg%>.',
 
   deprecation: {
-    seneca_parent:
-      'Seneca.parent has been renamed to Seneca.prior. Seneca.parent will be removed in Seneca 4.x.',
+    // seneca_parent:
+    //   'Seneca.parent has been renamed to Seneca.prior. Seneca.parent will be removed in Seneca 4.x.',
 
-    seneca_next_act: 'Seneca.next_act will be removed in Seneca 3.x',
+    // seneca_next_act: 'Seneca.next_act will be removed in Seneca 3.x',
   }
 }
 

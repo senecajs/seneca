@@ -74,22 +74,22 @@ describe('legacy', function () {
     fin()
   })
 
-  it('argprops', function (fin) {
-    var out = Seneca.util.argprops(
-      { a: 1, b: 2, c: 3 },
-      { b: 22, c: 33, d: 4 },
-      { c: 333 },
-      ['d'],
-    )
-    expect(out).to.include({ a: 1, b: 22, c: 333 })
+  // it('argprops', function (fin) {
+  //   var out = Seneca.util.argprops(
+  //     { a: 1, b: 2, c: 3 },
+  //     { b: 22, c: 33, d: 4 },
+  //     { c: 333 },
+  //     ['d'],
+  //   )
+  //   expect(out).to.include({ a: 1, b: 22, c: 333 })
 
-    out = Seneca.util.argprops({}, { d: 1 }, {}, 'd')
-    expect('{}').to.equal(Util.inspect(out))
+  //   out = Seneca.util.argprops({}, { d: 1 }, {}, 'd')
+  //   expect('{}').to.equal(Util.inspect(out))
 
-    out = Seneca.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
-    expect('{}').to.equal(Util.inspect(out))
-    fin()
-  })
+  //   out = Seneca.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
+  //   expect('{}').to.equal(Util.inspect(out))
+  //   fin()
+  // })
 
   it('router', function (fin) {
     expect(Seneca.util.router()).exists()
@@ -114,23 +114,25 @@ describe('legacy', function () {
     fin()
   })
 
-  it('meta_arg_remove', function (fin) {
-    Seneca({ legacy: { meta_arg_remove: true } })
-      .test(fin)
-      .add('a:1', (msg, reply, meta) => {
-        expect(msg).includes({ x: 2 })
-        expect(reply).function()
-        expect(meta).not.exists()
-        reply({ y: 3 })
-      })
-      .act('a:1', { x: 2 }, (err, out, meta) => {
-        expect(err).not.exists()
-        expect(out).includes({ y: 3 })
-        expect(meta).not.exists()
-        fin()
-      })
-  })
+  
+  // it('meta_arg_remove', function (fin) {
+  //   Seneca({ legacy: { meta_arg_remove: true } })
+  //     .test(fin)
+  //     .add('a:1', (msg, reply, meta) => {
+  //       expect(msg).includes({ x: 2 })
+  //       expect(reply).function()
+  //       expect(meta).not.exists()
+  //       reply({ y: 3 })
+  //     })
+  //     .act('a:1', { x: 2 }, (err, out, meta) => {
+  //       expect(err).not.exists()
+  //       expect(out).includes({ y: 3 })
+  //       expect(meta).not.exists()
+  //       fin()
+  //     })
+  // })
 
+  
   it('act_if', function (done) {
     var si = Seneca({ log: 'silent' })
 

@@ -25,10 +25,6 @@ declare namespace init {
         pincanon: any;
         router: () => any;
         resolve_option: any;
-        argprops: any;
-        recurse: any;
-        copydata: any;
-        nil: any;
         flatten: any;
     };
     var valid: Gubu;
@@ -51,10 +47,6 @@ declare namespace init {
                 pincanon: any;
                 router: () => any;
                 resolve_option: any;
-                argprops: any;
-                recurse: any;
-                copydata: any;
-                nil: any;
                 flatten: any;
             };
         };

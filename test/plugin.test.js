@@ -298,17 +298,17 @@ describe('plugin', function () {
   })
 
   // REMOVE in 4.x
-  it('legacy-options', function (fin) {
-    var si = Seneca({ log: 'silent' }).quiet()
+  // it('legacy-options', function (fin) {
+  //   var si = Seneca({ log: 'silent' }).quiet()
 
-    si.use('options', { a: 1 })
-    expect(si.export('options').a).equal(1)
+  //   si.use('options', { a: 1 })
+  //   expect(si.export('options').a).equal(1)
 
-    si.use('options', require('./stubs/plugin/options.file.js'))
-    expect(si.export('options').b).equal(2)
+  //   si.use('options', require('./stubs/plugin/options.file.js'))
+  //   expect(si.export('options').b).equal(2)
 
-    fin()
-  })
+  //   fin()
+  // })
 
   // TODO: move to transport
   /*
