@@ -254,7 +254,6 @@ describe('explain', function () {
     expect(topexp_off.length).equal(2)
   })
 
-
   // TODO: move to @seneca/transport
   // it('explain-transport', { timout: 22222 * tmx }, async () => {
   //   var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test()

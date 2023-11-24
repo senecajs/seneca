@@ -109,11 +109,10 @@ describe('act', function () {
     fin()
   })
 
-  
   it('validate-action-params', function (fin) {
     let s0 = Seneca({ legacy: false })
       .test()
-        .quiet()
+      .quiet()
       .add('a:1', { x: Number }, function (msg, reply) {
         reply({ x: 1 + msg.x })
       })
@@ -124,43 +123,41 @@ describe('act', function () {
       s0.act('a:1,x:s', function (err, out) {
         expect(err.code).equal('act_invalid_msg')
         expect(err.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "x" with string "s" because the string is not of type number.; message content was: {a:1,x:s}.'
+          'seneca: Action a:1 received an invalid message; Validation failed for property "x" with string "s" because the string is not of type number.; message content was: {a:1,x:s}.',
         )
         fin()
       })
     })
   })
 
-
   it('direct-basic', async () => {
-    let si = await Seneca({legacy:false}).test().ready()
+    let si = await Seneca({ legacy: false }).test().ready()
     let log = []
 
     si.add('a:1', function a1(msg, reply) {
       log.push('msg-exec')
-      reply({x:msg.x+1})
+      reply({ x: msg.x + 1 })
     })
-    
+
     log.push('pre-msg')
     si.act('a:1,x:1,direct$:true', function (err, out) {
       expect(err).null()
-      log.push('reply:'+JSON.stringify(out))
+      log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
     // console.log('log', log)
-    expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg' ])
+    expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
   })
 
-
   it('direct-no-reply', async () => {
-    let si = await Seneca({legacy:false}).test().ready()
+    let si = await Seneca({ legacy: false }).test().ready()
     let log = []
 
     si.add('a:1', function a1(msg) {
       log.push(`msg0:a1:x=${msg.x}`)
     })
-    
+
     log.push('pre-msg')
     si.act('a:1,x:1,direct$:true')
     log.push('post-msg')
@@ -169,30 +166,27 @@ describe('act', function () {
     expect(log).equal(['pre-msg', 'msg0:a1:x=1', 'post-msg'])
   })
 
-
   it('direct-child-actions', async () => {
-    let si = await Seneca({legacy:false}).test().ready()
+    let si = await Seneca({ legacy: false }).test().ready()
     let log = []
 
-    si
-      .add('a:1', function a1(msg, reply) {
-        log.push(`msg0:a1:x=${msg.x}`)
-        reply({x:msg.x+1})
-      })
-      .add('b:1', function b1(msg, reply) {
-        log.push(`msg0:b1:x=${msg.x}`)
+    si.add('a:1', function a1(msg, reply) {
+      log.push(`msg0:a1:x=${msg.x}`)
+      reply({ x: msg.x + 1 })
+    }).add('b:1', function b1(msg, reply) {
+      log.push(`msg0:b1:x=${msg.x}`)
 
-        this.act('a:1',{x:msg.x},function(err, out) {
-          expect(err).equal(null)
-          log.push(`msg1:b1:x=${out.x}`)
-          reply({x:out.x*2})
-        })
+      this.act('a:1', { x: msg.x }, function (err, out) {
+        expect(err).equal(null)
+        log.push(`msg1:b1:x=${out.x}`)
+        reply({ x: out.x * 2 })
       })
-    
+    })
+
     log.push('pre-msg')
     si.act('b:1,x:1,direct$:true', function (err, out) {
       expect(err).equal(null)
-      log.push('reply:'+JSON.stringify(out))
+      log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
@@ -203,33 +197,30 @@ describe('act', function () {
       'msg0:a1:x=1',
       'msg1:b1:x=2',
       'reply:{"x":4}',
-      'post-msg'
+      'post-msg',
     ])
   })
 
-
   it('direct-prior-actions', async () => {
-    let si = await Seneca({legacy:false}).test().ready()
+    let si = await Seneca({ legacy: false }).test().ready()
     let log = []
 
-    si
-      .add('a:1', function a1p1(msg, reply) {
-        log.push(`msg0:a1p1:x=${msg.x}`)
-        reply({x:msg.x+1})
+    si.add('a:1', function a1p1(msg, reply) {
+      log.push(`msg0:a1p1:x=${msg.x}`)
+      reply({ x: msg.x + 1 })
+    }).add('a:1', function a1(msg, reply) {
+      log.push(`msg0:a1:x=${msg.x}`)
+      this.prior(msg, function (err, out) {
+        expect(err).equal(null)
+        log.push(`msg1:a1:x=${out.x}`)
+        reply({ x: out.x * 2 })
       })
-      .add('a:1', function a1(msg, reply) {
-        log.push(`msg0:a1:x=${msg.x}`)
-        this.prior(msg, function(err, out) {
-          expect(err).equal(null)
-          log.push(`msg1:a1:x=${out.x}`)
-          reply({x:out.x*2})
-        })
-      })
-    
+    })
+
     log.push('pre-msg')
     si.act('a:1,x:1,direct$:true', function (err, out) {
       expect(err).equal(null)
-      log.push('reply:'+JSON.stringify(out))
+      log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
@@ -240,59 +231,57 @@ describe('act', function () {
       'msg0:a1p1:x=1',
       'msg1:a1:x=2',
       'reply:{"x":4}',
-      'post-msg'
+      'post-msg',
     ])
   })
 
-
   it('direct-sequence', async () => {
-    let si = await Seneca({legacy:false}).use('promisify').test().ready()
+    let si = await Seneca({ legacy: false }).use('promisify').test().ready()
     let log = []
 
-    si
-      .add('a:1', function a1(msg, reply) {
-        log.push(`msg0:a1:x=${msg.x}`)
-        reply({x:msg.x+1})
-      })
+    si.add('a:1', function a1(msg, reply) {
+      log.push(`msg0:a1:x=${msg.x}`)
+      reply({ x: msg.x + 1 })
+    })
       .add('b:1', function b1(msg, reply) {
         log.push(`msg0:b1:x=${msg.x}`)
-        reply({x:msg.x+2})
+        reply({ x: msg.x + 2 })
       })
       .add('c:1', function c1(msg, reply) {
         log.push(`msg0:c1:x=${msg.x}`)
-        reply({x:msg.x+3})
+        reply({ x: msg.x + 3 })
       })
       .add('d:1', function d1(msg) {
         log.push(`msg0:d1:x=${msg.x}`)
-        this.act('a:1',{x:1})
-        this.act('b:1',{x:1})
-        this.act('c:1',{x:1})
+        this.act('a:1', { x: 1 })
+        this.act('b:1', { x: 1 })
+        this.act('c:1', { x: 1 })
         log.push(`msg1:d1:x=${msg.x}`)
-        return {x:msg.x+4}
+        return { x: msg.x + 4 }
       })
-    
+
     log.push('seq0')
     si.act('a:1,x:1,direct$:true', function (err, out) {
       expect(err).null()
-      log.push('reply0:'+JSON.stringify(out))
+      log.push('reply0:' + JSON.stringify(out))
     })
-    
+
     log.push('seq1')
     si.act('b:1,x:1,direct$:true', function (err, out) {
       expect(err).null()
-      log.push('reply1:'+JSON.stringify(out))
+      log.push('reply1:' + JSON.stringify(out))
     })
-    
+
     log.push('seq2')
     si.act('c:1,x:1,direct$:true', function (err, out) {
       expect(err).null()
-      log.push('reply2:'+JSON.stringify(out))
+      log.push('reply2:' + JSON.stringify(out))
     })
-    
+
     log.push('seq3')
     si.act('d:1,x:1,direct$:true', function (err, out) {
       expect(err).null()
-      log.push('reply3:'+JSON.stringify(out))
+      log.push('reply3:' + JSON.stringify(out))
     })
     log.push('end')
 
@@ -314,8 +303,7 @@ describe('act', function () {
       'msg0:c1:x=1',
       'msg1:d1:x=1',
       'reply3:{"x":5}',
-      'end'
+      'end',
     ])
   })
-
 })

@@ -215,7 +215,7 @@ describe('plugin', function () {
           a: 1,
         },
       },
-      { b: 1 }
+      { b: 1 },
     )
 
     s0.quiet()
@@ -690,10 +690,8 @@ describe('plugin', function () {
   // })
 
   it('plugin actions receive errors in callback function', function (fin) {
-    var seneca = Seneca()
-        .test()
-        .quiet()
-    
+    var seneca = Seneca().test().quiet()
+
     seneca.fixedargs['fatal$'] = false
 
     seneca.use(function service() {

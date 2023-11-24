@@ -15,6 +15,7 @@ declare namespace init {
         Patrun: typeof Patrun;
         Gex: typeof Gex;
         Gubu: Gubu;
+        pins: any;
         clean: any;
         pattern: any;
         print: any;
@@ -37,6 +38,7 @@ declare namespace init {
                 Patrun: typeof Patrun;
                 Gex: typeof Gex;
                 Gubu: Gubu;
+                pins: any;
                 clean: any;
                 pattern: any;
                 print: any;

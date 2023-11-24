@@ -1,18 +1,18 @@
-/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Assert = require('assert')
+const Assert = require('assert')
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
-var Common = require('../lib/common')
+const Common = require('../lib/common')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var assert = Assert
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const assert = Assert
+const expect = Code.expect
 
-var Shared = require('./shared')
-var it = Shared.make_it(lab)
+const Shared = require('./shared')
+const it = Shared.make_it(lab)
 
 describe('common', function () {
   it('stringify', function (fin) {
@@ -22,23 +22,6 @@ describe('common', function () {
   })
 
   it('misc', function (fin) {
-    expect(Common.boolify(true)).to.equal(true)
-    expect(Common.boolify(false)).to.equal(false)
-    expect(Common.boolify('true')).to.equal(true)
-    expect(Common.boolify('false')).to.equal(false)
-    expect(Common.boolify(1)).to.equal(true)
-    expect(Common.boolify(0)).to.equal(false)
-
-    expect(Common.boolify()).to.equal(false)
-    expect(Common.boolify(null)).to.equal(false)
-    expect(Common.boolify(NaN)).to.equal(false)
-    expect(Common.boolify(void 0)).to.equal(false)
-    expect(Common.boolify(new Date())).to.equal(false)
-    expect(Common.boolify(/a/)).to.equal(false)
-
-    expect(Common.boolify('{')).to.equal(false)
-    expect(Common.boolify('}')).to.equal(false)
-
     expect(Common.resolve_option(1)).equal(1)
     expect(Common.resolve_option('a')).equal('a')
     expect(

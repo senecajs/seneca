@@ -3,8 +3,6 @@
 
 import { Legacy } from './legacy'
 
-const Common = require('./common')
-
 function addActions(instance: any) {
   instance.stats = make_action_seneca_stats(instance.private$)
 
@@ -65,7 +63,7 @@ function make_action_seneca_stats(private$: any) {
       stats.now = new Date(stats.now).toISOString()
       stats.start = new Date(stats.start).toISOString()
 
-      var summary = null == msg.summary || Common.boolify(msg.summary)
+      var summary = null == msg.summary || true === msg.summary
 
       if (summary) {
         stats.actmap = void 0

@@ -42,7 +42,6 @@ function testact(msg, reply) {
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 
 describe('transport', function () {
-
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
@@ -150,27 +149,26 @@ describe('transport', function () {
     })
   })
   */
-  
-  
+
   it('transport-exact-single', test_opts, function (done) {
     const st = make_simple_transport()
 
     Seneca({ tag: 'srv', timeout: 5555 })
       .test(done)
-    .use(st)
+      .use(st)
       .add('foo:1', function (msg, reply, meta) {
         // ensure action id is transferred for traceability
         expect('aa/BB').to.equal(meta.id)
         testact.call(this, msg, reply)
       })
-    .listen({ type: 'simple', pin: 'foo:1' })
+      .listen({ type: 'simple', pin: 'foo:1' })
       .ready(function () {
         //console.log(this.private$.actrouter)
 
         Seneca({ tag: 'cln', timeout: 22222 * tmx })
           .test(done)
-        .use(st)
-        .client({ type: 'simple', pin: 'foo:1' })
+          .use(st)
+          .client({ type: 'simple', pin: 'foo:1' })
           //.client({ port: 62222, pin: 'foo:1' })
           .act('foo:1,actid$:aa/BB', function (err, out) {
             expect(err).to.not.exist()
@@ -308,7 +306,6 @@ describe('transport', function () {
   })
   */
 
-  
   it('transport-pins-notdef', test_opts, function (fin) {
     const st = make_simple_transport()
 
@@ -770,5 +767,4 @@ describe('transport', function () {
     },
   )
   */
-  
 })

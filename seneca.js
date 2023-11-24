@@ -295,6 +295,7 @@ const seneca_util = {
     Patrun: patrun_1.Patrun,
     Gex: patrun_1.Gex,
     Gubu: gubu_1.Gubu,
+    pins: Common.pins,
     clean: Common.clean,
     pattern: Common.pattern,
     print: Common.print,

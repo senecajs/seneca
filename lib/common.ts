@@ -17,9 +17,6 @@ import Errors from './errors'
 
 
 
-// const Argu = MakeArgu('seneca')
-
-
 const error =
   (exports.error =
     exports.eraro =
@@ -28,6 +25,16 @@ const error =
       msgmap: Errors,
       override: true,
     }))
+
+
+function pins(inpin: any): Record<string, any>[] {
+  return (Array.isArray(inpin) ? inpin : [inpin])
+    .reduce((a: any, p: any) => (a.push(
+      'string' === typeof p ? p.split(';').map(pp => Jsonic(pp)) : p
+    ), a), [])
+    .filter((n: any) => null != n)
+    .flat()
+}
 
 
 function promiser(context: any, callback?: any) {
@@ -100,15 +107,6 @@ function make_plugin_key(plugin: any, origtag: any) {
   let key = name + (tag ? '$' + tag : '')
 
   return key
-}
-
-
-function boolify(v: any) {
-  try {
-    return !!JSON.parse(v)
-  } catch (e) {
-    return false
-  }
 }
 
 
@@ -767,14 +765,12 @@ class ActHistory {
 
 
 export {
+  pins,
   promiser,
   stringify,
   wrap_error,
   make_plugin_key,
-  boolify,
   parse_jsonic,
-  // parse_pattern,
-  // build_message,
   pattern,
   pincanon,
   noop,
@@ -790,7 +786,6 @@ export {
   make_trace_desc,
   history,
   print,
-  // parsePattern,
   tagnid,
   inspect,
   error,

@@ -114,7 +114,6 @@ describe('legacy', function () {
     fin()
   })
 
-  
   // it('meta_arg_remove', function (fin) {
   //   Seneca({ legacy: { meta_arg_remove: true } })
   //     .test(fin)
@@ -132,7 +131,6 @@ describe('legacy', function () {
   //     })
   // })
 
-  
   it('act_if', function (done) {
     var si = Seneca({ log: 'silent' })
 

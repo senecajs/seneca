@@ -395,6 +395,7 @@ const seneca_util = {
   Gex,
   Gubu,
 
+  pins: Common.pins,
   clean: Common.clean,
   pattern: Common.pattern,
   print: Common.print,

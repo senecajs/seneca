@@ -60,7 +60,6 @@ describe('error', function () {
 
   it('types', types)
 
-
   function response_is_error(fin) {
     const si = Seneca({ log: 'silent' })
 
@@ -353,7 +352,7 @@ describe('error', function () {
       errhandler: function (err) {
         try {
           err = err.meta$.err
-          
+
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
           assert.ok(err.message.indexOf('AAA' + aI) !== -1)
@@ -365,8 +364,7 @@ describe('error', function () {
           }
 
           done()
-        }
-        catch (e) {
+        } catch (e) {
           // console.log(e)
           done(e)
           return true
@@ -400,7 +398,7 @@ describe('error', function () {
           if (aI === 1) {
             try {
               err = err.meta$.err
-              
+
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
@@ -415,22 +413,19 @@ describe('error', function () {
               si.act('a:1', function () {
                 try {
                   assert.fail()
-                }
-                catch (e) {
+                } catch (e) {
                   // console.log(e)
                   done(e)
                 }
               })
-            }
-            catch (e) {
+            } catch (e) {
               // console.log(e)
               done(e)
             }
           }
         })
         si.act('a:1')
-      }
-      catch (e) {
+      } catch (e) {
         // console.log(e)
         done(e)
       }
@@ -446,7 +441,7 @@ describe('error', function () {
       errhandler: function (err) {
         try {
           err = err.meta$.err
-          
+
           assert.equal('act_execute', err.code)
           assert.equal('a:1', err.details.pattern)
           assert.ok(err.message.indexOf('AAA' + aI) !== -1)
@@ -490,7 +485,7 @@ describe('error', function () {
           if (aI === 1) {
             try {
               err = err.meta$.err
-              
+
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code)
               assert.equal('a:1', err.details.pattern)
@@ -719,8 +714,6 @@ describe('error', function () {
     assert.deepEqual({ BAR: 1 }, err.details)
   }
 
-
-  
   function types(fin) {
     const si = Seneca({ log: 'silent' })
 
@@ -739,6 +732,6 @@ describe('error', function () {
       // console.log('AAA', err)
       expect(out).not.exist()
       // expect(err.code).equal('act_execute')
-    })      
+    })
   }
 })

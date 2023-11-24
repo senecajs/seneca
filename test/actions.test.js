@@ -36,7 +36,7 @@ describe('actions', function () {
     })
   })
   */
-  
+
   it('cmd_stats', function (fin) {
     var si = Seneca().add('a:1').act('a:1')
 
