@@ -878,11 +878,6 @@ intern.resolve_config = function(config: any, options: any) {
   // Default transport is web
   out.type = out.type || 'web'
 
-  // DEPRECATED: Remove in 4.0
-  // if (out.type === 'direct' || out.type === 'http') {
-  //  out.type = 'web'
-  // }
-
   const base = options[out.type] || {}
 
   out = Object.assign({}, base, out)
