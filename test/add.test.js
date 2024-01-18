@@ -263,7 +263,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "undefined" because the value is required.; message content was: { a: 1 }.',
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "undefined" because the value is required.; message content was: {a:1}.',
         )
         fin()
       })
@@ -287,7 +287,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with string "q" because the string is not of type number.; message content was: { a: 1, b: \'q\' }.',
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with string "q" because the string is not of type number.; message content was: {a:1,b:q}.',
         )
         fin()
       })
@@ -311,7 +311,7 @@ describe('add', function () {
         expect(o).not.exist()
         expect(e.code).equal('act_invalid_msg')
         expect(e.message).equal(
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "undefined" because the value is required.; message content was: { a: 2, d: {} }.',
+          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "undefined" because the value is required.; message content was: {a:2,d:{}}.',
         )
         fin()
       })

@@ -43,7 +43,7 @@ const { error, deep } = Common;
 // Seneca options.
 const option_defaults = {
     // Tag this Seneca instance, will be appended to instance identifier.
-    tag: '-',
+    tag: '-', // TODO: FIX: Gubu api.test.js#292
     // Standard timeout for actions.
     timeout: 22222,
     // Standard length of identifiers for actions.

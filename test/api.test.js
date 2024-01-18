@@ -43,7 +43,7 @@ describe('api', function () {
       not_an_arg: 1,
     })
     expect(e0.code).equal('test_args')
-    expect(e0.message).equal('seneca: Test args foo { bar: 1 }.')
+    expect(e0.message).equal('seneca: Test args foo {bar:1}.')
     expect(e0.details).equal({ arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
     expect(e0.seneca).true()
 
@@ -56,7 +56,7 @@ describe('api', function () {
         si.fail('test_args', { arg0: 'foo', arg1: { bar: 1 }, not_an_arg: 1 })
       } catch (err) {
         expect(err.code).equal('test_args')
-        expect(err.message).equal('seneca: Test args foo { bar: 1 }.')
+        expect(err.message).equal('seneca: Test args foo {bar:1}.')
         expect(err.details).equal({
           arg0: 'foo',
           arg1: { bar: 1 },
@@ -81,7 +81,7 @@ describe('api', function () {
             })
           } catch (err) {
             expect(err.code).equal('test_args')
-            expect(err.message).equal('seneca: Test args foo { bar: 1 }.')
+            expect(err.message).equal('seneca: Test args foo {bar:1}.')
             expect(err.details).equal({
               arg0: 'foo',
               arg1: { bar: 1 },

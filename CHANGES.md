@@ -1,3 +1,8 @@
+## 3.34.0 2024-01-18
+
+* Internal plugin description now includes Gubu shape for plugin options.
+
+
 ## 3.33.0 2023-11-05
 
 * Remove norma library, replace functionality with update gubu library.

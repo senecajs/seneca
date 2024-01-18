@@ -1,3 +1,4 @@
+/// <reference types="node" />
 declare function wrap(this: any, pin: any, actdef: any, wrapper: any): any;
 declare function fix(this: any, patargs: any, msgargs: any, custom: any): any;
 declare function options(this: any, options: any, chain: any): any;
