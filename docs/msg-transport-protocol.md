@@ -71,12 +71,12 @@ structure:
 
 The `trk` array provides a history of the message flow through
 services. When an inbound message causes further outbound messages,
-the Seneca instance where the new outbound messages orginate is added
+the Seneca instance where the new outbound messages originate is added
 to the tracking array. Each entry in `trk` represents exactly one
 outbound request (the message), and at most one response.
 
 The return path is a HTTP end point, by default, and is optional. The
-`urn` is the full adress of the end point, suitable for use in a HTTP
+`urn` is the full address of the end point, suitable for use in a HTTP
 client. Transports may define additional return path meta data (for
 example, response topic name on a message queue).
 
@@ -125,8 +125,8 @@ finally acted on the message.
 
 There may be multiple responses to a given outbound message. By
 default only the first is provided to the response callback. to
-recieve all responses, use the `meta$: { multiple: true }` option when
-submitting the message. The repsonse callback will be called once for
+receive all responses, use the `meta$: { multiple: true }` option when
+submitting the message. The response callback will be called once for
 each message, up to some limit in time or message volume.
 
 The additional entries to the `tms` array can be used to measure local
