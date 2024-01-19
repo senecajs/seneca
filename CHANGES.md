@@ -1,3 +1,8 @@
+## 3.34.1 2024-01-18
+
+* Remove lodash.template as a sub-dependency.
+
+
 ## 3.34.0 2024-01-18
 
 * Internal plugin description now includes Gubu shape for plugin options.

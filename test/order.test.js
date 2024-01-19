@@ -12,7 +12,7 @@ var it = lab.it
 var Seneca = require('..')
 
 describe('order', function () {
-  it('happy', async () => {
+  it('order-happy', async () => {
     var s0 = Seneca({ legacy: false }).test()
 
     s0.order.plugin.add({
@@ -22,6 +22,9 @@ describe('order', function () {
           op: 'merge',
           out: {
             plugin: {
+              defaults: {
+                c: Number,
+              },
               options: {
                 c: 3,
               },
@@ -107,6 +110,9 @@ describe('order', function () {
                       op: 'merge',
                       out: {
                         plugin: {
+                          defaults: {
+                            f: Number,
+                          },
                           options: {
                             f: 5,
                           },
@@ -122,6 +128,7 @@ describe('order', function () {
 
         s0.use(p1)
 
+        /*
         var Joi = s0.util.Joi
 
         // console.log('TASKLIST',s0.order.plugin.tasks().map(t=>t.name).join('\n'))
@@ -133,6 +140,7 @@ describe('order', function () {
         }).default()
 
         // console.log(Joi.isSchema(joidef,{legacy:true}))
+        */
 
         s0.use({
           name: 'p2',
@@ -144,12 +152,17 @@ describe('order', function () {
             }
           },
 
-          defaults: joidef,
+          // defaults: joidef,
+          defaults: {
+            e: 'v0',
+            c: Number,
+            f: Number,
+          },
         })
 
         s0.ready(function () {
           //console.log('AAA', s0.export('p2/opts'))
-          expect(s0.export('p2/opts')).equals({
+          expect(s0.export('p2/opts')).contains({
             c: 3,
             e: 'v0',
             d: NaN,

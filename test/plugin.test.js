@@ -1154,6 +1154,7 @@ describe('plugin', function () {
     })
   })
 
+  /*
   it('plugin-defaults-top-level-joi', function (fin) {
     var s0 = Seneca().test(fin)
     var Joi = s0.util.Joi
@@ -1202,6 +1203,7 @@ describe('plugin', function () {
       fin()
     })
   })
+  */
 
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)

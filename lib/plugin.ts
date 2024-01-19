@@ -589,7 +589,9 @@ function make_tasks(): any {
         resolved_options = fullopts
       }
       else {
-        if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
+        let useJoi = so.legacy.options || Joi.isSchema(defaults_values, { legacy: true })
+
+        if (!useJoi) {
           // TODO: use Gubu.isShape
           let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
 
@@ -947,6 +949,11 @@ function make_intern() {
     prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
       if (Joi.isSchema(spec, { legacy: true })) {
         return spec
+      }
+
+      // Joi prototype missing, so just accept any options
+      else if (null != spec.$_root) {
+        return Joi.object({})
       }
 
       let joiobj = Joi.object()
