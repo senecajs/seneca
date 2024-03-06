@@ -1,4 +1,4 @@
-## 3.35.0 2024-03-06
+## 3.35.2 2024-03-06
 
 * Update use-plugin dependency to handle TypeScript default exports when loading plugins.
 
