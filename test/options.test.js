@@ -16,14 +16,14 @@ var it = lab.it
 var Seneca = require('..')
 
 describe('options', function () {
-  it('strict.find', async () => {
+  it('options-strict.find', async () => {
     await Seneca({ strict: { find: false } })
       .test()
       .act('foo:1')
       .ready()
   })
 
-  it('internal.routers', async () => {
+  it('options-internal.routers', async () => {
     await Seneca({
       internal: {
         actrouter: new Patrun({ gex: true }),
@@ -36,13 +36,13 @@ describe('options', function () {
       .ready()
   })
 
-  it('default_plugins', async () => {
+  it('options-default_plugins', async () => {
     await Seneca({ legacy: false, default_plugins: { foo: true } })
       .test()
       .ready()
   })
 
-  it('validate', async () => {
+  it('options-validate', async () => {
     expect(() => Seneca({ prior: { direct: 'BAD' } })).throws(/type/)
     expect(
       Seneca({ valid: { active: false }, prior: { direct: 'BAD' } }),

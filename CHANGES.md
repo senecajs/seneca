@@ -1,3 +1,18 @@
+## 3.35.0 2024-03-06
+
+* Update use-plugin dependency to handle TypeScript default exports when loading plugins.
+
+
+## 3.34.1 2024-01-18
+
+* Remove lodash.template as a sub-dependency.
+
+
+## 3.34.0 2024-01-18
+
+* Internal plugin description now includes Gubu shape for plugin options.
+
+
 ## 3.33.0 2023-11-05
 
 * Remove norma library, replace functionality with update gubu library.

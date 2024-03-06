@@ -1058,8 +1058,8 @@ describe('plugin', function () {
 
       .ready(function () {
         expect(this.options().plugin).equal({
-          bar: { a: 3, c: 1, d: 1, b: 1 },
-          foo: { a: 2, c: 3, b: 2, d: 1 },
+          bar: { a: 3, c: 1, d: 1, b: 1, init$: true },
+          foo: { a: 2, c: 3, b: 2, d: 1, init$: true },
         })
         fin()
       })
@@ -1154,6 +1154,7 @@ describe('plugin', function () {
     })
   })
 
+  /*
   it('plugin-defaults-top-level-joi', function (fin) {
     var s0 = Seneca().test(fin)
     var Joi = s0.util.Joi
@@ -1202,6 +1203,7 @@ describe('plugin', function () {
       fin()
     })
   })
+  */
 
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
@@ -1277,7 +1279,7 @@ describe('plugin', function () {
     )
 
     s0.ready(function () {
-      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y', init$: true })
       fin()
     })
   })

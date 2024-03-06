@@ -506,156 +506,6 @@ function make_tasks(): any {
     },
 
 
-    /*
-    pre_options: (spec: TaskSpec) => {
-      try {
-        let plugin: any = spec.data.plugin
-        // let delegate: any = spec.data.delegate
-        let seneca = spec.ctx.seneca
-
-        // let so = delegate.options()
-        let so = seneca.options()
-
-        let fullname = plugin.fullname
-        let defaults = plugin.defaults
-
-        let fullname_options = Object.assign(
-          {},
-
-          // DEPRECATED: remove in 4
-          so.legacy.top_plugins ? so[fullname] : {},
-
-          so.plugin[fullname],
-
-          // DEPRECATED: remove in 4
-          so.legacy.top_plugins ? so[fullname + '$' + plugin.tag] : {},
-
-          so.plugin[fullname + '$' + plugin.tag]
-        )
-
-        let shortname = fullname !== plugin.name ? plugin.name : null
-        if (!shortname && fullname.indexOf('seneca-') === 0) {
-          shortname = fullname.substring('seneca-'.length)
-        }
-
-        let shortname_options = Object.assign(
-          {},
-
-          // DEPRECATED: remove in 4
-          so.legacy.top_plugins ? so[fullname] : {},
-
-          so.plugin[shortname],
-
-          // DEPRECATED: remove in 4
-          so.legacy.top_plugins ? so[shortname + '$' + plugin.tag] : {},
-
-          so.plugin[shortname + '$' + plugin.tag]
-        )
-
-        let base: any = {}
-
-        // NOTE: plugin error codes are in their own namespaces
-        // TODO: test this!!!
-        let errors = plugin.errors || (plugin.define && plugin.define.errors)
-
-        if (errors) {
-          base.errors = errors
-        }
-
-        // TODO: these should deep merge
-        let fullopts = Object.assign(
-          base,
-          shortname_options,
-          fullname_options,
-          plugin.options || {}
-        )
-
-
-        let resolved_options: any = {}
-        // let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
-        let valid = seneca.valid // Gubu validator: https://github.com/rjrodger/gubu
-
-        let err: Error | undefined = void 0
-        let joi_schema: any = null
-        // let Joi = delegate.util.Joi
-        let Joi = seneca.util.Joi
-
-        let defaults_values =
-          ('function' === typeof (defaults) && !defaults.gubu) ?
-            defaults({ valid, Joi }) : defaults
-
-        if (null == defaults_values ||
-          0 === Object.keys(defaults_values).length ||
-          !so.valid.active ||
-          !so.valid.plugin
-        ) {
-          resolved_options = fullopts
-        }
-        else {
-          if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
-            // TODO: use Gubu.isShape
-            let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
-
-            // TODO: when Gubu supports merge, also merge if isShape
-            if (!isShape && null == defaults_values.errors && null != errors) {
-              defaults_values.errors = {}
-            }
-
-            let optionShape =
-              // isShape ? defaults_values : delegate.valid(defaults_values)
-              isShape ? defaults_values : seneca.valid(defaults_values)
-            let shapeErrors: any[] = []
-            resolved_options = optionShape(fullopts, { err: shapeErrors })
-
-            if (0 < shapeErrors.length) {
-              //err = delegate.error('invalid_plugin_option', {
-              err = seneca.error('invalid_plugin_option', {
-                name: fullname,
-                err_msg: shapeErrors.map((se: any) => se.t).join('; '),
-                options: fullopts,
-              })
-            }
-          }
-          else {
-            let joi_schema: any = intern.prepare_spec(
-              Joi,
-              defaults_values,
-              { allow_unknown: true },
-              {}
-            )
-
-            let joi_out = joi_schema.validate(fullopts)
-
-            if (joi_out.error) {
-              // err = delegate.error('invalid_plugin_option', {
-              err = seneca.error('invalid_plugin_option', {
-                name: fullname,
-                err_msg: joi_out.error.message,
-                options: fullopts,
-              })
-            }
-            else {
-              resolved_options = joi_out.value
-            }
-          }
-        }
-
-        return {
-          op: 'seneca_options',
-          err: err,
-          out: {
-            plugin: {
-              options: resolved_options,
-              options_schema: joi_schema
-            }
-          }
-        }
-      } catch (e: any) {
-        console.log('PREOPTS', e)
-      }
-    },
-    */
-
     options: (spec: TaskSpec) => {
       let plugin: any = spec.data.plugin
       let delegate: any =
@@ -725,6 +575,8 @@ function make_tasks(): any {
       let joi_schema: any = null
       let Joi = delegate.util.Joi
 
+      let optionsShape = null
+
       let defaults_values =
         ('function' === typeof (defaults) && !defaults.gubu) ?
           defaults({ valid, Joi }) : defaults
@@ -737,7 +589,9 @@ function make_tasks(): any {
         resolved_options = fullopts
       }
       else {
-        if (!so.legacy.options && !Joi.isSchema(defaults_values, { legacy: true })) {
+        let useJoi = so.legacy.options || Joi.isSchema(defaults_values, { legacy: true })
+
+        if (!useJoi) {
           // TODO: use Gubu.isShape
           let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
 
@@ -746,10 +600,14 @@ function make_tasks(): any {
             defaults_values.errors = {}
           }
 
-          let optionShape =
+          defaults_values.init$ =
+            null == defaults_values.init$ ? true : defaults_values.init$
+
+          optionsShape =
             isShape ? defaults_values : delegate.valid(defaults_values)
+
           let shapeErrors: any[] = []
-          resolved_options = optionShape(fullopts, { err: shapeErrors })
+          resolved_options = optionsShape(fullopts, { err: shapeErrors })
 
           if (0 < shapeErrors.length) {
             err = delegate.error('invalid_plugin_option', {
@@ -788,7 +646,8 @@ function make_tasks(): any {
         out: {
           plugin: {
             options: resolved_options,
-            options_schema: joi_schema
+            options_schema: joi_schema,
+            options_shape: optionsShape,
           }
         }
       }
@@ -1090,6 +949,11 @@ function make_intern() {
     prepare_spec: function(Joi: any, spec: any, opts: any, ctxt: any) {
       if (Joi.isSchema(spec, { legacy: true })) {
         return spec
+      }
+
+      // Joi prototype missing, so just accept any options
+      else if (null != spec.$_root) {
+        return Joi.object({})
       }
 
       let joiobj = Joi.object()
