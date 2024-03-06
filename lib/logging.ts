@@ -410,7 +410,7 @@ function build_test_log(seneca: any, data: any) {
       logb.push(data.data)
     }
 
-    if ('ERR' === data.case && data.err) { // && !data.err.$$logged$$) {
+    if ('ERR' === data.case && data.err) {
       logb.push(
         (data.err.code ? '\n\n' + data.err.code : '') +
         '\n\n' +
@@ -419,9 +419,6 @@ function build_test_log(seneca: any, data: any) {
         data.caller +
         '\n'
       )
-      // if ('object' === typeof data.err) {
-      //   data.err.$$logged$$ = () => { }
-      // }
     }
   } else if ('add' === data.kind) {
     logb.push(data.pattern)

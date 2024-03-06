@@ -180,7 +180,7 @@ const option_defaults = {
     env: One({}, null),
 
     // Length of data description in logs
-    datalen: 111,
+    datalen: 333,
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -577,7 +577,7 @@ function make_seneca(initial_opts?: any) {
   private$.translationrouter =
     start_opts.internal.translationrouter || Patrun({ gex: true })
 
-  let soi_subrouter = start_opts.internal.subrouter || {}
+  const soi_subrouter = start_opts.internal.subrouter || {}
   private$.subrouter = {
     // Check for legacy inward router
     inward: soi_subrouter.inward || Patrun({ gex: true }),

@@ -43,7 +43,7 @@ const { error, deep } = Common;
 // Seneca options.
 const option_defaults = {
     // Tag this Seneca instance, will be appended to instance identifier.
-    tag: '-',
+    tag: '-', // TODO: FIX: Gubu api.test.js#292
     // Standard timeout for actions.
     timeout: 22222,
     // Standard length of identifiers for actions.
@@ -429,7 +429,7 @@ function make_seneca(initial_opts) {
     private$.actrouter = start_opts.internal.actrouter || (0, patrun_1.Patrun)({ gex: true });
     private$.translationrouter =
         start_opts.internal.translationrouter || (0, patrun_1.Patrun)({ gex: true });
-    let soi_subrouter = start_opts.internal.subrouter || {};
+    const soi_subrouter = start_opts.internal.subrouter || {};
     private$.subrouter = {
         // Check for legacy inward router
         inward: soi_subrouter.inward || (0, patrun_1.Patrun)({ gex: true }),
