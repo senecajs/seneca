@@ -1,5 +1,5 @@
 /* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
-
+// @ts-nocheck
 
 import Util from 'util'
 

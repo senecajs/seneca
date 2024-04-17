@@ -1,4 +1,5 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
+// @ts-nocheck
 'use strict'
 
 
