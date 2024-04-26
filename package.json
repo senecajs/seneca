@@ -1,7 +1,8 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.35.2",
+  "version": "3.35.3",
+  "types": "seneca.d.ts",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
