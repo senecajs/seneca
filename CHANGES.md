@@ -1,3 +1,8 @@
+## 3.35.3 2024-04-26
+
+* Added types property to package.json to prevent compile warnngs. Thanks https://github.com/iolave!
+
+
 ## 3.35.2 2024-03-06
 
 * Update use-plugin dependency to handle TypeScript default exports when loading plugins.

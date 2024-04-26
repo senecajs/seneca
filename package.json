@@ -100,7 +100,7 @@
     "optioner": "^5.0.1",
     "ordu": "^2.2.0",
     "patrun": "^7.2.5",
-    "qs": "^6.11.2",
+    "qs": "^6.12.1",
     "rolling-stats": "^0.2.1",
     "seneca-transport": "^8.2.0",
     "use-plugin": "^11.0.0"
@@ -109,7 +109,7 @@
     "@hapi/code": "8",
     "@hapi/lab": "25",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.12.7",
     "async": "^3.2.5",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
@@ -123,6 +123,6 @@
     "seneca-joi": "^7.0.2",
     "seneca-promisify": "^3.7.1",
     "summary": "^2.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   }
 }
