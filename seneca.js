@@ -128,7 +128,7 @@ const option_defaults = {
         // Set to object to force artificial env and ignore process.env
         env: One({}, null),
         // Length of data description in logs
-        datalen: 111,
+        datalen: 333,
     },
     // Enforce strict behaviours. Relax when backwards compatibility needed.
     strict: {

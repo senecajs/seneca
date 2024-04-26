@@ -175,7 +175,7 @@ const option_defaults = {
     env: One({}, null),
 
     // Length of data description in logs
-    datalen: 111,
+    datalen: 333,
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
