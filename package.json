@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.35.3",
+  "version": "3.36.0",
   "types": "seneca.d.ts",
   "license": "MIT",
   "homepage": "http://senecajs.org",
@@ -103,13 +103,13 @@
     "qs": "^6.12.1",
     "rolling-stats": "^0.2.1",
     "seneca-transport": "^8.2.0",
-    "use-plugin": "^11.0.0"
+    "use-plugin": "^12.0.1"
   },
   "devDependencies": {
     "@hapi/code": "8",
     "@hapi/lab": "25",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.12.8",
     "async": "^3.2.5",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",

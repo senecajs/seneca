@@ -1,3 +1,8 @@
+## 3.36.0 2024-05-03
+
+* Updated use-plugin package to handle CamelCase plugin names (eg. seneca.use('BatchMonitor') finds @seneca/batch-monitor)
+
+
 ## 3.35.3 2024-04-26
 
 * Added types property to package.json to prevent compile warnngs. Thanks https://github.com/iolave!
