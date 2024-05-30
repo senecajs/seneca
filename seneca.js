@@ -499,6 +499,7 @@ function make_seneca(initial_opts) {
     root$.wrap = API.wrap; // wrap each found pattern with a new action
     root$.add = Add.api_add; // Add a pattern an associated action.
     root$.act = Act.api_act; // Submit a message and trigger the associated action.
+    root$.direct = Act.api_direct; // Run message action synchronously.
     root$.ready = ready.api_ready; // Callback when plugins initialized.
     root$.valid = gubu_1.Gubu; // Expose Gubu shape builders
     root$.internal = function () {

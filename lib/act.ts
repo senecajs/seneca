@@ -34,40 +34,53 @@ const ActArgu: any = Argu('act', {
 // patterns, and the most specific one wins.
 exports.api_act = function() {
   const instance = this
-  const opts = instance.options()
-
-  const spec =
-    ActArgu(arguments)
-
-  spec.msg = Object.assign(
-    {},
-    spec.moreprops ? spec.moreprops : null,
-    'string' === typeof spec.props ?
-      parse_jsonic(spec.props, 'msg_jsonic_syntax') :
-      spec.props,
-    instance.fixedargs,
-  )
-
-  const msg = spec.msg
-  const reply = spec.reply
-
-  // Capture caller code point if debugging.
-  if (opts.debug.act_caller || opts.test) {
-    msg.caller$ =
-      '\n    Action call arguments and location: ' +
-      (new Error(msgstr(msg, opts.debug.datalen)).stack + '\n')
-        .replace(/Error: /, '')
-        .replace(/.*\/gate-executor\.js:.*\n/g, '')
-        .replace(/.*\/seneca\.js:.*\n/g, '')
-        .replace(/.*\/seneca\/lib\/.*\.js:.*\n/g, '')
-  }
-
+  const { opts, msg, reply } = intern.prep_act(instance, arguments)
   intern.do_act(instance, opts, msg, reply)
   return instance
 }
 
 
+exports.api_direct = function() {
+  const instance = this
+  const { opts, msg, reply } = intern.prep_act(instance, arguments)
+  msg.direct$ = true
+  const out = intern.do_act(instance, opts, msg, reply)
+  return out
+}
+
 const intern = (module.exports.intern = {
+  prep_act: function(instance: any, args: any) {
+    const actspec = ActArgu(args)
+
+    actspec.opts = instance.options()
+
+    actspec.msg = Object.assign(
+      {},
+      actspec.moreprops ? actspec.moreprops : null,
+      'string' === typeof actspec.props ?
+        parse_jsonic(actspec.props, 'msg_jsonic_syntax') :
+        actspec.props,
+      instance.fixedargs,
+    )
+
+    // const msg = spec.msg
+    // const reply = spec.reply
+
+    // Capture caller code point if debugging.
+    if (actspec.opts.debug.act_caller || actspec.opts.test) {
+      actspec.msg.caller$ =
+        '\n    Action call arguments and location: ' +
+        (new Error(msgstr(actspec.msg, actspec.opts.debug.datalen)).stack + '\n')
+          .replace(/Error: /, '')
+          .replace(/.*\/gate-executor\.[jt]s:.*\n/g, '')
+          .replace(/.*\/seneca\.[jt]s:.*\n/g, '')
+          .replace(/.*\/seneca\/lib\/.*\.[jt]s:.*\n/g, '')
+    }
+
+    return actspec
+  },
+
+
   do_act: function(instance: any, opts: any, origmsg: any, origreply: any) {
     let timedout = false
     const actmsg = intern.make_actmsg(origmsg)
@@ -122,15 +135,6 @@ const intern = (module.exports.intern = {
         const ex = opts.error.identify(e) ? e : new Error(inspect(e))
         intern.handle_reply(opts, meta, actctxt, actmsg, ex)
         complete()
-
-        // if (opts.error.capture.action && true !== e?.$$seneca_callback_error$$) {
-        //   const ex = opts.error.identify(e) ? e : new Error(inspect(e))
-        //   intern.handle_reply(opts, meta, actctxt, actmsg, ex)
-        //   complete()
-        // }
-        // else {
-        //   throw e
-        // }
       }
     }
 
@@ -169,6 +173,8 @@ const intern = (module.exports.intern = {
           out
         )
       }
+
+      return out
     }
     else {
       instance.private$.ge.add(execspec)
@@ -387,13 +393,7 @@ const intern = (module.exports.intern = {
       data.msg.meta$ = meta
     }
 
-    // if (opts.legacy.meta_arg_remove) {
-    //   // Non-existence != undefined, so must be a separate call.
-    //   return actdef.func.call(delegate, data.msg, data.reply)
-    // }
-    // else {
     return actdef.func.call(delegate, data.msg, data.reply, data.meta)
-    //}
   },
 
 

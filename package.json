@@ -97,13 +97,13 @@
     "ordu": "^2.2.0",
     "patrun": "^7.2.5",
     "rolling-stats": "^0.2.1",
-    "use-plugin": "^11.0.0"
+    "use-plugin": "^12.0.1"
   },
   "devDependencies": {
     "@hapi/code": "^9.0.3",
     "@hapi/lab": "^25.2.0",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.12.13",
     "async": "^3.2.5",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
