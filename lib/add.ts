@@ -62,6 +62,47 @@ function api_add(this: any) {
 }
 
 
+function api_message(this: any, pattern0: any, pattern1: any, action: any) {
+  let actfunc = action || pattern1
+  const action_wrapper: any =
+    null == actfunc
+      ? null
+      : function(this: any, msg: any, reply: any, meta: any) {
+        actfunc.call(this, msg, meta).then(reply).catch(reply)
+      }
+
+  if (null != actfunc && null != action_wrapper) {
+    if ('' != actfunc.name) {
+      Object.defineProperty(action_wrapper, 'name', { value: actfunc.name })
+    }
+
+    for (var p in actfunc) {
+      action_wrapper[p] = actfunc[p]
+    }
+
+    // NOTE: also set properties defined after call to seneca.message
+    setImmediate(function() {
+      for (var p in actfunc) {
+        action_wrapper[p] = actfunc[p]
+      }
+    })
+  }
+
+  if (action) {
+    this.add(pattern0, pattern1, action_wrapper)
+  }
+  else if (action_wrapper) {
+    this.add(pattern0, action_wrapper)
+  }
+  else {
+    this.add(pattern0)
+  }
+
+  return this
+}
+
+
+
 const task = {
   translate(spec: TaskSpec) {
     const args = spec.ctx.args
@@ -411,5 +452,6 @@ const intern = (module.exports.intern = {
 
 export {
   api_add,
+  api_message,
   task,
 }

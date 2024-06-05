@@ -15,9 +15,8 @@ var Seneca = require('..')
 
 describe('explain', function () {
   it('explain-basic', async () => {
-    var si = Seneca()
+    const si = Seneca()
       .test()
-      .use('promisify')
       .message('a:1', async function (msg, meta) {
         var exp = meta.explain
         if (1 === msg.x) {
@@ -102,10 +101,10 @@ describe('explain', function () {
     })
   })
 
+  
   it('explain-data', async () => {
-    var si = Seneca({ id$: 's01' })
+    const si = Seneca({ id$: 's01' })
       .test()
-      .use('promisify')
       .use('entity')
       .message('a:1', async function (msg, meta) {
         var exp = this.explain()
@@ -130,10 +129,10 @@ describe('explain', function () {
     expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
   })
 
+  
   it('explain-deep', async () => {
-    var si = Seneca()
+    const si = Seneca()
       .test()
-      .use('promisify')
       .message('a:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: 3 })
@@ -212,10 +211,10 @@ describe('explain', function () {
     expect(exp[5]).includes({ z: 4 })
   })
 
+  
   it('explain-toplevel', async () => {
-    var si = Seneca()
+    const si = Seneca()
       .test()
-      .use('promisify')
       .message('a:1', async function (msg) {
         var exp = this.explain()
         exp && exp({ z: msg.z })

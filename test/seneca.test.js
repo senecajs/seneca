@@ -881,10 +881,10 @@ describe('seneca', function () {
     })
   })
 
+  
   it('wrap-priors', async () => {
-    let s0 = Seneca({ tag: 'wrap-priors', legacy: false })
+    const s0 = Seneca({ tag: 'wrap-priors', legacy: false })
       .test()
-      .use('promisify')
       .use('entity')
     await s0.ready()
 
@@ -892,7 +892,6 @@ describe('seneca', function () {
       return { x: msg.x, w: msg.w }
     })
 
-    // TODO add seneca-promisify support
     s0.wrap('foo:1', function (msg, reply) {
       msg.w++
       this.prior(msg, reply)

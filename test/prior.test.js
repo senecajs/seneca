@@ -32,16 +32,19 @@ describe('prior', function () {
       })
   })
 
+  
   it('top-level', function (fin) {
     try {
       Seneca().test().prior({ a: 1 })
       expect(false).true()
-    } catch (e) {
+    }
+    catch (e) {
       expect(e.code).equal('no_prior_action')
       fin()
     }
   })
 
+  
   it('add-general-to-specific', function (done) {
     Seneca(testopts)
       .error(done)

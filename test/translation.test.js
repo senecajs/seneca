@@ -14,9 +14,8 @@ var Seneca = require('..')
 
 describe('translation', () => {
   it('happy', async () => {
-    let s0 = Seneca({ legacy: false })
+    const s0 = Seneca({ legacy: false })
       .test()
-      .use('promisify')
 
       .message('a:1,b:2', async function (msg) {
         return { x: 1 + msg.x }
@@ -32,9 +31,8 @@ describe('translation', () => {
   })
 
   it('prior-add', async () => {
-    let s0 = Seneca({ legacy: false })
+    const s0 = Seneca({ legacy: false })
       .test()
-      .use('promisify')
 
       .message('a:1,b:2', async function (msg) {
         return { x: 1 + msg.x }
@@ -73,9 +71,8 @@ describe('translation', () => {
 
   it('sub', async () => {
     let log = []
-    let s0 = Seneca({ legacy: false })
+    const s0 = Seneca({ legacy: false })
       .test()
-      .use('promisify')
 
       .message('a:1', async function (msg) {
         return { x: 1 + msg.x }

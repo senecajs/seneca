@@ -257,8 +257,9 @@ describe('act', function () {
     ])
   })
 
+  
   it('direct-sequence', async () => {
-    let si = await Seneca({ legacy: false }).use('promisify').test().ready()
+    let si = await Seneca({ legacy: false }).test().ready()
     let log = []
 
     si.add('a:1', function a1(msg, reply) {

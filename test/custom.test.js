@@ -386,11 +386,10 @@ describe('custom', function () {
     })
   })
 
+  
   lab.it('custom-add-basic', test_opts, async () => {
     var si = await Seneca({ legacy: false })
       .test()
-      .use('promisify')
-      // TODO: extend seneca.message in promisify to handle this form
 
       .add(
         'foo:true',
@@ -441,10 +440,10 @@ describe('custom', function () {
     })
   })
 
+  
   lab.it('custom-add-fix', test_opts, async () => {
-    var si = await Seneca({ legacy: { transport: false } })
+    const si = await Seneca({ legacy: { transport: false } })
       .test()
-      .use('promisify')
 
     si.message('role:qaz,foo:false', async function (msg) {
       return msg

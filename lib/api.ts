@@ -835,6 +835,67 @@ function decorate(this: any) {
 }
 
 
+function prepare(this: any, prepareAction: Function) {
+  if (null == prepareAction || 'function' != typeof prepareAction) {
+    throw new Error('seneca: first argument to prepare must be a function')
+  }
+
+  async function prepare_wrapper(this: any, msg: any) {
+    await prepareAction.call(this, msg)
+    return this.prior(msg)
+  }
+
+  if ('' != prepareAction.name) {
+    Object.defineProperty(prepare_wrapper, 'name', {
+      value: 'prepare_' + prepareAction.name,
+    })
+  }
+
+  const plugin = this.plugin
+
+  let pat = {
+    role: 'seneca',
+    plugin: 'init',
+    init: plugin.name,
+    tag: undefined,
+  }
+
+  if (null != plugin.tag && '-' != plugin.tag) {
+    pat.tag = plugin.tag
+  }
+
+  this.message(pat, prepare_wrapper)
+
+  this.plugin.prepare = this.plugin.prepare || []
+  this.plugin.prepare.push(prepareAction)
+
+  return this
+}
+
+
+function destroy(this: any, destroyAction: any) {
+  async function destroy_wrapper(this: any, msg: any) {
+    await destroyAction.call(this, msg)
+    return this.prior(msg)
+  }
+
+  if ('' != destroyAction.name) {
+    Object.defineProperty(destroy_wrapper, 'name', {
+      value: 'destroy_' + destroyAction.name,
+    })
+  }
+
+  this.message('role:seneca,cmd:close', destroy_wrapper)
+
+  this.plugin.destroy = this.plugin.destroy || []
+  this.plugin.destroy.push(destroyAction)
+
+  return this
+}
+
+
+
+
 
 intern.parse_config = function(args: any) {
   let out: any = {}
@@ -1031,6 +1092,8 @@ let API = {
   listen,
   client,
   decorate,
+  prepare,
+  destroy,
 }
 
 

@@ -37,7 +37,6 @@ const { resolve_options } = require('./lib/options')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
 const { transport } = require('./lib/transport')
-
 import Pkg from './package.json'
 
 
@@ -659,11 +658,16 @@ function make_seneca(initial_opts?: any) {
   root$.options = API.options // Get and set options.
   root$.fix = API.fix // fix pattern arguments, message arguments, and custom meta
   root$.wrap = API.wrap // wrap each found pattern with a new action
-  root$.add = Add.api_add // Add a pattern an associated action.
+  root$.add = Add.api_add // Add a pattern and associated action.
+  root$.message = Add.api_message // Add a pattern and associated action async function.
   root$.act = Act.api_act // Submit a message and trigger the associated action.
+  root$.post = Util.promisify(root$.act) // Async version of act.
   root$.direct = Act.api_direct // Run message action synchronously.
   root$.ready = ready.api_ready // Callback when plugins initialized.
   root$.valid = Gubu // Expose Gubu shape builders
+  root$.prepare = API.prepare // Plugin preparation action.
+  root$.destroy = API.destroy // Close Seneca instance.
+
 
   root$.internal = function() {
     return {
@@ -932,7 +936,7 @@ function make_private() {
       }
     },
     ignore_plugins: {},
-    // intercept: { act_error: [] }
+    cleared: 0,
   }
 }
 

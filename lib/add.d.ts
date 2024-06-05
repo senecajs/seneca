@@ -1,5 +1,6 @@
 import { TaskSpec } from 'ordu';
 declare function api_add(this: any): any;
+declare function api_message(this: any, pattern0: any, pattern1: any, action: any): any;
 declare const task: {
     translate(spec: TaskSpec): {
         op: string;
@@ -60,4 +61,4 @@ declare const task: {
         op: string;
     };
 };
-export { api_add, task, };
+export { api_add, api_message, task, };

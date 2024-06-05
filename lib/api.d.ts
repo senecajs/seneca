@@ -45,6 +45,8 @@ declare function reply(this: any, spec: any): boolean;
 declare function listen(this: any, callpoint: any): (this: any, ...argsarr: any[]) => any;
 declare function client(this: any, callpoint: any): (this: any) => any;
 declare function decorate(this: any): void;
+declare function prepare(this: any, prepareAction: Function): any;
+declare function destroy(this: any, destroyAction: any): any;
 declare let API: {
     wrap: typeof wrap;
     fix: typeof fix;
@@ -78,5 +80,7 @@ declare let API: {
     listen: typeof listen;
     client: typeof client;
     decorate: typeof decorate;
+    prepare: typeof prepare;
+    destroy: typeof destroy;
 };
 export { API };

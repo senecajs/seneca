@@ -282,8 +282,9 @@ describe('exports', function () {
     })
   })
 
+  
   it('with-tags', async () => {
-    var s0 = Seneca({ legacy: false }).use('promisify').test()
+    const s0 = Seneca({ legacy: false }).test()
 
     var p0 = function p0(options) {
       return {
@@ -305,7 +306,7 @@ describe('exports', function () {
     expect(s0.export('p0$a/x')).equals(1)
     expect(s0.export('p0$b/x')).equals(2)
 
-    var s1 = Seneca({ legacy: false }).use('promisify').test()
+    const s1 = Seneca({ legacy: false }).test()
 
     var p1 = function p1(options) {
       return {
@@ -325,8 +326,9 @@ describe('exports', function () {
     expect(s1.export('p1$c/x')).equals(33)
   })
 
+  
   it('async-with-tags', async () => {
-    var s0 = Seneca({ legacy: false }).use('promisify').test()
+    const s0 = Seneca({ legacy: false }).test()
 
     var p0 = async function p0(options) {
       return {
@@ -348,7 +350,7 @@ describe('exports', function () {
     expect(s0.export('p0$a/x')).equals(1)
     expect(s0.export('p0$b/x')).equals(2)
 
-    var s1 = Seneca({ legacy: false }).use('promisify').test()
+    const s1 = Seneca({ legacy: false }).test()
 
     var p1 = async function p1(options) {
       return {

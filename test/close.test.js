@@ -133,11 +133,12 @@ describe('close', function () {
     })
   })
 
-  lab.it('with-async-await', async () => {
+  it('with-async-await', async () => {
     var si = Seneca().test()
 
     await si.close()
 
     expect(si.flags.closed).true()
   })
+
 })
