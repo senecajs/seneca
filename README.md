@@ -6,7 +6,7 @@
 |---|---|
 
 
-# seneca
+# Seneca
 [![Npm][BadgeNpm]][Npm]
 [![NpmFigs][BadgeNpmFigs]][Npm]
 [![Travis][BadgeTravis]][Travis]
