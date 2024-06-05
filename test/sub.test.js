@@ -1,4 +1,4 @@
-/* Copyright (c) 2020 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2020-2024 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 const Code = require('@hapi/code')
@@ -436,7 +436,7 @@ describe('sub', function () {
     var tmp = {}
     Seneca()
       .test(fin)
-      .sub('role:seneca,cmd:close', function () {
+      .sub('sys:seneca,cmd:close', function () {
         tmp.sc = 1
       })
       .close(function () {

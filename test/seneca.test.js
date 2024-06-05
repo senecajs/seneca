@@ -781,7 +781,7 @@ describe('seneca', function () {
           assert.ok(!err)
           assert.equal(2, out.x)
 
-          si.act('role:seneca,cmd:stats', function (err, stats) {
+          si.act('sys:seneca,cmd:stats', function (err, stats) {
             assert.ok(!err)
             // --seneca.log.all and count INs
             // ... | grep act | grep IN | wc -l

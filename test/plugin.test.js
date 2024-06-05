@@ -997,7 +997,7 @@ describe('plugin', function () {
           },
         }
       })
-      .act('role:seneca,cmd:stats')
+      .act('sys:seneca,cmd:stats')
       .ready(fin)
   })
 

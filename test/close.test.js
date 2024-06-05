@@ -1,4 +1,4 @@
-/* Copyright © 2010-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2010-2024 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 const Code = require('@hapi/code')
@@ -27,7 +27,7 @@ describe('close', function () {
     var tmp = {}
     Seneca()
       .test(fin)
-      .add('role:seneca,cmd:close', function (msg, reply) {
+      .add('sys:seneca,cmd:close', function (msg, reply) {
         tmp.sc = 1
         this.prior(msg, reply)
       })
@@ -92,12 +92,12 @@ describe('close', function () {
     Seneca()
       .test()
       .quiet()
-      .add('role:seneca,cmd:close', function (msg, reply) {
+      .add('sys:seneca,cmd:close', function (msg, reply) {
         reply(new Error('bad-close'))
       })
       .close(function (err) {
         expect(err.message).equal(
-          // 'seneca: Action cmd:close,role:seneca failed: bad-close.',
+          // 'seneca: Action cmd:close,sys:seneca failed: bad-close.',
           'bad-close',
         )
         fin()
@@ -111,7 +111,7 @@ describe('close', function () {
     var si0 = si.close(false)
     expect(si).equal(si0)
 
-    // waits for role:seneca,cmd:close to complete
+    // waits for sys:seneca,cmd:close to complete
     si.ready(() => {
       expect(si.flags.closed).true()
       fin()

@@ -52,8 +52,8 @@ function promiser(context: any, callback?: any) {
 }
 
 
-function stringify() {
-  return (Stringify as any)(...arguments)
+function stringify(...args: any) {
+  return (Stringify as any)(...args)
 }
 
 
@@ -342,7 +342,7 @@ function makedie(instance: any, ctxt: any) {
       }
 
       if (!undead) {
-        instance.act('role:seneca,info:fatal,closing$:true', { err: err })
+        instance.act('sys:seneca,info:fatal,closing$:true', { err: err })
 
         instance.close(
           // terminate process, err (if defined) is from seneca.close

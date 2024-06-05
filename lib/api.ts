@@ -885,7 +885,7 @@ function destroy(this: any, destroyAction: any) {
     })
   }
 
-  this.message('role:seneca,cmd:close', destroy_wrapper)
+  this.message('sys:seneca,cmd:close', destroy_wrapper)
 
   this.plugin.destroy = this.plugin.destroy || []
   this.plugin.destroy.push(destroyAction)
@@ -998,7 +998,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
       callpoint: callpoint(true),
     })
 
-    seneca.act('role:seneca,cmd:close,closing$:true', function(err: any) {
+    seneca.act('sys:seneca,cmd:close,closing$:true', function(err: any) {
       seneca.log.debug(errlog(err, { kind: 'close', notice: 'end' }))
 
       seneca.removeAllListeners('act-in')

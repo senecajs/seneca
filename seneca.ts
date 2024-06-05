@@ -304,6 +304,8 @@ const option_defaults = {
 
   // Backwards compatibility settings.
   legacy: One(Boolean, {
+    // 3.x
+
     // Add legacy properties
     actdef: false,
 
@@ -329,10 +331,10 @@ const option_defaults = {
     // meta_arg_remove: false,
 
     // Use seneca-transport plugin.
-    transport: true,
+    transport: false,
 
     // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: true,
+    timeout_string: false,
 
     // If false, use Gubu for message validation.
     rules: false,
@@ -340,8 +342,13 @@ const option_defaults = {
     // If false, use Gubu for option validation (including plugin defaults)
     options: true,
 
-    // If true, look for plugin options by name at the top level of options
+    // If true, look for plugin options by name at the top level of options.
     top_plugins: false,
+
+    // 4.x
+
+    // If true, add role:seneca variants of builtin actions.
+    builtin_actions: false,
   }),
 
   // Processing task ordering.

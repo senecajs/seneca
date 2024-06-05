@@ -9,19 +9,20 @@ function addActions(instance: any) {
   // Add builtin actions.
   instance
     .add('sys:seneca,on:point', on_point)
+    .add('sys:seneca,cmd:ping', cmd_ping)
+    .add('sys:seneca,cmd:stats', instance.stats)
+    .add('sys:seneca,cmd:close', action_seneca_close)
+    .add('sys:seneca,info:fatal', action_seneca_fatal)
+    .add('sys:seneca,get:options', action_options_get)
 
-  // TODO: complete merge of v4prep
-  // .add('role:transport,cmd:listen', action_listen)
-  // .add('role:transport,cmd:client', action_client)
 
-
-
-  // LEGACY
-  instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
-  instance.add({ role: 'seneca', cmd: 'stats' }, instance.stats)
-  instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close)
-  instance.add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
-  instance.add({ role: 'seneca', get: 'options' }, action_options_get)
+  if (instance.options().legacy.builtin_actions) {
+    instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
+    instance.add({ role: 'seneca', cmd: 'stats' }, instance.stats)
+    instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close)
+    instance.add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
+    instance.add({ role: 'seneca', get: 'options' }, action_options_get)
+  }
 }
 
 function on_point(this: any, msg: any, reply: any) {

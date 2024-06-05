@@ -3,7 +3,7 @@ import Util from 'util';
 declare const error: any;
 declare function pins(inpin: any): Record<string, any>[];
 declare function promiser(context: any, callback?: any): Promise<unknown>;
-declare function stringify(): any;
+declare function stringify(...args: any): any;
 declare function wrap_error(err: any): void;
 declare function make_plugin_key(plugin: any, origtag: any): string;
 declare const tagnid: any;
