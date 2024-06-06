@@ -402,7 +402,7 @@ describe('message', function () {
   it('single-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
+    var s0 = Seneca({ id$: 's0' })
       .test(fin)
       .use(st)
       .listen({ type: 'simple' })
@@ -411,7 +411,6 @@ describe('message', function () {
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false },
     })
       .test(fin)
       .use(st)
@@ -436,7 +435,7 @@ describe('message', function () {
   it('simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
+    var s0 = Seneca({ id$: 's0', log: 'silent' })
       .test(function (err, meta) {
         if (
           'a3err' === err.message ||
@@ -454,7 +453,6 @@ describe('message', function () {
       id$: 'c0',
       log: 'silent',
       timeout: 22222 * tmx,
-      legacy: { transport: false },
     })
       .test(function (err, meta) {
         if (

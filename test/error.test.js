@@ -548,7 +548,7 @@ describe('error', function () {
 
       return Seneca({
         trace: { unknown: 'error' },
-        legacy: { error_codes: false },
+        // legacy: { error_codes: false },
         internal: {
           logger: logger,
         },

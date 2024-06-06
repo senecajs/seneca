@@ -209,9 +209,10 @@ describe('add', function () {
     })
   })
 
+  
   it('rules-basic', function (fin) {
     const si = Seneca({ legacy: false }).test().quiet()
-
+    
     si.add({ a: 1, b: Number }, function (m, r) {
       r({ b: m.b * 2 })
     }).add('a:2', { b: Number }, function (m, r) {
@@ -247,6 +248,7 @@ describe('add', function () {
       })
     })
   })
+  
 
   it('rules-builders', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()

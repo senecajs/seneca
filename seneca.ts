@@ -306,44 +306,11 @@ const option_defaults = {
   legacy: One(Boolean, {
     // 3.x
 
-    // Add legacy properties
-    actdef: false,
-
-    // Action callback must always have signature callback(error, result).
-    action_signature: false,
-
     // Use old error handling.
-    error: true,
-
-    // Use old error codes. REMOVE in Seneca 4.x
-    error_codes: false,
-
-    // Use old fail method
-    fail: false,
-
-    // Logger can be changed by options method.
-    logging: false,
+    error: false,
 
     // Add meta$ property to messages.
     meta: false,
-
-    // Remove meta argument in action arguments and callbacks.
-    // meta_arg_remove: false,
-
-    // Use seneca-transport plugin.
-    transport: false,
-
-    // Insert "[TIMEOUT]" into timeout error message
-    timeout_string: false,
-
-    // If false, use Gubu for message validation.
-    rules: false,
-
-    // If false, use Gubu for option validation (including plugin defaults)
-    options: true,
-
-    // If true, look for plugin options by name at the top level of options.
-    top_plugins: false,
 
     // 4.x
 
@@ -655,9 +622,7 @@ function make_seneca(initial_opts?: any) {
   root$.inward = API.inward // Add a modifier function for messages inward
   root$.outward = API.outward // Add a modifier function for responses outward
   root$.error = API.error // Set global error handler, or generate Seneca Error
-  root$.fail = start_opts.legacy.fail
-    ? Legacy.make_legacy_fail(start_opts)
-    : API.fail // Throw a Seneca error
+  root$.fail = API.fail // Throw a Seneca error
   root$.explain = API.explain // Toggle top level explain capture
   root$.decorate = API.decorate // Decorate seneca object with functions
   root$.seneca = API.seneca

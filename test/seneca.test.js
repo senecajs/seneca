@@ -34,9 +34,12 @@ const timerstub = {
   },
 }
 
+
 const testopts = { log: 'test' }
 
+
 describe('seneca', function () {
+  
   it('happy', function (fin) {
     Seneca()
       .test(fin)
@@ -56,15 +59,17 @@ describe('seneca', function () {
       })
   })
 
+  
   it('require-abbrev', function (done) {
     var si0 = require('..').test()
     var si1 = require('..').quiet()
     si0.ready(si1.ready.bind(si1, done))
   })
 
+  
   it('version', function (done) {
     var start = Date.now()
-    var si = Seneca({ log: 'test', legacy: { logging: false } })
+    var si = Seneca({ log: 'test' })
     expect(si.version).to.equal(Package.version)
     var end = Date.now()
 
@@ -75,6 +80,7 @@ describe('seneca', function () {
     done()
   })
 
+  
   it('tag', function (done) {
     var si = Seneca({ tag: 'foo' }, testopts)
     expect(si.tag).to.equal('foo')
@@ -687,20 +693,21 @@ describe('seneca', function () {
     })
   })
 
+  
   it('string-add', function (done) {
-    var addFunction = function (args, done) {
+    const addFunction = function (args, done) {
       done(null, {
         v: (args.c || -1) + parseInt(args.b, 10) + parseInt(args.a, 10),
       })
     }
 
-    var checkFunction = function (err, out, done) {
+    const checkFunction = function (err, out, done) {
       assert.equal(err, null)
       assert.equal(6, out.v)
       done()
     }
 
-    var si = Seneca({ legacy: { rules: true } }).test(done) //(testopts).error(done)
+    const si = Seneca().test(done) //(testopts).error(done)
 
     si.add('i:0,a:1,b:2', addFunction)
 
@@ -712,7 +719,7 @@ describe('seneca', function () {
             checkFunction(err, out, function () {
               si.add(
                 'i:2,a:1',
-                { b: 2, c: { required$: true } },
+                { b: 2, c: si.valid.Required() },
                 addFunction,
               ).act('i:2,a:1,b:2,c:3', function (err, out) {
                 checkFunction(err, out, done)
@@ -723,6 +730,7 @@ describe('seneca', function () {
       })
     })
   })
+  
 
   it('fix-basic', function (done) {
     var si = Seneca(testopts)
@@ -798,7 +806,7 @@ describe('seneca', function () {
   })
 
   it('wrap', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca().test(fin)
 
     si.add('a:1', function a1(msg, reply, meta) {
       reply(null, { aa: msg.aa })
@@ -978,7 +986,7 @@ describe('seneca', function () {
   })
 
   it('strict-result', function (fin) {
-    var si = Seneca({ log: 'silent', legacy: { transport: false } })
+    var si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
       reply('a')
@@ -1343,6 +1351,7 @@ describe('seneca', function () {
       .ready(fin)
   })
 
+  
   it('order', function (fin) {
     var si = Seneca().test(fin)
 
@@ -1351,4 +1360,15 @@ describe('seneca', function () {
 
     fin()
   })
+
+  
+  it('actdef', function (fin) {
+    Seneca()
+      .test(fin)
+      .add('a:1')
+      .act('a:1')
+      .ready(fin)
+    fin()
+  })
+
 })

@@ -147,9 +147,9 @@ const intern = (module.exports.intern = {
         end: end,
         message: actmsg,
         pattern: execspec.ctxt.pattern,
-        legacy_string: actctxt.options.legacy.timeout_string
-          ? '[TIMEOUT] '
-          : '',
+        // legacy_string: actctxt.options.legacy.timeout_string
+        //   ? '[TIMEOUT] '
+        //   : '',
       })
 
       intern.handle_reply(opts, meta, actctxt, actmsg, timeout_err)
@@ -266,24 +266,10 @@ const intern = (module.exports.intern = {
 
     if (data.has_callback) {
       try {
-        // if (opts.legacy.meta_arg_remove) {
-        //   // Non-existence != undefined, so must be a separate call.
-        //   reply.call(delegate, data.err, data.res)
-        // } else {
         reply.call(delegate, data.err, data.res, data.meta)
-        //}
-      } catch (thrown_obj: any) {
+      }
+      catch (thrown_obj: any) {
         intern.callback_error(delegate, thrown_obj, actctxt, data)
-
-        // if (opts.error.capture.callback) {
-        //   intern.callback_error(delegate, thrown_obj, actctxt, data)
-        // }
-        // else {
-        //   if ('object' === typeof thrown_obj) {
-        //     thrown_obj.$$seneca_callback_error$$ = true
-        //   }
-        //   throw thrown_obj
-        // }
       }
     }
   },

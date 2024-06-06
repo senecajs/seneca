@@ -203,7 +203,6 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
-        legacy: { transport: false },
       })
         .error(restore)
         .add('a:1', a1)
@@ -225,7 +224,6 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
-        legacy: { transport: false },
       })
         .error(restore)
         .add('a:1', function a1(m, r) {
@@ -282,7 +280,6 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
-        legacy: { transport: false },
       })
         .error(restore)
         .add('a:1', function (m, r) {

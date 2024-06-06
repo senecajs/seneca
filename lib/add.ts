@@ -228,9 +228,9 @@ const task = {
         ? !!actdef.raw.strict$.add
         : !!opts.strict.add
 
-    if (opts.legacy.actdef) {
-      actdef.args = deep(pat)
-    }
+    // if (opts.legacy.actdef) {
+    //   actdef.args = deep(pat)
+    // }
 
     // Canonical string form of the action pattern.
     actdef.pattern = pattern(pat)
@@ -335,7 +335,6 @@ const task = {
 
   // TODO: accept action.valid to define rules
   rules(spec: TaskSpec) {
-    const opts = spec.ctx.opts
     const actdef = spec.data.actdef
     const pattern = spec.data.pattern
 
@@ -362,7 +361,7 @@ const task = {
     })
     actdef.rules = pattern_rules
 
-    if (!opts.legacy.rules && !external && 0 < prN) {
+    if (!external && 0 < prN) {
       // TODO: how to make Closed if specified by user ?
       actdef.gubu = Gubu(Open(pattern_rules))
     }

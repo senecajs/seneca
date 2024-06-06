@@ -152,17 +152,17 @@ function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
     // e.g. in seneca.options.js
     if (false === initial.legacy) {
       adjusted.legacy = {
-        actdef: false,
-        action_signature: false,
+        // actdef: false,
+        // action_signature: false,
         error: false,
-        error_codes: false,
-        fail: false,
-        logging: false,
+        // error_codes: false,
+        // fail: false,
+        // logging: false,
         meta: false,
-        transport: false,
-        timeout_string: false,
-        rules: false,
-        options: false,
+        // transport: false,
+        // timeout_string: false,
+        // rules: false,
+        // options: false,
 
         builtin_actions: false,
       }
@@ -198,7 +198,7 @@ function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
     out.log = out.log || out.logger || out.logging || {}
 
     // boolean corrections
-    out.legacy.logging = boolify(out.legacy.logging)
+    // out.legacy.logging = boolify(out.legacy.logging)
 
     return out
   }

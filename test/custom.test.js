@@ -214,7 +214,7 @@ describe('custom', function () {
   it('custom-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0', legacy: { transport: false } })
+    var s0 = Seneca({ id$: 's0' })
       .test(fin)
       .use(st)
       .listen({ type: 'simple' })
@@ -222,7 +222,6 @@ describe('custom', function () {
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false },
     })
       .test(fin)
       .use(st)
@@ -249,7 +248,6 @@ describe('custom', function () {
 
     var s0 = Seneca({
       id$: 's0',
-      legacy: { transport: false },
       limits: { maxparents: 111 },
     })
       .test(fin)
@@ -259,7 +257,6 @@ describe('custom', function () {
     var c0 = Seneca({
       id$: 'c0',
       timeout: 22222 * tmx,
-      legacy: { transport: false },
       limits: { maxparents: 111 },
     })
       .test(fin)
@@ -442,7 +439,7 @@ describe('custom', function () {
 
   
   lab.it('custom-add-fix', test_opts, async () => {
-    const si = await Seneca({ legacy: { transport: false } })
+    const si = await Seneca()
       .test()
 
     si.message('role:qaz,foo:false', async function (msg) {

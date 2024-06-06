@@ -226,7 +226,7 @@ function inward_validate_msg(spec: any) {
       op: 'stop',
       out: {
         kind: 'error',
-        code: so.legacy.error_codes ? 'act_invalid_args' : 'act_invalid_msg',
+        code: 'act_invalid_msg',
         info: {
           pattern: ctx.actdef.pattern,
           message: err.message,

@@ -466,7 +466,7 @@ describe('api', function () {
   })
 
   it('status', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca().test(fin)
 
     expect(si.status().stats.act.calls).equal(0)
     expect(si.status({ stats: false }).stats.act.calls).equal(0)
@@ -481,7 +481,7 @@ describe('api', function () {
   })
 
   it('reply', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca().test(fin)
     expect(si.reply()).equal(false)
     expect(si.reply({ out: { z: 1 } })).equal(false)
     expect(si.reply({ meta: { id: 'foo' }, out: { z: 2 } })).equal(false)
@@ -498,7 +498,7 @@ describe('api', function () {
   })
 
   it('delegate', function (fin) {
-    var si = Seneca({ legacy: { transport: false } }).test(fin)
+    var si = Seneca().test(fin)
 
     si.add('a:1', function (msg, reply) {
       this.context.bar = 2

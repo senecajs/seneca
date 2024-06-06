@@ -111,13 +111,13 @@ function options(this: any, options: any, chain: any) {
   }
 
   // DEPRECATED
-  if (out_opts.legacy.logging) {
-    if (options && options.log && Array.isArray(options.log.map)) {
-      for (let i = 0; i < options.log.map.length; ++i) {
-        self.logroute(options.log.map[i])
-      }
-    }
-  }
+  // if (out_opts.legacy.logging) {
+  //   if (options && options.log && Array.isArray(options.log.map)) {
+  //     for (let i = 0; i < options.log.map.length; ++i) {
+  //       self.logroute(options.log.map[i])
+  //     }
+  //   }
+  // }
 
   // TODO: in 4.x, when given options, it should chain
   // Allow chaining with seneca.options({...}, true)

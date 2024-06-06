@@ -203,6 +203,7 @@ describe('plugin', function () {
       })
   })
 
+  
   it('load-defaults', function (fin) {
     let s0 = Seneca().test(fin)
 
@@ -213,6 +214,7 @@ describe('plugin', function () {
         },
         defaults: {
           a: 1,
+          b: Number,
         },
       },
       { b: 1 },
@@ -227,6 +229,7 @@ describe('plugin', function () {
       .ready(fin)
   })
 
+  
   it('load-relative-to-root', function (fin) {
     var subfolder = require('./stubs/plugin/subfolder')
     subfolder(function (out) {
@@ -237,10 +240,12 @@ describe('plugin', function () {
 
   it('good-default-options', function (fin) {
     var init_p1 = function (opts) {
-      expect(opts).equal({ c: 1, d: 2 })
+      expect(opts).equal({ b: 0, c: 1, d: 2 })
     }
     init_p1.defaults = {
       c: 1,
+      b: 0,
+      d: 0,
     }
 
     Seneca()
@@ -253,7 +258,7 @@ describe('plugin', function () {
           init: function (opts) {
             expect(opts).equal({ a: 1, b: 2 })
           },
-          defaults: { a: 1 },
+          defaults: { a: 1, b: Number },
         },
         {
           b: 2,
@@ -297,18 +302,6 @@ describe('plugin', function () {
       )
   })
 
-  // REMOVE in 4.x
-  // it('legacy-options', function (fin) {
-  //   var si = Seneca({ log: 'silent' }).quiet()
-
-  //   si.use('options', { a: 1 })
-  //   expect(si.export('options').a).equal(1)
-
-  //   si.use('options', require('./stubs/plugin/options.file.js'))
-  //   expect(si.export('options').b).equal(2)
-
-  //   fin()
-  // })
 
   // TODO: move to transport
   /*
@@ -460,7 +453,6 @@ describe('plugin', function () {
   it('plugin-error-add', function (fin) {
     Seneca({
       debug: { undead: true },
-      legacy: { transport: false },
     })
       .quiet()
       .error(function (err) {
@@ -1006,7 +998,6 @@ describe('plugin', function () {
     var si = Seneca({
       log: 'silent',
       debug: { undead: true },
-      legacy: { transport: false },
       plugins: {
         foo: function () {
           tmp.foo = 1
@@ -1037,7 +1028,6 @@ describe('plugin', function () {
   it('plugins-from-bad-options', function (fin) {
     var si = Seneca({
       debug: { undead: true },
-      legacy: { transport: false },
     })
       .test(function (err) {
         // TODO: updated use-plugin should give error explaining that
@@ -1157,7 +1147,7 @@ describe('plugin', function () {
   })
 
   it('no-name', function (fin) {
-    var s0 = Seneca({ legacy: { transport: false } }).test(fin)
+    var s0 = Seneca().test(fin)
     s0.use(function () {})
     s0.use('./stubs/plugin/no-name.js')
     s0.use(__dirname + '/stubs/plugin/no-name.js')
@@ -1167,17 +1157,6 @@ describe('plugin', function () {
     })
   })
 
-  // TODO: seneca-joi won over joi - use another plugin to test
-  /*
-  it('seneca-prefix-wins', function (fin) {
-    var s0 = Seneca({ legacy: { transport: false } }).test(fin)
-    s0.use('joi')
-    s0.ready(function () {
-      expect(Object.keys(s0.list_plugins())[1]).equal('joi')
-      fin()
-    })
-  })
-  */
 
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)

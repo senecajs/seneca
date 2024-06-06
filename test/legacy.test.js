@@ -105,15 +105,6 @@ describe('legacy', function () {
       })
   })
 
-  it('actdef', function (fin) {
-    Seneca({ legacy: { actdef: true } })
-      .test(fin)
-      .add('a:1')
-      .act('a:1')
-      .ready(fin)
-    fin()
-  })
-
   // it('meta_arg_remove', function (fin) {
   //   Seneca({ legacy: { meta_arg_remove: true } })
   //     .test(fin)

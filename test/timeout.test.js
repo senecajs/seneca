@@ -14,7 +14,7 @@ var Seneca = require('..')
 
 describe('timeout', function () {
   it('happy', function (fin) {
-    Seneca({ timeout: 100, legacy: { transport: false } })
+    Seneca({ timeout: 100 })
       .test()
       .quiet()
       .add('a:1', function (msg, done) {
