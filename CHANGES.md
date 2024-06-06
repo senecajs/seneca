@@ -1,6 +1,6 @@
 
 
-## 4.0.0-rc.2 2024-06-06
+## 4.0.0-rc2 2024-06-06
 
 * Promisified: message, post
 * Remove most legacy flags
