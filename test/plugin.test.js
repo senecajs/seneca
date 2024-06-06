@@ -203,7 +203,6 @@ describe('plugin', function () {
       })
   })
 
-  
   it('load-defaults', function (fin) {
     let s0 = Seneca().test(fin)
 
@@ -229,7 +228,6 @@ describe('plugin', function () {
       .ready(fin)
   })
 
-  
   it('load-relative-to-root', function (fin) {
     var subfolder = require('./stubs/plugin/subfolder')
     subfolder(function (out) {
@@ -301,7 +299,6 @@ describe('plugin', function () {
         },
       )
   })
-
 
   // TODO: move to transport
   /*
@@ -1156,7 +1153,6 @@ describe('plugin', function () {
       fin()
     })
   })
-
 
   it('plugin-order-task-args', function (fin) {
     var s0 = Seneca({ legacy: false }).test(fin)

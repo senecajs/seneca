@@ -1,4 +1,11 @@
 
+
+## 4.0.0-rc.2 2024-06-06
+
+* Promisified: message, post
+* Remove most legacy flags
+
+
 ## 4.0.0-rc.1 2022-06-19
 
 * Node >= 14

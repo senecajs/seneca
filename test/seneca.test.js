@@ -34,12 +34,9 @@ const timerstub = {
   },
 }
 
-
 const testopts = { log: 'test' }
 
-
 describe('seneca', function () {
-  
   it('happy', function (fin) {
     Seneca()
       .test(fin)
@@ -59,14 +56,12 @@ describe('seneca', function () {
       })
   })
 
-  
   it('require-abbrev', function (done) {
     var si0 = require('..').test()
     var si1 = require('..').quiet()
     si0.ready(si1.ready.bind(si1, done))
   })
 
-  
   it('version', function (done) {
     var start = Date.now()
     var si = Seneca({ log: 'test' })
@@ -80,7 +75,6 @@ describe('seneca', function () {
     done()
   })
 
-  
   it('tag', function (done) {
     var si = Seneca({ tag: 'foo' }, testopts)
     expect(si.tag).to.equal('foo')
@@ -693,7 +687,6 @@ describe('seneca', function () {
     })
   })
 
-  
   it('string-add', function (done) {
     const addFunction = function (args, done) {
       done(null, {
@@ -730,7 +723,6 @@ describe('seneca', function () {
       })
     })
   })
-  
 
   it('fix-basic', function (done) {
     var si = Seneca(testopts)
@@ -889,7 +881,6 @@ describe('seneca', function () {
     })
   })
 
-  
   it('wrap-priors', async () => {
     const s0 = Seneca({ tag: 'wrap-priors', legacy: false })
       .test()
@@ -1351,7 +1342,6 @@ describe('seneca', function () {
       .ready(fin)
   })
 
-  
   it('order', function (fin) {
     var si = Seneca().test(fin)
 
@@ -1361,14 +1351,8 @@ describe('seneca', function () {
     fin()
   })
 
-  
   it('actdef', function (fin) {
-    Seneca()
-      .test(fin)
-      .add('a:1')
-      .act('a:1')
-      .ready(fin)
+    Seneca().test(fin).add('a:1').act('a:1').ready(fin)
     fin()
   })
-
 })

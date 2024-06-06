@@ -101,7 +101,6 @@ describe('explain', function () {
     })
   })
 
-  
   it('explain-data', async () => {
     const si = Seneca({ id$: 's01' })
       .test()
@@ -129,7 +128,6 @@ describe('explain', function () {
     expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
   })
 
-  
   it('explain-deep', async () => {
     const si = Seneca()
       .test()
@@ -211,7 +209,6 @@ describe('explain', function () {
     expect(exp[5]).includes({ z: 4 })
   })
 
-  
   it('explain-toplevel', async () => {
     const si = Seneca()
       .test()

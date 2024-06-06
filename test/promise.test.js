@@ -18,7 +18,6 @@ const it = Shared.make_it(lab)
 const Seneca = require('..')
 
 describe('promise', function () {
-
   it('happy', async () => {
     let counter = 0
 
@@ -121,7 +120,6 @@ describe('promise', function () {
     expect(counter).equal(2)
   })
 
-  
   it('plugin-prepare-prior', async () => {
     const si = makeSeneca().use(function prep2() {
       let y = 0
@@ -143,7 +141,6 @@ describe('promise', function () {
     expect(out).equal({ x: 2, y: 50 })
   })
 
-  
   it('plugin-prepare', async () => {
     const tmp = { log: [] }
 
@@ -183,16 +180,16 @@ describe('promise', function () {
     const tmp = { log: [] }
 
     const si = makeSeneca()
-        .use(function p0() {
-          this.destroy(async function p0d() {
-            tmp.log.push('p0')
-          })
+      .use(function p0() {
+        this.destroy(async function p0d() {
+          tmp.log.push('p0')
         })
-        .use(function p1() {
-          this.destroy(async function p1d() {
-            tmp.log.push('p1')
-          })
+      })
+      .use(function p1() {
+        this.destroy(async function p1d() {
+          tmp.log.push('p1')
         })
+      })
 
     await si.ready()
     await si.close()
@@ -205,60 +202,60 @@ describe('promise', function () {
     const tmp = { log: [] }
 
     const si = makeSeneca()
-        .use(function p0() {
-          let y = -1
-          this.prepare(async function p0p0() {
-            tmp.log.push('p0p0')
-            y = 0
-          })
-            .destroy(async function p0d0() {
-              tmp.log.push('p0d0')
-            })
-            .message('p:p0,get:y', async () => ({ y }))
+      .use(function p0() {
+        let y = -1
+        this.prepare(async function p0p0() {
+          tmp.log.push('p0p0')
+          y = 0
         })
-        .use(function p1() {
-          let y = -1
-          this.prepare(async function p1p0() {
-            tmp.log.push('p1p0')
-            y = 0
+          .destroy(async function p0d0() {
+            tmp.log.push('p0d0')
           })
-            .prepare(async function p1p1() {
-              tmp.log.push('p1p1')
-              y = 1
-            })
-            .destroy(async function p1d0() {
-              tmp.log.push('p1d0')
-            })
-            .destroy(async function p1d1() {
-              tmp.log.push('p1d1')
-            })
-            .message('p:p1,get:y', async () => ({ y }))
+          .message('p:p0,get:y', async () => ({ y }))
+      })
+      .use(function p1() {
+        let y = -1
+        this.prepare(async function p1p0() {
+          tmp.log.push('p1p0')
+          y = 0
         })
-        .use(function p2() {
-          let y = -1
-          this.prepare(async function p2p0() {
-            tmp.log.push('p2p0')
-            y = 0
+          .prepare(async function p1p1() {
+            tmp.log.push('p1p1')
+            y = 1
           })
-            .prepare(async function p2p1() {
-              tmp.log.push('p2p1')
-              y = 1
-            })
-            .prepare(async function p2p2() {
-              tmp.log.push('p2p2')
-              y = 2
-            })
-            .destroy(async function p2d0() {
-              tmp.log.push('p2d0')
-            })
-            .destroy(async function p2d1() {
-              tmp.log.push('p2d1')
-            })
-            .destroy(async function p2d2() {
-              tmp.log.push('p2d2')
-            })
-            .message('p:p2,get:y', async () => ({ y }))
+          .destroy(async function p1d0() {
+            tmp.log.push('p1d0')
+          })
+          .destroy(async function p1d1() {
+            tmp.log.push('p1d1')
+          })
+          .message('p:p1,get:y', async () => ({ y }))
+      })
+      .use(function p2() {
+        let y = -1
+        this.prepare(async function p2p0() {
+          tmp.log.push('p2p0')
+          y = 0
         })
+          .prepare(async function p2p1() {
+            tmp.log.push('p2p1')
+            y = 1
+          })
+          .prepare(async function p2p2() {
+            tmp.log.push('p2p2')
+            y = 2
+          })
+          .destroy(async function p2d0() {
+            tmp.log.push('p2d0')
+          })
+          .destroy(async function p2d1() {
+            tmp.log.push('p2d1')
+          })
+          .destroy(async function p2d2() {
+            tmp.log.push('p2d2')
+          })
+          .message('p:p2,get:y', async () => ({ y }))
+      })
 
     await si.ready()
 
@@ -400,9 +397,7 @@ describe('promise', function () {
     expect(tmp.a).equal(1)
     expect(si === so).true()
   })
-
 })
-
 
 function makeSeneca() {
   return Seneca().test().use('entity')

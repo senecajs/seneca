@@ -145,7 +145,6 @@ describe('add', function () {
     fin()
   })
 
-  
   it('action-name', function (fin) {
     var si = Seneca().test()
 
@@ -185,7 +184,6 @@ describe('add', function () {
     })
   })
 
-  
   it('action_modifier', function (fin) {
     var si = Seneca().test()
 
@@ -209,10 +207,9 @@ describe('add', function () {
     })
   })
 
-  
   it('rules-basic', function (fin) {
     const si = Seneca({ legacy: false }).test().quiet()
-    
+
     si.add({ a: 1, b: Number }, function (m, r) {
       r({ b: m.b * 2 })
     }).add('a:2', { b: Number }, function (m, r) {
@@ -248,7 +245,6 @@ describe('add', function () {
       })
     })
   })
-  
 
   it('rules-builders', function (fin) {
     const si = Seneca({ log: 'silent' }) //.test()

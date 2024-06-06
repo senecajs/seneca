@@ -140,5 +140,4 @@ describe('close', function () {
 
     expect(si.flags.closed).true()
   })
-
 })

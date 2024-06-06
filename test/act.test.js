@@ -130,7 +130,6 @@ describe('act', function () {
     })
   })
 
-  
   it('direct-basic-reply', async () => {
     let si = await Seneca({ legacy: false }).test().ready()
     let log = []
@@ -151,7 +150,6 @@ describe('act', function () {
     expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
   })
 
-
   it('direct-basic-api', async () => {
     let si = await Seneca({ timeout: 50, legacy: false }).test().ready()
     let log = []
@@ -168,10 +166,9 @@ describe('act', function () {
 
     expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
 
-    await new Promise(r=>setTimeout(r,100))
+    await new Promise((r) => setTimeout(r, 100))
   })
 
-  
   it('direct-no-reply', async () => {
     let si = await Seneca({ legacy: false }).test().ready()
     let log = []
@@ -257,7 +254,6 @@ describe('act', function () {
     ])
   })
 
-  
   it('direct-sequence', async () => {
     let si = await Seneca({ legacy: false }).test().ready()
     let log = []

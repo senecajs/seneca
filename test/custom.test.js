@@ -214,10 +214,7 @@ describe('custom', function () {
   it('custom-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0' })
-      .test(fin)
-      .use(st)
-      .listen({ type: 'simple' })
+    var s0 = Seneca({ id$: 's0' }).test(fin).use(st).listen({ type: 'simple' })
 
     var c0 = Seneca({
       id$: 'c0',
@@ -383,7 +380,6 @@ describe('custom', function () {
     })
   })
 
-  
   lab.it('custom-add-basic', test_opts, async () => {
     var si = await Seneca({ legacy: false })
       .test()
@@ -437,10 +433,8 @@ describe('custom', function () {
     })
   })
 
-  
   lab.it('custom-add-fix', test_opts, async () => {
-    const si = await Seneca()
-      .test()
+    const si = await Seneca().test()
 
     si.message('role:qaz,foo:false', async function (msg) {
       return msg

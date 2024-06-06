@@ -282,7 +282,6 @@ describe('exports', function () {
     })
   })
 
-  
   it('with-tags', async () => {
     const s0 = Seneca({ legacy: false }).test()
 
@@ -326,7 +325,6 @@ describe('exports', function () {
     expect(s1.export('p1$c/x')).equals(33)
   })
 
-  
   it('async-with-tags', async () => {
     const s0 = Seneca({ legacy: false }).test()
 

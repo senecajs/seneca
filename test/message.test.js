@@ -402,10 +402,7 @@ describe('message', function () {
   it('single-simple-transport', test_opts, function (fin) {
     var st = Transports.make_simple_transport()
 
-    var s0 = Seneca({ id$: 's0' })
-      .test(fin)
-      .use(st)
-      .listen({ type: 'simple' })
+    var s0 = Seneca({ id$: 's0' }).test(fin).use(st).listen({ type: 'simple' })
     s0.id = 's0'
 
     var c0 = Seneca({

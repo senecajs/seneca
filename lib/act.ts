@@ -328,7 +328,7 @@ const intern = (module.exports.intern = {
     const actdef = meta.prior
       ? private$.actdef[meta.prior]
       : act_instance.find(msg)
-    const delegate = intern.make_act_delegate(act_instance, opts, meta, actdef)
+    const delegate = intern.make_act_delegate(act_instance, msg, meta, actdef)
 
     actctxt.seneca = delegate
     actctxt.actdef = actdef
@@ -385,7 +385,7 @@ const intern = (module.exports.intern = {
 
   make_act_delegate: function(
     instance: any,
-    _opts: any,
+    msg: any,
     meta: any,
     actdef: any
   ) {
@@ -412,8 +412,9 @@ const intern = (module.exports.intern = {
 
     delegate.private$.act = {
       parent: parent_act && parent_act.meta,
-      meta: meta,
+      meta,
       def: actdef,
+      msg,
     }
 
     // special overrides
