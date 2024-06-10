@@ -14,7 +14,7 @@ var Seneca = require('..')
 
 describe('translation', () => {
   // return;
-  
+
   it('happy', async () => {
     let s0 = Seneca({ legacy: false })
       .test()

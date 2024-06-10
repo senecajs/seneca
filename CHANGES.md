@@ -1,6 +1,7 @@
-## 3.37.0 2024-06-08
+## 3.37.0 2024-06-10
 
-* Forward compatibility with Gubu-based option validation to make 4.x release easier.
+* Forward compatibility with Gubu-based option validation.
+* Forward compatibility with sys:seneca actions.
 
 
 ## 3.36.0 2024-05-03

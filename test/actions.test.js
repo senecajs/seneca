@@ -17,7 +17,7 @@ const Seneca = require('..')
 
 describe('actions', function () {
   // return;
-  
+
   // var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
@@ -60,7 +60,6 @@ describe('actions', function () {
     })
   })
 
-  
   it('cmd_close', function (fin) {
     const si = Seneca({
       system: { exit: function noop() {} },
@@ -80,7 +79,6 @@ describe('actions', function () {
     })
   })
 
-  
   it('info_fatal', function (fin) {
     Seneca({
       log: 'silent',

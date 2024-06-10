@@ -155,17 +155,17 @@ describe('add', function () {
     // NOTE: these may need to be updates if startup action call sequence changes.
 
     expect(si.find('n:0')).contains({
-      id: 'root$/default_action/8',
+      id: 'root$/default_action/9',
       name: 'default_action',
     })
 
     expect(si.find('n:1')).contains({
-      id: 'root$/action/9',
+      id: 'root$/action/10',
       name: 'action',
     })
 
     expect(si.find('n:2')).contains({
-      id: 'root$/n2/10',
+      id: 'root$/n2/11',
       name: 'n2',
     })
 
@@ -175,7 +175,7 @@ describe('add', function () {
       })
     }).ready(function () {
       expect(si.find('p:0')).contains({
-        id: 'p0/f0/23',
+        id: 'p0/f0/24',
         name: 'f0',
       })
 

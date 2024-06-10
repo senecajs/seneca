@@ -31,7 +31,7 @@ var Seneca = require('..')
 
 describe('seneca --seneca.log arguments tests: ', function () {
   // return;
-  
+
   it('--seneca.log=level:warn', function (done) {
     var opts = { debug: {} }
     opts.debug.argv = ['', '', '--seneca.log=level:warn']

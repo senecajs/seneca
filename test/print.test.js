@@ -19,7 +19,7 @@ const Seneca = require('..')
 // TODO: capture STDOUT and verify
 describe('print', function () {
   // return;
-  
+
   it('init', function (fin) {
     var si = Seneca().test(fin)
     Print(si, ['', ''])

@@ -158,7 +158,9 @@ describe('message', function () {
 
   it('loop', test_opts, function (fin) {
     var i = 0
-    Seneca({ id$: 'loop', idlen: 4, log: 'silent', limits: { maxparents: 3 } })
+    Seneca({ id$: 'loop', idlen: 4, legacy: false, limits: { maxparents: 3 } })
+      .test()
+      .quiet()
       .add('a:1', function a1(msg, reply, meta) {
         expect(is_uniq(parents(meta, 1))).true()
 
@@ -173,10 +175,10 @@ describe('message', function () {
         expect(err.code).equal('maxparents')
         // console.log(err.details.parents)
         expect(err.details.parents).equal([
-          'a:1 root$/a1/8',
-          'a:1 root$/a1/8',
-          'a:1 root$/a1/8',
-          'a:1 root$/a1/8',
+          'a:1 root$/a1/12',
+          'a:1 root$/a1/12',
+          'a:1 root$/a1/12',
+          'a:1 root$/a1/12',
         ])
 
         fin()

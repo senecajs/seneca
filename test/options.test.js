@@ -17,7 +17,7 @@ var Seneca = require('..')
 
 describe('options', function () {
   // return;
-  
+
   it('options-strict.find', async () => {
     await Seneca({ strict: { find: false } })
       .test()

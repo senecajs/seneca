@@ -38,7 +38,7 @@ const testopts = { log: 'test' }
 
 describe('seneca', function () {
   // return;
-  
+
   it('happy', function (fin) {
     Seneca()
       .test(fin)
@@ -754,7 +754,7 @@ describe('seneca', function () {
   })
 
   it('act-history', function (fin) {
-    var si = Seneca().test(fin).use('entity')
+    var si = Seneca({ legacy: false }).test(fin).use('entity')
 
     var x = 0
 

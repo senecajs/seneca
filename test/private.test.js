@@ -11,7 +11,7 @@ const Seneca = require('..')
 
 lab.describe('private', function () {
   // return;
-  
+
   lab.test('exit_close', async () => {
     var tmp = { exit: 0 }
     var opts = {

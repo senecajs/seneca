@@ -21,7 +21,7 @@ const Seneca = require('..')
 
 describe('legacy', function () {
   // return;
-  
+
   it('nil', function (fin) {
     Legacy.nil({ msg: 1 }, function reply() {
       fin()

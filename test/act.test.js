@@ -22,7 +22,7 @@ const intern = Act.intern
 
 describe('act', function () {
   // return;
-  
+
   it('make_actmsg', function (fin) {
     var origmsg = {
       a: 1,

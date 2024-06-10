@@ -15,7 +15,7 @@ var Seneca = require('..')
 
 describe('sequence', function () {
   // return;
-  
+
   it('single-add-act', function (fin) {
     Seneca.test(fin)
       .add('a:1', function (msg, done) {
