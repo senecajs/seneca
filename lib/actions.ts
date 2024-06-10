@@ -9,14 +9,16 @@ function addActions(instance: any) {
   instance.stats = make_action_seneca_stats(instance.private$)
 
   // Add builtin actions.
-  instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
-  instance.add({ role: 'seneca', cmd: 'stats' }, instance.stats)
-  instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close)
-  instance.add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
-  instance.add({ role: 'seneca', get: 'options' }, action_options_get)
+  instance
+    .add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
+    .add({ role: 'seneca', cmd: 'stats' }, instance.stats)
+    .add({ role: 'seneca', cmd: 'close' }, action_seneca_close)
+    .add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
+    .add({ role: 'seneca', get: 'options' }, action_options_get)
 
-  // TODO: review - is this used?
-  //instance.add({ role: 'seneca', make: 'error' }, action_make_error)
+  // Forward compatibility
+  instance
+    .translate('sys:seneca', 'role:seneca', ['-sys'])
 
   // Legacy builtin actions.
   // Remove in Seneca 4.x
