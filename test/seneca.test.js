@@ -37,6 +37,8 @@ const timerstub = {
 const testopts = { log: 'test' }
 
 describe('seneca', function () {
+  // return;
+  
   it('happy', function (fin) {
     Seneca()
       .test(fin)

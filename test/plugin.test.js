@@ -1558,4 +1558,67 @@ describe('plugin', function () {
         fin()
       })
   })
+
+
+  it('plugin-options-gubu-legacy-handling', (fin)=>{
+    let olog = []
+    let elog = []
+    const s0 = Seneca({
+      system: { exit: function noop() {} },
+    }).test().quiet().error(err=>elog.push(err))
+    const { Skip } = s0.valid
+    
+    const p0 = function(opts) {
+      olog.push(opts)
+    }
+    p0.defaults = {
+      a:1
+    }
+
+    const p1 = function(opts) {
+      olog.push(opts)
+    }
+    p1.defaults = {
+      c:1,
+      d: Skip(4)
+    }
+
+    const p2 = function(opts) {
+      olog.push(opts)
+    }
+    p2.defaults = {
+      e:1,
+      f:String
+    }
+
+    
+    s0.use(p0)
+    s0.use(p0, {a:2})
+    s0.use(p0, {b:2})
+    s0.use(p0, {a:2,b:3})
+
+    s0.use(p1)
+
+    s0.use(p2,{f:'F'})
+    s0.use(p2,{e:2,f:'F'})
+
+    s0.use(p0, {a:'A'})
+
+    setTimeout(()=>{
+      // console.dir(olog,{depth:null})
+      // console.log(elog)
+      expect(olog).equal([
+        { a: 1 },
+        { a: 2 },
+        { b: 2, a: 2 },
+        { a: 2, b: 3 },
+        { c: 1 },
+        { f: 'F', e: 1 },
+        { e: 2, f: 'F' }
+      ])
+      expect(elog[0].msg).equal('seneca: Plugin p0: option value is not valid:'+
+                                ' "a" must be a number in options {a:A,b:3}')
+      fin()
+    },111)
+  })
 })

@@ -248,6 +248,8 @@ const option_defaults = {
 
     // Function to exit the process.
     exit: (...args: any[]) => {
+      // console.log('EXIT', args)
+      // console.trace()
       process.exit(...args)
     },
 

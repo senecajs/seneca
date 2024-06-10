@@ -1,3 +1,8 @@
+## 3.37.0 2024-06-08
+
+* Forward compatibility with Gubu-based option validation to make 4.x release easier.
+
+
 ## 3.36.0 2024-05-03
 
 * Updated use-plugin package to handle CamelCase plugin names (eg. seneca.use('BatchMonitor') finds @seneca/batch-monitor)

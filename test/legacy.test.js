@@ -20,6 +20,8 @@ const Seneca = require('..')
 // TODO: move all legacy functions here and isolate lack of test coverage
 
 describe('legacy', function () {
+  // return;
+  
   it('nil', function (fin) {
     Legacy.nil({ msg: 1 }, function reply() {
       fin()

@@ -380,6 +380,9 @@ function makedie(instance: any, ctxt: any) {
 
       // make sure we close down within options.death_delay seconds
       if (!undead) {
+        // console.log('KILL', err)
+        // console.trace()
+
         let killtimer = setTimeout(function() {
           instance.log.fatal({ kind: 'close', timeout: true })
 

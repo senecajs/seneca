@@ -182,6 +182,8 @@ const option_defaults = {
     system: {
         // Function to exit the process.
         exit: (...args) => {
+            // console.log('EXIT', args)
+            // console.trace()
             process.exit(...args);
         },
         // Close instance on these signals, if true.

@@ -14,6 +14,8 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('sub', function () {
+  // return;
+  
   it('happy-sub', function (fin) {
     var log = []
     Seneca()

@@ -41,6 +41,8 @@ function testact(msg, reply) {
 var test_opts = { parallel: false, timeout: 5555 * tmx }
 
 describe('transport', function () {
+  // return;
+  
   // TODO: test top level qaz:* : def and undef other pats
 
   it('happy-nextgen', test_opts, function (fin) {
@@ -76,6 +78,7 @@ describe('transport', function () {
       })
   })
 
+  
   it('config-legacy-nextgen', test_opts, function (fin) {
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
     var c0 = Seneca({
@@ -104,6 +107,7 @@ describe('transport', function () {
           })
       })
   })
+
 
   it('error-nextgen', test_opts, function (fin) {
     var s0 = Seneca({ id$: 's0', log: 'silent', legacy: { transport: false } })
@@ -194,6 +198,7 @@ describe('transport', function () {
       }),
     )
   })
+
 
   it('config-nextgen', test_opts, function (fin) {
     var s0 = Seneca({
@@ -334,6 +339,7 @@ describe('transport', function () {
       })
   })
 
+  
   it('nextgen-ordering', test_opts, function (fin) {
     var s0 = Seneca({ id$: 's0', legacy: { transport: false } }).test(fin)
     var c0 = Seneca({
@@ -384,6 +390,7 @@ describe('transport', function () {
       })
   })
 
+  
   // TEST: parent and trace over transport - fake and network
   // TEST: separate reply - write TCP
 
@@ -910,8 +917,9 @@ describe('transport', function () {
           })
         })
       })
-  })
+      })
 
+  
   it('transport-balance-exact', test_opts, function (done) {
     var bt = make_balance_transport()
 
@@ -1024,6 +1032,7 @@ describe('transport', function () {
       })
     }
   })
+
 
   // Thanks to https://github.com/davide-talesco for this test
   // https://github.com/senecajs/seneca-transport/issues/165

@@ -14,6 +14,8 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('smoke', function () {
+  // return;
+  
   // Just one test - don't add anymore to this suite!
   it('seneca-smoke', function (fin) {
     Seneca({ log: 'silent' })

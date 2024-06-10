@@ -16,6 +16,8 @@ const it = Shared.make_it(lab)
 const Seneca = require('..')
 
 describe('actions', function () {
+  // return;
+  
   // var si = Seneca({ log: 'silent' })
 
   function z(msg, reply) {
@@ -58,8 +60,11 @@ describe('actions', function () {
     })
   })
 
+  
   it('cmd_close', function (fin) {
-    var si = Seneca().test(fin)
+    const si = Seneca({
+      system: { exit: function noop() {} },
+    }).test(fin)
 
     var log = []
     si.on('close', function () {
@@ -75,6 +80,7 @@ describe('actions', function () {
     })
   })
 
+  
   it('info_fatal', function (fin) {
     Seneca({
       log: 'silent',

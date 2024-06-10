@@ -16,6 +16,8 @@ var Seneca = require('..')
 var testopts = { log: 'test' }
 
 describe('prior', function () {
+  // return;
+  
   it('happy', function (fin) {
     Seneca()
       .test(fin)

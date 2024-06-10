@@ -13,6 +13,8 @@ var it = Shared.make_it(lab)
 var Seneca = require('..')
 
 describe('timeout', function () {
+  // return;
+  
   it('happy', function (fin) {
     Seneca({ timeout: 100, legacy: { transport: false } })
       .test()

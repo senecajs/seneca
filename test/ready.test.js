@@ -16,6 +16,8 @@ const it = Shared.make_it(lab)
 const Seneca = require('..')
 
 describe('ready', function () {
+  // return;
+  
   it('ready_die', function (fin) {
     const si = Seneca({
       log: 'silent',

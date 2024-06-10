@@ -15,6 +15,8 @@ var it = Shared.make_it(lab)
 var Seneca = require('../../..')
 
 describe('options', function () {
+  // return;
+  
   it('options-happy', function (fin) {
     // loads ./seneca.options.js as well
     var si = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
