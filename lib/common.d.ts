@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Util from 'util';
 declare const error: any;
 declare function pins(inpin: any): Record<string, any>[];
