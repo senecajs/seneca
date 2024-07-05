@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Util from 'util';
 declare const error: any;
 declare function promiser(context: any, callback?: any): Promise<unknown>;

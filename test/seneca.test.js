@@ -673,7 +673,8 @@ describe('seneca', function () {
                   })
                 } catch (e) {
                   expect(e.message).equal(
-                    'seneca (add): Value "123" for property "props" does not satisfy one of: string, Object',
+                    'seneca (add): Value "123" for property "props" does not satisfy one of: '+
+                      'String, Object',
                   )
                   done()
                 }
