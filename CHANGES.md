@@ -1,3 +1,8 @@
+## 3.37.1 2024-07-11
+
+* Dependency updates.
+
+
 ## 3.37.0 2024-06-10
 
 * Forward compatibility with Gubu-based option validation.
