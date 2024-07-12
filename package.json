@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "3.37.1",
+  "version": "3.37.2",
   "types": "seneca.d.ts",
   "license": "MIT",
   "homepage": "http://senecajs.org",
@@ -91,7 +91,7 @@
     "eraro": "^3.0.1",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
-    "gubu": "8.1.0",
+    "gubu": "8.2.1",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
     "lodash.uniq": "^4.5.0",

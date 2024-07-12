@@ -1,3 +1,8 @@
+## 3.37.2 2024-07-12
+
+* Dependency updates.
+
+
 ## 3.37.1 2024-07-11
 
 * Dependency updates.
