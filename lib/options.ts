@@ -5,7 +5,7 @@ import Fs from 'fs'
 import Path from 'path'
 
 const Eraro = require('eraro')
-const Jsonic = require('@jsonic/jsonic-next')
+const Jsonic = require('jsonic')
 const Minimist = require('minimist')
 const { Gubu } = require('gubu')
 

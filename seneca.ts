@@ -10,7 +10,7 @@ const Util = require('util')
 
 // External modules.
 const GateExecutor = require('gate-executor')
-const Jsonic = require('@jsonic/jsonic-next')
+const Jsonic = require('jsonic')
 const UsePlugin = require('use-plugin')
 import Nid from 'nid'
 import { Patrun, Gex } from 'patrun'
