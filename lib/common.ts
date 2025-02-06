@@ -5,7 +5,7 @@
 import Util from 'util'
 
 import Stringify from 'fast-safe-stringify'
-import Jsonic from '@jsonic/jsonic-next'
+import Jsonic from 'jsonic'
 import Nid from 'nid'
 
 const Eraro = require('eraro')
