@@ -1,7 +1,7 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "4.0.0-rc4",
+  "version": "4.0.0-rc5",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "keywords": [
@@ -51,7 +51,8 @@
     "Tane Piper (https://github.com/tanepiper)",
     "Wyatt Preul (https://github.com/geek)",
     "Vald Houbiev (https://github.com/vladgolubev)",
-    "Vito Tardia (https://github.com/vtardia)"
+    "Vito Tardia (https://github.com/vtardia)",
+    "Efim Bogdanovsky (https://github.com/lilsweetcaligula)"
   ],
   "repository": {
     "type": "git",
@@ -71,7 +72,7 @@
   "scripts": {
     "watch": "tsc -w -d",
     "build": "tsc -d",
-    "test": "lab -v -P test -L -t 85 --sourcemaps --transform node_modules/lab-transform-typescript -I AggregateError,atob,btoa,AbortController,AbortSignal,EventTarget,Event,MessageChannel,MessagePort,MessageEvent,performance -r console -o stdout -r html -o test/coverage.html",
+    "test": "lab -v -P test -t 85 --sourcemaps --transform node_modules/lab-transform-typescript -I AggregateError,atob,btoa,AbortController,AbortSignal,EventTarget,Event,MessageChannel,MessagePort,MessageEvent,performance -r console -o stdout -r html -o test/coverage.html",
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
     "coveralls": "lab -s -P test -I AggregateError,atob,btoa,DOMException,AbortController,AbortSignal,EventTarget,Event,MessageChannel,MessagePort,MessageEvent,performance,structuredClone -r lcov > ./coverage/lcov.info",
     "coverage": "lab -v -P test -L -t 90 -r html > docs/coverage.html",
@@ -87,35 +88,35 @@
     "eraro": "^3.0.1",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
-    "gubu": "^8.2.1",
-    "@jsonic/jsonic-next": "2.12.1",
+    "gubu": "^9.0.0",
+    "jsonic": "^2.16.0",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "minimist": "^1.2.8",
     "nid": "^2.0.1",
     "ordu": "^2.2.0",
-    "patrun": "^7.2.5",
+    "patrun": "^7.2.7",
     "rolling-stats": "^0.2.1",
-    "use-plugin": "^13.1.0"
+    "use-plugin": "^13.2.0"
   },
   "devDependencies": {
     "@hapi/code": "^9.0.3",
-    "@hapi/lab": "^25.2.0",
+    "@hapi/lab": "^26.0.0",
     "@seneca/test-plugin": "0.1.0",
-    "@types/node": "^20.14.10",
-    "async": "^3.2.5",
+    "@types/node": "^22.13.1",
+    "async": "^3.2.6",
     "bench": "^0.3.6",
     "coveralls": "^3.1.1",
     "gex": "^4.0.1",
     "handlebars": "^4.7.8",
     "lab-transform-typescript": "^3.0.1",
     "lolex": "^6.0.0",
-    "prettier": "^3.3.2",
-    "seneca-entity": "^27.2.0",
+    "prettier": "^3.4.2",
+    "seneca-entity": "^28.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-promisify": "^3.7.2",
     "summary": "^2.1.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.7.3"
   }
 }
