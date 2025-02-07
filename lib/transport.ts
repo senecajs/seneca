@@ -8,7 +8,7 @@ const Https = require('https')
 const Qs = require('qs')
 const Url = require('url')
 
-const Jsonic = require('@jsonic/jsonic-next')
+const Jsonic = require('jsonic')
 const Wreck = require('@hapi/wreck')
 const Common = require('./common')
 
