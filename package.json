@@ -88,7 +88,7 @@
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
     "gubu": "^8.2.1",
-    "@jsonic/jsonic-next": "2.12.1",
+    "jsonic": "2.15.2",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
     "lodash.uniq": "^4.5.0",
