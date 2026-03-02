@@ -85,7 +85,7 @@
     "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org"
   },
   "dependencies": {
-    "eraro": "^3.0.1",
+    "eraro": "^3.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
     "gubu": "^9.0.0",

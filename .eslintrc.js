@@ -12,4 +12,11 @@ module.exports = {
     'no-unused-vars': [2,{args:'none'}],
     'no-extra-semi': 0,
   },
+  ignores: [
+    "test/stubs",
+    "docs/examples",
+    "tmp",
+    "test",
+    "trial",
+  ]
 }

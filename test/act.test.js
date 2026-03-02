@@ -1,8 +1,6 @@
 /* Copyright (c) 2019-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Util = require('util')
-
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 
@@ -81,13 +79,13 @@ describe('act', function () {
     var d0 = { a: 1, meta: {} }
     intern.process_outward(actctxt, d0)
     expect(d0.x).equals(1)
-    expect(Util.isError(d0.err)).true()
+    expect(d0.err instanceof Error).true()
     expect(d0.meta.error).true()
 
     var d1 = { b: 2, meta: {} }
     intern.process_outward(actctxt, d1)
     expect(d1.x).equals(1)
-    expect(Util.isError(d1.err)).true()
+    expect(d1.err instanceof Error).true()
     expect(d1.err.code).equal('b')
     expect(d1.meta.error).true()
 

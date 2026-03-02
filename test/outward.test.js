@@ -1,8 +1,6 @@
 /* Copyright (c) 2016-2017 Richard Rodger, MIT License */
 'use strict'
 
-var Util = require('util')
-
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
@@ -26,7 +24,7 @@ describe('outward', function () {
       data,
     })
     expect(data.res.message).equal('foo')
-    expect(Util.isError(data.res)).false()
+    expect(data.res instanceof Error).false()
 
     data = { res: err }
     Outward.outward_make_error({
@@ -34,7 +32,7 @@ describe('outward', function () {
       data,
     })
     expect(data.res.message).equal('foo')
-    expect(!Util.isError(data.res)).true()
+    expect(!(data.res instanceof Error)).true()
 
     fin()
   })
