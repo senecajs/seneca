@@ -468,6 +468,7 @@ function make_seneca(initial_opts) {
     root$.depends = API.depends; // Check for plugin dependencies.
     root$.delegate = API.delegate; // Create an action-specific Seneca instance.
     root$.prior = prior_1.Prior.api_prior; // Call the previous action definition for pattern.
+    root$.direct_prior = prior_1.Prior.api_direct_prior; // Call the previous action definition synchronously.
     root$.inward = API.inward; // Add a modifier function for messages inward
     root$.outward = API.outward; // Add a modifier function for responses outward
     root$.error = API.error; // Set global error handler, or generate Seneca Error

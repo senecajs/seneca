@@ -78,8 +78,43 @@ function api_prior(this: any) {
 }
 
 
+function api_direct_prior(this: any) {
+  if (null == this.private$.act) {
+    throw this.util.error('no_prior_action', { args: arguments })
+  }
+
+  // Get definition of prior action
+  const priordef = this.private$.act.def.priordef
+
+  const spec = ActArgu(arguments)
+
+  spec.msg = Object.assign(
+    {},
+    spec.moreprops ? spec.moreprops : null,
+    'string' === typeof spec.props ?
+      parse_jsonic(spec.props, 'msg_jsonic_syntax') :
+      spec.props,
+  )
+
+  const msg = spec.msg
+  const reply = spec.reply
+
+  if (priordef) {
+    msg.prior$ = priordef.id
+    return this.direct(msg, reply)
+  }
+  else {
+    const meta = msg.meta$ || {}
+    let out = msg.default$ || meta.dflt || null
+    out = null == out ? out : Object.assign({}, out)
+    return reply ? reply.call(this, null, out, meta) : out
+  }
+}
+
+
 const Prior = {
-  api_prior
+  api_prior,
+  api_direct_prior,
 }
 
 
