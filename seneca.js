@@ -310,7 +310,7 @@ function Seneca() {
 }
 Util.inherits(Seneca, Events.EventEmitter);
 // The known, valid Seneca event names. Anything else passed to `.on`
-// is almost certainly a typo (e.g. 'act-err' vs 'act_err'), so it's
+// is almost certainly a typo, (e.g. 'act-err' vs 'act_err'), so it's
 // validated here rather than silently registering a listener that
 // will never fire. See lib/act.ts, lib/outward.ts, lib/logging.ts,
 // lib/ready.ts, lib/actions.ts (where these are emitted), and the
