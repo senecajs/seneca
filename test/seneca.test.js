@@ -170,7 +170,7 @@ describe('seneca', function () {
       }).to.not.throw()
     })
 
-    // An unknown event name should throw a clear, identifiable error.
+    // An unknown event name should throw a clear identifiable error.
     try {
       si.on('not-an-event', function () {})
       expect(true).false()
