@@ -149,6 +149,37 @@ describe('seneca', function () {
       })
   })
 
+  it('on-event-name-validation', function (done) {
+    var si = Seneca(testopts).test()
+
+    // Known, valid Seneca event names should register without error.
+    ;[
+      'act-in',
+      'act-out',
+      'act-err',
+      'act-err-4',
+      'pin',
+      'after-pin',
+      'ready',
+      'close',
+      'log',
+      'error',
+    ].forEach(function (event_name) {
+      expect(function () {
+        si.on(event_name, function () {})
+      }).to.not.throw()
+    })
+
+    // An unknown event name should throw a clear, identifiable error.
+    try {
+      si.on('not-an-event', function () {})
+      expect(true).false()
+    } catch (e) {
+      expect('invalid_event_name').equal(e.code)
+      done()
+    }
+  })
+
   it('errhandler', function (done) {
     var tmp = {}
 
