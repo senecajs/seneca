@@ -6,6 +6,7 @@ declare function stringify(...args: any): any;
 declare function wrap_error(err: any): void;
 declare function make_plugin_key(plugin: any, origtag: any): string;
 declare const tagnid: any;
+declare function idnid(opts?: any): any;
 declare function parse_jsonic(str: any, code: any): any;
 declare function pattern(patobj: any): any;
 declare function pincanon(inpin: any): any;
@@ -52,4 +53,4 @@ declare class ActHistory {
     toString(this: any): string;
     [Util.inspect.custom](this: any): any;
 }
-export { pins, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { pins, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, idnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
