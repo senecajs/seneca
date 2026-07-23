@@ -552,8 +552,8 @@ function make_seneca(initial_opts?: any) {
   })
 
   // Create internal tools.
-  private$.actnid = Nid({ length: start_opts.idlen })
-  private$.didnid = Nid({ length: start_opts.didlen })
+  private$.actnid = Common.idnid({ length: start_opts.idlen })
+  private$.didnid = Common.idnid({ length: start_opts.didlen })
 
   // Instance specific incrementing counters to create unique function names
   private$.next_action_id = Common.autoincr()
@@ -661,7 +661,7 @@ function make_seneca(initial_opts?: any) {
   root$.next_act = Legacy.next_act
 
   // Identifier generator.
-  root$.idgen = Nid({ length: start_opts.idlen })
+  root$.idgen = Common.idnid({ length: start_opts.idlen })
 
   // Instance tag
   start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag
@@ -684,7 +684,7 @@ function make_seneca(initial_opts?: any) {
 
   if (start_opts.debug.short_logs || start_opts.log.short) {
     start_opts.idlen = 2
-    root$.idgen = Nid({ length: start_opts.idlen })
+    root$.idgen = Common.idnid({ length: start_opts.idlen })
     root$.id = root$.idgen() + '/' + start_opts.tag
   }
 
