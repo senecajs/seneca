@@ -133,4 +133,21 @@ describe('util', function () {
     expect(Seneca.util.Gex('a*').match('ab')).equal(true)
     done()
   })
+
+  it('common.idnid-never-starts-with-digit', function (done) {
+    var Common = require('../lib/common.js')
+
+    // Use a short length so a digit-first id would be common by
+    // chance if the fix wasn't in place (default alphabet is
+    // 0-9a-z, so ~28% chance per id of starting with a digit).
+    var gen = Common.idnid({ length: 4 })
+
+    for (var i = 0; i < 2000; i++) {
+      var id = gen()
+      expect(id.length).equal(4)
+      expect(/^[0-9]/.test(id)).false()
+    }
+
+    done()
+  })
 })
