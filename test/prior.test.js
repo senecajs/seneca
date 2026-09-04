@@ -42,6 +42,118 @@ describe('prior', function () {
     }
   })
 
+  it('direct_prior-happy', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+    let log = []
+
+    si.add('a:1', function a1(msg) {
+      log.push(`a1:x=${msg.x}`)
+      return { x: msg.x }
+    }).add('a:1', function a1p(msg) {
+      msg.x = msg.x + 1
+      log.push(`a1p:x=${msg.x}`)
+      return this.direct_prior(msg)
+    })
+
+    log.push('pre')
+    let out = si.direct('a:1,x:2')
+    log.push('post')
+
+    expect(out.x).equal(3)
+    expect(log).equal(['pre', 'a1p:x=3', 'a1:x=3', 'post'])
+  })
+
+  it('direct_prior-with-reply', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+    let log = []
+
+    si.add('a:1', function a1(msg, reply) {
+      log.push(`a1:x=${msg.x}`)
+      reply({ x: msg.x })
+    }).add('a:1', function a1p(msg, reply) {
+      msg.x = msg.x + 1
+      log.push(`a1p:x=${msg.x}`)
+      this.direct_prior(msg, function (err, out) {
+        expect(err).equal(null)
+        log.push(`a1p-reply:x=${out.x}`)
+        reply({ x: out.x * 2 })
+      })
+    })
+
+    log.push('pre')
+    si.act('a:1,x:2,direct$:true', function (err, out) {
+      expect(err).equal(null)
+      log.push('reply:' + JSON.stringify(out))
+    })
+    log.push('post')
+
+    expect(log).equal([
+      'pre',
+      'a1p:x=3',
+      'a1:x=3',
+      'a1p-reply:x=3',
+      'reply:{"x":6}',
+      'post',
+    ])
+  })
+
+  it('direct_prior-no-prior', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+
+    si.add('a:1', function a1(msg) {
+      return this.direct_prior(msg)
+    })
+
+    let out = si.direct('a:1,x:2')
+    expect(out).equal(null)
+  })
+
+  it('direct_prior-no-prior-default', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+
+    si.add('a:1', function a1(msg) {
+      msg.default$ = { x: 99 }
+      return this.direct_prior(msg)
+    })
+
+    let out = si.direct('a:1,x:2')
+    expect(out.x).equal(99)
+  })
+
+  it('direct_prior-top-level-error', function (fin) {
+    try {
+      Seneca().test().direct_prior({ a: 1 })
+      expect(false).true()
+    } catch (e) {
+      expect(e.code).equal('no_prior_action')
+      fin()
+    }
+  })
+
+  it('direct_prior-chain', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+    let log = []
+
+    si.add('a:1', function a1(msg) {
+      log.push(`a1:x=${msg.x}`)
+      return { x: msg.x + 1 }
+    })
+      .add('a:1', function a1p1(msg) {
+        log.push(`a1p1:x=${msg.x}`)
+        let out = this.direct_prior(msg)
+        return { x: out.x + 10 }
+      })
+      .add('a:1', function a1p2(msg) {
+        log.push(`a1p2:x=${msg.x}`)
+        let out = this.direct_prior(msg)
+        return { x: out.x + 100 }
+      })
+
+    let out = si.direct('a:1,x:1')
+    expect(out.x).equal(112)
+    expect(log).equal(['a1p2:x=1', 'a1p1:x=1', 'a1:x=1'])
+  })
+
   it('add-general-to-specific', function (done) {
     Seneca(testopts)
       .error(done)
