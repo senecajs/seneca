@@ -154,6 +154,10 @@ export default {
   use_no_args:
     'The seneca.use method needs at least one argument to define a plugin.',
 
+  invalid_event_name:
+    'Invalid event name: "<%=name%>". The seneca.on method only accepts ' +
+    'known Seneca event names: <%=valid%>.',
+
   // Legacy error message codes
 
   act_invalid_args:

@@ -43,6 +43,7 @@ declare const _default: {
     fail_cond_must_be_bool: string;
     action_timeout: string;
     use_no_args: string;
+    invalid_event_name: string;
     act_invalid_args: string;
     deprecation: {};
 };

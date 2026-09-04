@@ -405,6 +405,38 @@ function Seneca(this: any) {
 }
 Util.inherits(Seneca, Events.EventEmitter)
 
+// The known, valid Seneca event names. Anything else passed to `.on`
+// is almost certainly a typo... (e.g. 'act-err' vs 'act_err'), so it's
+// validated here rather than silently registering a listener that
+// will never fire. See lib/act.ts, lib/outward.ts, lib/logging.ts,
+// lib/ready.ts, lib/actions.ts (where these are emitted), and the
+// close cleanup in lib/api.ts (where they are removed) for the
+// canonical list.
+const valid_event_names = [
+  'act-in',
+  'act-out',
+  'act-err',
+  'act-err-4',
+  'pin',
+  'after-pin',
+  'ready',
+  'close',
+  'log',
+  'error', // Node.js EventEmitter special-cases this event.
+]
+
+const original_on = Seneca.prototype.on
+Seneca.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
+  if ('string' === typeof event_name && -1 === valid_event_names.indexOf(event_name)) {
+    throw error('invalid_event_name', {
+      name: event_name,
+      valid: valid_event_names.join(', '),
+    })
+  }
+
+  return original_on.call(this, event_name, ...rest)
+}
+
 // Mark the Seneca object
 Seneca.prototype.isSeneca = true
 
@@ -547,7 +579,7 @@ function make_seneca(initial_opts?: any) {
 
 
   // Setup event handlers, if defined
-  var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
+  var event_names = ['log', 'act-in', 'act-out', 'act-err', 'ready', 'close']
   event_names.forEach(function(event_name) {
     if ('function' === typeof start_opts.events[event_name]) {
       root$.on(event_name, start_opts.events[event_name])
