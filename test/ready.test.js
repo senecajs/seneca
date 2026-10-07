@@ -3,15 +3,13 @@
 
 const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-const lab = (exports.lab = Lab.script())
-const describe = lab.describe
+const { describe } = require('node:test')
 const expect = Code.expect
 
 const Shared = require('./shared')
-const it = Shared.make_it(lab)
+const it = Shared.make_it()
 
 const Seneca = require('..')
 

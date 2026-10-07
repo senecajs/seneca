@@ -134,6 +134,8 @@ function make_use(ordu: any, callpoint: any) {
             err.plugin_callpoint = err.plugin_callpoint || ctx.callpoint
 
             self.die(err)
+
+            intern.release_define(self, data, err)
           }
         }
       })
@@ -853,14 +855,34 @@ function make_intern() {
         Nua(data.plugin, tr.out.plugin, { preserve: true })
 
         if (data.prepare.err) {
-          data.delegate.die(
-            data.delegate.error(data.prepare.err, data.plugin.err_code, data.plugin))
+          let err = data.delegate.error(data.prepare.err, data.plugin.err_code, data.plugin)
+          data.delegate.die(err)
+
+          intern.release_define(data.delegate, data, err)
         }
 
         return { stop: true }
       },
     },
 
+
+    // A plugin is defined inside a gated `role:seneca,plugin:define` action,
+    // and that action is only completed when the plugin has loaded. When the
+    // plugin fails, `die` terminates the process - except in undead mode
+    // (testing only), where the instance lives on with the define action
+    // still in flight. Complete the action so that the executor is released
+    // immediately, rather than when the action times out: later plugins can
+    // then load, and the process is not held open by the executor interval.
+    release_define: function(seneca: any, data: any, err: any) {
+      let so = seneca.options()
+      let undead = (so.debug && so.debug.undead) || (err && err.undead)
+
+      if (undead && 'function' === typeof data.plugin_done) {
+        let plugin_done = data.plugin_done
+        data.plugin_done = null
+        plugin_done()
+      }
+    },
 
     define_plugin: function(delegate: any, plugin: any, options: any): any {
       // legacy plugins

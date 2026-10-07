@@ -61,7 +61,8 @@ To install via npm,
 npm install seneca
 ```
 
-Seneca 4 requires Node.js 18 or later.
+Seneca 4 requires Node.js 22 or later. Node.js 24 is the default version
+used for development, continuous integration and releases (see `.nvmrc`).
 
 Network transports are provided by plugins. To use `listen` and
 `client` over HTTP or TCP, as in the examples below, also install
@@ -402,16 +403,25 @@ information on contribution please see our [Contributing][Contrib] guide.
 
 
 ### Test
-To run tests locally,
+
+The tests use the Node.js built-in test runner (`node:test`) and need
+Node.js 22 or later (24 is the default). To run them locally, with a
+coverage summary:
 
 ```
-npm run test
+npm test
 ```
 
-To obtain a coverage report,
+To run only the tests whose names match a pattern:
 
 ```
-npm run coverage; open docs/coverage.html
+npm run test-some -- close
+```
+
+To write an lcov coverage report to `coverage/lcov.info`:
+
+```
+npm run coverage
 ```
 
 ## Background

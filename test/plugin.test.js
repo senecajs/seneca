@@ -2,14 +2,11 @@
 'use strict'
 
 const Code = require('@hapi/code')
-const Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 var { Plugin } = require('../lib/plugin')

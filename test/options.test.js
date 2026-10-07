@@ -4,15 +4,10 @@
 var Patrun = require('patrun')
 
 const Code = require('@hapi/code')
-const Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe, it } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = lab.it
-
 var Seneca = require('..')
 
 describe('options', function () {

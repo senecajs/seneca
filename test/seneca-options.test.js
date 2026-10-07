@@ -1,14 +1,12 @@
 /* Copyright (c) 2017 Richard Rodger, MIT License */
 'use strict'
 
-const Lab = require('@hapi/lab')
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 const Code = require('@hapi/code')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 
@@ -88,12 +86,9 @@ describe('seneca --seneca.log arguments tests: ', function () {
       Seneca(opts)
       Code.fail()
     } catch (e) {
-      console.log(e)
       expect(e.code).equal('bad_logspec_string')
       fin()
     }
-
-    done()
   })
 
   it('incorrect arg --seneca.log.level.abc', function (done) {

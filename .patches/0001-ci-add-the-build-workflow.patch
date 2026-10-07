@@ -1,0 +1,94 @@
+From b51f5e5b6ab17b87557c029fedded58ffbf50947 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 14:02:39 +0000
+Subject: [PATCH] ci: add the build workflow
+
+Continuous integration for pushes and pull requests on master and 3.x:
+clean install, build and test on Node.js 24 (the default target) and
+22, on Linux, Windows and macOS, plus an informational coverage job on
+Node.js 24 that uploads the node:test lcov report to Coveralls.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01LaHppcejXbSsAH4BZXNsjV
+---
+ .github/workflows/build.yml | 71 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 71 insertions(+)
+ create mode 100644 .github/workflows/build.yml
+
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+new file mode 100644
+index 0000000..9e997bc
+--- /dev/null
++++ b/.github/workflows/build.yml
+@@ -0,0 +1,71 @@
++# Continuous integration: clean install, build and test on the supported
++# Node.js versions (24 is the default target, 22 is supported) across
++# Linux, Windows and macOS.
++# Publishing is handled separately by release.yml (npm trusted publishing).
++
++name: build
++
++on:
++  push:
++    branches: [master, 3.x]
++  pull_request:
++    branches: [master, 3.x]
++  workflow_dispatch:
++
++permissions:
++  contents: read
++
++jobs:
++  build:
++    name: node ${{ matrix.node-version }} / ${{ matrix.os }}
++    runs-on: ${{ matrix.os }}
++    timeout-minutes: 15
++
++    strategy:
++      fail-fast: false
++      matrix:
++        os: [ubuntu-latest, windows-latest, macos-latest]
++        node-version: [24.x, 22.x]
++
++    steps:
++      - uses: actions/checkout@v6
++        with:
++          persist-credentials: false
++
++      - name: Use Node.js ${{ matrix.node-version }}
++        uses: actions/setup-node@v6
++        with:
++          node-version: ${{ matrix.node-version }}
++          package-manager-cache: false
++
++      - run: npm install
++      - run: npm run build --if-present
++      - run: npm test
++
++  coverage:
++    name: coverage
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    needs: build
++    # Coverage upload is informational only and must never block a build.
++    continue-on-error: true
++
++    steps:
++      - uses: actions/checkout@v6
++        with:
++          persist-credentials: false
++
++      - uses: actions/setup-node@v6
++        with:
++          node-version: 24.x
++          package-manager-cache: false
++
++      - run: npm install
++      - run: npm run build --if-present
++      - run: npm run coverage
++
++      - name: Coveralls
++        uses: coverallsapp/github-action@v2
++        with:
++          github-token: ${{ secrets.GITHUB_TOKEN }}
++          file: ./coverage/lcov.info

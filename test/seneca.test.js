@@ -5,17 +5,15 @@ const Assert = require('assert')
 const Util = require('util')
 const Code = require('@hapi/code')
 const { Gex } = require('gex')
-const Lab = require('@hapi/lab')
 const Package = require('../package.json')
 const Common = require('../lib/common.js')
 
-const lab = (exports.lab = Lab.script())
-const describe = lab.describe
+const { describe } = require('node:test')
 const expect = Code.expect
 const assert = Assert
 
 const Shared = require('./shared')
-const it = Shared.make_it(lab)
+const it = Shared.make_it()
 const clock = Shared.clock()
 
 const Seneca = require('..')
@@ -212,20 +210,22 @@ describe('seneca', function () {
         done()
       })
     })
+  })
 
-    it('action timeouts override the seneca instance timeout', function (done) {
-      var seneca = Seneca({ log: 'silent', timeout: 2 }).error(done)
-      seneca.add({ cmd: 'foo' }, function (args, cb) {
-        root.setTimout(function () {
-          cb({ result: 'bar' })
-        }, 10)
-      })
+  it('action timeouts override the seneca instance timeout', function (done) {
+    // The instance timeout (25ms) is shorter than the action (50ms); the
+    // message-level timeout$ directive must take precedence.
+    var seneca = Seneca({ log: 'silent', timeout: 25 }).error(done)
+    seneca.add({ cmd: 'foo' }, function (args, cb) {
+      setTimeout(function () {
+        cb({ result: 'bar' })
+      }, 50)
+    })
 
-      seneca.act({ cmd: 'foo', timeout$: 20 }, function (err, message) {
-        expect(err).to.not.exist()
-        expect(message.result).to.equal('bar')
-        done()
-      })
+    seneca.act({ cmd: 'foo', timeout$: 500 }, function (err, message) {
+      expect(err).to.not.exist()
+      expect(message.result).to.equal('bar')
+      seneca.close(done)
     })
   })
 
@@ -1103,9 +1103,6 @@ describe('seneca', function () {
   })
 
   it('supports true to be passed as trace action option', function (done) {
-    var stdout = process.stdout.write
-    process.stdout.write = () => {}
-
     var seneca = Seneca({ log: 'silent', trace: { act: true } })
     seneca.add({ a: 1 }, function (args, cb) {
       cb(null, { b: 2 })
@@ -1113,7 +1110,6 @@ describe('seneca', function () {
     seneca.act({ a: 1 }, function (err, out) {
       expect(err).to.not.exist()
       assert.equal(out.b, 2)
-      process.stdout.write = stdout
       done()
     })
   })
@@ -1258,9 +1254,9 @@ describe('seneca', function () {
               extend: {
                 logger: function () {
                   if (!seen && si) {
-                    si.options().status.running = false
                     seen = true
-                    fin()
+                    // Closing clears the status interval.
+                    si.close(fin)
                   }
                 },
               },

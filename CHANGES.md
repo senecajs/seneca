@@ -18,7 +18,14 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `transport_client_null`, `bad_logspec`, `bad_logspec_string` and
   `no_options` error codes.
 * Test logger truncation marker fixed.
-* Node.js >= 18 is required (`engines.node`).
+* In undead mode (`debug.undead`, for testing only) a plugin that fails to
+  define or initialize no longer leaves its gated define action in flight
+  until the action timeout, so later plugins can load and the process is
+  not held open.
+* Node.js >= 22 is required (`engines.node`). Node.js 24 is the default
+  target: TypeScript compiles for ES2024 and `.nvmrc` selects Node.js 24.
+* Unit tests run on the Node.js built-in test runner (`node:test`) with
+  built-in coverage reporting; `@hapi/lab` is no longer used.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -26,7 +33,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
 ### Upgrading from 3.x
 
-* Node.js 18 or later is required.
+* Node.js 22 or later is required (24 recommended).
 * Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
   need a transport plugin: `npm install seneca-transport` and
   `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.
