@@ -186,6 +186,31 @@ describe('close', function () {
     })
   })
 
+  it('legacy-builtin-close-direct-call-emits', function (fin) {
+    // A direct call of the 3.x close pattern still emits the close event,
+    // as it did in Seneca 3 (legacy.builtin_actions).
+    var tmp = { close: 0 }
+
+    var si = Seneca({ legacy: { builtin_actions: true } }).test(fin)
+
+    si.on('close', function () {
+      tmp.close++
+    })
+
+    si.act('role:seneca,cmd:close', function (err) {
+      expect(err).not.exists()
+      expect(tmp.close).equal(1)
+      expect(si.flags.closed).false()
+
+      // A full close emits exactly once more, via sys:seneca,cmd:close.
+      si.close(function (err) {
+        expect(err).not.exists()
+        expect(tmp.close).equal(2)
+        fin()
+      })
+    })
+  })
+
   it('transport-utils-close', function (fin) {
     var tmp = { closer: 0 }
 
