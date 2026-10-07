@@ -1,4 +1,57 @@
 
+## 4.0.0 2026-10-07
+
+First stable release of Seneca 4. See "Upgrading from 3.x" below.
+
+* Fatal errors terminate the process again by default. In 4.0.0-rc3 to rc5
+  the default `system.exit` option only printed a stack trace, which left
+  a closed instance running.
+* `seneca.close()` now also calls close hooks registered on the 3.x pattern
+  `role:seneca,cmd:close` (used by seneca-transport and other 3.x plugins),
+  so that transport listeners are released and the process can exit.
+* `seneca.export('transport/utils').close` registers on `sys:seneca,cmd:close`.
+* A plugin definition function that throws a non-Error value (such as a
+  string) produces a `plugin_define_failed` error instead of a TypeError.
+* `seneca.options({tag})` keeps a custom instance identifier (option `id$`)
+  intact when the tag changes.
+* Error messages added for the `closed`, `unsupported_legacy_plugin`,
+  `transport_client_null`, `bad_logspec`, `bad_logspec_string` and
+  `no_options` error codes.
+* Test logger truncation marker fixed.
+* Node.js >= 18 is required (`engines.node`).
+* Continuous integration restored (GitHub Actions `build` workflow).
+* Releases are published by GitHub Actions using npm trusted publishing
+  (OpenID Connect) with provenance; no npm tokens are used. See
+  docs/create-a-release.md.
+
+### Upgrading from 3.x
+
+* Node.js 18 or later is required.
+* Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
+  need a transport plugin: `npm install seneca-transport` and
+  `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.
+* Built-in actions use the `sys:seneca` prefix: `sys:seneca,cmd:ping`,
+  `sys:seneca,cmd:stats`, `sys:seneca,cmd:close`, `sys:seneca,get:options`.
+  Set the option `legacy: { builtin_actions: true }` to also register the
+  3.x `role:seneca` variants.
+* Joi is removed. Message and option validation use Gubu shapes
+  (`seneca.valid`); plugins that passed Joi schemas as option defaults need
+  Gubu shapes instead.
+* Most `legacy` option flags are removed; `legacy.meta` and
+  `legacy.builtin_actions` remain.
+* `seneca.message(pattern, async (msg) => {...})` and `await seneca.post(msg)`
+  are built in (previously provided by seneca-promisify).
+* `seneca.prepare`, `seneca.destroy` and `seneca.direct` are available
+  for plugin preparation, shutdown, and synchronous action execution.
+
+
+## 4.0.0-rc5 2025-02-07
+
+* Dependency updates: jsonic 2.x (replaces @jsonic/jsonic-next), gubu 9,
+  patrun 7.2.7, use-plugin 13.2.
+* Test tooling updates: @hapi/lab 26, TypeScript 5.7, Node.js 22 types.
+
+
 ## 4.0.0-rc4 2024-07-12
 
 * Dependency updates.

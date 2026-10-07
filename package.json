@@ -1,9 +1,9 @@
 {
   "name": "seneca",
   "description": "A Microservices Framework for Node.js",
-  "version": "4.0.0-rc5",
+  "version": "4.0.0",
   "license": "MIT",
-  "homepage": "http://senecajs.org",
+  "homepage": "https://senecajs.org",
   "keywords": [
     "micro",
     "service",
@@ -58,6 +58,10 @@
     "type": "git",
     "url": "https://github.com/senecajs/seneca.git"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "files": [
     "LICENSE",
     "README.md",
@@ -66,9 +70,10 @@
     "seneca.*"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "main": "seneca.js",
+  "types": "seneca.d.ts",
   "scripts": {
     "watch": "tsc -w -d",
     "build": "tsc -d",
@@ -79,10 +84,7 @@
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
-    "reset": "npm run clean && npm i && npm run build && npm test",
-    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org"
+    "reset": "npm run clean && npm i && npm run build && npm test"
   },
   "dependencies": {
     "eraro": "^3.1.0",
