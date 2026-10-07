@@ -447,6 +447,25 @@ describe('plugin', function () {
     })
   })
 
+  it('plugin-error-define-throws-non-error', function (fin) {
+    var si = Seneca({
+      debug: {
+        undead: true,
+      },
+      log: 'silent',
+      errhandler: function (err) {
+        expect('plugin_define_failed').equal(err.code)
+        expect(err.details.fullname).contains('bad_plugin_def_string')
+        expect(err.details.message).contains('plugin-def-string')
+        fin()
+      },
+    }).quiet()
+
+    si.use(function bad_plugin_def_string() {
+      throw 'plugin-def-string'
+    })
+  })
+
   it('plugin-error-add', function (fin) {
     Seneca({
       debug: { undead: true },

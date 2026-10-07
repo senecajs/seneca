@@ -395,7 +395,7 @@ function build_test_log(seneca: any, data: any) {
         logb.push(objstr)
       }
       else {
-        logb.push(objstr.substring(0, 22)) + '...'
+        logb.push(objstr.substring(0, 22) + '...')
       }
     }
 

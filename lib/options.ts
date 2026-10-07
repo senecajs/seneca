@@ -314,6 +314,9 @@ function ERRMSGMAP() {
 
     require_default_options:
       'Call to require failed for <%=from%>: <%=errmsg%>.',
+
+    no_options:
+      'The seneca.options method was called with null or undefined options.',
   }
 }
 

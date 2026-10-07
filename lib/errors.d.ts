@@ -43,6 +43,11 @@ declare const _default: {
     fail_cond_must_be_bool: string;
     action_timeout: string;
     use_no_args: string;
+    closed: string;
+    unsupported_legacy_plugin: string;
+    transport_client_null: string;
+    bad_logspec_string: string;
+    bad_logspec: string;
     act_invalid_args: string;
     deprecation: {};
 };

@@ -884,10 +884,19 @@ function make_intern() {
       try {
         meta = plugin.define.call(delegate, options) || {}
       } catch (e: any) {
-        Common.wrap_error(e, 'plugin_define_failed', {
+        // The plugin may throw a non-Error value (such as a string),
+        // in which case there is no stack to locate the failure.
+        const is_error = e instanceof Error
+        const ex: any = is_error ? e :
+          new Error('string' === typeof e ? e : Common.inspect(e))
+        const where = is_error && 'string' === typeof ex.stack ?
+          ex.stack.match(/\n.*?\n/) : null
+
+        Common.wrap_error(ex, 'plugin_define_failed', {
           fullname: plugin.fullname,
           message: (
-            e.message + (' (' + e.stack.match(/\n.*?\n/)).replace(/\n.*\//g, '')
+            ex.message +
+            (null == where ? '' : (' (' + where[0]).replace(/\n.*\//g, ''))
           ).replace(/\n/g, ''),
           options: options,
           repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',

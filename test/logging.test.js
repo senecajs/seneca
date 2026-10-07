@@ -472,6 +472,33 @@ describe('logging', function () {
     reply()
   }
 
+  it('test-logger-truncates-long-error-message', function (fin) {
+    var lines = []
+
+    var si = Seneca({
+      logger: 'test',
+      log: 'error',
+      internal: { print: { log: (line) => lines.push(line), err: () => {} } },
+    })
+
+    si.add('a:1', function a1(msg, reply) {
+      reply(new Error('a1-failed'))
+    })
+
+    si.act({ a: 1, b: 'x'.repeat(100) }, function (err) {
+      expect(err).exist()
+
+      var errline = lines.find((line) => line.includes('act/ERR'))
+      expect(errline).exist()
+
+      // Message description is truncated to 22 characters, with a marker.
+      expect(errline).contains('...')
+      expect(errline).not.contains('x'.repeat(23))
+
+      fin()
+    })
+  })
+
   it('test-mode-basic', function (fin) {
     var capture = make_log_capture()
 
