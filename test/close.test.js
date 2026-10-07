@@ -140,4 +140,67 @@ describe('close', function () {
 
     expect(si.flags.closed).true()
   })
+
+  it('legacy-close-pattern', function (fin) {
+    // Seneca 3.x plugins (for example seneca-transport) register close
+    // hooks on role:seneca,cmd:close. These must still run on close.
+    var tmp = { legacy: 0, sys: 0 }
+
+    Seneca()
+      .test(fin)
+      .add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.legacy++
+        this.prior(msg, reply)
+      })
+      .add('sys:seneca,cmd:close', function (msg, reply) {
+        tmp.sys++
+        this.prior(msg, reply)
+      })
+      .close(function (err) {
+        expect(err).not.exists()
+        expect(tmp.sys).equal(1)
+        expect(tmp.legacy).equal(1)
+        fin()
+      })
+  })
+
+  it('legacy-builtin-close-event-once', function (fin) {
+    var tmp = { close: 0, legacy: 0 }
+
+    var si = Seneca({ legacy: { builtin_actions: true } })
+      .test(fin)
+      .add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.legacy++
+        this.prior(msg, reply)
+      })
+
+    si.on('close', function () {
+      tmp.close++
+    })
+
+    si.close(function (err) {
+      expect(err).not.exists()
+      expect(tmp.close).equal(1)
+      expect(tmp.legacy).equal(1)
+      fin()
+    })
+  })
+
+  it('transport-utils-close', function (fin) {
+    var tmp = { closer: 0 }
+
+    var si = Seneca().test(fin)
+    var tu = si.export('transport/utils')
+
+    tu.close(si, function (done) {
+      tmp.closer++
+      done()
+    })
+
+    si.close(function (err) {
+      expect(err).not.exists()
+      expect(tmp.closer).equal(1)
+      fin()
+    })
+  })
 })
