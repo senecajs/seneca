@@ -18,369 +18,111 @@
 - __Sponsor:__ [voxgig][Sponsor]
 
 Seneca is a toolkit for writing microservices and organizing the
-business logic of your app. You can break down your app into "stuff
-that happens", rather than focusing on data models or managing
-dependencies.
+business logic of your application. You describe what your system does
+as *messages*, and write *actions* that handle them. Which action runs
+is decided by pattern matching on the message, so the code that handles
+a message, and the process it runs in, can change without changing the
+code that sends it.
 
-Seneca provides,
+Seneca provides:
 
-- __pattern matching:__ a wonderfully flexible way to handle business requirements
-
-- __transport independence:__ how messages get to the right server is not something you
-should have to worry about
-
-- __maturity:__ 8 years in production (before we called it _microservices_), but was
-once taken out by [lightning][]
-
-- __plus:__ a deep and wide ecosystem of [plugins][]
-
-- __book:__ a guide to designing microservice architectures: [taomicro][]
-
-Use this module to define commands that work by taking in some JSON,
-and, optionally, returning some JSON. The command to run is selected
-by pattern-matching on the the input JSON. There are built-in and
-optional sets of commands that help you build Minimum Viable Products:
-data storage, user management, distributed logic, caching, logging,
-etc. And you can define your own product by breaking it into a set of
-commands - "stuff that happens".  That's pretty much it.
-
-If you're using this module, and need help, you can:
-
-- Post a [github issue][Issue],
-- Tweet to [@senecajs][Tweet],
-- Ask on the [Gitter][Gitter].
-
-If you are new to Seneca in general, please take a look at [senecajs.org][Org]. We have
-everything from tutorials to sample apps to help get you up and running quickly.
+- __pattern matching:__ messages are plain objects, routed to the most
+  specific matching action; special cases are new patterns, not branches
+- __composition:__ functionality is grouped into plugins that can extend
+  each other by overriding patterns and calling the prior action
+- __transport independence:__ the same actions run in one process or
+  across many, connected by transport plugins
+- __maturity:__ in production since 2010, with a deep and wide ecosystem
+  of [plugins][]
+- __a book:__ a guide to designing microservice architectures: [taomicro][]
 
 ## Install
 
-To install via npm,
-
-```
+```sh
 npm install seneca
 ```
 
-Seneca 4 requires Node.js 22 or later. Node.js 24 is the default version
+Seneca 4 requires Node.js 22 or later; Node.js 24 is the default version
 used for development, continuous integration and releases (see `.nvmrc`).
 
-Network transports are provided by plugins. To use `listen` and
-`client` over HTTP or TCP, as in the examples below, also install
-[seneca-transport](https://github.com/senecajs/seneca-transport):
+Network transports are plugins. For HTTP and TCP install
+[seneca-transport](https://github.com/senecajs/seneca-transport) as well.
 
-```
-npm install seneca-transport
-```
-
-and load it with `seneca.use('seneca-transport')`.
-
-## Quick Example
+## Example
 
 ```js
-'use strict'
+const Seneca = require('seneca')
 
-var Seneca = require('seneca')
+const seneca = Seneca({ log: 'warn' })
 
+// An action for a pattern: any message with role:math and cmd:sum
+seneca.add('role:math,cmd:sum', function (msg, reply) {
+  reply({ answer: msg.left + msg.right })
+})
 
-// Functionality in seneca is composed into simple
-// plugins that can be loaded into seneca instances.
+// A more specific pattern handles a special case
+seneca.add('role:math,cmd:sum,integer:true', function (msg, reply) {
+  reply({ answer: Math.floor(msg.left) + Math.floor(msg.right) })
+})
 
+seneca.act('role:math,cmd:sum,left:1.5,right:2.5', Seneca.util.print)
+// { answer: 4 }
 
-function rejector () {
-  this.add('cmd:run', (msg, done) => {
-    return done(null, {tag: 'rejector'})
-  })
-}
-
-function approver () {
-  this.add('cmd:run', (msg, done) => {
-    return done(null, {tag: 'approver'})
-  })
-}
-
-function local () {
-  this.add('cmd:run', function (msg, done) {
-    this.prior(msg, (err, reply) => {
-      return done(null, {tag: reply ? reply.tag : 'local'})
-    })
-  })
-}
-
-
-// Services can listen for messages using a variety of
-// transports. The seneca-transport plugin provides http and tcp.
-
-
-Seneca()
-  .use('seneca-transport')
-  .use(approver)
-  .listen({type: 'http', port: '8260', pin: 'cmd:*'})
-
-Seneca()
-  .use('seneca-transport')
-  .use(rejector)
-  .listen(8270)
-
-
-// Load order is important, messages can be routed
-// to other services or handled locally. Pins are
-// basically filters over messages
-
-
-function handler (err, reply) {
-  console.log(err, reply)
-}
-
-Seneca()
-  .use(local)
-  .act('cmd:run', handler)
-
-Seneca()
-  .use('seneca-transport')
-  .client({port: 8270, pin: 'cmd:run'})
-  .client({port: 8260, pin: 'cmd:run'})
-  .use(local)
-  .act('cmd:run', handler)
-
-Seneca()
-  .use('seneca-transport')
-  .client({port: 8260, pin: 'cmd:run'})
-  .client({port: 8270, pin: 'cmd:run'})
-  .use(local)
-  .act('cmd:run', handler)
-
-
-// Output
-// null { tag: 'local' }
-// null { tag: 'approver' }
-// null { tag: 'rejector' }
+seneca.act('role:math,cmd:sum,left:1.5,right:2.5,integer:true', Seneca.util.print)
+// { answer: 3 }
 ```
 
-## More Examples
+Promises are built in (`seneca.message` and `seneca.post`), and the same
+actions can be served over the network:
 
-### Running
+```js
+Seneca().use(math).use('seneca-transport').listen({ port: 8260, pin: 'role:math,cmd:*' })
 
-To run normally, say in a container, use
+const result = await Seneca().use('seneca-transport').client({ port: 8260, pin: 'role:math,cmd:*' })
+  .post('role:math,cmd:sum,left:1,right:2')
+```
+
+## Documentation
+
+The documentation lives in [docs/](https://github.com/senecajs/seneca/blob/master/docs/README.md)
+and is organized in four sections:
+
+- __[Tutorials](docs/README.md#tutorials)__: start with
+  [Getting started](docs/tutorials/getting-started.md), then
+  [Microservices with transports](docs/tutorials/microservices-with-transports.md)
+  and [Writing a plugin](docs/tutorials/writing-a-plugin.md).
+- __[How-to guides](docs/README.md#how-to-guides)__: configuring options
+  and logging, handling errors, testing, priors, transports, plugins,
+  debugging, graceful shutdown, running in production, migrating from
+  Seneca 3.
+- __[Reference](docs/README.md#reference)__: the
+  [instance API](docs/reference/api.md), [options](docs/reference/options.md),
+  [patterns](docs/reference/patterns.md),
+  [message directives](docs/reference/message-directives.md),
+  [plugin definition](docs/reference/plugins.md),
+  [logging](docs/reference/logging.md), [error codes](docs/reference/error-codes.md),
+  [transport](docs/reference/transport.md) and more, with a
+  [feature index](docs/reference/feature-index.md).
+- __[Explanation](docs/README.md#explanation)__: [why Seneca](docs/explanation/why-seneca.md),
+  [pattern matching](docs/explanation/pattern-matching.md),
+  [message lifecycle](docs/explanation/message-lifecycle.md),
+  [plugins and composition](docs/explanation/plugins-and-composition.md),
+  [transport independence](docs/explanation/transport-independence.md)
+  and [the error model](docs/explanation/error-model.md).
+
+Changes between versions are listed in [CHANGES.md](CHANGES.md);
+[Migrate from Seneca 3](docs/how-to/migrate-from-seneca-3.md) covers
+upgrading.
+
+## Running
 
 ```sh
-$ node microservice.js
+node service.js                   # JSON logs at level info, for log collectors
+node service.js --seneca.test     # readable logs with full detail, for development
+node service.js --seneca.log=warn # quieter
 ```
 
-(where `microservice.js` is a script file that uses Seneca).
-Logs are output in JSON format so you can send them to a logging service.
-
-To run in test mode, with human-readable, full debug logs, use:
-
-```
-$ node microservice.js --seneca.test
-```
-
-## Motivation
-
-### Why we built this?
-
-So that it doesn't matter,
-
-   * __who__ _provides_ the functionality,
-   * __where__ it _lives_ (on the network),
-   * __what__ it _depends_ on,
-   * it's __easy__ to _define blocks of functionality_ (plugins!).
-
-So long as _some_ command can handle a given JSON document, you're good.
-
-Here's an example:
-
-```javascript
-var seneca = require('seneca')()
-
-seneca.add({cmd: 'salestax'}, function (msg, done) {
-  var rate  = 0.23
-  var total = msg.net * (1 + rate)
-  done(null, {total: total})
-})
-
-seneca.act({cmd: 'salestax', net: 100}, function (err, result) {
-  console.log(result.total)
-})
-```
-
-In this code, whenever seneca sees the pattern `{cmd:'salestax'}`, it executes the
-function associated with this pattern, which calculates sales tax. There is nothing
-special about the property `cmd` . It is simply the property we want to pattern match.
-You could look for `foo` for all seneca cares! Yah!
-
-The `seneca.add` method adds a new pattern, and the function to execute whenever that
-pattern occurs.
-
-The `seneca.act` method accepts an object, and runs the command, if any, that matches.
-
-Where does the sales tax rate come from? Let's try it again:
-
-```js
-seneca.add({cmd: 'config'}, function (msg, done) {
-  var config = {rate: 0.23}
-  var value = config[msg.prop]
-  done(null, {value: value})
-})
-
-seneca.add({cmd: 'salestax'}, function (msg, done) {
-  seneca.act({cmd: 'config', prop: 'rate'}, function (err, result) {
-    var rate  = parseFloat(result.value)
-    var total = msg.net * (1 + rate)
-    done(null, {total: total})
-  })
-})
-
-seneca.act({cmd: 'salestax', net: 100}, function (err, result) {
-  console.log(result.total)
-})
-```
-
-The `config` command provides you with your configuration. This is cool because it
-doesn't matter _where_ it gets the configuration from - hard-coded, file system,
-database, network service, whatever. Did you have to define an abstraction API to make
-this work? Nope.
-
-There's a little but too much verbosity here, don't you think? Let's fix that:
-
-
-```javascript
-seneca.act('cmd:salestax,net:100', function (err, result) {
-  console.log(result.total)
-})
-```
-
-Instead of providing an object, you can provide a string using an
-[abbreviated form][Jsonic] of JSON. In fact, you
-can provide both:
-
-```javascript
-seneca.act('cmd:salestax', {net: 100}, function (err, result) {
-  console.log(result.total)
-})
-```
-
-This is a _very convenient way of combining a pattern and parameter data_.
-
-### Programmer Anarchy
-
-The way to build Node.js systems, is to build lots of little
-processes. Here's a great talk explaining why you should do this:
-[Programmer Anarchy](http://vimeo.com/43690647).
-
-Seneca makes this really easy. Let's put configuration out on the
-network into its own process:
-
-```javascript
-seneca.add({cmd: 'config'}, function (msg, done) {
-  var config = {rate: 0.23}
-  var value = config[msg.prop]
-  done(null, { value: value })
-})
-
-seneca.listen()
-```
-
-The `listen` method starts a web server that listens for JSON
-messages. When these arrive, they are submitted to the local Seneca
-instance, and executed as actions in the normal way.  The result is
-then returned to the client as the response to the HTTP
-request. Seneca can also listen for actions via a message bus.
-
-Your implementation of the configuration code _stays the same_.
-
-The client code looks like this:
-
-
-```javascript
-seneca.add({cmd: 'salestax'}, function (msg, done) {
-  seneca.act({cmd: 'config', prop: 'rate' }, function (err, result) {
-    var rate  = parseFloat(result.value)
-    var total = msg.net * (1 + rate)
-    done(null, { total: total })
-  })
-})
-
-seneca.client()
-
-seneca.act('cmd:salestax,net:100', function (err, result) {
-  console.log(result.total)
-})
-```
-
-On the client-side, calling `seneca.client()` means that Seneca will
-send any actions it cannot match locally out over the network. In this
-case, the configuration server will match the `cmd:config` pattern and
-return the configuration data.
-
-Again, notice that your sales tax code _does not change_. It does not
-need to know where the configuration comes from, who provides it, or
-how.
-
-You can do this with every command.
-
-### Keeping the Business Happy
-
-The thing about business requirements is that they have no respect for
-common sense, logic or orderly structure. The real world is messy.
-
-In our example, let's say some countries have single sales tax rate,
-and others have a variable rate, which depends either on locality, or product category.
-
-Here's the code. We'll rip out the configuration code for this example.
-
-```javascript
-// fixed rate
-seneca.add({cmd: 'salestax'}, function (msg, done) {
-  var rate  = 0.23
-  var total = msg.net * (1 + rate)
-  done(null, { total: total })
-})
-
-
-// local rates
-seneca.add({cmd: 'salestax', country: 'US'}, function (msg, done) {
-  var state = {
-    'NY': 0.04,
-    'CA': 0.0625
-    // ...
-  }
-  var rate = state[msg.state]
-  var total = msg.net * (1 + rate)
-  done(null, {total: total})
-})
-
-
-// categories
-seneca.add({ cmd: 'salestax', country: 'IE' }, function (msg, done) {
-  var category = {
-    'top': 0.23,
-    'reduced': 0.135
-    // ...
-  }
-  var rate = category[msg.category]
-  var total = msg.net * (1 + rate)
-  done(null, { total: total })
-})
-
-
-seneca.act('cmd:salestax,net:100,country:DE', function (err, result) {
-  console.log('DE: ' + result.total)
-})
-
-seneca.act('cmd:salestax,net:100,country:US,state:NY', function (err, result) {
-  console.log('US,NY: ' + result.total)
-})
-
-seneca.act('cmd:salestax,net:100,country:IE,category:reduced', function (err, result) {
-  console.log('IE: ' + result.total)
-})
-
-```
-
-In this case, you provide different implementations for different patterns. This lets you
-isolate complexity into well-defined places. It also means you can deal with special
-cases very easily.
+See [Command line and environment](docs/reference/command-line-and-environment.md).
 
 ## Support
 
@@ -390,10 +132,6 @@ If you're using this module and need help, you can:
 - Tweet to [@senecajs][Tweet]
 - Ask on the [Gitter][Gitter]
 
-## API
-
-See [senecajs.org][Org] for full API documentation.
-
 ## Contributing
 
 The [Senecajs org][Org] encourages participation. If you feel you can help in any way, be
@@ -401,28 +139,29 @@ it with bug reporting, documentation, examples, extra testing, or new features f
 to [create an issue][Issue], or better yet, [submit a Pull Request][Pull]. For more
 information on contribution please see our [Contributing][Contrib] guide.
 
-
 ### Test
 
 The tests use the Node.js built-in test runner (`node:test`) and need
 Node.js 22 or later (24 is the default). To run them locally, with a
 coverage summary:
 
-```
+```sh
 npm test
 ```
 
 To run only the tests whose names match a pattern:
 
-```
+```sh
 npm run test-some -- close
 ```
 
 To write an lcov coverage report to `coverage/lcov.info`:
 
-```
+```sh
 npm run coverage
 ```
+
+Maintainers: see [Create a release](docs/how-to/create-a-release.md).
 
 ## Background
 
@@ -450,7 +189,5 @@ Licensed under [MIT][Lic].
 [Pull]: https://github.com/senecajs/seneca/pulls
 [Sponsor]: http://www.voxgig.com
 [Tweet]: https://twitter.com/senecajs
-[Jsonic]: https://github.com/rjrodger/jsonic
-[Lightning]: http://aws.amazon.com/message/67457/
 [Plugins]: https://github.com/search?utf8=%E2%9C%93&q=seneca&type=Repositories&ref=searchresults
 [taomicro]: https://bitly.com/rrtaomicro
