@@ -85,7 +85,7 @@ have no effect. Use `seneca.on('act-in', fn)` instead.
 | ------ | ------- | ------ |
 | `strict.result` | `true` | An action result must be an object or array (or an `Error`, an entity, or an object with `force$`). Other values produce `result_not_objarr`. |
 | `strict.fixedargs` | `true` | A delegate's fixed arguments override message properties of the same name. When false, message properties win. |
-| `strict.fixedmeta` | none | Same rule for fixed meta data when set to true. |
+| `strict.fixedmeta` | none | Read by `delegate()` as the same rule for fixed meta data, but not part of the validated option shape: passing it to `Seneca()` is rejected as an unknown key, so it can only take effect when `valid.option` is false. |
 | `strict.add` | `false` | When true, adding a pattern only overrides (becomes the prior of) an existing action with exactly the same pattern. When false, the most specific existing match becomes the prior. Overridden per pattern with `strict$: { add }`. |
 | `strict.find` | `true` | When false, a message with no matching action gets an empty object result instead of an `act_not_found` error. |
 | `strict.maxloop` | `11` | Reserved; not read by Seneca 4 (see `limits.maxparents`). |
@@ -113,7 +113,7 @@ have no effect. Use `seneca.on('act-in', fn)` instead.
 | ------ | ------- | ------ |
 | `stats.size` | `1024` | Number of samples kept per pattern for action timing statistics. |
 | `stats.interval` | `60000` | Statistics calculation interval in milliseconds. |
-| `stats.running` | `false` | Calculate timing statistics on the interval, not only on request. |
+| `stats.running` | `false` | Calculate timing statistics on the interval, not only on request. The interval timer is not stopped by `close()`, so a process using it must exit explicitly. |
 
 ## `status`
 
@@ -153,10 +153,12 @@ logged or printed.
 
 Defaults shared by `seneca.listen()` and `seneca.client()`. Transport
 plugins add their own keys (for example `transport.web`, `transport.tcp`).
+`host`, `path` and `protocol` have no value in the option shape and are
+filled in at startup.
 
 | Option | Default | Effect |
 | ------ | ------- | ------ |
-| `transport.port` | `62345` | Default port. |
+| `transport.port` | `10101` | Default port. |
 | `transport.host` | `'127.0.0.1'` | Default host. |
 | `transport.path` | `'/act'` | Default HTTP path. |
 | `transport.protocol` | `'http'` | Default protocol. |

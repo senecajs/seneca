@@ -57,8 +57,8 @@ seneca
   .client({ port: 8280, pin: ['role:user,cmd:*', 'role:auth,cmd:*'] })
 ```
 
-Several pins can be given as an array or as one string separated by
-`;`.
+Several pins must be given as an array; `client()` does not split a
+single string on `;`.
 
 ## Keep some messages local
 

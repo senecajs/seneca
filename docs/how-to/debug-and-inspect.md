@@ -87,8 +87,9 @@ seneca.ping()                       // uptime, cpu, memory, counts
 
 The same data is available to other processes through
 `sys:seneca,cmd:stats` and `sys:seneca,cmd:ping`. Set
-`stats: { running: true }` to compute timing statistics continuously and
 `status: { running: true }` to log a status line periodically.
+`stats: { running: true }` computes timing statistics continuously, but
+its timer is not stopped by `close()` (the process must exit explicitly).
 
 ## See the resolved options
 

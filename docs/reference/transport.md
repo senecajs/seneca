@@ -46,7 +46,7 @@ Common configuration keys:
 | --- | ------- |
 | `type` | Transport type, matched against `role:transport,hook:*,type:<type>` actions provided by transport plugins. |
 | `port`, `host`, `path`, `protocol` | Network location. |
-| `pin`, `pins` | Patterns handled by this listener or client (see [Pins](patterns.md#pins)). A client without pins is a catch-all client for messages with no local action. |
+| `pin`, `pins` | Patterns handled by this listener or client (see [Pins](patterns.md#pins)): one pattern (string or object) as `pin`, or an array of patterns as `pin` or `pins`. A single string is one pattern; it is not split on `;`. A client without pins is a catch-all client for messages with no local action. |
 | `id` | Client identifier; defaults to the canonical form of the configuration. |
 | `override` | Client only: when true, existing local actions matching the pins are wrapped so that messages go to the client. |
 | `makehandle` | Client only: function `(config) => handle` used by transport plugins to intercept later `add` calls for the client's patterns. |

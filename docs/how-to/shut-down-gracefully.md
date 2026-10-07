@@ -20,9 +20,12 @@ seneca.close(function (err) { ... })
    event and runs every plugin's close stages;
 4. removes event and signal listeners and stops internal timers.
 
-After `close()` resolves, nothing in Seneca keeps the event loop alive.
-If the process does not exit, something else (your own servers, timers
-or connections) is still open.
+After `close()` resolves, nothing in Seneca keeps the event loop alive,
+with one exception: the timing statistics timer started by
+`stats: { running: true }` is not stopped by `close()`, so a process
+using that option must call `process.exit()` itself. Otherwise, if the
+process does not exit, something else (your own servers, timers or
+connections) is still open.
 
 ## Release resources in plugins
 

@@ -139,9 +139,9 @@ seneca.prepare(async function () {
 ```
 
 If initialization throws, the error is fatal (`plugin_init`), and so is
-not finishing within the instance timeout (`plugin_init_timeout`). The
-callback form `seneca.init(function (done) { ... done() })` does the same
-job for callback style code.
+not finishing within the instance timeout (reported as `action_timeout`).
+The callback form `seneca.init(function (done) { ... done() })` does the
+same job for callback style code.
 
 ## 6. Exports
 

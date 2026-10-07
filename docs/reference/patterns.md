@@ -87,9 +87,11 @@ property with any value".
 
 A *pin* is a pattern used to select a set of actions, typically for
 transports: `pin: 'role:shop,cmd:*'`. Several pins are given as an
-array, or as one string separated by `;`: `'role:shop;role:cart'`.
-`seneca.util.pins(pin)` returns the array of pattern objects, and
-`seneca.util.pincanon(pin)` their canonical string.
+array: `pin: ['role:shop', 'role:cart']`. The utility
+`seneca.util.pins(pin)` also accepts one string with patterns separated
+by `;` and returns the array of pattern objects, but `seneca.client()`
+does not split such strings. `seneca.util.pincanon(pin)` returns the
+canonical string of a pin.
 
 ## Validation rules
 

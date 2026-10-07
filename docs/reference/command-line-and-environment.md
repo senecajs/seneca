@@ -51,7 +51,10 @@ object to use instead.
   `--seneca.options.from=path`. A `.json` file is parsed as Jsonic (so
   comments and unquoted keys are allowed); a `.js` file is required as a
   module. A bare file name is resolved against the current working
-  directory.
+  directory. A `.js` file that does not exist is ignored silently (the
+  instance starts with the remaining sources); a `.json` file that does
+  not exist throws `ENOENT`; a `.js` file that fails to load for another
+  reason throws `require_options`.
 
 ## Option sources
 

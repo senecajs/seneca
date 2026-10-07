@@ -10,8 +10,13 @@ chosen by the environment, and allow overrides from the environment and
 command line:
 
 ```js
-const seneca = Seneca('./config/' + (process.env.NODE_ENV || 'development') + '.js')
+const file = './config/' + (process.env.NODE_ENV || 'development') + '.js'
+if (!require('fs').existsSync(file)) throw new Error('missing options file ' + file)
+const seneca = Seneca(file)
 ```
+
+Check that the file exists: a missing `.js` options file is ignored
+silently and the process would start with defaults.
 
 ```sh
 SENECA_OPTIONS='plugin:{store:{url:"postgres://..."}}' node service.js --seneca.tag=orders-1
@@ -51,8 +56,10 @@ reports repeated failures. Do not set `debug.undead` in production. See
   transport (or call it from an HTTP health endpoint) for liveness
   checks.
 * `sys:seneca,cmd:stats` returns call, completion and failure counts
-  per pattern; with `stats: { running: true }` timing statistics are
-  kept up to date.
+  per pattern, and timing statistics for a pattern on request. The
+  option `stats: { running: true }` recalculates timing statistics on
+  an interval, but that timer is not stopped by `close()`, so only use
+  it in processes that exit explicitly.
 * `status: { running: true }` logs a status entry every
   `status.interval` milliseconds.
 

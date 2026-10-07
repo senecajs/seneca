@@ -36,7 +36,7 @@
     "Glen Keane (https://github.com/thekemkid)",
     "Gege Pincin (https://github.com/Georgette)",
     "Jake Pruitt (https://github.com/jakepruitt)",
-    "Maciej Ma\u0142ecki (http://mmalecki.com)",
+    "Maciej Małecki (http://mmalecki.com)",
     "Matteo Collina (https://github.com/mcollina)",
     "Marian Radulescu (https://github.com/marianr)",
     "Marius Ursache (https://github.com/bamse16)",
@@ -114,6 +114,7 @@
     "seneca-entity": "^28.1.0",
     "seneca-error-test": "^0.2.2",
     "seneca-promisify": "^3.7.2",
+    "seneca-transport": "^8.3.0",
     "summary": "^2.1.0",
     "typescript": "^5.7.3"
   }

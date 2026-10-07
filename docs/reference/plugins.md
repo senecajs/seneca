@@ -57,7 +57,7 @@ delegate*, which has the full instance API plus:
 | `this.init(fn)` | Register an init function `function (done) { ... done(err) }` as the action `role:seneca,plugin:init,init:<name>[,tag:<tag>]`, run once after definition. |
 | `this.prepare(asyncFn)` | Register an async init stage on the same init action. Several `prepare` calls form a prior chain: the last one registered runs first. |
 | `this.destroy(asyncFn)` | Register an async close stage on `sys:seneca,cmd:close`. Stages run in reverse order of registration across all plugins. |
-| `this.depends(name, deps)` | Fatal `plugin_required` error if any of `deps` (array or further string arguments) is not loaded yet (`seneca-` prefixed names match too). |
+| `this.depends(name, deps)` | Fatal `plugin_required` error if any of `deps` (array or further string arguments) is not loaded yet (`seneca-` prefixed names match too). Returns `undefined`. |
 | `this.export(key)` | Read other plugins' exports. |
 | `this.fail(code, details)`, `this.error(code, details)` | Create errors using the plugin's `errors` map (falling back to Seneca's codes). |
 | `this.plugin` | The plugin record: `name`, `tag`, `fullname`, `options`, `meta`, `shared`, `prepare`, `destroy`, `loading`. |
@@ -134,8 +134,9 @@ For each `use` call, in order:
    `role:seneca,plugin:init,init:<name>[,tag:<tag>]` is called with
    `fatal$: true` (`INIT` log entry). It is defined by `this.init` and
    `this.prepare`; without them the default action replies at once.
-   Errors are fatal (`plugin_init`); no reply within the timeout is
-   `plugin_init_timeout`.
+   Errors are fatal (`plugin_init`); no reply within the timeout is a
+   fatal `action_timeout` (the dedicated `plugin_init_timeout` code is
+   not produced, see [Error codes](error-codes.md)).
 5. **complete**: `READY` log entry; `options.inited$` is called; the
    plugin options are printed when `debug.print.options` is set; the
    define message completes and the next plugin starts.

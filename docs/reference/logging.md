@@ -41,7 +41,7 @@ The `log` option (and `--seneca.log`, `SENECA_OPTIONS='log:...'`) accepts:
 | level name | `log: 'warn'` | Set the level. |
 | abbreviation | `log: 'silent'` | Set the level by abbreviation. |
 | numeric level | `log: 300` or `log: '301'` | Set the level by value. |
-| logger name | `log: 'flat'`, `log: 'json'`, `log: 'test'` | Use a builtin logger; the level stays at its default (`info`). |
+| logger name | `log: 'flat'`, `log: 'json'` | Use a builtin logger; the level stays at its default (`info`). (`'test'` is a level abbreviation for `warn`, not a logger name; the test logger is selected with `logger: 'test'` or `seneca.test()`.) |
 | function | `log: (entry) => ...` | Use a custom logger function. |
 | object | `log: { level: 'warn', logger: fn }` | Full specification (see below). |
 
@@ -75,7 +75,7 @@ option is honoured, as the builtin loggers do.
 | ------ | ----------- | ------ |
 | `json` (default) | default, `log: 'json'`, `logger: 'json'` | One JSON document per entry (circular references are made safe). Intended for log collection services. |
 | `flat` | `log: 'flat'`, `logger: 'flat'` | One tab separated line per entry: ISO time, first 5 characters of the instance id, level (5 characters), kind, case, plugin, pattern, action, id path, data (truncated to `debug.datalen`), callpoint. |
-| `test` | `seneca.test()`, `logger: 'test'` | Compact lines for reading test output: elapsed milliseconds, 2 characters of the instance id, tag, level, `kind/case`, then entry specific fields (action ids, patterns, results, stack traces for `ERR` entries). |
+| `test` | `seneca.test()`, `logger: 'test'` (not `log: 'test'`, which sets the level to `warn`) | Compact lines for reading test output: elapsed milliseconds, 2 characters of the instance id, tag, level, `kind/case`, then entry specific fields (action ids, patterns, results, stack traces for `ERR` entries). |
 
 Custom loggers are given with the `logger` option (a function, a builtin
 name, or a logger plugin), with `internal.logger`, or as `log.logger`.

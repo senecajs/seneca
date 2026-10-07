@@ -49,7 +49,9 @@ const seneca = Seneca('./config/production.js')
 const seneca = Seneca({ from: './config/production.js' })
 ```
 
-Options given in code override the file's values.
+Options given in code override the file's values. Check that the file
+exists before starting: a missing `.js` file is ignored silently, so a
+typo in the path would start the instance with defaults.
 
 ## Override from the environment
 

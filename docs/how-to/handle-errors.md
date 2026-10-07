@@ -48,11 +48,13 @@ codes are Seneca's own (see the reference).
 
 ```js
 seneca.act('role:shop,cmd:price,item:kiwi', function (err, result, meta) {
-  if (err) {
-    if ('unknown_item' === err.code) return reply({ price: null })
-    return reply(err)
+  if (err && 'unknown_item' === err.code) {
+    return console.log('no price for', err.details.item)
   }
-  ...
+  if (err) {
+    return console.error('price lookup failed:', err.message)
+  }
+  console.log(result.total)
 })
 
 try {

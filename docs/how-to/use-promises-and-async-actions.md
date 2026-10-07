@@ -55,8 +55,8 @@ return/throw, or call `reply`.
 ## Run an action synchronously
 
 `seneca.direct(msg)` runs the matching action on the current stack and
-returns its result (the action's return value, or the value given to
-`reply` synchronously):
+returns the action's return value (not the value given to `reply`, so
+write such actions to `return` their result):
 
 ```js
 seneca.add('role:util,cmd:slug', function (msg) {

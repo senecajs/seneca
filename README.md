@@ -50,20 +50,24 @@ Network transports are plugins. For HTTP and TCP install
 
 ## Example
 
+A plugin is a function that adds actions for patterns:
+
 ```js
 const Seneca = require('seneca')
 
-const seneca = Seneca({ log: 'warn' })
+function math(options) {
+  // An action for a pattern: any message with role:math and cmd:sum
+  this.add('role:math,cmd:sum', function (msg, reply) {
+    reply({ answer: msg.left + msg.right })
+  })
 
-// An action for a pattern: any message with role:math and cmd:sum
-seneca.add('role:math,cmd:sum', function (msg, reply) {
-  reply({ answer: msg.left + msg.right })
-})
+  // A more specific pattern handles a special case
+  this.add('role:math,cmd:sum,integer:true', function (msg, reply) {
+    reply({ answer: Math.floor(msg.left) + Math.floor(msg.right) })
+  })
+}
 
-// A more specific pattern handles a special case
-seneca.add('role:math,cmd:sum,integer:true', function (msg, reply) {
-  reply({ answer: Math.floor(msg.left) + Math.floor(msg.right) })
-})
+const seneca = Seneca({ log: 'warn' }).use(math)
 
 seneca.act('role:math,cmd:sum,left:1.5,right:2.5', Seneca.util.print)
 // { answer: 4 }
@@ -73,13 +77,15 @@ seneca.act('role:math,cmd:sum,left:1.5,right:2.5,integer:true', Seneca.util.prin
 ```
 
 Promises are built in (`seneca.message` and `seneca.post`), and the same
-actions can be served over the network:
+plugin can be served over the network with a transport plugin:
 
 ```js
+// service process
 Seneca().use(math).use('seneca-transport').listen({ port: 8260, pin: 'role:math,cmd:*' })
 
-const result = await Seneca().use('seneca-transport').client({ port: 8260, pin: 'role:math,cmd:*' })
-  .post('role:math,cmd:sum,left:1,right:2')
+// client process
+const client = Seneca().use('seneca-transport').client({ port: 8260, pin: 'role:math,cmd:*' })
+const result = await client.post('role:math,cmd:sum,left:1,right:2')
 ```
 
 ## Documentation

@@ -1,8 +1,11 @@
 # Instance API reference
 
 All methods are available on a Seneca instance (`const seneca = Seneca()`)
-and on its delegates (`this` inside actions and plugins). Unless stated
-otherwise, methods return the instance so that calls can be chained.
+and on its delegates (`this` inside actions and plugins). Methods that
+configure or register something return the instance so that calls can
+be chained, except `decorate` and `depends`, which return `undefined`;
+methods that look something up return the value found. Each entry
+below states what it returns when it is not the instance.
 
 Patterns and messages may be given as objects or as
 [Jsonic](https://github.com/jsonicjs/jsonic) strings, optionally followed
@@ -77,10 +80,13 @@ const result = seneca.direct(msg, [moreProps])
 ```
 
 Run the matching action synchronously on the calling stack and return
-its result (the action's return value, or the value passed to `reply`
-synchronously). Inward and outward processing still apply. Equivalent
-to a message with `direct$: true`. Child messages submitted by the
-action are asynchronous unless they are direct too.
+the action function's return value. Only the return value is returned:
+for a callback style action that calls `reply(result)`, `direct`
+returns `undefined` (the reply still goes through outward processing and
+to any callback). Write actions meant for direct calls so that they
+`return` their result. Inward and outward processing still apply.
+Equivalent to a message with `direct$: true`. Child messages submitted
+by the action are asynchronous unless they are direct too.
 
 ### `prior`
 
@@ -261,7 +267,8 @@ seneca.decorate(name, value)
 
 Add a property (usually a function) to the root instance, available on
 every delegate. The name must not start with `_`, must not already be
-decorated, and must not shadow an existing property.
+decorated, and must not shadow an existing property. Returns
+`undefined` (not chainable).
 
 ### `prepare`, `destroy`
 
@@ -340,7 +347,7 @@ directive. See [Debug and inspect](../how-to/debug-and-inspect.md).
 | ------ | ----------- |
 | `seneca.use(plugin, [options])` | Load a plugin. |
 | `seneca.export(key)` | Get a plugin export (`'name'`, `'name/key'`, `'name$tag/key'`). |
-| `seneca.depends(name, ...deps)` | Fatal error if a dependency is not loaded. |
+| `seneca.depends(name, ...deps)` | Fatal error if a dependency is not loaded; returns `undefined` (not chainable). |
 | `seneca.list_plugins()` | All plugin records by full name. |
 | `seneca.find_plugin(name, [tag])` | One plugin record. |
 | `seneca.has_plugin(name, [tag])` | Whether a plugin is loaded. |

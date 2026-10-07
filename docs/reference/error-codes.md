@@ -10,19 +10,7 @@ Errors created by Seneca are `Error` objects with these properties:
 | `seneca` | `true`. |
 | `package` | `'seneca'`. |
 | `callpoint` | Location in the calling code. |
-| `meta# Error codes reference
-
-Errors created by Seneca are `Error` objects with these properties:
-
-| Property | Meaning |
-| -------- | ------- |
-| `code` | The error code from the table below. |
-| `message` | `seneca: ` followed by the message template with its `<%=name%>` placeholders filled from `details`. |
-| `details` | The values given when the error was created, plus `callpoint` in some cases. |
-| `seneca` | `true`. |
-| `package` | `'seneca'`. |
-| `callpoint` | Location in the calling code. |
- | Present on the error passed to the global error handler: the message meta data, with `meta$.err` describing the `act_execute` failure (`pattern`, `message`, `callpoint`) and `meta$.data` holding the original message. It is removed before the error reaches the `act` callback. |
+| `meta$` | Present on the error passed to the global error handler: the message meta data, with `meta$.err` describing the `act_execute` failure (`pattern`, `message`, `callpoint`) and `meta$.data` holding the original message. It is removed before the error reaches the `act` callback. |
 
 Plugins define their own codes with the `errors` property of the
 definition function; `this.fail(code, details)` and
@@ -77,11 +65,11 @@ original message. A rejected `post` promise carries only the error.
 | `no_transport_client` | Reserved (transports log `no-transport-client` instead). |
 | `plugin_define_failed` | The plugin definition function threw. Fatal. |
 | `plugin_init` | The plugin init action replied with an error. Fatal. |
-| `plugin_init_timeout` | The plugin init action did not reply within the timeout. Fatal. |
+| `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error (the message text also starts with the unfilled placeholder `undefined`). |
 | `plugin_required` | `seneca.depends` found a missing plugin. Fatal. |
 | `ready_failed` | A function given to `seneca.ready` threw. Fatal unless an error handler is set. |
 | `require_default_options` | `seneca.options.js` exists but could not be loaded. |
-| `require_options` | The options file given with `from` could not be loaded. |
+| `require_options` | The `.js` options file given with `from` exists but failed to load (for example a syntax error). A missing `.js` file is ignored silently and the defaults are used; a missing `.json` file throws the file system `ENOENT` error. |
 | `result_not_objarr` | An action replied with a value that is not an object or array and `strict.result` is true. |
 | `store_cmd_missing` | Reserved for entity stores. |
 | `sub_inward_action_failed` | A subscription function for inbound messages threw. |

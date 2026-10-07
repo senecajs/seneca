@@ -1,393 +1,153 @@
-
-
 # Message transport protocol
 
-Wire format of messages exchanged between Seneca instances by transport
-plugins. For the core transport API see [Transport](transport.md).
+What travels between Seneca instances when a transport plugin carries a
+message and its reply. The core transport API is described in
+[Transport](transport.md); this page describes the data.
 
-The protocol is a request/response model. However some requests do not
-require responses, so the protocol also supports actor or pub/sub message flows.
+Two formats exist:
 
-The protocol is transport independent and simply assumes that JSON
-documents can be delivered whole and as discrete individual documents.
+* the envelope used by [seneca-transport](https://github.com/senecajs/seneca-transport)
+  8, the standard HTTP and TCP transport, which has its own serialization
+  code and does not use the core helpers;
+* the format produced by Seneca core's `transport/utils` helpers
+  (`externalize_msg`, `externalize_reply`, `internalize_msg`,
+  `internalize_reply`), available to transport plugins that choose to
+  use them.
 
-The JSON document can contain any data. The property `meta$` is
-reserved for Seneca meta data, but is not required. Seneca will
-construct meta data with default values if `meta$` is not
-present. This provides for the use case of simple manual HTTP
-interactions with tools like `curl`.
+A transport plugin must produce and consume the format its own listener
+and client agree on; nothing in Seneca core inspects the wire format.
 
-The term _message_ refers to a single instance of an outbound request
-JSON data transmitted between two specific service instances. The term
-message does *not* refer to a message flow over multiple services, *nor*
-to the optional JSON data response. The concept of the message
-response should be considered subsumed within the concept of a
-message, as a convenience of the protocol. If responses are to stand
-in their own right as separate messages, then an asynchronous message
-flow should be used.
+## The seneca-transport 8 envelope
 
+### Request
 
-# Request Document Meta Data
+The client sends a JSON object:
 
 ```js
 {
-  msg$:
-  {
-    vin:  // Transport protocol version increment
-    sid:  // Seneca instance identifier of sender of this message
-    out:  // fixed value of true,
-    mid:  // Seneca message identifier, an opaque string,
-    cid:  // Seneca correlation identifier, an opaque string,
-    snc:  // true if synchronous (expecting response), false if asynchronous
-    pat:  // pattern on the sending Seneca instance
-    trk:  [ // array of previously visited seneca instances including timing,
-      {
-        sid: // Seneca instance identifier of sender (not always redundant!)
-        mid: // Seneca message identifier of inbound message
-        tms: [
-          // local (sender instance) UTC milliseconds sent
-        ]
-      }
-    ],
-    rtn:  { // return path description
-      urn: // full network address for http response, optional
-    }
-    ctm: { // custom data, use this for your own meta data, optional
-      ...
-    }
-  }
+  id: 'z6wlh2q8xy6c/3tw2v5d9l0ab',   // message id: mi/tx
+  kind: 'act',
+  origin: '0qr9.../1791398793297/307/4.0.0/client',  // client instance id
+  track: ['0qr9.../1791398793297/307/4.0.0/client'], // instance ids visited so far
+  time: { client_sent: 1791398793577 },
+  act: { role: 'shop', cmd: 'price', item: 'apple', quantity: 3 },  // the message, without $ properties
+  sync: true,                                        // a reply is expected
+  msg$: {                                            // protocol design fields (see below)
+    vin: 1, sid: '<origin>', out: true,
+    mid: 'z6wlh2q8xy6c', cid: '3tw2v5d9l0ab', snc: true,
+    pat: 'cmd:price,role:shop',
+  },
 }
 ```
 
-## Notes
+`act` is the message with all `$` properties removed, plus `custom$`
+when the message carries custom meta data (`meta.custom`), so that it
+reaches the remote action's `meta.custom`.
 
-The full message identifier has the form _mid_/_cid_. The correlation
-identifier is retained across service instances and action calls so
-that the entire causal chain of a message flow can be traced.
+### Response
 
-The Seneca instance identifier is an opaque string. In debugging mode
-it may be extremely short. By convention, as a debugging aid, and not
-to be considered normative, the full instance identifier has internal
-structure:
-
-`12-random-chars-from-[0-9a-z]` / `UTC-absolute-milliseconds` / `network-address` / `local-process-number` / `user-tag` 
-
-The `trk` array provides a history of the message flow through
-services. When an inbound message causes further outbound messages,
-the Seneca instance where the new outbound messages originate is added
-to the tracking array. Each entry in `trk` represents exactly one
-outbound request (the message), and at most one response.
-
-The return path is a HTTP end point, by default, and is optional. The
-`urn` is the full address of the end point, suitable for use in a HTTP
-client. Transports may define additional return path meta data (for
-example, response topic name on a message queue).
-
-The `tms` array contains entries in UTC milliseconds, recording local
-send and receive times. Seneca instances should complete these arrays
-as much as possible. In particular, on receipt of responses, the final
-receive time should always be added so that it is available to
-plugins.
-
-
-# Response Document Meta Data
-
-This has the form:
+The listener replies with:
 
 ```js
 {
-  meta$:
-  {
-    rid:  // Seneca instance identifier of sender of this response, not the sender of the request
-    res:  // fixed value of true,
-    mid:  // Seneca message identifier, as per inbound message
-    cid:  // Seneca correlation identifier, as per inbound message
-    trk:  [ // array of previously visited seneca instances including timing,
-      {
-        sid: // Seneca instance identifier of sender
-        rid: // Seneca instance identifier of receiver
-        mid: // Seneca message identifier of inbound message
-        tms: [
-          // local (sender instance) UTC milliseconds sent,
-          // local (receiver instance) UTC milliseconds received
-          // local (receiver instance) UTC milliseconds response sent
-        ]
-      }
-    ],
-    usr: { // user data, use this for your own meta data, optional
-      ...
-    }
-  }
+  id: 'z6wlh2q8xy6c/3tw2v5d9l0ab',   // same id as the request
+  kind: 'res',
+  origin: '<client instance id>',   // the request's origin
+  accept: '<listener instance id>', // the instance that handled it
+  track: [...],                     // the request's track
+  time: { client_sent: 1791398793577, listen_recv: 1791398793580, listen_sent: 1791398793582 },
+  sync: true,
+  res: { item: 'apple', quantity: 3, total: 1.5 },  // the result, or null
+  error: { message: '...', name: 'Error', code: '...', ... },  // only when the action failed
+  input: { ... },                   // the request's act, only with error
 }
 ```
 
-## Notes
+An error is serialized as a plain object: `message`, `name` and the
+error's own enumerable properties (such as `code` and `details`).
 
-The `trk` array includes as the last entry the Seneca instance that
-finally acted on the message.
+### Identifiers and transactions
 
-There may be multiple responses to a given outbound message. By
-default only the first is provided to the response callback. to
-receive all responses, use the `meta$: { multiple: true }` option when
-submitting the message. The response callback will be called once for
-each message, up to some limit in time or message volume.
+`id` has the form `mi/tx` (see [Message directives](message-directives.md)).
+The listener sets the transaction id of its handling delegate from the
+request's `tx`, so child messages on the remote side share the
+transaction, and submits the message with `id$` set to the request id.
+`origin` is checked on responses so that a reply is only accepted by the
+instance that sent the request; `track` is used to reject messages that
+loop back to an instance they have already visited (`message_loop`) or
+that an instance sent itself (`own_message`).
 
-The additional entries to the `tms` array can be used to measure local
-processing time. Seneca does not assume remote clocks are synchronized
-within some range; all times are locally valid only.
+### HTTP (type `web`)
 
+The client posts the `act` object as the JSON body to
+`<protocol>://<host>:<port><path>` (default path `/act`) with the rest of
+the envelope in headers:
 
-# Example Flows
+| Header | Content |
+| ------ | ------- |
+| `Content-Type`, `Accept` | `application/json` |
+| `seneca-id` | the request `id` |
+| `seneca-kind` | `req` |
+| `seneca-origin` | the client instance id |
+| `seneca-track` | the `track` array as JSON |
+| `seneca-time-client-sent` | `time.client_sent` |
 
-Services: A, B
+A request without a `seneca-id` header is accepted as a plain message:
+the listener generates an id and uses the `User-Agent` header as the
+origin. This is what makes `curl` requests work.
 
-## A -> B; Synchronous
+The response body is the result as JSON (`null` when the action replied
+with nothing). The headers `seneca-id`, `seneca-kind: res`,
+`seneca-origin`, `seneca-accept`, `seneca-track`,
+`seneca-time-client-sent`, `seneca-time-listen-recv` and
+`seneca-time-listen-sent` carry the rest of the envelope. When the action
+failed, the status is the error's `statusCode` or 500 and the body is the
+serialized error. A Seneca client then reports the HTTP client library's
+error (`Response Error: 500 Internal Server Error`) rather than the
+serialized error in the body.
 
-  * Raw message data: `{ a: 1 }`
-  * Raw response data: `{ x: 1 }`
+### TCP (type `tcp`)
 
-Request:
+Each request and each response is one complete envelope object encoded
+as a line of newline delimited JSON (`ndjson`) on the connection.
 
-```js
-{
-  a: 1,
-  meta$:
-  {
-    sid: 'A',
-    act:  true,
-    mid:  'm01',
-    cid:  'c01',
-    snc:  true,
-    trk:  [ 
-      {
-        sid: 'A'
-        mid: 'm01'
-        tms: [ 1461023850000 ]
-      }
-    ],
-    rtn:  {
-      urn: 'http://192.168.0.1/rtn'
-    }
-  }
-```
+### The `msg$` block
 
-Response:
+The request envelope contains a `msg$` object with the fields of the
+original protocol design: `vin` (protocol version, 1), `sid` (sender
+instance id), `out` (true for an outbound request), `mid` and `cid`
+(message and correlation identifiers, the `mi` and `tx` parts of `id`),
+`snc` (synchronous) and `pat` (the pattern on the sending instance). The
+seneca-transport 8 listener does not read this block; the fields it uses
+are the top level `id`, `kind`, `origin`, `track`, `time`, `act` and
+`sync`. The remaining parts of that design (per hop timing in a `trk`
+array, a return path `rtn`, custom data `ctm`, a response `meta$` with
+`rid`, `res`, `trk` and `usr`, and multiple responses to one message) were
+never implemented in Seneca 4 transports and should not be relied on.
 
-```js
-{
-  x: 1,
-  meta$:
-  {
-    rid: 'B',  // NOTE: the Seneca id of the receiver
-    res:  true,
-    mid:  'm01',
-    cid:  'c01',
-    trk:  [ 
-      {
-        sid: 'A'
-        rid: 'B',
-        mid: 'm01'
-        tms: [ 1461023850000, // time message sent
-               1461023850200, // time message received
-               1461023850250  // time response sent
-             ]
-      }
-    ]
-  }
-```
+## The core helper format
 
-
-## A -> B, C; Asynchronous
-
-  * Raw message data: `{ a: 2 }`
-  * No response.
-
-Sent Request (at A):
+Seneca core offers serialization helpers through the
+`transport/utils` export (seneca-transport 8 replaces this export with
+its own object, so load order matters if both are needed). A transport
+built on them exchanges the message or reply object with the meta data
+attached as `meta$`:
 
 ```js
-{
-  a: 2,
-  meta$:
-  {
-    sid: 'A',
-    act:  true,
-    mid:  'm02',
-    cid:  'c02',
-    snc:  false,
-    trk:  [ 
-      {
-        sid: 'A',
-        mid: 'm02'
-        tms: [ 1461023851000 ]
-      }
-    ]
-  }
+// externalize_msg(seneca, msg, meta): outbound message
+{ role: 'shop', cmd: 'price', item: 'apple', meta$: { id, mi, tx, pattern, action, sync, custom, parents, ... } }
+
+// externalize_reply(seneca, err, out, meta): outbound reply
+{ item: 'apple', total: 1.5, meta$: { id, mi, tx, ..., error: false } }
+{ message: 'Unknown item', code: 'unknown_item', meta$: { ..., error: true } }   // an error, as a plain object
+{ meta$: { ..., empty: true } }                                                   // a reply with no data
 ```
 
-Received Request (at B):
-
-```js
-{
-  a: 2,
-  meta$:
-  {
-    sid: 'A',
-    act:  true,
-    mid:  'm02',
-    cid:  'c02',
-    snc:  false,
-    trk:  [ 
-      {
-        sid: 'A',
-        rid: 'B',
-        mid: 'm02'
-        tms: [ 1461023851000,
-               1461023851200,
-             ]
-      }
-    ]
-  }
-```
-
-
-
-## A -> B -> C; Chained synchronous
-
-### A -> B; Synchronous
-
-  * A raw message data: `{ a: 3 }`
-  * B raw message data: `{ b: 1 }`
-  * Waits for response from B -> C interaction
-  * C raw response data: `{ y: 1 }`
-  * B raw response data: `{ x: 2 }`
-  * A is hosted on 192.168.0.1
-  * B is hosted on 192.168.0.2
-
-Request A -> B:
-
-```js
-{
-  a: 3,
-  meta$:
-  {
-    sid: 'A',
-    act:  true,
-    mid:  'm03',
-    cid:  'c03',
-    snc:  true,
-    trk:  [ 
-      {
-        sid: 'A'
-        mid: 'm03'
-        tms: [ 1461023852000 ] // time sent by A
-      }
-    ],
-    rtn:  {
-      urn: 'http://192.168.0.1/rtn' // A
-    }
-  }
-```
-
-Request B -> C:
-
-```js
-{
-  b: 1,
-  meta$:
-  {
-    sid: 'B',  // NOTE: sending from B here
-    act:  true,
-    mid:  'm04', // NOTE: new message id
-    cid:  'c03',  // NOTE: same as A -> B
-    snc:  true,
-    trk:  [ 
-      {
-        sid: 'A'
-        rid: 'B',
-        mid: 'm03'
-        tms: [ 1461023852000,
-               1461023852200, // time received by B
-             ]
-      },
-      {
-        sid: 'B'
-        mid: 'm04'
-        tms: [ 1461023852300 ] // time sent by B
-      }
-    ],
-    rtn:  {
-      urn: 'http://192.168.0.2/rtn' // B
-    }
-  }
-```
-
-Response to B -> C:
-
-```js
-{
-  y: 1,
-  meta$:
-  {
-    rid:  'C', // NOTE: responding from C
-    res:  true,
-    mid:  'm04',
-    cid:  'c03',
-    trk:  [ 
-      {
-        sid: 'A'
-        rid: 'B',
-        mid: 'm03'
-        tms: [ 1461023852000,
-               1461023852200,
-             ]
-      },
-      {
-        sid: 'B'
-        rid: 'C',
-        mid: 'm04'
-        tms: [ 1461023852300,
-               1461023852500, // time received by C
-               1461023852600  // time sent from C
-             ]
-      }
-    ]
-  }
-```
-
-
-Response to A -> B:
-
-```js
-{
-  y: 1,
-  meta$:
-  {
-    rid:  'B', // NOTE: responding from B
-    res:  true,
-    mid:  'm03', // NOTE: back to working on m03 (presumably uses data from m04 response)
-    cid:  'c03',
-    trk:  [ 
-      {
-        sid: 'A'
-        rid: 'B',
-        mid: 'm03'
-        tms: [ 1461023852000,
-               1461023852200,
-               1461023852800  // time m03 response sent by B
-             ]
-      },
-      {
-        sid: 'B'
-        rid: 'C',
-        mid: 'm04'
-        tms: [ 1461023852300,
-               1461023852500, 
-               1461023852600,
-               1461023852700, // time m04 response received by B
-             ]
-      }
-    ]
-  }
-```
-
-
+`meta$` is the message's [meta data object](message-directives.md#the-meta-data-object);
+`error: true` marks an error reply and `empty: true` a reply without data.
+On receipt, `internalize_msg` moves `meta$.id`, `meta$.sync`,
+`meta$.custom`, `meta$.explain` and `meta$.parents` into the directives
+`id$`, `sync$`, `custom$`, `explain$` and `parents$`, removes `fatal$`,
+and sets `remote$: true`; `internalize_reply` returns `{ err, out, meta }`,
+rebuilding an `Error` when `meta$.error` is set. Both convert objects
+marked `entity$` into entities when the entity plugin is loaded.

@@ -28,6 +28,6 @@ See [Transport](transport.md).
 | Pattern | Purpose |
 | ------- | ------- |
 | `role:seneca,plugin:define,name:<name>[,tag:<tag>],seq:<n>` | Gated message under which a plugin is defined; it completes when the plugin has loaded, which is what makes plugins load one at a time. |
-| `role:seneca,plugin:init,init:<name>[,tag:<tag>]` | The plugin's initialization action, defined by `this.init(fn)` or `this.prepare(fn)` inside the plugin and called once after definition (unless the plugin option `init$` is false). Errors are fatal (`plugin_init`); a missing reply is a `plugin_init_timeout`. |
+| `role:seneca,plugin:init,init:<name>[,tag:<tag>]` | The plugin's initialization action, defined by `this.init(fn)` or `this.prepare(fn)` inside the plugin and called once after definition (unless the plugin option `init$` is false). Errors are fatal (`plugin_init`); a missing reply is reported as a fatal `action_timeout` (see [Error codes](error-codes.md)). |
 
 See [Plugins](plugins.md).

@@ -7,7 +7,7 @@ your own project use `require('seneca')` instead.
 | Directory | Tutorial |
 | --------- | -------- |
 | `getting-started/` | [Getting started](../tutorials/getting-started.md) |
-| `microservices/` | [Microservices with transports](../tutorials/microservices-with-transports.md) (needs `seneca-transport`, installed as a development dependency of this repository) |
+| `microservices/` | [Microservices with transports](../tutorials/microservices-with-transports.md) (needs `seneca-transport`, a development dependency of this repository, so `npm install` provides it) |
 | `plugin/` | [Writing a plugin](../tutorials/writing-a-plugin.md) |
 
 Run an example with Node.js 22 or later, for example:
