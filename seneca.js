@@ -176,12 +176,9 @@ const option_defaults = {
     plugins: One({}, [], null),
     // System wide functionality.
     system: {
-        // Function to exit the process.
-        exit: (...args) => {
-            console.log('EXIT', args);
-            console.trace();
-            // process.exit(...args)
-        },
+        // Function to exit the process. Called with the exit code after a
+        // fatal error has been handled and the instance has been closed.
+        exit: (code) => process.exit(code),
         // Close instance on these signals, if true.
         close_signals: {
             SIGHUP: false,
@@ -428,7 +425,6 @@ function make_seneca(initial_opts) {
     root$.version = package_json_1.default.version;
     // TODO: rename in 4.x as "args" terminology is legacy
     root$.fixedargs = {};
-    root$.fixedmeta = {};
     root$.fixedmeta = {};
     root$.flags = {
         closed: false,
