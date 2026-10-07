@@ -13,6 +13,7 @@ declare const Plugin: {
             seneca_options: (tr: any, ctx: any, data: any) => any;
             seneca_complete: (tr: any, _ctx: any, data: any) => any;
         };
+        release_define: (seneca: any, data: any, err: any) => void;
         define_plugin: (delegate: any, plugin: any, options: any) => any;
     };
 };

@@ -4,15 +4,12 @@
 var Assert = require('assert')
 
 var { Gex } = require('gex')
-var Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var assert = Assert
 var testopts = { log: 'silent' }
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 

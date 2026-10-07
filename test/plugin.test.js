@@ -2,14 +2,11 @@
 'use strict'
 
 const Code = require('@hapi/code')
-const Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 var { Plugin } = require('../lib/plugin')
@@ -444,6 +441,25 @@ describe('plugin', function () {
 
     si.use(function (options, register) {
       return { name: 'OldPlugin' }
+    })
+  })
+
+  it('plugin-error-define-throws-non-error', function (fin) {
+    var si = Seneca({
+      debug: {
+        undead: true,
+      },
+      log: 'silent',
+      errhandler: function (err) {
+        expect('plugin_define_failed').equal(err.code)
+        expect(err.details.fullname).contains('bad_plugin_def_string')
+        expect(err.details.message).contains('plugin-def-string')
+        fin()
+      },
+    }).quiet()
+
+    si.use(function bad_plugin_def_string() {
+      throw 'plugin-def-string'
     })
   })
 

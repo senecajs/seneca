@@ -91,8 +91,13 @@ function options(this: any, options: any, chain: any) {
   if ('string' === typeof options.tag) {
     const oldtag = self.root.tag
     self.root.tag = options.tag
+
+    // The tag is the last segment of the instance id (see make_seneca).
+    // A custom id (option id$) may not contain the tag at all, in which
+    // case the new tag is appended.
+    const tagpos = self.root.id.lastIndexOf('/' + oldtag)
     self.root.id =
-      self.root.id.substring(0, self.root.id.indexOf('/' + oldtag)) +
+      (-1 === tagpos ? self.root.id : self.root.id.substring(0, tagpos)) +
       '/' +
       options.tag
   }

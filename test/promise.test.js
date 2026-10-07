@@ -5,15 +5,13 @@ const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 const Util = require('util')
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-const lab = (exports.lab = Lab.script())
-const describe = lab.describe
+const { describe } = require('node:test')
 const expect = Code.expect
 
 const Shared = require('./shared')
-const it = Shared.make_it(lab)
+const it = Shared.make_it()
 
 const Seneca = require('..')
 
@@ -367,19 +365,17 @@ describe('promise', function () {
     expect(out).equal({ x: 1, y: 1, z: 1, q: 1 })
 
     const tmp = {}
-    si.add('a:1', function (msg) {
+    si.add('a:1', function (msg, reply) {
       tmp.a = msg.a
+      reply()
     })
 
-    si.add('a:1', function (msg) {
-      this.prior({ a: msg.a })
+    si.add('a:1', function (msg, reply) {
+      this.prior({ a: msg.a }, reply)
     })
 
-    si.act('a:1')
-
-    setImmediate(function () {
-      expect(tmp.a).equal(1)
-    })
+    await si.post('a:1')
+    expect(tmp.a).equal(1)
   })
 
   it('ready', async () => {

@@ -240,12 +240,9 @@ const option_defaults = {
   // System wide functionality.
   system: {
 
-    // Function to exit the process.
-    exit: (...args: any[]) => {
-      console.log('EXIT', args)
-      console.trace()
-      // process.exit(...args)
-    },
+    // Function to exit the process. Called with the exit code after a
+    // fatal error has been handled and the instance has been closed.
+    exit: (code?: number) => process.exit(code),
 
     // Close instance on these signals, if true.
     close_signals: {
@@ -572,8 +569,6 @@ function make_seneca(initial_opts?: any) {
 
   // TODO: rename in 4.x as "args" terminology is legacy
   root$.fixedargs = {}
-  root$.fixedmeta = {}
-
   root$.fixedmeta = {}
 
   root$.flags = {

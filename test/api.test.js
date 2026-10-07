@@ -4,14 +4,11 @@
 const Assert = require('assert')
 
 const Code = require('@hapi/code')
-const Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 
@@ -478,6 +475,29 @@ describe('api', function () {
       expect(si.status().transport.register.length).equal(0)
       fin()
     })
+  })
+
+  it('options-tag', function (fin) {
+    // Custom instance id does not contain the tag.
+    var s0 = Seneca({ id$: 'custom-id' }).test(fin)
+    expect(s0.id).equal('custom-id')
+
+    s0.options({ tag: 't0' })
+    expect(s0.tag).equal('t0')
+    expect(s0.id).equal('custom-id/t0')
+
+    s0.options({ tag: 't1' })
+    expect(s0.id).equal('custom-id/t1')
+
+    // Generated instance id ends with the tag.
+    var s1 = Seneca().test(fin)
+    var id1 = s1.id
+    expect(id1.endsWith('/-')).true()
+
+    s1.options({ tag: 't2' })
+    expect(s1.id).equal(id1.substring(0, id1.length - 1) + 't2')
+
+    fin()
   })
 
   it('reply', function (fin) {

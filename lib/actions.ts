@@ -3,6 +3,15 @@
 
 import { Legacy } from './legacy'
 
+// Seneca 3.x pattern for close hooks (still used by plugins such as
+// seneca-transport to release listeners when the instance closes).
+const LEGACY_CLOSE_PATTERN = { role: 'seneca', cmd: 'close' }
+
+// Message directive marking a call of the legacy close pattern made by
+// the sys:seneca,cmd:close action (which has already emitted the close event).
+const SYS_CLOSE_DIRECTIVE = 'sys_close$'
+
+
 function addActions(instance: any) {
   instance.stats = make_action_seneca_stats(instance.private$)
 
@@ -19,7 +28,7 @@ function addActions(instance: any) {
   if (instance.options().legacy.builtin_actions) {
     instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
     instance.add({ role: 'seneca', cmd: 'stats' }, instance.stats)
-    instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close)
+    instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close_legacy)
     instance.add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
     instance.add({ role: 'seneca', get: 'options' }, action_options_get)
   }
@@ -41,8 +50,35 @@ function action_seneca_fatal(this: any, _msg: any, reply: any) {
 }
 
 
+// Called by seneca.close(). Plugins extend this action using priors
+// (see seneca.destroy). If any close hooks have been registered on the
+// legacy 3.x pattern, call that pattern too, so that resources such as
+// transport listeners are released.
 function action_seneca_close(this: any, _msg: any, reply: any) {
   this.emit('close')
+
+  // Exact match only. Unlike seneca.has, this does not fall back to a
+  // catch-all action (such as a transport client), which would send the
+  // close message elsewhere.
+  const legacy_close = this.private$.actrouter.find(LEGACY_CLOSE_PATTERN, true)
+
+  if (legacy_close) {
+    const legacy_msg: any = { closing$: true }
+    legacy_msg[SYS_CLOSE_DIRECTIVE] = true
+    return this.act(LEGACY_CLOSE_PATTERN, legacy_msg, reply)
+  }
+
+  reply()
+}
+
+
+// Legacy alias (option legacy.builtin_actions). Direct calls emit the
+// close event as in Seneca 3. Calls made by sys:seneca,cmd:close (marked
+// with the sys_close$ directive) do not, as that action has emitted it.
+function action_seneca_close_legacy(this: any, msg: any, reply: any) {
+  if (!msg[SYS_CLOSE_DIRECTIVE]) {
+    this.emit('close')
+  }
   reply()
 }
 

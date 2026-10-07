@@ -2,17 +2,15 @@
 'use strict'
 
 const Assert = require('assert')
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const Common = require('../lib/common')
 
-const lab = (exports.lab = Lab.script())
-const describe = lab.describe
+const { describe } = require('node:test')
 const assert = Assert
 const expect = Code.expect
 
 const Shared = require('./shared')
-const it = Shared.make_it(lab)
+const it = Shared.make_it()
 
 describe('common', function () {
   it('stringify', function (fin) {

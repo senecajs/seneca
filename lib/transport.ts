@@ -187,8 +187,10 @@ function register(config: any, reply: any) {
 }
 
 
+// Register a transport close hook. Seneca 4 closes via sys:seneca,cmd:close
+// (the 3.x pattern role:seneca,cmd:close is also called, see lib/actions).
 function closeTransport(seneca: any, closer: any) {
-  seneca.add('role:seneca,cmd:close', function(this: any, msg: any, reply: any) {
+  seneca.add('sys:seneca,cmd:close', function(this: any, msg: any, reply: any) {
     const seneca = this
 
     closer.call(seneca, function(err: any) {

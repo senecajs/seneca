@@ -2,14 +2,11 @@
 'use strict'
 
 const Code = require('@hapi/code')
-const Lab = require('@hapi/lab')
-
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 
@@ -139,5 +136,93 @@ describe('close', function () {
     await si.close()
 
     expect(si.flags.closed).true()
+  })
+
+  it('legacy-close-pattern', function (fin) {
+    // Seneca 3.x plugins (for example seneca-transport) register close
+    // hooks on role:seneca,cmd:close. These must still run on close.
+    var tmp = { legacy: 0, sys: 0 }
+
+    Seneca()
+      .test(fin)
+      .add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.legacy++
+        this.prior(msg, reply)
+      })
+      .add('sys:seneca,cmd:close', function (msg, reply) {
+        tmp.sys++
+        this.prior(msg, reply)
+      })
+      .close(function (err) {
+        expect(err).not.exists()
+        expect(tmp.sys).equal(1)
+        expect(tmp.legacy).equal(1)
+        fin()
+      })
+  })
+
+  it('legacy-builtin-close-event-once', function (fin) {
+    var tmp = { close: 0, legacy: 0 }
+
+    var si = Seneca({ legacy: { builtin_actions: true } })
+      .test(fin)
+      .add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.legacy++
+        this.prior(msg, reply)
+      })
+
+    si.on('close', function () {
+      tmp.close++
+    })
+
+    si.close(function (err) {
+      expect(err).not.exists()
+      expect(tmp.close).equal(1)
+      expect(tmp.legacy).equal(1)
+      fin()
+    })
+  })
+
+  it('legacy-builtin-close-direct-call-emits', function (fin) {
+    // A direct call of the 3.x close pattern still emits the close event,
+    // as it did in Seneca 3 (legacy.builtin_actions).
+    var tmp = { close: 0 }
+
+    var si = Seneca({ legacy: { builtin_actions: true } }).test(fin)
+
+    si.on('close', function () {
+      tmp.close++
+    })
+
+    si.act('role:seneca,cmd:close', function (err) {
+      expect(err).not.exists()
+      expect(tmp.close).equal(1)
+      expect(si.flags.closed).false()
+
+      // A full close emits exactly once more, via sys:seneca,cmd:close.
+      si.close(function (err) {
+        expect(err).not.exists()
+        expect(tmp.close).equal(2)
+        fin()
+      })
+    })
+  })
+
+  it('transport-utils-close', function (fin) {
+    var tmp = { closer: 0 }
+
+    var si = Seneca().test(fin)
+    var tu = si.export('transport/utils')
+
+    tu.close(si, function (done) {
+      tmp.closer++
+      done()
+    })
+
+    si.close(function (err) {
+      expect(err).not.exists()
+      expect(tmp.closer).equal(1)
+      fin()
+    })
   })
 })

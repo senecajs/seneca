@@ -154,6 +154,25 @@ export default {
   use_no_args:
     'The seneca.use method needs at least one argument to define a plugin.',
 
+  closed:
+    'The Seneca instance is closed and cannot process the message: <%=args%>.',
+
+  unsupported_legacy_plugin:
+    'The plugin <%=fullname%> uses the unsupported legacy plugin definition ' +
+    'signature "<%=init_func_sig%>". Seneca 4 plugin definition functions ' +
+    'accept a single options argument, and use "this" as the Seneca instance.',
+
+  transport_client_null:
+    'The transport client for configuration <%=type%> was not created ' +
+    '(the role:transport,hook:client action returned nothing).',
+
+  bad_logspec_string:
+    'The log option string "<%=logspec%>" is not a log level name, ' +
+    'level abbreviation, numeric level, or logger name (flat, json, test).',
+
+  bad_logspec:
+    'The log option must be a string, number, function, or object; was: <%=logspec%>.',
+
   // Legacy error message codes
 
   act_invalid_args:

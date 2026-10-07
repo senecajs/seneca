@@ -53,9 +53,6 @@ If you're using this module, and need help, you can:
 If you are new to Seneca in general, please take a look at [senecajs.org][Org]. We have
 everything from tutorials to sample apps to help get you up and running quickly.
 
-Seneca's source can be read in an annotated fashion by running `npm run annotate`. An
-annotated version of each file will be generated in `./docs/`
-
 ## Install
 
 To install via npm,
@@ -63,6 +60,19 @@ To install via npm,
 ```
 npm install seneca
 ```
+
+Seneca 4 requires Node.js 22 or later. Node.js 24 is the default version
+used for development, continuous integration and releases (see `.nvmrc`).
+
+Network transports are provided by plugins. To use `listen` and
+`client` over HTTP or TCP, as in the examples below, also install
+[seneca-transport](https://github.com/senecajs/seneca-transport):
+
+```
+npm install seneca-transport
+```
+
+and load it with `seneca.use('seneca-transport')`.
 
 ## Quick Example
 
@@ -98,14 +108,16 @@ function local () {
 
 
 // Services can listen for messages using a variety of
-// transports. In process and http are included by default.
+// transports. The seneca-transport plugin provides http and tcp.
 
 
 Seneca()
+  .use('seneca-transport')
   .use(approver)
   .listen({type: 'http', port: '8260', pin: 'cmd:*'})
 
 Seneca()
+  .use('seneca-transport')
   .use(rejector)
   .listen(8270)
 
@@ -124,12 +136,14 @@ Seneca()
   .act('cmd:run', handler)
 
 Seneca()
+  .use('seneca-transport')
   .client({port: 8270, pin: 'cmd:run'})
   .client({port: 8260, pin: 'cmd:run'})
   .use(local)
   .act('cmd:run', handler)
 
 Seneca()
+  .use('seneca-transport')
   .client({port: 8260, pin: 'cmd:run'})
   .client({port: 8270, pin: 'cmd:run'})
   .use(local)
@@ -389,23 +403,32 @@ information on contribution please see our [Contributing][Contrib] guide.
 
 
 ### Test
-To run tests locally,
+
+The tests use the Node.js built-in test runner (`node:test`) and need
+Node.js 22 or later (24 is the default). To run them locally, with a
+coverage summary:
 
 ```
-npm run test
+npm test
 ```
 
-To obtain a coverage report,
+To run only the tests whose names match a pattern:
 
 ```
-npm run coverage; open docs/coverage.html
+npm run test-some -- close
+```
+
+To write an lcov coverage report to `coverage/lcov.info`:
+
+```
+npm run coverage
 ```
 
 ## Background
 
 Seneca is sponsored and supported by [Voxgig](https://www.voxgig.com/).
 
-Copyright (c) 2010-2018 Richard Rodger and other contributors;
+Copyright (c) 2010-2026 Richard Rodger and other contributors;
 Licensed under [MIT][Lic].
 
 [BadgeNpmFigs]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000

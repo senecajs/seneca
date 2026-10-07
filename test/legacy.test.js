@@ -3,17 +3,15 @@
 
 const Util = require('util')
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-const lab = (exports.lab = Lab.script())
-const describe = lab.describe
+const { describe } = require('node:test')
 const expect = Code.expect
 
 const { Legacy } = require('../lib/legacy.js')
 
 const Shared = require('./shared')
-const it = Shared.make_it(lab)
+const it = Shared.make_it()
 
 const Seneca = require('..')
 

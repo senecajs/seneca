@@ -1,15 +1,13 @@
 /* Copyright (c) 2016 Richard Rodger, MIT License */
 'use strict'
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe } = require('node:test')
 var expect = Code.expect
 
 var Shared = require('./shared')
-var it = Shared.make_it(lab)
+var it = Shared.make_it()
 
 var Seneca = require('..')
 var { make_logging } = require('../lib/logging')
@@ -180,18 +178,15 @@ describe('logging', function () {
   it('logger-output', function (fin) {
     var log
 
-    var stdout_write = process.stdout.write
-    // Note: comment out to see logs to debug test
-    process.stdout.write = function (data) {
-      log.push(data.toString())
+    // Capture logger output through the print option. The node:test runner
+    // uses process.stdout as its event channel, so it must not be replaced.
+    var capture = {
+      internal: { print: { log: (line) => log.push(line + '\n') } },
     }
 
     function restore(err) {
       if (err && err.message && !err.message.includes('a1')) {
-        process.stdout.write = stdout_write
         fin(err)
-      } else if (true === err) {
-        process.stdout.write = stdout_write
       }
     }
 
@@ -203,6 +198,7 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
+        ...capture,
       })
         .error(restore)
         .add('a:1', a1)
@@ -224,6 +220,7 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
+        ...capture,
       })
         .error(restore)
         .add('a:1', function a1(m, r) {
@@ -280,6 +277,7 @@ describe('logging', function () {
       log = []
       Seneca({
         log: { level: 'debug', logger: logger },
+        ...capture,
       })
         .error(restore)
         .add('a:1', function (m, r) {
@@ -303,17 +301,15 @@ describe('logging', function () {
   it('shortcuts', { timeout: 2222 * tmx }, function (fin) {
     var log
 
-    var stdout_write = process.stdout.write
-    // Note: comment out to see logs to debug test
-    process.stdout.write = function (data) {
-      log.push(data.toString())
+    // Capture logger output through the print option. The node:test runner
+    // uses process.stdout as its event channel, so it must not be replaced.
+    var capture = {
+      internal: { print: { log: (line) => log.push(line + '\n') } },
     }
 
     function restore(err) {
-      process.stdout.write = stdout_write
-
       if (err) {
-        console.log('SHORTCUTS ERROR', log)
+        console.error('SHORTCUTS ERROR', log)
       }
 
       fin(err)
@@ -324,7 +320,7 @@ describe('logging', function () {
 
     function nothing() {
       log = []
-      Seneca()
+      Seneca(capture)
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -336,7 +332,7 @@ describe('logging', function () {
 
     function quiet() {
       log = []
-      Seneca({ log: 'quiet' })
+      Seneca({ log: 'quiet', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -348,7 +344,7 @@ describe('logging', function () {
 
     function silent() {
       log = []
-      Seneca({ log: 'silent' })
+      Seneca({ log: 'silent', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -360,7 +356,7 @@ describe('logging', function () {
 
     function any() {
       log = []
-      Seneca({ log: 'any' })
+      Seneca({ log: 'any', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -372,7 +368,7 @@ describe('logging', function () {
 
     function all() {
       log = []
-      Seneca({ log: 'all' })
+      Seneca({ log: 'all', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -384,7 +380,7 @@ describe('logging', function () {
 
     function print() {
       log = []
-      Seneca({ log: 'print' })
+      Seneca({ log: 'print', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -396,7 +392,7 @@ describe('logging', function () {
 
     function standard() {
       log = []
-      Seneca({ log: 'standard' })
+      Seneca({ log: 'standard', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -410,7 +406,7 @@ describe('logging', function () {
     // DEPRECATED DEFAULT = 4.x will change to 'flat'
     function json() {
       log = []
-      Seneca()
+      Seneca(capture)
         // Seneca( {log:'json'}) - change to this in 4.x
         .error(restore)
         .add('a:1', a1)
@@ -424,7 +420,7 @@ describe('logging', function () {
 
     function flat() {
       log = []
-      Seneca({ log: 'flat' }) // should not be needed in 4.x
+      Seneca({ log: 'flat', ...capture }) // should not be needed in 4.x
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -437,7 +433,7 @@ describe('logging', function () {
 
     function logger_test() {
       log = []
-      Seneca({ logger: 'test' })
+      Seneca({ logger: 'test', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -450,7 +446,7 @@ describe('logging', function () {
 
     function do_test() {
       log = []
-      Seneca({ log: 'test' })
+      Seneca({ log: 'test', ...capture })
         .error(restore)
         .add('a:1', a1)
         .act('a:1')
@@ -471,6 +467,33 @@ describe('logging', function () {
     this.log.warn('a1')
     reply()
   }
+
+  it('test-logger-truncates-long-error-message', function (fin) {
+    var lines = []
+
+    var si = Seneca({
+      logger: 'test',
+      log: 'error',
+      internal: { print: { log: (line) => lines.push(line), err: () => {} } },
+    })
+
+    si.add('a:1', function a1(msg, reply) {
+      reply(new Error('a1-failed'))
+    })
+
+    si.act({ a: 1, b: 'x'.repeat(100) }, function (err) {
+      expect(err).exist()
+
+      var errline = lines.find((line) => line.includes('act/ERR'))
+      expect(errline).exist()
+
+      // Message description is truncated to 22 characters, with a marker.
+      expect(errline).contains('...')
+      expect(errline).not.contains('x'.repeat(23))
+
+      fin()
+    })
+  })
 
   it('test-mode-basic', function (fin) {
     var capture = make_log_capture()

@@ -1,0 +1,81 @@
+From 2bc7376aad9b3548a09f506e61b5cff8359e8b82 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 14:02:40 +0000
+Subject: [PATCH] ci: add the release workflow (npm trusted publishing)
+
+Publishes vX.Y.Z tags to npm with npm trusted publishing (GitHub OIDC)
+and build provenance through the reusable workflow in senecajs/admin.
+No npm token is stored. A manual run (workflow_dispatch) performs a dry
+run that validates, builds and tests without publishing. The npm
+trusted publisher must name this file (release.yml) and the `npm`
+environment. See docs/create-a-release.md.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01LaHppcejXbSsAH4BZXNsjV
+---
+ .github/workflows/release.yml | 56 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+ create mode 100644 .github/workflows/release.yml
+
+diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+new file mode 100644
+index 0000000..fde1dfa
+--- /dev/null
++++ b/.github/workflows/release.yml
+@@ -0,0 +1,56 @@
++# Publish a tagged release to npm using npm trusted publishing (GitHub OIDC).
++#
++# No npm token is stored anywhere: the workflow exchanges a short-lived GitHub
++# OIDC token for a publish credential, and npm attaches build provenance.
++#
++# Trigger: push a tag of the form vX.Y.Z (see docs/create-a-release.md), or
++# run manually (workflow_dispatch) for a dry run that validates and builds
++# without publishing.
++#
++# The npm trusted publisher for the `seneca` package must be configured as:
++#   Organization or user: senecajs
++#   Repository:           seneca
++#   Workflow filename:    release.yml   (this file - npm checks the *calling* workflow)
++#   Environment name:     npm
++#
++# The shared validation and publishing steps live in senecajs/admin.
++
++name: release
++
++on:
++  push:
++    tags:
++      - 'v*'
++  workflow_dispatch:
++    inputs:
++      dry-run:
++        description: 'Validate, build and test only (no publish, no GitHub release)'
++        type: boolean
++        default: true
++      tag:
++        description: 'Existing tag to release (vX.Y.Z). Leave empty for a dry run of the selected ref.'
++        type: string
++        default: ''
++      dist-tag:
++        description: 'npm dist-tag (default: latest, or next for prereleases; use e.g. 3x for maintenance releases)'
++        type: string
++        default: ''
++
++# One release at a time per ref; never cancel a publish in progress.
++concurrency:
++  group: release-${{ github.ref }}
++  cancel-in-progress: false
++
++permissions:
++  contents: write # create the GitHub release
++  id-token: write # mint the OIDC token for npm trusted publishing
++
++jobs:
++  release:
++    uses: senecajs/admin/.github/workflows/npm-release.yml@main
++    with:
++      node-version: '24'
++      tag: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
++      dist-tag: ${{ inputs.dist-tag || '' }}
++      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
++      environment: npm

@@ -3,14 +3,10 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
+const { describe, it } = require('node:test')
 var expect = Code.expect
-var it = lab.it
-
 var Seneca = require('..')
 
 describe('explain', function () {
