@@ -26,6 +26,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   target: TypeScript compiles for ES2024 and `.nvmrc` selects Node.js 24.
 * Unit tests run on the Node.js built-in test runner (`node:test`) with
   built-in coverage reporting; `@hapi/lab` is no longer used.
+* Documentation reorganized under `docs/` following the Diátaxis structure
+  (tutorials, how-to guides, reference, explanation), covering every
+  option, method, directive, event and error code. The example programs
+  are rewritten for Seneca 4.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
