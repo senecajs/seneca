@@ -655,13 +655,12 @@ function make_seneca(initial_opts) {
         addActions(root$);
     }
     start_opts.legacy.error = false;
-    // TODO: move to static options in Seneca 4.x
-    start_opts.transport = deep({
-        port: 62345,
-        host: '127.0.0.1',
-        path: '/act',
-        protocol: 'http',
-    }, start_opts.transport);
+    // The shared transport configuration (option `transport`) only carries
+    // the values the user set, plus the default port. Host, path and
+    // protocol defaults belong to the transport plugin in use (for example
+    // seneca-transport listens on 0.0.0.0, path /act, protocol http), as in
+    // Seneca 3. Injecting HTTP defaults here broke TCP listeners, which read
+    // `path` as a UNIX socket path.
     transport(root$);
     Print(root$, start_opts.debug.argv || process.argv);
     Common.each(start_opts.system.close_signals, function (active, signal) {

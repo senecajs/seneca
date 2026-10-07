@@ -10,6 +10,14 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `role:seneca,cmd:close` (used by seneca-transport and other 3.x plugins),
   so that transport listeners are released and the process can exit.
 * `seneca.export('transport/utils').close` registers on `sys:seneca,cmd:close`.
+* The core no longer injects `host: '127.0.0.1'`, `path: '/act'` and
+  `protocol: 'http'` into every listen and client configuration. Those
+  values served the built-in web transport of Seneca 3, which Seneca 4
+  does not have; with seneca-transport they changed the default listen
+  host from `0.0.0.0` to the loopback address and made TCP listeners
+  treat `/act` as a UNIX socket path, so `listen({type:'tcp'})` never
+  bound its port. The transport plugin's own defaults apply, as in
+  Seneca 3; `transport.port` (default 10101) is still shared.
 * `await seneca.ready()` resolves when the instance is idle. In 4.0.0-rc2
   to rc5 the promise waited for a later clear point, so awaiting `ready()`
   on an instance that had already finished loading (for example a second

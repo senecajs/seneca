@@ -33,8 +33,11 @@ callback) and returns the instance. A client failure is fatal
 
 The configuration object is completed in this order:
 
-1. Scalar values of `options.transport` (`port`, `host`, `path`,
-   `protocol` by default) fill in missing keys.
+1. Scalar values of `options.transport` fill in missing keys. By default
+   only `port` (10101) is set; `host`, `path` and `protocol` are copied
+   only when you set them. Everything else comes from the transport
+   plugin's own defaults (seneca-transport: host `0.0.0.0`, path `/act`,
+   protocol `http` for `web`; host `0.0.0.0`, port 10201 for `tcp`).
 2. `type` defaults to `'web'`.
 3. The section `options.transport[type]` (for example
    `options.transport.web`) supplies further defaults; for `web` and
