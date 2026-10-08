@@ -8,8 +8,32 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   a closed instance running.
 * `seneca.close()` now also calls close hooks registered on the 3.x pattern
   `role:seneca,cmd:close` (used by seneca-transport and other 3.x plugins),
-  so that transport listeners are released and the process can exit.
+  so that transport listeners are released and the process can exit. The
+  call is a `local$` message: a 3.x hook whose prior is a catch-all
+  transport client (Seneca 4 has no builtin action on that pattern) does
+  not send the close message to the remote service, which would close
+  that service's listeners.
 * `seneca.export('transport/utils').close` registers on `sys:seneca,cmd:close`.
+* The core no longer injects `host: '127.0.0.1'`, `path: '/act'` and
+  `protocol: 'http'` into every listen and client configuration. Those
+  values served the built-in web transport of Seneca 3, which Seneca 4
+  does not have; with seneca-transport they changed the default listen
+  host from `0.0.0.0` to the loopback address and made TCP listeners
+  treat `/act` as a UNIX socket path, so `listen({type:'tcp'})` never
+  bound its port. The transport plugin's own defaults apply, as in
+  Seneca 3; `transport.port` (default 10101) is still shared.
+* `await seneca.ready()` resolves when the instance is idle. In 4.0.0-rc2
+  to rc5 the promise waited for a later clear point, so awaiting `ready()`
+  on an instance that had already finished loading (for example a second
+  instance created earlier, or a second `await ready()`) never resolved.
+* The plugin option directives `init$`, `defined$`, `inited$` and `tag$`
+  are accepted for plugins that declare `defaults`, as in Seneca 3. In
+  4.0.0-rc they were validated as plugin options and rejected with
+  `invalid_plugin_option`. They are still removed from the options
+  passed to the plugin definition.
+* The `action_timeout` error message starts with `Action <pattern> timed
+  out`. In 4.0.0-rc it started with an unfilled placeholder, which read
+  `seneca: undefinedAction ... timed out`.
 * A plugin definition function that throws a non-Error value (such as a
   string) produces a `plugin_define_failed` error instead of a TypeError.
 * `seneca.options({tag})` keeps a custom instance identifier (option `id$`)

@@ -28,6 +28,9 @@ describe('timeout', function () {
           message: { a: 1 },
           pattern: 'a:1',
         })
+        expect(err.message).startsWith(
+          'seneca: Action a:1 timed out. Timeout was: 100 (start: ',
+        )
         expect(out).to.not.exist()
         fin()
       })

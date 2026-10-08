@@ -65,7 +65,7 @@ original message. A rejected `post` promise carries only the error.
 | `no_transport_client` | Reserved (transports log `no-transport-client` instead). |
 | `plugin_define_failed` | The plugin definition function threw. Fatal. |
 | `plugin_init` | The plugin init action replied with an error. Fatal. |
-| `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error (the message text also starts with the unfilled placeholder `undefined`). |
+| `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error. |
 | `plugin_required` | `seneca.depends` found a missing plugin. Fatal. |
 | `ready_failed` | A function given to `seneca.ready` threw. Fatal unless an error handler is set. |
 | `require_default_options` | `seneca.options.js` exists but could not be loaded. |

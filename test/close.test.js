@@ -9,6 +9,7 @@ var Shared = require('./shared')
 var it = Shared.make_it()
 
 var Seneca = require('..')
+var Transports = require('./stubs/transports.js')
 
 describe('close', function () {
   it('happy', function (fin) {
@@ -159,6 +160,40 @@ describe('close', function () {
         expect(tmp.legacy).equal(1)
         fin()
       })
+  })
+
+  it('legacy-close-hook-with-catchall-client', function (fin) {
+    // A 3.x close hook (as registered by seneca-transport 8.3) added after
+    // a catch-all client has the client as its prior. The close message
+    // is local$, so the client does not send it to the remote service,
+    // which would close the service's listeners.
+    var st = Transports.make_simple_transport()
+    var tmp = { hook: 0, remote: 0 }
+
+    var s0 = Seneca({ id$: 's0' })
+      .test(fin)
+      .use(st)
+      .listen({ type: 'simple' })
+      .add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.remote++
+        reply()
+      })
+
+    var c0 = Seneca({ id$: 'c0' }).test(fin).use(st).client({ type: 'simple' })
+
+    c0.ready(function () {
+      c0.add('role:seneca,cmd:close', function (msg, reply) {
+        tmp.hook++
+        this.prior(msg, reply)
+      })
+
+      c0.close(function (err) {
+        expect(err).not.exists()
+        expect(tmp.hook).equal(1)
+        expect(tmp.remote).equal(0)
+        s0.close(fin)
+      })
+    })
   })
 
   it('legacy-builtin-close-event-once', function (fin) {

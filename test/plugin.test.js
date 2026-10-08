@@ -1523,4 +1523,50 @@ describe('plugin', function () {
         fin()
       })
   })
+
+  it('plugin-options-directives-with-defaults', function (fin) {
+    // init$ and defined$ are loading directives, not plugin options, so a
+    // plugin with defaults accepts them.
+    const seen = { options: null, init: 0, defined: 0 }
+    const p0 = function p0(opts) {
+      seen.options = opts
+      this.init(function (reply) {
+        seen.init++
+        reply()
+      })
+    }
+    p0.defaults = { a: 1 }
+
+    const seneca = Seneca({ legacy: false })
+      .test(fin)
+      .use(p0, { a: 2, init$: false, defined$: () => seen.defined++ })
+
+    seneca.ready(function () {
+      expect(seen.options).equal({ a: 2 })
+      expect(seen.init).equal(0)
+      expect(seen.defined).equal(1)
+      expect(seneca.options().plugin.p0.init$).equal(false)
+      fin()
+    })
+  })
+
+  it('plugin-options-inited-tag-directives-with-defaults', function (fin) {
+    let inited = 0
+    const p0 = function p0(opts) {
+      this.init(function (reply) {
+        reply()
+      })
+    }
+    p0.defaults = { a: 1 }
+
+    const seneca = Seneca({ legacy: false })
+      .test(fin)
+      .use(p0, { tag$: 't0', inited$: () => inited++ })
+
+    seneca.ready(function () {
+      expect(inited).equal(1)
+      expect(seneca.has_plugin('p0', 't0')).true()
+      fin()
+    })
+  })
 })

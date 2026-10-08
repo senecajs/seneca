@@ -7,6 +7,7 @@ declare function api_use(callpoint: any, opts: any): {
 declare const Plugin: {
     api_use: typeof api_use;
     intern: {
+        option_directives: string[];
         op: {
             seneca_plugin: (tr: any, ctx: any, data: any) => any;
             seneca_export: (tr: any, ctx: any, data: any) => any;

@@ -158,4 +158,46 @@ describe('ready', function () {
       }
     }
   })
+
+  it('ready-promise-resolves-instance', async function () {
+    const si = Seneca({ log: 'silent' })
+    const out = await si.ready()
+    expect(out).equal(si)
+    await si.close()
+  })
+
+  it('ready-promise-waits-for-plugins', async function () {
+    const si = Seneca({ log: 'silent' }).use(function p0() {
+      this.add('a:1', function (msg, reply) {
+        reply({ x: 1 })
+      })
+    })
+    await si.ready()
+    expect(si.find('a:1')).exist()
+    expect(await si.post('a:1')).equal({ x: 1 })
+    await si.close()
+  })
+
+  // The promise form must resolve even if the instance is already idle
+  // (no pending work), the same as the callback form does.
+  it('ready-promise-idle-instance', async function () {
+    const si = Seneca({ log: 'silent' })
+    await si.ready()
+    await si.ready()
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    await si.ready()
+    await si.close()
+  })
+
+  it('ready-promise-second-instance', async function () {
+    // Both instances are created up front, as a test file does.
+    const s0 = Seneca({ log: 'silent' })
+    const s1 = Seneca({ log: 'silent' })
+    await s0.ready()
+    await s0.post('sys:seneca,get:options')
+    await s1.ready()
+    await s1.ready()
+    await s0.close()
+    await s1.close()
+  })
 })

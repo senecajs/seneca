@@ -25,20 +25,21 @@ function make_ready(root: any) {
 function api_ready(this: any, ready_func: any) {
   const self = this
 
-  if (ready_func) {
-    setTimeout(run_ready, self.private$.ge.options.interval)
-  }
-  else {
-    const lastCleared = self.root.private$.cleared
-    return new Promise<void>((resolve) => {
-      const interval = setInterval(() => {
-        if (lastCleared < self.root.private$.cleared) {
-          clearInterval(interval)
-          resolve(self)
-        }
-      }, self.private$.ge.options.interval)
+  // No callback: return a Promise that resolves with the instance.
+  // Uses the callback mechanism below, so that it resolves once pending
+  // work (such as plugin loading) has completed, or promptly if the
+  // instance is already idle. (Waiting for a later clear point would
+  // never resolve on an idle instance.)
+  if ('function' !== typeof ready_func) {
+    return new Promise<any>((resolve) => {
+      api_ready.call(self, function ready_promise() {
+        resolve(self)
+      })
     })
   }
+
+  // Allow pending actions to be queued before checking the executor.
+  setTimeout(run_ready, self.private$.ge.options.interval)
 
   function run_ready() {
     const private$ = self.root.private$
