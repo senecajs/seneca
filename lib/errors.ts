@@ -149,7 +149,7 @@ export default {
     'The Seneca.fail method expected the `cond` param to be a boolean.',
 
   action_timeout:
-    '<%=legacy_string%>Action <%=pattern%> timed out. Timeout was: <%=timeout%> (start: <%=start%>, end: <%=end%>. Message was: <%=message%>.',
+    'Action <%=pattern%> timed out. Timeout was: <%=timeout%> (start: <%=start%>, end: <%=end%>. Message was: <%=message%>.',
 
   use_no_args:
     'The seneca.use method needs at least one argument to define a plugin.',
