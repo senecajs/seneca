@@ -8,7 +8,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   a closed instance running.
 * `seneca.close()` now also calls close hooks registered on the 3.x pattern
   `role:seneca,cmd:close` (used by seneca-transport and other 3.x plugins),
-  so that transport listeners are released and the process can exit.
+  so that transport listeners are released and the process can exit. The
+  call is a `local$` message: a 3.x hook whose prior is a catch-all
+  transport client (Seneca 4 has no builtin action on that pattern) does
+  not send the close message to the remote service, which would close
+  that service's listeners.
 * `seneca.export('transport/utils').close` registers on `sys:seneca,cmd:close`.
 * The core no longer injects `host: '127.0.0.1'`, `path: '/act'` and
   `protocol: 'http'` into every listen and client configuration. Those
