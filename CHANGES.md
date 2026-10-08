@@ -22,6 +22,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   to rc5 the promise waited for a later clear point, so awaiting `ready()`
   on an instance that had already finished loading (for example a second
   instance created earlier, or a second `await ready()`) never resolved.
+* The plugin option directives `init$`, `defined$`, `inited$` and `tag$`
+  are accepted for plugins that declare `defaults`, as in Seneca 3. In
+  4.0.0-rc they were validated as plugin options and rejected with
+  `invalid_plugin_option`. They are still removed from the options
+  passed to the plugin definition.
 * The `action_timeout` error message starts with `Action <pattern> timed
   out`. In 4.0.0-rc it started with an unfilled placeholder, which read
   `seneca: undefinedAction ... timed out`.

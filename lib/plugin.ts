@@ -542,6 +542,18 @@ function make_tasks(): any {
         plugin.options || {}
       )
 
+      // The directives init$, defined$, inited$ and tag$ control loading;
+      // they are not plugin options, so they are kept out of the
+      // validation against the defaults and added back to the resolved
+      // options, where the later loading steps read them.
+      let directives: any = {}
+      for (const directive of intern.option_directives) {
+        if (undefined !== fullopts[directive]) {
+          directives[directive] = fullopts[directive]
+          delete fullopts[directive]
+        }
+      }
+
       let resolved_options: any = {}
       let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
 
@@ -610,6 +622,10 @@ function make_tasks(): any {
           }
           */
         }
+      }
+
+      if (null != resolved_options) {
+        Object.assign(resolved_options, directives)
       }
 
       return {
@@ -817,6 +833,9 @@ function make_tasks(): any {
 
 function make_intern() {
   return {
+    // Plugin option directives (see the options task of the plugin load).
+    option_directives: ['init$', 'defined$', 'inited$', 'tag$'],
+
     // TODO: explicit tests for these operators
 
     op: {
