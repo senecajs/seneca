@@ -1,0 +1,231 @@
+# Publish a tagged release to npm with npm trusted publishing (GitHub OIDC).
+#
+# No npm token exists anywhere: the publish job exchanges a short-lived GitHub
+# OIDC token for a publish credential, and npm attaches build provenance.
+#
+# Triggers
+#   * push of a tag vX.Y.Z (or vX.Y.Z-rcN for a prerelease): validate, build
+#     and test, then publish once the `npm` environment is approved.
+#   * workflow_dispatch: a dry run by default (validate, build, test and pack;
+#     nothing is published). With dry-run off and an existing tag it publishes
+#     that tag; this is the manual path when a tag push run has failed.
+#
+# The npm trusted publisher of the `seneca` package must be configured as
+#   Organization or user: senecajs
+#   Repository:           seneca
+#   Workflow filename:    release.yml
+#   Environment name:     npm
+# with the "npm publish" action allowed. See docs/how-to/create-a-release.md.
+#
+# Layout: the `validate` job installs dependencies, builds and tests, and has
+# no OIDC permission. The `publish` job never installs dependencies or runs
+# third-party code: it checks out the tag, checks it again with the
+# dependency-free validation script, and publishes the committed files.
+#
+# Actions are pinned to commits; Dependabot keeps the pins up to date.
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run: validate, build, test and pack, but do not publish'
+        type: boolean
+        default: true
+      tag:
+        description: 'Existing tag to release (vX.Y.Z). Empty: dry run of the selected branch'
+        type: string
+        default: ''
+      dist-tag:
+        description: 'npm dist-tag (empty: latest, or next for a prerelease; for example 3x for a maintenance release)'
+        type: string
+        default: ''
+
+# One release at a time per ref; never cancel a publish in progress.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  validate:
+    name: validate, build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      ref: ${{ steps.plan.outputs.ref }}
+      tag: ${{ steps.plan.outputs.tag }}
+      dry_run: ${{ steps.plan.outputs.dry_run }}
+      version: ${{ steps.check.outputs.version }}
+      dist_tag: ${{ steps.check.outputs.dist_tag }}
+      prerelease: ${{ steps.check.outputs.prerelease }}
+
+    steps:
+      - name: Plan the run
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          SHA: ${{ github.sha }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          if [ "$EVENT" = push ]; then
+            tag="$REF_NAME"
+            dry_run=false
+          else
+            tag="$INPUT_TAG"
+            # Manual run started from a tag ("Use workflow from": the tag): release that tag.
+            if [ -z "$tag" ] && [ "$REF_TYPE" = tag ]; then tag="$REF_NAME"; fi
+            dry_run="$INPUT_DRY_RUN"
+          fi
+          if [ -n "$tag" ] && ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::tag '$tag' is not of the form vX.Y.Z or vX.Y.Z-pre"
+            exit 1
+          fi
+          if [ "$dry_run" != true ] && [ -z "$tag" ]; then
+            echo "::error::a tag is required to publish; enable dry-run to validate a branch"
+            exit 1
+          fi
+          if [ -n "$tag" ]; then ref="refs/tags/$tag"; else ref="$SHA"; fi
+          {
+            echo "ref=$ref"
+            echo "tag=$tag"
+            echo "dry_run=$dry_run"
+          } >> "$GITHUB_OUTPUT"
+          echo "ref=$ref tag=$tag dry_run=$dry_run"
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ steps.plan.outputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - run: npm install
+      - run: npm run build
+      - run: npm test
+
+      - name: Validate the release
+        id: check
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: >-
+          node .github/scripts/validate-release.js
+          --tag "$TAG" --dist-tag "$DIST_TAG"
+          --notes-file "$RUNNER_TEMP/release-notes.md"
+
+      - name: Pack (dry run)
+        env:
+          DIST_TAG: ${{ steps.check.outputs.dist_tag }}
+        run: npm publish --dry-run --ignore-scripts --tag "$DIST_TAG"
+
+  publish:
+    name: publish ${{ needs.validate.outputs.tag }}
+    needs: validate
+    if: needs.validate.outputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/seneca/v/${{ needs.validate.outputs.version }}
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # mint the OIDC token for npm trusted publishing
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ needs.validate.outputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Check the npm version
+        # Trusted publishing needs npm 11.5.1 or later; Node.js 24 bundles a newer npm.
+        run: |
+          node -e '
+            const [major, minor, patch] = require("node:child_process")
+              .execSync("npm --version").toString().trim().split(".").map(Number)
+            const ok = 11 < major || (11 === major && (5 < minor || (5 === minor && 1 <= patch)))
+            console.log("npm " + [major, minor, patch].join(".") + (ok ? "" : ": too old for trusted publishing"))
+            process.exit(ok ? 0 : 1)
+          ' || npm install -g npm@11
+          npm --version
+
+      - name: Validate the tag again
+        id: check
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+          DIST_TAG: ${{ needs.validate.outputs.dist_tag }}
+        run: >-
+          node .github/scripts/validate-release.js
+          --tag "$TAG" --dist-tag "$DIST_TAG"
+          --notes-file "$RUNNER_TEMP/release-notes.md"
+
+      - name: Publish to npm
+        env:
+          DIST_TAG: ${{ steps.check.outputs.dist_tag }}
+        run: npm publish --ignore-scripts --tag "$DIST_TAG"
+
+      - name: Verify the published package
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          DIST_TAG: ${{ steps.check.outputs.dist_tag }}
+        run: |
+          for i in $(seq 1 30); do
+            if [ "$(npm view "seneca@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then break; fi
+            echo "waiting for the registry ($i)"
+            sleep 10
+          done
+          test "$(npm view "seneca@$VERSION" version)" = "$VERSION"
+          test "$(npm view seneca "dist-tags.$DIST_TAG")" = "$VERSION"
+          attestations="$(npm view "seneca@$VERSION" dist.attestations.url)"
+          test -n "$attestations"
+          echo "provenance attestation: $attestations"
+
+      - name: Verify the registry signature and provenance attestation
+        # Informational: the version is already published when this runs.
+        continue-on-error: true
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
+          npm init -y > /dev/null
+          npm install "seneca@$VERSION" --ignore-scripts --no-audit --no-fund
+          npm audit signatures
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          PRERELEASE: ${{ steps.check.outputs.prerelease }}
+          NOTES: ${{ runner.temp }}/release-notes.md
+        run: |
+          flags=(--title "$TAG" --notes-file "$NOTES")
+          if [ "$PRERELEASE" = true ]; then flags+=(--prerelease); fi
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" "${flags[@]}"
+          else
+            gh release create "$TAG" --verify-tag "${flags[@]}"
+          fi
+          gh release view "$TAG" --json url --jq .url

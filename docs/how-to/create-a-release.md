@@ -5,15 +5,26 @@ For maintainers.
 Seneca is published to npm by GitHub Actions using
 [npm trusted publishing](https://docs.npmjs.com/trusted-publishers)
 (OpenID Connect). No npm token is stored in this repository, in GitHub
-secrets, or on a maintainer's machine: the `release` workflow exchanges a
-short-lived GitHub OIDC token for a publish credential, and npm attaches
-build provenance to the published package.
+secrets, or on a maintainer's machine: the `release` workflow
+(`.github/workflows/release.yml`) exchanges a short-lived GitHub OIDC
+token for a publish credential, and npm attaches build provenance to the
+published package.
 
-The shared validation and publishing steps live in the
-[senecajs/admin](https://github.com/senecajs/admin) repository
-(`.github/workflows/npm-release.yml` and the `release/` scripts). The
-workflow in this repository, `.github/workflows/release.yml`, is a thin
-caller.
+The workflow has two jobs:
+
+* `validate` installs the dependencies, builds, runs the tests, and checks
+  the release with `.github/scripts/validate-release.js`: the tag matches
+  the `package.json` version, `CHANGES.md` has an entry for the version,
+  the committed compiled output matches the sources, the package contents
+  are complete and contain nothing else, the version is not already
+  published, and the dist-tag is consistent with the published versions.
+  The job has no OIDC permission.
+* `publish` waits for the approval of the `npm` environment, checks out
+  the tag, runs the validation script again, and publishes the committed
+  files with `npm publish`. It does not run `npm install`, so no
+  third-party code runs in the job that holds the publish credential. It
+  then verifies the published version, its dist-tag and its provenance
+  attestation, and creates the GitHub release from the `CHANGES.md` entry.
 
 
 ## One-time setup
@@ -28,26 +39,29 @@ caller.
    | Workflow filename    | `release.yml` |
    | Environment name     | `npm`         |
 
-   The workflow filename is the *calling* workflow in this repository,
-   not the reusable workflow in senecajs/admin. Allow the `npm publish`
-   action. A new trusted publisher must complete its first successful
-   publish within two days of being created.
+   Under *Allowed actions* allow `npm publish`: configurations created
+   after September 2026 allow only `npm stage publish` by default, and the
+   workflow publishes directly. All fields are case sensitive. A new
+   trusted publisher must complete its first successful publish within two
+   days, or it expires and has to be created again.
 
-2. **Disallow tokens.** Once the trusted publisher works, set
-   *Settings* → *Publishing access* to
-   *Require two-factor authentication and disallow tokens*.
-   Trusted publishers keep working; leaked or stale tokens cannot publish.
+2. **GitHub environment.** In this repository open *Settings* →
+   *Environments* → *New environment* and name it `npm`. Add the
+   maintainers as *Required reviewers*, and under *Deployment branches and
+   tags* allow only tags matching `v*`. Every publish then waits for a
+   maintainer to approve the run, and only a tagged commit can reach the
+   publish job.
 
-3. **GitHub environment.** In this repository, *Settings* →
-   *Environments* → create `npm`, add the maintainers as required
-   reviewers, and restrict deployment branches and tags to tags matching
-   `v*`. Every publish then waits for a maintainer to approve the run.
+3. **Disallow tokens.** Once the first trusted publish has succeeded, set
+   the package's *Settings* → *Publishing access* to *Require two-factor
+   authentication and disallow tokens*. Trusted publishing keeps working;
+   leaked or stale tokens cannot publish.
 
-4. **Reusable workflow access.** GitHub only lets public repositories use
-   reusable workflows from public repositories, so `senecajs/admin` must
-   be public (it holds no secrets). Alternatively copy
-   `npm-release.yml` into a public repository and update the `uses:` line
-   in `release.yml`.
+The `3.x` branch has no release workflow. A 3.x maintenance release is
+published by hand (`npm publish --tag 3x` with a one-time password), or
+with the workflow after copying `.github/workflows/release.yml`,
+`.github/scripts/validate-release.js` and `.github/dependabot.yml` to that
+branch.
 
 
 ## Releasing a version
@@ -61,23 +75,37 @@ caller.
 4. Run `npm install`, `npm run build` and `npm test`. Commit the result,
    including the compiled `lib/*.js` and `seneca.js` output:
    `git commit -a -m vX.Y.Z`.
-5. Optionally validate locally with the admin tooling:
-   `node ../admin/release/validate-release.js --tag vX.Y.Z`.
-6. Tag and push. Either
-   `git tag vX.Y.Z && git push origin master && git push origin vX.Y.Z`,
-   or let the admin script do steps 3 to 6:
-   `node ../admin/release/release.js X.Y.Z`.
-7. The tag push starts the `release` workflow, which installs, builds,
-   validates (version matches the tag, `CHANGES.md` entry, clean working
-   tree after build, package contents), runs the tests, waits for the
-   `npm` environment approval, publishes with provenance, verifies the
-   published version and its attestation, and creates the GitHub release.
+5. Check the release locally:
+   `node .github/scripts/validate-release.js --tag vX.Y.Z`.
+6. Tag and push:
+   `git tag vX.Y.Z && git push origin master && git push origin vX.Y.Z`.
+7. The tag push starts the `release` workflow. When the `validate` job has
+   passed, approve the deployment to the `npm` environment on the run page
+   (*Review deployments*). The `publish` job then publishes with
+   provenance and creates the GitHub release.
 8. Check the [release](https://github.com/senecajs/seneca/actions/workflows/release.yml)
-   run and the [npm package page](https://www.npmjs.com/package/seneca).
+   run, the [npm package page](https://www.npmjs.com/package/seneca)
+   (the version shows a *Provenance* section) and the
+   [GitHub release](https://github.com/senecajs/seneca/releases).
 9. Notify core maintainers of the release via email.
 
 To rehearse without publishing, run the `release` workflow manually
-(*Actions* → *release* → *Run workflow*) with *dry-run* enabled.
+(*Actions* → *release* → *Run workflow*) with *dry-run* enabled; without
+a tag it validates the selected branch. If a tag push run failed (for
+example before the trusted publisher was configured), run the workflow
+manually with the tag selected under *Use workflow from* and *dry-run*
+disabled; the environment rule only admits runs started from a `v*` tag.
 
-Dist-tags other than `latest`/`next` (for example `plugin`) are set
-manually with `npm dist-tag add seneca@X.Y.Z plugin` using 2FA.
+Dist-tags: a stable version newer than the current `latest` is published
+as `latest`, a prerelease as `next`. A maintenance release of an older
+line needs an explicit dist-tag (the *dist-tag* input, for example `3x`).
+Other dist-tags (for example `plugin`) are set by hand with
+`npm dist-tag add seneca@X.Y.Z plugin` using a one-time password.
+
+
+## Dependencies of the workflows
+
+The actions used by the workflows (`actions/checkout`,
+`actions/setup-node` and `coverallsapp/github-action`) are pinned to
+commits. Dependabot (`.github/dependabot.yml`) opens a monthly pull
+request when a newer version is available.
