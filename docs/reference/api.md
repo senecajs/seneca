@@ -101,6 +101,19 @@ without one like `post`. When there is no prior, the reply is the
 message's `default$` value or `null`. Calling `prior` outside an action
 throws `no_prior_action`.
 
+### `direct_prior`
+
+```js
+const result = this.direct_prior(msg, [moreProps])   // inside an action
+```
+
+Call the action that the current action overrides synchronously, as
+[`direct`](#direct) does, and return its return value. When there is no
+prior, it returns the message's `default$` value (or the metadata
+default) or `null`. With a callback, the callback receives the same
+values. Calling `direct_prior` outside an action throws
+`no_prior_action`.
+
 ### `reply`
 
 ```js

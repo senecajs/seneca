@@ -183,6 +183,8 @@ describe('seneca', function () {
       'close',
       'log',
       'error',
+      'newListener',
+      'removeListener',
     ].forEach(function (event_name) {
       expect(function () {
         si.on(event_name, function () {})

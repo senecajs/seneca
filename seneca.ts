@@ -420,6 +420,8 @@ const valid_event_names = [
   'close',
   'log',
   'error', // Node.js EventEmitter special-cases this event.
+  'newListener', // Emitted by EventEmitter itself; used by events.once().
+  'removeListener',
 ]
 
 const original_on = Seneca.prototype.on
