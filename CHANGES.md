@@ -57,6 +57,9 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * `seneca.direct_prior(msg)` calls the overridden action synchronously,
   as `seneca.direct` does, and returns its return value. Without a prior
   action it returns the message's `default$` value or `null` (#947).
+* Without a prior action, `seneca.prior` and `seneca.direct_prior` return
+  a copy of an array `default$` as an array. Before, the copy was a plain
+  object with numeric keys.
 * `seneca.on()` accepts only the events Seneca emits (`log`, `ready`,
   `close`, `act-in`, `act-out`, `act-err`, `act-err-4`, `pin`,
   `after-pin`) and the EventEmitter events `error`, `newListener` and

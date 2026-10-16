@@ -117,6 +117,45 @@ describe('prior', function () {
     expect(out.x).equal(99)
   })
 
+  it('direct_prior-no-prior-default-array', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+    let dflt = [1, 2]
+
+    si.add('a:1', function a1(msg) {
+      msg.default$ = dflt
+      return this.direct_prior(msg)
+    })
+
+    let out = si.direct('a:1')
+    expect(out).equal([1, 2])
+    expect(out).not.shallow.equal(dflt)
+
+    si.add('b:1', function b1(msg, reply) {
+      msg.default$ = dflt
+      this.direct_prior(msg, reply)
+    })
+
+    let cbout = null
+    si.direct('b:1', function (err, out) {
+      cbout = out
+    })
+    expect(Array.isArray(cbout)).true()
+    expect(cbout).equal([1, 2])
+  })
+
+  it('prior-no-prior-default-array', async () => {
+    let si = await Seneca({ legacy: false }).test().ready()
+
+    si.add('a:1', function a1(msg, reply) {
+      msg.default$ = [1, 2]
+      this.prior(msg, reply)
+    })
+
+    let out = await si.post('a:1')
+    expect(Array.isArray(out)).true()
+    expect(out).equal([1, 2])
+  })
+
   it('direct_prior-top-level-error', function (fin) {
     try {
       Seneca().test().direct_prior({ a: 1 })
