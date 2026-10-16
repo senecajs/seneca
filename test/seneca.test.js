@@ -147,6 +147,60 @@ describe('seneca', function () {
       })
   })
 
+  it('idgen-never-starts-with-digit', function (done) {
+    var Jsonic = require('jsonic')
+    var si = Seneca(testopts).test()
+
+    // Ids get embedded directly (unquoted) into jsonic pattern
+    // strings, e.g. seneca.post('foo:bar,id:'+id). If an id happened
+    // to start with a digit and look like a number (e.g. '1e2'),
+    // jsonic would parse it as a number (100) instead of a string,
+    // silently corrupting it. See #935.
+    for (var i = 0; i < 2000; i++) {
+      var id = si.idgen()
+      expect(/^[0-9]/.test(id)).false()
+
+      var parsed = Jsonic('foo:bar,id:' + id)
+      expect(parsed.id).equal(id)
+    }
+
+    done()
+  })
+
+
+  it('on-event-name-validation', function (done) {
+    var si = Seneca(testopts).test()
+
+    // Known, valid Seneca event names should register without error.
+    ;[
+      'act-in',
+      'act-out',
+      'act-err',
+      'act-err-4',
+      'pin',
+      'after-pin',
+      'ready',
+      'close',
+      'log',
+      'error',
+      'newListener',
+      'removeListener',
+    ].forEach(function (event_name) {
+      expect(function () {
+        si.on(event_name, function () {})
+      }).to.not.throw()
+    })
+
+    // An unknown event name should throw a clear identifiable error.
+    try {
+      si.on('not-an-event', function () {})
+      expect(true).false()
+    } catch (e) {
+      expect('invalid_event_name').equal(e.code)
+      done()
+    }
+  })
+
   it('errhandler', function (done) {
     var tmp = {}
 

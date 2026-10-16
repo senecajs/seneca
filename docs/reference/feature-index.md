@@ -31,7 +31,7 @@ Options are listed under their top level key in the
 | `deprecate$`, `debug.deprecation` | [Message directives](message-directives.md) | |
 | `destroy` (plugin shutdown stages) | [API: prepare, destroy](api.md#prepare-destroy) | [Shut down gracefully](../how-to/shut-down-gracefully.md) |
 | `die`, fatal errors, `debug.undead` | [Error codes](error-codes.md), [Options: debug](options.md#debug) | [Handle errors](../how-to/handle-errors.md), [The error model](../explanation/error-model.md) |
-| `direct`, `direct$` | [API: direct](api.md#direct) | [Use promises and async actions](../how-to/use-promises-and-async-actions.md) |
+| `direct`, `direct$`, `direct_prior` | [API: direct](api.md#direct), [API: direct_prior](api.md#direct_prior) | [Use promises and async actions](../how-to/use-promises-and-async-actions.md) |
 | Entities (`entity$`, `make$`) | [Legacy: entities](legacy.md#entities) | |
 | `error` (create errors, set the error handler), `errhandler` | [API: error](api.md#error), [Error codes](error-codes.md) | [Handle errors](../how-to/handle-errors.md) |
 | Error codes and error object properties | [Error codes](error-codes.md) | [Handle errors](../how-to/handle-errors.md) |

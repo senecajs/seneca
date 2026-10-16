@@ -54,6 +54,24 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   (tutorials, how-to guides, reference, explanation), covering every
   option, method, directive, event and error code. The example programs
   are rewritten for Seneca 4.
+* `seneca.direct_prior(msg)` calls the overridden action synchronously,
+  as `seneca.direct` does, and returns its return value. Without a prior
+  action it returns the message's `default$` value or `null` (#947).
+* Without a prior action, `seneca.prior` and `seneca.direct_prior` return
+  a copy of an array `default$` as an array. Before, the copy was a plain
+  object with numeric keys.
+* `seneca.on()` accepts only the events Seneca emits (`log`, `ready`,
+  `close`, `act-in`, `act-out`, `act-err`, `act-err-4`, `pin`,
+  `after-pin`) and the EventEmitter events `error`, `newListener` and
+  `removeListener`. Any other name throws `invalid_event_name`, so a
+  misspelt event no longer registers a listener that never fires (#929,
+  #949).
+* The `events` option registers the action events under their emitted
+  names `act-in`, `act-out` and `act-err`. The underscore keys it used
+  before never matched an emitted event (#949).
+* Generated ids (`seneca.idgen()`, action and instance ids) never start
+  with a digit, so an id embedded unquoted in a jsonic pattern string is
+  not parsed as a number (#935, #950).
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -78,6 +96,9 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   are built in (previously provided by seneca-promisify).
 * `seneca.prepare`, `seneca.destroy` and `seneca.direct` are available
   for plugin preparation, shutdown, and synchronous action execution.
+* `seneca.on()` throws `invalid_event_name` for an event Seneca does not
+  emit. Listeners for custom events belong on a separate EventEmitter.
+* In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
 
 
 ## 4.0.0-rc5 2025-02-07

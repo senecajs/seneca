@@ -113,6 +113,35 @@ function make_plugin_key(plugin: any, origtag: any) {
 const tagnid = Nid({ length: 3, alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' })
 
 
+// Wraps Nid so the generated id never starts with a digit. These ids
+// are often embedded directly (unquoted) into jsonic pattern strings,
+// e.g. seneca.post('foo:bar,id:'+id) - if the id happens to look like
+// a number (e.g. '1e2'), jsonic parses it as a number (100) instead of
+// a string, silently corrupting the id. See
+// https://github.com/senecajs/seneca/issues/935
+function idnid(opts?: any) {
+  const gen = Nid(opts)
+  const alphabet: string =
+    (opts && opts.alphabet) || '0123456789abcdefghijklmnopqrstuvwxyz'
+  const letters = alphabet.split('').filter((c: string) => !/[0-9]/.test(c))
+
+  // Nothing sensible to do if the alphabet has no letters at all -
+  // fall back to the raw generator rather than looping forever.
+  if (0 === letters.length) {
+    return gen
+  }
+
+  return function () {
+    let id = gen()
+    if (/^[0-9]/.test(id)) {
+      const letter = letters[Math.floor(Math.random() * letters.length)]
+      id = letter + id.slice(1)
+    }
+    return id
+  }
+}
+
+
 function parse_jsonic(str: any, code: any) {
   code = code || 'bad_jsonic'
 
@@ -787,6 +816,7 @@ export {
   history,
   print,
   tagnid,
+  idnid,
   inspect,
   error,
   msgstr,

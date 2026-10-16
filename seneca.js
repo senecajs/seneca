@@ -306,6 +306,37 @@ function Seneca() {
     this.setMaxListeners(0);
 }
 Util.inherits(Seneca, Events.EventEmitter);
+// The known, valid Seneca event names. Anything else passed to `.on`
+// is almost certainly a typo... (e.g. 'act-err' vs 'act_err'), so it's
+// validated here rather than silently registering a listener that
+// will never fire. See lib/act.ts, lib/outward.ts, lib/logging.ts,
+// lib/ready.ts, lib/actions.ts (where these are emitted), and the
+// close cleanup in lib/api.ts (where they are removed) for the
+// canonical list.
+const valid_event_names = [
+    'act-in',
+    'act-out',
+    'act-err',
+    'act-err-4',
+    'pin',
+    'after-pin',
+    'ready',
+    'close',
+    'log',
+    'error', // Node.js EventEmitter special-cases this event.
+    'newListener', // Emitted by EventEmitter itself; used by events.once().
+    'removeListener',
+];
+const original_on = Seneca.prototype.on;
+Seneca.prototype.on = function (event_name, ...rest) {
+    if ('string' === typeof event_name && -1 === valid_event_names.indexOf(event_name)) {
+        throw error('invalid_event_name', {
+            name: event_name,
+            valid: valid_event_names.join(', '),
+        });
+    }
+    return original_on.call(this, event_name, ...rest);
+};
 // Mark the Seneca object
 Seneca.prototype.isSeneca = true;
 // Provide useful description when convered to JSON.
@@ -407,15 +438,15 @@ function make_seneca(initial_opts) {
         outward: soi_subrouter.outward || (0, patrun_1.Patrun)({ gex: true }),
     };
     // Setup event handlers, if defined
-    var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close'];
+    var event_names = ['log', 'act-in', 'act-out', 'act-err', 'ready', 'close'];
     event_names.forEach(function (event_name) {
         if ('function' === typeof start_opts.events[event_name]) {
             root$.on(event_name, start_opts.events[event_name]);
         }
     });
     // Create internal tools.
-    private$.actnid = (0, nid_1.default)({ length: start_opts.idlen });
-    private$.didnid = (0, nid_1.default)({ length: start_opts.didlen });
+    private$.actnid = Common.idnid({ length: start_opts.idlen });
+    private$.didnid = Common.idnid({ length: start_opts.didlen });
     // Instance specific incrementing counters to create unique function names
     private$.next_action_id = Common.autoincr();
     var callpoint = (private$.callpoint = Common.make_callpoint(start_opts.debug.callpoint));
@@ -464,6 +495,7 @@ function make_seneca(initial_opts) {
     root$.depends = API.depends; // Check for plugin dependencies.
     root$.delegate = API.delegate; // Create an action-specific Seneca instance.
     root$.prior = prior_1.Prior.api_prior; // Call the previous action definition for pattern.
+    root$.direct_prior = prior_1.Prior.api_direct_prior; // Call the previous action definition synchronously.
     root$.inward = API.inward; // Add a modifier function for messages inward
     root$.outward = API.outward; // Add a modifier function for responses outward
     root$.error = API.error; // Set global error handler, or generate Seneca Error
@@ -504,7 +536,7 @@ function make_seneca(initial_opts) {
     root$.pinact = Legacy.findpins;
     root$.next_act = Legacy.next_act;
     // Identifier generator.
-    root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
+    root$.idgen = Common.idnid({ length: start_opts.idlen });
     // Instance tag
     start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag;
     // Create a unique identifer for this instance.
@@ -523,7 +555,7 @@ function make_seneca(initial_opts) {
     root$.tag = start_opts.tag;
     if (start_opts.debug.short_logs || start_opts.log.short) {
         start_opts.idlen = 2;
-        root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
+        root$.idgen = Common.idnid({ length: start_opts.idlen });
         root$.id = root$.idgen() + '/' + start_opts.tag;
     }
     root$.fullname = 'Seneca/' + root$.id;
