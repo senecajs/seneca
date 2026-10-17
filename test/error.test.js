@@ -575,7 +575,7 @@ describe('error', function () {
           // ~~ CASE: action; no-callback; no-errhandler
           si.on('act-err', function (whence, msg, meta, err) {
             try {
-              assert.equal('action', whence)
+              assert.equal('callback', whence)
               assert.equal(1, msg.a)
               assert.equal('act_execute', err.code, ctxt.name + '-D')
               assert.equal('a:1', err.details.pattern, ctxt.name + '-E')
@@ -726,4 +726,43 @@ describe('error', function () {
       // assert.equal(err.code, 'act_execute')
     })
   }
+
+  it('act-err-arguments', function (t, done) {
+    const seen = []
+    const si = Seneca({ log: 'silent' })
+      .add('a:1', function (msg, reply) {
+        reply(new Error('a1'))
+      })
+      .add('a:2', function (msg, reply) {
+        reply({ x: 2 })
+      })
+
+    si.on('act-err', function (whence, msg, meta, err, result) {
+      seen.push([whence, msg.a, err.code, err.message, result])
+    })
+
+    si.act('a:1', function () {
+      si.act('a:2', function () {
+        throw new Error('callback throws')
+      })
+    })
+
+    setTimeout(() => {
+      try {
+        // Seneca 4 layout: the first argument is always 'callback'. An
+        // action failure passes the original error; a callback that threw
+        // is wrapped as act_callback and the result is the fifth argument.
+        assert.deepEqual(seen[0], ['callback', 1, undefined, 'a1', undefined])
+        assert.equal(seen[1][0], 'callback')
+        assert.equal(seen[1][1], 2)
+        assert.equal(seen[1][2], 'act_callback')
+        assert.match(seen[1][3], /callback threw: callback throws/)
+        assert.deepEqual(seen[1][4], { x: 2 })
+        assert.equal(seen.length, 2)
+        si.close(done)
+      } catch (e) {
+        done(e)
+      }
+    }, 222)
+  })
 })

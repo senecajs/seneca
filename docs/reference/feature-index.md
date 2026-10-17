@@ -8,7 +8,7 @@ Options are listed under their top level key in the
 | Feature | Reference | Guides |
 | ------- | --------- | ------ |
 | `act` (submit a message) | [API: act](api.md#act) | [Getting started](../tutorials/getting-started.md) |
-| `act-in`, `act-out`, `act-err`, `act-err-4` events | [Events](events.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
+| `act-in`, `act-out`, `act-err` events (`act-err-4` deprecated) | [Events](events.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
 | Action definition (`find` result, `priorpath`, `rules`) | [Action definition](action-definition.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
 | Action modifiers (`extend.action_modifier`) | [Plugins: return value](plugins.md#return-value) | |
 | `add` (define an action) | [API: add](api.md#add) | [Getting started](../tutorials/getting-started.md) |

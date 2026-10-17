@@ -77,6 +77,12 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Generated ids (`seneca.idgen()`, action and instance ids) never start
   with a digit, so an id embedded unquoted in a jsonic pattern string is
   not parsed as a number (#935, #950).
+* `act-err` uses the Seneca 4 argument layout: the first argument is
+  always `'callback'` (it was `'action'` for action failures). An action
+  failure passes the original error; a callback that threw is wrapped as
+  `act_callback`, with the result as the fifth argument. `act-err-4`, the
+  preview of this layout added in 3.32.1, is a deprecated alias with the
+  same arguments.
 * Validation uses [shape](https://github.com/rjrodger/shape) 11, the
   renamed successor of Gubu: `seneca.valid`, `Seneca.valid` and
   `Seneca.util.Shape` are Shape, and action definitions carry the compiled
@@ -126,6 +132,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * `seneca.on()` throws `invalid_event_name` for an event Seneca does not
   emit. Listeners for custom events belong on a separate EventEmitter.
 * In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
+* `act-err` listeners receive `'callback'` as the first argument for every
+  failure. To tell a throwing callback from a failed action, check
+  `err.code === 'act_callback'`. Listeners on `act-err-4` can move to
+  `act-err` unchanged.
 
 
 ## 4.0.0-rc5 2025-02-07
