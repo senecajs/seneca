@@ -1,17 +1,13 @@
 /* Copyright (c) 2014-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 var Common = require('../lib/common')
 var { API } = require('../lib/api')
 var TransportStubs = require('./stubs/transports')
 
 // Test shortcuts
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
@@ -36,7 +32,7 @@ function testact(msg, reply) {
   }, 11 * tmx)
 }
 
-var test_opts = { parallel: false, timeout: 5555 * tmx }
+var test_opts = { timeout: 5555 * tmx }
 
 describe('transport', function () {
   // TEST: parent and trace over transport - fake and network
@@ -51,7 +47,7 @@ describe('transport', function () {
       var fn = function () {
         listen.call(seneca)
       }
-      expect(fn).to.not.throw()
+      assert.doesNotThrow(fn)
       seneca.close(fin)
     })
 
@@ -62,7 +58,7 @@ describe('transport', function () {
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
       }
-      expect(fn).to.not.throw()
+      assert.doesNotThrow(fn)
       seneca.close(fin)
     })
 
@@ -73,7 +69,7 @@ describe('transport', function () {
       var fn = function () {
         listen.call(seneca, 8080, 'localhost', '/')
       }
-      expect(fn).to.not.throw()
+      assert.doesNotThrow(fn)
       seneca.close(fin)
     })
 
@@ -84,7 +80,7 @@ describe('transport', function () {
       var fn = function () {
         listen.call(seneca, 8080)
       }
-      expect(fn).to.not.throw()
+      assert.doesNotThrow(fn)
       seneca.close(fin)
     })
 
@@ -98,7 +94,7 @@ describe('transport', function () {
         var fn = function () {
           listen.call(seneca, 8080, 'localhost')
         }
-        expect(fn).to.not.throw()
+        assert.doesNotThrow(fn)
         seneca.close(fin)
       },
     )
@@ -113,7 +109,7 @@ describe('transport', function () {
         var fn = function () {
           listen.call(seneca, 8080, 'localhost', '/')
         }
-        expect(fn).to.not.throw()
+        assert.doesNotThrow(fn)
         seneca.close(fin)
       },
     )
@@ -141,13 +137,13 @@ describe('transport', function () {
         client.call(seneca)
       }
 
-      expect(fn).to.not.throw()
+      assert.doesNotThrow(fn)
       seneca.close(fin)
     })
   })
   */
 
-  it('transport-exact-single', test_opts, function (done) {
+  it('transport-exact-single', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ tag: 'srv', timeout: 5555 })
@@ -155,7 +151,7 @@ describe('transport', function () {
       .use(st)
       .add('foo:1', function (msg, reply, meta) {
         // ensure action id is transferred for traceability
-        expect('aa/BB').to.equal(meta.id)
+        assert.equal('aa/BB', meta.id)
         testact.call(this, msg, reply)
       })
       .listen({ type: 'simple', pin: 'foo:1' })
@@ -168,15 +164,15 @@ describe('transport', function () {
           .client({ type: 'simple', pin: 'foo:1' })
           //.client({ port: 62222, pin: 'foo:1' })
           .act('foo:1,actid$:aa/BB', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.foo).to.equal(1)
+            assert.ifError(err)
+            assert.equal(out.foo, 1)
 
             done()
           })
       })
   })
 
-  it('transport-local-override', test_opts, function (done) {
+  it('transport-local-override', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ tag: 'srv', timeout: 5555 })
@@ -195,17 +191,17 @@ describe('transport', function () {
           })
           .client({ type: 'simple', pin: 'foo:1' })
           .act('foo:1,actid$:aa/BB', function (err, out) {
-            expect(err).to.not.exist()
+            assert.ifError(err)
 
             // The remote version overrides the local version
-            expect(out.bar).to.equal(1)
+            assert.equal(out.bar, 1)
 
             done()
           })
       })
   })
 
-  it('transport-star', test_opts, function (done) {
+  it('transport-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
@@ -224,13 +220,13 @@ describe('transport', function () {
           .client({ type: 'simple', pin: 'foo:*' })
           .ready(function () {
             si.act('foo:1', function (err, out) {
-              expect(err).to.not.exist()
-              expect(out.foo).to.equal(1)
+              assert.ifError(err)
+              assert.equal(out.foo, 1)
               si.act('foo:2', function (err, out) {
-                expect(err).to.not.exist()
-                expect(out.foo).to.equal(2)
+                assert.ifError(err)
+                assert.equal(out.foo, 2)
                 si.act('bar:1', function (err) {
-                  expect(err.code).to.equal('act_not_found')
+                  assert.equal(err.code, 'act_not_found')
 
                   done()
                 })
@@ -240,7 +236,7 @@ describe('transport', function () {
       })
   })
 
-  it('transport-star-pin-object', test_opts, function (done) {
+  it('transport-star-pin-object', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
@@ -258,13 +254,13 @@ describe('transport', function () {
           .client({ type: 'simple', pin: { foo: '*' } })
           .ready(function () {
             si.act('foo:1', function (err, out) {
-              expect(err).to.not.exist()
-              expect(out.foo).to.equal(1)
+              assert.ifError(err)
+              assert.equal(out.foo, 1)
               si.act('foo:2', function (err, out) {
-                expect(err).to.not.exist()
-                expect(out.foo).to.equal(2)
+                assert.ifError(err)
+                assert.equal(out.foo, 2)
                 si.act('bar:1', function (err) {
-                  expect(err.code).to.equal('act_not_found')
+                  assert.equal(err.code, 'act_not_found')
 
                   done()
                 })
@@ -289,12 +285,12 @@ describe('transport', function () {
           .client({ type: 'simple', pin: 'foo:1' })
 
         si.act('foo:2', function (err) {
-          expect(err.code).to.equal('act_not_found')
+          assert.equal(err.code, 'act_not_found')
 
           this.act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(1)
-            expect(out).contains({ foo: 1, bar: 2 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 1)
+            assert.partialDeepStrictEqual(out, { foo: 1, bar: 2 })
 
             fin()
           })
@@ -303,7 +299,7 @@ describe('transport', function () {
   })
   */
 
-  it('transport-pins-notdef', test_opts, function (fin) {
+  it('transport-pins-notdef', test_opts, function (t, fin) {
     const st = make_simple_transport()
 
     Seneca({ tag: 's0', timeout: 5555 })
@@ -322,17 +318,17 @@ describe('transport', function () {
           .client({ type: 'simple', pins: ['foo:1', 'baz:2'] })
 
         si.act('foo:2', function (err) {
-          expect(err).to.exist()
+          assert.ok(null != err)
 
           this.act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(1)
-            expect(out).contains({ foo: 1, bar: 2 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 1)
+            assert.partialDeepStrictEqual(out, { foo: 1, bar: 2 })
 
             this.act('baz:2,qoo:10', function (err, out) {
-              expect(err).to.not.exist()
-              // expect(tt.outmsgs.length).to.equal(2)
-              expect(out).contains({ baz: 2, qoo: 20 })
+              assert.ifError(err)
+              // assert.equal(tt.outmsgs.length, 2)
+              assert.partialDeepStrictEqual(out, { baz: 2, qoo: 20 })
 
               fin()
             })
@@ -342,7 +338,7 @@ describe('transport', function () {
   })
 
   // TODO: investigate sporadic travis timeout failures
-  it('transport-single-wrap-and-star', test_opts, function (done) {
+  it('transport-single-wrap-and-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
@@ -366,19 +362,19 @@ describe('transport', function () {
 
         si.ready(function () {
           si.act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(1)
-            expect(out).contains({ foo: 1, bar: 2 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 1)
+            assert.partialDeepStrictEqual(out, { foo: 1, bar: 2 })
 
             si.act('foo:1,qaz:1,bar:1', function (err, out) {
-              expect(err).to.not.exist()
-              // expect(tt.outmsgs.length).to.equal(2)
-              expect(out).contains({ foo: 1, qaz: 1, bar: 2 })
+              assert.ifError(err)
+              // assert.equal(tt.outmsgs.length, 2)
+              assert.partialDeepStrictEqual(out, { foo: 1, qaz: 1, bar: 2 })
 
               si.act('foo:2,qaz:1,bar:1', function (err, out) {
-                expect(err).to.not.exist()
-                // expect(tt.outmsgs.length).to.equal(3)
-                expect(out).contains({ foo: 2, qaz: 1, bar: 2 })
+                assert.ifError(err)
+                // assert.equal(tt.outmsgs.length, 3)
+                assert.partialDeepStrictEqual(out, { foo: 2, qaz: 1, bar: 2 })
 
                 done()
               })
@@ -388,7 +384,7 @@ describe('transport', function () {
       })
   })
 
-  it('transport-local-single-and-star', test_opts, function (done) {
+  it('transport-local-single-and-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
@@ -410,19 +406,19 @@ describe('transport', function () {
 
         si.ready(function () {
           si.act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(0)
-            expect(out).contains({ foo: 1, local: 1 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 0)
+            assert.partialDeepStrictEqual(out, { foo: 1, local: 1 })
 
             si.act('foo:2,qaz:1,bar:1', function (err, out) {
-              expect(err).to.not.exist()
-              // expect(tt.outmsgs.length).to.equal(1)
-              expect(out).contains({ foo: 2, qaz: 1, bar: 2 })
+              assert.ifError(err)
+              // assert.equal(tt.outmsgs.length, 1)
+              assert.partialDeepStrictEqual(out, { foo: 2, qaz: 1, bar: 2 })
 
               si.act('foo:2,qaz:2,bar:1', function (err, out) {
-                expect(err).to.not.exist()
-                // expect(tt.outmsgs.length).to.equal(2)
-                expect(out).contains({ foo: 2, qaz: 2, bar: 2 })
+                assert.ifError(err)
+                // assert.equal(tt.outmsgs.length, 2)
+                assert.partialDeepStrictEqual(out, { foo: 2, qaz: 2, bar: 2 })
 
                 done()
               })
@@ -432,7 +428,7 @@ describe('transport', function () {
       })
   })
 
-  it('transport-local-over-wrap', test_opts, function (done) {
+  it('transport-local-over-wrap', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
@@ -454,9 +450,9 @@ describe('transport', function () {
           })
 
           si.act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(0)
-            expect(out).contains({ foo: 1, local: 1 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 0)
+            assert.partialDeepStrictEqual(out, { foo: 1, local: 1 })
 
             done()
           })
@@ -464,7 +460,7 @@ describe('transport', function () {
       })
   })
 
-  it('transport-local-prior-wrap', test_opts, function (done) {
+  it('transport-local-prior-wrap', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ tag: 'srv', timeout: 22222 * tmx })
@@ -483,16 +479,21 @@ describe('transport', function () {
             this.prior(msg, reply)
           })
           .act('foo:1,bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            // expect(tt.outmsgs.length).to.equal(1)
-            expect(out).contains({ foo: 1, bar: 2, local: 1, qaz: 1 })
+            assert.ifError(err)
+            // assert.equal(tt.outmsgs.length, 1)
+            assert.partialDeepStrictEqual(out, {
+              foo: 1,
+              bar: 2,
+              local: 1,
+              qaz: 1,
+            })
 
             done()
           })
       })
   })
 
-  it('transport-init-ordering', test_opts, function (done) {
+  it('transport-init-ordering', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     var inits = {}
@@ -526,15 +527,15 @@ describe('transport', function () {
         })
       })
       .ready(function () {
-        expect(inits.bar).to.equal(1)
-        expect(inits.zed).to.equal(1)
-        expect(inits.qux).to.equal(1)
+        assert.equal(inits.bar, 1)
+        assert.equal(inits.zed, 1)
+        assert.equal(inits.qux, 1)
 
         this.close(done)
       })
   })
 
-  it('transport-no-plugin-init', test_opts, function (done) {
+  it('transport-no-plugin-init', test_opts, function (t, done) {
     const st = make_simple_transport()
 
     Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
@@ -551,16 +552,16 @@ describe('transport', function () {
       })
       .ready(function () {
         this.act('foo:1', function (err, out) {
-          expect(err).to.not.exist()
-          expect(out.foo).to.equal(1)
+          assert.ifError(err)
+          assert.equal(out.foo, 1)
 
           this.act('bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.bar).to.equal(2)
+            assert.ifError(err)
+            assert.equal(out.bar, 2)
 
             this.act('zed:1', function (err, out) {
-              expect(err).to.not.exist()
-              expect(out.zed).to.equal(1)
+              assert.ifError(err)
+              assert.equal(out.zed, 1)
 
               if (err) return done(err)
               this.close(done)
@@ -590,7 +591,7 @@ describe('transport', function () {
         .error(done)
         .add('foo:1', function (msg, reply, meta) {
           // ensure action id is transferred for traceability
-          expect('aa/BB').to.equal(meta.id)
+          assert.equal('aa/BB', meta.id)
           msg.s = 0
           testact.call(this, msg, reply)
         })
@@ -612,7 +613,7 @@ describe('transport', function () {
         .error(done)
         .add('foo:1', function (msg, reply, meta) {
           // ensure action id is transferred for traceability
-          expect('cc/DD').to.equal(meta.id)
+          assert.equal('cc/DD', meta.id)
           msg.s = 1
           testact.call(this, msg, reply)
         })
@@ -653,26 +654,26 @@ describe('transport', function () {
         .client({ type: 'simple', port: 44449, pin: 'bar:2' })
 
       c0.act('foo:1,actid$:aa/BB', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.foo).to.equal(1)
-        expect(out.s).to.equal(0)
+        assert.ifError(err)
+        assert.equal(out.foo, 1)
+        assert.equal(out.s, 0)
 
         c0.act('foo:1,actid$:cc/DD', function (err, out) {
-          expect(err).to.not.exist()
-          expect(out.foo).to.equal(1)
-          expect(out.s).to.equal(1)
+          assert.ifError(err)
+          assert.equal(out.foo, 1)
+          assert.equal(out.s, 1)
 
           c0.act('bar:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.q).to.equal(1)
+            assert.ifError(err)
+            assert.equal(out.q, 1)
 
             c0.act('bar:1', function (err, out) {
-              expect(err).to.not.exist()
-              expect(out.q).to.equal(1)
+              assert.ifError(err)
+              assert.equal(out.q, 1)
 
               c0.act('bar:2', function (err, out) {
-                expect(err).to.not.exist()
-                expect(out.q).to.equal(2)
+                assert.ifError(err)
+                assert.equal(out.q, 2)
 
                 s0.close(function () {
                   s1.close(function () {
@@ -717,7 +718,7 @@ describe('transport', function () {
         s2,
         s3.ready.bind(s3, function () {
           s1.act('cmd:test1', function (err) {
-            expect(err.message).equal('from-test3')
+            assert.equal(err.message, 'from-test3')
             s1.close(s2.close.bind(s2, s3.close.bind(s3, fin)))
           })
         }),
@@ -736,13 +737,13 @@ describe('transport', function () {
         cb(null, { result: 'bar' })
       })
       server.listen({ port: 0 }, function (err, address) {
-        expect(err).to.not.exist()
+        assert.ifError(err)
         var client = Seneca({ log: 'silent', timeout: 22222 * tmx })
         client.client({ port: address.port })
         client.ready(function () {
           client.act({ cmd: 'foo' }, function (err, message) {
-            expect(err).to.not.exist()
-            expect(message.result).to.equal('bar')
+            assert.ifError(err)
+            assert.equal(message.result, 'bar')
             server.close(function () {
               var server2 = Seneca({ log: 'silent' })
               server2.add({ cmd: 'foo' }, function (message, cb) {
@@ -751,9 +752,9 @@ describe('transport', function () {
               server2.listen({ port: address.port })
               server2.ready(function () {
                 client.act({ cmd: 'foo' }, function (err, message) {
-                  expect(err).to.not.exist()
-                  expect(message.result).to.equal('bar')
-                  expect(execCount).to.equal(1)
+                  assert.ifError(err)
+                  assert.equal(message.result, 'bar')
+                  assert.equal(execCount, 1)
                   server2.close(client.close.bind(client, done))
                 })
               })

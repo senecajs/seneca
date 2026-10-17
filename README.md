@@ -147,9 +147,9 @@ information on contribution please see our [Contributing][Contrib] guide.
 
 ### Test
 
-The tests use the Node.js built-in test runner (`node:test`) and need
-Node.js 24 or later. To run them locally, with a
-coverage summary:
+The tests use the Node.js built-in test runner (`node:test`) and
+assertions (`node:assert`), and need Node.js 24 or later. To run them
+locally, with a coverage summary:
 
 ```sh
 npm test

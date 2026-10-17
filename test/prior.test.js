@@ -1,19 +1,15 @@
 /* Copyright (c) 2015-2020 Richard Rodger, Contributors */
 'use strict'
 
-const Code = require('@hapi/code')
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 var testopts = { log: 'test' }
 
 describe('prior', function () {
-  it('happy', function (fin) {
+  it('happy', function (t, fin) {
     Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply) {
@@ -24,17 +20,17 @@ describe('prior', function () {
         this.prior(msg, reply)
       })
       .act('a:1,x:2', function (ignore, out) {
-        expect(out.x).equal(3)
+        assert.equal(out.x, 3)
         fin()
       })
   })
 
-  it('top-level', function (fin) {
+  it('top-level', function (t, fin) {
     try {
       Seneca().test().prior({ a: 1 })
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equal('no_prior_action')
+      assert.equal(e.code, 'no_prior_action')
       fin()
     }
   })
@@ -56,8 +52,8 @@ describe('prior', function () {
     let out = si.direct('a:1,x:2')
     log.push('post')
 
-    expect(out.x).equal(3)
-    expect(log).equal(['pre', 'a1p:x=3', 'a1:x=3', 'post'])
+    assert.equal(out.x, 3)
+    assert.deepEqual(log, ['pre', 'a1p:x=3', 'a1:x=3', 'post'])
   })
 
   it('direct_prior-with-reply', async () => {
@@ -71,7 +67,7 @@ describe('prior', function () {
       msg.x = msg.x + 1
       log.push(`a1p:x=${msg.x}`)
       this.direct_prior(msg, function (err, out) {
-        expect(err).equal(null)
+        assert.equal(err, null)
         log.push(`a1p-reply:x=${out.x}`)
         reply({ x: out.x * 2 })
       })
@@ -79,12 +75,12 @@ describe('prior', function () {
 
     log.push('pre')
     si.act('a:1,x:2,direct$:true', function (err, out) {
-      expect(err).equal(null)
+      assert.equal(err, null)
       log.push('reply:' + JSON.stringify(out))
     })
     log.push('post')
 
-    expect(log).equal([
+    assert.deepEqual(log, [
       'pre',
       'a1p:x=3',
       'a1:x=3',
@@ -102,7 +98,7 @@ describe('prior', function () {
     })
 
     let out = si.direct('a:1,x:2')
-    expect(out).equal(null)
+    assert.equal(out, null)
   })
 
   it('direct_prior-no-prior-default', async () => {
@@ -114,7 +110,7 @@ describe('prior', function () {
     })
 
     let out = si.direct('a:1,x:2')
-    expect(out.x).equal(99)
+    assert.equal(out.x, 99)
   })
 
   it('direct_prior-no-prior-default-array', async () => {
@@ -127,8 +123,8 @@ describe('prior', function () {
     })
 
     let out = si.direct('a:1')
-    expect(out).equal([1, 2])
-    expect(out).not.shallow.equal(dflt)
+    assert.deepEqual(out, [1, 2])
+    assert.notEqual(out, dflt)
 
     si.add('b:1', function b1(msg, reply) {
       msg.default$ = dflt
@@ -139,8 +135,8 @@ describe('prior', function () {
     si.direct('b:1', function (err, out) {
       cbout = out
     })
-    expect(Array.isArray(cbout)).true()
-    expect(cbout).equal([1, 2])
+    assert.equal(Array.isArray(cbout), true)
+    assert.deepEqual(cbout, [1, 2])
   })
 
   it('prior-no-prior-default-array', async () => {
@@ -152,16 +148,16 @@ describe('prior', function () {
     })
 
     let out = await si.post('a:1')
-    expect(Array.isArray(out)).true()
-    expect(out).equal([1, 2])
+    assert.equal(Array.isArray(out), true)
+    assert.deepEqual(out, [1, 2])
   })
 
-  it('direct_prior-top-level-error', function (fin) {
+  it('direct_prior-top-level-error', function (t, fin) {
     try {
       Seneca().test().direct_prior({ a: 1 })
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equal('no_prior_action')
+      assert.equal(e.code, 'no_prior_action')
       fin()
     }
   })
@@ -186,63 +182,63 @@ describe('prior', function () {
       })
 
     let out = si.direct('a:1,x:1')
-    expect(out.x).equal(112)
-    expect(log).equal(['a1p2:x=1', 'a1p1:x=1', 'a1:x=1'])
+    assert.equal(out.x, 112)
+    assert.deepEqual(log, ['a1p2:x=1', 'a1p1:x=1', 'a1:x=1'])
   })
 
-  it('add-general-to-specific', function (done) {
+  it('add-general-to-specific', function (t, done) {
     Seneca(testopts)
       .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1, 2, 3])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1, 2, 3])
         done()
       })
   })
 
-  it('add-strict-general-to-specific', function (done) {
+  it('add-strict-general-to-specific', function (t, done) {
     Seneca(Object.assign({ strict: { add: true } }, testopts))
       .error(done)
       .add('a:1', order_called(3))
       .add('a:1,b:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1])
         done()
       })
   })
 
-  it('add-specific-to-general', function (done) {
+  it('add-specific-to-general', function (t, done) {
     Seneca(testopts)
       .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
       .add('a:1', order_called(3))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1])
         done()
       })
   })
 
-  it('add-strict-specific-to-general', function (done) {
+  it('add-strict-specific-to-general', function (t, done) {
     Seneca(Object.assign({ strict: { add: true } }, testopts))
       .error(done)
       .add('a:1,b:1,c:1', order_called(1))
       .add('a:1,b:1', order_called(2))
       .add('a:1', order_called(3))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1])
         done()
       })
   })
 
-  it('add-general-to-specific-alpha', function (done) {
+  it('add-general-to-specific-alpha', function (t, done) {
     Seneca(testopts)
       .error(done)
       .add('a:1', order_called(4))
@@ -250,13 +246,13 @@ describe('prior', function () {
       .add('a:1,b:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1, 2, 4])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1, 2, 4])
         done()
       })
   })
 
-  it('add-general-to-specific-reverse-alpha', function (done) {
+  it('add-general-to-specific-reverse-alpha', function (t, done) {
     Seneca(testopts)
       .error(done)
       .add('a:1', order_called(4))
@@ -264,45 +260,45 @@ describe('prior', function () {
       .add('a:1,c:1', order_called(2))
       .add('a:1,b:1,c:1', order_called(1))
       .act('a:1,b:1,c:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1, 3, 4])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1, 3, 4])
         done()
       })
   })
 
-  it('add-strict-default', function (done) {
+  it('add-strict-default', function (t, done) {
     Seneca(testopts)
       .error(done)
       .add('a:1', order_called(2))
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1, 2])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1, 2])
 
         this.add('c:1', order_called(2))
           .add('c:1,d:1,strict$:{add:true}', order_called(1))
           .act('c:1,d:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.order).to.equal([1])
+            assert.ifError(err)
+            assert.deepEqual(out.order, [1])
             done()
           })
       })
   })
 
-  it('add-strict-true', function (done) {
+  it('add-strict-true', function (t, done) {
     Seneca(Object.assign({ strict: { add: true } }, testopts))
       .error(done)
       .add('a:1', order_called(2))
       .add('a:1,b:1', order_called(1))
       .act('a:1,b:1', function (err, out) {
-        expect(err).to.not.exist()
-        expect(out.order).to.equal([1])
+        assert.ifError(err)
+        assert.deepEqual(out.order, [1])
 
         this.add('c:1', order_called(2))
           .add('c:1,d:1,strict$:{add:false}', order_called(1))
           .act('c:1,d:1', function (err, out) {
-            expect(err).to.not.exist()
-            expect(out.order).to.equal([1, 2])
+            assert.ifError(err)
+            assert.deepEqual(out.order, [1, 2])
             done()
           })
       })

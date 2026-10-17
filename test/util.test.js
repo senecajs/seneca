@@ -2,32 +2,30 @@
 
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 var Util = require('util')
 
 var testopts = { log: 'silent' }
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 describe('util', function () {
   var si = Seneca(testopts)
 
-  it('seneca.util.deep.happy', function (done) {
-    expect(
+  it('seneca.util.deep.happy', function (t, done) {
+    assert.partialDeepStrictEqual(
       si.util.deep({}, { a: 1 }, { b: { c: 2 } }, { b: { c: 3, d: 4 } }),
-    ).to.include({ a: 1, b: { c: 3, d: 4 } })
-    expect(
+      { a: 1, b: { c: 3, d: 4 } },
+    )
+    assert.partialDeepStrictEqual(
       si.util.deep({}, { a: 1 }, { b: [11, 22] }, { b: [undefined, 222, 333] }),
-    ).to.include({ a: 1, b: [11, 222, 333] })
+      { a: 1, b: [11, 222, 333] },
+    )
     done()
   })
 
-  it('seneca.util.deep.types with new', function (done) {
+  it('seneca.util.deep.types with new', function (t, done) {
     /* eslint no-new-wrappers: 0 */
     var t1 = {
       s: 's1',
@@ -45,19 +43,19 @@ describe('util', function () {
 
     var to = si.util.deep({}, t1)
 
-    expect(to.s).to.equal(t1.s)
-    expect(to.so).to.equal(t1.so)
-    expect(to.n).to.equal(t1.n)
-    expect(to.no).to.equal(t1.no)
-    expect(to.b).to.equal(t1.b)
-    expect(to.bo).to.equal(t1.bo)
-    expect(to.do).to.equal(t1.do)
-    expect(to.f).to.equal(t1.f)
-    expect(to.re).to.equal(t1.re)
+    assert.equal(to.s, t1.s)
+    assert.deepEqual(to.so, t1.so)
+    assert.equal(to.n, t1.n)
+    assert.deepEqual(to.no, t1.no)
+    assert.equal(to.b, t1.b)
+    assert.deepEqual(to.bo, t1.bo)
+    assert.deepEqual(to.do, t1.do)
+    assert.deepEqual(to.f, t1.f)
+    assert.deepEqual(to.re, t1.re)
     done()
   })
 
-  it('seneca.util.deep.types', function (done) {
+  it('seneca.util.deep.types', function (t, done) {
     var t1 = {
       s: 's1',
       so: String('s2'),
@@ -74,19 +72,19 @@ describe('util', function () {
 
     var to = si.util.deep({}, t1)
 
-    expect(to.s).to.equal(t1.s)
-    expect(to.so).to.equal(t1.so)
-    expect(to.n).to.equal(t1.n)
-    expect(to.no).to.equal(t1.no)
-    expect(to.b).to.equal(t1.b)
-    expect(to.bo).to.equal(t1.bo)
-    expect(to.do).to.equal(t1.do)
-    expect(to.f).to.equal(t1.f)
-    expect(to.re).to.equal(t1.re)
+    assert.equal(to.s, t1.s)
+    assert.equal(to.so, t1.so)
+    assert.equal(to.n, t1.n)
+    assert.equal(to.no, t1.no)
+    assert.equal(to.b, t1.b)
+    assert.equal(to.bo, t1.bo)
+    assert.equal(to.do, t1.do)
+    assert.deepEqual(to.f, t1.f)
+    assert.deepEqual(to.re, t1.re)
     done()
   })
 
-  it('seneca.util.deep.mixed', function (done) {
+  it('seneca.util.deep.mixed', function (t, done) {
     var obj = si.util.deep(
       {},
       { a: 1, b: { bb: 1 }, c: 's', d: 'ss', e: [2, 3], f: { fa: 1, fb: 2 } },
@@ -100,25 +98,25 @@ describe('util', function () {
       },
     )
 
-    expect(obj.a).to.equal({ aa: 1 })
-    expect(obj.b).to.equal({ bb: { bbb: 1 } })
-    expect(obj.c).to.equal([1])
-    expect(obj.d).to.equal({ dd: 1 })
-    expect(obj.e).to.equal({ 0: 2, 1: 3, ee: 1 })
-    expect(obj.f).to.equal([4, 5, 6])
-    expect(obj.f.fa).to.equal(1)
-    expect(obj.f.fb).to.equal(2)
+    assert.deepEqual(obj.a, { aa: 1 })
+    assert.deepEqual(obj.b, { bb: { bbb: 1 } })
+    assert.deepEqual(obj.c, [1])
+    assert.deepEqual(obj.d, { dd: 1 })
+    assert.deepEqual(obj.e, { 0: 2, 1: 3, ee: 1 })
+    assert.deepEqual([...obj.f], [4, 5, 6])
+    assert.equal(obj.f.fa, 1)
+    assert.equal(obj.f.fb, 2)
 
     done()
   })
 
-  it('seneca.util.deep.entity', function (done) {
+  it('seneca.util.deep.entity', function (t, done) {
     var obj = si.util.deep(
       { a: { x: 1 }, b: { y: 1, entity$: 'a/b/c' } },
       { c: { z: 1 }, b: { y: 2, entity$: 'a/b/c' } },
     )
 
-    expect(obj).to.include({
+    assert.partialDeepStrictEqual(obj, {
       a: { x: 1 },
       b: { y: 2, entity$: 'a/b/c' },
       c: { z: 1 },
@@ -126,13 +124,13 @@ describe('util', function () {
     done()
   })
 
-  it('seneca.util.gex', function (done) {
-    expect(Seneca.util.Gex).exist()
-    expect(Seneca.util.Gex('a*').match('ab')).equal(true)
+  it('seneca.util.gex', function (t, done) {
+    assert.ok(null != Seneca.util.Gex)
+    assert.equal(Seneca.util.Gex('a*').match('ab'), true)
     done()
   })
 
-  it('common.idnid-never-starts-with-digit', function (done) {
+  it('common.idnid-never-starts-with-digit', function (_t, done) {
     var Common = require('../lib/common.js')
 
     // Use a short length so a digit-first id would be common by
@@ -142,8 +140,8 @@ describe('util', function () {
 
     for (var i = 0; i < 2000; i++) {
       var id = gen()
-      expect(id.length).equal(4)
-      expect(/^[0-9]/.test(id)).false()
+      assert.equal(id.length, 4)
+      assert.equal(/^[0-9]/.test(id), false)
     }
 
     done()

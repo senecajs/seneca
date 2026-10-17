@@ -1,31 +1,27 @@
 /* Copyright (c) 2016 Richard Rodger, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 describe('sequence', function () {
-  it('single-add-act', function (fin) {
+  it('single-add-act', function (t, fin) {
     Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
         done(null, msg)
       })
       .act('a:1', function (err, out) {
-        expect(out.a).to.equal(1)
-        expect(out.x).to.equal(2)
+        assert.equal(out.a, 1)
+        assert.equal(out.x, 2)
         fin(err)
       })
   })
 
-  it('double-add-act', function (fin) {
+  it('double-add-act', function (t, fin) {
     var log = []
     Seneca.test(fin)
       .add('a:1', function (msg, done) {
@@ -35,8 +31,8 @@ describe('sequence', function () {
       })
       .act('a:1', function (ignore, out) {
         log.push('a:1-check')
-        expect(out.a).to.equal(1)
-        expect(out.x).to.equal(2)
+        assert.equal(out.a, 1)
+        assert.equal(out.x, 2)
       })
       .add('a:2', function (msg, done) {
         log.push('a:2-call')
@@ -44,22 +40,22 @@ describe('sequence', function () {
         done(null, msg)
       })
       .act('a:2', function (err, out) {
-        expect(out.a).to.equal(2)
-        expect(out.y).to.equal(3)
-        expect(log).to.equal(['a:1-call', 'a:1-check', 'a:2-call'])
+        assert.equal(out.a, 2)
+        assert.equal(out.y, 3)
+        assert.deepEqual(log, ['a:1-call', 'a:1-check', 'a:2-call'])
         fin(err)
       })
   })
 
-  it('single-add-act-ready', { timeout: 3333 }, function (fin) {
+  it('single-add-act-ready', { timeout: 3333 }, function (t, fin) {
     const log = []
     const s0 = Seneca.test(fin)
 
       // this works! acts only happen after all gates finished
       .act('a:1', function (ignore, out) {
         log.push('a:1-act')
-        expect(out.a).to.equal(1)
-        expect(out.x).to.equal(2)
+        assert.equal(out.a, 1)
+        assert.equal(out.x, 2)
       })
       .add('a:1', function (msg, done) {
         log.push('a:1-add')
@@ -76,7 +72,7 @@ describe('sequence', function () {
         log.push('ready-2')
       })
       .ready(function () {
-        expect(log).to.equal([
+        assert.deepEqual(log, [
           'a:1-add',
           'a:1-act',
           'ready-0',
@@ -87,20 +83,20 @@ describe('sequence', function () {
       })
   })
 
-  it('single-add-act-gate-action', function (fin) {
+  it('single-add-act-gate-action', function (t, fin) {
     Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
         done(null, msg)
       })
       .act('a:1,gate$:true', function (ignore, out) {
-        expect(out.a).to.equal(1)
-        expect(out.x).to.equal(2)
+        assert.equal(out.a, 1)
+        assert.equal(out.x, 2)
         fin()
       })
   })
 
-  it('single-add-act-gate-instance', function (fin) {
+  it('single-add-act-gate-instance', function (t, fin) {
     Seneca.test(fin)
       .add('a:1', function (msg, done) {
         msg.x = 2
@@ -108,8 +104,8 @@ describe('sequence', function () {
       })
       .gate()
       .act('a:1', function (ignore, out) {
-        expect(out.a).to.equal(1)
-        expect(out.x).to.equal(2)
+        assert.equal(out.a, 1)
+        assert.equal(out.x, 2)
         fin()
       })
   })

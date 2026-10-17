@@ -2,20 +2,16 @@
 'use strict'
 
 const Path = require('path')
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 const { Print } = require('../lib/print.js')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
 
 // TODO: capture STDOUT and verify
 describe('print', function () {
-  it('init', function (fin) {
+  it('init', function (t, fin) {
     var si = Seneca().test(fin)
     Print(si, ['', ''])
     Print(si, ['', '', '--seneca.print'])
@@ -23,7 +19,7 @@ describe('print', function () {
     fin()
   })
 
-  it('options', function (fin) {
+  it('options', function (t, fin) {
     var si = Seneca({ debug: { print: { options: true } } })
       .test(fin)
       .add('a:1', function (msg, reply) {
@@ -32,13 +28,13 @@ describe('print', function () {
     fin()
   })
 
-  it('print', function (fin) {
+  it('print', function (t, fin) {
     Print.print(new Error('foo'))
     Print.print(null, { foo: 1 })
     fin()
   })
 
-  it('custom-print', function (fin) {
+  it('custom-print', function (t, fin) {
     var tmp = []
     function print(prefix) {
       return function (str) {
@@ -52,8 +48,8 @@ describe('print', function () {
     si.log.info('bbb')
     si.private$.print.err('ccc')
 
-    expect(tmp[0]).startsWith('LOG:{"data":["bbb"]')
-    expect(tmp[1]).equals('ERR:ccc')
+    assert.ok(tmp[0].startsWith('LOG:{"data":["bbb"]'))
+    assert.equal(tmp[1], 'ERR:ccc')
 
     fin()
   })

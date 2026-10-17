@@ -1,13 +1,10 @@
 /* Copyright (c) 2023 Richard Rodger, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
+const { describe, it } = require('node:test')
 
-var Shared = require('./shared')
-var it = Shared.make_it()
 var Seneca = require('..')
 
 describe('translation', () => {
@@ -20,12 +17,12 @@ describe('translation', () => {
       })
 
     let out = await s0.post('a:1,b:2,x:11')
-    expect(out.x).equal(12)
+    assert.equal(out.x, 12)
 
     s0.translate('c:3', 'a:1')
 
     out = await s0.post('c:3,b:2,x:21')
-    expect(out.x).equal(22)
+    assert.equal(out.x, 22)
   })
 
   it('prior-add', async () => {
@@ -50,10 +47,10 @@ describe('translation', () => {
     // console.log(s0.find('c:3,b:2'))
 
     let out = await s0.post('c:3,b:2,x:11')
-    expect(out.x).equal(23)
+    assert.equal(out.x, 23)
 
     out = await s0.post('a:1,b:2,x:11')
-    expect(out.x).equal(23)
+    assert.equal(out.x, 23)
 
     s0.message('c:3,b:2', async function (msg) {
       msg.x = 0.1 + msg.x
@@ -61,10 +58,10 @@ describe('translation', () => {
     })
 
     out = await s0.post('c:3,b:2,x:11')
-    expect(out.x).equal(23.2)
+    assert.equal(out.x, 23.2)
 
     out = await s0.post('a:1,b:2,x:11')
-    expect(out.x).equal(23.2)
+    assert.equal(out.x, 23.2)
   })
 
   it('sub', async () => {
@@ -80,18 +77,18 @@ describe('translation', () => {
       })
 
     let out = await s0.post('a:1,x:11')
-    expect(out.x).equal(12)
-    expect(log[0]).equal({ a: 1, x: 11, in$: true })
+    assert.equal(out.x, 12)
+    assert.deepEqual(log[0], { a: 1, x: 11, in$: true })
 
     s0.translate('b:2', 'a:1,b:null')
 
     out = await s0.post('a:1,x:12')
-    expect(out.x).equal(13)
-    expect(log[1]).equal({ a: 1, x: 12, in$: true })
+    assert.equal(out.x, 13)
+    assert.deepEqual(log[1], { a: 1, x: 12, in$: true })
 
     out = await s0.post('b:2,x:13')
-    expect(out.x).equal(14)
-    expect(log[2]).equal({ a: 1, x: 13, in$: true })
+    assert.equal(out.x, 14)
+    assert.deepEqual(log[2], { a: 1, x: 13, in$: true })
 
     s0.message('c:3', async function (msg) {
       return { x: 2 * msg.x }
@@ -102,11 +99,11 @@ describe('translation', () => {
       })
 
     out = await s0.post('c:3,x:14')
-    expect(out.x).equal(28)
-    expect(log[3]).equal({ c: 3, x: 14, in$: true })
+    assert.equal(out.x, 28)
+    assert.deepEqual(log[3], { c: 3, x: 14, in$: true })
 
     out = await s0.post('d:4,x:15')
-    expect(out.x).equal(30)
-    expect(log[4]).equal({ c: 3, x: 15, in$: true })
+    assert.equal(out.x, 30)
+    assert.deepEqual(log[4], { c: 3, x: 15, in$: true })
   })
 })

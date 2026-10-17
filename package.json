@@ -77,9 +77,9 @@
   "scripts": {
     "watch": "tsc -w -d",
     "build": "tsc -d",
-    "test": "node --test --test-concurrency=1 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-coverage-lines=85 --test-reporter=spec --test-reporter-destination=stdout \"test/*.test.js\"",
-    "test-some": "node --test --test-concurrency=1 \"test/*.test.js\" --test-name-pattern",
-    "coverage": "node --test --test-concurrency=1 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"test/*.test.js\"",
+    "test": "node --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-coverage-lines=85 --test-reporter=spec --test-reporter-destination=stdout \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
+    "test-some": "node --test --test-concurrency=1 --test-timeout=11111 \"test/*.test.js\" \"test/stubs/options/*.test.js\" --test-name-pattern",
+    "coverage": "node --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
@@ -102,18 +102,15 @@
     "use-plugin": "^13.2.0"
   },
   "devDependencies": {
-    "@hapi/code": "^9.0.3",
     "@seneca/test-plugin": "0.1.0",
     "@types/node": "^24.0.0",
     "async": "^3.2.6",
     "bench": "^0.3.6",
     "gex": "^4.0.1",
     "handlebars": "^4.7.8",
-    "lolex": "^6.0.0",
     "prettier": "^3.4.2",
     "seneca-entity": "^28.1.0",
     "seneca-error-test": "^0.2.2",
-    "seneca-promisify": "^3.7.2",
     "seneca-transport": "^8.3.0",
     "summary": "^2.1.0",
     "typescript": "^5.7.3"

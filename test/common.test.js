@@ -1,48 +1,44 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Assert = require('assert')
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 const Common = require('../lib/common')
 
-const { describe } = require('node:test')
-const assert = Assert
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 describe('common', function () {
-  it('stringify', function (fin) {
-    expect(Common.stringify({})).equal('{}')
-    expect(Common.stringify({ a: 1 })).equal('{"a":1}')
+  it('stringify', function (t, fin) {
+    assert.equal(Common.stringify({}), '{}')
+    assert.equal(Common.stringify({ a: 1 }), '{"a":1}')
     fin()
   })
 
-  it('misc', function (fin) {
-    expect(Common.resolve_option(1)).equal(1)
-    expect(Common.resolve_option('a')).equal('a')
-    expect(
+  it('misc', function (t, fin) {
+    assert.equal(Common.resolve_option(1), 1)
+    assert.equal(Common.resolve_option('a'), 'a')
+    assert.equal(
       Common.resolve_option(function () {
         return 'b'
       }),
-    ).equal('b')
-    expect(
+      'b',
+    )
+    assert.equal(
       Common.resolve_option(
         function (opts) {
           return opts.c
         },
         { c: 2 },
       ),
-    ).equal(2)
+      2,
+    )
 
     fin()
   })
 
-  it('deep-empty', function (fin) {
+  it('deep-empty', function (t, fin) {
     assert.equal(1, Common.deep({ a: 1 }).a)
 
-    assert.equal(null, Common.deep({}).a)
+    assert.ok(null == Common.deep({}).a)
 
     assert.equal(1, Common.deep({ a: 1 }).a)
 
@@ -114,7 +110,7 @@ describe('common', function () {
     fin()
   })
 
-  it('deep-dups', function (fin) {
+  it('deep-dups', function (t, fin) {
     var aa = { a: { aa: 1 } }
     var bb = { a: { bb: 2 } }
 
@@ -129,7 +125,7 @@ describe('common', function () {
     fin()
   })
 
-  it('deep-objs', function (fin) {
+  it('deep-objs', function (t, fin) {
     var d = {
       s: 's',
       n: 100,
@@ -144,7 +140,7 @@ describe('common', function () {
     fin()
   })
 
-  it('deep-objs with functions', function (fin) {
+  it('deep-objs with functions', function (t, fin) {
     function noop() {}
     function f1() {}
 
@@ -163,7 +159,7 @@ describe('common', function () {
     fin()
   })
 
-  it('pattern', function (fin) {
+  it('pattern', function (t, fin) {
     assert.equal('a:1', Common.pattern('a:1'))
     assert.equal('a:1', Common.pattern({ a: 1 }))
     assert.equal('a:1,b:2', Common.pattern({ a: 1, b: 2 }))
@@ -174,7 +170,7 @@ describe('common', function () {
     fin()
   })
 
-  it('pincanon', function (fin) {
+  it('pincanon', function (t, fin) {
     assert.equal('a:1', Common.pincanon({ a: 1 }))
     assert.equal('a:1', Common.pincanon([{ a: 1 }]))
     assert.equal('a:1', Common.pincanon('a:1'))
@@ -192,7 +188,7 @@ describe('common', function () {
     fin()
   })
 
-  it('history', function (fin) {
+  it('history', function (t, fin) {
     function itemlist(item) {
       return item.id + '~' + item.timelimit
     }
@@ -200,16 +196,16 @@ describe('common', function () {
     var h0 = Common.history()
 
     h0.add({ id: 'a0', timelimit: 100 })
-    expect(h0._list.map(itemlist)).equal(['a0~100'])
+    assert.deepEqual(h0._list.map(itemlist), ['a0~100'])
 
     h0.add({ id: 'a1', timelimit: 200 })
-    expect(h0._list.map(itemlist)).equal(['a0~100', 'a1~200'])
+    assert.deepEqual(h0._list.map(itemlist), ['a0~100', 'a1~200'])
 
     h0.add({ id: 'a2', timelimit: 300 })
-    expect(h0._list.map(itemlist)).equal(['a0~100', 'a1~200', 'a2~300'])
+    assert.deepEqual(h0._list.map(itemlist), ['a0~100', 'a1~200', 'a2~300'])
 
     h0.add({ id: 'a3', timelimit: 200 })
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a1~200',
       'a3~200',
@@ -217,7 +213,7 @@ describe('common', function () {
     ])
 
     h0.add({ id: 'a4', timelimit: 300 })
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a1~200',
       'a3~200',
@@ -226,7 +222,7 @@ describe('common', function () {
     ])
 
     h0.add({ id: 'a5', timelimit: 100 })
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a5~100',
       'a1~200',
@@ -235,10 +231,10 @@ describe('common', function () {
       'a4~300',
     ])
 
-    expect(Object.keys(h0._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4', 'a5'])
+    assert.deepEqual(Object.keys(h0._map), ['a0', 'a1', 'a2', 'a3', 'a4', 'a5'])
 
     h0.add({ id: 'a6', timelimit: 101 })
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a5~100',
       'a6~101',
@@ -249,7 +245,7 @@ describe('common', function () {
     ])
 
     h0.add({ id: 'a7', timelimit: 199 })
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a5~100',
       'a6~101',
@@ -261,7 +257,7 @@ describe('common', function () {
     ])
 
     h0.prune(99)
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a0~100',
       'a5~100',
       'a6~101',
@@ -273,7 +269,7 @@ describe('common', function () {
     ])
 
     h0.prune(100)
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a6~101',
       'a7~199',
       'a1~200',
@@ -283,7 +279,7 @@ describe('common', function () {
     ])
 
     h0.prune(101)
-    expect(h0._list.map(itemlist)).equal([
+    assert.deepEqual(h0._list.map(itemlist), [
       'a7~199',
       'a1~200',
       'a3~200',
@@ -292,49 +288,49 @@ describe('common', function () {
     ])
 
     h0.prune(299)
-    expect(h0._list.map(itemlist)).equal(['a2~300', 'a4~300'])
+    assert.deepEqual(h0._list.map(itemlist), ['a2~300', 'a4~300'])
 
     h0.prune(299)
-    expect(h0._list.map(itemlist)).equal(['a2~300', 'a4~300'])
+    assert.deepEqual(h0._list.map(itemlist), ['a2~300', 'a4~300'])
 
     h0.prune(300)
-    expect(h0._list.map(itemlist)).equal([])
+    assert.deepEqual(h0._list.map(itemlist), [])
 
     var h1 = Common.history()
 
     h1.add({ id: 'a0', timelimit: 100 })
-    expect(h1._list.map(itemlist)).equal(['a0~100'])
+    assert.deepEqual(h1._list.map(itemlist), ['a0~100'])
 
     h1.add({ id: 'a1', timelimit: 50 })
-    expect(h1._list.map(itemlist)).equal(['a1~50', 'a0~100'])
+    assert.deepEqual(h1._list.map(itemlist), ['a1~50', 'a0~100'])
 
     h1.add({ id: 'a2', timelimit: 25 })
-    expect(h1._list.map(itemlist)).equal(['a2~25', 'a1~50', 'a0~100'])
+    assert.deepEqual(h1._list.map(itemlist), ['a2~25', 'a1~50', 'a0~100'])
 
-    expect(Object.keys(h1._map)).equal(['a0', 'a1', 'a2'])
+    assert.deepEqual(Object.keys(h1._map), ['a0', 'a1', 'a2'])
 
     h1.prune(0)
-    expect(h1._list.map(itemlist)).equal(['a2~25', 'a1~50', 'a0~100'])
+    assert.deepEqual(h1._list.map(itemlist), ['a2~25', 'a1~50', 'a0~100'])
 
     h1.prune(25)
-    expect(h1._list.map(itemlist)).equal(['a1~50', 'a0~100'])
+    assert.deepEqual(h1._list.map(itemlist), ['a1~50', 'a0~100'])
 
     h1.prune(100)
-    expect(h1._list.map(itemlist)).equal([])
+    assert.deepEqual(h1._list.map(itemlist), [])
 
     var h2 = Common.history()
 
     h2.add({ id: 'a0', timelimit: 100 })
-    expect(h2._list.map(itemlist)).equal(['a0~100'])
+    assert.deepEqual(h2._list.map(itemlist), ['a0~100'])
 
     h2.add({ id: 'a1', timelimit: 200 })
-    expect(h2._list.map(itemlist)).equal(['a0~100', 'a1~200'])
+    assert.deepEqual(h2._list.map(itemlist), ['a0~100', 'a1~200'])
 
     h2.add({ id: 'a2', timelimit: 150 })
-    expect(h2._list.map(itemlist)).equal(['a0~100', 'a2~150', 'a1~200'])
+    assert.deepEqual(h2._list.map(itemlist), ['a0~100', 'a2~150', 'a1~200'])
 
     h2.add({ id: 'a3', timelimit: 125 })
-    expect(h2._list.map(itemlist)).equal([
+    assert.deepEqual(h2._list.map(itemlist), [
       'a0~100',
       'a3~125',
       'a2~150',
@@ -342,7 +338,7 @@ describe('common', function () {
     ])
 
     h2.add({ id: 'a4', timelimit: 175 })
-    expect(h2._list.map(itemlist)).equal([
+    assert.deepEqual(h2._list.map(itemlist), [
       'a0~100',
       'a3~125',
       'a2~150',
@@ -350,99 +346,100 @@ describe('common', function () {
       'a1~200',
     ])
 
-    expect(Object.keys(h2._map)).equal(['a0', 'a1', 'a2', 'a3', 'a4'])
+    assert.deepEqual(Object.keys(h2._map), ['a0', 'a1', 'a2', 'a3', 'a4'])
 
     fin()
   })
 
-  it('clean', function (fin) {
-    expect(Common.clean({})).equal({})
-    expect(Common.clean({ a: 1 })).equal({ a: 1 })
-    expect(Common.clean({ b$: 2, a: 1 })).equal({ a: 1 })
-    expect(Common.clean({ b$: 2 })).equal({})
+  it('clean', function (t, fin) {
+    assert.deepEqual(Common.clean({}), {})
+    assert.deepEqual(Common.clean({ a: 1 }), { a: 1 })
+    assert.deepEqual(Common.clean({ b$: 2, a: 1 }), { a: 1 })
+    assert.deepEqual(Common.clean({ b$: 2 }), {})
 
-    expect(Common.clean([])).equal([])
-    expect(Common.clean([1])).equal([1])
-    expect(Common.clean([1, 2])).equal([1, 2])
+    assert.deepEqual(Common.clean([]), [])
+    assert.deepEqual(Common.clean([1]), [1])
+    assert.deepEqual(Common.clean([1, 2]), [1, 2])
 
     var a = [1, 2, 3]
     a.foo = 4
     a.bar$ = 5
     var ca = Common.clean(a)
-    expect(ca).equal([1, 2, 3])
-    expect(ca.foo).equal(4)
-    expect(ca.bar$).not.exist()
+    assert.deepEqual([...ca], [1, 2, 3])
+    assert.equal(ca.foo, 4)
+    assert.ok(null == ca.bar$)
 
     fin()
   })
 
-  it('parse_jsonic', function (fin) {
-    expect(Common.parse_jsonic('a:b')).equal({ a: 'b' })
-    expect(Common.parse_jsonic('\na:b')).equal({ a: 'b' })
+  it('parse_jsonic', function (t, fin) {
+    assert.deepEqual({ ...Common.parse_jsonic('a:b') }, { a: 'b' })
+    assert.deepEqual({ ...Common.parse_jsonic('\na:b') }, { a: 'b' })
 
     try {
       Common.parse_jsonic('a::')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_jsonic')
+      assert.equal(e.code, 'bad_jsonic')
     }
 
     try {
       Common.parse_jsonic('\n\na::\n\n  x}')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_jsonic')
+      assert.equal(e.code, 'bad_jsonic')
     }
 
     fin()
   })
 
-  it('make_plugin_key', function (fin) {
-    expect(Common.make_plugin_key('foo')).equal('foo')
-    expect(Common.make_plugin_key('foo', '0')).equal('foo$0')
-    expect(Common.make_plugin_key('foo', 0)).equal('foo$0')
-    expect(Common.make_plugin_key('foo$0')).equal('foo$0')
-    expect(Common.make_plugin_key({ name: 'foo' }, '0')).equal('foo$0')
-    expect(Common.make_plugin_key({ name: 'foo', tag: '0' })).equal('foo$0')
-    expect(Common.make_plugin_key({ name: 'foo', tag: '0' }, 'a')).equal(
+  it('make_plugin_key', function (t, fin) {
+    assert.equal(Common.make_plugin_key('foo'), 'foo')
+    assert.equal(Common.make_plugin_key('foo', '0'), 'foo$0')
+    assert.equal(Common.make_plugin_key('foo', 0), 'foo$0')
+    assert.equal(Common.make_plugin_key('foo$0'), 'foo$0')
+    assert.equal(Common.make_plugin_key({ name: 'foo' }, '0'), 'foo$0')
+    assert.equal(Common.make_plugin_key({ name: 'foo', tag: '0' }), 'foo$0')
+    assert.equal(
+      Common.make_plugin_key({ name: 'foo', tag: '0' }, 'a'),
       'foo$0',
     )
 
-    expect(Common.make_plugin_key('foo.1~2-3$_')).equal('foo.1~2-3$_')
+    assert.equal(Common.make_plugin_key('foo.1~2-3$_'), 'foo.1~2-3$_')
 
     try {
       Common.make_plugin_key()
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('missing_plugin_name')
+      assert.equal(e.code, 'missing_plugin_name')
     }
 
     try {
       Common.make_plugin_key({})
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_name')
+      assert.equal(e.code, 'bad_plugin_name')
     }
 
     try {
       Common.make_plugin_key('')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_name')
+      assert.equal(e.code, 'bad_plugin_name')
     }
 
     try {
       Common.make_plugin_key('$')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_name')
+      assert.equal(e.code, 'bad_plugin_name')
     }
 
     try {
       Common.make_plugin_key('a', '$')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_tag')
+      assert.equal(e.code, 'bad_plugin_tag')
     }
 
     var b = []
@@ -453,16 +450,16 @@ describe('common', function () {
 
     try {
       Common.make_plugin_key(s)
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_name')
+      assert.equal(e.code, 'bad_plugin_name')
     }
 
     try {
       Common.make_plugin_key('a', s)
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equals('bad_plugin_tag')
+      assert.equal(e.code, 'bad_plugin_tag')
     }
 
     fin()

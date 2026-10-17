@@ -1,18 +1,14 @@
 /* Copyright (c) 2016 Richard Rodger, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
 
 describe('xward', function () {
-  it('happy-inward', function (fin) {
+  it('happy-inward', function (t, fin) {
     Seneca()
       .test(fin)
       .inward(function (spec) {
@@ -22,13 +18,13 @@ describe('xward', function () {
         done(null, { x: 2, y: msg.y })
       })
       .act('a:1', function (ignore, out) {
-        expect(out.x).to.equal(2)
-        expect(out.y).to.equal(3)
+        assert.equal(out.x, 2)
+        assert.equal(out.y, 3)
         fin()
       })
   })
 
-  it('happy-outward', function (fin) {
+  it('happy-outward', function (t, fin) {
     Seneca()
       .test(fin)
       .outward(function (spec) {
@@ -40,14 +36,14 @@ describe('xward', function () {
         done(null, { x: 2, y: msg.y })
       })
       .act('a:1,y:3', function (ignore, out) {
-        expect(out.x).to.equal(2)
-        expect(out.y).to.equal(3)
-        expect(out.z).to.equal(4)
+        assert.equal(out.x, 2)
+        assert.equal(out.y, 3)
+        assert.equal(out.z, 4)
         fin()
       })
   })
 
-  it('per-action-context', function (fin) {
+  it('per-action-context', function (t, fin) {
     const seneca = Seneca() // {legacy:true})
       .test(fin)
       .inward(function (spec) {
@@ -59,7 +55,7 @@ describe('xward', function () {
         context.peract = context.peract || {}
         let peract = (context.peract[mi] = context.peract[mi] || {})
 
-        expect(peract.mark).not.exist()
+        assert.ok(null == peract.mark)
         peract.mark = 2 * parseInt(spec.data.msg.x)
       })
       .outward(function (spec) {
@@ -89,33 +85,33 @@ describe('xward', function () {
 
     seneca
       .act('a:1', { x: 11 }, function (ignore, out, meta) {
-        expect(this.context.shared.mark).equal(110)
-        expect(this.context.peract[meta.mi].mark).equal(23)
+        assert.equal(this.context.shared.mark, 110)
+        assert.equal(this.context.peract[meta.mi].mark, 23)
       })
       .act('a:1', { x: 22 }, function (ignore, out, meta) {
-        expect(this.context.shared.mark).equal(220)
-        expect(this.context.peract[meta.mi].mark).equal(45)
+        assert.equal(this.context.shared.mark, 220)
+        assert.equal(this.context.peract[meta.mi].mark, 45)
       })
       .act('a:1', { x: 33 }, function (ignore, out, meta) {
-        expect(this.context.shared.mark).equal(330)
-        expect(this.context.peract[meta.mi].mark).equal(67)
+        assert.equal(this.context.shared.mark, 330)
+        assert.equal(this.context.peract[meta.mi].mark, 67)
 
         this.act('a:1', { x: 44 }, function (ignore, out, meta) {
           // NOT: NOT 440! context is preserved into children
-          expect(this.context.shared.mark).equal(3300)
-          expect(this.context.peract[meta.mi].mark).equal(89)
+          assert.equal(this.context.shared.mark, 3300)
+          assert.equal(this.context.peract[meta.mi].mark, 89)
         })
       })
       .act('b:1', { x: 55 }, function (ignore, out, meta) {
         // NOTE: both b1 and b1p apply, so 2*2*5*5
-        expect(this.context.shared.mark).equal(5500)
+        assert.equal(this.context.shared.mark, 5500)
 
         // NOTE: NOT 111.5! - this is the meta of the first prior step: b1p
-        expect(this.context.peract[meta.mi].mark).equal(111)
+        assert.equal(this.context.peract[meta.mi].mark, 111)
       })
       .act('b:1', { x: 66 }, function (ignore, out, meta) {
-        expect(this.context.shared.mark).equal(6600)
-        expect(this.context.peract[meta.mi].mark).equal(133)
+        assert.equal(this.context.shared.mark, 6600)
+        assert.equal(this.context.peract[meta.mi].mark, 133)
       })
 
       .ready(fin)

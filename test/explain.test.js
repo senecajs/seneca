@@ -3,10 +3,9 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
 const { describe, it } = require('node:test')
-var expect = Code.expect
 var Seneca = require('..')
 
 describe('explain', function () {
@@ -16,7 +15,7 @@ describe('explain', function () {
       .message('a:1', async function (msg, meta) {
         var exp = meta.explain
         if (1 === msg.x) {
-          expect(exp).not.exist()
+          assert.ok(null == exp)
         }
         exp && exp.push({ z: 3 })
         return { x: msg.x }
@@ -24,7 +23,7 @@ describe('explain', function () {
       .message('b:1', async function (msg) {
         var exp = this.explain()
         if (4 === msg.x) {
-          expect(exp).not.exist()
+          assert.ok(null == exp)
         }
         exp && exp({ z: 3 })
         return { x: msg.x }
@@ -37,61 +36,61 @@ describe('explain', function () {
 
     var exp = []
     var out = await si.post('a:1,x:1')
-    expect(out.x).equal(1)
-    expect(exp.length).equal(0)
+    assert.equal(out.x, 1)
+    assert.equal(exp.length, 0)
 
     exp = []
     out = await si.post('a:1,x:2', { explain$: exp })
-    expect(out.x).equal(2)
-    expect(exp[0].explain$).includes({ pattern: 'a:1' })
-    expect(exp[1]).includes({ z: 3 })
+    assert.equal(out.x, 2)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'a:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 3 })
 
     await new Promise((resolve, reject) => {
       exp = []
       si.act('a:1,x:3', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
-        expect(out.x).equal(3)
-        expect(meta.explain[1]).includes({ z: 3 })
+        assert.equal(out.x, 3)
+        assert.partialDeepStrictEqual(meta.explain[1], { z: 3 })
         resolve(out)
       })
     })
 
     exp = []
     out = await si.post('b:1,x:4')
-    expect(out.x).equal(4)
-    expect(exp.length).equal(0)
+    assert.equal(out.x, 4)
+    assert.equal(exp.length, 0)
 
     exp = []
     out = await si.post('b:1,x:5', { explain$: exp })
-    expect(out.x).equal(5)
-    expect(exp[1]).includes({ z: 3 })
+    assert.equal(out.x, 5)
+    assert.partialDeepStrictEqual(exp[1], { z: 3 })
 
     await new Promise((resolve, reject) => {
       exp = []
       si.act('b:1,x:6', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
-        expect(out.x).equal(6)
-        expect(meta.explain[1]).includes({ z: 3 })
+        assert.equal(out.x, 6)
+        assert.partialDeepStrictEqual(meta.explain[1], { z: 3 })
         resolve(out)
       })
     })
 
     exp = []
     out = await si.post('c:1,x:5')
-    expect(out).equal([5])
-    expect(exp.length).equal(0)
+    assert.deepEqual(out, [5])
+    assert.equal(exp.length, 0)
 
     exp = []
     out = await si.post('c:1,x:6', { explain$: exp })
-    expect(out).equal([6])
-    expect(exp[1]).includes({ z: 4 })
+    assert.deepEqual(out, [6])
+    assert.partialDeepStrictEqual(exp[1], { z: 4 })
 
     await new Promise((resolve, reject) => {
       exp = []
       si.act('c:1,x:7', { explain$: exp }, function (err, out, meta) {
         if (err) return reject(err)
-        expect(out).equal([7])
-        expect(meta.explain[1]).includes({ z: 4 })
+        assert.deepEqual(out, [7])
+        assert.partialDeepStrictEqual(meta.explain[1], { z: 4 })
         resolve(out)
       })
     })
@@ -109,19 +108,19 @@ describe('explain', function () {
 
     var exp = []
     var out = await si.post('a:1,x:2', { explain$: exp })
-    expect(out.x).equal(2)
+    assert.equal(out.x, 2)
 
     var json_exp = JSON.stringify(exp)
     var exp_json = JSON.parse(json_exp)
 
-    expect(exp_json[0].explain$.pattern).equal('a:1')
-    expect(exp_json[0].msg$).equal({ a: 1, x: 2 })
-    expect(exp_json[1].z).equal(1)
-    expect(exp_json[1].s).includes({
+    assert.equal(exp_json[0].explain$.pattern, 'a:1')
+    assert.deepEqual(exp_json[0].msg$, { a: 1, x: 2 })
+    assert.equal(exp_json[1].z, 1)
+    assert.partialDeepStrictEqual(exp_json[1].s, {
       isSeneca: true,
       id: 's01',
     })
-    expect(exp_json[1].e).equal({ entity$: '-/-/foo', d: 2 })
+    assert.deepEqual(exp_json[1].e, { entity$: '-/-/foo', d: 2 })
   })
 
   it('explain-deep', async () => {
@@ -161,48 +160,48 @@ describe('explain', function () {
 
     var exp = []
     var out = await si.post('a:1,x:2')
-    expect(out.x).equal(2)
+    assert.equal(out.x, 2)
 
     exp = []
     out = await si.post('a:1,x:2', { explain$: exp })
-    expect(out.x).equal(2)
-    expect(exp[0].explain$).includes({ pattern: 'a:1' })
-    expect(exp[1]).includes({ z: 3 })
+    assert.equal(out.x, 2)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'a:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 3 })
 
     exp = []
     out = await si.post('b:1,y:1', { explain$: exp })
-    expect(out.y).equal(1)
-    expect(exp[0].explain$).includes({ pattern: 'b:1' })
-    expect(exp[1]).includes({ z: 4 })
+    assert.equal(out.y, 1)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'b:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 4 })
 
     exp = []
     out = await si.post('c:1,x:4', { explain$: exp })
-    expect(out.x).equal(4)
-    expect(exp[0].explain$).includes({ pattern: 'c:1' })
-    expect(exp[1]).includes({ z: 5 })
-    expect(exp[2].explain$).includes({ pattern: 'a:1' })
-    expect(exp[3]).includes({ z: 3 })
+    assert.equal(out.x, 4)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'c:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 5 })
+    assert.partialDeepStrictEqual(exp[2].explain$, { pattern: 'a:1' })
+    assert.partialDeepStrictEqual(exp[3], { z: 3 })
 
     exp = []
     out = await si.post('d:1,x:5', { explain$: exp })
-    expect(out.x).equal(5)
-    expect(exp[0].explain$).includes({ pattern: 'd:1' })
-    expect(exp[1]).includes({ z: 6 })
-    expect(exp[2].explain$).includes({ pattern: 'c:1' })
-    expect(exp[3]).includes({ z: 5 })
-    expect(exp[4].explain$).includes({ pattern: 'a:1' })
-    expect(exp[5]).includes({ z: 3 })
+    assert.equal(out.x, 5)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'd:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 6 })
+    assert.partialDeepStrictEqual(exp[2].explain$, { pattern: 'c:1' })
+    assert.partialDeepStrictEqual(exp[3], { z: 5 })
+    assert.partialDeepStrictEqual(exp[4].explain$, { pattern: 'a:1' })
+    assert.partialDeepStrictEqual(exp[5], { z: 3 })
 
     exp = []
     out = await si.post('e:1,x:6,y:2', { explain$: exp })
-    expect(out.x).equal(6)
-    expect(out.y).equal(2)
-    expect(exp[0].explain$).includes({ pattern: 'e:1' })
-    expect(exp[1]).includes({ z: 7 })
-    expect(exp[2].explain$).includes({ pattern: 'a:1' })
-    expect(exp[3]).includes({ z: 3 })
-    expect(exp[4].explain$).includes({ pattern: 'b:1' })
-    expect(exp[5]).includes({ z: 4 })
+    assert.equal(out.x, 6)
+    assert.equal(out.y, 2)
+    assert.partialDeepStrictEqual(exp[0].explain$, { pattern: 'e:1' })
+    assert.partialDeepStrictEqual(exp[1], { z: 7 })
+    assert.partialDeepStrictEqual(exp[2].explain$, { pattern: 'a:1' })
+    assert.partialDeepStrictEqual(exp[3], { z: 3 })
+    assert.partialDeepStrictEqual(exp[4].explain$, { pattern: 'b:1' })
+    assert.partialDeepStrictEqual(exp[5], { z: 4 })
   })
 
   it('explain-toplevel', async () => {
@@ -217,33 +216,33 @@ describe('explain', function () {
     await si.ready()
 
     var exp = si.explain()
-    expect(exp).not.exists()
+    assert.ok(null == exp)
 
     // turns on explain for each msg, for this instance
     var topexp = si.explain(true)
-    expect(topexp).equal([])
+    assert.deepEqual(topexp, [])
 
     var out = await si.post('a:1,x:1,z:1')
-    expect(out.x).equal(1)
-    expect(topexp[0][0].msg$).includes({ a: 1, x: 1, z: 1 })
-    expect(topexp[0][1]).includes({ z: 1 })
+    assert.equal(out.x, 1)
+    assert.partialDeepStrictEqual(topexp[0][0].msg$, { a: 1, x: 1, z: 1 })
+    assert.partialDeepStrictEqual(topexp[0][1], { z: 1 })
 
     out = await si.post('a:1,x:2,z:2')
-    expect(out.x).equal(2)
-    expect(topexp[0][0].msg$).includes({ a: 1, x: 1, z: 1 })
-    expect(topexp[0][1]).includes({ z: 1 })
-    expect(topexp[1][0].msg$).includes({ a: 1, x: 2, z: 2 })
-    expect(topexp[1][1]).includes({ z: 2 })
+    assert.equal(out.x, 2)
+    assert.partialDeepStrictEqual(topexp[0][0].msg$, { a: 1, x: 1, z: 1 })
+    assert.partialDeepStrictEqual(topexp[0][1], { z: 1 })
+    assert.partialDeepStrictEqual(topexp[1][0].msg$, { a: 1, x: 2, z: 2 })
+    assert.partialDeepStrictEqual(topexp[1][1], { z: 2 })
 
     var topexp_off = si.explain(false)
-    expect(topexp_off[0][0].msg$).includes({ a: 1, x: 1, z: 1 })
-    expect(topexp_off[0][1]).includes({ z: 1 })
-    expect(topexp_off[1][0].msg$).includes({ a: 1, x: 2, z: 2 })
-    expect(topexp_off[1][1]).includes({ z: 2 })
+    assert.partialDeepStrictEqual(topexp_off[0][0].msg$, { a: 1, x: 1, z: 1 })
+    assert.partialDeepStrictEqual(topexp_off[0][1], { z: 1 })
+    assert.partialDeepStrictEqual(topexp_off[1][0].msg$, { a: 1, x: 2, z: 2 })
+    assert.partialDeepStrictEqual(topexp_off[1][1], { z: 2 })
 
     out = await si.post('a:1,x:3,z:3')
-    expect(out.x).equal(3)
-    expect(topexp_off.length).equal(2)
+    assert.equal(out.x, 3)
+    assert.equal(topexp_off.length, 2)
   })
 
   // TODO: move to @seneca/transport
@@ -268,10 +267,10 @@ describe('explain', function () {
   //       var exp = this.explain()
 
   //       if (1 === msg.x) {
-  //         expect(exp).not.exist()
+  //         assert.ok(null == exp)
   //         exp && exp('bbb')
   //       } else {
-  //         expect(exp).exist()
+  //         assert.ok(null != exp)
   //         exp && exp('ccc')
   //       }
   //       //reply([1, 2, 3])
@@ -294,46 +293,46 @@ describe('explain', function () {
   //     s0.error(reject)
 
   //     c0.act('a:1,x:2', { explain$: exp }, function (ignore, out, meta) {
-  //       expect(out.x).equals(2)
+  //       assert.equal(out.x, 2)
 
-  //       expect(exp[0].msg$).includes({ a: 1, x: 2 })
-  //       expect(exp[0].explain$).includes({ instance: 'c0' })
-  //       expect(exp[1].msg$).includes({ a: 1, x: 2 })
-  //       expect(exp[1].explain$).includes({ instance: 's0' })
-  //       expect(exp[2]).includes({ direct: 1 })
-  //       expect(exp[3]).includes({ content: 'aaa' })
+  //       assert.partialDeepStrictEqual(exp[0].msg$, { a: 1, x: 2 })
+  //       assert.partialDeepStrictEqual(exp[0].explain$, { instance: 'c0' })
+  //       assert.partialDeepStrictEqual(exp[1].msg$, { a: 1, x: 2 })
+  //       assert.partialDeepStrictEqual(exp[1].explain$, { instance: 's0' })
+  //       assert.partialDeepStrictEqual(exp[2], { direct: 1 })
+  //       assert.partialDeepStrictEqual(exp[3], { content: 'aaa' })
 
   //       c0.act('b:1,x:1', function (ignore, out, meta) {
-  //         expect(out.x).equals(1)
-  //         expect(meta.explain).equal(void 0)
+  //         assert.equal(out.x, 1)
+  //         assert.deepEqual(meta.explain, void 0)
 
   //         exp = []
   //         c0.act('b:1,x:2', { explain$: exp }, function (ignore, out, meta) {
-  //           expect(out.x).equals(2)
+  //           assert.equal(out.x, 2)
 
-  //           expect(exp[0].msg$).includes({ b: 1, x: 2 })
-  //           expect(exp[0].explain$).includes({ instance: 'c0' })
-  //           expect(exp[1].msg$).includes({ b: 1, x: 2 })
-  //           expect(exp[1].explain$).includes({ instance: 's0' })
+  //           assert.partialDeepStrictEqual(exp[0].msg$, { b: 1, x: 2 })
+  //           assert.partialDeepStrictEqual(exp[0].explain$, { instance: 'c0' })
+  //           assert.partialDeepStrictEqual(exp[1].msg$, { b: 1, x: 2 })
+  //           assert.partialDeepStrictEqual(exp[1].explain$, { instance: 's0' })
 
-  //           expect(meta.explain[0].msg$).includes({ b: 1, x: 2 })
-  //           expect(meta.explain[0].explain$).includes({ instance: 'c0' })
-  //           expect(meta.explain[1].msg$).includes({ b: 1, x: 2 })
-  //           expect(meta.explain[1].explain$).includes({ instance: 's0' })
+  //           assert.partialDeepStrictEqual(meta.explain[0].msg$, { b: 1, x: 2 })
+  //           assert.partialDeepStrictEqual(meta.explain[0].explain$, { instance: 'c0' })
+  //           assert.partialDeepStrictEqual(meta.explain[1].msg$, { b: 1, x: 2 })
+  //           assert.partialDeepStrictEqual(meta.explain[1].explain$, { instance: 's0' })
 
   //           exp = []
   //           c0.act('c:1,x:3', { explain$: exp }, function (ignore, out, meta) {
-  //             expect(out).equals([3])
+  //             assert.deepEqual(out, [3])
 
-  //             expect(exp[0].msg$).includes({ c: 1, x: 3 })
-  //             expect(exp[0].explain$).includes({ instance: 'c0' })
-  //             expect(exp[1].msg$).includes({ c: 1, x: 3 })
-  //             expect(exp[1].explain$).includes({ instance: 's0' })
+  //             assert.partialDeepStrictEqual(exp[0].msg$, { c: 1, x: 3 })
+  //             assert.partialDeepStrictEqual(exp[0].explain$, { instance: 'c0' })
+  //             assert.partialDeepStrictEqual(exp[1].msg$, { c: 1, x: 3 })
+  //             assert.partialDeepStrictEqual(exp[1].explain$, { instance: 's0' })
 
-  //             expect(meta.explain[0].msg$).includes({ c: 1, x: 3 })
-  //             expect(meta.explain[0].explain$).includes({ instance: 'c0' })
-  //             expect(meta.explain[1].msg$).includes({ c: 1, x: 3 })
-  //             expect(meta.explain[1].explain$).includes({ instance: 's0' })
+  //             assert.partialDeepStrictEqual(meta.explain[0].msg$, { c: 1, x: 3 })
+  //             assert.partialDeepStrictEqual(meta.explain[0].explain$, { instance: 'c0' })
+  //             assert.partialDeepStrictEqual(meta.explain[1].msg$, { c: 1, x: 3 })
+  //             assert.partialDeepStrictEqual(meta.explain[1].explain$, { instance: 's0' })
 
   //             s0.close(c0.close.bind(c0, resolve))
   //           })

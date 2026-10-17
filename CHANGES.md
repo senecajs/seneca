@@ -50,7 +50,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   for ES2024, `.nvmrc` selects Node.js 24, and continuous integration
   runs on Node.js 24.
 * Unit tests run on the Node.js built-in test runner (`node:test`) with
-  built-in coverage reporting; `@hapi/lab` is no longer used.
+  `node:assert` and built-in coverage reporting; `@hapi/lab` and
+  `@hapi/code` are no longer used. Two `act_if` assertions and a
+  `strargs` check that had been failing inside act callbacks, where Seneca
+  logged and swallowed them, are fixed, and the options-file tests in
+  `test/stubs/options` run again.
 * Documentation reorganized under `docs/` following the Diátaxis structure
   (tutorials, how-to guides, reference, explanation), covering every
   option, method, directive, event and error code. The example programs

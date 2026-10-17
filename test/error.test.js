@@ -1,16 +1,10 @@
 /* Copyright (c) 2014-2021 Richard Rodger, MIT License */
 'use strict'
 
-const Assert = require('assert')
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 const TransportStubs = require('./stubs/transports')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-const assert = Assert
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
 
@@ -19,15 +13,15 @@ const testopts = { log: 'silent' }
 const make_test_transport = TransportStubs.make_test_transport
 
 describe('error', function () {
-  it('fail', function (fin) {
+  it('fail', function (t, fin) {
     const si = Seneca({ tag: 'aaa' }).test()
 
     try {
       si.fail('foo', 'Foo')
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.code).equal('foo')
-      expect(e.message).contains('Foo')
+      assert.equal(e.code, 'foo')
+      assert.ok(e.message.includes('Foo'))
       fin()
     }
   })
@@ -58,7 +52,7 @@ describe('error', function () {
 
   it('types', types)
 
-  function response_is_error(fin) {
+  function response_is_error(t, fin) {
     const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
@@ -68,17 +62,17 @@ describe('error', function () {
     })
 
     si.error(function (err) {
-      expect(err.code).equal('result_not_objarr')
+      assert.equal(err.code, 'result_not_objarr')
       fin()
     })
 
     si.act('a:1', function (err, out) {
-      expect(out).not.exist()
-      expect(err.code).equal('result_not_objarr')
+      assert.ok(null == out)
+      assert.equal(err.code, 'result_not_objarr')
     })
   }
 
-  function action_callback(fin) {
+  function action_callback(t, fin) {
     const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
@@ -90,8 +84,8 @@ describe('error', function () {
     function throw_err_obj() {
       si.error(function (err) {
         try {
-          expect(err.code).equal('act_callback')
-          expect(err.message).contains('CALLBACK')
+          assert.equal(err.code, 'act_callback')
+          assert.ok(err.message.includes('CALLBACK'))
           throw_obj()
         } catch (e) {
           fin(e)
@@ -106,8 +100,8 @@ describe('error', function () {
     function throw_obj() {
       si.error(function (err) {
         try {
-          expect(err.code).equal('act_callback')
-          expect(err.message).contains('CALLBACK')
+          assert.equal(err.code, 'act_callback')
+          assert.ok(err.message.includes('CALLBACK'))
           throw_seneca_error()
         } catch (e) {
           fin(e)
@@ -122,8 +116,8 @@ describe('error', function () {
     function throw_seneca_error() {
       si.error(function (err) {
         try {
-          expect(err.code).equal('foo')
-          expect(err.message).contains('foo')
+          assert.equal(err.code, 'foo')
+          assert.ok(err.message.includes('foo'))
           fin()
         } catch (e) {
           fin(e)
@@ -136,7 +130,7 @@ describe('error', function () {
     }
   }
 
-  function plugin_load(fin) {
+  function plugin_load(t, fin) {
     const si = Seneca({ log: 'silent', debug: { undead: true } })
 
     si.error(function (err) {
@@ -157,7 +151,7 @@ describe('error', function () {
     }
   }
 
-  function exec_action_result(done) {
+  function exec_action_result(t, done) {
     Seneca({ legacy: { error: false }, log: 'silent' })
       .error(fail_assert(done))
       .add('a:1', function (msg, reply) {
@@ -169,7 +163,7 @@ describe('error', function () {
       })
   }
 
-  function exec_deep_action_result(fin) {
+  function exec_deep_action_result(t, fin) {
     Seneca({ id$: 'edar', legacy: { error: false }, log: 'silent' })
       .error(fail_assert(fin))
       .add('a:1', function (msg, reply) {
@@ -213,7 +207,7 @@ describe('error', function () {
       })
   }
 
-  function exec_action_throw_basic(fin) {
+  function exec_action_throw_basic(t, fin) {
     Seneca({ legacy: { error: false }, log: 'silent' })
       .error(fail_assert(fin))
       .add('a:1', function () {
@@ -232,7 +226,7 @@ describe('error', function () {
       })
   }
 
-  function act_not_found(done) {
+  function act_not_found(t, done) {
     const ctxt = { errlog: null }
     const si = make_seneca(ctxt)
 
@@ -305,7 +299,7 @@ describe('error', function () {
 
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
-  function exec_action_throw_nolog(done) {
+  function exec_action_throw_nolog(t, done) {
     const ctxt = { errlog: null, done: done, log: false, name: 'throw_nolog' }
     const si = make_seneca(ctxt)
 
@@ -324,7 +318,7 @@ describe('error', function () {
 
   // REMOVE after Seneca 3.x
   // err.log = false is a feature of legacy logging
-  function exec_action_result_nolog(done) {
+  function exec_action_result_nolog(t, done) {
     const ctxt = { errlog: null, done: done, log: false, name: 'result_nolog' }
     const si = make_seneca(ctxt)
 
@@ -341,7 +335,7 @@ describe('error', function () {
     }
   }
 
-  function exec_action_errhandler_throw(done) {
+  function exec_action_errhandler_throw(t, done) {
     const ctxt = { errlog: null }
     const si = make_seneca(ctxt)
     let aI = 0
@@ -430,7 +424,7 @@ describe('error', function () {
     })
   }
 
-  function exec_action_errhandler_result(done) {
+  function exec_action_errhandler_result(t, done) {
     const ctxt = { errlog: null }
     const si = make_seneca(ctxt)
     let aI = 0
@@ -712,7 +706,7 @@ describe('error', function () {
     assert.deepEqual({ BAR: 1 }, err.details)
   }
 
-  function types(fin) {
+  function types(t, fin) {
     const si = Seneca({ log: 'silent' })
 
     si.add('a:1', function (msg, reply) {
@@ -722,14 +716,14 @@ describe('error', function () {
     si.error(function (err) {
       // console.log('WWW',err)
       err = err.meta$.err
-      expect(err.code).equal('act_execute')
+      assert.equal(err.code, 'act_execute')
       fin()
     })
 
     si.act('a:1', function (err, out) {
       // console.log('AAA', err)
-      expect(out).not.exist()
-      // expect(err.code).equal('act_execute')
+      assert.ok(null == out)
+      // assert.equal(err.code, 'act_execute')
     })
   }
 })
