@@ -202,19 +202,17 @@ function inward_validate_msg(spec: any) {
   var err: any = null
 
   if (so.valid.active && so.valid.message) {
-    if (ctx.actdef.gubu) {
-      // TODO: gubu option to provide Error without throwing
-      // TODO: how to expose gubu builders, Required, etc?
+    if (ctx.actdef.shape) {
+      // TODO: shape option to provide Error without throwing
       // TODO: use original msg for error
       try {
-        data.msg = ctx.actdef.gubu(msg)
+        data.msg = ctx.actdef.shape(msg)
       } catch (e) {
         err = e
       }
     }
     else if ('function' === typeof ctx.actdef.validate) {
       // FIX: this is assumed to be synchronous
-      // seneca-parambulator and seneca-joi need to be updated
       ctx.actdef.validate(msg, function(verr: any) {
         err = verr
       })
@@ -232,7 +230,7 @@ function inward_validate_msg(spec: any) {
           message: err.message,
           msg: clean(msg),
           error: err,
-          props: err.gubu ? err.props : [],
+          props: err.shape ? err.props : [],
         },
         log: {
           level: so.trace.invalid ? 'warn' : null,

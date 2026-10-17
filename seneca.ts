@@ -4,39 +4,43 @@
 
 
 // Node API modules.
-const Events = require('events')
-const Util = require('util')
+import Events from 'events'
+import type { EventEmitter } from 'events'
+import Util from 'util'
 
 
 // External modules.
-const GateExecutor = require('gate-executor')
-const Jsonic = require('jsonic')
-const UsePlugin = require('use-plugin')
+import Eraro from 'eraro'
+import GateExecutor from 'gate-executor'
+import Jsonic from 'jsonic'
 import Nid from 'nid'
+import { Ordu } from 'ordu'
 import { Patrun, Gex } from 'patrun'
-const Stats = require('rolling-stats')
-const { Ordu } = require('ordu')
-const Eraro = require('eraro')
-import { Gubu } from 'gubu'
+import Stats from 'rolling-stats'
+import { Shape } from 'shape'
+
+// Untyped external modules.
+const UsePlugin: (opts: Record<string, any>) => any = require('use-plugin')
 
 
 // Internal modules.
-const Common = require('./lib/common')
-const { make_logging } = require('./lib/logging')
-const { API } = require('./lib/api')
-const { make_ready } = require('./lib/ready')
-const Act = require('./lib/act')
-const Add = require('./lib/add')
-const Sub = require('./lib/sub')
-import { Prior } from './lib/prior'
-import { Plugin } from './lib/plugin'
+import Act = require('./lib/act')
+import { addActions } from './lib/actions'
+import Add = require('./lib/add')
+import { API } from './lib/api'
+import Common = require('./lib/common')
+import { Deprecate } from './lib/deprecate'
 import { Inward } from './lib/inward'
+import { Legacy } from './lib/legacy'
+import { make_logging } from './lib/logging'
+import { resolve_options } from './lib/options'
 import { Outward } from './lib/outward'
-const { Legacy } = require('./lib/legacy')
-const { resolve_options } = require('./lib/options')
-const { Print } = require('./lib/print')
-const { addActions } = require('./lib/actions')
-const { transport } = require('./lib/transport')
+import { Plugin } from './lib/plugin'
+import { Print } from './lib/print'
+import { Prior } from './lib/prior'
+import { make_ready } from './lib/ready'
+import Sub = require('./lib/sub')
+import { transport } from './lib/transport'
 import Pkg from './package.json'
 
 
@@ -44,12 +48,12 @@ import Pkg from './package.json'
 const { error, deep } = Common
 
 
-const { One, Any, Skip, Open } = Gubu
+const { One, Any, Skip, Open } = Shape
 
 // Seneca options.
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
-  tag: '-', // TODO: FIX: Gubu api.test.js#292
+  tag: '-', // TODO: FIX: Shape api.test.js#292
 
   // Standard timeout for actions.
   timeout: 22222,
@@ -80,7 +84,7 @@ const option_defaults = {
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
-  // LEGACY: remove in 4.x
+  // Deprecated alias of death_delay. Remove in Seneca 5.
   deathdelay: 11111,
 
   // Wait time for actions to complete before shutdown.
@@ -315,6 +319,20 @@ const option_defaults = {
 
     // If true, add role:seneca variants of builtin actions.
     builtin_actions: false,
+
+    // Removed in Seneca 4. Accepted and ignored, with a deprecation
+    // warning, so that Seneca 3 configurations load.
+    actdef: Skip(Boolean),
+    action_signature: Skip(Boolean),
+    error_codes: Skip(Boolean),
+    fail: Skip(Boolean),
+    logging: Skip(Boolean),
+    meta_arg_remove: Skip(Boolean),
+    options: Skip(Boolean),
+    rules: Skip(Boolean),
+    timeout_string: Skip(Boolean),
+    top_plugins: Skip(Boolean),
+    transport: Skip(Boolean),
   }),
 
   // Processing task ordering.
@@ -357,6 +375,23 @@ const option_defaults = {
 }
 
 
+// Seneca 3 legacy flags that Seneca 4 removed. They are accepted (see the
+// legacy option) and ignored, with a deprecation warning.
+const REMOVED_LEGACY_FLAGS = [
+  'actdef',
+  'action_signature',
+  'error_codes',
+  'fail',
+  'logging',
+  'meta_arg_remove',
+  'options',
+  'rules',
+  'timeout_string',
+  'top_plugins',
+  'transport',
+]
+
+
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
   Eraro,
@@ -365,7 +400,7 @@ const seneca_util = {
   Nid,
   Patrun,
   Gex,
-  Gubu,
+  Shape,
 
   pins: Common.pins,
   clean: Common.clean,
@@ -374,33 +409,38 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
-  deepextend: Common.deep,
-  parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
   router: function router() {
     return Patrun()
   },
   resolve_option: Common.resolve_option,
 
-  // Legacy (deprecate and remove)
-  // argprops: Legacy.argprops,
-  // recurse: Legacy.recurse,
-  // copydata: Legacy.copydata,
-  // nil: Legacy.nil,
-  flatten: Legacy.flatten,
+  // Deprecated. Remove in Seneca 5.
+  deepextend: Deprecate.deprecated('util_deepextend', Common.deep),
+  flatten: Deprecate.deprecated('util_flatten', Legacy.flatten),
 }
+
+// Deprecated alias of Shape. Remove in Seneca 5.
+Object.defineProperty(seneca_util, 'Gubu', {
+  get() {
+    Deprecate.deprecate(null, 'util_gubu')
+    return Shape
+  },
+  enumerable: false,
+})
 
 // Internal implementations.
 const intern = {
   util: seneca_util,
 }
 
-// Seneca is an EventEmitter.
-function Seneca(this: any) {
+// The constructor of Seneca instances, which are EventEmitters. Exposed as
+// Seneca.Seneca for monkey-patching the prototype.
+function SenecaInstance(this: any) {
   Events.EventEmitter.call(this)
   this.setMaxListeners(0)
 }
-Util.inherits(Seneca, Events.EventEmitter)
+Util.inherits(SenecaInstance, Events.EventEmitter)
 
 // The known, valid Seneca event names. Anything else passed to `.on`
 // is almost certainly a typo... (e.g. 'act-err' vs 'act_err'), so it's
@@ -424,8 +464,8 @@ const valid_event_names = [
   'removeListener',
 ]
 
-const original_on = Seneca.prototype.on
-Seneca.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
+const original_on = SenecaInstance.prototype.on
+SenecaInstance.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
   if ('string' === typeof event_name && -1 === valid_event_names.indexOf(event_name)) {
     throw error('invalid_event_name', {
       name: event_name,
@@ -433,15 +473,19 @@ Seneca.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
     })
   }
 
+  if ('act-err-4' === event_name) {
+    Deprecate.deprecate(this, 'act_err_4')
+  }
+
   return original_on.call(this, event_name, ...rest)
 }
 
 // Mark the Seneca object
-Seneca.prototype.isSeneca = true
+SenecaInstance.prototype.isSeneca = true
 
 // Provide useful description when convered to JSON.
 // Cannot be instantiated from JSON.
-Seneca.prototype.toJSON = function toJSON() {
+SenecaInstance.prototype.toJSON = function toJSON() {
   return {
     isSeneca: true,
     id: this.id,
@@ -453,20 +497,44 @@ Seneca.prototype.toJSON = function toJSON() {
   }
 }
 
-Seneca.prototype[Util.inspect.custom] = Seneca.prototype.toJSON
+SenecaInstance.prototype[Util.inspect.custom] = SenecaInstance.prototype.toJSON
 
 // Create a Seneca instance.
-function init(seneca_options?: any, more_options?: any) {
+function Seneca(
+  seneca_options?: Seneca.Options | string,
+  more_options?: Seneca.Options,
+): Seneca.Instance {
   var initial_opts =
     'string' === typeof seneca_options
       ? deep({}, { from: seneca_options }, more_options)
       : deep({}, seneca_options, more_options)
 
-  // Legacy options, remove in 4.x
+  // Deprecated: deathdelay is an alias of death_delay.
+  const used_deathdelay = undefined !== initial_opts.deathdelay
+  if (used_deathdelay && undefined === initial_opts.death_delay) {
+    initial_opts.death_delay = initial_opts.deathdelay
+  }
   initial_opts.deathdelay = initial_opts.death_delay
 
   var seneca = make_seneca(initial_opts)
   var options = seneca.options()
+
+  if (used_deathdelay) {
+    Deprecate.deprecate(seneca, 'deathdelay')
+  }
+
+  // Deprecated: legacy flags that Seneca 4 ignores.
+  const initial_legacy = initial_opts.legacy
+  if (null != initial_legacy && 'object' === typeof initial_legacy) {
+    if (undefined !== initial_legacy.error) {
+      Deprecate.deprecate(seneca, 'legacy_error')
+    }
+    for (const flag of REMOVED_LEGACY_FLAGS) {
+      if (undefined !== initial_legacy[flag]) {
+        Deprecate.deprecate(seneca, 'legacy_flag', { flag }, 'legacy_flag:' + flag)
+      }
+    }
+  }
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
@@ -492,52 +560,468 @@ function init(seneca_options?: any, more_options?: any) {
     this.log.info({ kind: 'notice', data: 'hello ' + this.id })
   })
 
-  return seneca
+  return seneca as Seneca.Instance
 }
 
 
 // Expose Seneca prototype for easier monkey-patching
-init.Seneca = Seneca
-
-// To reference builtin loggers when defining logging options.
-init.loghandler = Legacy.loghandler
+Seneca.Seneca = SenecaInstance
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
-init.use = function top_use() {
-  var argsarr = new Array(arguments.length)
-  for (var l = 0; l < argsarr.length; ++l) {
-    argsarr[l] = arguments[l]
-  }
-
-  var instance = init()
-
-  return instance.use.apply(instance, argsarr)
+Seneca.use = function top_use(
+  ...args: Parameters<Seneca.Instance['use']>
+): Seneca.Instance {
+  return Seneca().use(...args)
 }
 
 // Makes require('seneca').test() work.
-init.test = function top_test() {
-  return init().test(...arguments)
+Seneca.test = function top_test(
+  ...args: Parameters<Seneca.Instance['test']>
+): Seneca.Instance {
+  return Seneca().test(...args)
 }
 
 // Makes require('seneca').quiet() work.
-init.quiet = function top_quiet() {
-  return init().quiet(...arguments)
+Seneca.quiet = function top_quiet(
+  ...args: Parameters<Seneca.Instance['quiet']>
+): Seneca.Instance {
+  return Seneca().quiet(...args)
 }
 
-init.util = seneca_util
-init.valid = Gubu
+Seneca.util = seneca_util as unknown as Seneca.Util
+Seneca.valid = Shape
 
-init.test$ = { intern: intern }
-
-
-type Instance = ReturnType<typeof make_seneca> & Record<string, any>
-
-export type { Instance }
+// Internals for Seneca's own tests; not part of the public API.
+Seneca.test$ = { intern: intern } as { intern: any }
 
 
-export default init
+/**
+ * The public types: Seneca.Instance, Seneca.Options and so on. A Seneca
+ * instance is assembled at runtime (see make_seneca), so these types are
+ * written by hand to describe the documented API (docs/reference/api.md),
+ * rather than inferred from the implementation.
+ *
+ * Plugins that add members to instances (with seneca.decorate, for
+ * example) declare them by augmenting Instance:
+ *
+ *     declare module 'seneca' {
+ *       interface Instance {
+ *         make$(name: string): Entity
+ *       }
+ *     }
+ */
+namespace Seneca {
+  /** The meta data of a message, passed to actions and callbacks. */
+  export interface Meta {
+    id: string
+    mi: string
+    tx: string
+    start: number
+    end?: number
+    pattern?: string
+    action?: string
+    instance: string
+    tag: string
+    seneca: string
+    version: string
+    gate: boolean
+    fatal: boolean
+    closing: boolean
+    sync: boolean
+    local: boolean
+    remote: boolean
+    direct: boolean
+    timeout: number
+    dflt: any
+    custom: Record<string, any> | null
+    plugin: any
+    prior: any
+    caller: any
+    parents: any
+    trace: any
+    sub: any
+    data: any
+    err: any
+    err_trace: any
+    error: any
+    empty: any
+    [key: string]: any
+  }
 
-module.exports = init
+  /** A message or pattern property map. */
+  export type Msg = Record<string, any>
+
+  /** A pattern or message: an object, or a Jsonic string such as 'a:1,b:2'. */
+  export type Pattern = string | Msg
+
+  /** A message result: an object or an array, or null. */
+  export type Result = Record<string, any> | any[] | null
+
+  /** The reply function passed to an action. Call it exactly once. */
+  export interface Reply {
+    (err: Error | null | undefined, result?: Result): void
+    (result?: Result | Error): void
+  }
+
+  /** An action: replies through reply, or returns its result for direct calls. */
+  export type ActionFunc = (
+    this: Instance,
+    msg: Msg,
+    reply: Reply,
+    meta: Meta,
+  ) => any
+
+  /** An action written as an async function (seneca.message). */
+  export type MessageFunc = (this: Instance, msg: Msg, meta: Meta) => Promise<Result | void>
+
+  /** The callback of seneca.act. */
+  export type ActCallback = (
+    this: Instance,
+    err: Error | null,
+    result?: any,
+    meta?: Meta,
+  ) => void
+
+  /** A subscription function (seneca.sub). */
+  export type SubFunc = (this: Instance, msg: Msg, result: any, meta: Meta) => void
+
+  /** An action definition, as returned by seneca.find. */
+  export interface ActDef {
+    id: string
+    name: string
+    func: ActionFunc
+    pattern: string
+    msgcanon: Msg
+    raw: Msg
+    plugin: { name: string; tag: string; fullname: string }
+    plugin_name: string
+    plugin_tag: string
+    plugin_fullname: string
+    priordef?: ActDef
+    priorpath: string
+    fixed: Msg
+    custom: Msg
+    rules: Msg
+    /** The compiled message shape, present when the pattern has rules. */
+    shape?: (msg: Msg) => Msg
+    /** @deprecated Use shape. Removed in Seneca 5. */
+    readonly gubu?: (msg: Msg) => Msg
+    sub?: boolean
+    client?: boolean
+    client_pattern?: string
+    deprecate?: string
+    callpoint?: string
+    handle?: (...args: any[]) => any
+    /** Other properties given to seneca.add, such as desc. */
+    [key: string]: any
+  }
+
+  /** A loaded plugin, as returned by seneca.find_plugin. */
+  export interface PluginRecord {
+    name: string
+    tag: string
+    fullname: string
+    options: Record<string, any>
+    shared: Record<string, any>
+    [key: string]: any
+  }
+
+  /** A plugin definition function. `this` is the plugin delegate. */
+  export type PluginDefine = (
+    this: Instance,
+    options: any,
+  ) => void | Record<string, any> | Promise<void | Record<string, any>>
+
+  /** A plugin description object, for seneca.use. See docs/reference/plugins.md. */
+  export interface PluginDesc {
+    name?: string
+    tag?: string
+    define?: PluginDefine
+    /** @deprecated Use define. Removed in Seneca 5. */
+    init?: PluginDefine
+    defaults?:
+      | Record<string, any>
+      | ((spec: { valid: Shape }) => Record<string, any>)
+    errors?: Record<string, string>
+    preload?: (this: Instance, plugin: PluginRecord) => any
+    exports?: Record<string, any>
+    exportmap?: Record<string, any>
+    export?: any
+    extend?: {
+      action_modifier?: (actdef: ActDef) => void
+      logger?: (...args: any[]) => any
+    }
+    order?: { plugin?: any }
+    /** Legacy: a function kept as plugin.service. */
+    service?: (...args: any[]) => any
+  }
+
+  /** A plugin: a module name, a definition function, or a description. */
+  export type Plugin = string | PluginDefine | PluginDesc
+
+  /** The logger: callable, with a method per level. */
+  export interface Logger {
+    (...entry: any[]): void
+    debug(...entry: any[]): void
+    info(...entry: any[]): void
+    warn(...entry: any[]): void
+    error(...entry: any[]): void
+    fatal(...entry: any[]): void
+    all(...entry: any[]): void
+    none(...entry: any[]): void
+  }
+
+  /** Utilities available as seneca.util and Seneca.util. */
+  export interface Util {
+    Eraro: any
+    Jsonic: any
+    Nid: any
+    Patrun: any
+    Gex: any
+    Shape: Shape
+    /** @deprecated Use Shape. Removed in Seneca 5. */
+    readonly Gubu: Shape
+    pins(pin: any): Msg[]
+    clean<T extends Msg>(obj: T): T
+    pattern(patobj: Pattern): string
+    print(...args: any[]): void
+    error(code: string | Error, details?: Record<string, any>): Error
+    deep(...objs: any[]): any
+    /** @deprecated Use deep. Removed in Seneca 5. */
+    deepextend(...objs: any[]): any
+    pincanon(pin: any): string
+    router(): any
+    resolve_option(value: any, options?: any): any
+    /** @deprecated Removed in Seneca 5. */
+    flatten(obj: any, prop: string): any[]
+  }
+
+  /** Options for Seneca(options). See docs/reference/options.md. */
+  export interface Options {
+    tag?: string
+    timeout?: number
+    idlen?: number
+    didlen?: number
+    id$?: string
+    default_plugins?: Record<string, boolean>
+    test?: boolean
+    quiet?: boolean
+    log?: any
+    logger?: any
+    death_delay?: number
+    /** @deprecated Use death_delay. Removed in Seneca 5. */
+    deathdelay?: number
+    close_delay?: number
+    errhandler?: ((this: Instance, err: Error, meta?: Meta) => any) | null
+    from?: string
+    module?: any
+    error?: Record<string, any>
+    valid?: {
+      active?: boolean
+      message?: boolean
+      option?: boolean
+      plugin?: boolean
+    }
+    debug?: {
+      fragile?: boolean
+      undead?: boolean
+      print?: Record<string, any>
+      act_caller?: boolean
+      short_logs?: boolean
+      callpoint?: boolean
+      deprecation?: boolean
+      argv?: string[] | null
+      env?: Record<string, string> | null
+      datalen?: number
+    }
+    strict?: {
+      result?: boolean
+      fixedargs?: boolean
+      add?: boolean
+      find?: boolean
+      maxloop?: number
+      exports?: boolean
+    }
+    history?: { active?: boolean; prune?: boolean; interval?: number }
+    trace?: Record<string, any>
+    stats?: { size?: number; interval?: number; running?: boolean }
+    plugin?: Record<string, any>
+    plugins?: Record<string, any> | any[] | null
+    system?: {
+      exit?: (code?: number) => void
+      close_signals?: Record<string, boolean>
+      plugin?: { load_once?: boolean }
+      action?: { add?: boolean }
+    }
+    internal?: Record<string, any>
+    status?: { interval?: number; running?: boolean }
+    transport?: Record<string, any>
+    limits?: { maxparents?: number }
+    events?: Record<string, (...args: any[]) => void>
+    legacy?:
+      | boolean
+      | {
+          meta?: boolean
+          builtin_actions?: boolean
+          /** @deprecated Has no effect. Removed in Seneca 5. */
+          error?: boolean
+          [removed_flag: string]: boolean | undefined
+        }
+    order?: Record<string, { debug?: boolean }>
+    prior?: { direct?: boolean }
+    /** Plugin options, by plugin name. */
+    [plugin_options: string]: any
+  }
+
+  /** A Seneca instance, or a delegate of one. See docs/reference/api.md. */
+  export interface Instance extends EventEmitter {
+    readonly id: string
+    readonly did: string
+    readonly tag: string
+    readonly version: string
+    readonly start_time: number
+    readonly root: Instance
+    readonly isSeneca: true
+    fixedargs: Msg
+    fixedmeta: Msg
+    context: Record<string, any>
+    flags: { closed: boolean }
+    /** @deprecated Use flags.closed. Removed in Seneca 5. */
+    readonly closed: boolean
+
+    /** Shape builders for validation rules and plugin defaults. */
+    valid: Shape
+    util: Util
+    log: Logger
+
+    /** Inside a plugin: the plugin record and the plugin's shared object. */
+    plugin?: PluginRecord
+    shared?: Record<string, any>
+
+    /** Internal state. Not part of the public API. */
+    private$: any
+
+    // Actions and messages
+
+    add(pattern: Pattern, action?: ActionFunc, actdef?: Partial<ActDef>): this
+    add(
+      pattern: Pattern,
+      moreProps: Msg,
+      action?: ActionFunc,
+      actdef?: Partial<ActDef>,
+    ): this
+    message(pattern: Pattern, action: MessageFunc): this
+    message(pattern: Pattern, moreProps: Msg, action: MessageFunc): this
+    act(msg: Pattern, callback?: ActCallback): this
+    act(msg: Pattern, moreProps: Msg, callback?: ActCallback): this
+    post<T = any>(msg: Pattern, moreProps?: Msg): Promise<T>
+    direct<T = any>(msg: Pattern, moreProps?: Msg): T
+    prior(msg: Msg, reply: Reply | ActCallback): void
+    prior<T = any>(msg: Msg): Promise<T>
+    direct_prior<T = any>(msg: Pattern, moreProps?: Msg): T
+    reply(spec: { meta: Meta | Msg; err?: Error | null; out?: any }): boolean
+
+    // Extending actions
+
+    wrap(pin: Pattern | Pattern[], wrapper: ActionFunc): this
+    wrap(pin: Pattern | Pattern[], actdef: Partial<ActDef>, wrapper: ActionFunc): this
+    fix(pattern: Pattern, fixedMsgProps?: Msg, customMeta?: Msg): Instance
+    translate(
+      from: Pattern,
+      to: Pattern,
+      pick?: string | string[] | Record<string, boolean>,
+      flags?: Record<string, any>,
+    ): this
+    inward(step: (spec: any) => any): this
+    outward(step: (spec: any) => any): this
+
+    // Message flow
+
+    sub(pattern: Pattern, fn: SubFunc): this
+    sub(pattern: Pattern, moreProps: Msg, fn: SubFunc): this
+    gate(): Instance
+    ungate(): this
+    delegate(fixedargs?: Msg, fixedmeta?: Msg): Instance
+
+    // Lifecycle
+
+    ready(fn: (this: Instance) => void): this
+    ready(): Promise<Instance>
+    close(done: (err?: Error | null) => void): this
+    close(): Promise<void>
+    options(): Options & Record<string, any>
+    options(opts: Options, chain?: false): Options & Record<string, any>
+    options(opts: Options, chain: true): this
+    use(plugin: Plugin, options?: Record<string, any>): this
+    decorate(name: string, value: any): void
+    prepare(fn: (this: Instance) => Promise<void> | void): this
+    destroy(fn: (this: Instance) => Promise<void> | void): this
+    init(fn: (done: (err?: Error | null) => void) => void): this
+
+    // Errors and testing
+
+    error(handler: (this: Instance, err: Error, meta?: Meta) => any): this
+    error(code: string, details?: Record<string, any>): Error
+    fail(code: string, details?: Record<string, any>): Error
+    fail(condition: boolean, code: string, details?: Record<string, any>): Error
+    test(errhandler?: ((err?: Error) => void) | string, logspec?: any): this
+    quiet(): this
+    explain(on: boolean): any[] | undefined
+    explain(entry?: any): any
+    die(err: Error): void
+
+    // Plugins
+
+    export(key: string): any
+    depends(name: string, ...deps: (string | string[])[]): void
+    list_plugins(): Record<string, PluginRecord>
+    find_plugin(name: string, tag?: string): PluginRecord | undefined
+    has_plugin(name: string, tag?: string): boolean
+    ignore_plugin(name: string, tag?: string, ignore?: boolean): this
+
+    // Inspection
+
+    has(pattern: Pattern): boolean
+    find(pattern: Pattern, flags?: { exact?: boolean }): ActDef | null
+    list(pattern?: Pattern): Msg[]
+    status(spec?: { stats?: Msg }): Record<string, any>
+    stats(msg?: Msg): Record<string, any>
+    ping(): Record<string, any>
+    idgen(): string
+
+    // Transport
+
+    listen(config?: any, callback?: (...args: any[]) => void): this
+    client(config?: any): this
+
+    // Other
+
+    seneca(): this
+    toString(): string
+
+    // Deprecated aliases. Removed in Seneca 5.
+
+    /** @deprecated Use find. */
+    findact(pattern: Pattern, flags?: { exact?: boolean }): ActDef | null
+    /** @deprecated Use find(pattern, { exact: false }), or has. */
+    hasact(pattern: Pattern): boolean
+    /** @deprecated Call act inside an if statement. */
+    act_if(execute: boolean, ...actargs: any[]): this
+    /** @deprecated Use list. */
+    findpins(...patterns: (Pattern | Pattern[])[]): Msg[]
+    /** @deprecated Use list. */
+    pinact(...patterns: (Pattern | Pattern[])[]): Msg[]
+    /** @deprecated Use list_plugins. */
+    plugins(): Record<string, PluginRecord>
+    /** @deprecated Use find_plugin. */
+    findplugin(name: string, tag?: string): PluginRecord | undefined
+    /** @deprecated Use has_plugin. */
+    hasplugin(name: string, tag?: string): boolean
+  }
+}
+
+
+export = Seneca
 
 
 // Create a new Seneca instance.
@@ -547,10 +1031,13 @@ function make_seneca(initial_opts?: any) {
   private$.error = error
 
   // Create a new root Seneca instance.
-  var root$: any = new (Seneca as any)()
+  var root$: any = new (SenecaInstance as any)()
 
   // Expose private data to plugins.
   root$.private$ = private$
+
+  // Deprecations reached without an instance (Seneca.util) report here.
+  Deprecate.track(root$)
 
   // Resolve initial options.
   private$.optioner = resolve_options(module, option_defaults, initial_opts)
@@ -608,6 +1095,16 @@ function make_seneca(initial_opts?: any) {
   root$.flags = {
     closed: false,
   }
+
+  // Deprecated alias of flags.closed. Remove in Seneca 5.
+  Object.defineProperty(root$, 'closed', {
+    get() {
+      Deprecate.deprecate(this, 'closed')
+      return this.flags.closed
+    },
+    enumerable: false,
+    configurable: true,
+  })
 
   Object.defineProperty(root$, 'root', { value: root$ })
 
@@ -668,7 +1165,7 @@ function make_seneca(initial_opts?: any) {
   root$.post = Util.promisify(root$.act) // Async version of act.
   root$.direct = Act.api_direct // Run message action synchronously.
   root$.ready = ready.api_ready // Callback when plugins initialized.
-  root$.valid = Gubu // Expose Gubu shape builders
+  root$.valid = Shape // Expose the Shape builders
   root$.prepare = API.prepare // Plugin preparation action.
   root$.destroy = API.destroy // Close Seneca instance.
 
@@ -684,16 +1181,15 @@ function make_seneca(initial_opts?: any) {
   // Non-API methods.
   // root$.register = Plugins.register(callpoint)
 
-  // DEPRECATE IN 4.x
-  root$.findact = root$.find
-  root$.plugins = API.list_plugins
-  root$.findplugin = API.find_plugin
-  root$.hasplugin = API.has_plugin
-  root$.hasact = Legacy.hasact
-  root$.act_if = Legacy.act_if
-  root$.findpins = Legacy.findpins
-  root$.pinact = Legacy.findpins
-  root$.next_act = Legacy.next_act
+  // Deprecated aliases. Remove in Seneca 5.
+  root$.findact = Deprecate.deprecated('findact', root$.find)
+  root$.plugins = Deprecate.deprecated('plugins', API.list_plugins)
+  root$.findplugin = Deprecate.deprecated('findplugin', API.find_plugin)
+  root$.hasplugin = Deprecate.deprecated('hasplugin', API.has_plugin)
+  root$.hasact = Deprecate.deprecated('hasact', Legacy.hasact)
+  root$.act_if = Deprecate.deprecated('act_if', Legacy.act_if)
+  root$.findpins = Deprecate.deprecated('findpins', Legacy.findpins)
+  root$.pinact = Deprecate.deprecated('pinact', Legacy.findpins)
 
   // Identifier generator.
   root$.idgen = Common.idnid({ length: start_opts.idlen })
@@ -763,10 +1259,11 @@ function make_seneca(initial_opts?: any) {
   }
 
   if (start_opts.stats) {
-    private$.timestats = new Stats.NamedStats(
-      start_opts.stats.size,
-      start_opts.stats.interval
-    )
+    // rolling-stats declares the clock argument as required; it defaults to
+    // Date.now.
+    private$.timestats = (
+      Stats.NamedStats as (size: number, duration: number) => any
+    )(start_opts.stats.size, start_opts.stats.interval)
 
     if (start_opts.stats.running) {
       setInterval(function stats() {

@@ -1,6 +1,8 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'gubu'
+import { MakeArgu, Any, Check, Rest, Skip } from 'shape'
+
+import { Deprecate } from './deprecate'
 
 import {
   each,
@@ -14,6 +16,7 @@ import {
   clean,
   jsonic_stringify,
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
@@ -132,7 +135,7 @@ function options(this: any, options: any, chain: any) {
 
 
 // close seneca instance
-// sets public seneca.closed property
+// sets seneca.flags.closed
 function close(callpoint: any) {
   return function api_close(this: any, done: any) {
     const seneca = this
@@ -193,7 +196,7 @@ function error(this: any, first: any) {
       err = plugin.eraro.apply(this, arguments)
     }
     else {
-      err = common_error.apply(this, arguments)
+      err = common_error.apply(this, arguments as any)
     }
 
     return err
@@ -365,6 +368,7 @@ function export$(this: any, key: any) {
 
   // Legacy aliases
   if (key === 'util') {
+    Deprecate.deprecate(this, 'export_util')
     key = 'basic'
   }
 
@@ -909,7 +913,7 @@ intern.parse_config = function(args: any) {
 
   const arglen = config.length
 
-  // TODO: use Gubu for better error msgs
+  // TODO: use Shape for better error msgs
 
   if (arglen === 1) {
     if (config[0] && 'object' === typeof config[0]) {
@@ -985,9 +989,6 @@ intern.close = function(this: any, callpoint: any, done: any) {
       return safe_done()
     }
 
-    // TODO: remove in 4.x
-    seneca.closed = true
-
     seneca.flags.closed = true
 
     // cleanup process event listeners
@@ -1031,7 +1032,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 
 const FixArgu: any = Argu('fix', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   rest: Rest(Any()),
 })

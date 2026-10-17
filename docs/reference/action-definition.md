@@ -19,7 +19,7 @@ action modifiers.
 | `fixed` | Properties merged into every message (`fixed$`). |
 | `custom` | Values merged into `meta.custom` (`custom$`). |
 | `rules` | Validation rules taken from object and function valued pattern properties, and from the action function's `validate` property. |
-| `gubu` | Compiled [Gubu](https://github.com/rjrodger/gubu) shape used to validate messages, present when the pattern had rules. |
+| `shape` | Compiled [Shape](https://github.com/rjrodger/shape) shape used to validate messages, present when the pattern had rules. |
 | `sub` | True for subscription actions (`sub$`). |
 | `client` | True for transport client actions (`client$`). |
 | `client_pattern` | For client actions, the pattern the client was registered with. |

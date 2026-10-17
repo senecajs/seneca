@@ -1,111 +1,51 @@
 /* Copyright © 2013-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Code = require('@hapi/code')
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
-var { Plugin } = require('../lib/plugin')
 
 describe('plugin', function () {
-  // TODO: move to seneca-joi
-  /*
-  it('use.intern', (fin) => {
-    expect(Plugin.intern).exists()
-
-    var Joi = Seneca.util.Joi
-
-    var spec = {
-      a: null,
-      b: void 0,
-      c: {}, // Joi.object(),
-      d: 1,
-      e: 'a',
-      f: {},
-      g: { h: 2 },
-      i: { j: { k: 3 } },
-
-      // NOTE: a simple array check is as good as it gets
-      // Use explicit Joi.array construction for detailed validation
-
-      l: [],
-      m: [4],
-      n: [[5]],
-      o: { p: [6] },
-      q: { u: [{ v: [{ w: 7 }] }] },
-    }
-
-    var out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: false })
-    // console.dir(out.describe(),{depth:null})
-    expect(out.validate(spec).error).not.exists()
-
-    out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: true })
-    //console.dir(out.describe(),{depth:null})
-
-    //console.dir(out.validate({}),{depth:null})
-    expect(out.validate({}).value).equals({
-      a: null,
-      d: 1,
-      e: 'a',
-      f: {},
-      g: { h: 2 },
-      i: { j: { k: 3 } },
-      l: [],
-      m: [4],
-      n: [[5]],
-      o: { p: [6] },
-      q: {
-        u: [{ v: [{ w: 7 }] }],
-      },
-    })
-
-    spec.z = 1
-    expect(out.validate(spec).error).not.exists()
-
-    fin()
-  })
-  */
-
-  it('plugin-edges', (fin) => {
+  it('plugin-edges', (t, fin) => {
     var s = Seneca({ debug: { undead: true } }).test(fin)
 
     try {
       s.use()
-      Code.fail('empty-use-should-throw')
+      assert.fail('empty-use-should-throw')
     } catch (e) {
-      expect(e.message).includes('seneca.use')
+      assert.ok(e.message.includes('seneca.use'))
       fin()
     }
   })
 
-  it('plugin-internal-ordu', (fin) => {
+  it('plugin-internal-ordu', (_t, fin) => {
     var s = Seneca().test(fin)
 
     var sin = s.internal()
 
     var ordu_use = sin.ordu.use
-    expect(ordu_use.tasks().map((t) => t.name)).equal([
-      'args',
-      'load',
-      'normalize',
-      'pre_options',
-      'preload',
-      'pre_meta',
-      'pre_legacy_extend',
-      'delegate',
-      'call_define',
-      'options',
-      'define',
-      'post_meta',
-      'post_legacy_extend',
-      'call_prepare',
-      'complete',
-    ])
-    expect(Object.keys(ordu_use.operators())).equal([
+    assert.deepEqual(
+      ordu_use.tasks().map((t) => t.name),
+      [
+        'args',
+        'load',
+        'normalize',
+        'pre_options',
+        'preload',
+        'pre_meta',
+        'pre_legacy_extend',
+        'delegate',
+        'call_define',
+        'options',
+        'define',
+        'post_meta',
+        'post_legacy_extend',
+        'call_prepare',
+        'complete',
+      ],
+    )
+    assert.deepEqual(Object.keys(ordu_use.operators()), [
       'next',
       'skip',
       'stop',
@@ -120,50 +60,50 @@ describe('plugin', function () {
   })
 
   // Validates that @seneca/ prefix can be dropped.
-  it('standard-test-plugin', function (fin) {
+  it('standard-test-plugin', function (t, fin) {
     Seneca()
       .test(fin)
       .quiet()
       .use('test-plugin')
       .ready(function () {
         this.act('role:test,cmd:foo,size:3', function (err, out) {
-          expect(out.foo).equal(6)
+          assert.equal(out.foo, 6)
           fin()
         })
       })
   })
 
-  it('standard-test-plugin-full-ignore', function (fin) {
+  it('standard-test-plugin-full-ignore', function (t, fin) {
     Seneca()
       .test(fin)
       .quiet()
       .ignore_plugin('@seneca/test-plugin')
       .use('@seneca/test-plugin')
       .ready(function () {
-        expect(this.has_plugin('@seneca/test-plugin')).false()
+        assert.equal(this.has_plugin('@seneca/test-plugin'), false)
         this.ignore_plugin('@seneca/test-plugin', false)
           .use('@seneca/test-plugin')
           .ready(function () {
             this.act('role:test,cmd:foo,size:3', function (err, out) {
-              expect(out.foo).equal(6)
+              assert.equal(out.foo, 6)
               fin()
             })
           })
       })
   })
 
-  it('plugin-ignore-via-options', function (fin) {
+  it('plugin-ignore-via-options', function (t, fin) {
     Seneca({ plugins: { foo: false } })
       .test(fin)
       .quiet()
       .use(function foo() {})
       .ready(function () {
-        expect(this.has_plugin('foo')).false()
+        assert.equal(this.has_plugin('foo'), false)
         fin()
       })
   })
 
-  it('plugin-ignore-null', function (fin) {
+  it('plugin-ignore-null', function (t, fin) {
     Seneca({ plugins: null })
       .test(fin)
       .quiet()
@@ -173,7 +113,7 @@ describe('plugin', function () {
       })
   })
 
-  it('plugin-delegate-init', function (fin) {
+  it('plugin-delegate-init', function (t, fin) {
     Seneca()
       .test(fin)
       .quiet()
@@ -194,19 +134,19 @@ describe('plugin', function () {
       )
       .ready(function () {
         this.act('a:1,x:2', function (err, out) {
-          expect(out).equal({ x: 2, y: 3, z: 4 })
+          assert.deepEqual(out, { x: 2, y: 3, z: 4 })
           fin()
         })
       })
   })
 
-  it('load-defaults', function (fin) {
+  it('load-defaults', function (t, fin) {
     let s0 = Seneca().test(fin)
 
     s0.use(
       {
         define: function (options) {
-          expect(options).equal({ a: 1, b: 1 })
+          assert.deepEqual(options, { a: 1, b: 1 })
         },
         defaults: {
           a: 1,
@@ -225,17 +165,17 @@ describe('plugin', function () {
       .ready(fin)
   })
 
-  it('load-relative-to-root', function (fin) {
+  it('load-relative-to-root', function (t, fin) {
     var subfolder = require('./stubs/plugin/subfolder')
     subfolder(function (out) {
-      expect(out).equal('relative-to-root')
+      assert.equal(out, 'relative-to-root')
       fin()
     })
   })
 
-  it('good-default-options', function (fin) {
+  it('good-default-options', function (t, fin) {
     var init_p1 = function (opts) {
-      expect(opts).equal({ b: 0, c: 1, d: 2 })
+      assert.deepEqual(opts, { b: 0, c: 1, d: 2 })
     }
     init_p1.defaults = {
       c: 1,
@@ -251,7 +191,7 @@ describe('plugin', function () {
         {
           name: 'p0',
           init: function (opts) {
-            expect(opts).equal({ a: 1, b: 2 })
+            assert.deepEqual(opts, { a: 1, b: 2 })
           },
           defaults: { a: 1, b: Number },
         },
@@ -273,10 +213,10 @@ describe('plugin', function () {
       .ready(fin)
   })
 
-  it('bad-default-options', function (fin) {
+  it('bad-default-options', function (t, fin) {
     Seneca({ legacy: false, debug: { undead: true } })
       .test(function (err) {
-        expect(err.code).equals('invalid_plugin_option')
+        assert.equal(err.code, 'invalid_plugin_option')
         fin()
       })
       .quiet()
@@ -284,10 +224,10 @@ describe('plugin', function () {
         {
           name: 'p0',
           init: function () {
-            Code.fail()
+            assert.fail()
           },
           defaults: {
-            a: String, // Seneca.util.Joi.string(),
+            a: String,
           },
         },
         {
@@ -295,6 +235,48 @@ describe('plugin', function () {
           b: 2,
         },
       )
+  })
+
+  // A plugin that bundles gubu builds nodes carrying gubu's marker, which
+  // shape does not accept. The load fails with a clear error instead.
+  it('gubu-default-options', function (t, fin) {
+    const gubu_node = { $: { gubu$: true, v$: '9.0.0' }, t: 'string' }
+    Seneca({ legacy: false, debug: { undead: true } })
+      .test(function (err) {
+        assert.equal(err.code, 'plugin_gubu_shape')
+        assert.match(
+          err.message,
+          /Plugin p0: its option defaults were built with gubu \(at a\.b\)/,
+        )
+        fin()
+      })
+      .quiet()
+      .use({
+        name: 'p0',
+        define: function () {
+          assert.fail()
+        },
+        defaults: { a: { b: gubu_node } },
+      })
+  })
+
+  it('gubu-default-shape', function (t, fin) {
+    // A prepared gubu shape is a function with a gubu property.
+    const gubu_shape = Object.assign(function gubu_shape() {}, { gubu: {} })
+    Seneca({ legacy: false, debug: { undead: true } })
+      .test(function (err) {
+        assert.equal(err.code, 'plugin_gubu_shape')
+        assert.match(err.message, /\(at \(root\)\)/)
+        fin()
+      })
+      .quiet()
+      .use({
+        name: 'p1',
+        define: function () {
+          assert.fail()
+        },
+        defaults: gubu_shape,
+      })
   })
 
   // TODO: move to transport
@@ -314,8 +296,8 @@ describe('plugin', function () {
         seneca.act(
           { role: 'api', cmd: 'tmpQuery', test: 'false' },
           function (err, res) {
-            expect(err).to.not.exist()
-            expect(res.message).to.contain('no errors created.')
+            assert.ifError(err)
+            assert.ok(res.message.includes('no errors created.'))
             s0.close(seneca.close.bind(seneca, fin))
           },
         )
@@ -336,8 +318,8 @@ describe('plugin', function () {
         seneca.act(
           { role: 'api', cmd: 'tmpQuery', test: 'true' },
           function (err, res) {
-            expect(err).to.not.exist()
-            expect(res.message).to.contain('error caught!')
+            assert.ifError(err)
+            assert.ok(res.message.includes('error caught!'))
             s0.close(seneca.close.bind(seneca, fin))
           },
         )
@@ -345,7 +327,7 @@ describe('plugin', function () {
   })
   */
 
-  it('works with exportmap', function (fin) {
+  it('works with exportmap', function (t, fin) {
     var seneca = Seneca.test(fin).quiet()
 
     seneca.options({
@@ -359,7 +341,7 @@ describe('plugin', function () {
         name: 'foo',
         exportmap: {
           bar: function (num) {
-            expect(num).to.equal(42)
+            assert.equal(num, 42)
             fin()
           },
         },
@@ -367,12 +349,12 @@ describe('plugin', function () {
     })
 
     seneca.ready(function () {
-      expect(typeof seneca.export('foo/bar')).to.equal('function')
+      assert.equal(typeof seneca.export('foo/bar'), 'function')
       seneca.export('foo/bar')(42)
     })
   })
 
-  it('bad', function (fin) {
+  it('bad', function (t, fin) {
     var si = Seneca({
       // this lets you change undead per test
       debug: {
@@ -384,27 +366,27 @@ describe('plugin', function () {
     try {
       si.use({ foo: 1 })
     } catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_no_name').to.equal(e.code)
+      assert.ok(null != e.seneca)
+      assert.equal('plugin_no_name', e.code)
     }
 
     try {
       si.use({ foo: 1 })
     } catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_no_name').to.equal(e.code)
+      assert.ok(null != e.seneca)
+      assert.equal('plugin_no_name', e.code)
     }
 
     try {
       si.use('not-a-plugin-at-all-at-all')
     } catch (e) {
-      expect(e.seneca).to.exist()
-      expect('plugin_not_found').to.equal(e.code)
+      assert.ok(null != e.seneca)
+      assert.equal('plugin_not_found', e.code)
     }
     si.close(fin)
   })
 
-  it('plugin-error-def', function (fin) {
+  it('plugin-error-def', function (t, fin) {
     var si = Seneca({
       debug: {
         undead: true,
@@ -412,11 +394,11 @@ describe('plugin', function () {
       log: 'silent',
       errhandler: function (err) {
         //console.log('AAA', err && err.details, err && err.seneca)
-        expect('plugin_define_failed').equal(err.code)
+        assert.equal('plugin_define_failed', err.code)
         //console.log('AAA1')
-        expect(err.details.fullname).contains('bad_plugin_def')
+        assert.ok(err.details.fullname.includes('bad_plugin_def'))
         //console.log('AAA2')
-        expect(err.details.message).contains('plugin-def')
+        assert.ok(err.details.message.includes('plugin-def'))
         //console.log('AAA3')
         fin()
       },
@@ -427,14 +409,14 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin-error-deprecated', function (fin) {
+  it('plugin-error-deprecated', function (t, fin) {
     var si = Seneca({
       debug: {
         undead: true,
       },
       log: 'silent',
       errhandler: function (err) {
-        expect('unsupported_legacy_plugin').to.equal(err.code)
+        assert.equal('unsupported_legacy_plugin', err.code)
         fin()
       },
     })
@@ -444,16 +426,16 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin-error-define-throws-non-error', function (fin) {
+  it('plugin-error-define-throws-non-error', function (t, fin) {
     var si = Seneca({
       debug: {
         undead: true,
       },
       log: 'silent',
       errhandler: function (err) {
-        expect('plugin_define_failed').equal(err.code)
-        expect(err.details.fullname).contains('bad_plugin_def_string')
-        expect(err.details.message).contains('plugin-def-string')
+        assert.equal('plugin_define_failed', err.code)
+        assert.ok(err.details.fullname.includes('bad_plugin_def_string'))
+        assert.ok(err.details.message.includes('plugin-def-string'))
         fin()
       },
     }).quiet()
@@ -463,14 +445,14 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin-error-add', function (fin) {
+  it('plugin-error-add', function (t, fin) {
     Seneca({
       debug: { undead: true },
     })
       .quiet()
       .error(function (err) {
-        expect('plugin_define_failed').to.equal(err.code)
-        expect('shape').to.equal(err.orig.code)
+        assert.equal('plugin_define_failed', err.code)
+        assert.equal('shape', err.orig.code)
         fin()
       })
       .use(function foo() {
@@ -478,15 +460,15 @@ describe('plugin', function () {
       })
   })
 
-  it('plugin-error-act', function (fin) {
+  it('plugin-error-act', function (t, fin) {
     var si = Seneca({
       debug: {
         undead: true,
       },
       log: 'silent',
       errhandler: function (err) {
-        // expect('seneca: Action foo:1 failed: act-cb.').to.equal(err.message)
-        expect('act-cb').to.equal(err.message)
+        // assert.equal('seneca: Action foo:1 failed: act-cb.', err.message)
+        assert.equal('act-cb', err.message)
         fin()
       },
     })
@@ -500,7 +482,7 @@ describe('plugin', function () {
     })
   })
 
-  it('depends', function (fin) {
+  it('depends', function (t, fin) {
     var si = Seneca({
       // this lets you change undead per test
       debug: {
@@ -520,7 +502,7 @@ describe('plugin', function () {
 
     si.options({
       errhandler: function (err) {
-        expect('plugin_required').to.equal(err.code)
+        assert.equal('plugin_required', err.code)
       },
     })
 
@@ -565,7 +547,7 @@ describe('plugin', function () {
     })
   })
 
-  it('plugin-fix', function (fin) {
+  it('plugin-fix', function (_t, fin) {
     var si = Seneca.test(fin)
 
     function echo(args, cb) {
@@ -575,7 +557,7 @@ describe('plugin', function () {
     var plugin_aaa = function aaa() {
       this.add({ a: 1 }, function (args, cb) {
         this.act('z:1', function (err, out) {
-          expect(err).to.not.exist()
+          assert.ifError(err)
           cb(null, Object.assign({ a: 1 }, out))
         })
       })
@@ -584,39 +566,39 @@ describe('plugin', function () {
     si.add({ z: 1 }, echo)
     si.use(plugin_aaa)
 
-    expect(si.hasact({ z: 1 })).true()
+    assert.equal(si.hasact({ z: 1 }), true)
 
     si.act({ a: 1 }, function (err, out) {
-      expect(err).to.not.exist()
-      expect(1).to.equal(out.a)
-      expect(1).to.equal(out.z)
-      expect(out.t).to.exist()
-      expect(si.hasact({ a: 1 })).true()
+      assert.ifError(err)
+      assert.equal(1, out.a)
+      assert.equal(1, out.z)
+      assert.ok(null != out.t)
+      assert.equal(si.hasact({ a: 1 }), true)
 
       si.fix({ q: 1 }).use(function bbb() {
         this.add({ a: 1 }, function (args, fin) {
           this.act('z:1', function (err, out) {
-            expect(err).to.not.exist()
+            assert.ifError(err)
             fin(null, Object.assign({ a: 1, w: 1 }, out))
           })
         })
       })
 
-      expect(si.hasact({ a: 1 })).true()
-      expect(si.hasact({ a: 1, q: 1 })).true()
+      assert.equal(si.hasact({ a: 1 }), true)
+      assert.equal(si.hasact({ a: 1, q: 1 }), true)
 
       si.act({ a: 1 }, function (err, out) {
-        expect(err).to.not.exist()
-        expect(1).to.equal(out.a)
-        expect(1).to.equal(out.z)
-        expect(out.t).to.exist()
+        assert.ifError(err)
+        assert.equal(1, out.a)
+        assert.equal(1, out.z)
+        assert.ok(null != out.t)
 
         si.act({ a: 1, q: 1 }, function (err, out) {
-          expect(err).to.not.exist()
-          expect(1).to.equal(out.a)
-          expect(1).to.equal(out.z)
-          expect(1).to.equal(out.w)
-          expect(out.t).to.exist()
+          assert.ifError(err)
+          assert.equal(1, out.a)
+          assert.equal(1, out.z)
+          assert.equal(1, out.w)
+          assert.ok(null != out.t)
 
           si.close(fin)
         })
@@ -624,7 +606,7 @@ describe('plugin', function () {
     })
   })
 
-  it('export', function (fin) {
+  it('export', function (t, fin) {
     var si = Seneca({
       // this lets you change undead per test
       debug: {
@@ -640,7 +622,7 @@ describe('plugin', function () {
 
     si.options({
       errhandler: function (err) {
-        expect('export_not_found').to.equal(err.code)
+        assert.equal('export_not_found', err.code)
         fin()
       },
     })
@@ -648,18 +630,18 @@ describe('plugin', function () {
     si.export('not-an-export')
   })
 
-  it('handles plugin with action that timesout', function (fin) {
+  it('handles plugin with action that timesout', function (t, fin) {
     Seneca({ log: 'silent', timeout: 10, debug: { undead: true } })
       .use(function foo() {
         this.add({ role: 'plugin', cmd: 'timeout' }, function () {})
       })
       .act({ role: 'plugin', cmd: 'timeout' }, function (err) {
-        expect(err).to.exist()
+        assert.ok(null != err)
         this.close(fin)
       })
   })
 
-  it('handles plugin action that throws an error', function (fin) {
+  it('handles plugin action that throws an error', function (t, fin) {
     var seneca = Seneca({ log: 'silent' })
 
     seneca.use(function foo() {
@@ -669,7 +651,7 @@ describe('plugin', function () {
     })
 
     seneca.act({ role: 'plugin', cmd: 'throw' }, function (err) {
-      expect(err).to.exist()
+      assert.ok(null != err)
       seneca.close(fin)
     })
   })
@@ -686,7 +668,7 @@ describe('plugin', function () {
 
   //   seneca.add({ init: 'msgstats-metrics' }, function () {
   //     seneca.act({ role: 'metrics', subscriptions: 'create' }, function (err) {
-  //       expect(err).to.not.exist()
+  //       assert.ifError(err)
   //       fin()
   //     })
   //   })
@@ -694,14 +676,14 @@ describe('plugin', function () {
   //   seneca.act({ init: 'msgstats-metrics' })
   // })
 
-  it('plugin actions receive errors in callback function', function (fin) {
+  it('plugin actions receive errors in callback function', function (t, fin) {
     var seneca = Seneca().test().quiet()
 
     seneca.fixedargs['fatal$'] = false
 
     seneca.use(function service() {
       this.add({ role: 'plugin', cmd: 'throw' }, function (args, next) {
-        expect(args.blah).to.equal('blah')
+        assert.equal(args.blah, 'blah')
         next(new Error('from action'))
       })
     })
@@ -712,8 +694,8 @@ describe('plugin', function () {
         self.act(
           { role: 'plugin', cmd: 'throw', blah: 'blah' },
           function (err) {
-            expect(err).to.exist()
-            expect(err.message).to.contain('from action')
+            assert.ok(null != err)
+            assert.ok(err.message.includes('from action'))
             fin()
           },
         )
@@ -721,7 +703,7 @@ describe('plugin', function () {
     })
   })
 
-  it('dynamic-load-sequence', function (fin) {
+  it('dynamic-load-sequence', function (t, fin) {
     var a = []
     var seneca = Seneca.test(fin)
 
@@ -747,14 +729,14 @@ describe('plugin', function () {
               d()
             })
           }).ready(function () {
-            expect(a).to.equal([1, 2, 3])
+            assert.deepEqual(a, [1, 2, 3])
             fin()
           })
         })
       })
   })
 
-  it('serial-load-sequence', function (fin) {
+  it('serial-load-sequence', function (t, fin) {
     var log = []
 
     Seneca.test(fin, 'silent')
@@ -773,12 +755,12 @@ describe('plugin', function () {
         })
       })
       .ready(function () {
-        expect(log.join('')).to.equal('abcd')
+        assert.equal(log.join(''), 'abcd')
         fin()
       })
   })
 
-  it('define-load-sequence', function (fin) {
+  it('define-load-sequence', function (t, fin) {
     var log = []
 
     Seneca.test(fin, 'silent')
@@ -788,8 +770,8 @@ describe('plugin', function () {
       })
       .act('a:1,x:4', function (err, out) {
         log.push('B')
-        expect(err).not.exist()
-        expect(out.x).equals(4)
+        assert.ifError(err)
+        assert.equal(out.x, 4)
       })
       .use(function foo() {
         log.push('C')
@@ -799,8 +781,8 @@ describe('plugin', function () {
         })
         this.act('a:1,x:2', function (err, out) {
           log.push('D')
-          expect(err).not.exist()
-          expect(out.x).equals(2)
+          assert.ifError(err)
+          assert.equal(out.x, 2)
         })
         this.add('init:foo', function (msg, reply) {
           log.push('E')
@@ -813,25 +795,25 @@ describe('plugin', function () {
           log.push('G')
           this.act('foo:1,y:3', function (err, out) {
             log.push('H')
-            expect(err).not.exist()
-            expect(out.y).equals(3)
+            assert.ifError(err)
+            assert.equal(out.y, 3)
             reply()
           })
         })
       })
       .act('a:1,x:5', function (err, out) {
         log.push('J')
-        expect(err).not.exist()
-        expect(out.x).equals(5)
+        assert.ifError(err)
+        assert.equal(out.x, 5)
       })
       .ready(function () {
         log.push('K')
-        expect(log.join('')).to.equal('AB CADE FGIH AJ K'.replace(/ /g, ''))
+        assert.equal(log.join(''), 'AB CADE FGIH AJ K'.replace(/ /g, ''))
         fin()
       })
   })
 
-  it('plugin options can be modified by plugins during load sequence', function (fin) {
+  it('plugin options can be modified by plugins during load sequence', function (t, fin) {
     var seneca = Seneca({
       log: 'test',
       plugin: {
@@ -846,27 +828,27 @@ describe('plugin', function () {
 
     seneca
       .use(function foo(opts) {
-        expect(opts.x).to.equal(1)
+        assert.equal(opts.x, 1)
         this.add('init:foo', function (msg, reply) {
           this.options({ plugin: { bar: { y: 3 } } })
           reply()
         })
       })
       .use(function bar(opts) {
-        expect(opts.x).to.equal(2)
-        expect(opts.y).to.equal(3)
+        assert.equal(opts.x, 2)
+        assert.equal(opts.y, 3)
         this.add('init:bar', function (msg, reply) {
           reply()
         })
       })
       .ready(function () {
-        expect(seneca.options().plugin.foo).to.equal({ x: 1 })
-        expect(seneca.options().plugin.bar).to.equal({ x: 2, y: 3 })
+        assert.deepEqual(seneca.options().plugin.foo, { x: 1 })
+        assert.deepEqual(seneca.options().plugin.bar, { x: 2, y: 3 })
         fin()
       })
   })
 
-  it('plugin options can be modified by plugins during init sequence', function (fin) {
+  it('plugin options can be modified by plugins during init sequence', function (t, fin) {
     var seneca = Seneca({
       log: 'silent',
       plugin: {
@@ -882,7 +864,7 @@ describe('plugin', function () {
 
     seneca
       .use(function foo(options) {
-        expect(options.x).to.equal(1)
+        assert.equal(options.x, 1)
         this.add('init:foo', function (msg, cb) {
           this.options({ plugin: { foo: { y: 3 } } })
           cb()
@@ -890,7 +872,7 @@ describe('plugin', function () {
       })
       .use(function bar() {
         this.add('init:bar', function (msg, cb) {
-          expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
+          assert.deepEqual(seneca.options().plugin.foo, { x: 1, y: 3 })
           this.options({ plugin: { bar: { y: 4 } } })
           cb()
         })
@@ -909,9 +891,9 @@ describe('plugin', function () {
         })
       })
       .ready(function () {
-        expect(seneca.options().plugin.foo).to.equal({ x: 1, y: 3 })
-        expect(seneca.options().plugin.bar).to.equal({ x: 2, y: 4 })
-        expect(seneca.options().plugin.foobar).to.equal({
+        assert.deepEqual(seneca.options().plugin.foo, { x: 1, y: 3 })
+        assert.deepEqual(seneca.options().plugin.bar, { x: 2, y: 4 })
+        assert.deepEqual(seneca.options().plugin.foobar, {
           foo: { x: 1, y: 3 },
           bar: { x: 2, y: 4 },
         })
@@ -919,7 +901,7 @@ describe('plugin', function () {
       })
   })
 
-  it('plugin init can add actions for future init actions to call', function (fin) {
+  it('plugin init can add actions for future init actions to call', function (t, fin) {
     var seneca = Seneca.test(fin, 'silent')
 
     seneca
@@ -934,20 +916,20 @@ describe('plugin', function () {
       .use(function bar() {
         this.add('init:bar', function (msg, cb) {
           this.act({ role: 'test', cmd: 'foo' }, function (err, result) {
-            expect(err).to.not.exist()
-            expect(result.success).true()
+            assert.ifError(err)
+            assert.equal(result.success, true)
             seneca.success = true
             cb()
           })
         })
       })
       .ready(function () {
-        expect(seneca.success).true()
+        assert.equal(seneca.success, true)
         fin()
       })
   })
 
-  it('plugin-init-error', function (fin) {
+  it('plugin-init-error', function (t, fin) {
     var si = Seneca({ log: 'silent', debug: { undead: true } })
       .error(function (err) {
         fin()
@@ -959,7 +941,7 @@ describe('plugin', function () {
       })
   })
 
-  it('plugin-extend-action-modifier', function (fin) {
+  it('plugin-extend-action-modifier', function (t, fin) {
     var si = Seneca({ legacy: false, log: 'silent' })
       .test()
       .use(function foo() {
@@ -978,20 +960,20 @@ describe('plugin', function () {
         this.add('a:1', function (msg, reply) {
           reply({ x: msg.x })
         }).act('a:1,x:1', function (err, out) {
-          expect(err).not.exist()
-          expect(out.x).equal(1)
+          assert.ifError(err)
+          assert.equal(out.x, 1)
 
           this.act('a:1,y:1', function (err, out) {
-            expect(out).not.exist()
-            expect(err).exist()
-            expect(err.code).equal('act_invalid_msg')
+            assert.ok(null == out)
+            assert.ok(null != err)
+            assert.equal(err.code, 'act_invalid_msg')
             fin()
           })
         })
       })
   })
 
-  it('plugin-extend-logger', function (fin) {
+  it('plugin-extend-logger', function (t, fin) {
     var si = Seneca({ log: 'silent' })
       .use(function foo() {
         return {
@@ -1006,7 +988,7 @@ describe('plugin', function () {
       .ready(fin)
   })
 
-  it('plugins-from-options', function (fin) {
+  it('plugins-from-options', function (t, fin) {
     var tmp = {}
     var si = Seneca({
       log: 'silent',
@@ -1032,20 +1014,20 @@ describe('plugin', function () {
       .test(fin)
       .quiet()
       .ready(function () {
-        expect(Object.keys(this.plugins()).length).equal(4)
-        expect(tmp).equal({ foo: 1, bar: 1, zed: 1 })
+        assert.equal(Object.keys(this.plugins()).length, 4)
+        assert.deepEqual(tmp, { foo: 1, bar: 1, zed: 1 })
         fin()
       })
   })
 
-  it('plugins-from-bad-options', function (fin) {
+  it('plugins-from-bad-options', function (t, fin) {
     var si = Seneca({
       debug: { undead: true },
     })
       .test(function (err) {
         // TODO: updated use-plugin should give error explaining that
         // no `define` function exists in plugin spec
-        expect(err).exist()
+        assert.ok(null != err)
         fin()
       })
       .quiet()
@@ -1054,7 +1036,7 @@ describe('plugin', function () {
       })
   })
 
-  it('plugins-options-precedence', function (fin) {
+  it('plugins-options-precedence', function (t, fin) {
     var si = Seneca({
       legacy: false,
       debug: { undead: true },
@@ -1065,7 +1047,7 @@ describe('plugin', function () {
     }).test(fin)
 
     function bar(opts) {
-      expect(opts).equal({ a: 3, b: 1, c: 1, d: 1 })
+      assert.deepEqual(opts, { a: 3, b: 1, c: 1, d: 1 })
     }
     bar.defaults = { a: 1, b: 1, c: 1, d: 1 }
 
@@ -1074,7 +1056,7 @@ describe('plugin', function () {
         name: 'foo',
         defaults: { a: 1, b: 1, c: 1, d: 1 },
         init: function (opts) {
-          expect(opts).equal({ a: 2, b: 2, c: 3, d: 1 })
+          assert.deepEqual(opts, { a: 2, b: 2, c: 3, d: 1 })
         },
       },
       { b: 2, c: 3, d: 1 },
@@ -1082,7 +1064,7 @@ describe('plugin', function () {
       .use(bar, { a: 3, d: 1 })
 
       .ready(function () {
-        expect(this.options().plugin).equal({
+        assert.deepEqual(this.options().plugin, {
           bar: { a: 3, c: 1, d: 1, b: 1 },
           foo: { a: 2, c: 3, b: 2, d: 1 },
         })
@@ -1090,12 +1072,12 @@ describe('plugin', function () {
       })
   })
 
-  it('error-plugin-define', function (fin) {
+  it('error-plugin-define', function (t, fin) {
     var s0 = Seneca({ legacy: false, log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
       try {
-        expect(err.code).equal('e0')
-        expect(err.message).contains('a is 1')
+        assert.equal(err.code, 'e0')
+        assert.ok(err.message.includes('a is 1'))
         fin()
       } catch (e) {
         fin(e)
@@ -1112,12 +1094,12 @@ describe('plugin', function () {
     s0.use(p0)
   })
 
-  it('error-plugin-init', function (fin) {
+  it('error-plugin-init', function (t, fin) {
     var s0 = Seneca({ log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
       try {
-        expect(err.code).equal('e0')
-        expect(err.message).contains('a is 1')
+        assert.equal(err.code, 'e0')
+        assert.ok(err.message.includes('a is 1'))
         fin()
       } catch (e) {
         fin(e)
@@ -1136,7 +1118,7 @@ describe('plugin', function () {
     s0.use(p0)
   })
 
-  it('error-plugin-action', function (fin) {
+  it('error-plugin-action', function (t, fin) {
     var s0 = Seneca({ log: 'silent', debug: { undead: true } })
 
     var p0 = function p0() {
@@ -1150,8 +1132,8 @@ describe('plugin', function () {
 
     s0.use(p0).act('a:1', function (err) {
       try {
-        expect(err.code).equal('e0')
-        expect(err.message).contains('a is 1')
+        assert.equal(err.code, 'e0')
+        assert.ok(err.message.includes('a is 1'))
         fin()
       } catch (e) {
         fin(e)
@@ -1159,43 +1141,43 @@ describe('plugin', function () {
     })
   })
 
-  it('no-name', function (fin) {
+  it('no-name', function (t, fin) {
     var s0 = Seneca().test(fin)
     s0.use(function () {})
     s0.use('./stubs/plugin/no-name.js')
     s0.use(__dirname + '/stubs/plugin/no-name.js')
     s0.ready(function () {
-      expect(Object.keys(s0.list_plugins()).length).equal(4)
+      assert.equal(Object.keys(s0.list_plugins()).length, 4)
       fin()
     })
   })
 
-  it('plugin-order-task-args', function (fin) {
+  it('plugin-order-task-args', function (t, fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
     var args_task = s0.order.plugin.task.args
-    expect(args_task.name).equals('args')
+    assert.equal(args_task.name, 'args')
 
     var out = args_task.exec({ ctx: { args: [] } })
-    expect(out).equal({ op: 'merge', out: { plugin: { args: [] } } })
+    assert.deepEqual(out, { op: 'merge', out: { plugin: { args: [] } } })
 
     out = args_task.exec({ ctx: { args: ['foo'] } })
-    expect(out).equal({ op: 'merge', out: { plugin: { args: ['foo'] } } })
+    assert.deepEqual(out, { op: 'merge', out: { plugin: { args: ['foo'] } } })
 
     function a() {}
     out = args_task.exec({ ctx: { args: [a] } })
-    expect(out).equal({ op: 'merge', out: { plugin: { args: [a] } } })
+    assert.deepEqual(out, { op: 'merge', out: { plugin: { args: [a] } } })
 
     var b = {}
     out = args_task.exec({ ctx: { args: [b] } })
-    expect(out).equal({
+    assert.deepEqual(out, {
       op: 'merge',
       out: { plugin: { args: [{ init: void 0 }] } },
     })
 
     var b = { define: a }
     out = args_task.exec({ ctx: { args: [b] } })
-    expect(out).equal({
+    assert.deepEqual(out, {
       op: 'merge',
       out: { plugin: { args: [{ init: a, define: a }] } },
     })
@@ -1203,7 +1185,7 @@ describe('plugin', function () {
     fin()
   })
 
-  it('plugin-defaults-function', function (fin) {
+  it('plugin-defaults-function', function (t, fin) {
     var s0 = Seneca().test(fin)
 
     s0.use(
@@ -1215,19 +1197,19 @@ describe('plugin', function () {
           }
         },
         define: function p0(options) {
-          expect(options).equal({ x: 1, y: 'Y' })
+          assert.deepEqual(options, { x: 1, y: 'Y' })
         },
       },
       { x: 1 },
     )
 
     s0.ready(function () {
-      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      assert.deepEqual(s0.options().plugin.p0, { x: 1, y: 'Y' })
       fin()
     })
   })
 
-  it('plugin-defaults-valid-plain', function (fin) {
+  it('plugin-defaults-valid-plain', function (t, fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
     s0.use(
@@ -1237,19 +1219,19 @@ describe('plugin', function () {
           y: 'Y',
         },
         define: function p0(options) {
-          expect(options).equal({ x: 1, y: 'Y' })
+          assert.deepEqual(options, { x: 1, y: 'Y' })
         },
       },
       { x: 1 },
     )
 
     s0.ready(function () {
-      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      assert.deepEqual(s0.options().plugin.p0, { x: 1, y: 'Y' })
       fin()
     })
   })
 
-  it('plugin-defaults-valid-prepared', function (fin) {
+  it('plugin-defaults-valid-prepared', function (t, fin) {
     var s0 = Seneca({ legacy: false }).test(fin)
 
     s0.use(
@@ -1259,62 +1241,62 @@ describe('plugin', function () {
           y: 'Y',
         }),
         define: function p0(options) {
-          expect(options).equal({ x: 1, y: 'Y' })
+          assert.deepEqual(options, { x: 1, y: 'Y' })
         },
       },
       { x: 1 },
     )
 
     s0.ready(function () {
-      expect(s0.options().plugin.p0).equal({ x: 1, y: 'Y' })
+      assert.deepEqual(s0.options().plugin.p0, { x: 1, y: 'Y' })
       fin()
     })
   })
 
-  it('delegate-plugin-access', function (fin) {
+  it('delegate-plugin-access', function (t, fin) {
     function p1(opts) {
-      expect(opts.foo).equal(1)
-      expect(opts.ned).not.exist()
-      expect(this.plugin.name).equal('p1')
-      expect(this.context.qaz).equal(3)
+      assert.equal(opts.foo, 1)
+      assert.ok(null == opts.ned)
+      assert.equal(this.plugin.name, 'p1')
+      assert.equal(this.context.qaz, 3)
       this.shared.bar = 2
 
       this.add('a:1', function a1(msg, reply) {
-        expect(this.shared.bar).equal(2)
-        expect(this.shared.bob).not.exist()
-        expect(this.plugin.name).equal('p1')
-        expect(this.plugin.options.foo).equal(1)
-        expect(this.plugin.options.ned).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bar, 2)
+        assert.ok(null == this.shared.bob)
+        assert.equal(this.plugin.name, 'p1')
+        assert.equal(this.plugin.options.foo, 1)
+        assert.ok(null == this.plugin.options.ned)
+        assert.equal(this.context.qaz, 3)
         return reply({ x: 1 + msg.x })
       })
 
       this.add('b:1', function b1(msg, reply) {
-        expect(this.shared.bar).equal(2)
-        expect(this.plugin.name).equal('p1')
-        expect(this.plugin.options.foo).equal(1)
-        expect(this.plugin.options.ned).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bar, 2)
+        assert.equal(this.plugin.name, 'p1')
+        assert.equal(this.plugin.options.foo, 1)
+        assert.ok(null == this.plugin.options.ned)
+        assert.equal(this.context.qaz, 3)
         this.act('a:1', { x: msg.x }, function (err, out) {
           return reply({ x: 2 * out.x })
         })
       })
 
       this.add('c:1', function c1(msg, reply) {
-        expect(this.shared.bar).equal(2)
-        expect(this.plugin.name).equal('p1')
-        expect(this.plugin.options.foo).equal(1)
-        expect(this.plugin.options.ned).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bar, 2)
+        assert.equal(this.plugin.name, 'p1')
+        assert.equal(this.plugin.options.foo, 1)
+        assert.ok(null == this.plugin.options.ned)
+        assert.equal(this.context.qaz, 3)
         return reply({ x: 2 * msg.x })
       })
 
       this.add('c:1', function c1p(msg, reply) {
-        expect(this.shared.bar).equal(2)
-        expect(this.plugin.name).equal('p1')
-        expect(this.plugin.options.foo).equal(1)
-        expect(this.plugin.options.ned).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bar, 2)
+        assert.equal(this.plugin.name, 'p1')
+        assert.equal(this.plugin.options.foo, 1)
+        assert.ok(null == this.plugin.options.ned)
+        assert.equal(this.context.qaz, 3)
         this.prior(msg, function (err, out) {
           return reply({ x: 5 * out.x })
         })
@@ -1323,39 +1305,39 @@ describe('plugin', function () {
 
     // Should not overlap with p1
     function p2(opts) {
-      expect(opts.foo).not.exist()
-      expect(opts.ned).equal(4)
-      expect(this.plugin.name).equal('p2')
-      expect(this.context.qaz).equal(3)
+      assert.ok(null == opts.foo)
+      assert.equal(opts.ned, 4)
+      assert.equal(this.plugin.name, 'p2')
+      assert.equal(this.context.qaz, 3)
       this.shared.bob = 5
 
       this.add('d:1', function d1(msg, reply) {
-        expect(this.shared.bob).equal(5)
-        expect(this.shared.bar).not.exist()
-        expect(this.plugin.name).equal('p2')
-        expect(this.plugin.options.ned).equal(4)
-        expect(this.plugin.options.foo).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bob, 5)
+        assert.ok(null == this.shared.bar)
+        assert.equal(this.plugin.name, 'p2')
+        assert.equal(this.plugin.options.ned, 4)
+        assert.ok(null == this.plugin.options.foo)
+        assert.equal(this.context.qaz, 3)
         return reply({ x: 3 * msg.x })
       })
 
       // Calls other plugin
       this.add('e:1', function e1(msg, reply) {
-        expect(this.shared.bob).equal(5)
-        expect(this.shared.bar).not.exist()
-        expect(this.plugin.name).equal('p2')
-        expect(this.plugin.options.ned).equal(4)
-        expect(this.plugin.options.foo).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bob, 5)
+        assert.ok(null == this.shared.bar)
+        assert.equal(this.plugin.name, 'p2')
+        assert.equal(this.plugin.options.ned, 4)
+        assert.ok(null == this.plugin.options.foo)
+        assert.equal(this.context.qaz, 3)
 
         this.act('a:1', { x: msg.x }, function (err, out) {
           // Back to p1 context
-          expect(this.shared.bar).equal(2)
-          expect(this.shared.bob).not.exist()
-          expect(this.plugin.name).equal('p1')
-          expect(this.plugin.options.foo).equal(1)
-          expect(this.plugin.options.ned).not.exist()
-          expect(this.context.qaz).equal(3)
+          assert.equal(this.shared.bar, 2)
+          assert.ok(null == this.shared.bob)
+          assert.equal(this.plugin.name, 'p1')
+          assert.equal(this.plugin.options.foo, 1)
+          assert.ok(null == this.plugin.options.ned)
+          assert.equal(this.context.qaz, 3)
 
           reply({ x: 0.5 + out.x })
         })
@@ -1368,23 +1350,23 @@ describe('plugin', function () {
     s0.use(p2, { ned: 4 })
 
     s0.add('q:1', function q1(msg, reply) {
-      expect(this.context.qaz).equal(3)
-      expect(this.plugin.name).equal('root$')
-      expect(this.plugin.options.foo).not.exist()
-      expect(this.plugin.options.ned).not.exist()
-      expect(this.shared.bob).not.exist()
-      expect(this.shared.bar).not.exist()
+      assert.equal(this.context.qaz, 3)
+      assert.equal(this.plugin.name, 'root$')
+      assert.ok(null == this.plugin.options.foo)
+      assert.ok(null == this.plugin.options.ned)
+      assert.ok(null == this.shared.bob)
+      assert.ok(null == this.shared.bar)
 
       reply({ x: 0.1 + msg.x })
     })
 
     s0.add('w:1', function w1(msg, reply) {
-      expect(this.context.qaz).equal(3)
-      expect(this.plugin.name).equal('root$')
-      expect(this.plugin.options.foo).not.exist()
-      expect(this.plugin.options.ned).not.exist()
-      expect(this.shared.bob).not.exist()
-      expect(this.shared.bar).not.exist()
+      assert.equal(this.context.qaz, 3)
+      assert.equal(this.plugin.name, 'root$')
+      assert.ok(null == this.plugin.options.foo)
+      assert.ok(null == this.plugin.options.ned)
+      assert.ok(null == this.shared.bob)
+      assert.ok(null == this.shared.bar)
 
       this.act('e:1', { x: msg.x }, function (err, out) {
         reply({ x: 0.2 + out.x })
@@ -1395,30 +1377,30 @@ describe('plugin', function () {
 
     function p1_test() {
       s0.act({ a: 1, x: 2 }, function (err, out) {
-        expect(out).equal({ x: 3 })
+        assert.deepEqual(out, { x: 3 })
 
         // Callback has plugin action context
-        expect(this.shared.bar).equal(2)
-        expect(this.plugin.name).equal('p1')
-        expect(this.plugin.options.foo).equal(1)
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bar, 2)
+        assert.equal(this.plugin.name, 'p1')
+        assert.equal(this.plugin.options.foo, 1)
+        assert.equal(this.context.qaz, 3)
 
         s0.act({ b: 1, x: 2 }, function (err, out) {
-          expect(out).equal({ x: 6 })
+          assert.deepEqual(out, { x: 6 })
 
-          expect(this.shared.bar).equal(2)
-          expect(this.plugin.name).equal('p1')
-          expect(this.plugin.options.foo).equal(1)
-          expect(this.context.qaz).equal(3)
+          assert.equal(this.shared.bar, 2)
+          assert.equal(this.plugin.name, 'p1')
+          assert.equal(this.plugin.options.foo, 1)
+          assert.equal(this.context.qaz, 3)
 
           s0.act({ c: 1, x: 2 }, function (err, out) {
-            expect(out).equal({ x: 20 })
+            assert.deepEqual(out, { x: 20 })
 
             // Callback has plugin action context
-            expect(this.shared.bar).equal(2)
-            expect(this.plugin.name).equal('p1')
-            expect(this.plugin.options.foo).equal(1)
-            expect(this.context.qaz).equal(3)
+            assert.equal(this.shared.bar, 2)
+            assert.equal(this.plugin.name, 'p1')
+            assert.equal(this.plugin.options.foo, 1)
+            assert.equal(this.context.qaz, 3)
 
             p2_test()
           })
@@ -1428,25 +1410,25 @@ describe('plugin', function () {
 
     function p2_test() {
       s0.act({ d: 1, x: 2 }, function (err, out) {
-        expect(out).equal({ x: 6 })
+        assert.deepEqual(out, { x: 6 })
 
-        expect(this.shared.bob).equal(5)
-        expect(this.shared.bar).not.exist()
-        expect(this.plugin.name).equal('p2')
-        expect(this.plugin.options.ned).equal(4)
-        expect(this.plugin.options.foo).not.exist()
-        expect(this.context.qaz).equal(3)
+        assert.equal(this.shared.bob, 5)
+        assert.ok(null == this.shared.bar)
+        assert.equal(this.plugin.name, 'p2')
+        assert.equal(this.plugin.options.ned, 4)
+        assert.ok(null == this.plugin.options.foo)
+        assert.equal(this.context.qaz, 3)
 
         s0.act({ e: 1, x: 2 }, function (err, out) {
-          expect(out).equal({ x: 3.5 })
+          assert.deepEqual(out, { x: 3.5 })
 
           // p2 context!!!
-          expect(this.shared.bob).equal(5)
-          expect(this.shared.bar).not.exist()
-          expect(this.plugin.name).equal('p2')
-          expect(this.plugin.options.ned).equal(4)
-          expect(this.plugin.options.foo).not.exist()
-          expect(this.context.qaz).equal(3)
+          assert.equal(this.shared.bob, 5)
+          assert.ok(null == this.shared.bar)
+          assert.equal(this.plugin.name, 'p2')
+          assert.equal(this.plugin.options.ned, 4)
+          assert.ok(null == this.plugin.options.foo)
+          assert.equal(this.context.qaz, 3)
 
           root$_test()
         })
@@ -1455,24 +1437,24 @@ describe('plugin', function () {
 
     function root$_test() {
       s0.act('q:1,x:2', function (err, out) {
-        expect(out.x).equal(2.1)
+        assert.equal(out.x, 2.1)
 
-        expect(this.context.qaz).equal(3)
-        expect(this.plugin.name).equal('root$')
-        expect(this.plugin.options.foo).not.exist()
-        expect(this.plugin.options.ned).not.exist()
-        expect(this.shared.bob).not.exist()
-        expect(this.shared.bar).not.exist()
+        assert.equal(this.context.qaz, 3)
+        assert.equal(this.plugin.name, 'root$')
+        assert.ok(null == this.plugin.options.foo)
+        assert.ok(null == this.plugin.options.ned)
+        assert.ok(null == this.shared.bob)
+        assert.ok(null == this.shared.bar)
 
         s0.act('w:1,x:2', function (err, out) {
-          expect(out.x).equal(3.7)
+          assert.equal(out.x, 3.7)
 
-          expect(this.context.qaz).equal(3)
-          expect(this.plugin.name).equal('root$')
-          expect(this.plugin.options.foo).not.exist()
-          expect(this.plugin.options.ned).not.exist()
-          expect(this.shared.bob).not.exist()
-          expect(this.shared.bar).not.exist()
+          assert.equal(this.context.qaz, 3)
+          assert.equal(this.plugin.name, 'root$')
+          assert.ok(null == this.plugin.options.foo)
+          assert.ok(null == this.plugin.options.ned)
+          assert.ok(null == this.shared.bob)
+          assert.ok(null == this.shared.bar)
 
           fin()
         })
@@ -1480,7 +1462,7 @@ describe('plugin', function () {
     }
   })
 
-  it('plugin-options-no-defaults', function (fin) {
+  it('plugin-options-no-defaults', function (t, fin) {
     const tmp = {}
     const p0 = (opts) => {
       Object.assign(tmp, opts)
@@ -1489,12 +1471,12 @@ describe('plugin', function () {
       .test()
       .use(p0, { x: 1 })
       .ready(function () {
-        expect(tmp.x).equals(1)
+        assert.equal(tmp.x, 1)
         fin()
       })
   })
 
-  it('plugin-options-valid-general-inactive', function (fin) {
+  it('plugin-options-valid-general-inactive', function (t, fin) {
     const tmp = {}
     const p0 = (opts) => {
       Object.assign(tmp, opts)
@@ -1504,12 +1486,12 @@ describe('plugin', function () {
       .test()
       .use(p0, { x: 1 })
       .ready(function () {
-        expect(tmp.x).equals(1)
+        assert.equal(tmp.x, 1)
         fin()
       })
   })
 
-  it('plugin-options-valid-plugin-inactive', function (fin) {
+  it('plugin-options-valid-plugin-inactive', function (t, fin) {
     const tmp = {}
     const p0 = (opts) => {
       Object.assign(tmp, opts)
@@ -1519,12 +1501,12 @@ describe('plugin', function () {
       .test()
       .use(p0, { x: 1 })
       .ready(function () {
-        expect(tmp.x).equals(1)
+        assert.equal(tmp.x, 1)
         fin()
       })
   })
 
-  it('plugin-options-directives-with-defaults', function (fin) {
+  it('plugin-options-directives-with-defaults', function (t, fin) {
     // init$ and defined$ are loading directives, not plugin options, so a
     // plugin with defaults accepts them.
     const seen = { options: null, init: 0, defined: 0 }
@@ -1542,15 +1524,15 @@ describe('plugin', function () {
       .use(p0, { a: 2, init$: false, defined$: () => seen.defined++ })
 
     seneca.ready(function () {
-      expect(seen.options).equal({ a: 2 })
-      expect(seen.init).equal(0)
-      expect(seen.defined).equal(1)
-      expect(seneca.options().plugin.p0.init$).equal(false)
+      assert.deepEqual(seen.options, { a: 2 })
+      assert.equal(seen.init, 0)
+      assert.equal(seen.defined, 1)
+      assert.equal(seneca.options().plugin.p0.init$, false)
       fin()
     })
   })
 
-  it('plugin-options-inited-tag-directives-with-defaults', function (fin) {
+  it('plugin-options-inited-tag-directives-with-defaults', function (t, fin) {
     let inited = 0
     const p0 = function p0(opts) {
       this.init(function (reply) {
@@ -1564,8 +1546,8 @@ describe('plugin', function () {
       .use(p0, { tag$: 't0', inited$: () => inited++ })
 
     seneca.ready(function () {
-      expect(inited).equal(1)
-      expect(seneca.has_plugin('p0', 't0')).true()
+      assert.equal(inited, 1)
+      assert.equal(seneca.has_plugin('p0', 't0'), true)
       fin()
     })
   })

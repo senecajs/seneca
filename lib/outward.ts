@@ -1,9 +1,9 @@
 /* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Util = require('util')
+import Util from 'util'
 
-var Common = require('./common')
+import Common = require('./common')
 
 // Internal implementations.
 var intern: any = {}
@@ -355,9 +355,9 @@ intern.act_error = function(instance: any, ctx: any, data: any) {
   }
 
   instance.log.error(entry)
-  instance.emit('act-err', 'action', msg, meta, err)
+  instance.emit('act-err', 'callback', msg, meta, err)
 
-  // Seneca 4 arguments
+  // Deprecated alias of act-err, with the same arguments. Remove in Seneca 5.
   instance.emit('act-err-4', 'callback', msg, meta, err)
 
   // when fatal$ is set, prefer to die instead

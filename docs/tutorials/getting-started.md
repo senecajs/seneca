@@ -7,7 +7,7 @@ programs are in [docs/examples/getting-started](../examples/getting-started/).
 
 ## 1. Install
 
-Seneca needs Node.js 22 or later (24 is recommended). In a new
+Seneca needs Node.js 24 or later. In a new
 directory:
 
 ```sh

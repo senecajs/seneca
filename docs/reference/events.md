@@ -11,8 +11,8 @@ can be called on any instance or delegate.
 | `close` | none | During `seneca.close()`, emitted by the builtin `sys:seneca,cmd:close` action before plugin close hooks run. |
 | `act-in` | `(msg, null, meta)` | A message has passed inward processing and its action is about to run. |
 | `act-out` | `(msg, result, meta)` | An action replied without error. |
-| `act-err` | `('action', msg, meta, err)` or `('callback', msg, meta, err, result)` | An action failed (threw, replied an error, or timed out), or the caller's callback threw. |
-| `act-err-4` | as `act-err`, first argument always `'callback'` | Emitted alongside `act-err`; reserved for a future argument layout. |
+| `act-err` | `('callback', msg, meta, err)` or `('callback', msg, meta, err, result)` | An action failed (threw, replied an error, or timed out): `err` is the original error. Or the caller's callback threw: `err` has code `act_callback` and `result` is what the callback was given. |
+| `act-err-4` | as `act-err` | Deprecated: emitted alongside `act-err` with the same arguments, and removed in Seneca 5. Seneca 3.32 added it to preview the Seneca 4 layout, which `act-err` now uses. |
 | `error` | `(err)` | Bound to `seneca.die`: emitting `error` is a fatal error. |
 
 `seneca.close()` removes all listeners for `act-in`, `act-out`,

@@ -62,8 +62,8 @@ later plugins and messages still proceed.
 ## Callback errors
 
 If the caller's own callback throws, the failure belongs to the caller,
-not the action. Seneca logs it, emits `act-err` with kind `callback`,
-wraps it as `act_callback`, and passes it to the error handler. It is
+not the action. Seneca logs it, wraps it as `act_callback`, emits
+`act-err` with the result as the fifth argument, and passes it to the error handler. It is
 not sent back into the action.
 
 ## Where to handle what

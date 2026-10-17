@@ -3,7 +3,9 @@
 Seneca 4 keeps a number of Seneca 3 names and behaviours for
 compatibility. They are listed here so that code using them can be
 recognized and updated; new code should use the Seneca 4 equivalents.
-See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
+Most are deprecated: they report a deprecation warning when used (see
+[Deprecation warnings](#deprecation-warnings)) and are removed in
+Seneca 5. See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 
 ## Instance method aliases
 
@@ -16,7 +18,7 @@ See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 | `seneca.plugins()` | `seneca.list_plugins()` | |
 | `seneca.findplugin(name, tag)` | `seneca.find_plugin(name, tag)` | |
 | `seneca.hasplugin(name, tag)` | `seneca.has_plugin(name, tag)` | |
-| `seneca.next_act` | none | Removed; the property is undefined. |
+| `seneca.next_act` | none | Removed. |
 | `seneca.closed` | `seneca.flags.closed` | Set to true by `close()`. |
 | `seneca.export('util')` | `seneca.export('basic')` | `util` is mapped to `basic`. |
 
@@ -24,9 +26,10 @@ See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 
 | Legacy | Notes |
 | ------ | ----- |
-| `Seneca.loghandler` | Removed; undefined. Use the `logger` option. |
+| `Seneca.loghandler` | Removed. Use the `logger` option. |
 | `Seneca.util.flatten(list, prop)` | Flattens a linked list of objects by property. |
 | `Seneca.util.deepextend` | Alias of `Seneca.util.deep`. |
+| `Seneca.util.Gubu` | Alias of `Seneca.util.Shape` (Shape is the renamed successor of Gubu). |
 
 ## Options
 
@@ -35,8 +38,9 @@ See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 | `legacy.builtin_actions: true` | Register `role:seneca,cmd:ping`, `role:seneca,cmd:stats`, `role:seneca,cmd:close`, `role:seneca,info:fatal` and `role:seneca,get:options` alongside the `sys:seneca` actions. A direct call of `role:seneca,cmd:close` emits the `close` event as in Seneca 3. |
 | `legacy.meta: true` | Attach meta data to messages as `msg.meta$` and pass it to transport client `send` functions, as Seneca 3 transports expect. |
 | `legacy.error` | Forced to false; the Seneca 3 error format is not available. |
+| `legacy.actdef`, `action_signature`, `error_codes`, `fail`, `logging`, `meta_arg_remove`, `options`, `rules`, `timeout_string`, `top_plugins`, `transport` | Seneca 3 flags, removed. Accepted and ignored so that Seneca 3 configurations load. |
 | `legacy: false` | Sets all legacy flags to false. |
-| `deathdelay` | Replaced by `death_delay`. |
+| `deathdelay` | Replaced by `death_delay`; used as `death_delay` when that is not set. |
 | `reload$: true` | With `seneca.options({ reload$: true, ... })`, options are recomputed from all sources. |
 
 ## Plugin definitions
@@ -77,3 +81,51 @@ with `perm/` are passed through unchanged (seneca-perm).
 When the entity plugin is loaded (`seneca.make$` exists), results and
 inbound transport messages carrying `entity$` are converted into entity
 objects.
+
+## Actions and events
+
+* Action definitions carry the compiled message shape as `shape`; `gubu`
+  is an alias.
+* The `act-err-4` event is emitted alongside `act-err` with the same
+  arguments. It previewed the Seneca 4 layout in Seneca 3.32.
+
+## Deprecation warnings
+
+Each deprecated name or behaviour reports a deprecation the first time it
+is used in a process, on two channels:
+
+* a Node.js `DeprecationWarning` with a `SENECA_DEP_*` code, so that
+  `node --trace-deprecation` shows where it is used,
+  `--throw-deprecation` makes it an error, and `--no-deprecation` hides
+  it;
+* a warn-level Seneca log entry `{ kind: 'notice', case: 'DEPRECATED',
+  code, notice }`.
+
+The option `debug: { deprecation: false }` turns both off.
+
+| Code | Reported when | Use instead |
+| ---- | ------------- | ----------- |
+| `SENECA_DEP_FINDACT` | `seneca.findact` is called | `seneca.find` |
+| `SENECA_DEP_HASACT` | `seneca.hasact` is called | `seneca.find(pattern, { exact: false })`, or `seneca.has(pattern)` for an exact pattern |
+| `SENECA_DEP_ACT_IF` | `seneca.act_if` is called | `seneca.act` inside an `if` |
+| `SENECA_DEP_FINDPINS`, `SENECA_DEP_PINACT` | `seneca.findpins` or `seneca.pinact` is called | `seneca.list` |
+| `SENECA_DEP_PLUGINS` | `seneca.plugins()` is called | `seneca.list_plugins()` |
+| `SENECA_DEP_FINDPLUGIN` | `seneca.findplugin` is called | `seneca.find_plugin` |
+| `SENECA_DEP_HASPLUGIN` | `seneca.hasplugin` is called | `seneca.has_plugin` |
+| `SENECA_DEP_CLOSED` | `seneca.closed` is read | `seneca.flags.closed` |
+| `SENECA_DEP_EXPORT_UTIL` | `seneca.export('util')` | `seneca.export('basic')` |
+| `SENECA_DEP_UTIL_DEEPEXTEND` | `seneca.util.deepextend` is called | `seneca.util.deep` |
+| `SENECA_DEP_UTIL_FLATTEN` | `seneca.util.flatten` is called | none |
+| `SENECA_DEP_UTIL_GUBU` | `seneca.util.Gubu` is read | `seneca.util.Shape` or `seneca.valid` |
+| `SENECA_DEP_ACTDEF_GUBU` | the `gubu` property of an action definition is read | `shape` |
+| `SENECA_DEP_ACT_ERR_4` | a listener is added for `act-err-4` | `act-err` |
+| `SENECA_DEP_DEATHDELAY` | the `deathdelay` option is set | `death_delay` |
+| `SENECA_DEP_LEGACY_ERROR` | the `legacy.error` option is set | nothing; it has no effect |
+| `SENECA_DEP_LEGACY_FLAG` | a removed Seneca 3 `legacy.*` flag is set (once per flag) | nothing; it has no effect |
+| `SENECA_DEP_ROLE_SENECA` | a `role:seneca` builtin action is called (`legacy.builtin_actions`; once per pattern) | the `sys:seneca` action |
+| `SENECA_DEP_LEGACY_CLOSE_HOOK` | `close()` calls a plugin's close hook on `role:seneca,cmd:close` (once per plugin) | `this.destroy(fn)` or a prior on `sys:seneca,cmd:close` |
+| `SENECA_DEP_PLUGIN_INIT` | a plugin definition object names its function `init` (once per plugin) | `define` |
+| `SENECA_DEP_PROMISIFY` | the `promisify` plugin (seneca-promisify) is loaded | nothing; promises are built in |
+
+Actions can also be marked deprecated with the `deprecate$` pattern
+directive; calling one logs a `DEPRECATED` entry with its notice.

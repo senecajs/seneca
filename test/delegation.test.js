@@ -1,20 +1,15 @@
 /* Copyright © 2013-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Assert = require('assert')
-
 var { Gex } = require('gex')
-const { describe } = require('node:test')
-var assert = Assert
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 var testopts = { log: 'silent' }
-
-var Shared = require('./shared')
-var it = Shared.make_it()
 
 var Seneca = require('..')
 
 describe('delegation', function () {
-  it('happy', function (fin) {
+  it('happy', function (t, fin) {
     var si = Seneca().test(fin)
 
     si.add({ c: 'C' }, function (msg, reply) {
@@ -39,7 +34,7 @@ describe('delegation', function () {
     })
   })
 
-  it('dynamic', function (fin) {
+  it('dynamic', function (t, fin) {
     var si = Seneca.test(fin)
     si.add({ c: 'C' }, function (msg, reply) {
       reply(msg)
@@ -76,7 +71,7 @@ describe('delegation', function () {
     })
   })
 
-  it('prior.basic', function (fin) {
+  it('prior.basic', function (t, fin) {
     var si = Seneca().test(fin)
 
     si.add({ c: 'C' }, function c0(msg, reply) {
@@ -99,7 +94,7 @@ describe('delegation', function () {
     })
   })
 
-  it('parent.plugin', function (fin) {
+  it('parent.plugin', function (t, fin) {
     var si = Seneca.test(fin)
 
     si.use(function () {

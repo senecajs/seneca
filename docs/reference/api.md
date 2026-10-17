@@ -422,7 +422,7 @@ Receive or send messages through a transport plugin. See
 | `seneca.on(event, fn)`, `once`, `emit`, `removeListener` | Node.js `EventEmitter` methods; see [Events](events.md). |
 | `seneca.die(err)` | Trigger a fatal error: log, call the error handler, close and exit (unless `debug.undead`). |
 | `seneca.util` | Utilities; see [Module exports and utilities](static-api-and-utilities.md). |
-| `seneca.valid` | Gubu shape builders for validation rules and plugin defaults. |
+| `seneca.valid` | Shape builders for validation rules and plugin defaults. |
 
 Legacy aliases (`findact`, `hasact`, `act_if`, `findpins`, `pinact`,
 `plugins`, `findplugin`, `hasplugin`) are listed in [Legacy](legacy.md).

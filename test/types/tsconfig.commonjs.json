@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "esModuleInterop": true,
+    "target": "es2024",
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "seneca": ["../../seneca.d.ts"]
+    }
+  },
+  "files": ["commonjs.ts"]
+}

@@ -96,7 +96,7 @@ canonical string of a pin.
 ## Validation rules
 
 Object and function values in a pattern are compiled into a
-[Gubu](https://github.com/rjrodger/gubu) shape that validates the
+[Shape](https://github.com/rjrodger/shape) shape that validates the
 message before the action runs (when `valid.message` is on):
 
 ```js
@@ -109,8 +109,8 @@ seneca.add({ role: 'shop', cmd: 'find', query: Required({}), limit: Default(10) 
 
 A failing message gets an `act_invalid_msg` error whose
 `details.props` lists the failures. Defaults in the shape are applied to
-the message. Rules with a `$_root` property (Joi schemas) are not
-compiled; validation of those requires a plugin.
+the message. Rules built with Gubu, Shape's predecessor, are rejected
+with `add_gubu_shape`.
 
 The rules are recorded on the action definition as `rules`. An action
 function's `validate` property is also merged into `rules` (for

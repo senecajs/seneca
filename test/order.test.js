@@ -1,9 +1,8 @@
 /* Copyright © 2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 const { describe, it } = require('node:test')
-var expect = Code.expect
 var Seneca = require('..')
 
 describe('order', function () {
@@ -46,25 +45,28 @@ describe('order', function () {
       after: 'options',
     })
 
-    expect(s0.order.plugin.tasks().map((t) => t.name)).equal([
-      'args',
-      'load',
-      'normalize',
-      'pre_options',
-      'preload',
-      'pre_meta',
-      'pre_legacy_extend',
-      'delegate',
-      'call_define',
-      'before-options',
-      'options',
-      'after-options',
-      'define',
-      'post_meta',
-      'post_legacy_extend',
-      'call_prepare',
-      'complete',
-    ])
+    assert.deepEqual(
+      s0.order.plugin.tasks().map((t) => t.name),
+      [
+        'args',
+        'load',
+        'normalize',
+        'pre_options',
+        'preload',
+        'pre_meta',
+        'pre_legacy_extend',
+        'delegate',
+        'call_define',
+        'before-options',
+        'options',
+        'after-options',
+        'define',
+        'post_meta',
+        'post_legacy_extend',
+        'call_prepare',
+        'complete',
+      ],
+    )
 
     var p0 = function p0(options) {
       //console.log('p0 OPTS', options)
@@ -87,7 +89,7 @@ describe('order', function () {
     return new Promise((r, j) => {
       s0.error(j)
       s0.ready(function () {
-        expect(s0.export('p0/opts')).equals({ b: 2, a: 1, c: 3, d: 4 })
+        assert.deepEqual(s0.export('p0/opts'), { b: 2, a: 1, c: 3, d: 4 })
 
         var p1 = function p1() {}
         p1.preload = function () {
@@ -117,18 +119,6 @@ describe('order', function () {
 
         s0.use(p1)
 
-        // var Joi = s0.util.Joi
-
-        // console.log('TASKLIST',s0.order.plugin.tasks().map(t=>t.name).join('\n'))
-
-        // let joidef = Joi.object({
-        //   e: Joi.string().default('v0'),
-        //   c: Joi.number(),
-        //   f: Joi.number(),
-        // }).default()
-
-        // console.log(Joi.isSchema(joidef,{legacy:true}))
-
         s0.use({
           name: 'p2',
           define: function (options) {
@@ -148,7 +138,7 @@ describe('order', function () {
 
         s0.ready(function () {
           //console.log('AAA', s0.export('p2/opts'))
-          expect(s0.export('p2/opts')).equals({
+          assert.deepEqual(s0.export('p2/opts'), {
             c: 3,
             e: 'v0',
             d: NaN,

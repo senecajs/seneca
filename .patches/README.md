@@ -15,7 +15,7 @@ git push
 
 | Patch | Adds |
 | ----- | ---- |
-| `0001-ci-add-the-build-workflow.patch` | `.github/workflows/build.yml`: continuous integration on Node.js 24 (default) and 22, on Linux, Windows and macOS, with a Coveralls upload. The README build badge points at this workflow. |
+| `0001-ci-add-the-build-workflow.patch` | `.github/workflows/build.yml`: continuous integration on Node.js 24, on Linux, Windows and macOS, with a Coveralls upload. The README build badge points at this workflow. |
 | `0002-ci-add-the-release-workflow-npm-trusted-publishing.patch` | `.github/workflows/release.yml`: publishes `vX.Y.Z` tags to npm with trusted publishing (OIDC) via the reusable workflow in `senecajs/admin`. See `docs/create-a-release.md`. |
 
 The patches are plain additions; `git apply --check .patches/*.patch`

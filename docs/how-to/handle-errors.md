@@ -146,9 +146,9 @@ can be observed with `seneca.sub('sys:seneca,info:fatal', fn)`.
 
 ## Errors in callbacks
 
-If your `act` callback throws, the error is logged, emitted as `act-err`
-with kind `callback`, wrapped as `act_callback`, and given to the error
-handler. It does not reach the action.
+If your `act` callback throws, the error is logged, wrapped as
+`act_callback`, emitted as `act-err` (with the result as the fifth
+argument), and given to the error handler. It does not reach the action.
 
 ## Errors across transports
 

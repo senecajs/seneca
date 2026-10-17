@@ -1,20 +1,11 @@
 /* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
 
-import Util from 'util'
-
-import { MakeArgu, Open, Skip, One, Empty } from 'gubu'
-
-
-// const { Ordu } = require('ordu')
-
-// const Common = require('./common')
-// const { Inward } = require('./inward')
-// const Act = require('./act')
-// const { Meta } = require('./meta')
+import { MakeArgu, Skip } from 'shape'
 
 import {
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
@@ -22,7 +13,7 @@ const Argu = MakeArgu('seneca')
 
 
 const ActArgu: any = Argu('prior', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   reply: Skip(Function),
 })

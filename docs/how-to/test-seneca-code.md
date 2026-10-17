@@ -141,6 +141,7 @@ assert.equal(seneca.options().timeout, 777)
 The Seneca repository uses `node --test`:
 
 ```sh
-npm test                      # all tests, with coverage
+npm test                      # type checks, then all tests with coverage
 npm run test-some -- close    # tests whose names match
+npm run test-types            # type checks of test/types only
 ```

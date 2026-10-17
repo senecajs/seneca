@@ -3,13 +3,9 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
@@ -17,12 +13,10 @@ var Transports = require('./stubs/transports.js')
 
 var parents = (meta) => meta.parents.map((x) => x[0])
 
-var partial_match = (obj, pat) => Hoek.contain(obj, pat, { deep: true })
-
-var test_opts = { parallel: false, timeout: 5555 * tmx }
+var test_opts = { timeout: 5555 * tmx }
 
 describe('custom', function () {
-  it('custom-basic', test_opts, function (fin) {
+  it('custom-basic', test_opts, function (t, fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -40,30 +34,30 @@ describe('custom', function () {
 
     si.gate()
       .act({ a: 1, custom$: foo }, function (err, out, meta) {
-        expect(err).equal(null)
-        expect(out).includes({ x: 1 })
-        expect(foo).equal({ y: 1, a1: 1 })
-        expect(meta.custom).equal({ y: 1, a1: 1 })
+        assert.equal(err, null)
+        assert.partialDeepStrictEqual(out, { x: 1 })
+        assert.deepEqual(foo, { y: 1, a1: 1 })
+        assert.deepEqual(meta.custom, { y: 1, a1: 1 })
       })
       .act({ a: 2, custom$: bar }, function (err, out, meta) {
-        expect(err).equal(null)
-        expect(out).includes({ a: 2, x: 2 })
-        expect(bar).equal({ z: 1, a2: 1 })
-        expect(meta.custom).equal({ z: 1, a2: 1 })
+        assert.equal(err, null)
+        assert.partialDeepStrictEqual(out, { a: 2, x: 2 })
+        assert.deepEqual(bar, { z: 1, a2: 1 })
+        assert.deepEqual(meta.custom, { z: 1, a2: 1 })
         fin()
       })
   })
 
-  it('custom-deep', test_opts, function (fin) {
+  it('custom-deep', test_opts, function (t, fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
-        expect(meta.custom.y).equal(meta.custom.z)
+        assert.equal(meta.custom.y, meta.custom.z)
         if (2 == meta.custom.y) {
-          expect(meta.custom.a2).equal(1)
+          assert.equal(meta.custom.a2, 1)
         }
         if (3 == meta.custom.y) {
-          expect(meta.custom.a3).equal(1)
+          assert.equal(meta.custom.a3, 1)
         }
 
         meta.custom.a1 = 1
@@ -71,9 +65,9 @@ describe('custom', function () {
         reply(this.util.clean(msg))
       })
       .add('a:2', function a2(msg, reply, meta) {
-        expect(meta.custom.y).equal(meta.custom.z)
+        assert.equal(meta.custom.y, meta.custom.z)
         if (3 == meta.custom.y) {
-          expect(meta.custom.a3).equal(1)
+          assert.equal(meta.custom.a3, 1)
         }
 
         meta.custom.a2 = 1
@@ -81,7 +75,7 @@ describe('custom', function () {
         this.act('a:1', this.util.clean(msg), reply)
       })
       .add('a:3', function a3(msg, reply, meta) {
-        expect(meta.custom.y).equal(meta.custom.z)
+        assert.equal(meta.custom.y, meta.custom.z)
         meta.custom.a3 = 1
         msg.x3 = 1
         this.act('a:2', this.util.clean(msg), reply)
@@ -92,8 +86,8 @@ describe('custom', function () {
       si.act(
         { a: 1, q: 1, custom$: { y: 1, z: 1 } },
         function (err, out, meta) {
-          expect(out).includes({ a: 1, x1: 1 })
-          expect(meta.custom).equal({ y: 1, z: 1, a1: 1 })
+          assert.partialDeepStrictEqual(out, { a: 1, x1: 1 })
+          assert.deepEqual(meta.custom, { y: 1, z: 1, a1: 1 })
 
           do_a2()
         },
@@ -104,8 +98,8 @@ describe('custom', function () {
       si.act(
         { a: 2, q: 2, custom$: { y: 2, z: 2 } },
         function (err, out, meta) {
-          expect(out).includes({ a: 1, x1: 1, x2: 1 })
-          expect(meta.custom).equal({ y: 2, z: 2, a1: 1, a2: 1 })
+          assert.partialDeepStrictEqual(out, { a: 1, x1: 1, x2: 1 })
+          assert.deepEqual(meta.custom, { y: 2, z: 2, a1: 1, a2: 1 })
 
           do_a3()
         },
@@ -116,8 +110,8 @@ describe('custom', function () {
       si.act(
         { a: 3, q: 3, custom$: { y: 3, z: 3 } },
         function (err, out, meta) {
-          expect(out).includes({ a: 1, x1: 1, x2: 1, x3: 1 })
-          expect(meta.custom).equal({ y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
+          assert.partialDeepStrictEqual(out, { a: 1, x1: 1, x2: 1, x3: 1 })
+          assert.deepEqual(meta.custom, { y: 3, z: 3, a1: 1, a2: 1, a3: 1 })
 
           fin()
         },
@@ -125,7 +119,7 @@ describe('custom', function () {
     }
   })
 
-  it('custom-reply', test_opts, function (fin) {
+  it('custom-reply', test_opts, function (t, fin) {
     var si = Seneca()
       .test(fin)
       .add('a:1', function a1(msg, reply, meta) {
@@ -142,14 +136,14 @@ describe('custom', function () {
       })
       .ready(function () {
         this.act('b:1', { custom$: { x: 1 } }, function (err, out, meta) {
-          expect(out).equal({ g: 2, h: 1 })
-          expect(meta.custom).equal({ x: 1, b1q: 1, a1: 1, b1w: 1 })
+          assert.deepEqual(out, { g: 2, h: 1 })
+          assert.deepEqual(meta.custom, { x: 1, b1q: 1, a1: 1, b1w: 1 })
           fin()
         })
       })
   })
 
-  it('custom-entity', test_opts, function (fin) {
+  it('custom-entity', test_opts, function (t, fin) {
     // var v8 = require('v8')
 
     var si = Seneca({ legacy: false })
@@ -170,8 +164,8 @@ describe('custom', function () {
           'a:1,id:A,q:1',
           { custom$: { w: 1 } },
           function (err, out, meta) {
-            expect('' + out.foo).equal('$-/-/foo;id=A;{q:1}')
-            expect(meta.custom).equals({ w: 1, a1x: 1, a1y: 1 })
+            assert.equal('' + out.foo, '$-/-/foo;id=A;{q:1}')
+            assert.deepEqual(meta.custom, { w: 1, a1x: 1, a1y: 1 })
             fin()
           },
         )
@@ -179,7 +173,7 @@ describe('custom', function () {
   })
 
   function make_custom_prior_test(opts) {
-    return function custom_prior_test(fin) {
+    return function custom_prior_test(t, fin) {
       var si = Seneca(opts)
         .test(fin)
         .add('a:1', function a1(msg, reply, meta) {
@@ -195,8 +189,8 @@ describe('custom', function () {
           this.prior({ x: msg.x, y: 1 }, reply)
         })
         .act('a:1,x:1', { custom$: { q1: 1 } }, function (err, out, meta) {
-          expect(meta.custom).equal({ q1: 1, q2: 1, q3: 1, q4: 1 })
-          expect(out).equal({ x: 1, y: 1, z: 1 })
+          assert.deepEqual(meta.custom, { q1: 1, q2: 1, q3: 1, q4: 1 })
+          assert.deepEqual(out, { x: 1, y: 1, z: 1 })
           fin()
         })
     }
@@ -209,7 +203,7 @@ describe('custom', function () {
     make_custom_prior_test({ prior: { direct: false } }),
   )
 
-  it('custom-simple-transport', test_opts, function (fin) {
+  it('custom-simple-transport', test_opts, function (t, fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({ id$: 's0' }).test(fin).use(st).listen({ type: 'simple' })
@@ -223,22 +217,22 @@ describe('custom', function () {
       .client({ type: 'simple' })
 
     s0.add('a:1', function a1(msg, reply, meta) {
-      expect(meta.custom).equal({ q: 1 })
+      assert.deepEqual(meta.custom, { q: 1 })
       reply({ x: 1 })
     })
 
     s0.ready(function () {
       c0.act('a:1', { custom$: { q: 1 } }, function (err, out, meta) {
-        expect(err).not.exist()
-        expect(out).equal({ x: 1 })
-        expect(meta.custom).equal({ q: 1 })
+        assert.ifError(err)
+        assert.deepEqual(out, { x: 1 })
+        assert.deepEqual(meta.custom, { q: 1 })
 
         fin()
       })
     })
   })
 
-  it('custom-bells-transport', test_opts, function (fin) {
+  it('custom-bells-transport', test_opts, function (t, fin) {
     var st = Transports.make_simple_transport()
 
     var s0 = Seneca({
@@ -336,7 +330,7 @@ describe('custom', function () {
           // Message pathway:
           // h:2->h:1->d:1->d:1-|->c:3->c:2->c:1->b:1->a:1->a:1-|->g:1->g2
           this.act('h:2,p:1', { custom$: { v: 1 } }, function (err, out, meta) {
-            expect(this.util.clean(out)).equal({
+            assert.deepEqual(this.util.clean(out), {
               g: 22,
               x: 1,
               y: 1,
@@ -355,7 +349,7 @@ describe('custom', function () {
               d: 11,
               r: 1,
             })
-            expect(meta.custom).equal({
+            assert.deepEqual(meta.custom, {
               v: 1,
               g1: 1,
               g2: 1,
@@ -394,14 +388,14 @@ describe('custom', function () {
       .ready()
 
     var out = await si.post('foo:true')
-    expect(out).equal({ foo: true, bar: 1, custom_zed: 'a' })
+    assert.deepEqual(out, { foo: true, bar: 1, custom_zed: 'a' })
 
     si.message('foo:false', async function (msg) {
       return msg
     })
 
     out = await si.post('foo:false')
-    expect(out).equal({ foo: false })
+    assert.deepEqual(out, { foo: false })
 
     si.message('foo:true', async function foo_true_a(msg) {
       // TODO: this is adding plugin$ to msg and should not
@@ -409,7 +403,7 @@ describe('custom', function () {
     })
 
     var out = await si.post('foo:true')
-    expect(out).equal({ foo: true, bar: 1, custom_zed: 'a' })
+    assert.deepEqual(out, { foo: true, bar: 1, custom_zed: 'a' })
 
     si.add(
       'foo:true',
@@ -422,7 +416,7 @@ describe('custom', function () {
     )
 
     var out = await si.post('foo:true')
-    expect(out).equal({
+    assert.deepEqual(out, {
       foo: true,
       bar: 2,
       qaz: 3,
@@ -446,10 +440,10 @@ describe('custom', function () {
       .ready()
 
     var out = await si.post('role:qaz,foo:true')
-    expect(out).equal({ role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
+    assert.deepEqual(out, { role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
 
     out = await si.post('role:qaz,foo:false')
-    expect(out).equal({ role: 'qaz', foo: false })
+    assert.deepEqual(out, { role: 'qaz', foo: false })
 
     si.message('role:qaz,foo:true', async function foo_true_a(msg) {
       // TODO: this is adding plugin$ to msg and should not
@@ -457,6 +451,6 @@ describe('custom', function () {
     })
 
     var out = await si.post('role:qaz,foo:true')
-    expect(out).equal({ role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
+    assert.deepEqual(out, { role: 'qaz', foo: true, bar: 1, custom_zed: 'a' })
   })
 })

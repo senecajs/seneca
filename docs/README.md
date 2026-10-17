@@ -30,7 +30,7 @@ Task oriented recipes for people who already know the basics.
 | [Test Seneca code](how-to/test-seneca-code.md) | Test mode, failing on unexpected errors, stubbing actions, fatal paths. |
 | [Extend actions with priors](how-to/extend-actions-with-priors.md) | Overriding patterns, calling the original, `wrap`, `strict.add`. |
 | [Use promises and async actions](how-to/use-promises-and-async-actions.md) | `message`, `post`, `ready`, `close`, `prior`, `direct`. |
-| [Validate messages and options](how-to/validate-messages-and-options.md) | Gubu rules in patterns, plugin defaults, instance options. |
+| [Validate messages and options](how-to/validate-messages-and-options.md) | Shape rules in patterns, plugin defaults, instance options. |
 | [Control message flow](how-to/control-message-flow.md) | Gates, timeouts, locality, fatal, defaults, custom meta data, idempotency, subscriptions, translation, hooks. |
 | [Manage plugins](how-to/manage-plugins.md) | Loading, configuration, tags, dependencies, exports, ignoring, load order. |
 | [Use network transports](how-to/use-network-transports.md) | seneca-transport over HTTP and TCP, pins, several services, local overrides, HTTPS. |
@@ -47,7 +47,7 @@ Information oriented descriptions of every part of Seneca.
 | Reference | Describes |
 | --------- | --------- |
 | [Instance API](reference/api.md) | Every method on a Seneca instance. |
-| [Module exports, instance properties and utilities](reference/static-api-and-utilities.md) | `Seneca()`, `Seneca.use/test/quiet/util/valid`, instance properties, `seneca.util`. |
+| [Module exports, instance properties and utilities](reference/static-api-and-utilities.md) | `Seneca()`, `Seneca.use/test/quiet/util/valid`, instance properties, `seneca.util`, TypeScript types. |
 | [Options](reference/options.md) | Every option with its default and effect. |
 | [Command line and environment](reference/command-line-and-environment.md) | `--seneca.*` arguments, `SENECA_*` variables, options files, precedence. |
 | [Patterns](reference/patterns.md) | Pattern syntax, matching rules, wildcards, pins, validation rules. |

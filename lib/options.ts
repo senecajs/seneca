@@ -4,19 +4,21 @@
 import Fs from 'fs'
 import Path from 'path'
 
-const Eraro = require('eraro')
-const Jsonic = require('jsonic')
-const Minimist = require('minimist')
-const { Gubu } = require('gubu')
-
+import Eraro from 'eraro'
+import Jsonic from 'jsonic'
+import { Shape } from 'shape'
 
 import { deep } from './common'
+
+// Untyped modules.
+const Minimist: (args: string[], opts?: Record<string, any>) => Record<string, any> =
+  require('minimist')
 
 const error = Eraro({ package: 'seneca', msgmap: ERRMSGMAP() })
 
 
 function resolve_options(callmodule: any, defaults: any, orig_initial: any) {
-  let optionShape = Gubu(defaults)
+  let optionShape = Shape(defaults)
 
   const sourcemap: any = {
     argv: {},

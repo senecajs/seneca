@@ -1,29 +1,28 @@
-From b51f5e5b6ab17b87557c029fedded58ffbf50947 Mon Sep 17 00:00:00 2001
+From 8e35ec726d3605a4a3241fa3ca590dcd9fdb6f1e Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Wed, 7 Oct 2026 14:02:39 +0000
 Subject: [PATCH] ci: add the build workflow
 
 Continuous integration for pushes and pull requests on master and 3.x:
-clean install, build and test on Node.js 24 (the default target) and
-22, on Linux, Windows and macOS, plus an informational coverage job on
-Node.js 24 that uploads the node:test lcov report to Coveralls.
+clean install, build and test on Node.js 24 on Linux, Windows and
+macOS, plus an informational coverage job that uploads the node:test
+lcov report to Coveralls.
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01LaHppcejXbSsAH4BZXNsjV
 ---
- .github/workflows/build.yml | 71 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 71 insertions(+)
+ .github/workflows/build.yml | 70 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 70 insertions(+)
  create mode 100644 .github/workflows/build.yml
 
 diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
 new file mode 100644
-index 0000000..9e997bc
+index 0000000..63ddb7d
 --- /dev/null
 +++ b/.github/workflows/build.yml
-@@ -0,0 +1,71 @@
-+# Continuous integration: clean install, build and test on the supported
-+# Node.js versions (24 is the default target, 22 is supported) across
-+# Linux, Windows and macOS.
+@@ -0,0 +1,70 @@
++# Continuous integration: clean install, build and test on Node.js 24, the
++# version Seneca 4 targets, across Linux, Windows and macOS.
 +# Publishing is handled separately by release.yml (npm trusted publishing).
 +
 +name: build
@@ -48,7 +47,7 @@ index 0000000..9e997bc
 +      fail-fast: false
 +      matrix:
 +        os: [ubuntu-latest, windows-latest, macos-latest]
-+        node-version: [24.x, 22.x]
++        node-version: [24.x]
 +
 +    steps:
 +      - uses: actions/checkout@v6

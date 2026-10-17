@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2024",
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": ["node"],
+    "paths": {
+      "seneca": ["../../seneca.d.ts"]
+    }
+  },
+  "files": ["esm.mts", "cjs.cts", "plugin.mts", "augment.d.mts"]
+}

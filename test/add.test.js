@@ -1,17 +1,13 @@
 /* Copyright (c) 2019 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 describe('add', function () {
-  it('args', function (fin) {
+  it('args', function (_t, fin) {
     const si = Seneca().test()
     si
       // First can be jsonic
@@ -69,7 +65,7 @@ describe('add', function () {
 
     let pats = si.list('a:*')
     // console.log(pats)
-    expect(pats).equal([
+    assert.deepEqual(pats, [
       { a: '1' },
       { a: '2' },
       { a: '3', b: '1' },
@@ -85,40 +81,40 @@ describe('add', function () {
     ])
 
     si.act('a:1', function (err, out) {
-      expect(err).equal(null)
-      expect(out).equal({ x: 1 })
+      assert.equal(err, null)
+      assert.deepEqual(out, { x: 1 })
 
       si.act('a:2', function (err, out) {
-        expect(err).equal(null)
-        expect(out).equal({ x: 2 })
+        assert.equal(err, null)
+        assert.deepEqual(out, { x: 2 })
 
         si.act('a:3,b:1', function (err, out) {
-          expect(err).equal(null)
-          expect(out).equal({ x: 3 })
+          assert.equal(err, null)
+          assert.deepEqual(out, { x: 3 })
 
           si.act('a:4,b:2', function (err, out) {
-            expect(err).equal(null)
-            expect(out).equal({ x: 4 })
+            assert.equal(err, null)
+            assert.deepEqual(out, { x: 4 })
 
             si.act('a:9', function (err, out, meta) {
-              expect(err).equal(null)
-              expect(out).equal({ x: 9 })
-              expect(meta.plugin.name).equal('p9')
+              assert.equal(err, null)
+              assert.deepEqual(out, { x: 9 })
+              assert.equal(meta.plugin.name, 'p9')
 
               si.act('a:10', function (err, out, meta) {
-                expect(err).equal(null)
-                expect(out).equal({ x: 10 })
-                expect(meta.plugin.name).equal('p10')
+                assert.equal(err, null)
+                assert.deepEqual(out, { x: 10 })
+                assert.equal(meta.plugin.name, 'p10')
 
                 si.act('a:11,b:6', function (err, out, meta) {
-                  expect(err).equal(null)
-                  expect(out).equal({ x: 11 })
-                  expect(meta.plugin.name).equal('p11')
+                  assert.equal(err, null)
+                  assert.deepEqual(out, { x: 11 })
+                  assert.equal(meta.plugin.name, 'p11')
 
                   si.act('a:12,b:7', function (err, out, meta) {
-                    expect(err).equal(null)
-                    expect(out).equal({ x: 12 })
-                    expect(meta.plugin.name).equal('p12')
+                    assert.equal(err, null)
+                    assert.deepEqual(out, { x: 12 })
+                    assert.equal(meta.plugin.name, 'p12')
 
                     fin()
                   })
@@ -131,18 +127,19 @@ describe('add', function () {
     })
   })
 
-  it('args-error', function (fin) {
+  it('args-error', function (t, fin) {
     const si = Seneca().test()
 
-    expect(() => si.add('a', 'b')).throw(
-      'seneca (add): Validation failed for property "actdef"' +
+    assert.throws(() => si.add('a', 'b'), {
+      message:
+        'seneca (add): Validation failed for property "actdef"' +
         ' with string "b" because the string is not of type object.',
-    )
+    })
 
     fin()
   })
 
-  it('action-name', function (fin) {
+  it('action-name', function (t, fin) {
     var si = Seneca().test()
 
     si.add('n:0')
@@ -152,17 +149,17 @@ describe('add', function () {
     // NOTE: these may need to be updated if startup action call sequence changes.
     // console.log(si.list().map(x=>si.find(x).id))
 
-    expect(si.find('n:0')).contains({
+    assert.partialDeepStrictEqual(si.find('n:0'), {
       id: 'root$/default_action/8',
       name: 'default_action',
     })
 
-    expect(si.find('n:1')).contains({
+    assert.partialDeepStrictEqual(si.find('n:1'), {
       id: 'root$/action/9',
       name: 'action',
     })
 
-    expect(si.find('n:2')).contains({
+    assert.partialDeepStrictEqual(si.find('n:2'), {
       id: 'root$/n2/10',
       name: 'n2',
     })
@@ -172,7 +169,7 @@ describe('add', function () {
         reply({ x: 1 })
       })
     }).ready(function () {
-      expect(si.find('p:0')).contains({
+      assert.partialDeepStrictEqual(si.find('p:0'), {
         id: 'p0/f0/12',
         name: 'f0',
       })
@@ -181,7 +178,7 @@ describe('add', function () {
     })
   })
 
-  it('action_modifier', function (fin) {
+  it('action_modifier', function (t, fin) {
     var si = Seneca().test()
 
     si.private$.action_modifiers.push(function (actdef) {
@@ -198,13 +195,13 @@ describe('add', function () {
 
     si.ready(function () {
       var actdef = si.find('a:1')
-      expect(actdef.rules.b).equal(2)
-      expect(actdef.desc).equal('The ubiquitous a1 action.')
+      assert.equal(actdef.rules.b, 2)
+      assert.equal(actdef.desc, 'The ubiquitous a1 action.')
       fin()
     })
   })
 
-  it('rules-basic', function (fin) {
+  it('rules-basic', function (t, fin) {
     const si = Seneca({ legacy: false }).test().quiet()
 
     si.add({ a: 1, b: Number }, function (m, r) {
@@ -214,26 +211,26 @@ describe('add', function () {
     })
 
     si.act({ a: 1, b: 2 }, function (e, o) {
-      expect(e).not.exist()
-      expect(o).equal({ b: 4 })
+      assert.ifError(e)
+      assert.deepEqual(o, { b: 4 })
 
       this.act({ a: 1, b: 'x' }, function (e, o) {
-        expect(e).exist()
-        expect(o).not.exist()
-        expect(e.code).equal('act_invalid_msg')
-        expect(e.details.props).equal([
+        assert.ok(null != e)
+        assert.ok(null == o)
+        assert.equal(e.code, 'act_invalid_msg')
+        assert.deepEqual(e.details.props, [
           { path: 'b', what: 'type', type: 'number', value: 'x' },
         ])
 
         si.act({ a: 2, b: 3 }, function (e, o) {
-          expect(e).not.exist()
-          expect(o).equal({ b: 9 })
+          assert.ifError(e)
+          assert.deepEqual(o, { b: 9 })
 
           this.act({ a: 2, b: 'x' }, function (e, o) {
-            expect(e).exist()
-            expect(o).not.exist()
-            expect(e.code).equal('act_invalid_msg')
-            expect(e.details.props).equal([
+            assert.ok(null != e)
+            assert.ok(null == o)
+            assert.equal(e.code, 'act_invalid_msg')
+            assert.deepEqual(e.details.props, [
               { path: 'b', what: 'type', type: 'number', value: 'x' },
             ])
             fin()
@@ -243,7 +240,7 @@ describe('add', function () {
     })
   })
 
-  it('rules-builders', function (fin) {
+  it('rules-builders', function (t, fin) {
     const si = Seneca({ log: 'silent' }) //.test()
     const { Required } = si.valid
 
@@ -252,22 +249,23 @@ describe('add', function () {
     })
 
     si.act({ a: 1, b: { x: 2 } }, function (e, o) {
-      expect(e).not.exist()
-      expect(o).equal({ b: 4 })
+      assert.ifError(e)
+      assert.deepEqual(o, { b: 4 })
 
       this.act({ a: 1 }, function (e, o) {
-        expect(e).exist()
-        expect(o).not.exist()
-        expect(e.code).equal('act_invalid_msg')
-        expect(e.message).equal(
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "undefined" because the value is required.; message content was: {a:1}.',
+        assert.ok(null != e)
+        assert.ok(null == o)
+        assert.equal(e.code, 'act_invalid_msg')
+        assert.equal(
+          e.message,
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" because the property is missing.; message content was: {a:1}.',
         )
         fin()
       })
     })
   })
 
-  it('rules-scalars', function (fin) {
+  it('rules-scalars', function (t, fin) {
     const si = Seneca({ legacy: false }).test().quiet()
     const { Required, Default } = si.valid
 
@@ -276,14 +274,15 @@ describe('add', function () {
     })
 
     si.act({ a: 1 }, function (e, o) {
-      expect(e).not.exist()
-      expect(o).equal({ x: 4 })
+      assert.ifError(e)
+      assert.deepEqual(o, { x: 4 })
 
       this.act({ a: 1, b: 'q' }, function (e, o) {
-        expect(e).exist()
-        expect(o).not.exist()
-        expect(e.code).equal('act_invalid_msg')
-        expect(e.message).equal(
+        assert.ok(null != e)
+        assert.ok(null == o)
+        assert.equal(e.code, 'act_invalid_msg')
+        assert.equal(
+          e.message,
           'seneca: Action a:1 received an invalid message; Validation failed for property "b" with string "q" because the string is not of type number.; message content was: {a:1,b:q}.',
         )
         fin()
@@ -291,7 +290,7 @@ describe('add', function () {
     })
   })
 
-  it('rules-deep', function (fin) {
+  it('rules-deep', function (t, fin) {
     const si = Seneca({ legacy: false }).test().quiet()
     si.add({ a: 1, b: { c: 2 } }, function (m, r) {
       r({ r: m.b.c * 2 })
@@ -300,18 +299,35 @@ describe('add', function () {
     })
 
     si.act({ a: 1 }, function (e, o) {
-      expect(e).not.exist()
-      expect(o).equal({ r: 4 })
+      assert.ifError(e)
+      assert.deepEqual(o, { r: 4 })
 
       this.act({ a: 2 }, function (e, o) {
-        expect(e).exist()
-        expect(o).not.exist()
-        expect(e.code).equal('act_invalid_msg')
-        expect(e.message).equal(
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "undefined" because the value is required.; message content was: {a:2,d:{}}.',
+        assert.ok(null != e)
+        assert.ok(null == o)
+        assert.equal(e.code, 'act_invalid_msg')
+        assert.equal(
+          e.message,
+          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" because the property is missing.; message content was: {a:2,d:{}}.',
         )
         fin()
       })
     })
+  })
+
+  it('gubu-rules', function (t, fin) {
+    const si = Seneca().test(fin)
+    const gubu_node = { $: { gubu$: true, v$: '9.0.0' }, t: 'string' }
+    assert.throws(
+      () =>
+        si.add({ a: 1, b: gubu_node }, function (msg, reply) {
+          reply()
+        }),
+      {
+        code: 'add_gubu_shape',
+        message: /Action a:1: its pattern rules were built with gubu \(at b\)/,
+      },
+    )
+    fin()
   })
 })

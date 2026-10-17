@@ -1,23 +1,15 @@
 /* Copyright (c) 2019-2022 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var Assert = require('assert')
-var Lab = require('@hapi/lab')
-
-var lab = exports.lab = Lab.script()
-var describe = lab.describe
-var it = lab.it
-var assert = Assert
-
-var Shared = require('../../shared')
-var it = Shared.make_it(lab)
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 var Seneca = require('../../..')
 
 describe('options', function () {
-  it('options-happy', function (fin) {
+  it('options-happy', function (t, fin) {
     // loads ./seneca.options.js as well
-    var si = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
+    var si = Seneca({ internal: { d: 4, foo: { dd: 4 } }, module: module })
     si.test(fin)
 
     var opts = si.options()
@@ -34,12 +26,11 @@ describe('options', function () {
     si.close(fin)
   })
 
-
-  it('options-getset', function (fin) {
-    var si = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
+  it('options-getset', function (t, fin) {
+    var si = Seneca({ internal: { d: 4, foo: { dd: 4 } }, module: module })
     si.test(fin)
 
-    si.options({internal:{e: 5, foo: {ee: 5}}})
+    si.options({ internal: { e: 5, foo: { ee: 5 } } })
 
     var opts = si.options()
 
@@ -59,10 +50,9 @@ describe('options', function () {
     assert.equal(5, opts.internal.foo.ee)
     si.close(fin)
   })
-
 
   // // DEPRECATED: Remove when Seneca >= 4.x
-  // it('options-legacy', function (fin) {
+  // it('options-legacy', function (t, fin) {
   //   var si = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
   //   si.test(fin)
 
@@ -86,10 +76,11 @@ describe('options', function () {
   //   si.close(fin)
   // })
 
-
-  it('options-file-js', function (fin) {
-    var si0 = Seneca({from: __dirname + '/options.require.js'},
-                     {internal:{d: 4, foo: {dd: 4}}, module: module})
+  it('options-file-js', function (t, fin) {
+    var si0 = Seneca(
+      { from: __dirname + '/options.require.js' },
+      { internal: { d: 4, foo: { dd: 4 } }, module: module },
+    )
     si0.test(fin)
 
     var opts = si0.options()
@@ -110,10 +101,9 @@ describe('options', function () {
     si0.close(fin)
   })
 
-
   // DEPRECATED: Remove when Seneca >= 4.x
-  it('legacy-options-file-js', function (fin) {
-    var si0 = Seneca({internal:{d: 4, foo: {dd: 4}}, module: module})
+  it('legacy-options-file-js', function (t, fin) {
+    var si0 = Seneca({ internal: { d: 4, foo: { dd: 4 } }, module: module })
     si0.test(fin)
 
     si0.options(__dirname + '/options.require.js')
@@ -136,10 +126,11 @@ describe('options', function () {
     si0.close(fin)
   })
 
-
-  it('options-file-json', function (fin) {
-    var si0 = Seneca(__dirname + '/options.file.json',
-                     {internal:{d: 4, foo: {dd: 4}}, module: module})
+  it('options-file-json', function (t, fin) {
+    var si0 = Seneca(__dirname + '/options.file.json', {
+      internal: { d: 4, foo: { dd: 4 } },
+      module: module,
+    })
     si0.test(fin)
 
     var opts = si0.options()
@@ -160,8 +151,7 @@ describe('options', function () {
     si0.close(fin)
   })
 
-
-  it('options-file-json-nomore', function (fin) {
+  it('options-file-json-nomore', function (t, fin) {
     // does NOT load seneca.options.js due to module reference from unit test
     var si0 = Seneca(__dirname + '/options.file.json')
     si0.test(fin)
@@ -176,8 +166,7 @@ describe('options', function () {
     si0.close(fin)
   })
 
-
-  it('options-env', function (fin) {
+  it('options-env', function (t, fin) {
     process.env.SENECA_OPTIONS = '{"internal":{"foo":"bar","a":99}}'
     var si = Seneca().test(fin)
 
@@ -185,14 +174,13 @@ describe('options', function () {
 
     assert.equal('bar', opts.internal.foo)
     assert.equal(99, opts.internal.a)
-    si.close(()=>{
+    si.close(() => {
       delete process.env.SENECA_OPTIONS
       fin()
     })
   })
 
-
-  it('options-cmdline', function (fin) {
+  it('options-cmdline', function (t, fin) {
     let argv = [...process.argv]
     process.argv.push('--seneca.options.internal.cfoo=bar')
     process.argv.push('--seneca.options.internal.ca=99')
@@ -203,7 +191,7 @@ describe('options', function () {
 
     assert.equal('bar', opts.internal.cfoo)
     assert.equal(99, opts.internal.ca)
-    si.close(()=>{
+    si.close(() => {
       process.argv = argv
       fin()
     })

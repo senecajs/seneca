@@ -1,17 +1,14 @@
 /* Copyright (c) 2016 Richard Rodger, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
+const { describe, it } = require('node:test')
 
-var Shared = require('./shared')
-var it = Shared.make_it()
 var Seneca = require('..')
 
 describe('timeout', function () {
-  it('happy', function (fin) {
+  it('happy', function (t, fin) {
     Seneca({ timeout: 100 })
       .test()
       .quiet()
@@ -21,27 +18,29 @@ describe('timeout', function () {
         }, 300)
       })
       .act('a:1', function (err, out) {
-        expect(err).to.exist()
-        expect(err.code).equal('action_timeout')
-        expect(err.details).includes({
+        assert.ok(null != err)
+        assert.equal(err.code, 'action_timeout')
+        assert.partialDeepStrictEqual(err.details, {
           timeout: 100,
           message: { a: 1 },
           pattern: 'a:1',
         })
-        expect(err.message).startsWith(
-          'seneca: Action a:1 timed out. Timeout was: 100 (start: ',
+        assert.ok(
+          err.message.startsWith(
+            'seneca: Action a:1 timed out. Timeout was: 100 (start: ',
+          ),
         )
-        expect(out).to.not.exist()
+        assert.ok(null == out)
         fin()
       })
   })
 
-  it('error-handler', function (fin) {
+  it('error-handler', function (t, fin) {
     Seneca({ timeout: 100 })
       .test()
       .quiet()
       .error(function (err) {
-        expect(err).to.exist()
+        assert.ok(null != err)
         fin()
       })
       .add('a:1', function (msg, done) {
@@ -52,7 +51,7 @@ describe('timeout', function () {
       .act('a:1')
   })
 
-  it('should accept a timeout value from options', function (fin) {
+  it('should accept a timeout value from options', function (t, fin) {
     var token = null // Token for clearing the setTimeout call.
     var seneca = Seneca() // Seneca instance with no timeout value specified.
     seneca.options({ timeout: 100 }) // Set a global timeout via the options function.
@@ -61,9 +60,9 @@ describe('timeout', function () {
       .quiet()
       .error(function (err, meta) {
         // Should get a timeout error.
-        expect(err).to.exist()
-        expect(meta).to.exist()
-        expect(token).to.exist()
+        assert.ok(null != err)
+        assert.ok(null != meta)
+        assert.ok(null != token)
         // Clear the timeout function to avoid duplicate callbacks.
         clearTimeout(token)
         fin()
