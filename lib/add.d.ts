@@ -50,9 +50,14 @@ declare const task: {
     };
     rules(spec: TaskSpec): {
         op: string;
+        err: any;
+        out?: undefined;
+    } | {
+        op: string;
         out: {
             actdef: any;
         };
+        err?: undefined;
     };
     register(spec: TaskSpec): {
         op: string;

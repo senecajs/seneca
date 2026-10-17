@@ -16,7 +16,7 @@ const patrun_1 = require("patrun");
 const Stats = require('rolling-stats');
 const { Ordu } = require('ordu');
 const Eraro = require('eraro');
-const gubu_1 = require("gubu");
+const shape_1 = require("shape");
 // Internal modules.
 const Common = require('./lib/common');
 const { make_logging } = require('./lib/logging');
@@ -37,11 +37,11 @@ const { transport } = require('./lib/transport');
 const package_json_1 = __importDefault(require("./package.json"));
 // Internal data and utilities.
 const { error, deep } = Common;
-const { One, Any, Skip, Open } = gubu_1.Gubu;
+const { One, Any, Skip, Open } = shape_1.Shape;
 // Seneca options.
 const option_defaults = {
     // Tag this Seneca instance, will be appended to instance identifier.
-    tag: '-', // TODO: FIX: Gubu api.test.js#292
+    tag: '-', // TODO: FIX: Shape api.test.js#292
     // Standard timeout for actions.
     timeout: 22222,
     // Standard length of identifiers for actions.
@@ -275,7 +275,7 @@ const seneca_util = {
     Nid: nid_1.default,
     Patrun: patrun_1.Patrun,
     Gex: patrun_1.Gex,
-    Gubu: gubu_1.Gubu,
+    Shape: shape_1.Shape,
     pins: Common.pins,
     clean: Common.clean,
     pattern: Common.pattern,
@@ -406,7 +406,7 @@ init.quiet = function top_quiet() {
     return init().quiet(...arguments);
 };
 init.util = seneca_util;
-init.valid = gubu_1.Gubu;
+init.valid = shape_1.Shape;
 init.test$ = { intern: intern };
 exports.default = init;
 module.exports = init;
@@ -513,7 +513,7 @@ function make_seneca(initial_opts) {
     root$.post = Util.promisify(root$.act); // Async version of act.
     root$.direct = Act.api_direct; // Run message action synchronously.
     root$.ready = ready.api_ready; // Callback when plugins initialized.
-    root$.valid = gubu_1.Gubu; // Expose Gubu shape builders
+    root$.valid = shape_1.Shape; // Expose the Shape builders
     root$.prepare = API.prepare; // Plugin preparation action.
     root$.destroy = API.destroy; // Close Seneca instance.
     root$.internal = function () {

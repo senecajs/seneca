@@ -9,6 +9,13 @@ const Eraro: any = require('eraro')
 
 import Nua from 'nua'
 import { Ordu, TaskSpec } from 'ordu'
+import { Shape } from 'shape'
+import type { ErrDesc } from 'shape'
+
+// Shape.isShape exists at runtime, but shape 11.4 declares it only on built
+// shapes, not on the Shape function itself.
+const isShape: (v: any) => boolean =
+  (Shape as unknown as { isShape: (v: any) => boolean }).isShape
 
 
 // TODO: refactor: use.js->plugin.js and contain *_plugin api methods too
@@ -555,17 +562,29 @@ function make_tasks(): any {
       }
 
       let resolved_options: any = {}
-      let valid = delegate.valid // Gubu validator: https://github.com/rjrodger/gubu
+      let valid = delegate.valid // Shape validator: https://github.com/rjrodger/shape
 
       let err: Error | undefined = void 0
-      let joi_schema: any = null
-      let Joi = delegate.util.Joi
+
+      // Shapes built with gubu are not accepted by shape; fail clearly.
+      let gubu_at: string | null = Common.find_gubu_shape(defaults)
 
       let defaults_values =
-        ('function' === typeof (defaults) && !defaults.gubu) ?
-          defaults({ valid, Joi }) : defaults
+        (null == gubu_at && 'function' === typeof (defaults) && !isShape(defaults)) ?
+          defaults({ valid }) : defaults
 
-      if (null == defaults_values ||
+      if (null == gubu_at) {
+        gubu_at = Common.find_gubu_shape(defaults_values)
+      }
+
+      if (null != gubu_at) {
+        err = delegate.error('plugin_gubu_shape', {
+          name: fullname,
+          path: gubu_at,
+        })
+        resolved_options = fullopts
+      }
+      else if (null == defaults_values ||
         0 === Object.keys(defaults_values).length ||
         !so.valid.active ||
         !so.valid.plugin
@@ -573,54 +592,24 @@ function make_tasks(): any {
         resolved_options = fullopts
       }
       else {
-        if (
-          !defaults_values.$_root // check for legacy Joi schema
-        ) {
-          // TODO: use Gubu.isShape
-          let isShape = defaults_values.gubu && defaults_values.gubu.gubu$
+        let is_shape = isShape(defaults_values)
 
-          // TODO: when Gubu supports merge, also merge if isShape
-          if (!isShape && null == defaults_values.errors && null != errors) {
-            defaults_values.errors = {}
-          }
-
-          let optionShape =
-            isShape ? defaults_values : delegate.valid(defaults_values)
-          let shapeErrors: any[] = []
-          resolved_options = optionShape(fullopts, { err: shapeErrors })
-
-          if (0 < shapeErrors.length) {
-            err = delegate.error('invalid_plugin_option', {
-              name: fullname,
-              err_msg: shapeErrors.map((se: any) => se.t).join('; '),
-              options: fullopts,
-            })
-          }
+        // TODO: when Shape supports merge, also merge if is_shape
+        if (!is_shape && null == defaults_values.errors && null != errors) {
+          defaults_values.errors = {}
         }
-        else {
-          resolved_options = delegate.util.deep(defaults_values, fullopts)
 
-          /* TODO: move to seneca-joi
-          let joi_schema: any = intern.prepare_spec(
-            Joi,
-            defaults_values,
-            { allow_unknown: true },
-            {}
-          )
+        let optionShape =
+          is_shape ? defaults_values : delegate.valid(defaults_values)
+        let shapeErrors: ErrDesc[] = []
+        resolved_options = optionShape(fullopts, { err: shapeErrors })
 
-          let joi_out = joi_schema.validate(fullopts)
-
-          if (joi_out.error) {
-            err = delegate.error('invalid_plugin_option', {
-              name: fullname,
-              err_msg: joi_out.error.message,
-              options: fullopts,
-            })
-          }
-          else {
-            resolved_options = joi_out.value
-          }
-          */
+        if (0 < shapeErrors.length) {
+          err = delegate.error('invalid_plugin_option', {
+            name: fullname,
+            err_msg: shapeErrors.map((se) => se.text).join('; '),
+            options: fullopts,
+          })
         }
       }
 
@@ -634,7 +623,6 @@ function make_tasks(): any {
         out: {
           plugin: {
             options: resolved_options,
-            options_schema: joi_schema
           }
         }
       }

@@ -125,6 +125,16 @@ export default {
   invalid_plugin_option:
     'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
 
+  plugin_gubu_shape:
+    'Plugin <%=name%>: its option defaults were built with gubu (at <%=path%>). ' +
+    'Seneca 4 validates with shape, which does not accept gubu shapes. ' +
+    'Build the defaults with this.valid (shape) or from the shape package.',
+
+  add_gubu_shape:
+    'Action <%=pattern%>: its pattern rules were built with gubu (at <%=path%>). ' +
+    'Seneca 4 validates with shape, which does not accept gubu shapes. ' +
+    'Build the rules with seneca.valid (shape) or from the shape package.',
+
   no_prior_action:
     'The `prior` method must be called inside an action function. Arguments were: <%=args%>',
 

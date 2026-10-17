@@ -40,12 +40,12 @@ describe('inward', function () {
       assert.equal(
         e.message,
         'seneca: Validation failed for property "inward"' +
-          ' with value "undefined" because the value is required.',
+          ' because the property is missing.',
       )
       assert.partialDeepStrictEqual(
         { ...e },
         {
-          gubu: true,
+          shape: true,
           code: 'shape',
         },
       )

@@ -77,9 +77,9 @@
   "scripts": {
     "watch": "tsc -w -d",
     "build": "tsc -d",
-    "test": "node --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-coverage-lines=85 --test-reporter=spec --test-reporter-destination=stdout \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
-    "test-some": "node --test --test-concurrency=1 --test-timeout=11111 \"test/*.test.js\" \"test/stubs/options/*.test.js\" --test-name-pattern",
-    "coverage": "node --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
+    "test": "node --require ./test/stubs/gubu-shape/register.js --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-coverage-lines=85 --test-reporter=spec --test-reporter-destination=stdout \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
+    "test-some": "node --require ./test/stubs/gubu-shape/register.js --test --test-concurrency=1 --test-timeout=11111 \"test/*.test.js\" \"test/stubs/options/*.test.js\" --test-name-pattern",
+    "coverage": "node --require ./test/stubs/gubu-shape/register.js --test --test-concurrency=1 --test-timeout=11111 --experimental-test-coverage --test-coverage-include=\"lib/*.js\" --test-coverage-include=seneca.js --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"test/*.test.js\" \"test/stubs/options/*.test.js\"",
     "smoke": "node test/stubs/launch.js",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
@@ -89,7 +89,6 @@
     "eraro": "^3.1.0",
     "fast-safe-stringify": "^2.1.1",
     "gate-executor": "^3.1.1",
-    "gubu": "^9.0.0",
     "jsonic": "^2.16.0",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.flatten": "^4.4.0",
@@ -99,6 +98,7 @@
     "ordu": "^2.2.0",
     "patrun": "^7.2.7",
     "rolling-stats": "^0.2.1",
+    "shape": "^11.4.1",
     "use-plugin": "^13.2.0"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import Nid from 'nid';
 import { Patrun, Gex } from 'patrun';
-import { Gubu } from 'gubu';
+import { Shape } from 'shape';
 declare function init(seneca_options?: any, more_options?: any): any;
 declare namespace init {
     var Seneca: (this: any) => void;
@@ -14,7 +14,7 @@ declare namespace init {
         Nid: typeof Nid;
         Patrun: typeof Patrun;
         Gex: typeof Gex;
-        Gubu: Gubu;
+        Shape: Shape;
         pins: any;
         clean: any;
         pattern: any;
@@ -28,7 +28,7 @@ declare namespace init {
         resolve_option: any;
         flatten: any;
     };
-    var valid: Gubu;
+    var valid: Shape;
     var test$: {
         intern: {
             util: {
@@ -37,7 +37,7 @@ declare namespace init {
                 Nid: typeof Nid;
                 Patrun: typeof Patrun;
                 Gex: typeof Gex;
-                Gubu: Gubu;
+                Shape: Shape;
                 pins: any;
                 clean: any;
                 pattern: any;

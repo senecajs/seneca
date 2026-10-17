@@ -2,7 +2,7 @@
 
 Every option accepted by `Seneca(options)` and `seneca.options(options)`,
 with its default value and effect. Options are validated against this
-shape with [Gubu](https://github.com/rjrodger/gubu) when `valid.option`
+shape with [Shape](https://github.com/rjrodger/shape) when `valid.option`
 is true (the default): unknown keys and wrong types are reported as an
 `invalid_options` error at construction time.
 
@@ -11,8 +11,8 @@ file, environment, command line) see
 [Command line and environment](command-line-and-environment.md) and the
 how-to guide [Configure options](../how-to/configure-options.md).
 
-Values shown as `Gubu shape` describe the accepted type rather than a
-fixed default.
+Values shown as Shape builders (for example `One(Function, null)`)
+describe the accepted type rather than a fixed default.
 
 ## Top level
 
@@ -51,7 +51,7 @@ fixed default.
 | Option | Default | Effect |
 | ------ | ------- | ------ |
 | `valid.active` | `true` | Master switch for all validation. |
-| `valid.message` | `true` | Validate messages against the rules of the matched action (Gubu shapes in the pattern, or an action `validate` property). Failures produce `act_invalid_msg`. |
+| `valid.message` | `true` | Validate messages against the rules of the matched action (Shape rules in the pattern, or an action `validate` property). Failures produce `act_invalid_msg`. |
 | `valid.option` | `true` | Validate the instance options against this reference shape. |
 | `valid.plugin` | `true` | Validate plugin options against the plugin's `defaults`. Failures produce `invalid_plugin_option`. |
 

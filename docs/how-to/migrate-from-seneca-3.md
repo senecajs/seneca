@@ -40,10 +40,11 @@ variants while callers are updated. Plugins that add close hooks on
 close when it exists. New close hooks should use `this.destroy(fn)` or a
 prior on `sys:seneca,cmd:close`.
 
-## Validation: Joi to Gubu
+## Validation: Joi to Shape
 
-Message and option validation uses Gubu shapes instead of Joi schemas.
-Replace Joi rules in patterns and plugin `defaults`:
+Message and option validation uses [Shape](https://github.com/rjrodger/shape) (the successor of Gubu)
+instead of Joi schemas. Replace Joi rules in patterns and plugin
+`defaults`:
 
 ```js
 // Seneca 3
@@ -53,8 +54,15 @@ seneca.add({ role: 'shop', cmd: 'price', item: Joi.string().required() }, action
 seneca.add({ role: 'shop', cmd: 'price', item: seneca.valid.Required(String) }, action)
 ```
 
-Plugin `defaults` written as Joi schemas are deep merged without
-validation; convert them to plain default objects or Gubu shapes.
+Seneca 4 has no Joi support: Joi schemas in pattern rules or plugin
+`defaults` are not recognized. Convert them to plain default objects or
+Shape builders.
+
+Shapes built with Gubu are not accepted either. A plugin whose
+`defaults` were built with Gubu fails to load with
+`plugin_gubu_shape`, and pattern rules built with Gubu fail with
+`add_gubu_shape`. Build them with `seneca.valid` or `this.valid` (Shape),
+or import the builders from the `shape` package.
 
 ## Plugin definitions
 
@@ -101,7 +109,7 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 * `seneca.prepare` and `seneca.destroy` for plugin lifecycle stages.
 * `seneca.fix`, `seneca.translate`, `seneca.explain` and the `explain$`
   directive.
-* `seneca.valid` (Gubu) for validation shapes.
+* `seneca.valid` (Shape) for validation shapes.
 * `sys:seneca,get:options` and `sys:seneca,on:point` actions.
 
 ## Check your application
@@ -109,7 +117,7 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 1. Update Node.js and dependencies; install seneca-transport if needed.
 2. Run with `--seneca.test` and look for `DEPRECATED` and `UNKNOWN`
    entries.
-3. Grep for `role:seneca` patterns, `Joi`, `deathdelay`, `seneca.closed`
+3. Grep for `role:seneca` patterns, `Joi`, `gubu`, `deathdelay`, `seneca.closed`
    and the removed API names.
 4. Run your test suite with `debug.undead` off: plugin failures that
    were tolerated before are fatal in Seneca 4.

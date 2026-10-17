@@ -32,7 +32,7 @@ function tax(options) {
   }
 }
 
-// Default options, also the validation shape (Gubu).
+// Default options, also the validation shape (Shape).
 tax.defaults = ({ valid }) => ({
   rates: valid.Open({ EU: 0.2 }),
   precision: 2,

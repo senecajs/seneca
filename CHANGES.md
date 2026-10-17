@@ -77,6 +77,21 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Generated ids (`seneca.idgen()`, action and instance ids) never start
   with a digit, so an id embedded unquoted in a jsonic pattern string is
   not parsed as a number (#935, #950).
+* Validation uses [shape](https://github.com/rjrodger/shape) 11, the
+  renamed successor of Gubu: `seneca.valid`, `Seneca.valid` and
+  `Seneca.util.Shape` are Shape, and action definitions carry the compiled
+  message shape as `shape`. Plugin option errors list each failure's full
+  text.
+* Shapes built with Gubu fail with a clear error instead of a list of
+  unrelated validation failures: `plugin_gubu_shape` for plugin defaults,
+  `add_gubu_shape` for pattern rules.
+* The message argument of `act`, `add`, `prior`, `sub` and `fix` is
+  validated in place. Shape's `One` validates and returns a copy, which
+  would have replaced the caller's message objects (and `custom$`) with
+  copies.
+* All remaining Joi handling is removed: plugin `defaults` functions no
+  longer receive `Joi`, and Joi schemas in defaults and pattern rules are
+  no longer merged without validation.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -92,9 +107,16 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `sys:seneca,cmd:stats`, `sys:seneca,cmd:close`, `sys:seneca,get:options`.
   Set the option `legacy: { builtin_actions: true }` to also register the
   3.x `role:seneca` variants.
-* Joi is removed. Message and option validation use Gubu shapes
-  (`seneca.valid`); plugins that passed Joi schemas as option defaults need
-  Gubu shapes instead.
+* Joi and Gubu are replaced by [shape](https://github.com/rjrodger/shape),
+  the renamed successor of Gubu. Message and option validation use Shape
+  builders (`seneca.valid`). Joi schemas in plugin defaults or pattern rules
+  are not recognized, and shapes built with Gubu are rejected
+  (`plugin_gubu_shape`, `add_gubu_shape`), so plugins that bundle Gubu,
+  such as seneca-entity 28 and seneca-mem-store 9, need releases built on
+  shape (or on `this.valid`).
+* Plugin `defaults` functions are called with `{ valid }`; the `Joi`
+  argument is gone. Action definitions carry the compiled shape as `shape`
+  (was `gubu`).
 * Most `legacy` option flags are removed; `legacy.meta` and
   `legacy.builtin_actions` remain.
 * `seneca.message(pattern, async (msg) => {...})` and `await seneca.post(msg)`

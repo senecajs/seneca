@@ -33,6 +33,8 @@ declare const _default: {
     plugin_define_failed: string;
     no_transport_client: string;
     invalid_plugin_option: string;
+    plugin_gubu_shape: string;
+    add_gubu_shape: string;
     no_prior_action: string;
     missing_plugin_name: string;
     bad_plugin_name: string;

@@ -1,6 +1,6 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'gubu'
+import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'shape'
 
 import {
   each,
@@ -14,6 +14,7 @@ import {
   clean,
   jsonic_stringify,
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
@@ -909,7 +910,7 @@ intern.parse_config = function(args: any) {
 
   const arglen = config.length
 
-  // TODO: use Gubu for better error msgs
+  // TODO: use Shape for better error msgs
 
   if (arglen === 1) {
     if (config[0] && 'object' === typeof config[0]) {
@@ -1031,7 +1032,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 
 const FixArgu: any = Argu('fix', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   rest: Rest(Any()),
 })

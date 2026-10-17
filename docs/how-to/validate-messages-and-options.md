@@ -1,13 +1,14 @@
 # Validate messages and options
 
 How to declare what a message must contain, and how to validate plugin
-and instance options. Validation uses [Gubu](https://github.com/rjrodger/gubu)
-shapes, available as `seneca.valid` (and `Seneca.valid`).
+and instance options. Validation uses [Shape](https://github.com/rjrodger/shape)
+shapes, available as `seneca.valid` (and `Seneca.valid`). Shapes built
+with Gubu, Shape's predecessor, are rejected.
 
 ## Validate message properties
 
 Add rules to the pattern. A rule is a property whose value is an object,
-a type constructor or a Gubu builder; scalar values remain pattern
+a type constructor or a Shape builder; scalar values remain pattern
 matching values:
 
 ```js
@@ -103,7 +104,7 @@ The instance options are validated against the reference shape (see
 
 ## Builders
 
-Commonly used Gubu builders: `Required`, `Skip`, `Default`, `Open`,
+Commonly used Shape builders: `Required`, `Skip`, `Default`, `Open`,
 `Closed`, `One`, `Some`, `All`, `Any`, `Exact`, `Check`, `Min`, `Max`,
-`Len`, `Rename`, `Empty`, `Never`. See the Gubu documentation for the
+`Len`, `Rename`, `Empty`, `Never`. See the Shape documentation for the
 complete list.

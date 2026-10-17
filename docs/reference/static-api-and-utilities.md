@@ -13,7 +13,7 @@ const Seneca = require('seneca')
 | `Seneca.test(...)` | Create an instance and call `test` on it. |
 | `Seneca.quiet(...)` | Create an instance and call `quiet` on it. |
 | `Seneca.util` | Utility functions (below); also available as `seneca.util`. |
-| `Seneca.valid` | The [Gubu](https://github.com/rjrodger/gubu) shape builder (`Required`, `Default`, `Skip`, `Open`, ...); also `seneca.valid`. |
+| `Seneca.valid` | The [Shape](https://github.com/rjrodger/shape) builder (`Required`, `Default`, `Skip`, `Open`, ...); also `seneca.valid`. |
 | `Seneca.Seneca` | The instance constructor (prototype), for extension. |
 | `Seneca.test$` | Internals exposed for Seneca's own tests. |
 | `Seneca.loghandler` | Legacy; undefined. |
@@ -64,7 +64,7 @@ Instances are event emitters (see [Events](events.md)) and serialize to
 | `resolve_option(value, options)` | Return `value(options)` when `value` is a function, otherwise `value`. |
 | `router()` | A new Patrun router. |
 | `flatten(list, prop)` | Legacy list flattening. |
-| `Jsonic`, `Patrun`, `Gex`, `Gubu`, `Nid`, `Eraro` | The underlying libraries: Jsonic string parsing, pattern routing, glob matching, shape validation, id generation, error construction. |
+| `Jsonic`, `Patrun`, `Gex`, `Shape`, `Nid`, `Eraro` | The underlying libraries: Jsonic string parsing, pattern routing, glob matching, shape validation, id generation, error construction. |
 
 `seneca.util.Jsonic('a:1,b:x')` parses a Jsonic string;
 `seneca.util.Jsonic.stringify(obj)` produces one.

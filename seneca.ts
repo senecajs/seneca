@@ -17,7 +17,7 @@ import { Patrun, Gex } from 'patrun'
 const Stats = require('rolling-stats')
 const { Ordu } = require('ordu')
 const Eraro = require('eraro')
-import { Gubu } from 'gubu'
+import { Shape } from 'shape'
 
 
 // Internal modules.
@@ -44,12 +44,12 @@ import Pkg from './package.json'
 const { error, deep } = Common
 
 
-const { One, Any, Skip, Open } = Gubu
+const { One, Any, Skip, Open } = Shape
 
 // Seneca options.
 const option_defaults = {
   // Tag this Seneca instance, will be appended to instance identifier.
-  tag: '-', // TODO: FIX: Gubu api.test.js#292
+  tag: '-', // TODO: FIX: Shape api.test.js#292
 
   // Standard timeout for actions.
   timeout: 22222,
@@ -365,7 +365,7 @@ const seneca_util = {
   Nid,
   Patrun,
   Gex,
-  Gubu,
+  Shape,
 
   pins: Common.pins,
   clean: Common.clean,
@@ -525,7 +525,7 @@ init.quiet = function top_quiet() {
 }
 
 init.util = seneca_util
-init.valid = Gubu
+init.valid = Shape
 
 init.test$ = { intern: intern }
 
@@ -668,7 +668,7 @@ function make_seneca(initial_opts?: any) {
   root$.post = Util.promisify(root$.act) // Async version of act.
   root$.direct = Act.api_direct // Run message action synchronously.
   root$.ready = ready.api_ready // Callback when plugins initialized.
-  root$.valid = Gubu // Expose Gubu shape builders
+  root$.valid = Shape // Expose the Shape builders
   root$.prepare = API.prepare // Plugin preparation action.
   root$.destroy = API.destroy // Close Seneca instance.
 

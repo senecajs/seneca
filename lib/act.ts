@@ -1,6 +1,6 @@
 /* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
-import { Gubu } from 'gubu'
+import { Shape } from 'shape'
 
 import { Meta } from './meta'
 
@@ -14,16 +14,17 @@ import {
   make_standard_err_log_entry,
   make_standard_act_log_entry,
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
-const { MakeArgu, Skip, One, Empty } = Gubu
+const { MakeArgu, Skip } = Shape
 
 const Argu = MakeArgu('seneca')
 
 
 const ActArgu: any = Argu('act', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   reply: Skip(Function),
 })

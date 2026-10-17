@@ -3,7 +3,7 @@
 
 import Util from 'util'
 
-import { MakeArgu, Open, Skip, One, Empty } from 'gubu'
+import { MakeArgu, Open, Skip } from 'shape'
 
 
 // const { Ordu } = require('ordu')
@@ -15,6 +15,7 @@ import { MakeArgu, Open, Skip, One, Empty } from 'gubu'
 
 import {
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
@@ -22,7 +23,7 @@ const Argu = MakeArgu('seneca')
 
 
 const ActArgu: any = Argu('prior', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   reply: Skip(Function),
 })

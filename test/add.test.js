@@ -258,7 +258,7 @@ describe('add', function () {
         assert.equal(e.code, 'act_invalid_msg')
         assert.equal(
           e.message,
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with value "undefined" because the value is required.; message content was: {a:1}.',
+          'seneca: Action a:1 received an invalid message; Validation failed for property "b" because the property is missing.; message content was: {a:1}.',
         )
         fin()
       })
@@ -308,10 +308,26 @@ describe('add', function () {
         assert.equal(e.code, 'act_invalid_msg')
         assert.equal(
           e.message,
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" with value "undefined" because the value is required.; message content was: {a:2,d:{}}.',
+          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" because the property is missing.; message content was: {a:2,d:{}}.',
         )
         fin()
       })
     })
+  })
+
+  it('gubu-rules', function (t, fin) {
+    const si = Seneca().test(fin)
+    const gubu_node = { $: { gubu$: true, v$: '9.0.0' }, t: 'string' }
+    assert.throws(
+      () =>
+        si.add({ a: 1, b: gubu_node }, function (msg, reply) {
+          reply()
+        }),
+      {
+        code: 'add_gubu_shape',
+        message: /Action a:1: its pattern rules were built with gubu \(at b\)/,
+      },
+    )
+    fin()
   })
 })

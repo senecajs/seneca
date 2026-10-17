@@ -286,7 +286,7 @@ describe('plugin', function () {
             assert.fail()
           },
           defaults: {
-            a: String, // Seneca.util.Joi.string(),
+            a: String,
           },
         },
         {
@@ -294,6 +294,48 @@ describe('plugin', function () {
           b: 2,
         },
       )
+  })
+
+  // A plugin that bundles gubu builds nodes carrying gubu's marker, which
+  // shape does not accept. The load fails with a clear error instead.
+  it('gubu-default-options', function (t, fin) {
+    const gubu_node = { $: { gubu$: true, v$: '9.0.0' }, t: 'string' }
+    Seneca({ legacy: false, debug: { undead: true } })
+      .test(function (err) {
+        assert.equal(err.code, 'plugin_gubu_shape')
+        assert.match(
+          err.message,
+          /Plugin p0: its option defaults were built with gubu \(at a\.b\)/,
+        )
+        fin()
+      })
+      .quiet()
+      .use({
+        name: 'p0',
+        define: function () {
+          assert.fail()
+        },
+        defaults: { a: { b: gubu_node } },
+      })
+  })
+
+  it('gubu-default-shape', function (t, fin) {
+    // A prepared gubu shape is a function with a gubu property.
+    const gubu_shape = Object.assign(function gubu_shape() {}, { gubu: {} })
+    Seneca({ legacy: false, debug: { undead: true } })
+      .test(function (err) {
+        assert.equal(err.code, 'plugin_gubu_shape')
+        assert.match(err.message, /\(at \(root\)\)/)
+        fin()
+      })
+      .quiet()
+      .use({
+        name: 'p1',
+        define: function () {
+          assert.fail()
+        },
+        defaults: gubu_shape,
+      })
   })
 
   // TODO: move to transport

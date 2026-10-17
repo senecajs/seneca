@@ -15,6 +15,8 @@ const { Print } = require('./print')
 
 import Errors from './errors'
 
+import { Check, Fault } from 'shape'
+
 
 
 const error =
@@ -793,8 +795,54 @@ class ActHistory {
 }
 
 
+// The props argument of act, add, prior, sub and fix: a pattern string or a
+// message object. Shape's One validates a copy and returns the copy, so the
+// caller's object, and objects inside it such as custom$, would lose their
+// identity. Check validates the value in place; Fault keeps the message One
+// produced.
+function message_props_shape() {
+  return Fault(
+    'Value "$VALUE" for property "$PATH" does not satisfy one of: String, Object',
+    Check(
+      (v: any) =>
+        'string' === typeof v ||
+        (null != v && 'object' === typeof v && !Array.isArray(v)),
+    ),
+  )
+}
+
+
+// Seneca 4 validates with shape, which does not recognise shapes built with
+// gubu. Returns the path of the first gubu shape in value, or null, so that
+// a plugin or action using gubu fails with a clear error.
+function find_gubu_shape(value: any, path: string = '', seen = new Set()): string | null {
+  if (null == value || ('object' !== typeof value && 'function' !== typeof value)) {
+    return null
+  }
+  if (seen.has(value)) return null
+  seen.add(value)
+  if ('function' === typeof value) {
+    return null != value.gubu ? (path || '(root)') : null
+  }
+  if (null != value.$ && 'object' === typeof value.$ && Object.hasOwn(value.$, 'gubu$')) {
+    return path || '(root)'
+  }
+  const proto = Object.getPrototypeOf(value)
+  if (!Array.isArray(value) && null != proto && Object.prototype !== proto) {
+    return null
+  }
+  for (const key of Object.keys(value)) {
+    const found = find_gubu_shape(value[key], path ? path + '.' + key : key, seen)
+    if (null != found) return found
+  }
+  return null
+}
+
+
 export {
   pins,
+  find_gubu_shape,
+  message_props_shape,
   promiser,
   stringify,
   wrap_error,

@@ -30,7 +30,7 @@ Task oriented recipes for people who already know the basics.
 | [Test Seneca code](how-to/test-seneca-code.md) | Test mode, failing on unexpected errors, stubbing actions, fatal paths. |
 | [Extend actions with priors](how-to/extend-actions-with-priors.md) | Overriding patterns, calling the original, `wrap`, `strict.add`. |
 | [Use promises and async actions](how-to/use-promises-and-async-actions.md) | `message`, `post`, `ready`, `close`, `prior`, `direct`. |
-| [Validate messages and options](how-to/validate-messages-and-options.md) | Gubu rules in patterns, plugin defaults, instance options. |
+| [Validate messages and options](how-to/validate-messages-and-options.md) | Shape rules in patterns, plugin defaults, instance options. |
 | [Control message flow](how-to/control-message-flow.md) | Gates, timeouts, locality, fatal, defaults, custom meta data, idempotency, subscriptions, translation, hooks. |
 | [Manage plugins](how-to/manage-plugins.md) | Loading, configuration, tags, dependencies, exports, ignoring, load order. |
 | [Use network transports](how-to/use-network-transports.md) | seneca-transport over HTTP and TCP, pins, several services, local overrides, HTTPS. |

@@ -12,7 +12,7 @@ const Jsonic = require('jsonic')
 
 const Common = require('./common')
 
-import { MakeArgu, Rest, Any } from 'gubu'
+import { MakeArgu, Rest, Any } from 'shape'
 
 
 const Argu = MakeArgu('seneca')

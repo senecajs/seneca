@@ -3,7 +3,7 @@
 
 import { TaskSpec } from 'ordu'
 
-import { Gubu, MakeArgu, Open, Skip, One, Empty } from 'gubu'
+import { Shape, MakeArgu, Open, Skip } from 'shape'
 
 
 import {
@@ -11,7 +11,10 @@ import {
   deep,
   each,
   pattern,
+  pattern as common_pattern_str,
   parse_jsonic,
+  message_props_shape,
+  find_gubu_shape,
 } from './common'
 
 
@@ -19,7 +22,7 @@ const Argu = MakeArgu('seneca')
 
 
 const AddArgu: any = Argu('add', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   action: Skip(Function),
   actdef: Skip(Object),
@@ -338,10 +341,7 @@ const task = {
     const actdef = spec.data.actdef
     const pattern = spec.data.pattern
 
-    // TODO: provide option for seneca-joi etc to disable Gubu
-
     let pattern_rules: any = {}
-    let external = false // external rule engine
     let prN = 0
     each(actdef.raw, function(v: any, k: string) {
       if (
@@ -352,18 +352,25 @@ const task = {
         pattern_rules[k] = v
         prN++
         delete pattern[k]
-
-        // Recognize joi
-        if (v.$_root) {
-          external = true
-        }
       }
     })
     actdef.rules = pattern_rules
 
-    if (!external && 0 < prN) {
+    // Shapes built with gubu are not accepted by shape; fail clearly.
+    const gubu_at = find_gubu_shape(pattern_rules)
+    if (null != gubu_at) {
+      return {
+        op: 'stop',
+        err: spec.ctx.instance.error('add_gubu_shape', {
+          pattern: common_pattern_str(pattern),
+          path: gubu_at,
+        }),
+      }
+    }
+
+    if (0 < prN) {
       // TODO: how to make Closed if specified by user ?
-      actdef.gubu = Gubu(Open(pattern_rules))
+      actdef.shape = Shape(Open(pattern_rules))
     }
 
     return {
