@@ -70,7 +70,7 @@
     "seneca.*"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "main": "seneca.js",
   "types": "seneca.d.ts",

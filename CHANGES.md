@@ -46,8 +46,9 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   define or initialize no longer leaves its gated define action in flight
   until the action timeout, so later plugins can load and the process is
   not held open.
-* Node.js >= 22 is required (`engines.node`). Node.js 24 is the default
-  target: TypeScript compiles for ES2024 and `.nvmrc` selects Node.js 24.
+* Node.js 24 or later is required (`engines.node`). TypeScript compiles
+  for ES2024, `.nvmrc` selects Node.js 24, and continuous integration
+  runs on Node.js 24.
 * Unit tests run on the Node.js built-in test runner (`node:test`) with
   built-in coverage reporting; `@hapi/lab` is no longer used.
 * Documentation reorganized under `docs/` following the Diátaxis structure
@@ -79,7 +80,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
 ### Upgrading from 3.x
 
-* Node.js 22 or later is required (24 recommended).
+* Node.js 24 or later is required.
 * Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
   need a transport plugin: `npm install seneca-transport` and
   `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.

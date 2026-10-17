@@ -42,8 +42,8 @@ Seneca provides:
 npm install seneca
 ```
 
-Seneca 4 requires Node.js 22 or later; Node.js 24 is the default version
-used for development, continuous integration and releases (see `.nvmrc`).
+Seneca 4 requires Node.js 24 or later, the version used for development,
+continuous integration and releases (see `.nvmrc`).
 
 Network transports are plugins. For HTTP and TCP install
 [seneca-transport](https://github.com/senecajs/seneca-transport) as well.
@@ -148,7 +148,7 @@ information on contribution please see our [Contributing][Contrib] guide.
 ### Test
 
 The tests use the Node.js built-in test runner (`node:test`) and need
-Node.js 22 or later (24 is the default). To run them locally, with a
+Node.js 24 or later. To run them locally, with a
 coverage summary:
 
 ```sh

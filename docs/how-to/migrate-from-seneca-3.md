@@ -7,7 +7,7 @@ behaviours that remain.
 
 ## Requirements
 
-Node.js 22 or later (24 recommended).
+Node.js 24 or later.
 
 ## Install a transport
 
