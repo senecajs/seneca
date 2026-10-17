@@ -12,6 +12,8 @@ import { Ordu, TaskSpec } from 'ordu'
 import { Shape } from 'shape'
 import type { ErrDesc } from 'shape'
 
+import { Deprecate } from './deprecate'
+
 // Shape.isShape exists at runtime, but shape 11.4 declares it only on built
 // shapes, not on the Shape function itself.
 const isShape: (v: any) => boolean =
@@ -163,9 +165,13 @@ function make_tasks(): any {
       let args: any[] = [...spec.ctx.args]
 
       // Plugin definition function is under property `define`.
-      // `init` is deprecated from 4.x
+      // `init` is deprecated (remove in Seneca 5).
       // TODO: use-plugin expects `init` - update use-plugin to make this customizable
       if (null != args[0] && 'object' === typeof args[0]) {
+        if (null == args[0].define && 'function' === typeof args[0].init) {
+          Deprecate.deprecate(spec.ctx.seneca, 'plugin_init',
+            { name: args[0].name }, 'plugin_init:' + args[0].name)
+        }
         args[0].init = args[0].define || args[0].init
       }
 
@@ -225,8 +231,13 @@ function make_tasks(): any {
       let modify: any = {}
 
       // NOTE: `define` is the property for the plugin definition action.
-      // The property `init` will be deprecated in 4.x
+      // The property `init` is deprecated (see the args task).
       modify.define = plugin.define || plugin.init
+
+      // Promises are built in; seneca-promisify is no longer needed.
+      if ('promisify' === plugin.name) {
+        Deprecate.deprecate(spec.ctx.seneca, 'promisify')
+      }
 
       modify.fullname = Common.make_plugin_key(plugin)
 

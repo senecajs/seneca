@@ -77,6 +77,26 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Generated ids (`seneca.idgen()`, action and instance ids) never start
   with a digit, so an id embedded unquoted in a jsonic pattern string is
   not parsed as a number (#935, #950).
+* Deprecation warnings. Each Seneca 3 name or behaviour that Seneca 4
+  still supports, and that Seneca 5 removes, reports a deprecation the
+  first time it is used in a process: a Node.js `DeprecationWarning` with
+  a `SENECA_DEP_*` code, and a warn-level `DEPRECATED` log entry. This
+  covers the instance aliases (`findact`, `hasact`, `act_if`, `findpins`,
+  `pinact`, `plugins`, `findplugin`, `hasplugin`, `closed`),
+  `export('util')`, `util.deepextend`, `util.flatten`, `util.Gubu`,
+  `actdef.gubu`, the `act-err-4` event, the `deathdelay` and `legacy.*`
+  options, the `role:seneca` builtin actions and close hooks, the plugin
+  `init` property and the promisify plugin.
+  `debug: { deprecation: false }` turns them off. See
+  docs/reference/legacy.md.
+* The Seneca 3 `legacy` flags that Seneca 4 removed (`legacy.transport`,
+  `legacy.timeout_string` and others) are accepted and ignored, with a
+  deprecation warning, instead of failing option validation, so Seneca 3
+  configurations load.
+* The `deathdelay` option is used as `death_delay` when that is not set.
+  Before, it was overwritten and had no effect.
+* `seneca.next_act`, `Seneca.loghandler` and `seneca.util.parsepattern`,
+  which were undefined, are removed.
 * `act-err` uses the Seneca 4 argument layout: the first argument is
   always `'callback'` (it was `'action'` for action failures). An action
   failure passes the original error; a callback that threw is wrapped as
@@ -132,6 +152,9 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * `seneca.on()` throws `invalid_event_name` for an event Seneca does not
   emit. Listeners for custom events belong on a separate EventEmitter.
 * In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
+* Deprecated Seneca 3 names still work in 4.x, and are removed in Seneca 5.
+  Run your tests with `node --trace-deprecation` to find them: each one
+  reports a `SENECA_DEP_*` deprecation warning with a stack trace.
 * `act-err` listeners receive `'callback'` as the first argument for every
   failure. To tell a throwing callback from a failed action, check
   `err.code === 'act_callback'`. Listeners on `act-err-4` can move to

@@ -85,7 +85,10 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 
 * Most `legacy.*` flags are gone; `legacy.meta` and
   `legacy.builtin_actions` remain, and `legacy: false` turns both off.
-* `deathdelay` is `death_delay`.
+  The removed flags are still accepted, so Seneca 3 configurations load,
+  but they are ignored and each one reports a deprecation.
+* `deathdelay` is `death_delay`. `deathdelay` still works, as a deprecated
+  alias.
 * `legacy.error` has no effect: errors always use the Seneca 4 format,
   where the caller receives the original error object and the error
   handler receives it with `meta$` attached.
@@ -97,26 +100,35 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 
 | Seneca 3 | Seneca 4 |
 | -------- | -------- |
-| `seneca.closed` | `seneca.flags.closed` |
+| `seneca.closed` | `seneca.flags.closed` (`closed` is a deprecated alias) |
 | `seneca.next_act` | removed |
 | `Seneca.loghandler` | removed; use the `logger` option |
-| `seneca.findact`, `hasact`, `act_if`, `findpins`, `pinact`, `plugins`, `findplugin`, `hasplugin` | still available as aliases; prefer `find`, `has`, `list`, `list_plugins`, `find_plugin`, `has_plugin` |
-| `seneca.util.parsepattern` | removed (undefined) |
+| `seneca.findact`, `hasact`, `act_if`, `findpins`, `pinact`, `plugins`, `findplugin`, `hasplugin` | deprecated aliases; use `find`, `has`, `list`, `list_plugins`, `find_plugin`, `has_plugin` |
+| `seneca.util.parsepattern` | removed |
+| `seneca.util.Gubu` | `seneca.util.Shape` or `seneca.valid` (`Gubu` is a deprecated alias) |
+| `act-err-4` event | `act-err`, which now has the same arguments (`act-err-4` is deprecated) |
 
 ## New in Seneca 4
 
-* `seneca.direct(msg)` runs an action synchronously.
+* `seneca.direct(msg)` and `seneca.direct_prior(msg)` run an action
+  synchronously.
 * `seneca.prepare` and `seneca.destroy` for plugin lifecycle stages.
-* `seneca.fix`, `seneca.translate`, `seneca.explain` and the `explain$`
-  directive.
-* `seneca.valid` (Shape) for validation shapes.
-* `sys:seneca,get:options` and `sys:seneca,on:point` actions.
+* The `sys:seneca,on:point` action.
+
+`seneca.fix`, `seneca.translate`, `seneca.explain`, the `explain$`
+directive, `seneca.valid` and `sys:seneca,get:options` arrived during
+Seneca 3 and remain.
 
 ## Check your application
 
 1. Update Node.js and dependencies; install seneca-transport if needed.
-2. Run with `--seneca.test` and look for `DEPRECATED` and `UNKNOWN`
-   entries.
+2. Run your tests and look for deprecation warnings. Each deprecated
+   Seneca 3 name or behaviour in use is reported once per process as a
+   Node.js `DeprecationWarning` with a `SENECA_DEP_*` code (run with
+   `node --trace-deprecation` to see where it is used, or
+   `--throw-deprecation` to fail on it) and as a `DEPRECATED` log entry.
+   Also look for `UNKNOWN` entries with `--seneca.test`. See
+   [Deprecation warnings](../reference/legacy.md#deprecation-warnings).
 3. Grep for `role:seneca` patterns, `Joi`, `gubu`, `deathdelay`, `seneca.closed`
    and the removed API names.
 4. Run your test suite with `debug.undead` off: plugin failures that

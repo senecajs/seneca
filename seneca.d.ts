@@ -4,7 +4,6 @@ import { Shape } from 'shape';
 declare function init(seneca_options?: any, more_options?: any): any;
 declare namespace init {
     var Seneca: (this: any) => void;
-    var loghandler: any;
     var use: () => any;
     var test: () => any;
     var quiet: () => any;
@@ -21,11 +20,10 @@ declare namespace init {
         print: any;
         error: any;
         deep: any;
-        deepextend: any;
-        parsepattern: any;
         pincanon: any;
         router: () => any;
         resolve_option: any;
+        deepextend: any;
         flatten: any;
     };
     var valid: Shape;
@@ -44,11 +42,10 @@ declare namespace init {
                 print: any;
                 error: any;
                 deep: any;
-                deepextend: any;
-                parsepattern: any;
                 pincanon: any;
                 router: () => any;
                 resolve_option: any;
+                deepextend: any;
                 flatten: any;
             };
         };

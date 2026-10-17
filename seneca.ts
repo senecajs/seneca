@@ -33,6 +33,7 @@ import { Plugin } from './lib/plugin'
 import { Inward } from './lib/inward'
 import { Outward } from './lib/outward'
 const { Legacy } = require('./lib/legacy')
+const { Deprecate } = require('./lib/deprecate')
 const { resolve_options } = require('./lib/options')
 const { Print } = require('./lib/print')
 const { addActions } = require('./lib/actions')
@@ -80,7 +81,7 @@ const option_defaults = {
   // Wait time for plugins to close gracefully.
   death_delay: 11111,
 
-  // LEGACY: remove in 4.x
+  // Deprecated alias of death_delay. Remove in Seneca 5.
   deathdelay: 11111,
 
   // Wait time for actions to complete before shutdown.
@@ -315,6 +316,20 @@ const option_defaults = {
 
     // If true, add role:seneca variants of builtin actions.
     builtin_actions: false,
+
+    // Removed in Seneca 4. Accepted and ignored, with a deprecation
+    // warning, so that Seneca 3 configurations load.
+    actdef: Skip(Boolean),
+    action_signature: Skip(Boolean),
+    error_codes: Skip(Boolean),
+    fail: Skip(Boolean),
+    logging: Skip(Boolean),
+    meta_arg_remove: Skip(Boolean),
+    options: Skip(Boolean),
+    rules: Skip(Boolean),
+    timeout_string: Skip(Boolean),
+    top_plugins: Skip(Boolean),
+    transport: Skip(Boolean),
   }),
 
   // Processing task ordering.
@@ -357,6 +372,23 @@ const option_defaults = {
 }
 
 
+// Seneca 3 legacy flags that Seneca 4 removed. They are accepted (see the
+// legacy option) and ignored, with a deprecation warning.
+const REMOVED_LEGACY_FLAGS = [
+  'actdef',
+  'action_signature',
+  'error_codes',
+  'fail',
+  'logging',
+  'meta_arg_remove',
+  'options',
+  'rules',
+  'timeout_string',
+  'top_plugins',
+  'transport',
+]
+
+
 // Utility functions exposed by Seneca via `seneca.util`.
 const seneca_util = {
   Eraro,
@@ -374,21 +406,25 @@ const seneca_util = {
   error: error,
   deep: Common.deep,
 
-  deepextend: Common.deep,
-  parsepattern: Common.parsePattern,
   pincanon: Common.pincanon,
   router: function router() {
     return Patrun()
   },
   resolve_option: Common.resolve_option,
 
-  // Legacy (deprecate and remove)
-  // argprops: Legacy.argprops,
-  // recurse: Legacy.recurse,
-  // copydata: Legacy.copydata,
-  // nil: Legacy.nil,
-  flatten: Legacy.flatten,
+  // Deprecated. Remove in Seneca 5.
+  deepextend: Deprecate.deprecated('util_deepextend', Common.deep),
+  flatten: Deprecate.deprecated('util_flatten', Legacy.flatten),
 }
+
+// Deprecated alias of Shape. Remove in Seneca 5.
+Object.defineProperty(seneca_util, 'Gubu', {
+  get() {
+    Deprecate.deprecate(null, 'util_gubu')
+    return Shape
+  },
+  enumerable: false,
+})
 
 // Internal implementations.
 const intern = {
@@ -433,6 +469,10 @@ Seneca.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
     })
   }
 
+  if ('act-err-4' === event_name) {
+    Deprecate.deprecate(this, 'act_err_4')
+  }
+
   return original_on.call(this, event_name, ...rest)
 }
 
@@ -462,11 +502,32 @@ function init(seneca_options?: any, more_options?: any) {
       ? deep({}, { from: seneca_options }, more_options)
       : deep({}, seneca_options, more_options)
 
-  // Legacy options, remove in 4.x
+  // Deprecated: deathdelay is an alias of death_delay.
+  const used_deathdelay = undefined !== initial_opts.deathdelay
+  if (used_deathdelay && undefined === initial_opts.death_delay) {
+    initial_opts.death_delay = initial_opts.deathdelay
+  }
   initial_opts.deathdelay = initial_opts.death_delay
 
   var seneca = make_seneca(initial_opts)
   var options = seneca.options()
+
+  if (used_deathdelay) {
+    Deprecate.deprecate(seneca, 'deathdelay')
+  }
+
+  // Deprecated: legacy flags that Seneca 4 ignores.
+  const initial_legacy = initial_opts.legacy
+  if (null != initial_legacy && 'object' === typeof initial_legacy) {
+    if (undefined !== initial_legacy.error) {
+      Deprecate.deprecate(seneca, 'legacy_error')
+    }
+    for (const flag of REMOVED_LEGACY_FLAGS) {
+      if (undefined !== initial_legacy[flag]) {
+        Deprecate.deprecate(seneca, 'legacy_flag', { flag }, 'legacy_flag:' + flag)
+      }
+    }
+  }
 
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
@@ -498,9 +559,6 @@ function init(seneca_options?: any, more_options?: any) {
 
 // Expose Seneca prototype for easier monkey-patching
 init.Seneca = Seneca
-
-// To reference builtin loggers when defining logging options.
-init.loghandler = Legacy.loghandler
 
 // Makes require('seneca').use(...) work by creating an on-the-fly instance.
 init.use = function top_use() {
@@ -551,6 +609,9 @@ function make_seneca(initial_opts?: any) {
 
   // Expose private data to plugins.
   root$.private$ = private$
+
+  // Deprecations reached without an instance (Seneca.util) report here.
+  Deprecate.track(root$)
 
   // Resolve initial options.
   private$.optioner = resolve_options(module, option_defaults, initial_opts)
@@ -608,6 +669,16 @@ function make_seneca(initial_opts?: any) {
   root$.flags = {
     closed: false,
   }
+
+  // Deprecated alias of flags.closed. Remove in Seneca 5.
+  Object.defineProperty(root$, 'closed', {
+    get() {
+      Deprecate.deprecate(this, 'closed')
+      return this.flags.closed
+    },
+    enumerable: false,
+    configurable: true,
+  })
 
   Object.defineProperty(root$, 'root', { value: root$ })
 
@@ -684,16 +755,15 @@ function make_seneca(initial_opts?: any) {
   // Non-API methods.
   // root$.register = Plugins.register(callpoint)
 
-  // DEPRECATE IN 4.x
-  root$.findact = root$.find
-  root$.plugins = API.list_plugins
-  root$.findplugin = API.find_plugin
-  root$.hasplugin = API.has_plugin
-  root$.hasact = Legacy.hasact
-  root$.act_if = Legacy.act_if
-  root$.findpins = Legacy.findpins
-  root$.pinact = Legacy.findpins
-  root$.next_act = Legacy.next_act
+  // Deprecated aliases. Remove in Seneca 5.
+  root$.findact = Deprecate.deprecated('findact', root$.find)
+  root$.plugins = Deprecate.deprecated('plugins', API.list_plugins)
+  root$.findplugin = Deprecate.deprecated('findplugin', API.find_plugin)
+  root$.hasplugin = Deprecate.deprecated('hasplugin', API.has_plugin)
+  root$.hasact = Deprecate.deprecated('hasact', Legacy.hasact)
+  root$.act_if = Deprecate.deprecated('act_if', Legacy.act_if)
+  root$.findpins = Deprecate.deprecated('findpins', Legacy.findpins)
+  root$.pinact = Deprecate.deprecated('pinact', Legacy.findpins)
 
   // Identifier generator.
   root$.idgen = Common.idnid({ length: start_opts.idlen })

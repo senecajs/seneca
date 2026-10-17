@@ -29,7 +29,7 @@ describe the accepted type rather than a fixed default.
 | `log` | `'info'` level, JSON logger | Logging specification: a level name, level abbreviation, numeric level, logger name, logger function or logspec object. See [Logging](logging.md). |
 | `logger` | none | Custom logger: a function `(entry) => void` called with the instance as `this`, a logger plugin, or the name of a builtin logger (`'flat'`, `'json'`, `'test'`). See [Logging](logging.md). |
 | `death_delay` | `11111` | Milliseconds a fatal error waits for `close()` to finish before the process is terminated anyway (exit code 2). |
-| `deathdelay` | `11111` | Legacy spelling. Overwritten by `death_delay` at construction; set `death_delay` instead. |
+| `deathdelay` | `11111` | Deprecated alias of `death_delay` (`SENECA_DEP_DEATHDELAY`): used as `death_delay` when that is not set. |
 | `close_delay` | `22222` | Milliseconds `close()` waits for in-flight actions before closing anyway. |
 | `errhandler` | none | Global error handler `(err, meta) => boolean`. Also set by `seneca.error(fn)` and `seneca.test(fn)`. A truthy return value marks the error as handled and suppresses the action callback. See [Handle errors](../how-to/handle-errors.md). |
 | `from` | none | Path of an options file (`.js` or `.json`) to load. `Seneca('path')` is shorthand for `Seneca({ from: 'path' })`. |
@@ -69,7 +69,7 @@ describe the accepted type rather than a fixed default.
 | `debug.act_caller` | `false` | Record the calling code location of each `act` call in `msg.caller$` (always on in test mode). |
 | `debug.short_logs` | `false` | Shorten identifiers to 2 characters (the instance id becomes `xx/tag`). |
 | `debug.callpoint` | `false` | Record the calling code location when actions are added and called (`actdef.callpoint`, log entries). Enabled by test mode. |
-| `debug.deprecation` | `true` | Log a warning when an action marked with `deprecate$` is called. |
+| `debug.deprecation` | `true` | Report deprecations: each deprecated Seneca 3 name or behaviour in use (once per process, as a warn-level `DEPRECATED` log entry and a Node.js `DeprecationWarning` with a `SENECA_DEP_*` code), and calls of actions marked with `deprecate$`. See [Legacy](legacy.md#deprecation-warnings). |
 | `debug.argv` | `null` | Array used instead of `process.argv` when parsing `--seneca.*` arguments (the first two entries are skipped). For tests. |
 | `debug.env` | `null` | Object used instead of `process.env` when reading `SENECA_*` variables. For tests. |
 | `debug.datalen` | `333` | Maximum length of message and result data in log lines and error messages. |
@@ -177,9 +177,10 @@ defaults.
 
 | Option | Default | Effect |
 | ------ | ------- | ------ |
-| `legacy.error` | `false` | Always forced to false at startup; Seneca 4 error handling cannot be switched to the 3.x behaviour. |
+| `legacy.error` | `false` | Deprecated (`SENECA_DEP_LEGACY_ERROR`). Always forced to false at startup; Seneca 4 error handling cannot be switched to the 3.x behaviour. |
 | `legacy.meta` | `false` | Attach the meta data object to messages as `msg.meta$` and pass it to transport clients, as 3.x transports expect. |
-| `legacy.builtin_actions` | `false` | Also register the 3.x `role:seneca` variants of the builtin actions. See [Builtin actions](builtin-actions.md). |
+| `legacy.builtin_actions` | `false` | Also register the 3.x `role:seneca` variants of the builtin actions; calling one reports `SENECA_DEP_ROLE_SENECA`. See [Builtin actions](builtin-actions.md). |
+| `legacy.actdef`, `legacy.action_signature`, `legacy.error_codes`, `legacy.fail`, `legacy.logging`, `legacy.meta_arg_remove`, `legacy.options`, `legacy.rules`, `legacy.timeout_string`, `legacy.top_plugins`, `legacy.transport` | none | Seneca 3 flags removed in Seneca 4. Accepted and ignored, with `SENECA_DEP_LEGACY_FLAG`, so that Seneca 3 configurations load. |
 
 ## `order`
 

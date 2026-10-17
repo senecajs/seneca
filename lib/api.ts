@@ -2,6 +2,8 @@
 
 import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'shape'
 
+import { Deprecate } from './deprecate'
+
 import {
   each,
   make_standard_err_log_entry,
@@ -133,7 +135,7 @@ function options(this: any, options: any, chain: any) {
 
 
 // close seneca instance
-// sets public seneca.closed property
+// sets seneca.flags.closed
 function close(callpoint: any) {
   return function api_close(this: any, done: any) {
     const seneca = this
@@ -366,6 +368,7 @@ function export$(this: any, key: any) {
 
   // Legacy aliases
   if (key === 'util') {
+    Deprecate.deprecate(this, 'export_util')
     key = 'basic'
   }
 
@@ -985,9 +988,6 @@ intern.close = function(this: any, callpoint: any, done: any) {
     if (seneca.flags.closed) {
       return safe_done()
     }
-
-    // TODO: remove in 4.x
-    seneca.closed = true
 
     seneca.flags.closed = true
 

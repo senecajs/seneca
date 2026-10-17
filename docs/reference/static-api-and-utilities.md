@@ -16,7 +16,6 @@ const Seneca = require('seneca')
 | `Seneca.valid` | The [Shape](https://github.com/rjrodger/shape) builder (`Required`, `Default`, `Skip`, `Open`, ...); also `seneca.valid`. |
 | `Seneca.Seneca` | The instance constructor (prototype), for extension. |
 | `Seneca.test$` | Internals exposed for Seneca's own tests. |
-| `Seneca.loghandler` | Legacy; undefined. |
 
 TypeScript: the module's default export is the factory, and the type
 `Instance` describes an instance.
@@ -56,9 +55,8 @@ Instances are event emitters (see [Events](events.md)) and serialize to
 | `pattern(obj)` | Canonical pattern string of an object (`$` keys, object and function values omitted; keys sorted). A string is returned unchanged. |
 | `pincanon(pin)` | Canonical string of a pin (string, object or array; arrays are sorted and joined with `;`). |
 | `pins(pin)` | Array of pattern objects from a pin (strings may contain several patterns separated by `;`). |
-| `parsepattern(...)` | Alias kept for compatibility; not implemented in Seneca 4 (undefined). |
 | `clean(obj)` | Shallow copy without properties whose names end in `$`. |
-| `deep(...objs)` | Deep merge, later arguments override earlier ones (`lodash.defaultsdeep` in reverse); returns a new object. `deepextend` is an alias. |
+| `deep(...objs)` | Deep merge, later arguments override earlier ones (`lodash.defaultsdeep` in reverse); returns a new object. `deepextend` is a deprecated alias. |
 | `error(code, details)` | Create a Seneca error (see [Error codes](error-codes.md)). |
 | `print(err, result)` | Callback for `act` that prints the error or the result; `seneca.act('a:1', Seneca.util.print)`. |
 | `resolve_option(value, options)` | Return `value(options)` when `value` is a function, otherwise `value`. |

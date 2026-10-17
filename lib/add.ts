@@ -5,6 +5,8 @@ import { TaskSpec } from 'ordu'
 
 import { Shape, MakeArgu, Open, Skip } from 'shape'
 
+import { Deprecate } from './deprecate'
+
 
 import {
   clean,
@@ -372,6 +374,17 @@ const task = {
       // TODO: how to make Closed if specified by user ?
       actdef.shape = Shape(Open(pattern_rules))
     }
+
+    // Deprecated alias of shape. Remove in Seneca 5.
+    const instance = spec.ctx.instance
+    Object.defineProperty(actdef, 'gubu', {
+      get() {
+        Deprecate.deprecate(instance, 'actdef_gubu')
+        return this.shape
+      },
+      enumerable: false,
+      configurable: true,
+    })
 
     return {
       // TODO: simple op:set would be faster
