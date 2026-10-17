@@ -139,7 +139,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
-  docs/create-a-release.md.
+  docs/how-to/create-a-release.md.
 
 ### Upgrading from 3.x
 

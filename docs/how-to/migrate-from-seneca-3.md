@@ -115,8 +115,9 @@ The declarations describe the API; before, instances were typed as
 
 * Import the factory with `import Seneca from 'seneca'` (ES modules, or
   CommonJS with `esModuleInterop`) or `import Seneca = require('seneca')`.
-  The declarations use `export =`, as the module does, so the default
-  import also works from ES modules under `module: nodenext`.
+  The declarations use `export =`, matching the module's
+  `module.exports`, so the default import also works from ES modules
+  under `module: nodenext`.
 * `Seneca()` returns `Seneca.Instance`, which is also `this` in actions
   and plugin definitions. Calls to methods that do not exist, or with
   arguments of the wrong type, no longer compile.

@@ -5,67 +5,8 @@ const assert = require('node:assert/strict')
 const { describe, it } = require('node:test')
 
 var Seneca = require('..')
-var { Plugin } = require('../lib/plugin')
 
 describe('plugin', function () {
-  // TODO: move to seneca-joi
-  /*
-  it('use.intern', (fin) => {
-    assert.ok(null != Plugin.intern)
-
-    var Joi = Seneca.util.Joi
-
-    var spec = {
-      a: null,
-      b: void 0,
-      c: {}, // Joi.object(),
-      d: 1,
-      e: 'a',
-      f: {},
-      g: { h: 2 },
-      i: { j: { k: 3 } },
-
-      // NOTE: a simple array check is as good as it gets
-      // Use explicit Joi.array construction for detailed validation
-
-      l: [],
-      m: [4],
-      n: [[5]],
-      o: { p: [6] },
-      q: { u: [{ v: [{ w: 7 }] }] },
-    }
-
-    var out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: false })
-    // console.dir(out.describe(),{depth:null})
-    assert.ifError(out.validate(spec).error)
-
-    out = Plugin.intern.prepare_spec(Joi, spec, { allow_unknown: true })
-    //console.dir(out.describe(),{depth:null})
-
-    //console.dir(out.validate({}),{depth:null})
-    assert.deepEqual(out.validate({}).value, {
-      a: null,
-      d: 1,
-      e: 'a',
-      f: {},
-      g: { h: 2 },
-      i: { j: { k: 3 } },
-      l: [],
-      m: [4],
-      n: [[5]],
-      o: { p: [6] },
-      q: {
-        u: [{ v: [{ w: 7 }] }],
-      },
-    })
-
-    spec.z = 1
-    assert.ifError(out.validate(spec).error)
-
-    fin()
-  })
-  */
-
   it('plugin-edges', (t, fin) => {
     var s = Seneca({ debug: { undead: true } }).test(fin)
 

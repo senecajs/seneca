@@ -148,7 +148,9 @@ information on contribution please see our [Contributing][Contrib] guide.
 ### Test
 
 The tests use the Node.js built-in test runner (`node:test`) and
-assertions (`node:assert`), and need Node.js 24 or later. To run them
+assertions (`node:assert`), and need Node.js 24 or later. `npm test` also
+compiles the TypeScript consumer code in `test/types` against the
+declarations (`npm run test-types` runs only that). To run the tests
 locally, with a coverage summary:
 
 ```sh
