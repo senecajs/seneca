@@ -108,6 +108,32 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 | `seneca.util.Gubu` | `seneca.util.Shape` or `seneca.valid` (`Gubu` is a deprecated alias) |
 | `act-err-4` event | `act-err`, which now has the same arguments (`act-err-4` is deprecated) |
 
+## TypeScript
+
+The declarations describe the API; before, instances were typed as
+`any`.
+
+* Import the factory with `import Seneca from 'seneca'` (ES modules, or
+  CommonJS with `esModuleInterop`) or `import Seneca = require('seneca')`.
+  The declarations use `export =`, as the module does, so the default
+  import also works from ES modules under `module: nodenext`.
+* `Seneca()` returns `Seneca.Instance`, which is also `this` in actions
+  and plugin definitions. Calls to methods that do not exist, or with
+  arguments of the wrong type, no longer compile.
+* Members that plugins add to instances (such as `seneca.make$` from
+  seneca-entity) are not part of `Instance`. Declare them by augmenting
+  it:
+
+  ```ts
+  declare module 'seneca' {
+    interface Instance {
+      make$(name: string): any
+    }
+  }
+  ```
+
+See [TypeScript](../reference/static-api-and-utilities.md#typescript).
+
 ## New in Seneca 4
 
 * `seneca.direct(msg)` and `seneca.direct_prior(msg)` run an action

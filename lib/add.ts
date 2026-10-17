@@ -440,7 +440,7 @@ const task = {
 
 
 // TODO: write specific test cases for these
-const intern = (module.exports.intern = {
+const intern = {
   make_action_stats: function(actdef: any) {
     return {
       id: actdef.id,
@@ -466,11 +466,12 @@ const intern = (module.exports.intern = {
       })
     })
   },
-})
+}
 
 
 export {
   api_add,
   api_message,
   task,
+  intern,
 }

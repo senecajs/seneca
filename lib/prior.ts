@@ -1,17 +1,7 @@
 /* Copyright © 2019-2023 Richard Rodger and other contributors, MIT License. */
 
 
-import Util from 'util'
-
-import { MakeArgu, Open, Skip } from 'shape'
-
-
-// const { Ordu } = require('ordu')
-
-// const Common = require('./common')
-// const { Inward } = require('./inward')
-// const Act = require('./act')
-// const { Meta } = require('./meta')
+import { MakeArgu, Skip } from 'shape'
 
 import {
   parse_jsonic,

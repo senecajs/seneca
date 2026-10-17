@@ -118,6 +118,24 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * All remaining Joi handling is removed: plugin `defaults` functions no
   longer receive `Joi`, and Joi schemas in defaults and pattern rules are
   no longer merged without validation.
+* The TypeScript declarations describe the module and the documented
+  API. They use `export =`, as the module does at runtime, so
+  `import Seneca from 'seneca'` type-checks from ES modules
+  (`module: nodenext`) and with `esModuleInterop`, and
+  `import Seneca = require('seneca')` from CommonJS. Before, they
+  declared a default export that the module does not have, and typed
+  instances as `any`. `Seneca()` returns `Seneca.Instance`, with the
+  methods and properties of docs/reference/api.md; `Seneca.Options`,
+  `Seneca.Meta`, `Seneca.ActionFunc`, `Seneca.PluginDefine` and the
+  other public types are in the `Seneca` namespace, and deprecated names
+  are marked `@deprecated`. Plugins declare the members they add by
+  augmenting `Instance` (`declare module 'seneca'`).
+* The TypeScript sources import Seneca's own modules and typed
+  dependencies with `import` instead of `require`, so the calls between
+  them are type-checked, and `npm test` compiles example consumer code
+  against the declarations (`test/types`). `lodash.flatten` and
+  `lodash.uniq` are replaced by `Array.prototype.flat` and `Set`, and
+  `nua`, which was used without being declared, is a dependency.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -159,6 +177,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   failure. To tell a throwing callback from a failed action, check
   `err.code === 'act_callback'`. Listeners on `act-err-4` can move to
   `act-err` unchanged.
+* TypeScript: instances are typed as `Seneca.Instance` instead of `any`.
+  Declare members that plugins add (such as `seneca.make$`) by augmenting
+  the interface:
+  `declare module 'seneca' { interface Instance { make$(name: string): any } }`.
 
 
 ## 4.0.0-rc5 2025-02-07

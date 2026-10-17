@@ -1,9 +1,9 @@
 /* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Util = require('util')
+import Util from 'util'
 
-var Common = require('./common')
+import Common = require('./common')
 
 // Internal implementations.
 var intern: any = {}

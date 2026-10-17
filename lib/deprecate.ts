@@ -14,14 +14,12 @@
 //
 // The option debug.deprecation: false turns both off.
 
-import Errors from './errors'
+import { deprecation } from './errors'
 
 type Instance = {
   log?: { warn: (entry: Record<string, unknown>) => void }
   options?: () => { debug?: { deprecation?: boolean } }
 }
-
-const messages: Record<string, string> = Errors.deprecation
 
 const reported = new Set<string>()
 
@@ -59,7 +57,7 @@ function deprecate(
 
   reported.add(key)
 
-  const template = messages[code]
+  const template = deprecation[code]
   const notice = null == template ? code : render(template, values)
   const nodeCode = 'SENECA_DEP_' + code.toUpperCase()
 

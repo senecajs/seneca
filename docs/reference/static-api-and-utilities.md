@@ -17,8 +17,7 @@ const Seneca = require('seneca')
 | `Seneca.Seneca` | The instance constructor (prototype), for extension. |
 | `Seneca.test$` | Internals exposed for Seneca's own tests. |
 
-TypeScript: the module's default export is the factory, and the type
-`Instance` describes an instance.
+See [TypeScript](#typescript) for the types.
 
 ## Instance properties
 
@@ -61,8 +60,41 @@ Instances are event emitters (see [Events](events.md)) and serialize to
 | `print(err, result)` | Callback for `act` that prints the error or the result; `seneca.act('a:1', Seneca.util.print)`. |
 | `resolve_option(value, options)` | Return `value(options)` when `value` is a function, otherwise `value`. |
 | `router()` | A new Patrun router. |
-| `flatten(list, prop)` | Legacy list flattening. |
+| `flatten(list, prop)` | Legacy list flattening. Deprecated; removed in Seneca 5. |
 | `Jsonic`, `Patrun`, `Gex`, `Shape`, `Nid`, `Eraro` | The underlying libraries: Jsonic string parsing, pattern routing, glob matching, shape validation, id generation, error construction. |
 
 `seneca.util.Jsonic('a:1,b:x')` parses a Jsonic string;
 `seneca.util.Jsonic.stringify(obj)` produces one.
+
+## TypeScript
+
+The package includes its declarations (`seneca.d.ts`). The module
+exports the factory as `module.exports`, and the declarations use
+`export =` to match:
+
+```ts
+import Seneca from 'seneca' // ES modules, or CommonJS with esModuleInterop
+import Seneca = require('seneca') // CommonJS without esModuleInterop
+
+const seneca: Seneca.Instance = Seneca({ timeout: 2222 })
+```
+
+The `Seneca` namespace exports the public types: `Instance`, `Options`,
+`Msg`, `Pattern`, `Result`, `Meta`, `Reply`, `ActionFunc`,
+`MessageFunc`, `ActCallback`, `SubFunc`, `ActDef`, `Plugin`,
+`PluginDefine`, `PluginDesc`, `PluginRecord`, `Logger` and `Util`. They
+can also be imported by name: `import type { Instance } from 'seneca'`.
+
+`this` is a `Seneca.Instance` inside actions, callbacks and plugin
+definitions. Deprecated methods and options are marked `@deprecated`.
+
+Plugins that add members to instances, for example with
+`seneca.decorate`, declare them by augmenting `Instance`:
+
+```ts
+declare module 'seneca' {
+  interface Instance {
+    make$(name: string): Entity
+  }
+}
+```

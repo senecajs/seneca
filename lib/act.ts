@@ -33,7 +33,7 @@ const ActArgu: any = Argu('act', {
 // Perform an action and optionally return the result by callback.
 // The properties of the combined arguments are matched against known
 // patterns, and the most specific one wins.
-exports.api_act = function() {
+function api_act(this: any) {
   const instance = this
   const { opts, msg, reply } = intern.prep_act(instance, arguments)
   intern.do_act(instance, opts, msg, reply)
@@ -41,7 +41,7 @@ exports.api_act = function() {
 }
 
 
-exports.api_direct = function() {
+function api_direct(this: any) {
   const instance = this
   const { opts, msg, reply } = intern.prep_act(instance, arguments)
   msg.direct$ = true
@@ -49,7 +49,7 @@ exports.api_direct = function() {
   return out
 }
 
-const intern = (module.exports.intern = {
+const intern = {
   prep_act: function(instance: any, args: any) {
     const actspec = ActArgu(args)
 
@@ -536,4 +536,11 @@ const intern = (module.exports.intern = {
       opts.errhandler.call(instance, err, err.meta$)
     }
   },
-})
+}
+
+
+export {
+  api_act,
+  api_direct,
+  intern,
+}

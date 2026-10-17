@@ -1,6 +1,6 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'shape'
+import { MakeArgu, Any, Check, Rest, Skip } from 'shape'
 
 import { Deprecate } from './deprecate'
 
@@ -196,7 +196,7 @@ function error(this: any, first: any) {
       err = plugin.eraro.apply(this, arguments)
     }
     else {
-      err = common_error.apply(this, arguments)
+      err = common_error.apply(this, arguments as any)
     }
 
     return err

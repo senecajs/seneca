@@ -47,7 +47,7 @@ Information oriented descriptions of every part of Seneca.
 | Reference | Describes |
 | --------- | --------- |
 | [Instance API](reference/api.md) | Every method on a Seneca instance. |
-| [Module exports, instance properties and utilities](reference/static-api-and-utilities.md) | `Seneca()`, `Seneca.use/test/quiet/util/valid`, instance properties, `seneca.util`. |
+| [Module exports, instance properties and utilities](reference/static-api-and-utilities.md) | `Seneca()`, `Seneca.use/test/quiet/util/valid`, instance properties, `seneca.util`, TypeScript types. |
 | [Options](reference/options.md) | Every option with its default and effect. |
 | [Command line and environment](reference/command-line-and-environment.md) | `--seneca.*` arguments, `SENECA_*` variables, options files, precedence. |
 | [Patterns](reference/patterns.md) | Pattern syntax, matching rules, wildcards, pins, validation rules. |

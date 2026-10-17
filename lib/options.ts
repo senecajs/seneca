@@ -4,13 +4,15 @@
 import Fs from 'fs'
 import Path from 'path'
 
-const Eraro = require('eraro')
-const Jsonic = require('jsonic')
-const Minimist = require('minimist')
+import Eraro from 'eraro'
+import Jsonic from 'jsonic'
 import { Shape } from 'shape'
 
-
 import { deep } from './common'
+
+// Untyped modules.
+const Minimist: (args: string[], opts?: Record<string, any>) => Record<string, any> =
+  require('minimist')
 
 const error = Eraro({ package: 'seneca', msgmap: ERRMSGMAP() })
 

@@ -2,10 +2,11 @@
 'use strict'
 
 // Node API modules
-var Util = require('util')
+import Util from 'util'
 
-// External modules.
-var Minimist = require('minimist')
+// Untyped modules.
+const Minimist: (args: string[], opts?: Record<string, any>) => Record<string, any> =
+  require('minimist')
 
 
 /** Handle command line specific functionality */
@@ -84,13 +85,11 @@ function plugin_options(
 }
 
 
-Object.assign(Print, {
-  print_options,
-  internal_log,
-  internal_err,
-  plugin_options,
-  print: print_reply,
-})
+Print.print_options = print_options
+Print.internal_log = internal_log
+Print.internal_err = internal_err
+Print.plugin_options = plugin_options
+Print.print = print_reply
 
 
 export { Print }

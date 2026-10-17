@@ -4,25 +4,22 @@
 
 // TODO: replace `seneca-` prefix with `plugin-` for unnamed plugins
 
-const Uniq: any = require('lodash.uniq')
-const Eraro: any = require('eraro')
-
+import Eraro from 'eraro'
 import Nua from 'nua'
 import { Ordu, TaskSpec } from 'ordu'
 import { Shape } from 'shape'
 import type { ErrDesc } from 'shape'
 
+import Common = require('./common')
 import { Deprecate } from './deprecate'
+import { Print } from './print'
 
 // Shape.isShape exists at runtime, but shape 11.4 declares it only on built
 // shapes, not on the Shape function itself.
 const isShape: (v: any) => boolean =
   (Shape as unknown as { isShape: (v: any) => boolean }).isShape
 
-
 // TODO: refactor: use.js->plugin.js and contain *_plugin api methods too
-const Common: any = require('./common')
-const { Print } = require('./print')
 
 /* $lab:coverage:on$ */
 
@@ -695,9 +692,9 @@ function make_tasks(): any {
         seneca.private$.plugins[plugin.fullname] = plugin
 
         seneca.private$.plugin_order.byname.push(plugin.name)
-        seneca.private$.plugin_order.byname = Uniq(
-          seneca.private$.plugin_order.byname
-        )
+        seneca.private$.plugin_order.byname = [
+          ...new Set(seneca.private$.plugin_order.byname),
+        ]
         seneca.private$.plugin_order.byref.push(plugin.fullname)
 
         // // 3.x Backwards compatibility - REMOVE in 4.x

@@ -100,6 +100,7 @@ Options are listed under their top level key in the
 | `transport` options, configuration resolution | [Transport](transport.md), [Options: transport](options.md#transport) | [Use network transports](../how-to/use-network-transports.md) |
 | `transport/utils` export, transport plugin hooks | [Transport: for transport plugin authors](transport.md#for-transport-plugin-authors) | |
 | Transport protocol (`meta$` wire format) | [Message transport protocol](message-transport-protocol.md) | [Transport independence](../explanation/transport-independence.md) |
+| TypeScript types (`Seneca.Instance`, `Seneca.Options`, augmenting `Instance`) | [TypeScript](static-api-and-utilities.md#typescript) | [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md#typescript) |
 | `use` (load a plugin) | [API: use](api.md#use), [Plugins](plugins.md) | [Manage plugins](../how-to/manage-plugins.md) |
 | `valid` (Shape builders), `valid.*` options | [Module exports](static-api-and-utilities.md#the-module), [Options: valid](options.md#valid) | [Validate messages and options](../how-to/validate-messages-and-options.md) |
 | `wrap` | [API: wrap](api.md#wrap) | [Extend actions with priors](../how-to/extend-actions-with-priors.md) |

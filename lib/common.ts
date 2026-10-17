@@ -4,29 +4,26 @@
 
 import Util from 'util'
 
+import Eraro from 'eraro'
 import Stringify from 'fast-safe-stringify'
 import Jsonic from 'jsonic'
 import Nid from 'nid'
-
-const Eraro = require('eraro')
-
-const DefaultsDeep = require('lodash.defaultsdeep')
-const { Print } = require('./print')
-
-import Errors from './errors'
-
 import { Check, Fault } from 'shape'
 
+import { messages } from './errors'
+import { Print } from './print'
+
+// Untyped modules.
+const DefaultsDeep: (...objs: any[]) => any = require('lodash.defaultsdeep')
 
 
-const error =
-  (exports.error =
-    exports.eraro =
-    Eraro({
-      package: 'seneca',
-      msgmap: Errors,
-      override: true,
-    }))
+
+// eraro does not export the type of its error makers.
+const error: ReturnType<typeof Eraro> = Eraro({
+  package: 'seneca',
+  msgmap: messages,
+  override: true,
+})
 
 
 function pins(inpin: any): Record<string, any>[] {
@@ -59,16 +56,20 @@ function stringify(...args: any) {
 }
 
 
-function wrap_error(err: any) {
+function wrap_error(
+  err: any,
+  code?: string,
+  details?: Record<string, any>,
+): never {
   if (err.seneca) {
     throw err
   } else {
-    throw error.call(null, ...arguments)
+    throw error(err, code, details)
   }
 }
 
 
-function make_plugin_key(plugin: any, origtag: any) {
+function make_plugin_key(plugin: any, origtag?: any) {
   if (null == plugin) {
     throw error('missing_plugin_name')
   }
@@ -488,7 +489,7 @@ function make_standard_act_log_entry(
   )
 }
 
-function make_standard_err_log_entry(err: any, ctxt: any) {
+function make_standard_err_log_entry(err: any, ctxt?: any) {
   if (!err) return ctxt
 
   if (err.details && ctxt && ctxt.caller) {
