@@ -6,8 +6,15 @@ import {
   TRACE_ACTION,
   clean,
   make_trace_desc,
-  inspect,
 } from './common'
+
+import {
+  describe_msg,
+  describe_shape_errors,
+  redact_props,
+  shape_errors,
+  type_name,
+} from './redact'
 
 
 const intern: any = {}
@@ -54,7 +61,7 @@ function inward_limit_msg(spec: any) {
           parents: meta.parents.map(
             (p: any) => p[TRACE_PATTERN] + ' ' + p[TRACE_ACTION]
           ),
-          args: inspect(clean(data.msg)).replace(/\n/g, ''),
+          args: describe_msg(ctx.seneca, data.msg),
         },
       },
     }
@@ -89,7 +96,7 @@ function inward_closed(spec: any) {
         kind: 'error',
         code: 'closed',
         info: {
-          args: inspect(clean(data.msg)).replace(/\n/g, ''),
+          args: describe_msg(ctx.seneca, data.msg),
         },
       },
     }
@@ -153,8 +160,8 @@ function inward_act_default(spec: any) {
           kind: 'error',
           code: 'act_default_bad',
           info: {
-            args: inspect(clean(msg)).replace(/\n/g, ''),
-            xdefault: inspect(default$),
+            args: describe_msg(ctx.seneca, msg),
+            xdefault: type_name(default$),
           },
         },
       }
@@ -178,7 +185,7 @@ function inward_act_not_found(spec: any) {
       out: {
         kind: 'error',
         code: 'act_not_found',
-        info: { args: inspect(clean(msg)).replace(/\n/g, '') },
+        info: { args: describe_msg(ctx.seneca, msg) },
         log: {
           level: so.trace.unknown ? 'warn' : 'debug',
           data: {
@@ -222,6 +229,11 @@ function inward_validate_msg(spec: any) {
   }
 
   if (err) {
+    // Gubu's own error text contains the invalid values, so the text is
+    // rebuilt from its error records. A custom validate function's error
+    // is used as is.
+    const errs = shape_errors(err)
+
     return {
       op: 'stop',
       out: {
@@ -229,10 +241,12 @@ function inward_validate_msg(spec: any) {
         code: 'act_invalid_msg',
         info: {
           pattern: ctx.actdef.pattern,
-          message: err.message,
+          message: errs ? describe_shape_errors(errs) : err.message,
           msg: clean(msg),
-          error: err,
-          props: err.gubu ? err.props : [],
+          ...(errs ? {} : { error: err }),
+          props: err.gubu
+            ? redact_props(err.props, ctx.seneca.private$.redact)
+            : [],
         },
         log: {
           level: so.trace.invalid ? 'warn' : null,

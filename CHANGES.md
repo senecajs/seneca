@@ -1,5 +1,5 @@
 
-## 4.0.0 2026-10-07
+## 4.0.0 2026-10-18
 
 First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
@@ -72,10 +72,45 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Generated ids (`seneca.idgen()`, action and instance ids) never start
   with a digit, so an id embedded unquoted in a jsonic pattern string is
   not parsed as a number (#935, #950).
+* Secrets in messages and plugin options no longer reach error text or
+  logs (#954, #955):
+  * Error messages never contain message or plugin option values. A
+    message is described by its pattern keys with their values and the
+    names of its other keys, for example `No matching action pattern
+    found for cmd:logn,sys:user (other keys: email, pass)`. Validation
+    failures name the property and the expected type, without the value
+    that Gubu's own text includes. This changes the text of
+    `act_not_found`, `act_default_bad`, `act_invalid_msg`,
+    `action_timeout`, `result_not_objarr`, `closed`, `maxparents`,
+    `no_prior_action`, `invalid_plugin_option`,
+    `sub_inward_action_failed` and `sub_outward_action_failed`.
+  * The new `redact` option (on by default) replaces the values of
+    secret-looking keys (names with words such as `password`, `secret`,
+    `token`, `apikey`, `auth` or `cookie`, plus `redact.keys`; see
+    docs/reference/options.md) and passwords in URLs, in log entries,
+    entries delivered to `log` event listeners (which receive entries
+    of every level), error `details`, options printed by
+    `debug.print.options`, and the fatal error report, including its
+    command line arguments and, when printed, environment variables.
+    Actions and callbacks still receive the real values. With a `log`
+    listener or debug logging, a benchmark of trivial actions runs
+    about 15-20% slower; with the default logging there is no
+    measurable change.
+  * Error details change with the text: `action_timeout` details keep
+    the message in `message` (with secret-looking values redacted) and
+    add `desc`, the description used in the text; `result_not_objarr`
+    `details.result` and `act_default_bad` `details.xdefault` give the
+    type of the value instead of the value.
+* The `invalid_plugin_option` message names the failing option again.
+  With Gubu 9 the reason was empty and the message printed the whole
+  options object instead.
+* The `act_invalid_msg` error details no longer include the Gubu error
+  object; `details.props` lists the failures.
+* The `action_timeout` message closes its parenthesis.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
-  docs/create-a-release.md.
+  docs/how-to/create-a-release.md.
 
 ### Upgrading from 3.x
 
@@ -99,6 +134,8 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * `seneca.on()` throws `invalid_event_name` for an event Seneca does not
   emit. Listeners for custom events belong on a separate EventEmitter.
 * In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
+* Error message text no longer includes message or option values; code
+  that matched on error text should check `err.code` and `err.details`.
 
 
 ## 4.0.0-rc5 2025-02-07

@@ -61,9 +61,9 @@ fixed default.
 | ------ | ------- | ------ |
 | `debug.fragile` | `false` | Reserved for throwing errors from `seneca.act`; not read by Seneca 4. |
 | `debug.undead` | `false` | Fatal errors do not terminate the process. The error handler is still called. For tests only. |
-| `debug.print.options` | `false` | Print the resolved options to standard output at startup, and each plugin's options when it loads. Also enabled by `--seneca.print.options`. |
+| `debug.print.options` | `false` | Print the resolved options to standard output at startup, and each plugin's options when it loads. Also enabled by `--seneca.print.options`. Secret values are redacted (see [`redact`](#redact)). |
 | `debug.print.fatal` | `'summary'` | Amount of detail in the fatal error report: `'summary'` or `'full'` (adds the error details, process path, process versions and the module list). |
-| `debug.print.env` | `false` | Include the environment in a full fatal report. Off by default so that secrets are not printed. |
+| `debug.print.env` | `false` | Include the environment in a full fatal report. Off by default so that secrets are not printed; when on, variables with secret-looking names are still redacted. |
 | `debug.print.err` | `false` | The flat logger also prints errors to standard error. |
 | `debug.print.depth` | `2` | Object inspection depth for printed options, replies and log data. |
 | `debug.act_caller` | `false` | Record the calling code location of each `act` call in `msg.caller$` (always on in test mode). |
@@ -73,6 +73,41 @@ fixed default.
 | `debug.argv` | `null` | Array used instead of `process.argv` when parsing `--seneca.*` arguments (the first two entries are skipped). For tests. |
 | `debug.env` | `null` | Object used instead of `process.env` when reading `SENECA_*` variables. For tests. |
 | `debug.datalen` | `333` | Maximum length of message and result data in log lines and error messages. |
+
+## `redact`
+
+Keeps secrets out of the data that leaves an instance: log entries
+(including those delivered to `log` event listeners), error `details`,
+printed options and the fatal error report. A value is replaced by the
+mark when its key name looks secret. The name is split into words at
+`-`, `_`, `.`, spaces, digits and camelCase boundaries (`apiKey`,
+`api_key` and `API-KEY` are the words `api` and `key`). It looks secret
+when a word ends with `password`, `passwd`, `passphrase`, `secret`,
+`secrets`, `token`, `apikey`, `privatekey`, `credential`,
+`credentials`, `authorization`, `cookie` or `cookies`, or is `pass`;
+when its last word is `auth` or `pwd`; or when it contains the words
+`api key`, `private key`, `secret key`, `signing key`, `access key`,
+`encryption key` or `session key`. So `dbPassword`, `access_token` and
+`basic_auth` are secret, while `max_tokens`, `passenger`, `author` and
+`cache_key` are not. Names in `redact.keys` are matched as words too:
+`pin` matches `pin` and `user_pin` but not `spinner`.
+
+Boolean values are kept. Passwords in URLs (`scheme://user:password@host`,
+also inside error messages) are replaced too. The data itself is never
+modified: actions, priors, `act-in` and `act-out` listeners and
+callbacks receive the real values. With a `log` listener or debug
+logging, every delivered entry is checked, which in a benchmark of
+trivial actions lowers throughput by about 15-20%; with the default
+logging nothing is checked.
+
+Error message text does not depend on this option: it never contains
+message or option values (see [Error codes](error-codes.md)).
+
+| Option | Default | Effect |
+| ------ | ------- | ------ |
+| `redact.active` | `true` | Set false to switch redaction off, for local debugging only. |
+| `redact.keys` | `[]` | Additional names to redact, matched by words, such as `['pin', 'ssn']`. |
+| `redact.mark` | `'[REDACTED]'` | Replacement text. |
 
 ## `strict`
 

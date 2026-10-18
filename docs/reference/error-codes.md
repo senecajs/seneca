@@ -5,8 +5,8 @@ Errors created by Seneca are `Error` objects with these properties:
 | Property | Meaning |
 | -------- | ------- |
 | `code` | The error code from the table below. |
-| `message` | `seneca: ` followed by the message template with its `<%=name%>` placeholders filled from `details`. |
-| `details` | The values given when the error was created, plus `callpoint` in some cases. |
+| `message` | `seneca: ` followed by the message template with its `<%=name%>` placeholders filled from `details`. It never contains message or plugin option values: a message is described by its pattern keys with their values and the names of its other keys, for example `cmd:logn,sys:user (other keys: email, pass)`, and a validation failure by the property and the expected type. |
+| `details` | The values given when the error was created, plus `callpoint` in some cases. Values of secret-looking keys are redacted (see [Options: redact](options.md#redact)). |
 | `seneca` | `true`. |
 | `package` | `'seneca'`. |
 | `callpoint` | Location in the calling code. |
@@ -27,17 +27,17 @@ original message. A rejected `post` promise carries only the error.
 
 | Code | Raised when |
 | ---- | ----------- |
-| `act_not_found` | No action matches the message and no `default$` was given. |
-| `act_default_bad` | No action matches and `default$` is not an object or array. |
+| `act_not_found` | No action matches the message and no `default$` was given. The text describes the message, as in `No matching action pattern found for cmd:logn,sys:user (other keys: email, pass)`. |
+| `act_default_bad` | No action matches and `default$` is not an object or array; the text and `details.xdefault` give its type. |
 | `act_execute` | An action threw or replied with an error (recorded in `err.meta$.err`; the error handler sees the original error). |
 | `act_callback` | The callback given to `act` threw. |
-| `act_invalid_msg` | The message failed the action's validation rules; `details.props` lists the failures. |
+| `act_invalid_msg` | The message failed the action's validation rules. The text names each failing property and what was expected, without the value, as in `property "email" is required (string)`; `details.props` lists the failures, with the values of secret-looking paths redacted. |
 | `act_invalid_args` | Legacy variant of `act_invalid_msg`. |
 | `act_loop` | Reserved. |
 | `act_no_args` | `act` was called without a pattern. |
 | `act_string_args_syntax` | The message string given to `act` is not valid Jsonic. |
 | `act_if_expects_boolean` | `act_if` was called without a boolean first argument. |
-| `action_timeout` | The action did not reply within the timeout; `details` has `timeout`, `start`, `end`, `pattern` and `message`. |
+| `action_timeout` | The action did not reply within the timeout; `details` has `timeout`, `start`, `end`, `pattern`, `message` (the message, with secret-looking values redacted) and `desc` (the description of the message used in the text). |
 | `add_string_pattern_syntax` | The pattern string given to `add`, `sub` or `fix` is not valid Jsonic. |
 | `add_pattern_object_expected` | `add` was called without a pattern. |
 | `add_pattern_object_expected_after_string_pattern` | Unexpected argument after a pattern string. |
@@ -55,7 +55,7 @@ original message. A rejected `post` promise carries only the error.
 | `fail_wrong_number_of_args` | `seneca.fail` was called with more than three arguments. |
 | `invalid_event_name` | `seneca.on` was given an event name that Seneca does not emit. See [Events](events.md). |
 | `invalid_options` | The options failed validation. |
-| `invalid_plugin_option` | Plugin options failed validation against the plugin's `defaults`. |
+| `invalid_plugin_option` | Plugin options failed validation against the plugin's `defaults`. The text names each failing option and what was expected; `details.options` holds the options with secret-looking values redacted. |
 | `inverted_file_name` | A file `options.seneca.js` exists; the supported name is `seneca.options.js`. |
 | `maxparents` | The chain of parent messages exceeds `limits.maxparents` (usually an action calling itself). |
 | `missing_plugin_name` | `use` was given a plugin without a name. |
@@ -64,14 +64,14 @@ original message. A rejected `post` promise carries only the error.
 | `no_options` | `seneca.options()` was given null or undefined. |
 | `no_prior_action` | `seneca.prior` was called outside an action. |
 | `no_transport_client` | Reserved (transports log `no-transport-client` instead). |
-| `plugin_define_failed` | The plugin definition function threw. Fatal. |
+| `plugin_define_failed` | The plugin definition function threw. Fatal. `details.options` holds the plugin options with secret-looking values redacted. |
 | `plugin_init` | The plugin init action replied with an error. Fatal. |
 | `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error. |
 | `plugin_required` | `seneca.depends` found a missing plugin. Fatal. |
 | `ready_failed` | A function given to `seneca.ready` threw. Fatal unless an error handler is set. |
 | `require_default_options` | `seneca.options.js` exists but could not be loaded. |
 | `require_options` | The `.js` options file given with `from` exists but failed to load (for example a syntax error). A missing `.js` file is ignored silently and the defaults are used; a missing `.json` file throws the file system `ENOENT` error. |
-| `result_not_objarr` | An action replied with a value that is not an object or array and `strict.result` is true. |
+| `result_not_objarr` | An action replied with a value that is not an object or array and `strict.result` is true. The text and `details.result` give the type of the result, not its value. |
 | `store_cmd_missing` | Reserved for entity stores. |
 | `sub_inward_action_failed` | A subscription function for inbound messages threw. |
 | `sub_outward_action_failed` | A subscription function for outbound results threw. |

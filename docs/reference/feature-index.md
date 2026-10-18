@@ -81,6 +81,7 @@ Options are listed under their top level key in the
 | `prior` | [API: prior](api.md#prior) | [Extend actions with priors](../how-to/extend-actions-with-priors.md) |
 | `quiet` | [API: quiet](api.md#quiet) | [Test Seneca code](../how-to/test-seneca-code.md) |
 | `ready`, `ready` event | [API: ready](api.md#ready), [Events](events.md) | [Getting started](../tutorials/getting-started.md) |
+| Redaction of secrets (`redact` option) | [Options: redact](options.md#redact), [Logging: redaction](logging.md#redaction) | [Run in production](../how-to/run-in-production.md#security-notes) |
 | `reply` (deliver a reply by message id) | [API: reply](api.md#reply) | |
 | Result rules (`strict.result`, `force$`) | [Options: strict](options.md#strict), [Message directives](message-directives.md#markers-on-results) | |
 | `seneca()` (self), `isSeneca`, `toJSON`, `toString` | [API: other](api.md#other), [Instance properties](static-api-and-utilities.md#instance-properties) | |

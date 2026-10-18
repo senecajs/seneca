@@ -394,6 +394,11 @@ const task = {
       })
 
       private$.actrouter.add(pattern, actdef)
+
+      // Remembered so that error text can show pattern values only.
+      for (const key of Object.keys(pattern)) {
+        private$.pattern_keys.add(key)
+      }
     }
 
     private$.stats.actmap[actdef.pattern] =

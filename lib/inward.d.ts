@@ -75,11 +75,11 @@ declare function inward_validate_msg(spec: any): {
         kind: string;
         code: string;
         info: {
+            props: any[];
+            error?: any;
             pattern: any;
             message: any;
             msg: any;
-            error: any;
-            props: any;
         };
         log: {
             level: string | null;

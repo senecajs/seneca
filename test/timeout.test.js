@@ -26,6 +26,7 @@ describe('timeout', function () {
         expect(err.details).includes({
           timeout: 100,
           message: { a: 1 },
+          desc: 'a:1',
           pattern: 'a:1',
         })
         expect(err.message).startsWith(

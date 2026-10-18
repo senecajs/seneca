@@ -49,16 +49,16 @@ export default {
     'result provided (using a default$ property).',
 
   act_default_bad:
-    'No matching action pattern found for <%=args%>, and default ' +
-    'result is not a plain object or an array: <%=xdefault%>.',
+    'No matching action pattern found for <%=args%>, and the default ' +
+    'result (using a default$ property) is not a plain object or an ' +
+    'array (type: <%=xdefault%>).',
 
   act_no_args:
     'No action pattern defined in "<%=args%>"; the first argument ' +
     'should be a string or object pattern.',
 
   act_invalid_msg:
-    'Action <%=pattern%> received an invalid message; <%=message%>; ' +
-    'message content was: <%=msg%>.',
+    'Action <%=pattern%> received an invalid message; <%=message%>.',
 
   act_execute: 'Action <%=pattern%> failed: <%=message%>.',
 
@@ -68,9 +68,9 @@ export default {
     'Action <%=pattern%> loops back on itself. Action details: <%=actdef%>, history: <%=history%>',
 
   result_not_objarr:
-    'Action <%=pattern%> responded with result that was not an ' +
-    'object or array: <%=result%>; Use option strict:{result:false} to allow; ' +
-    'arguments were: <%=args%>',
+    'Action <%=pattern%> responded with a result that was not an ' +
+    'object or array (type: <%=result%>); use option strict:{result:false} ' +
+    'to allow; the message was: <%=args%>.',
 
   no_client: 'Transport client was not created; arguments were: "<%=args%>".',
 
@@ -100,12 +100,12 @@ export default {
 
   sub_inward_action_failed:
     'Subscription action on inward pattern <%=pattern%>' +
-    ' threw: <%=errmsg%> at <%=errline%> on message data: <%=msg%>. ' +
+    ' threw: <%=errmsg%> at <%=errline%> on message: <%=msg%>. ' +
     'To start debugging, find the `seneca.sub` method call that defines the subscription action, and review the code of the action function.',
 
   sub_outward_action_failed:
     'Subscription action on outward pattern <%=pattern%>' +
-    ' threw: <%=errmsg%> at <%=errline%> on message data: <%=msg%>. ' +
+    ' threw: <%=errmsg%> at <%=errline%> on message: <%=msg%>. ' +
     'To start debugging, find the `seneca.sub` method call that defines the subscription action, and review the code of the action function.',
 
   ready_failed: 'Ready function failed: <%=message%>',
@@ -123,7 +123,7 @@ export default {
     'The transport client defined by <%=config%> does not exist for message: <%=msg%>',
 
   invalid_plugin_option:
-    'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
+    'Plugin <%=name%>: option value is not valid: <%=err_msg%>.',
 
   no_prior_action:
     'The `prior` method must be called inside an action function. Arguments were: <%=args%>',
@@ -149,7 +149,7 @@ export default {
     'The Seneca.fail method expected the `cond` param to be a boolean.',
 
   action_timeout:
-    'Action <%=pattern%> timed out. Timeout was: <%=timeout%> (start: <%=start%>, end: <%=end%>. Message was: <%=message%>.',
+    'Action <%=pattern%> timed out. Timeout was: <%=timeout%> (start: <%=start%>, end: <%=end%>). Message was: <%=desc%>.',
 
   use_no_args:
     'The seneca.use method needs at least one argument to define a plugin.',

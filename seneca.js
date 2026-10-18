@@ -28,6 +28,7 @@ const Sub = require('./lib/sub');
 const prior_1 = require("./lib/prior");
 const plugin_1 = require("./lib/plugin");
 const inward_1 = require("./lib/inward");
+const redact_1 = require("./lib/redact");
 const outward_1 = require("./lib/outward");
 const { Legacy } = require('./lib/legacy');
 const { resolve_options } = require('./lib/options');
@@ -129,6 +130,21 @@ const option_defaults = {
         env: One({}, null),
         // Length of data description in logs
         datalen: 333,
+    },
+    // Keep secrets out of log entries (including the log event), error
+    // details, printed options and fatal error reports. A value is
+    // replaced by the mark when its key name looks secret, by the words of
+    // the name (see lib/redact: password, secret, token, apikey, auth and
+    // others), or matches one of `keys`. Passwords in URLs
+    // (scheme://user:pass@host) are replaced too. Error message text never
+    // contains message values.
+    redact: {
+        // Set false to switch redaction off (for local debugging only).
+        active: true,
+        // Additional names to redact, matched by words.
+        keys: [String],
+        // Replacement text.
+        mark: '[REDACTED]',
     },
     // Enforce strict behaviours. Relax when backwards compatibility needed.
     strict: {
@@ -422,6 +438,8 @@ function make_seneca(initial_opts) {
     // Resolve initial options.
     private$.optioner = resolve_options(module, option_defaults, initial_opts);
     var start_opts = private$.optioner.get();
+    // Redacts secrets from data leaving the instance (see lib/redact).
+    private$.redact = (0, redact_1.make_redactor)(start_opts.redact);
     // Console print utilities
     private$.print = {
         log: start_opts.internal.print.log || Print.internal_log,
@@ -734,6 +752,8 @@ function make_private() {
         },
         ignore_plugins: {},
         cleared: 0,
+        // Keys used in action patterns (see lib/redact describe_msg).
+        pattern_keys: new Set(),
     };
 }
 //# sourceMappingURL=seneca.js.map

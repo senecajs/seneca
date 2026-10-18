@@ -16,6 +16,8 @@ import {
   parse_jsonic,
 } from './common'
 
+import { make_redactor, redact_with } from './redact'
+
 
 const Argu = MakeArgu('seneca')
 
@@ -77,6 +79,14 @@ function options(this: any, options: any, chain: any) {
     return private$.optioner.get()
   }
 
+  let out_opts = (private$.exports.options = private$.optioner.set(options))
+
+  // Update redaction (shared by all delegates of the root instance)
+  // before logging the new options, so that new redact.keys apply.
+  if (options.redact) {
+    self.root.private$.redact = make_redactor(out_opts.redact)
+  }
+
   // self.log may not exist yet as .options() used during construction
   if (self.log) {
     self.log.debug({
@@ -85,8 +95,6 @@ function options(this: any, options: any, chain: any) {
       data: options,
     })
   }
-
-  let out_opts = (private$.exports.options = private$.optioner.set(options))
 
   if ('string' === typeof options.tag) {
     const oldtag = self.root.tag
@@ -683,7 +691,9 @@ function listen(this: any, callpoint: any) {
       { config: config, gate$: true },
       function(err: any, result: any) {
         if (err) {
-          return self.die(private$.error(err, 'transport_listen', config))
+          return self.die(
+            private$.error(err, 'transport_listen', redact_with(self, config))
+          )
         }
 
         done(null, result)
@@ -802,12 +812,17 @@ function client(this: any, callpoint: any) {
       { config: config, gate$: true },
       function(err: any, liveclient: any) {
         if (err) {
-          return sd.die(private$.error(err, 'transport_client', config))
+          return sd.die(
+            private$.error(err, 'transport_client', redact_with(sd, config))
+          )
         }
 
         if (null == liveclient) {
           return sd.die(
-            private$.error('transport_client_null', clean(config))
+            private$.error(
+              'transport_client_null',
+              redact_with(sd, clean(config))
+            )
           )
         }
 

@@ -85,6 +85,18 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
   callbacks; it is attached to messages as `msg.meta$` only with
   `legacy: { meta: true }`, which Seneca 3 transports need.
 
+## Error text and logs
+
+* Error messages no longer contain message or option values. A message
+  is described by its pattern keys and the names of its other keys, for
+  example `cmd:logn,sys:user (other keys: email, pass)`, and a
+  validation failure by the property and the expected type. Code that
+  matched on error text should check `err.code` and `err.details`.
+* Values of secret-looking keys (names with words such as `password`,
+  `secret`, `token`, `apikey` or `auth`) are redacted from log entries,
+  the `log` event, error details, printed options and fatal error
+  reports. Add your own names with the `redact.keys` option.
+
 ## Removed or renamed API
 
 | Seneca 3 | Seneca 4 |
