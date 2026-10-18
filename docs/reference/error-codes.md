@@ -39,6 +39,7 @@ original message. A rejected `post` promise carries only the error.
 | `act_if_expects_boolean` | `act_if` was called without a boolean first argument. |
 | `action_timeout` | The action did not reply within the timeout; `details` has `timeout`, `start`, `end`, `pattern`, `message` (the message, with secret-looking values redacted) and `desc` (the description of the message used in the text). |
 | `add_string_pattern_syntax` | The pattern string given to `add`, `sub` or `fix` is not valid Jsonic. |
+| `add_gubu_shape` | The pattern rules given to `add` were built with Gubu, which Seneca 4 does not accept; `details.path` names the rule. Build them with `seneca.valid` (Shape). |
 | `add_pattern_object_expected` | `add` was called without a pattern. |
 | `add_pattern_object_expected_after_string_pattern` | Unexpected argument after a pattern string. |
 | `add_action_function_expected` | The action argument of `add` is not a function. |
@@ -65,6 +66,7 @@ original message. A rejected `post` promise carries only the error.
 | `no_prior_action` | `seneca.prior` was called outside an action. |
 | `no_transport_client` | Reserved (transports log `no-transport-client` instead). |
 | `plugin_define_failed` | The plugin definition function threw. Fatal. `details.options` holds the plugin options with secret-looking values redacted. |
+| `plugin_gubu_shape` | The plugin's `defaults` were built with Gubu, which Seneca 4 does not accept; `details.path` names the option. Fatal. |
 | `plugin_init` | The plugin init action replied with an error. Fatal. |
 | `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error. |
 | `plugin_required` | `seneca.depends` found a missing plugin. Fatal. |

@@ -46,10 +46,15 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   define or initialize no longer leaves its gated define action in flight
   until the action timeout, so later plugins can load and the process is
   not held open.
-* Node.js >= 22 is required (`engines.node`). Node.js 24 is the default
-  target: TypeScript compiles for ES2024 and `.nvmrc` selects Node.js 24.
+* Node.js 24 or later is required (`engines.node`). TypeScript compiles
+  for ES2024, `.nvmrc` selects Node.js 24, and continuous integration
+  runs on Node.js 24.
 * Unit tests run on the Node.js built-in test runner (`node:test`) with
-  built-in coverage reporting; `@hapi/lab` is no longer used.
+  `node:assert` and built-in coverage reporting; `@hapi/lab` and
+  `@hapi/code` are no longer used. Two `act_if` assertions and a
+  `strargs` check that had been failing inside act callbacks, where Seneca
+  logged and swallowed them, are fixed, and the options-file tests in
+  `test/stubs/options` run again.
 * Documentation reorganized under `docs/` following the Diátaxis structure
   (tutorials, how-to guides, reference, explanation), covering every
   option, method, directive, event and error code. The example programs
@@ -72,14 +77,74 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Generated ids (`seneca.idgen()`, action and instance ids) never start
   with a digit, so an id embedded unquoted in a jsonic pattern string is
   not parsed as a number (#935, #950).
+* Deprecation warnings. Each Seneca 3 name or behaviour that Seneca 4
+  still supports, and that Seneca 5 removes, reports a deprecation the
+  first time it is used in a process: a Node.js `DeprecationWarning` with
+  a `SENECA_DEP_*` code, and a warn-level `DEPRECATED` log entry. This
+  covers the instance aliases (`findact`, `hasact`, `act_if`, `findpins`,
+  `pinact`, `plugins`, `findplugin`, `hasplugin`, `closed`),
+  `export('util')`, `util.deepextend`, `util.flatten`, `util.Gubu`,
+  `actdef.gubu`, the `act-err-4` event, the `deathdelay` and `legacy.*`
+  options, the `role:seneca` builtin actions and close hooks, the plugin
+  `init` property and the promisify plugin.
+  `debug: { deprecation: false }` turns them off. See
+  docs/reference/legacy.md.
+* The Seneca 3 `legacy` flags that Seneca 4 removed (`legacy.transport`,
+  `legacy.timeout_string` and others) are accepted and ignored, with a
+  deprecation warning, instead of failing option validation, so Seneca 3
+  configurations load.
+* The `deathdelay` option is used as `death_delay` when that is not set.
+  Before, it was overwritten and had no effect.
+* `seneca.next_act`, `Seneca.loghandler` and `seneca.util.parsepattern`,
+  which were undefined, are removed.
+* `act-err` uses the Seneca 4 argument layout: the first argument is
+  always `'callback'` (it was `'action'` for action failures). An action
+  failure passes the original error; a callback that threw is wrapped as
+  `act_callback`, with the result as the fifth argument. `act-err-4`, the
+  preview of this layout added in 3.32.1, is a deprecated alias with the
+  same arguments.
+* Validation uses [shape](https://github.com/rjrodger/shape) 11, the
+  renamed successor of Gubu: `seneca.valid`, `Seneca.valid` and
+  `Seneca.util.Shape` are Shape, and action definitions carry the compiled
+  message shape as `shape`. Plugin option errors list each failure (without
+  the value, see below).
+* Shapes built with Gubu fail with a clear error instead of a list of
+  unrelated validation failures: `plugin_gubu_shape` for plugin defaults,
+  `add_gubu_shape` for pattern rules.
+* The message argument of `act`, `add`, `prior`, `sub` and `fix` is
+  validated in place. Shape's `One` validates and returns a copy, which
+  would have replaced the caller's message objects (and `custom$`) with
+  copies.
+* All remaining Joi handling is removed: plugin `defaults` functions no
+  longer receive `Joi`, and Joi schemas in defaults and pattern rules are
+  no longer merged without validation.
+* The TypeScript declarations describe the module and the documented
+  API. They use `export =`, as the module does at runtime, so
+  `import Seneca from 'seneca'` type-checks from ES modules
+  (`module: nodenext`) and with `esModuleInterop`, and
+  `import Seneca = require('seneca')` from CommonJS. Before, they
+  declared a default export that the module does not have, and typed
+  instances as `any`. `Seneca()` returns `Seneca.Instance`, with the
+  methods and properties of docs/reference/api.md; `Seneca.Options`,
+  `Seneca.Meta`, `Seneca.ActionFunc`, `Seneca.PluginDefine` and the
+  other public types are in the `Seneca` namespace, and deprecated names
+  are marked `@deprecated`. Plugins declare the members they add by
+  augmenting `Instance` (`declare module 'seneca'`).
+* The TypeScript sources import Seneca's own modules and typed
+  dependencies with `import` instead of `require`, so the calls between
+  them are type-checked, and `npm test` compiles example consumer code
+  against the declarations (`test/types`). `lodash.flatten` and
+  `lodash.uniq` are replaced by `Array.prototype.flat` and `Set`, and
+  `nua`, which was used without being declared, is a dependency.
 * Secrets in messages and plugin options no longer reach error text or
   logs (#954, #955):
   * Error messages never contain message or plugin option values. A
     message is described by its pattern keys with their values and the
     names of its other keys, for example `No matching action pattern
     found for cmd:logn,sys:user (other keys: email, pass)`. Validation
-    failures name the property and the expected type, without the value
-    that Gubu's own text includes. This changes the text of
+    failures name the property and the rule or expected type, without the
+    value that shape's own text includes; custom `Fault` messages are kept,
+    with `$VALUE` replaced by the type of the value. This changes the text of
     `act_not_found`, `act_default_bad`, `act_invalid_msg`,
     `action_timeout`, `result_not_objarr`, `closed`, `maxparents`,
     `no_prior_action`, `invalid_plugin_option`,
@@ -101,15 +166,14 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
     add `desc`, the description used in the text; `result_not_objarr`
     `details.result` and `act_default_bad` `details.xdefault` give the
     type of the value instead of the value.
-* The `invalid_plugin_option` message names the failing option again.
-  With Gubu 9 the reason was empty and the message printed the whole
-  options object instead.
-* The `act_invalid_msg` error details no longer include the Gubu error
+* The `invalid_plugin_option` message no longer prints the whole options
+  object, and `details.options` has secret-looking values redacted.
+* The `act_invalid_msg` error details no longer include the shape error
   object; `details.props` lists the failures.
 * The transport type names `http` and `direct` are accepted again as
-  aliases of `web`, as in Seneca 3, and log a deprecation warning. In
-  4.0.0-rc they reached seneca-transport unchanged, where a client of
-  type `http` crashed at start-up.
+  aliases of `web`, as in Seneca 3, and report the deprecation
+  `SENECA_DEP_TRANSPORT_TYPE`. In 4.0.0-rc they reached seneca-transport
+  unchanged, where a client of type `http` crashed at start-up.
 * The `action_timeout` message closes its parenthesis.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
@@ -118,7 +182,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
 ### Upgrading from 3.x
 
-* Node.js 22 or later is required (24 recommended).
+* Node.js 24 or later is required.
 * Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
   need a transport plugin: `npm install seneca-transport` and
   `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.
@@ -126,9 +190,16 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `sys:seneca,cmd:stats`, `sys:seneca,cmd:close`, `sys:seneca,get:options`.
   Set the option `legacy: { builtin_actions: true }` to also register the
   3.x `role:seneca` variants.
-* Joi is removed. Message and option validation use Gubu shapes
-  (`seneca.valid`); plugins that passed Joi schemas as option defaults need
-  Gubu shapes instead.
+* Joi and Gubu are replaced by [shape](https://github.com/rjrodger/shape),
+  the renamed successor of Gubu. Message and option validation use Shape
+  builders (`seneca.valid`). Joi schemas in plugin defaults or pattern rules
+  are not recognized, and shapes built with Gubu are rejected
+  (`plugin_gubu_shape`, `add_gubu_shape`), so plugins that bundle Gubu,
+  such as seneca-entity 28 and seneca-mem-store 9, need releases built on
+  shape (or on `this.valid`).
+* Plugin `defaults` functions are called with `{ valid }`; the `Joi`
+  argument is gone. Action definitions carry the compiled shape as `shape`
+  (was `gubu`).
 * Most `legacy` option flags are removed; `legacy.meta` and
   `legacy.builtin_actions` remain.
 * `seneca.message(pattern, async (msg) => {...})` and `await seneca.post(msg)`
@@ -138,6 +209,17 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * `seneca.on()` throws `invalid_event_name` for an event Seneca does not
   emit. Listeners for custom events belong on a separate EventEmitter.
 * In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
+* Deprecated Seneca 3 names still work in 4.x, and are removed in Seneca 5.
+  Run your tests with `node --trace-deprecation` to find them: each one
+  reports a `SENECA_DEP_*` deprecation warning with a stack trace.
+* `act-err` listeners receive `'callback'` as the first argument for every
+  failure. To tell a throwing callback from a failed action, check
+  `err.code === 'act_callback'`. Listeners on `act-err-4` can move to
+  `act-err` unchanged.
+* TypeScript: instances are typed as `Seneca.Instance` instead of `any`.
+  Declare members that plugins add (such as `seneca.make$`) by augmenting
+  the interface:
+  `declare module 'seneca' { interface Instance { make$(name: string): any } }`.
 * Error message text no longer includes message or option values; code
   that matched on error text should check `err.code` and `err.details`.
 * Use the transport type `web` instead of the deprecated `http` and

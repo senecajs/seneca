@@ -50,9 +50,14 @@ declare const task: {
     };
     rules(spec: TaskSpec): {
         op: string;
+        err: any;
+        out?: undefined;
+    } | {
+        op: string;
         out: {
             actdef: any;
         };
+        err?: undefined;
     };
     register(spec: TaskSpec): {
         op: string;
@@ -61,4 +66,20 @@ declare const task: {
         op: string;
     };
 };
-export { api_add, api_message, task, };
+declare const intern: {
+    make_action_stats: (actdef: any) => {
+        id: any;
+        plugin: {
+            full: any;
+            name: any;
+            tag: any;
+        };
+        prior: any;
+        calls: number;
+        done: number;
+        fails: number;
+        time: {};
+    };
+    deferred_modify_action: (seneca: any, actdef: any) => void;
+};
+export { api_add, api_message, task, intern, };

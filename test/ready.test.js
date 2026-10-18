@@ -3,24 +3,20 @@
 
 const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
 
 describe('ready', function () {
-  it('ready_die', function (fin) {
+  it('ready_die', function (t, fin) {
     const si = Seneca({
       log: 'silent',
       debug: { undead: true },
       errhandler: function (err) {
         try {
-          expect(err.foo).exist()
+          assert.ok(null != err.foo)
           fin()
         } catch (e) {
           fin(e)
@@ -35,7 +31,7 @@ describe('ready', function () {
     })
   })
 
-  it('ready_die_no_errhandler', function (fin) {
+  it('ready_die_no_errhandler', function (t, fin) {
     const si = Seneca({
       log: function (entry) {
         if ('fatal' === entry.kind && 'ready_failed' === entry.code) {
@@ -52,7 +48,7 @@ describe('ready', function () {
   })
 
   // This can happen in the browser
-  it('ready_null_name', function (fin) {
+  it('ready_null_name', function (t, fin) {
     const si = Seneca().test(fin)
 
     var null_ready = function () {
@@ -64,7 +60,7 @@ describe('ready', function () {
     si.ready(null_ready)
   })
 
-  it('ready-complex', function (done) {
+  it('ready-complex', function (t, done) {
     var mark = { ec: 0 }
 
     var si = Seneca().test()
@@ -99,29 +95,29 @@ describe('ready', function () {
       })
 
       si.ready(function () {
-        expect(mark.r0).exist()
-        expect(mark.p1).exist()
-        expect(mark.r1).exist()
-        expect(mark.p2).exist()
-        expect(mark.ec).equal(2)
+        assert.ok(null != mark.r0)
+        assert.ok(null != mark.p1)
+        assert.ok(null != mark.r1)
+        assert.ok(null != mark.p2)
+        assert.equal(mark.ec, 2)
 
         done()
       })
     })
   })
 
-  it('ready-always-called', function (fin) {
+  it('ready-always-called', function (t, fin) {
     Seneca.test(fin).ready(function () {
       this.ready(fin)
     })
   })
 
-  it('ready-error-test', function (fin) {
+  it('ready-error-test', function (t, fin) {
     var si = Seneca()
       .test()
       .error(function (err) {
-        expect(err.code).equal('ready_failed')
-        expect(err.message).equal('seneca: Ready function failed: foo')
+        assert.equal(err.code, 'ready_failed')
+        assert.equal(err.message, 'seneca: Ready function failed: foo')
         fin()
       })
 
@@ -130,7 +126,7 @@ describe('ready', function () {
     })
   })
 
-  it('ready-event', function (done) {
+  it('ready-event', function (t, done) {
     var si = Seneca().test()
 
     si.on('ready', function () {
@@ -138,7 +134,7 @@ describe('ready', function () {
     })
   })
 
-  it('ready-both', function (done) {
+  it('ready-both', function (t, done) {
     var si = Seneca().test()
     var tmp = {}
 
@@ -162,7 +158,7 @@ describe('ready', function () {
   it('ready-promise-resolves-instance', async function () {
     const si = Seneca({ log: 'silent' })
     const out = await si.ready()
-    expect(out).equal(si)
+    assert.deepEqual(out, si)
     await si.close()
   })
 
@@ -173,8 +169,8 @@ describe('ready', function () {
       })
     })
     await si.ready()
-    expect(si.find('a:1')).exist()
-    expect(await si.post('a:1')).equal({ x: 1 })
+    assert.ok(null != si.find('a:1'))
+    assert.deepEqual(await si.post('a:1'), { x: 1 })
     await si.close()
   })
 

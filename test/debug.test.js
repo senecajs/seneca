@@ -1,18 +1,14 @@
 /* Copyright (c) 2015 Richard Rodger, MIT License */
 'use strict'
 
-var Assert = require('assert')
-const { describe } = require('node:test')
-var assert = Assert
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 describe('debug', function () {
   // REMOVE after Seneca 4.x
-  it('logroute', function (done) {
+  it('logroute', function (t, done) {
     var si = Seneca({ log: 'test' }).error(done)
 
     // test not applicable to new logging in Seneca 3.x

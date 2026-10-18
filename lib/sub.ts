@@ -1,12 +1,13 @@
 /* Copyright © 2020-2023 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-import { MakeArgu, Skip, One, Empty } from 'gubu'
+import { MakeArgu, Skip } from 'shape'
 
 
 import {
   pattern as common_pattern,
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 
@@ -14,7 +15,7 @@ const Argu = MakeArgu('seneca')
 
 
 const SubArgu: any = Argu('sub', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   action: Function,
 })

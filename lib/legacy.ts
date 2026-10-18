@@ -3,16 +3,12 @@
 
 import Util from 'util'
 
-import Errors from './errors'
+import Eraro from 'eraro'
+import Jsonic from 'jsonic'
+import { MakeArgu, Rest, Any } from 'shape'
 
-
-const Flatten = require('lodash.flatten')
-const Eraro = require('eraro')
-const Jsonic = require('jsonic')
-
-const Common = require('./common')
-
-import { MakeArgu, Rest, Any } from 'gubu'
+import Common = require('./common')
+import { messages } from './errors'
 
 
 const Argu = MakeArgu('seneca')
@@ -20,7 +16,7 @@ const Argu = MakeArgu('seneca')
 const internals = {
   error: Eraro({
     package: 'seneca',
-    msgmap: Errors,
+    msgmap: messages,
     override: true,
   }),
 }
@@ -173,7 +169,7 @@ function findpins(this: any) {
   }
 
   var pins: any[] = []
-  var patterns = Flatten(argsarr)
+  var patterns = argsarr.flat()
 
   patterns.forEach(function(pattern: any) {
     pattern = 'string' === typeof pattern ? Jsonic(pattern) : pattern
@@ -230,7 +226,8 @@ function make_legacy_fail(so: any) {
       }
     }
 
-    var err = internals.error.apply(null, argsarr)
+    var err: Error & Record<string, any> =
+      internals.error.apply(null, argsarr as any)
     err.callpoint = ((new Error()).stack?.match(/^.*\n.*\n\s*(.*)/) || [])[1]
     err.seneca = { code: err.code, valmap: err.details }
 

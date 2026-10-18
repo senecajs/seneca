@@ -5,16 +5,14 @@
 // error details, log entries, the log event, printed options, transport
 // replies or the fatal error report (#954, #955).
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
+const { isDeepStrictEqual } = require('node:util')
 const Stringify = require('fast-safe-stringify')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
+const { Deprecate } = require('../lib/deprecate')
 const {
   make_redactor,
   describe_msg,
@@ -109,7 +107,7 @@ function make_web_stub() {
 }
 
 describe('redact', function () {
-  it('unmatched-message', function (fin) {
+  it('unmatched-message', function (t, fin) {
     const { si, leaks } = capture()
     si.add('sys:user,cmd:login', function (msg, reply) {
       reply({ ok: true })
@@ -119,21 +117,22 @@ describe('redact', function () {
       'sys:user,cmd:logn',
       { email: 'alice@example.com', pass: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('act_not_found')
-        expect(err.message).equal(
+        assert.deepStrictEqual(err.code, 'act_not_found')
+        assert.deepStrictEqual(
+          err.message,
           'seneca: No matching action pattern found for cmd:logn,sys:user ' +
             '(other keys: email, pass), and no default result provided ' +
             '(using a default$ property).',
         )
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(Stringify(err.details)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.ok(!Stringify(err.details).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('invalid-message', function (fin) {
+  it('invalid-message', function (t, fin) {
     const { si, leaks } = capture()
     si.add(
       { sys: 'user', cmd: 'login', email: String, pass: Number },
@@ -145,27 +144,33 @@ describe('redact', function () {
     si.act(
       { sys: 'user', cmd: 'login', pass: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('act_invalid_msg')
-        expect(err.message).startsWith(
-          'seneca: Action cmd:login,sys:user received an invalid message; ',
+        assert.deepStrictEqual(err.code, 'act_invalid_msg')
+        assert.ok(
+          err.message.startsWith(
+            'seneca: Action cmd:login,sys:user received an invalid message; ',
+          ),
         )
-        expect(err.message).contains('property "email" is required (string)')
-        expect(err.message).contains('property "pass" is not of type number')
-        expect(err.message).not.contains(SECRET)
-        expect(err.details.props).includes({
-          path: 'pass',
-          what: 'type',
-          type: 'number',
-          value: '[REDACTED]',
-        })
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.ok(err.message.includes('property "email" is required (string)'))
+        assert.ok(err.message.includes('property "pass" is not of type number'))
+        assert.ok(!err.message.includes(SECRET))
+        assert.ok(
+          err.details.props.some((x) =>
+            isDeepStrictEqual(x, {
+              path: 'pass',
+              what: 'type',
+              type: 'number',
+              value: '[REDACTED]',
+            }),
+          ),
+        )
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('closed-object-message', function (fin) {
+  it('closed-object-message', function (t, fin) {
     const { si, leaks } = capture()
     const { Closed } = si.valid
     si.add(
@@ -178,23 +183,24 @@ describe('redact', function () {
     si.act(
       { sys: 'user', cmd: 'login', profile: { name: 'a', pass: SECRET } },
       check(fin, function (err) {
-        expect(err.code).equal('act_invalid_msg')
-        expect(err.message).equal(
+        assert.deepStrictEqual(err.code, 'act_invalid_msg')
+        assert.deepStrictEqual(
+          err.message,
           'seneca: Action cmd:login,sys:user received an invalid message; ' +
             'object "profile" does not allow the property "pass".',
         )
-        expect(err.details.props[0].value).equal({
+        assert.deepStrictEqual(err.details.props[0].value, {
           name: 'a',
           pass: '[REDACTED]',
         })
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('action-timeout', function (fin) {
+  it('action-timeout', function (t, fin) {
     const { si, leaks } = capture({ timeout: 111 })
     si.add('sys:user,cmd:login', function (msg, reply) {
       setTimeout(() => reply({ ok: true }), 333)
@@ -204,26 +210,31 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pass: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('action_timeout')
-        expect(err.details.desc).equal('cmd:login,sys:user (other keys: pass)')
-        expect(err.details.message).equal({
+        assert.deepStrictEqual(err.code, 'action_timeout')
+        assert.deepStrictEqual(
+          err.details.desc,
+          'cmd:login,sys:user (other keys: pass)',
+        )
+        assert.deepStrictEqual(err.details.message, {
           sys: 'user',
           cmd: 'login',
           pass: '[REDACTED]',
         })
-        expect(err.message).contains(
-          'Message was: cmd:login,sys:user (other keys: pass).',
+        assert.ok(
+          err.message.includes(
+            'Message was: cmd:login,sys:user (other keys: pass).',
+          ),
         )
-        expect(Stringify(err)).not.contains(SECRET)
+        assert.ok(!Stringify(err).includes(SECRET))
         setTimeout(() => {
-          expect(leaks()).equal([])
+          assert.deepStrictEqual(leaks(), [])
           si.close(fin)
         }, 444)
       }),
     )
   })
 
-  it('action-error', function (fin) {
+  it('action-error', function (t, fin) {
     const { si, leaks } = capture()
     si.add('sys:user,cmd:login', function (msg, reply) {
       reply(new Error('bad password'))
@@ -233,14 +244,14 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pass: SECRET },
       check(fin, function (err) {
-        expect(err.message).equal('bad password')
-        expect(leaks()).equal([])
+        assert.deepStrictEqual(err.message, 'bad password')
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('result-not-object', function (fin) {
+  it('result-not-object', function (t, fin) {
     const { si, leaks } = capture()
     si.add('sys:user,cmd:token', function (msg, reply) {
       reply(null, SECRET)
@@ -250,31 +261,31 @@ describe('redact', function () {
       'sys:user,cmd:token',
       { pass: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('result_not_objarr')
-        expect(err.message).contains('(type: string)')
-        expect(err.message).contains('the message was: cmd:token,sys:user')
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.deepStrictEqual(err.code, 'result_not_objarr')
+        assert.ok(err.message.includes('(type: string)'))
+        assert.ok(err.message.includes('the message was: cmd:token,sys:user'))
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('default-not-object', function (fin) {
+  it('default-not-object', function (t, fin) {
     const { si } = capture()
     si.act(
       'sys:user,cmd:none',
       { default$: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('act_default_bad')
-        expect(err.message).contains('(type: string)')
-        expect(Stringify(err)).not.contains(SECRET)
+        assert.deepStrictEqual(err.code, 'act_default_bad')
+        assert.ok(err.message.includes('(type: string)'))
+        assert.ok(!Stringify(err).includes(SECRET))
         si.close(fin)
       }),
     )
   })
 
-  it('closed-instance', function (fin) {
+  it('closed-instance', function (t, fin) {
     const { si, leaks } = capture()
     si.add('sys:user,cmd:login', function (msg, reply) {
       reply({ ok: true })
@@ -286,12 +297,13 @@ describe('redact', function () {
             'sys:user,cmd:login',
             { pass: SECRET },
             check(fin, function (err) {
-              expect(err.code).equal('closed')
-              expect(err.message).equal(
+              assert.deepStrictEqual(err.code, 'closed')
+              assert.deepStrictEqual(
+                err.message,
                 'seneca: The Seneca instance is closed and cannot process the ' +
                   'message: cmd:login,sys:user (other keys: pass).',
               )
-              expect(leaks()).equal([])
+              assert.deepStrictEqual(leaks(), [])
               fin()
             }),
           )
@@ -300,20 +312,20 @@ describe('redact', function () {
     )
   })
 
-  it('prior-outside-action', function (fin) {
+  it('prior-outside-action', function (t, fin) {
     const { si } = capture()
     try {
       si.prior({ sys: 'user', cmd: 'login', pass: SECRET })
       fin(new Error('expected an error'))
     } catch (err) {
-      expect(err.code).equal('no_prior_action')
-      expect(err.message).contains('cmd:login,sys:user (other keys: pass)')
-      expect(Stringify(err)).not.contains(SECRET)
+      assert.deepStrictEqual(err.code, 'no_prior_action')
+      assert.ok(err.message.includes('cmd:login,sys:user (other keys: pass)'))
+      assert.ok(!Stringify(err).includes(SECRET))
       si.close(fin)
     }
   })
 
-  it('plugin-options', function (fin) {
+  it('plugin-options', function (t, fin) {
     const printed = []
     const { si, lines, leaks } = capture({
       debug: { print: { options: true } },
@@ -339,30 +351,32 @@ describe('redact', function () {
     si.ready(
       check(fin, function () {
         // Redaction never modifies the data itself.
-        expect(si.export('provider/keys')).equal({
+        assert.deepStrictEqual(si.export('provider/keys'), {
           apikey: SECRET,
           client_secret: SECRET,
         })
 
-        expect(leaks()).equal([])
-        expect(
+        assert.deepStrictEqual(leaks(), [])
+        assert.strictEqual(
           lines.some((line) => line.includes('"password_set":true')),
-        ).true()
-        expect(
+          true,
+        )
+        assert.strictEqual(
           lines.some((line) => line.includes('redis://user:[REDACTED]@')),
-        ).true()
+          true,
+        )
 
         const printout = printed.join('\n')
-        expect(printout).contains('Seneca Options')
-        expect(printout).contains('[REDACTED]')
-        expect(printout).not.contains(SECRET)
+        assert.ok(printout.includes('Seneca Options'))
+        assert.ok(printout.includes('[REDACTED]'))
+        assert.ok(!printout.includes(SECRET))
 
         si.close(fin)
       }),
     )
   })
 
-  it('plugin-option-invalid', function (fin) {
+  it('plugin-option-invalid', function (t, fin) {
     const { si, leaks } = capture({ debug: { undead: true } })
 
     function provider() {}
@@ -370,14 +384,15 @@ describe('redact', function () {
 
     si.error(
       check(fin, function (err) {
-        expect(err.code).equal('invalid_plugin_option')
-        expect(err.message).equal(
+        assert.deepStrictEqual(err.code, 'invalid_plugin_option')
+        assert.deepStrictEqual(
+          err.message,
           'seneca: Plugin provider: option value is not valid: ' +
             'property "port" is not of type number.',
         )
-        expect(err.details.options.apikey).equal('[REDACTED]')
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.deepStrictEqual(err.details.options.apikey, '[REDACTED]')
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
@@ -385,7 +400,7 @@ describe('redact', function () {
     si.use(provider, { apikey: SECRET, port: 'eighty' })
   })
 
-  it('plugin-define-throws', function (fin) {
+  it('plugin-define-throws', function (t, fin) {
     const { si, leaks } = capture({ debug: { undead: true } })
 
     function provider() {
@@ -394,10 +409,10 @@ describe('redact', function () {
 
     si.error(
       check(fin, function (err) {
-        expect(err.code).equal('plugin_define_failed')
-        expect(err.details.options.apikey).equal('[REDACTED]')
-        expect(Stringify(err)).not.contains(SECRET)
-        expect(leaks()).equal([])
+        assert.deepStrictEqual(err.code, 'plugin_define_failed')
+        assert.deepStrictEqual(err.details.options.apikey, '[REDACTED]')
+        assert.ok(!Stringify(err).includes(SECRET))
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
@@ -405,7 +420,7 @@ describe('redact', function () {
     si.use(provider, { apikey: SECRET })
   })
 
-  it('fatal-report', function (fin) {
+  it('fatal-report', function (t, fin) {
     // In test mode a fatal error prints a report to stderr.
     const printed = []
     const console_error = console.error
@@ -433,10 +448,10 @@ describe('redact', function () {
       console.error = console_error
       const report = printed.join('\n')
       try {
-        expect(0 < exits).true()
-        expect(report).contains('SENECA FATAL ERROR')
-        expect(report).contains('[REDACTED]')
-        expect(report).not.contains(SECRET)
+        assert.strictEqual(0 < exits, true)
+        assert.ok(report.includes('SENECA FATAL ERROR'))
+        assert.ok(report.includes('[REDACTED]'))
+        assert.ok(!report.includes(SECRET))
         fin()
       } catch (e) {
         fin(e)
@@ -444,7 +459,7 @@ describe('redact', function () {
     }, 666)
   })
 
-  it('log-event', function (fin) {
+  it('log-event', function (t, fin) {
     // Listeners receive every entry, before level filtering.
     const si = Seneca({ log: 'silent' })
     const entries = []
@@ -459,17 +474,24 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pass: SECRET },
       check(fin, function () {
-        expect(
+        assert.strictEqual(
           entries.some((entry) => entry.includes('"case":"DEFINE"')),
-        ).true()
-        expect(entries.some((entry) => entry.includes('"case":"IN"'))).true()
-        expect(entries.filter((entry) => entry.includes(SECRET))).equal([])
+          true,
+        )
+        assert.strictEqual(
+          entries.some((entry) => entry.includes('"case":"IN"')),
+          true,
+        )
+        assert.deepStrictEqual(
+          entries.filter((entry) => entry.includes(SECRET)),
+          [],
+        )
         si.close(fin)
       }),
     )
   })
 
-  it('redact-option', function (fin) {
+  it('redact-option', function (t, fin) {
     const { si, lines, leaks } = capture({
       redact: { keys: ['pin'], mark: '***' },
     })
@@ -481,14 +503,17 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pin: SECRET, pass: SECRET },
       check(fin, function () {
-        expect(leaks()).equal([])
-        expect(lines.some((line) => line.includes('"pin":"***"'))).true()
+        assert.deepStrictEqual(leaks(), [])
+        assert.strictEqual(
+          lines.some((line) => line.includes('"pin":"***"')),
+          true,
+        )
         si.close(fin)
       }),
     )
   })
 
-  it('redact-option-inactive', function (fin) {
+  it('redact-option-inactive', function (t, fin) {
     const { si, leaks } = capture({ redact: { active: false } })
     si.add('sys:user,cmd:login', function (msg, reply) {
       reply({ ok: true })
@@ -498,13 +523,13 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pass: SECRET },
       check(fin, function () {
-        expect(0 < leaks().length).true()
+        assert.strictEqual(0 < leaks().length, true)
         si.close(fin)
       }),
     )
   })
 
-  it('redact-option-update', function (fin) {
+  it('redact-option-update', function (t, fin) {
     const { si, lines, leaks } = capture()
     si.options({ redact: { keys: ['pin'] } })
     si.add('sys:user,cmd:login', function (msg, reply) {
@@ -515,14 +540,17 @@ describe('redact', function () {
       'sys:user,cmd:login',
       { pin: SECRET },
       check(fin, function () {
-        expect(leaks()).equal([])
-        expect(lines.some((line) => line.includes('"pin":"[REDACTED]"'))).true()
+        assert.deepStrictEqual(leaks(), [])
+        assert.strictEqual(
+          lines.some((line) => line.includes('"pin":"[REDACTED]"')),
+          true,
+        )
         si.close(fin)
       }),
     )
   })
 
-  it('redact-option-same-call', function (fin) {
+  it('redact-option-same-call', function (t, fin) {
     const { si, leaks } = capture()
     si.options({
       redact: { keys: ['dsn'] },
@@ -530,13 +558,13 @@ describe('redact', function () {
     })
     si.ready(
       check(fin, function () {
-        expect(leaks()).equal([])
+        assert.deepStrictEqual(leaks(), [])
         si.close(fin)
       }),
     )
   })
 
-  it('error-text-without-redaction', function (fin) {
+  it('error-text-without-redaction', function (t, fin) {
     const si = Seneca({ log: 'silent', redact: { active: false } })
     si.add('role:auth,cmd:login,token:*', function (msg, reply) {
       reply({ ok: true })
@@ -546,15 +574,17 @@ describe('redact', function () {
       'role:auth,cmd:logn',
       { token: SECRET },
       check(fin, function (err) {
-        expect(err.code).equal('act_not_found')
-        expect(err.message).contains('cmd:logn,role:auth (other keys: token)')
-        expect(err.message).not.contains(SECRET)
+        assert.deepStrictEqual(err.code, 'act_not_found')
+        assert.ok(
+          err.message.includes('cmd:logn,role:auth (other keys: token)'),
+        )
+        assert.ok(!err.message.includes(SECRET))
         si.close(fin)
       }),
     )
   })
 
-  it('custom-validation-message', function (fin) {
+  it('custom-validation-message', function (t, fin) {
     const { si } = capture()
     const { Fault, Check, Exact } = si.valid
     si.add(
@@ -574,20 +604,24 @@ describe('redact', function () {
     si.act(
       { a: 1, port: 0, mode: 'odd' },
       check(fin, function (err) {
-        expect(err.code).equal('act_invalid_msg')
-        expect(err.message).contains(
-          'port must be between 1 and 65535, got (number) at port',
+        assert.deepStrictEqual(err.code, 'act_invalid_msg')
+        assert.ok(
+          err.message.includes(
+            'port must be between 1 and 65535, got (number) at port',
+          ),
         )
-        expect(err.message).contains(
-          'property "mode" must be exactly one of: fast, slow',
+        assert.ok(
+          err.message.includes(
+            'property "mode" must be exactly one of: fast, slow',
+          ),
         )
-        expect(err.message).not.contains('odd')
+        assert.ok(!err.message.includes('odd'))
         si.close(fin)
       }),
     )
   })
 
-  it('transport-error-reply', function (fin) {
+  it('transport-error-reply', function (t, fin) {
     const stub = make_web_stub()
     const server = capture({ tag: 'server' })
     const client = capture({ tag: 'client' })
@@ -609,15 +643,15 @@ describe('redact', function () {
               'sys:user,cmd:logn',
               { pass: SECRET },
               check(fin, function (err) {
-                expect(err.code).equal('act_not_found')
-                expect(err.message).contains(
-                  'cmd:logn,sys:user (other keys: pass)',
+                assert.deepStrictEqual(err.code, 'act_not_found')
+                assert.ok(
+                  err.message.includes('cmd:logn,sys:user (other keys: pass)'),
                 )
-                expect(Stringify(err)).not.contains(SECRET)
-                expect(stub.wire.length).equal(1)
-                expect(stub.wire[0]).not.contains(SECRET)
-                expect(server.leaks()).equal([])
-                expect(client.leaks()).equal([])
+                assert.ok(!Stringify(err).includes(SECRET))
+                assert.deepStrictEqual(stub.wire.length, 1)
+                assert.ok(!stub.wire[0].includes(SECRET))
+                assert.deepStrictEqual(server.leaks(), [])
+                assert.deepStrictEqual(client.leaks(), [])
                 client.si.close(() => server.si.close(fin))
               }),
             )
@@ -627,7 +661,8 @@ describe('redact', function () {
     )
   })
 
-  it('transport-type-alias', function (fin) {
+  it('transport-type-alias', function (t, fin) {
+    Deprecate.reset()
     const stub = make_web_stub()
     const server = capture({ tag: 'server' })
     const client = capture({ tag: 'client' })
@@ -649,29 +684,32 @@ describe('redact', function () {
             client.si.act(
               'a:1,x:2',
               check(fin, function (err, out) {
-                expect(err).not.exist()
-                expect(out.x).equal(2)
+                assert.ok(null == err)
+                assert.deepStrictEqual(out.x, 2)
 
                 // The 3.x names reach the web transport hooks.
-                expect(stub.seen).equal([
+                assert.deepStrictEqual(stub.seen, [
                   'listen:web',
                   'listen:web',
                   'client:web',
                 ])
 
-                // One deprecation warning per instance.
-                const warned = (lines) =>
+                // One deprecation report per type name, per process, on the
+                // instance that used it: the server reports http and direct, and
+                // the client's http was already reported.
+                const reported = (lines) =>
                   lines.filter(
                     (line) =>
-                      line.includes('"case":"DEPRECATED"') &&
-                      line.includes('"kind":"transport"') &&
+                      line.includes('"code":"SENECA_DEP_TRANSPORT_TYPE"') &&
                       line.includes('"level_name":"warn"'),
                   )
                 // Each entry is recorded twice: by the logger and the log event.
-                expect(warned(server.lines).length).equal(2)
-                expect(warned(client.lines).length).equal(2)
-                expect(warned(server.lines)[0]).contains(
-                  'The transport type \\"http\\" is deprecated; use \\"web\\".',
+                assert.equal(reported(server.lines).length, 4)
+                assert.equal(reported(client.lines).length, 0)
+                assert.ok(
+                  reported(server.lines)[0].includes(
+                    'The transport type http is deprecated',
+                  ),
                 )
 
                 client.si.close(() => server.si.close(fin))
@@ -696,21 +734,24 @@ describe('redact', function () {
       empty: { pass: '' },
     }
     const out = redact(input)
-    expect(input.user.pass).equal(SECRET)
-    expect(out.user).equal({ name: 'alice', pass: '[REDACTED]' })
-    expect(out.shared).shallow.equal(shared)
-    expect(out.list).equal([{ token: '[REDACTED]' }, 'plain'])
-    expect(out.flag).shallow.equal(input.flag)
-    expect(out.empty).shallow.equal(input.empty)
-    expect(redact(shared)).shallow.equal(shared)
-    expect(redact(null)).equal(null)
-    expect(redact('plain')).equal('plain')
-    expect(redact(1)).equal(1)
+    assert.deepStrictEqual(input.user.pass, SECRET)
+    assert.deepStrictEqual(out.user, { name: 'alice', pass: '[REDACTED]' })
+    assert.strictEqual(out.shared, shared)
+    assert.deepStrictEqual(out.list, [{ token: '[REDACTED]' }, 'plain'])
+    assert.strictEqual(out.flag, input.flag)
+    assert.strictEqual(out.empty, input.empty)
+    assert.strictEqual(redact(shared), shared)
+    assert.deepStrictEqual(redact(null), null)
+    assert.deepStrictEqual(redact('plain'), 'plain')
+    assert.deepStrictEqual(redact(1), 1)
 
     // Secret objects are replaced whole.
-    expect(redact({ credentials: { user: 'u', key: SECRET } })).equal({
-      credentials: '[REDACTED]',
-    })
+    assert.deepStrictEqual(
+      redact({ credentials: { user: 'u', key: SECRET } }),
+      {
+        credentials: '[REDACTED]',
+      },
+    )
 
     // Key names are matched by words.
     for (const key of [
@@ -746,7 +787,7 @@ describe('redact', function () {
       'cookie',
       'set-cookie',
     ]) {
-      expect(redact.is_secret_key(key), key).true()
+      assert.strictEqual(redact.is_secret_key(key), true, key)
     }
     for (const key of [
       'name',
@@ -767,68 +808,79 @@ describe('redact', function () {
       'compass',
       '',
     ]) {
-      expect(redact.is_secret_key(key), key).false()
+      assert.strictEqual(redact.is_secret_key(key), false, key)
     }
-    expect(redact.is_secret_key(1)).false()
-    expect(SECRET_KEYS).includes('pass')
-    expect(redact.is_secret_path('keys.apikey')).true()
-    expect(redact.is_secret_path('keys.id')).false()
+    assert.strictEqual(redact.is_secret_key(1), false)
+    assert.ok(SECRET_KEYS.includes('pass'))
+    assert.strictEqual(redact.is_secret_path('keys.apikey'), true)
+    assert.strictEqual(redact.is_secret_path('keys.id'), false)
 
     // URL credentials.
-    expect(redact('redis://user:' + SECRET + '@host:6379/0')).equal(
+    assert.deepStrictEqual(
+      redact('redis://user:' + SECRET + '@host:6379/0'),
       'redis://user:[REDACTED]@host:6379/0',
     )
-    expect(redact('see postgres://:' + SECRET + '@db/x and more')).equal(
+    assert.deepStrictEqual(
+      redact('see postgres://:' + SECRET + '@db/x and more'),
       'see postgres://:[REDACTED]@db/x and more',
     )
-    expect(redact('mongodb://u:p@ss@host/db')).equal(
+    assert.deepStrictEqual(
+      redact('mongodb://u:p@ss@host/db'),
       'mongodb://u:[REDACTED]@host/db',
     )
-    expect(redact('redis://:pw@host:6379?x=a@b')).equal(
+    assert.deepStrictEqual(
+      redact('redis://:pw@host:6379?x=a@b'),
       'redis://:[REDACTED]@host:6379?x=a@b',
     )
-    expect(redact('https://example.com/a@b')).equal('https://example.com/a@b')
-    expect(redact('mailto:alice@example.com')).equal('mailto:alice@example.com')
+    assert.deepStrictEqual(
+      redact('https://example.com/a@b'),
+      'https://example.com/a@b',
+    )
+    assert.deepStrictEqual(
+      redact('mailto:alice@example.com'),
+      'mailto:alice@example.com',
+    )
 
     // Cycles map to the copies.
     const a = { name: 'a' }
     const b = { pass: SECRET, a }
     a.b = b
     const ca = redact(a)
-    expect(ca).not.shallow.equal(a)
-    expect(ca.b.pass).equal('[REDACTED]')
-    expect(ca.b.a).shallow.equal(ca)
-    expect(Stringify(ca)).not.contains(SECRET)
-    expect(a.b.pass).equal(SECRET)
+    assert.notStrictEqual(ca, a)
+    assert.deepStrictEqual(ca.b.pass, '[REDACTED]')
+    assert.strictEqual(ca.b.a, ca)
+    assert.ok(!Stringify(ca).includes(SECRET))
+    assert.deepStrictEqual(a.b.pass, SECRET)
 
     // Cycles without secrets.
     const c = { name: 'c' }
     c.self = c
     const cc = redact(c)
-    expect(cc.self).shallow.equal(cc)
+    assert.strictEqual(cc.self, cc)
 
     // Errors keep their type, message and stack.
     const err = new Error('boom')
     err.code = 'x'
     err.details = { token: SECRET }
     const cerr = redact(err)
-    expect(cerr).not.shallow.equal(err)
-    expect(cerr instanceof Error).true()
-    expect(cerr.message).equal('boom')
-    expect(cerr.stack).equal(err.stack)
-    expect(cerr.code).equal('x')
-    expect(cerr.details.token).equal('[REDACTED]')
-    expect(err.details.token).equal(SECRET)
+    assert.notStrictEqual(cerr, err)
+    assert.strictEqual(cerr instanceof Error, true)
+    assert.deepStrictEqual(cerr.message, 'boom')
+    assert.deepStrictEqual(cerr.stack, err.stack)
+    assert.deepStrictEqual(cerr.code, 'x')
+    assert.deepStrictEqual(cerr.details.token, '[REDACTED]')
+    assert.deepStrictEqual(err.details.token, SECRET)
 
     // Credentials in an error's message and stack are replaced.
     const cfail = new Error('connect failed postgres://bob:' + SECRET + '@db/x')
     const ccfail = redact({ err: cfail }).err
-    expect(ccfail instanceof Error).true()
-    expect(ccfail.message).equal(
+    assert.strictEqual(ccfail instanceof Error, true)
+    assert.deepStrictEqual(
+      ccfail.message,
       'connect failed postgres://bob:[REDACTED]@db/x',
     )
-    expect(ccfail.stack).not.contains(SECRET)
-    expect(cfail.message).contains(SECRET)
+    assert.ok(!ccfail.stack.includes(SECRET))
+    assert.ok(cfail.message.includes(SECRET))
 
     // Class instances keep their prototype.
     class Entity {
@@ -839,28 +891,31 @@ describe('redact', function () {
     const ent = new Entity()
     ent.pass = SECRET
     const cent = redact(ent)
-    expect(cent instanceof Entity).true()
-    expect(cent.canon()).equal('sys/user')
-    expect(cent.pass).equal('[REDACTED]')
+    assert.strictEqual(cent instanceof Entity, true)
+    assert.deepStrictEqual(cent.canon(), 'sys/user')
+    assert.deepStrictEqual(cent.pass, '[REDACTED]')
 
     // Frozen objects.
-    expect(redact(Object.freeze({ pass: SECRET })).pass).equal('[REDACTED]')
+    assert.deepStrictEqual(
+      redact(Object.freeze({ pass: SECRET })).pass,
+      '[REDACTED]',
+    )
 
     // Seneca instances and built-in objects are not walked.
     const si = Seneca({ log: 'silent' })
     const when = new Date()
     const map = new Map([['pass', SECRET]])
     const held = redact({ seneca: si, when, map, buf: Buffer.from('x') })
-    expect(held.seneca).shallow.equal(si)
-    expect(held.when).shallow.equal(when)
-    expect(held.map).shallow.equal(map)
+    assert.strictEqual(held.seneca, si)
+    assert.strictEqual(held.when, when)
+    assert.strictEqual(held.map, map)
 
     // Null-prototype objects.
     const bare = Object.create(null)
     bare.pass = SECRET
     const cbare = redact(bare)
-    expect(Object.getPrototypeOf(cbare)).equal(null)
-    expect(cbare.pass).equal('[REDACTED]')
+    assert.deepStrictEqual(Object.getPrototypeOf(cbare), null)
+    assert.deepStrictEqual(cbare.pass, '[REDACTED]')
 
     // A getter that throws leaves its object as it is.
     const bad = {
@@ -869,7 +924,7 @@ describe('redact', function () {
         throw new Error('boom')
       },
     }
-    expect(redact({ bad }).bad).shallow.equal(bad)
+    assert.strictEqual(redact({ bad }).bad, bad)
 
     // Own accessors of class instances are copied as values; one that
     // throws is left out of the copy.
@@ -883,10 +938,10 @@ describe('redact', function () {
       },
     })
     const cacc = redact(acc)
-    expect(cacc instanceof Account).true()
-    expect(cacc.token).equal('[REDACTED]')
-    expect(cacc.owner).equal('alice')
-    expect(Object.getOwnPropertyDescriptor(cacc, 'broken')).not.exist()
+    assert.strictEqual(cacc instanceof Account, true)
+    assert.deepStrictEqual(cacc.token, '[REDACTED]')
+    assert.deepStrictEqual(cacc.owner, 'alice')
+    assert.ok(null == Object.getOwnPropertyDescriptor(cacc, 'broken'))
 
     // Objects whose keys cannot be listed are passed through.
     const unlisted = new Proxy(
@@ -897,7 +952,7 @@ describe('redact', function () {
         },
       },
     )
-    expect(redact({ unlisted }).unlisted === unlisted).true()
+    assert.strictEqual(redact({ unlisted }).unlisted === unlisted, true)
 
     // Objects whose type cannot be checked are passed through.
     const hostile = new Proxy(
@@ -908,29 +963,32 @@ describe('redact', function () {
         },
       },
     )
-    expect(redact({ hostile }).hostile === hostile).true()
+    assert.strictEqual(redact({ hostile }).hostile === hostile, true)
 
     // Very deep data is passed through.
     let deep = { pass: SECRET }
     for (let i = 0; i < 33; i++) deep = { next: deep }
-    expect(redact(deep)).shallow.equal(deep)
+    assert.strictEqual(redact(deep), deep)
 
     // A depth limit leaves deeper data as it is.
     const nested = { a: { pass: SECRET }, b: { c: { pass: SECRET } } }
     const limited = redact(nested, 1)
-    expect(limited.a.pass).equal('[REDACTED]')
-    expect(limited.b.c).shallow.equal(nested.b.c)
+    assert.deepStrictEqual(limited.a.pass, '[REDACTED]')
+    assert.strictEqual(limited.b.c, nested.b.c)
 
     // Inactive, custom keys and mark.
     const off = make_redactor({ active: false })
-    expect(off(input)).shallow.equal(input)
-    expect(off.is_secret_key('pass')).false()
-    expect(off.matches_key('pass')).true()
+    assert.strictEqual(off(input), input)
+    assert.strictEqual(off.is_secret_key('pass'), false)
+    assert.strictEqual(off.matches_key('pass'), true)
     const custom = make_redactor({ keys: ['pin', ''], mark: '***' })
-    expect(custom({ pin: 1234, pass: 'x' })).equal({ pin: '***', pass: '***' })
+    assert.deepStrictEqual(custom({ pin: 1234, pass: 'x' }), {
+      pin: '***',
+      pass: '***',
+    })
 
     // Command line arguments.
-    expect(
+    assert.deepStrictEqual(
       redact.argv([
         'node',
         'app.js',
@@ -942,18 +1000,19 @@ describe('redact', function () {
         '80',
         3,
       ]),
-    ).equal([
-      'node',
-      'app.js',
-      '--seneca.options.plugin.provider.apikey=[REDACTED]',
-      '--password',
-      '[REDACTED]',
-      '--db=redis://u:[REDACTED]@h',
-      '--port',
-      '80',
-      3,
-    ])
-    expect(off.argv(['--pass=x'])).equal(['--pass=x'])
+      [
+        'node',
+        'app.js',
+        '--seneca.options.plugin.provider.apikey=[REDACTED]',
+        '--password',
+        '[REDACTED]',
+        '--db=redis://u:[REDACTED]@h',
+        '--port',
+        '80',
+        3,
+      ],
+    )
+    assert.deepStrictEqual(off.argv(['--pass=x']), ['--pass=x'])
 
     si.close()
   })
@@ -966,7 +1025,7 @@ describe('redact', function () {
       },
     )
 
-    expect(
+    assert.deepStrictEqual(
       describe_msg(si, {
         sys: 'user',
         cmd: 'logn',
@@ -976,14 +1035,16 @@ describe('redact', function () {
         nested: { a: 1 },
         default$: {},
       }),
-    ).equal('cmd:logn,sys:user (other keys: email, nested, pass, token)')
-    expect(describe_msg(si, { foo: 1 })).equal('{} (other keys: foo)')
-    expect(describe_msg(si, { cmd: 'x'.repeat(50) })).equal(
+      'cmd:logn,sys:user (other keys: email, nested, pass, token)',
+    )
+    assert.deepStrictEqual(describe_msg(si, { foo: 1 }), '{} (other keys: foo)')
+    assert.deepStrictEqual(
+      describe_msg(si, { cmd: 'x'.repeat(50) }),
       'cmd:' + 'x'.repeat(44) + '...',
     )
-    expect(describe_msg(si, null)).equal('(null)')
-    expect(describe_msg(si, [1])).equal('(array)')
-    expect(describe_msg(null, { a: 1 })).equal('{} (other keys: a)')
+    assert.deepStrictEqual(describe_msg(si, null), '(null)')
+    assert.deepStrictEqual(describe_msg(si, [1]), '(array)')
+    assert.deepStrictEqual(describe_msg(null, { a: 1 }), '{} (other keys: a)')
 
     // A property that cannot be read is named only.
     const odd = {
@@ -991,7 +1052,7 @@ describe('redact', function () {
         throw new Error('no')
       },
     }
-    expect(describe_msg(si, odd)).equal('{} (other keys: cmd)')
+    assert.deepStrictEqual(describe_msg(si, odd), '{} (other keys: cmd)')
     const unlisted = new Proxy(
       {},
       {
@@ -1000,21 +1061,22 @@ describe('redact', function () {
         },
       },
     )
-    expect(describe_msg(si, unlisted)).equal('{}')
+    assert.deepStrictEqual(describe_msg(si, unlisted), '{}')
 
     const many = {}
     for (let i = 0; i < 30; i++) many['k' + i] = i
-    expect(describe_msg(si, many)).endsWith(', ...)')
+    assert.ok(describe_msg(si, many).endsWith(', ...)'))
 
-    expect(
+    assert.deepStrictEqual(
       describe_args(si, ['sys:user,cmd:x,pass:' + SECRET, '}', () => {}, 1]),
-    ).equal('cmd:x,sys:user (other keys: pass), (string), (function), (number)')
+      'cmd:x,sys:user (other keys: pass), (string), (function), (number)',
+    )
 
     // Validation errors without Gubu records use the summary properties.
     const { shape_errors } = require('../lib/redact')
-    expect(shape_errors(null)).equal(null)
-    expect(shape_errors(new Error('x'))).equal(null)
-    expect(
+    assert.deepStrictEqual(shape_errors(null), null)
+    assert.deepStrictEqual(shape_errors(new Error('x')), null)
+    assert.deepStrictEqual(
       shape_errors({
         gubu: true,
         desc: () => {
@@ -1022,10 +1084,11 @@ describe('redact', function () {
         },
         props: [{ path: 'a', what: 'type', type: 'number', value: 1 }],
       }),
-    ).equal([{ path: 'a', why: 'type', type: 'number' }])
-    expect(shape_errors({ gubu: true })).equal(null)
+      [{ path: 'a', why: 'type', type: 'number' }],
+    )
+    assert.deepStrictEqual(shape_errors({ gubu: true }), null)
 
-    expect(
+    assert.deepStrictEqual(
       describe_shape_errors([
         { path: 'a', why: 'required', type: 'string' },
         { path: 'b', why: 'required' },
@@ -1036,7 +1099,6 @@ describe('redact', function () {
         { path: '' },
         null,
       ]),
-    ).equal(
       'property "a" is required (string); property "b" is required; ' +
         'property "c" is not of type number; the object does not allow the ' +
         'properties "x, y"; object "d" does not allow the property "z"; ' +
@@ -1044,7 +1106,7 @@ describe('redact', function () {
         'validation check; the value failed a validation check',
     )
 
-    expect(
+    assert.deepStrictEqual(
       describe_shape_errors([
         {
           path: 'a',
@@ -1076,7 +1138,6 @@ describe('redact', function () {
           value: -1,
         },
       ]),
-    ).equal(
       'property "a" must be exactly one of: x, y; ' +
         'property "b" must be a minimum of 5; ' +
         'property "c" failed a validation check (check); ' +

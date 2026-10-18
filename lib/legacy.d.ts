@@ -6,7 +6,7 @@ declare function argprops(defaults: any, args: any, fixed: any, omits: any): any
 declare function findpins(this: any): any[];
 declare function act_if(this: any): any;
 declare function hasact(this: any, pattern: any): boolean;
-declare function make_legacy_fail(so: any): (this: any) => any;
+declare function make_legacy_fail(so: any): (this: any) => Error & Record<string, any>;
 declare const Legacy: {
     flatten: typeof flatten;
     nil: typeof nil;

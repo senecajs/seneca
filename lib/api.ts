@@ -1,6 +1,8 @@
 /* Copyright © 2010-2023 Richard Rodger and other contributors, MIT License. */
 
-import { MakeArgu, Any, Check, Rest, Skip, One, Empty } from 'gubu'
+import { MakeArgu, Any, Check, Rest, Skip } from 'shape'
+
+import { Deprecate } from './deprecate'
 
 import {
   each,
@@ -14,6 +16,7 @@ import {
   clean,
   jsonic_stringify,
   parse_jsonic,
+  message_props_shape,
 } from './common'
 
 import { make_redactor, redact_with } from './redact'
@@ -140,7 +143,7 @@ function options(this: any, options: any, chain: any) {
 
 
 // close seneca instance
-// sets public seneca.closed property
+// sets seneca.flags.closed
 function close(callpoint: any) {
   return function api_close(this: any, done: any) {
     const seneca = this
@@ -201,7 +204,7 @@ function error(this: any, first: any) {
       err = plugin.eraro.apply(this, arguments)
     }
     else {
-      err = common_error.apply(this, arguments)
+      err = common_error.apply(this, arguments as any)
     }
 
     return err
@@ -373,6 +376,7 @@ function export$(this: any, key: any) {
 
   // Legacy aliases
   if (key === 'util') {
+    Deprecate.deprecate(this, 'export_util')
     key = 'basic'
   }
 
@@ -928,7 +932,7 @@ intern.parse_config = function(args: any) {
 
   const arglen = config.length
 
-  // TODO: use Gubu for better error msgs
+  // TODO: use Shape for better error msgs
 
   if (arglen === 1) {
     if (config[0] && 'object' === typeof config[0]) {
@@ -949,9 +953,6 @@ intern.parse_config = function(args: any) {
 }
 
 
-// Instances that have already logged the transport type alias warning.
-intern.type_alias_warned = new WeakSet()
-
 intern.resolve_config = function(config: any, options: any, seneca?: any) {
   let out = Object.assign({}, config)
 
@@ -970,24 +971,12 @@ intern.resolve_config = function(config: any, options: any, seneca?: any) {
   // They still work, so that Seneca 3 code does not fail, but are
   // deprecated.
   if ('http' === out.type || 'direct' === out.type) {
-    const root = seneca && seneca.root
-    if (
-      root &&
-      !intern.type_alias_warned.has(root) &&
-      false !== seneca.options().debug.deprecation
-    ) {
-      intern.type_alias_warned.add(root)
-      seneca.log.warn({
-        kind: 'transport',
-        case: 'DEPRECATED',
-        type: out.type,
-        notice:
-          'The transport type "' +
-          out.type +
-          '" is deprecated; use "web". It is an alias of "web" kept ' +
-          'for compatibility with Seneca 3.',
-      })
-    }
+    Deprecate.deprecate(
+      seneca,
+      'transport_type',
+      { type: out.type },
+      'transport_type:' + out.type,
+    )
     out.type = 'web'
   }
 
@@ -1032,9 +1021,6 @@ intern.close = function(this: any, callpoint: any, done: any) {
       return safe_done()
     }
 
-    // TODO: remove in 4.x
-    seneca.closed = true
-
     seneca.flags.closed = true
 
     // cleanup process event listeners
@@ -1078,7 +1064,7 @@ intern.close = function(this: any, callpoint: any, done: any) {
 
 
 const FixArgu: any = Argu('fix', {
-  props: One(Empty(String), Object),
+  props: message_props_shape(),
   moreprops: Skip(Object),
   rest: Rest(Any()),
 })

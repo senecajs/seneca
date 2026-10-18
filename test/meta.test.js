@@ -3,36 +3,32 @@
 
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
 // TODO: test priors
 
 describe('meta', function () {
-  it('custom-parents', function (fin) {
+  it('custom-parents', function (_t, fin) {
     Seneca()
       .test(fin)
       .add('a:1', function (msg, reply, meta) {
-        expect(meta.custom.foo).equal(msg.t)
+        assert.equal(meta.custom.foo, msg.t)
         reply({ x: 1, t: msg.t })
       })
 
       // tests calls: b -> a
       .add('b:1', function (msg, reply, meta) {
-        expect(meta.custom.foo).equal(msg.t)
+        assert.equal(meta.custom.foo, msg.t)
         this.act('a:1', { t: msg.t }, reply)
       })
 
       // test calls: c -> b -> a
       .add('c:1', function (msg, reply, meta) {
-        expect(meta.custom.foo).equal(msg.t)
+        assert.equal(meta.custom.foo, msg.t)
         this.act('b:1,t:' + msg.t, reply)
       })
 
@@ -44,23 +40,23 @@ describe('meta', function () {
         'a:1,t:0',
         { meta$: { custom: { foo: 0 } } },
         function (ignore, out, meta) {
-          expect(meta.custom.foo).equal(0)
+          assert.equal(meta.custom.foo, 0)
 
           this.act(
             { b: 1, t: 1, meta$: { custom: { foo: 1 } } },
             function (ignore, out, meta) {
-              expect(meta.custom.foo).equal(1)
+              assert.equal(meta.custom.foo, 1)
 
               this.act(
                 { c: 1, t: 2, meta$: { custom: { foo: 2 } } },
                 function (ignore, out, meta) {
-                  expect(meta.custom.foo).equal(2)
+                  assert.equal(meta.custom.foo, 2)
 
                   this.act(
                     { d: 1, t: 11, meta$: { custom: { foo: 0 } } },
                     function (ignore, out, meta) {
                       // d:1 changed custom.foo
-                      expect(meta.custom.foo).equal(11)
+                      assert.equal(meta.custom.foo, 11)
 
                       fin()
                     },
@@ -74,12 +70,12 @@ describe('meta', function () {
   })
 
   function make_custom_meta_prior(opts) {
-    return function custom_meta_prior_test(fin) {
+    return function custom_meta_prior_test(_t, fin) {
       Seneca(opts)
         .test(fin)
         .add('a:1', function p0(msg, reply, meta) {
           // console.log('META', msg, meta)
-          expect(meta.custom.foo).equal(msg.t)
+          assert.equal(meta.custom.foo, msg.t)
           reply({ x: 1, t: msg.t })
         })
 
@@ -87,25 +83,25 @@ describe('meta', function () {
           'a:1,t:0',
           { meta$: { custom: { foo: 0 } } },
           function (ignore, out, meta) {
-            expect(meta.custom.foo).equal(0)
+            assert.equal(meta.custom.foo, 0)
 
             // tests prior: p1 -> p0
             this.add('a:1', function p1(msg, reply, meta) {
-              expect(meta.custom.foo).equal(msg.t)
+              assert.equal(meta.custom.foo, msg.t)
               this.prior(msg, reply)
             }).act(
               { a: 1, t: 1, meta$: { custom: { foo: 1 } } },
               function (ignore, out, meta) {
-                expect(meta.custom.foo).equal(1)
+                assert.equal(meta.custom.foo, 1)
 
                 // test prior: p2 -> p1 -> p0
                 this.add('a:1', function p2(msg, reply, meta) {
-                  expect(meta.custom.foo).equal(msg.t)
+                  assert.equal(meta.custom.foo, msg.t)
                   this.prior(msg, reply)
                 }).act(
                   { a: 1, t: 2, meta$: { custom: { foo: 2 } } },
                   function (ignore, out, meta) {
-                    expect(meta.custom.foo).equal(2)
+                    assert.equal(meta.custom.foo, 2)
 
                     this.add('a:1', function p3(msg, reply, meta) {
                       this.prior(msg, { meta$: { custom: { foo: 11 } } }, reply)
@@ -113,7 +109,7 @@ describe('meta', function () {
                       { a: 1, t: 11, meta$: { custom: { foo: 0 } } },
                       function (ignore, out, meta) {
                         // changed custom.foo
-                        expect(meta.custom.foo).equal(11)
+                        assert.equal(meta.custom.foo, 11)
 
                         fin()
                       },
@@ -133,7 +129,7 @@ describe('meta', function () {
     make_custom_meta_prior({ prior: { direct: true } }),
   )
 
-  it('custom-fixed', function (fin) {
+  it('custom-fixed', function (t, fin) {
     var si = Seneca()
       .test(fin)
 
@@ -148,19 +144,19 @@ describe('meta', function () {
     var d0 = si.delegate(null, { custom: { bar: 1 } })
 
     d0.act('a:1', function (ignore, out, meta) {
-      expect(meta.custom.bar).equal(1)
-      expect(out.bar).equal(1)
+      assert.equal(meta.custom.bar, 1)
+      assert.equal(out.bar, 1)
 
       d0.act(
         'a:1',
         { meta$: { custom: { bar: 2 } } },
         function (ignore, out, meta) {
-          expect(meta.custom.bar).equal(1)
-          expect(out.bar).equal(1)
+          assert.equal(meta.custom.bar, 1)
+          assert.equal(out.bar, 1)
 
           d0.act('b:1', function (ignore, out, meta) {
-            expect(meta.custom.bar).equal(1)
-            expect(out.bar).equal(1)
+            assert.equal(meta.custom.bar, 1)
+            assert.equal(out.bar, 1)
 
             fin()
           })

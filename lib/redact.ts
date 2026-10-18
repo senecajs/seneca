@@ -531,9 +531,9 @@ function describe_args(instance: any, args: any): string {
     .join(', ')
 }
 
-// The Gubu error records of a validation error, if it has any.
+// The error records of a shape (or Gubu) validation error, if it has any.
 function shape_errors(err: any): any[] | null {
-  if (null == err || !err.gubu) {
+  if (null == err || !(err.shape || err.gubu)) {
     return null
   }
 

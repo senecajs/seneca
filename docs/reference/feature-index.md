@@ -8,7 +8,7 @@ Options are listed under their top level key in the
 | Feature | Reference | Guides |
 | ------- | --------- | ------ |
 | `act` (submit a message) | [API: act](api.md#act) | [Getting started](../tutorials/getting-started.md) |
-| `act-in`, `act-out`, `act-err`, `act-err-4` events | [Events](events.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
+| `act-in`, `act-out`, `act-err` events (`act-err-4` deprecated) | [Events](events.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
 | Action definition (`find` result, `priorpath`, `rules`) | [Action definition](action-definition.md) | [Debug and inspect](../how-to/debug-and-inspect.md) |
 | Action modifiers (`extend.action_modifier`) | [Plugins: return value](plugins.md#return-value) | |
 | `add` (define an action) | [API: add](api.md#add) | [Getting started](../tutorials/getting-started.md) |
@@ -44,7 +44,7 @@ Options are listed under their top level key in the
 | `find`, `has`, `list` | [API: has, find, list](api.md#has-find-list), [Patterns](patterns.md#inspecting-patterns) | [Debug and inspect](../how-to/debug-and-inspect.md) |
 | `fix`, `fixed$` | [API: fix](api.md#fix), [Message directives](message-directives.md) | [Control message flow](../how-to/control-message-flow.md) |
 | `gate`, `ungate`, `gate$` | [API: gate, ungate](api.md#gate-ungate) | [Control message flow](../how-to/control-message-flow.md) |
-| Gubu validation (`valid`, pattern rules) | [Patterns: validation rules](patterns.md#validation-rules) | [Validate messages and options](../how-to/validate-messages-and-options.md) |
+| Shape validation (`valid`, pattern rules) | [Patterns: validation rules](patterns.md#validation-rules) | [Validate messages and options](../how-to/validate-messages-and-options.md) |
 | History and message cache (`history.*`, `id$`) | [Options: history](options.md#history), [Message directives](message-directives.md) | [Control message flow](../how-to/control-message-flow.md) |
 | `id`, `tag`, `fullname`, `version`, `start_time` | [Instance properties](static-api-and-utilities.md#instance-properties) | |
 | `id$`, `actid$`, `tx$` (message and transaction ids) | [Message directives](message-directives.md) | [Control message flow](../how-to/control-message-flow.md) |
@@ -101,6 +101,7 @@ Options are listed under their top level key in the
 | `transport` options, configuration resolution | [Transport](transport.md), [Options: transport](options.md#transport) | [Use network transports](../how-to/use-network-transports.md) |
 | `transport/utils` export, transport plugin hooks | [Transport: for transport plugin authors](transport.md#for-transport-plugin-authors) | |
 | Transport protocol (`meta$` wire format) | [Message transport protocol](message-transport-protocol.md) | [Transport independence](../explanation/transport-independence.md) |
+| TypeScript types (`Seneca.Instance`, `Seneca.Options`, augmenting `Instance`) | [TypeScript](static-api-and-utilities.md#typescript) | [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md#typescript) |
 | `use` (load a plugin) | [API: use](api.md#use), [Plugins](plugins.md) | [Manage plugins](../how-to/manage-plugins.md) |
-| `valid` (Gubu builders), `valid.*` options | [Module exports](static-api-and-utilities.md#the-module), [Options: valid](options.md#valid) | [Validate messages and options](../how-to/validate-messages-and-options.md) |
+| `valid` (Shape builders), `valid.*` options | [Module exports](static-api-and-utilities.md#the-module), [Options: valid](options.md#valid) | [Validate messages and options](../how-to/validate-messages-and-options.md) |
 | `wrap` | [API: wrap](api.md#wrap) | [Extend actions with priors](../how-to/extend-actions-with-priors.md) |

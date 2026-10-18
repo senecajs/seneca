@@ -13,13 +13,11 @@ const Seneca = require('seneca')
 | `Seneca.test(...)` | Create an instance and call `test` on it. |
 | `Seneca.quiet(...)` | Create an instance and call `quiet` on it. |
 | `Seneca.util` | Utility functions (below); also available as `seneca.util`. |
-| `Seneca.valid` | The [Gubu](https://github.com/rjrodger/gubu) shape builder (`Required`, `Default`, `Skip`, `Open`, ...); also `seneca.valid`. |
+| `Seneca.valid` | The [Shape](https://github.com/rjrodger/shape) builder (`Required`, `Default`, `Skip`, `Open`, ...); also `seneca.valid`. |
 | `Seneca.Seneca` | The instance constructor (prototype), for extension. |
 | `Seneca.test$` | Internals exposed for Seneca's own tests. |
-| `Seneca.loghandler` | Legacy; undefined. |
 
-TypeScript: the module's default export is the factory, and the type
-`Instance` describes an instance.
+See [TypeScript](#typescript) for the types.
 
 ## Instance properties
 
@@ -56,15 +54,47 @@ Instances are event emitters (see [Events](events.md)) and serialize to
 | `pattern(obj)` | Canonical pattern string of an object (`$` keys, object and function values omitted; keys sorted). A string is returned unchanged. |
 | `pincanon(pin)` | Canonical string of a pin (string, object or array; arrays are sorted and joined with `;`). |
 | `pins(pin)` | Array of pattern objects from a pin (strings may contain several patterns separated by `;`). |
-| `parsepattern(...)` | Alias kept for compatibility; not implemented in Seneca 4 (undefined). |
 | `clean(obj)` | Shallow copy without properties whose names end in `$`. |
-| `deep(...objs)` | Deep merge, later arguments override earlier ones (`lodash.defaultsdeep` in reverse); returns a new object. `deepextend` is an alias. |
+| `deep(...objs)` | Deep merge, later arguments override earlier ones (`lodash.defaultsdeep` in reverse); returns a new object. `deepextend` is a deprecated alias. |
 | `error(code, details)` | Create a Seneca error (see [Error codes](error-codes.md)). |
 | `print(err, result)` | Callback for `act` that prints the error or the result; `seneca.act('a:1', Seneca.util.print)`. |
 | `resolve_option(value, options)` | Return `value(options)` when `value` is a function, otherwise `value`. |
 | `router()` | A new Patrun router. |
-| `flatten(list, prop)` | Legacy list flattening. |
-| `Jsonic`, `Patrun`, `Gex`, `Gubu`, `Nid`, `Eraro` | The underlying libraries: Jsonic string parsing, pattern routing, glob matching, shape validation, id generation, error construction. |
+| `flatten(list, prop)` | Legacy list flattening. Deprecated; removed in Seneca 5. |
+| `Jsonic`, `Patrun`, `Gex`, `Shape`, `Nid`, `Eraro` | The underlying libraries: Jsonic string parsing, pattern routing, glob matching, shape validation, id generation, error construction. |
 
 `seneca.util.Jsonic('a:1,b:x')` parses a Jsonic string;
 `seneca.util.Jsonic.stringify(obj)` produces one.
+
+## TypeScript
+
+The package includes its declarations (`seneca.d.ts`). The module
+exports the factory as `module.exports`, and the declarations use
+`export =` to match:
+
+```ts
+import Seneca from 'seneca' // ES modules, or CommonJS with esModuleInterop
+import Seneca = require('seneca') // CommonJS without esModuleInterop
+
+const seneca: Seneca.Instance = Seneca({ timeout: 2222 })
+```
+
+The `Seneca` namespace exports the public types: `Instance`, `Options`,
+`Msg`, `Pattern`, `Result`, `Meta`, `Reply`, `ActionFunc`,
+`MessageFunc`, `ActCallback`, `SubFunc`, `ActDef`, `Plugin`,
+`PluginDefine`, `PluginDesc`, `PluginRecord`, `Logger` and `Util`. They
+can also be imported by name: `import type { Instance } from 'seneca'`.
+
+`this` is a `Seneca.Instance` inside actions, callbacks and plugin
+definitions. Deprecated methods and options are marked `@deprecated`.
+
+Plugins that add members to instances, for example with
+`seneca.decorate`, declare them by augmenting `Instance`:
+
+```ts
+declare module 'seneca' {
+  interface Instance {
+    make$(name: string): Entity
+  }
+}
+```

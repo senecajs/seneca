@@ -54,7 +54,7 @@ tax.defaults = ({ valid }) => ({
 ```
 
 `defaults` is also a validation shape, using
-[Gubu](https://github.com/rjrodger/gubu) (available as `seneca.valid`
+[Shape](https://github.com/rjrodger/shape) (available as `seneca.valid`
 and passed to the function as `valid`):
 
 * `precision: 2` means "a number, default 2".

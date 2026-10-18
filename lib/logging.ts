@@ -6,7 +6,7 @@
 
 import Util from 'util'
 
-const Common = require('./common')
+import Common = require('./common')
 
 const default_logspec = {
   level: 'info',

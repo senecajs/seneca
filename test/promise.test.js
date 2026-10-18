@@ -5,13 +5,9 @@ const tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 const Util = require('util')
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-const expect = Code.expect
-
-const Shared = require('./shared')
-const it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 const Seneca = require('..')
 
@@ -29,9 +25,9 @@ describe('promise', function () {
 
     // sync message (has response)
     const out = await si.post('a:1,x:3')
-    expect(out.x).equal(3)
+    assert.equal(out.x, 3)
 
-    expect(counter).equal(2)
+    assert.equal(counter, 2)
   })
 
   it('message', async () => {
@@ -47,9 +43,9 @@ describe('promise', function () {
 
     // sync message (has response)
     const out = await si.post('a:1,b:2,x:3')
-    expect(out.x).equal(3)
+    assert.equal(out.x, 3)
 
-    expect(counter).equal(2)
+    assert.equal(counter, 2)
 
     si.add('s:1')
       .sub('s:1', function () {
@@ -58,7 +54,7 @@ describe('promise', function () {
       .act('s:1')
     await si.ready()
 
-    expect(counter).equal(3)
+    assert.equal(counter, 3)
   })
 
   it('no-action', async () => {
@@ -75,21 +71,21 @@ describe('promise', function () {
     // async message (no response)
     si.act('a:1')
     await si.ready()
-    expect(tmp).equal({ a1: 1, a1x1: 0 })
+    assert.deepEqual(tmp, { a1: 1, a1x1: 0 })
 
     return
 
     si.act('a:1,x:1')
     await si.ready()
-    expect(tmp).equal({ a1: 1, a1x1: 1 })
+    assert.deepEqual(tmp, { a1: 1, a1x1: 1 })
   })
 
   it('close', async () => {
     const si = makeSeneca()
-    expect(si.flags.closed).false()
+    assert.equal(si.flags.closed, false)
 
     await si.close()
-    expect(si.flags.closed).true()
+    assert.equal(si.flags.closed, true)
   })
 
   it('validate-handle', async () => {
@@ -113,9 +109,9 @@ describe('promise', function () {
 
     // sync message (has response)
     const out = await si.post('a:1,x:3')
-    expect(out.x).equal(3)
+    assert.equal(out.x, 3)
 
-    expect(counter).equal(2)
+    assert.equal(counter, 2)
   })
 
   it('plugin-prepare-prior', async () => {
@@ -136,7 +132,7 @@ describe('promise', function () {
     const out = await si.post('a:1,x:2')
 
     // NOTE: prior order!
-    expect(out).equal({ x: 2, y: 50 })
+    assert.deepEqual(out, { x: 2, y: 50 })
   })
 
   it('plugin-prepare', async () => {
@@ -153,7 +149,7 @@ describe('promise', function () {
     })
 
     let out = await si.post('a:1,x:2')
-    expect(out).equal({ x: 2, y: 50 })
+    assert.deepEqual(out, { x: 2, y: 50 })
 
     si.use(function p1$t0() {
       let y = -1
@@ -166,9 +162,9 @@ describe('promise', function () {
     })
 
     out = await si.post('p1:a,x:3')
-    expect(out).equal({ x: 3, y: 0 })
+    assert.deepEqual(out, { x: 3, y: 0 })
 
-    expect(si.list('init:p1')).equals([
+    assert.deepEqual(si.list('init:p1'), [
       { init: 'p1', plugin: 'init', role: 'seneca' },
       { init: 'p1', plugin: 'init', role: 'seneca', tag: 't0' },
     ])
@@ -193,7 +189,7 @@ describe('promise', function () {
     await si.close()
 
     // NOTE: inverse order
-    expect(tmp).equal({ log: ['p1', 'p0'] })
+    assert.deepEqual(tmp, { log: ['p1', 'p0'] })
   })
 
   it('plugin-multi-prepare-destroy', async () => {
@@ -258,14 +254,14 @@ describe('promise', function () {
     await si.ready()
 
     // NOTE: prior order!
-    expect(await si.post('p:p0,get:y')).equal({ y: 0 })
-    expect(await si.post('p:p1,get:y')).equal({ y: 0 })
-    expect(await si.post('p:p2,get:y')).equal({ y: 0 })
+    assert.deepEqual(await si.post('p:p0,get:y'), { y: 0 })
+    assert.deepEqual(await si.post('p:p1,get:y'), { y: 0 })
+    assert.deepEqual(await si.post('p:p2,get:y'), { y: 0 })
 
     await si.close()
 
     // NOTE: inverse order, by design, these are just priors!
-    expect(tmp).equal({
+    assert.deepEqual(tmp, {
       log: [
         'p0p0',
         'p1p1',
@@ -287,51 +283,51 @@ describe('promise', function () {
     const si = makeSeneca()
 
     const bar0 = si.entity('bar').data$({ a: 1 })
-    expect('' + bar0).equal('$-/-/bar;id=;{a:1}')
+    assert.equal('' + bar0, '$-/-/bar;id=;{a:1}')
 
     const bar1 = si.entity('bar', { a: 2 })
-    expect('' + bar1).equal('$-/-/bar;id=;{a:2}')
+    assert.equal('' + bar1, '$-/-/bar;id=;{a:2}')
 
     const bar2 = si.entity('bar')
     bar2.a = 3
-    expect('' + bar2).equal('$-/-/bar;id=;{a:3}')
+    assert.equal('' + bar2, '$-/-/bar;id=;{a:3}')
 
     const bar10 = si.make('bar').data$({ a: 1 })
-    expect('' + bar10).equal('$-/-/bar;id=;{a:1}')
+    assert.equal('' + bar10, '$-/-/bar;id=;{a:1}')
 
     const bar11 = si.make('bar', { a: 2 })
-    expect('' + bar11).equal('$-/-/bar;id=;{a:2}')
+    assert.equal('' + bar11, '$-/-/bar;id=;{a:2}')
 
     const bar12 = si.make('bar')
     bar12.a = 3
-    expect('' + bar12).equal('$-/-/bar;id=;{a:3}')
+    assert.equal('' + bar12, '$-/-/bar;id=;{a:3}')
 
     const foo0 = await si.entity('foo').data$({ a: 1 }).save$()
 
     const foo1 = await si.entity('foo').load$(foo0.id)
-    expect('' + foo0).equal('' + foo1)
+    assert.equal('' + foo0, '' + foo1)
 
     const foo2 = await si.entity('foo').data$({ a: 1 }).save$()
     let list = await si.entity('foo').list$({ a: 1 })
-    expect(list.length).equal(2)
+    assert.equal(list.length, 2)
 
     await foo0.remove$()
     list = await si.entity('foo').list$({ a: 1 })
-    expect(list.length).equal(1)
+    assert.equal(list.length, 1)
 
     const foo3 = list[0].clone$()
     foo3.a = 2
     await foo3.save$()
 
     const foo4 = await list[0].load$()
-    expect(foo4.a).equal(2)
+    assert.equal(foo4.a, 2)
   })
 
   it('prepare-entity', async () => {
     const si = makeSeneca().use(function () {
       this.prepare(async function () {
         const foo = await this.entity('foo').data$({ a: 1 }).save$()
-        expect(foo.a).equal(1)
+        assert.equal(foo.a, 1)
       })
     })
 
@@ -353,7 +349,7 @@ describe('promise', function () {
     })
 
     let out = await si.post('trad:0,x:1')
-    expect(out).equal({ x: 1, y: 1, z: 1, q: void 0 })
+    assert.deepEqual(out, { x: 1, y: 1, z: 1, q: void 0 })
 
     si.message('trad:0', async function (msg) {
       msg = this.util.clean(msg)
@@ -362,7 +358,7 @@ describe('promise', function () {
     })
 
     out = await si.post('trad:0,x:1')
-    expect(out).equal({ x: 1, y: 1, z: 1, q: 1 })
+    assert.deepEqual(out, { x: 1, y: 1, z: 1, q: 1 })
 
     const tmp = {}
     si.add('a:1', function (msg, reply) {
@@ -375,7 +371,7 @@ describe('promise', function () {
     })
 
     await si.post('a:1')
-    expect(tmp.a).equal(1)
+    assert.equal(tmp.a, 1)
   })
 
   it('ready', async () => {
@@ -390,8 +386,8 @@ describe('promise', function () {
     })
 
     const so = await si.ready()
-    expect(tmp.a).equal(1)
-    expect(si === so).true()
+    assert.equal(tmp.a, 1)
+    assert.equal(si === so, true)
   })
 })
 

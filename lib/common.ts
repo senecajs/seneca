@@ -4,27 +4,26 @@
 
 import Util from 'util'
 
+import Eraro from 'eraro'
 import Stringify from 'fast-safe-stringify'
 import Jsonic from 'jsonic'
 import Nid from 'nid'
+import { Check, Fault } from 'shape'
 
-const Eraro = require('eraro')
+import { messages } from './errors'
+import { Print } from './print'
 
-const DefaultsDeep = require('lodash.defaultsdeep')
-const { Print } = require('./print')
-
-import Errors from './errors'
-
+// Untyped modules.
+const DefaultsDeep: (...objs: any[]) => any = require('lodash.defaultsdeep')
 
 
-const error =
-  (exports.error =
-    exports.eraro =
-    Eraro({
-      package: 'seneca',
-      msgmap: Errors,
-      override: true,
-    }))
+
+// eraro does not export the type of its error makers.
+const error: ReturnType<typeof Eraro> = Eraro({
+  package: 'seneca',
+  msgmap: messages,
+  override: true,
+})
 
 
 function pins(inpin: any): Record<string, any>[] {
@@ -57,16 +56,20 @@ function stringify(...args: any) {
 }
 
 
-function wrap_error(err: any) {
+function wrap_error(
+  err: any,
+  code?: string,
+  details?: Record<string, any>,
+): never {
   if (err.seneca) {
     throw err
   } else {
-    throw error.call(null, ...arguments)
+    throw error(err, code, details)
   }
 }
 
 
-function make_plugin_key(plugin: any, origtag: any) {
+function make_plugin_key(plugin: any, origtag?: any) {
   if (null == plugin) {
     throw error('missing_plugin_name')
   }
@@ -494,7 +497,7 @@ function make_standard_act_log_entry(
   )
 }
 
-function make_standard_err_log_entry(err: any, ctxt: any) {
+function make_standard_err_log_entry(err: any, ctxt?: any) {
   if (!err) return ctxt
 
   if (err.details && ctxt && ctxt.caller) {
@@ -801,8 +804,54 @@ class ActHistory {
 }
 
 
+// The props argument of act, add, prior, sub and fix: a pattern string or a
+// message object. Shape's One validates a copy and returns the copy, so the
+// caller's object, and objects inside it such as custom$, would lose their
+// identity. Check validates the value in place; Fault keeps the message One
+// produced.
+function message_props_shape() {
+  return Fault(
+    'Value "$VALUE" for property "$PATH" does not satisfy one of: String, Object',
+    Check(
+      (v: any) =>
+        'string' === typeof v ||
+        (null != v && 'object' === typeof v && !Array.isArray(v)),
+    ),
+  )
+}
+
+
+// Seneca 4 validates with shape, which does not recognise shapes built with
+// gubu. Returns the path of the first gubu shape in value, or null, so that
+// a plugin or action using gubu fails with a clear error.
+function find_gubu_shape(value: any, path: string = '', seen = new Set()): string | null {
+  if (null == value || ('object' !== typeof value && 'function' !== typeof value)) {
+    return null
+  }
+  if (seen.has(value)) return null
+  seen.add(value)
+  if ('function' === typeof value) {
+    return null != value.gubu ? (path || '(root)') : null
+  }
+  if (null != value.$ && 'object' === typeof value.$ && Object.hasOwn(value.$, 'gubu$')) {
+    return path || '(root)'
+  }
+  const proto = Object.getPrototypeOf(value)
+  if (!Array.isArray(value) && null != proto && Object.prototype !== proto) {
+    return null
+  }
+  for (const key of Object.keys(value)) {
+    const found = find_gubu_shape(value[key], path ? path + '.' + key : key, seen)
+    if (null != found) return found
+  }
+  return null
+}
+
+
 export {
   pins,
+  find_gubu_shape,
+  message_props_shape,
   promiser,
   stringify,
   wrap_error,

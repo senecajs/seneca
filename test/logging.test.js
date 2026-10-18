@@ -1,13 +1,9 @@
 /* Copyright (c) 2016 Richard Rodger, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 var { make_logging } = require('../lib/logging')
@@ -15,7 +11,7 @@ var { make_logging } = require('../lib/logging')
 var tmx = parseInt(process.env.TIMEOUT_MULTIPLIER || 1, 10)
 
 describe('logging', function () {
-  it('happy', function (fin) {
+  it('happy', function (t, fin) {
     var capture = make_log_capture()
 
     Seneca({ log: 'all', internal: { logger: capture } })
@@ -24,19 +20,19 @@ describe('logging', function () {
         r(null, { x: 1 })
       })
       .act('a:1', function () {
-        expect(this.seneca).to.exist()
+        assert.ok(null != this.seneca)
         this.log({ seen: 'a:1' })
       })
       .ready(function () {
         var log = capture.log.filter(function (entry) {
           return entry.seen
         })
-        expect(log[0].seen).to.equal('a:1')
+        assert.equal(log[0].seen, 'a:1')
         fin()
       })
   })
 
-  it('happy-ng', function (fin) {
+  it('happy-ng', function (t, fin) {
     var capture = make_log_capture({ legacy: false })
 
     Seneca({ log: 'all', internal: { logger: capture } })
@@ -45,32 +41,32 @@ describe('logging', function () {
         r(null, { x: 1 })
       })
       .act('a:1', function () {
-        expect(this.seneca).to.exist()
+        assert.ok(null != this.seneca)
         this.log({ seen: 'a:1' })
       })
       .ready(function () {
         var log = capture.log.filter(function (entry) {
           return entry.seen
         })
-        expect(log[0].seen).to.equal('a:1')
+        assert.equal(log[0].seen, 'a:1')
         fin()
       })
   })
 
-  it('level-text-values', function (fin) {
+  it('level-text-values', function (t, fin) {
     var capture = make_log_capture({ legacy: false })
 
     var options = Seneca().test(fin).options()
 
     // ensure text-level mapping is reversible
     Object.keys(options.log.text_level).forEach((text) => {
-      expect(options.log.level_text[options.log.text_level[text]]).equal(text)
+      assert.equal(options.log.level_text[options.log.text_level[text]], text)
     })
 
     fin()
   })
 
-  it('build_log_spec', function (fin) {
+  it('build_log_spec', function (t, fin) {
     var msi = (opts) => {
       return {
         options: () => {
@@ -83,33 +79,33 @@ describe('logging', function () {
     var logging = make_logging()
 
     out = logging.build_log_spec(msi({ log: 'test' }))
-    expect(out).contains({ level: 'warn', live_level: 400 })
+    assert.partialDeepStrictEqual(out, { level: 'warn', live_level: 400 })
 
     out = logging.build_log_spec(msi({ log: 'quiet' }))
-    expect(out).contains({ level: 'none', live_level: 999 })
+    assert.partialDeepStrictEqual(out, { level: 'none', live_level: 999 })
 
     out = logging.build_log_spec(msi({ log: 'any' }))
-    expect(out).contains({ level: 'all', live_level: 100 })
+    assert.partialDeepStrictEqual(out, { level: 'all', live_level: 100 })
 
     out = logging.build_log_spec(msi({ log: 'debug' }))
-    expect(out).contains({ level: 'debug', live_level: 200 })
+    assert.partialDeepStrictEqual(out, { level: 'debug', live_level: 200 })
 
     out = logging.build_log_spec(msi({ log: 'fatal' }))
-    expect(out).contains({ level: 'fatal', live_level: 600 })
+    assert.partialDeepStrictEqual(out, { level: 'fatal', live_level: 600 })
 
     out = logging.build_log_spec(msi({ log: '300' }))
-    expect(out).contains({ level: 'info', live_level: 300 })
+    assert.partialDeepStrictEqual(out, { level: 'info', live_level: 300 })
 
     out = logging.build_log_spec(msi({ log: 300 }))
-    expect(out).contains({ level: 'info', live_level: 300 })
+    assert.partialDeepStrictEqual(out, { level: 'info', live_level: 300 })
 
     out = logging.build_log_spec(msi({ log: 301 }))
-    expect(out).contains({ level: '301', live_level: 301 })
+    assert.partialDeepStrictEqual(out, { level: '301', live_level: 301 })
 
     fin()
   })
 
-  it('event', function (fin) {
+  it('event', function (t, fin) {
     var loga = []
     var logb = []
     Seneca({
@@ -124,37 +120,37 @@ describe('logging', function () {
         logb.push(data)
       })
       .ready(function () {
-        expect(loga.length).above(logb.length)
+        assert.ok(loga.length > logb.length)
         var last_entry = logb[logb.length - 1]
-        expect(last_entry).contains({
+        assert.partialDeepStrictEqual(last_entry, {
           kind: 'ready',
           case: 'call',
           name: 'ready_1',
         })
 
         var hello_entry = logb[logb.length - 2]
-        expect(hello_entry.data).startsWith('hello')
+        assert.ok(hello_entry.data.startsWith('hello'))
 
         fin()
       })
   })
 
-  it('quiet', function (fin) {
+  it('quiet', function (t, fin) {
     Seneca().quiet().error(fin).ready(fin)
   })
 
-  it('bad_logspec', function (fin) {
+  it('bad_logspec', function (t, fin) {
     try {
       Seneca({ log: true })
-      Code.fail()
+      assert.fail()
     } catch (e) {
-      expect(e.code).equal('bad_logspec')
+      assert.equal(e.code, 'bad_logspec')
       fin()
     }
   })
 
   // DEPRECATED
-  it('logging-basic', function (fin) {
+  it('logging-basic', function (t, fin) {
     var capture = make_log_capture()
 
     Seneca({ log: { basic: 'all' }, internal: { logger: capture } })
@@ -163,19 +159,19 @@ describe('logging', function () {
         r(null, { x: 1 })
       })
       .act('a:1', function () {
-        expect(this.seneca).to.exist()
+        assert.ok(null != this.seneca)
         this.log({ seen: 'a:1', level: 'info' })
       })
       .ready(function () {
         var log = capture.log.filter(function (entry) {
           return entry.seen
         })
-        expect(log[0].seen).to.equal('a:1')
+        assert.equal(log[0].seen, 'a:1')
         fin()
       })
   })
 
-  it('logger-output', function (fin) {
+  it('logger-output', function (t, fin) {
     var log
 
     // Capture logger output through the print option. The node:test runner
@@ -210,7 +206,7 @@ describe('logging', function () {
         })
         .act('b:1')
         .ready(function () {
-          expect(log.length).above(20)
+          assert.ok(log.length > 20)
 
           entry(logger)
         })
@@ -266,7 +262,7 @@ describe('logging', function () {
         })
         .act('b:1')
         .ready(function () {
-          expect(log.length).above(20)
+          assert.ok(log.length > 20)
 
           error(logger)
         })
@@ -285,7 +281,7 @@ describe('logging', function () {
         })
         .act('a:1')
         .ready(function () {
-          expect(log.length).above(10)
+          assert.ok(log.length > 10)
 
           if ('flat' === logger) {
             basic('test')
@@ -298,7 +294,7 @@ describe('logging', function () {
   })
 
   // NOTE: spurious console.logs left in code with cause this to fail
-  it('shortcuts', { timeout: 2222 * tmx }, function (fin) {
+  it('shortcuts', { timeout: 2222 * tmx }, function (t, fin) {
     var log
 
     // Capture logger output through the print option. The node:test runner
@@ -325,7 +321,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(1)
+          assert.equal(log.length, 1)
           quiet()
         })
     }
@@ -337,7 +333,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(0)
+          assert.equal(log.length, 0)
           silent()
         })
     }
@@ -349,7 +345,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(0)
+          assert.equal(log.length, 0)
           any()
         })
     }
@@ -361,7 +357,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).above(11)
+          assert.ok(log.length > 11)
           all()
         })
     }
@@ -373,7 +369,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).above(11)
+          assert.ok(log.length > 11)
           print()
         })
     }
@@ -385,7 +381,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).above(11)
+          assert.ok(log.length > 11)
           standard()
         })
     }
@@ -397,7 +393,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(1)
+          assert.equal(log.length, 1)
 
           json()
         })
@@ -412,7 +408,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(1)
+          assert.equal(log.length, 1)
 
           flat()
         })
@@ -425,7 +421,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(1)
+          assert.equal(log.length, 1)
 
           logger_test()
         })
@@ -438,7 +434,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(1)
+          assert.equal(log.length, 1)
 
           do_test()
         })
@@ -451,7 +447,7 @@ describe('logging', function () {
         .add('a:1', a1)
         .act('a:1')
         .ready(function () {
-          expect(log.length).to.equal(0)
+          assert.equal(log.length, 0)
           restore()
         })
     }
@@ -468,7 +464,7 @@ describe('logging', function () {
     reply()
   }
 
-  it('test-logger-truncates-long-error-message', function (fin) {
+  it('test-logger-truncates-long-error-message', function (t, fin) {
     var lines = []
 
     var si = Seneca({
@@ -482,20 +478,20 @@ describe('logging', function () {
     })
 
     si.act({ a: 1, b: 'x'.repeat(100) }, function (err) {
-      expect(err).exist()
+      assert.ok(null != err)
 
       var errline = lines.find((line) => line.includes('act/ERR'))
-      expect(errline).exist()
+      assert.ok(null != errline)
 
       // Message description is truncated to 22 characters, with a marker.
-      expect(errline).contains('...')
-      expect(errline).not.contains('x'.repeat(23))
+      assert.ok(errline.includes('...'))
+      assert.ok(!errline.includes('x'.repeat(23)))
 
       fin()
     })
   })
 
-  it('test-mode-basic', function (fin) {
+  it('test-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -508,14 +504,17 @@ describe('logging', function () {
       .act('a:1')
       .ready(function () {
         // only warn should appear
-        expect(capture.log.map((x) => x.data[0])).equal(['a1'])
+        assert.deepEqual(
+          capture.log.map((x) => x.data[0]),
+          ['a1'],
+        )
 
         // console.log('QQQ', capture)
         fin()
       })
   })
 
-  it('test-mode-option', function (fin) {
+  it('test-mode-option', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -528,23 +527,29 @@ describe('logging', function () {
       .act('a:2')
       .ready(function () {
         // only warn should appear
-        expect(capture.log.map((x) => x.data[0])).equal(['a2'])
+        assert.deepEqual(
+          capture.log.map((x) => x.data[0]),
+          ['a2'],
+        )
         fin()
       })
   })
 
-  it('test-mode-argv', function (fin) {
+  it('test-mode-argv', function (t, fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.test'] } })
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.map((x) => x.data[0])).equal(['a1'])
+        assert.deepEqual(
+          capture.log.map((x) => x.data[0]),
+          ['a1'],
+        )
         fin()
       })
   })
 
-  it('test-mode-argv-opts', function (fin) {
+  it('test-mode-argv-opts', function (t, fin) {
     var capture = make_log_capture()
     Seneca({
       logger: capture,
@@ -553,23 +558,29 @@ describe('logging', function () {
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.map((x) => x.data[0])).equal(['a1'])
+        assert.deepEqual(
+          capture.log.map((x) => x.data[0]),
+          ['a1'],
+        )
         fin()
       })
   })
 
-  it('test-mode-env', function (fin) {
+  it('test-mode-env', function (t, fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { env: { SENECA_TEST: 'true' } } })
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.map((x) => x.data[0])).equal(['a1'])
+        assert.deepEqual(
+          capture.log.map((x) => x.data[0]),
+          ['a1'],
+        )
         fin()
       })
   })
 
-  it('quiet-mode-basic', function (fin) {
+  it('quiet-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -578,12 +589,12 @@ describe('logging', function () {
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-mode-option', function (fin) {
+  it('quiet-mode-option', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -591,23 +602,23 @@ describe('logging', function () {
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-mode-argv', function (fin) {
+  it('quiet-mode-argv', function (t, fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { argv: ['', '', '--seneca.quiet'] } })
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-mode-argv-opts', function (fin) {
+  it('quiet-mode-argv-opts', function (t, fin) {
     var capture = make_log_capture()
     Seneca({
       logger: capture,
@@ -616,23 +627,23 @@ describe('logging', function () {
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-mode-env', function (fin) {
+  it('quiet-mode-env', function (t, fin) {
     var capture = make_log_capture()
     Seneca({ logger: capture, debug: { env: { SENECA_QUIET: 'true' } } })
       .add('a:1', a1w)
       .act('a:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('test-quiet-mode-basic', function (fin) {
+  it('test-quiet-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -644,12 +655,12 @@ describe('logging', function () {
       .act('a:1')
       .ready(function () {
         // NO LOGS - quiet called synchronously!
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-test-mode-basic', function (fin) {
+  it('quiet-test-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -661,12 +672,12 @@ describe('logging', function () {
       .act('a:1')
       .ready(function () {
         // BOTH LOGGED - test called synchronously!
-        expect(capture.log.length).equal(2)
+        assert.equal(capture.log.length, 2)
         fin()
       })
   })
 
-  it('test-ready-quiet-mode-basic', function (fin) {
+  it('test-ready-quiet-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -678,14 +689,14 @@ describe('logging', function () {
         this.quiet().ready(function () {
           this.act('a:1,x:2')
 
-          expect(capture.log.length).equal(1)
-          expect(capture.log[0].data).equal(['a1x1'])
+          assert.equal(capture.log.length, 1)
+          assert.deepEqual(capture.log[0].data, ['a1x1'])
           fin()
         })
       })
   })
 
-  it('quiet-ready-test-mode-basic', function (fin) {
+  it('quiet-ready-test-mode-basic', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -697,15 +708,15 @@ describe('logging', function () {
         this.test()
 
         this.act('a:1,x:2').ready(function () {
-          expect(capture.log.length).equal(1)
-          expect(capture.log[0].data).equal(['a1x2'])
+          assert.equal(capture.log.length, 1)
+          assert.deepEqual(capture.log[0].data, ['a1x2'])
 
           fin()
         })
       })
   })
 
-  it('quiet-argv-override', function (fin) {
+  it('quiet-argv-override', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -714,13 +725,13 @@ describe('logging', function () {
       .add('a:1', a1x)
       .act('a:1,x:1')
       .ready(function () {
-        expect(capture.log.length).equal(1)
-        expect(capture.log[0].data).equal(['a1x1'])
+        assert.equal(capture.log.length, 1)
+        assert.deepEqual(capture.log[0].data, ['a1x1'])
         fin()
       })
   })
 
-  it('test-argv-override', function (fin) {
+  it('test-argv-override', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -729,12 +740,12 @@ describe('logging', function () {
       .add('a:1', a1x)
       .act('a:1,x:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('quiet-env-override', function (fin) {
+  it('quiet-env-override', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -743,13 +754,13 @@ describe('logging', function () {
       .add('a:1', a1x)
       .act('a:1,x:1')
       .ready(function () {
-        expect(capture.log.length).equal(1)
-        expect(capture.log[0].data).equal(['a1x1'])
+        assert.equal(capture.log.length, 1)
+        assert.deepEqual(capture.log[0].data, ['a1x1'])
         fin()
       })
   })
 
-  it('test-env-override', function (fin) {
+  it('test-env-override', function (t, fin) {
     var capture = make_log_capture()
 
     // Note: capture logger is marked from_options$ so overrides test_logger
@@ -758,19 +769,19 @@ describe('logging', function () {
       .add('a:1', a1x)
       .act('a:1,x:1')
       .ready(function () {
-        expect(capture.log.length).equal(0)
+        assert.equal(capture.log.length, 0)
         fin()
       })
   })
 
-  it('intern.build_act_entry', function (fin) {
+  it('intern.build_act_entry', function (t, fin) {
     var entry0 = {}
     var actA = { meta: { id: 1, pattern: 'p:1', tx: 3, mi: 4 }, def: { id: 2 } }
 
     make_logging.intern.build_act_entry(actA, entry0)
     //console.log(entry0)
 
-    expect(entry0).equal({
+    assert.deepEqual(entry0, {
       kind: 'act',
       actid: 1,
       pattern: 'p:1',
@@ -789,7 +800,7 @@ describe('logging', function () {
     make_logging.intern.build_act_entry(actA, entry1)
     //console.log(entry1)
 
-    expect(entry1).equal({
+    assert.deepEqual(entry1, {
       kind: 'act',
       actid: 1,
       pattern: 'p:1',

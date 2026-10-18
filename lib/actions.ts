@@ -2,6 +2,7 @@
 
 
 import { Legacy } from './legacy'
+import { Deprecate } from './deprecate'
 
 // Seneca 3.x pattern for close hooks (still used by plugins such as
 // seneca-transport to release listeners when the instance closes).
@@ -25,13 +26,37 @@ function addActions(instance: any) {
     .add('sys:seneca,get:options', action_options_get)
 
 
+  // Deprecated (remove in Seneca 5): each role:seneca action reports a
+  // deprecation the first time it is called.
   if (instance.options().legacy.builtin_actions) {
-    instance.add({ role: 'seneca', cmd: 'ping' }, cmd_ping)
-    instance.add({ role: 'seneca', cmd: 'stats' }, instance.stats)
-    instance.add({ role: 'seneca', cmd: 'close' }, action_seneca_close_legacy)
-    instance.add({ role: 'seneca', info: 'fatal' }, action_seneca_fatal)
-    instance.add({ role: 'seneca', get: 'options' }, action_options_get)
+    instance.add({ role: 'seneca', cmd: 'ping' },
+      legacy_builtin('cmd:ping', cmd_ping))
+    instance.add({ role: 'seneca', cmd: 'stats' },
+      legacy_builtin('cmd:stats', instance.stats))
+    instance.add({ role: 'seneca', cmd: 'close' },
+      legacy_builtin('cmd:close', action_seneca_close_legacy))
+    instance.add({ role: 'seneca', info: 'fatal' },
+      legacy_builtin('info:fatal', action_seneca_fatal))
+    instance.add({ role: 'seneca', get: 'options' },
+      legacy_builtin('get:options', action_options_get))
   }
+}
+
+
+// A role:seneca alias of a sys:seneca builtin action. Calls made by
+// sys:seneca,cmd:close itself (sys_close$) are not reported.
+function legacy_builtin(spec: string, action: any) {
+  const pattern = 'role:seneca,' + spec
+  const replacement = 'sys:seneca,' + spec
+  const legacy_action = function(this: any, msg: any, reply: any, meta: any) {
+    if (!msg[SYS_CLOSE_DIRECTIVE]) {
+      Deprecate.deprecate(this, 'role_seneca', { pattern, replacement },
+        'role_seneca:' + pattern)
+    }
+    return action.call(this, msg, reply, meta)
+  }
+  Object.defineProperty(legacy_action, 'name', { value: action.name })
+  return legacy_action
 }
 
 function on_point(this: any, msg: any, reply: any) {
@@ -63,6 +88,12 @@ function action_seneca_close(this: any, _msg: any, reply: any) {
   const legacy_close = this.private$.actrouter.find(LEGACY_CLOSE_PATTERN, true)
 
   if (legacy_close) {
+    const plugin = legacy_close.plugin_fullname
+    if (null != plugin && 'root$' !== plugin) {
+      Deprecate.deprecate(this, 'legacy_close_hook', { name: plugin },
+        'legacy_close_hook:' + plugin)
+    }
+
     // local$: a 3.x close hook calls its prior, which can be a catch-all
     // transport client (Seneca 4 has no builtin action on this pattern
     // unless legacy.builtin_actions is set). Without local$ the client

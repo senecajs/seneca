@@ -3,11 +3,9 @@
 
 var Patrun = require('patrun')
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 const { describe, it } = require('node:test')
-var expect = Code.expect
 
-var Shared = require('./shared')
 var Seneca = require('..')
 
 describe('options', function () {
@@ -38,12 +36,14 @@ describe('options', function () {
   })
 
   it('validate', async () => {
-    expect(() => Seneca({ prior: { direct: 'BAD' } })).throws(/type/)
-    expect(
-      Seneca({ valid: { active: false }, prior: { direct: 'BAD' } }),
-    ).exist()
-    expect(
-      Seneca({ valid: { option: false }, prior: { direct: 'BAD' } }),
-    ).exist()
+    assert.throws(() => Seneca({ prior: { direct: 'BAD' } }), {
+      message: /type/,
+    })
+    assert.ok(
+      null != Seneca({ valid: { active: false }, prior: { direct: 'BAD' } }),
+    )
+    assert.ok(
+      null != Seneca({ valid: { option: false }, prior: { direct: 'BAD' } }),
+    )
   })
 })

@@ -1,14 +1,10 @@
 /* Copyright (c) 2019-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Code = require('@hapi/code')
-const { describe } = require('node:test')
-const expect = Code.expect
+const assert = require('node:assert/strict')
+const { describe, it } = require('node:test')
 
 const { Ordu } = require('ordu')
-
-const Shared = require('./shared')
-const it = Shared.make_it()
 
 const Seneca = require('..')
 const Act = require('../lib/act.js')
@@ -16,7 +12,7 @@ const Act = require('../lib/act.js')
 const intern = Act.intern
 
 describe('act', function () {
-  it('make_actmsg', function (fin) {
+  it('make_actmsg', function (t, fin) {
     var origmsg = {
       a: 1,
       b: { c: 11 },
@@ -28,21 +24,21 @@ describe('act', function () {
 
     var actmsg = intern.make_actmsg(origmsg)
 
-    expect(actmsg.a).equal(1)
-    expect(actmsg.b.c).equal(11)
-    expect(actmsg.id$).not.exist()
-    expect(actmsg.caller$).not.exist()
-    expect(actmsg.meta$).not.exist()
+    assert.equal(actmsg.a, 1)
+    assert.equal(actmsg.b.c, 11)
+    assert.ok(null == actmsg.id$)
+    assert.ok(null == actmsg.caller$)
+    assert.ok(null == actmsg.meta$)
 
-    expect(actmsg.transport$).equal(5)
+    assert.equal(actmsg.transport$, 5)
 
     actmsg.a = 111
-    expect(origmsg.a).equal(1)
+    assert.equal(origmsg.a, 1)
 
     fin()
   })
 
-  it('process_outward', function (fin) {
+  it('process_outward', function (t, fin) {
     var outward = new Ordu({ name: 'outward' })
       .add(function (spec) {
         spec.data.x = 1
@@ -75,36 +71,36 @@ describe('act', function () {
 
     var d0 = { a: 1, meta: {} }
     intern.process_outward(actctxt, d0)
-    expect(d0.x).equals(1)
-    expect(d0.err instanceof Error).true()
-    expect(d0.meta.error).true()
+    assert.equal(d0.x, 1)
+    assert.equal(d0.err instanceof Error, true)
+    assert.equal(d0.meta.error, true)
 
     var d1 = { b: 2, meta: {} }
     intern.process_outward(actctxt, d1)
-    expect(d1.x).equals(1)
-    expect(d1.err instanceof Error).true()
-    expect(d1.err.code).equal('b')
-    expect(d1.meta.error).true()
+    assert.equal(d1.x, 1)
+    assert.equal(d1.err instanceof Error, true)
+    assert.equal(d1.err.code, 'b')
+    assert.equal(d1.meta.error, true)
 
     // var d2 = { c: 3, meta: {} }
     // intern.process_outward(actctxt, d2)
-    // expect(d2.x).equals(1)
-    // expect(d2.res).equal({ c: 1 })
-    // expect(d2.meta.error).not.exists()
+    // assert.equal(d2.x, 1)
+    // assert.deepEqual(d2.res, { c: 1 })
+    // assert.ifError(d2.meta.error)
 
     var d3 = { d: 4 }
     intern.process_outward(actctxt, d3)
-    expect(d3.err.code).equals('invalid-process-outward-code')
-    expect(d3.meta.error).exists()
+    assert.equal(d3.err.code, 'invalid-process-outward-code')
+    assert.ok(null != d3.meta.error)
 
     var d4 = {}
     intern.process_outward(actctxt, d4)
-    expect(d4.x).equals(1)
+    assert.equal(d4.x, 1)
 
     fin()
   })
 
-  it('validate-action-params', function (fin) {
+  it('validate-action-params', function (t, fin) {
     let s0 = Seneca({ legacy: false })
       .test()
       .quiet()
@@ -113,11 +109,12 @@ describe('act', function () {
       })
 
     s0.act('a:1,x:2', function (err, out) {
-      expect(out.x).equal(3)
+      assert.equal(out.x, 3)
 
       s0.act('a:1,x:s', function (err, out) {
-        expect(err.code).equal('act_invalid_msg')
-        expect(err.message).equal(
+        assert.equal(err.code, 'act_invalid_msg')
+        assert.equal(
+          err.message,
           'seneca: Action a:1 received an invalid message; property "x" is not of type number.',
         )
         fin()
@@ -136,13 +133,13 @@ describe('act', function () {
 
     log.push('pre-msg')
     si.act('a:1,x:1,direct$:true', function (err, out) {
-      expect(err).null()
+      assert.equal(err, null)
       log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
     // console.log('log', log)
-    expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
+    assert.deepEqual(log, ['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
   })
 
   it('direct-basic-api', async () => {
@@ -159,7 +156,7 @@ describe('act', function () {
     log.push('reply:' + JSON.stringify(out))
     log.push('post-msg')
 
-    expect(log).equal(['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
+    assert.deepEqual(log, ['pre-msg', 'msg-exec', 'reply:{"x":2}', 'post-msg'])
 
     await new Promise((r) => setTimeout(r, 100))
   })
@@ -177,7 +174,7 @@ describe('act', function () {
     log.push('post-msg')
 
     // console.log('log', log)
-    expect(log).equal(['pre-msg', 'msg0:a1:x=1', 'post-msg'])
+    assert.deepEqual(log, ['pre-msg', 'msg0:a1:x=1', 'post-msg'])
   })
 
   it('direct-child-actions', async () => {
@@ -191,7 +188,7 @@ describe('act', function () {
       log.push(`msg0:b1:x=${msg.x}`)
 
       this.act('a:1', { x: msg.x }, function (err, out) {
-        expect(err).equal(null)
+        assert.equal(err, null)
         log.push(`msg1:b1:x=${out.x}`)
         reply({ x: out.x * 2 })
       })
@@ -199,13 +196,13 @@ describe('act', function () {
 
     log.push('pre-msg')
     si.act('b:1,x:1,direct$:true', function (err, out) {
-      expect(err).equal(null)
+      assert.equal(err, null)
       log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
     // console.log('log', log)
-    expect(log).equal([
+    assert.deepEqual(log, [
       'pre-msg',
       'msg0:b1:x=1',
       'msg0:a1:x=1',
@@ -225,7 +222,7 @@ describe('act', function () {
     }).add('a:1', function a1(msg, reply) {
       log.push(`msg0:a1:x=${msg.x}`)
       this.prior(msg, function (err, out) {
-        expect(err).equal(null)
+        assert.equal(err, null)
         log.push(`msg1:a1:x=${out.x}`)
         reply({ x: out.x * 2 })
       })
@@ -233,13 +230,13 @@ describe('act', function () {
 
     log.push('pre-msg')
     si.act('a:1,x:1,direct$:true', function (err, out) {
-      expect(err).equal(null)
+      assert.equal(err, null)
       log.push('reply:' + JSON.stringify(out))
     })
     log.push('post-msg')
 
     // console.log('log', log)
-    expect(log).equal([
+    assert.deepEqual(log, [
       'pre-msg',
       'msg0:a1:x=1',
       'msg0:a1p1:x=1',
@@ -276,31 +273,31 @@ describe('act', function () {
 
     log.push('seq0')
     si.act('a:1,x:1,direct$:true', function (err, out) {
-      expect(err).null()
+      assert.equal(err, null)
       log.push('reply0:' + JSON.stringify(out))
     })
 
     log.push('seq1')
     si.act('b:1,x:1,direct$:true', function (err, out) {
-      expect(err).null()
+      assert.equal(err, null)
       log.push('reply1:' + JSON.stringify(out))
     })
 
     log.push('seq2')
     si.act('c:1,x:1,direct$:true', function (err, out) {
-      expect(err).null()
+      assert.equal(err, null)
       log.push('reply2:' + JSON.stringify(out))
     })
 
     log.push('seq3')
     si.act('d:1,x:1,direct$:true', function (err, out) {
-      expect(err).null()
+      assert.equal(err, null)
       log.push('reply3:' + JSON.stringify(out))
     })
     log.push('end')
 
     // console.log('log', log)
-    expect(log).equal([
+    assert.deepEqual(log, [
       'seq0',
       'msg0:a1:x=1',
       'reply0:{"x":2}',

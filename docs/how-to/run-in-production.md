@@ -92,6 +92,6 @@ in the background.
 
 ## Dependencies
 
-Seneca runs on Node.js 22 or later. Pin plugin versions in
+Seneca runs on Node.js 24 or later. Pin plugin versions in
 `package.json` and run `npm audit signatures` or your usual supply chain
 checks as part of deployment.

@@ -1,13 +1,9 @@
 /* Copyright © 2016-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-var expect = Code.expect
-
-var Shared = require('./shared')
-var it = Shared.make_it()
+const { describe, it } = require('node:test')
 
 var Seneca = require('..')
 
@@ -15,13 +11,13 @@ var { Inward } = require('../lib/inward')
 var { API } = require('../lib/api')
 
 describe('inward', function () {
-  it('announce', function (fin) {
+  it('announce', function (t, fin) {
     var seneca = Seneca().test(fin)
     var seen = 0
 
     seneca.ready(function () {
       seneca.on('act-in', function (ev) {
-        expect(ev.a).equal(2)
+        assert.equal(ev.a, 2)
         fin()
       })
 
@@ -36,20 +32,24 @@ describe('inward', function () {
     })
   })
 
-  it('arg-check', function (fin) {
+  it('arg-check', function (t, fin) {
     try {
       API.inward()
-      expect(false).true()
+      assert.equal(false, true)
     } catch (e) {
-      expect(e.message).equal(
+      assert.equal(
+        e.message,
         'seneca: Validation failed for property "inward"' +
-          ' with value "undefined" because the value is required.',
+          ' because the property is missing.',
       )
-      expect({ ...e }).includes({
-        gubu: true,
-        code: 'shape',
-      })
-      expect(e.props[0]).includes({
+      assert.partialDeepStrictEqual(
+        { ...e },
+        {
+          shape: true,
+          code: 'shape',
+        },
+      )
+      assert.partialDeepStrictEqual(e.props[0], {
         path: 'inward',
         type: 'function',
       })

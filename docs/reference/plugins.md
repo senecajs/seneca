@@ -91,7 +91,7 @@ A returned function is treated as `{ service: fn }`.
 
 | Property | Purpose |
 | -------- | ------- |
-| `defaults` | Default options. An object of defaults and [Gubu](https://github.com/rjrodger/gubu) shapes (`{ currency: 'EUR', timeout: Number }`), a prepared Gubu shape, or a function `({ valid, Joi }) => shape`. The resolved options are validated against it (`invalid_plugin_option` is fatal) unless `valid.plugin` is false. A Joi schema (object with `$_root`) is deep merged without validation. |
+| `defaults` | Default options. An object of defaults and [Shape](https://github.com/rjrodger/shape) builders (`{ currency: 'EUR', timeout: Number }`), a prepared Shape shape, or a function `({ valid }) => shape`. The resolved options are validated against it (`invalid_plugin_option` is fatal) unless `valid.plugin` is false. Defaults built with Gubu fail with `plugin_gubu_shape`. |
 | `errors` | Map of error code to message template for `this.fail` and `this.error`. Also accepted as `options.errors`. |
 | `preload` | Function `(plugin) => meta` called with the root instance before the definition function, with the plugin record as argument. The returned meta may rename the plugin (`name`) and is merged like the definition's meta (so `preload` can provide `extend.logger`, which is how logger plugins work). |
 

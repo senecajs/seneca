@@ -3,46 +3,42 @@
 
 const Util = require('util')
 
-const Code = require('@hapi/code')
+const assert = require('node:assert/strict')
 
-const { describe } = require('node:test')
-const expect = Code.expect
+const { describe, it } = require('node:test')
 
 const { Legacy } = require('../lib/legacy.js')
-
-const Shared = require('./shared')
-const it = Shared.make_it()
 
 const Seneca = require('..')
 
 // TODO: move all legacy functions here and isolate lack of test coverage
 
 describe('legacy', function () {
-  it('nil', function (fin) {
+  it('nil', function (t, fin) {
     Legacy.nil({ msg: 1 }, function reply() {
       fin()
     })
   })
 
-  it('copydata', function (fin) {
-    expect(Legacy.copydata()).to.equal(void 0)
-    expect(Legacy.copydata(null)).to.equal(null)
-    expect(Legacy.copydata(NaN)).to.equal(NaN)
-    expect(Legacy.copydata(true)).to.equal(true)
-    expect(Legacy.copydata(false)).to.equal(false)
-    expect(Legacy.copydata(0)).to.equal(0)
-    expect(Legacy.copydata(1)).to.equal(1)
+  it('copydata', function (t, fin) {
+    assert.equal(Legacy.copydata(), void 0)
+    assert.equal(Legacy.copydata(null), null)
+    assert.equal(Legacy.copydata(NaN), NaN)
+    assert.equal(Legacy.copydata(true), true)
+    assert.equal(Legacy.copydata(false), false)
+    assert.equal(Legacy.copydata(0), 0)
+    assert.equal(Legacy.copydata(1), 1)
 
     var d = new Date()
-    expect(Legacy.copydata(d).getTime()).to.equal(d.getTime())
+    assert.equal(Legacy.copydata(d).getTime(), d.getTime())
 
-    expect(Legacy.copydata([])).to.equal([])
-    expect(Legacy.copydata([1, 2, 3])).to.equal([1, 2, 3])
-    expect(Legacy.copydata([1, ['a', 'b'], 3])).to.equal([1, ['a', 'b'], 3])
+    assert.deepEqual(Legacy.copydata([]), [])
+    assert.deepEqual(Legacy.copydata([1, 2, 3]), [1, 2, 3])
+    assert.deepEqual(Legacy.copydata([1, ['a', 'b'], 3]), [1, ['a', 'b'], 3])
 
-    expect(Legacy.copydata({})).to.equal({})
-    expect(Legacy.copydata({ a: 1 })).to.equal({ a: 1 })
-    expect(Legacy.copydata({ a: 1, b: { c: 2 } })).to.equal({
+    assert.deepEqual(Legacy.copydata({}), {})
+    assert.deepEqual(Legacy.copydata({ a: 1 }), { a: 1 })
+    assert.deepEqual(Legacy.copydata({ a: 1, b: { c: 2 } }), {
       a: 1,
       b: { c: 2 },
     })
@@ -50,12 +46,12 @@ describe('legacy', function () {
     var a = { a: 1 }
     var b = Object.create(a)
     b.b = 2
-    expect(Legacy.copydata(b)).to.equal({ b: 2 })
+    assert.deepEqual(Legacy.copydata(b), { b: 2 })
 
     fin()
   })
 
-  it('recurse', function (fin) {
+  it('recurse', function (t, fin) {
     Legacy.recurse(
       [1, 2, 3],
       function (i, next) {
@@ -65,10 +61,10 @@ describe('legacy', function () {
     )
   })
 
-  it('fail', function (fin) {
+  it('fail', function (t, fin) {
     var f0 = Legacy.make_legacy_fail({})
     var e0 = f0.call({ log: { error: function () {} } }, { code: 'foo' })
-    expect(e0.code).equal('foo')
+    assert.equal(e0.code, 'foo')
     fin()
   })
 
@@ -79,26 +75,26 @@ describe('legacy', function () {
   //     { c: 333 },
   //     ['d'],
   //   )
-  //   expect(out).to.include({ a: 1, b: 22, c: 333 })
+  //   assert.partialDeepStrictEqual(out, { a: 1, b: 22, c: 333 })
 
   //   out = Seneca.util.argprops({}, { d: 1 }, {}, 'd')
-  //   expect('{}').to.equal(Util.inspect(out))
+  //   assert.equal('{}', Util.inspect(out))
 
   //   out = Seneca.util.argprops({}, { d: 1, e: 2 }, {}, 'd, e')
-  //   expect('{}').to.equal(Util.inspect(out))
+  //   assert.equal('{}', Util.inspect(out))
   //   fin()
   // })
 
-  it('router', function (fin) {
-    expect(Seneca.util.router()).exists()
+  it('router', function (t, fin) {
+    assert.ok(null != Seneca.util.router())
     fin()
   })
 
-  it('no-default-transport', function (fin) {
+  it('no-default-transport', function (t, fin) {
     Seneca({ default_plugins: { transport: false } })
       .test()
       .ready(function () {
-        expect(this.list_plugins().transport).not.exists()
+        assert.ok(null == this.list_plugins().transport)
         fin()
       })
   })
@@ -107,47 +103,47 @@ describe('legacy', function () {
   //   Seneca({ legacy: { meta_arg_remove: true } })
   //     .test(fin)
   //     .add('a:1', (msg, reply, meta) => {
-  //       expect(msg).includes({ x: 2 })
-  //       expect(reply).function()
-  //       expect(meta).not.exists()
+  //       assert.partialDeepStrictEqual(msg, { x: 2 })
+  //       assert.equal(typeof reply, 'function')
+  //       assert.ok(null == meta)
   //       reply({ y: 3 })
   //     })
   //     .act('a:1', { x: 2 }, (err, out, meta) => {
-  //       expect(err).not.exists()
-  //       expect(out).includes({ y: 3 })
-  //       expect(meta).not.exists()
+  //       assert.ifError(err)
+  //       assert.partialDeepStrictEqual(out, { y: 3 })
+  //       assert.ok(null == meta)
   //       fin()
   //     })
   // })
 
-  it('act_if', function (done) {
-    var si = Seneca({ log: 'silent' })
+  it('act_if', function (t, done) {
+    var si = Seneca({ log: 'silent', strict: { result: false } })
 
     si.add({ op: 'foo' }, function (args, next) {
       next(null, 'foo' + args.bar)
     })
 
     si.act_if(true, { op: 'foo', bar: '1' }, function (err, out) {
-      expect(err).equal(null)
-      expect('foo1').equal(out)
+      assert.equal(err, null)
+      assert.equal('foo1', out)
     })
 
     si.act_if(false, { op: 'foo', bar: '2' }, function () {
-      expect(true).equal(false)
+      assert.equal(true, false)
     })
 
     si.act_if(true, 'op:foo,bar:3', function (err, out) {
-      expect(err).equal(null)
-      expect('foo3').equal(out)
+      assert.equal(err, null)
+      assert.equal('foo3', out)
     })
 
     try {
       si.act_if({ op: 'foo', bar: '2' }, function () {
-        expect(true).equal(false)
+        assert.equal(true, false)
       })
-      expect(true).equal(false)
+      assert.equal(true, false)
     } catch (e) {
-      expect(e.message).match(/not of type boolean/)
+      assert.match(e.message, /not of type boolean/)
     }
 
     si = Seneca({ log: 'test' })
@@ -159,11 +155,11 @@ describe('legacy', function () {
       })
 
     si.act_if(true, 'a:1', function (err, out) {
-      expect(!err).true()
-      expect(2).equal(out.b)
+      assert.equal(!err, true)
+      assert.equal(2, out.b)
 
       si.act_if(false, 'a:2', function () {
-        expect(true).equal(false)
+        assert.equal(true, false)
       })
 
       process.nextTick(done)
