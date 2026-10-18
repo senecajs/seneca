@@ -106,6 +106,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   options object instead.
 * The `act_invalid_msg` error details no longer include the Gubu error
   object; `details.props` lists the failures.
+* The transport type names `http` and `direct` are accepted again as
+  aliases of `web`, as in Seneca 3, and log a deprecation warning. In
+  4.0.0-rc they reached seneca-transport unchanged, where a client of
+  type `http` crashed at start-up.
 * The `action_timeout` message closes its parenthesis.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
@@ -136,6 +140,8 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
 * Error message text no longer includes message or option values; code
   that matched on error text should check `err.code` and `err.details`.
+* Use the transport type `web` instead of the deprecated `http` and
+  `direct`.
 
 
 ## 4.0.0-rc5 2025-02-07

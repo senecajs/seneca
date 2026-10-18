@@ -627,6 +627,62 @@ describe('redact', function () {
     )
   })
 
+  it('transport-type-alias', function (fin) {
+    const stub = make_web_stub()
+    const server = capture({ tag: 'server' })
+    const client = capture({ tag: 'client' })
+
+    server.si
+      .use(stub.web_stub)
+      .add('a:1', function (msg, reply) {
+        reply({ x: msg.x })
+      })
+      .listen({ type: 'http', pin: 'a:1' })
+      .listen({ type: 'direct', pin: 'a:2' })
+
+    server.si.ready(
+      check(fin, function () {
+        client.si.use(stub.web_stub).client({ type: 'http', pin: 'a:1' })
+
+        client.si.ready(
+          check(fin, function () {
+            client.si.act(
+              'a:1,x:2',
+              check(fin, function (err, out) {
+                expect(err).not.exist()
+                expect(out.x).equal(2)
+
+                // The 3.x names reach the web transport hooks.
+                expect(stub.seen).equal([
+                  'listen:web',
+                  'listen:web',
+                  'client:web',
+                ])
+
+                // One deprecation warning per instance.
+                const warned = (lines) =>
+                  lines.filter(
+                    (line) =>
+                      line.includes('"case":"DEPRECATED"') &&
+                      line.includes('"kind":"transport"') &&
+                      line.includes('"level_name":"warn"'),
+                  )
+                // Each entry is recorded twice: by the logger and the log event.
+                expect(warned(server.lines).length).equal(2)
+                expect(warned(client.lines).length).equal(2)
+                expect(warned(server.lines)[0]).contains(
+                  'The transport type \\"http\\" is deprecated; use \\"web\\".',
+                )
+
+                client.si.close(() => server.si.close(fin))
+              }),
+            )
+          }),
+        )
+      }),
+    )
+  })
+
   it('redactor', function () {
     const redact = make_redactor()
 

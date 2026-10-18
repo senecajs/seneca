@@ -69,7 +69,7 @@ fixed default.
 | `debug.act_caller` | `false` | Record the calling code location of each `act` call in `msg.caller$` (always on in test mode). |
 | `debug.short_logs` | `false` | Shorten identifiers to 2 characters (the instance id becomes `xx/tag`). |
 | `debug.callpoint` | `false` | Record the calling code location when actions are added and called (`actdef.callpoint`, log entries). Enabled by test mode. |
-| `debug.deprecation` | `true` | Log a warning when an action marked with `deprecate$` is called. |
+| `debug.deprecation` | `true` | Log a warning when an action marked with `deprecate$` is called, and once per instance when a deprecated transport type name (`http`, `direct`) is used. |
 | `debug.argv` | `null` | Array used instead of `process.argv` when parsing `--seneca.*` arguments (the first two entries are skipped). For tests. |
 | `debug.env` | `null` | Object used instead of `process.env` when reading `SENECA_*` variables. For tests. |
 | `debug.datalen` | `333` | Maximum length of message and result data in log lines and error messages. |

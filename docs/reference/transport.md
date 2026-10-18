@@ -38,7 +38,9 @@ The configuration object is completed in this order:
    only when you set them. Everything else comes from the transport
    plugin's own defaults (seneca-transport: host `0.0.0.0`, path `/act`,
    protocol `http` for `web`; host `0.0.0.0`, port 10201 for `tcp`).
-2. `type` defaults to `'web'`.
+2. `type` defaults to `'web'`. The Seneca 3 names `http` and `direct`
+   are accepted as aliases of `web`; they are deprecated, and the first
+   use logs a warning (`kind: 'transport'`, `case: 'DEPRECATED'`).
 3. The section `options.transport[type]` (for example
    `options.transport.web`) supplies further defaults; for `web` and
    `tcp` its `port`, `host` and `path` fill in missing values.

@@ -684,7 +684,11 @@ function listen(this: any, callpoint: any) {
     })
 
     const opts = self.options().transport || {}
-    const config = intern.resolve_config(intern.parse_config(argsarr), opts)
+    const config = intern.resolve_config(
+      intern.parse_config(argsarr),
+      opts,
+      self
+    )
 
     self.act(
       'role:transport,cmd:listen',
@@ -728,7 +732,7 @@ function client(this: any, callpoint: any) {
     // pg: pin group
     raw_config.pg = pincanon(raw_config.pin || raw_config.pins)
 
-    const config = intern.resolve_config(raw_config, opts)
+    const config = intern.resolve_config(raw_config, opts, self)
 
     config.id = config.id || pattern(raw_config)
 
@@ -945,7 +949,10 @@ intern.parse_config = function(args: any) {
 }
 
 
-intern.resolve_config = function(config: any, options: any) {
+// Instances that have already logged the transport type alias warning.
+intern.type_alias_warned = new WeakSet()
+
+intern.resolve_config = function(config: any, options: any, seneca?: any) {
   let out = Object.assign({}, config)
 
   Object.keys(options).forEach((key) => {
@@ -958,6 +965,31 @@ intern.resolve_config = function(config: any, options: any) {
 
   // Default transport is web
   out.type = out.type || 'web'
+
+  // Seneca 3 accepted 'http' and 'direct' as names of the web transport.
+  // They still work, so that Seneca 3 code does not fail, but are
+  // deprecated.
+  if ('http' === out.type || 'direct' === out.type) {
+    const root = seneca && seneca.root
+    if (
+      root &&
+      !intern.type_alias_warned.has(root) &&
+      false !== seneca.options().debug.deprecation
+    ) {
+      intern.type_alias_warned.add(root)
+      seneca.log.warn({
+        kind: 'transport',
+        case: 'DEPRECATED',
+        type: out.type,
+        notice:
+          'The transport type "' +
+          out.type +
+          '" is deprecated; use "web". It is an alias of "web" kept ' +
+          'for compatibility with Seneca 3.',
+      })
+    }
+    out.type = 'web'
+  }
 
   const base = options[out.type] || {}
 
