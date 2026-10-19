@@ -156,9 +156,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
     docs/reference/options.md) and passwords in URLs, in log entries,
     entries delivered to `log` event listeners (which receive entries
     of every level), error `details` and causes (`cause`, and `errors`
-    of an `AggregateError`), the error replies that transport plugins
-    send to remote callers (text, stack, details and the copy of the
-    message in `meta$.data`), the transport client identifier, options
+    of an `AggregateError`), errors replied to remote callers (an error
+    replied to a message that arrived through a transport plugin,
+    seneca-transport included, is redacted before the plugin serializes
+    it, and so is the copy of the message that `transport/utils`
+    returns in `meta$.data`), the transport client identifier, options
     printed by `debug.print.options`, and the fatal error report,
     including its error text, command line arguments and, when
     printed, environment variables.

@@ -695,6 +695,108 @@ describe('redact', function () {
     })
   })
 
+  it('remote-error-reply', function (t, fin) {
+    // A transport plugin serializes the error it receives for a remote
+    // caller. Messages from seneca-transport carry transport$; messages
+    // internalized by the core transport utilities carry remote$.
+    const SERVER = 'server-only-secret'
+    const si = Seneca({ log: 'silent' })
+    si.add('sys:user,cmd:login', function (msg, reply) {
+      const err = new Error('cannot reach postgres://u:' + SERVER + '@db/x', {
+        cause: { token: SERVER },
+      })
+      err.details = {
+        attempt: { pass: msg.pass },
+        server: { db_password: SERVER },
+      }
+      err.api_key = SERVER
+      reply(err)
+    })
+
+    // What seneca-transport 8 serializes: the message, the name and the
+    // error's own enumerable properties.
+    const wire = (err) =>
+      JSON.stringify({ ...err, message: err.message, name: err.name })
+    const act = (pattern, msg) =>
+      new Promise((resolve) => si.act(pattern, msg, (err) => resolve(err)))
+
+    si.ready(async function () {
+      try {
+        const markers = [
+          { transport$: { track: [], origin: 'o' } },
+          { remote$: true },
+        ]
+        for (const marker of markers) {
+          const err = await act('sys:user,cmd:login', {
+            pass: SECRET,
+            ...marker,
+          })
+          assert.ok(err instanceof Error)
+          assert.equal(err.message, 'cannot reach postgres://u:[REDACTED]@db/x')
+          assert.deepStrictEqual(err.details, {
+            attempt: { pass: '[REDACTED]' },
+            server: { db_password: '[REDACTED]' },
+          })
+          assert.equal(err.api_key, '[REDACTED]')
+          assert.deepStrictEqual(err.cause, { token: '[REDACTED]' })
+          assert.ok(!wire(err).includes(SECRET))
+          assert.ok(!wire(err).includes(SERVER))
+        }
+
+        // Errors from the inward checks, such as a missing action, too.
+        const missing = await act('sys:user,cmd:logn', {
+          pass: SECRET,
+          remote$: true,
+        })
+        assert.equal(missing.code, 'act_not_found')
+        assert.ok(!wire(missing).includes(SECRET))
+
+        // A local caller receives the error unchanged.
+        const local = await act('sys:user,cmd:login', { pass: SECRET })
+        assert.equal(local.details.attempt.pass, SECRET)
+        assert.equal(local.details.server.db_password, SERVER)
+        assert.equal(local.api_key, SERVER)
+        assert.equal(local.cause.token, SERVER)
+        si.close(fin)
+      } catch (e) {
+        si.close(() => fin(e))
+      }
+    })
+  })
+
+  it('externalize-error-reply', function (t, fin) {
+    const si = Seneca({ log: 'silent' })
+    si.ready(
+      check(fin, function () {
+        const tu = si.export('transport/utils')
+        const err = new AggregateError([{ token: SECRET }], 'many', {
+          cause: { token: SECRET },
+        })
+        err.details = { pass: SECRET }
+        err.api_key = SECRET
+        const meta = { id: 'm1', data: { pass: SECRET, a: 1 } }
+
+        const rep = tu.externalize_reply(si, err, null, meta)
+        assert.ok(!JSON.stringify(rep).includes(SECRET))
+        assert.equal(rep.message, 'many')
+        assert.deepStrictEqual(rep.cause, { token: '[REDACTED]' })
+        assert.deepStrictEqual(rep.errors, [{ token: '[REDACTED]' }])
+        assert.deepStrictEqual(rep.details, { pass: '[REDACTED]' })
+        assert.equal(rep.api_key, '[REDACTED]')
+        assert.equal(rep.meta$.error, true)
+        assert.equal(rep.meta$.id, 'm1')
+        assert.deepStrictEqual(rep.meta$.data, { pass: '[REDACTED]', a: 1 })
+
+        // The local error keeps its values.
+        assert.equal(err.cause.token, SECRET)
+        assert.equal(err.errors[0].token, SECRET)
+        assert.equal(err.details.pass, SECRET)
+        assert.equal(meta.data.pass, SECRET)
+        si.close(fin)
+      }),
+    )
+  })
+
   it('transport-error-reply', function (t, fin) {
     const stub = make_web_stub()
     const server = capture({ tag: 'server' })

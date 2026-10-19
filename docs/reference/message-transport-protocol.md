@@ -64,7 +64,12 @@ The listener replies with:
 ```
 
 An error is serialized as a plain object: `message`, `name` and the
-error's own enumerable properties (such as `code` and `details`).
+error's own enumerable properties (such as `code` and `details`). Seneca
+core redacts the error before seneca-transport receives it (see
+[Options: redact](options.md#redact)). `input` is the request's `act` as
+received, so it holds the caller's own message, including any secrets the
+caller sent: the TCP transport returns it with the error, while the web
+transport sends only the serialized error.
 
 ### Identifiers and transactions
 

@@ -75,18 +75,17 @@ function externalize_reply(seneca: any, err: any, out: any, meta: any) {
       .reduce((a: any, pn: any) => (a[pn] = rep[pn], a), {})
     rep.meta$.error = true
 
-    // An error reply can carry the incoming message (meta$.data) and
-    // error details that include message values. The remote caller gets
-    // redacted copies; the local error is not changed. Results and
-    // custom meta data are not redacted, as callers depend on them.
-    rep.message = redact_with(seneca, rep.message)
-    rep.stack = redact_with(seneca, rep.stack)
-    if (null != rep.details) {
-      rep.details = redact_with(seneca, rep.details)
-    }
-    if (rep.meta$ && null != rep.meta$.data) {
-      rep.meta$ = { ...rep.meta$, data: redact_with(seneca, rep.meta$.data) }
-    }
+    // The remote caller gets a redacted copy of all the error's own
+    // properties (message, stack, details, cause, errors and any others)
+    // and of the incoming message (meta$.data); the local error is not
+    // changed. Results and the other meta data are not redacted, as
+    // callers depend on them.
+    const { meta$, ...props } = rep
+    rep = redact_with(seneca, props)
+    rep.meta$ =
+      meta$ && null != meta$.data
+        ? { ...meta$, data: redact_with(seneca, meta$.data) }
+        : meta$
   }
 
   return rep
