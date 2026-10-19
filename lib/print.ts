@@ -8,6 +8,9 @@ import Util from 'util'
 const Minimist: (args: string[], opts?: Record<string, any>) => Record<string, any> =
   require('minimist')
 
+// Printed options are redacted like log entries.
+import { redact_with } from './redact'
+
 
 /** Handle command line specific functionality */
 function Print(seneca: any, process_argv: any) {
@@ -33,7 +36,9 @@ function print_options(instance: any, options: any) {
       '\nSeneca Options (' + instance.id + '): before plugins\n' + '===\n'
     )
     instance.private$.print.log(
-      Util.inspect(options, { depth: options.debug.print.depth })
+      Util.inspect(redact_with(instance, options), {
+        depth: options.debug.print.depth,
+      })
     )
     instance.private$.print.log('')
   }
@@ -77,7 +82,7 @@ function plugin_options(
     '===\n'
   )
   instance.private$.print.log(
-    Util.inspect(plugin_options, {
+    Util.inspect(redact_with(instance, plugin_options), {
       depth: instance.options().debug.print.depth,
     })
   )

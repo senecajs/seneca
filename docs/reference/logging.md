@@ -99,7 +99,8 @@ Every instance and delegate has `seneca.log`:
 | `seneca.log.debug(entry)`, `seneca.log.info(...)`, `seneca.log.warn(...)`, `seneca.log.error(...)`, `seneca.log.fatal(...)`, `seneca.log.all(...)`, `seneca.log.none(...)` | As above, at the named level; non-object arguments become `{ data: [...] }`. |
 
 `log` returns the instance. The `log` event is emitted for every entry,
-whatever the level (see [Events](events.md)).
+whatever the level (see [Events](events.md)). Listeners and loggers
+receive the entry with secrets redacted (see [Redaction](#redaction)).
 
 Inside an action, `this.log` is the action's delegate, so the entry is
 annotated with the action and message identifiers.
@@ -137,6 +138,24 @@ Conventional fields used by Seneca's own entries:
 Entries may also carry `depth$` (inspection depth for the flat logger)
 and `maxlen$` (line length limit for the flat logger).
 
+## Redaction
+
+Before an entry reaches a `log` event listener or the logger, the values
+of secret-looking keys anywhere in it are replaced with `[REDACTED]`,
+and passwords in URLs are replaced too, including inside error messages.
+A key looks secret when the words of its name include a word such as
+`password`, `secret`, `token`, `apikey` or `credentials`, end in `auth`,
+or contain a pair such as `api key` or `private key`; the full rules and
+the `redact.keys` option for adding names are in
+[Options: redact](options.md#redact). Boolean values are kept, so flags
+such as `password_set` stay readable.
+
+The entry is copied only where something is replaced, so the message,
+result and options seen by actions and callbacks keep their values.
+Entries that no listener or logger receives are not processed. Secrets
+stored under other key names are not detected: add those names to
+`redact.keys`. See [Options: redact](options.md#redact).
+
 ## Where output goes
 
 Builtin loggers print with `console.log`, or with the function given as
@@ -146,7 +165,7 @@ error output (`debug.print.err`) use `console.error`, or
 
 ## Related options
 
-`log`, `logger`, `test`, `quiet`, `debug.datalen`, `debug.print.depth`,
+`log`, `logger`, `redact.*`, `test`, `quiet`, `debug.datalen`, `debug.print.depth`,
 `debug.print.err`, `debug.short_logs`, `status.*`, `trace.unknown`,
 `trace.invalid`, `internal.print.*`, `internal.logger`. See
 [Options](options.md).

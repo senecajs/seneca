@@ -115,7 +115,7 @@ describe('act', function () {
         assert.equal(err.code, 'act_invalid_msg')
         assert.equal(
           err.message,
-          'seneca: Action a:1 received an invalid message; Validation failed for property "x" with string "s" because the string is not of type number.; message content was: {a:1,x:s}.',
+          'seneca: Action a:1 received an invalid message; property "x" is not of type number.',
         )
         fin()
       })

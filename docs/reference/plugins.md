@@ -138,8 +138,9 @@ For each `use` call, in order:
    fatal `action_timeout` (the dedicated `plugin_init_timeout` code is
    not produced, see [Error codes](error-codes.md)).
 5. **complete**: `READY` log entry; `options.inited$` is called; the
-   plugin options are printed when `debug.print.options` is set; the
-   define message completes and the next plugin starts.
+   plugin options are printed, with secret-looking values redacted, when
+   `debug.print.options` is set; the define message completes and the
+   next plugin starts.
 
 `seneca.ready(fn)` callbacks run when the action queue is empty, which
 includes the completion of all plugins submitted so far.

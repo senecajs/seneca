@@ -258,7 +258,7 @@ describe('add', function () {
         assert.equal(e.code, 'act_invalid_msg')
         assert.equal(
           e.message,
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" because the property is missing.; message content was: {a:1}.',
+          'seneca: Action a:1 received an invalid message; property "b" is required (object).',
         )
         fin()
       })
@@ -283,7 +283,7 @@ describe('add', function () {
         assert.equal(e.code, 'act_invalid_msg')
         assert.equal(
           e.message,
-          'seneca: Action a:1 received an invalid message; Validation failed for property "b" with string "q" because the string is not of type number.; message content was: {a:1,b:q}.',
+          'seneca: Action a:1 received an invalid message; property "b" is not of type number.',
         )
         fin()
       })
@@ -308,7 +308,7 @@ describe('add', function () {
         assert.equal(e.code, 'act_invalid_msg')
         assert.equal(
           e.message,
-          'seneca: Action a:2 received an invalid message; Validation failed for property "d.f" because the property is missing.; message content was: {a:2,d:{}}.',
+          'seneca: Action a:2 received an invalid message; property "d.f" is required (boolean).',
         )
         fin()
       })

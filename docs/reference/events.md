@@ -6,7 +6,7 @@ can be called on any instance or delegate.
 
 | Event | Arguments | When |
 | ----- | --------- | ---- |
-| `log` | `(entry)` | Every log entry, before level filtering. See [Logging](logging.md). |
+| `log` | `(entry)` | Every log entry, before level filtering, with secrets redacted. See [Logging](logging.md). |
 | `ready` | none | Each time the action queue becomes empty (so after startup, after each plugin finishes loading, and whenever all in-flight actions complete). Use `seneca.ready(fn)` for a one-time callback. |
 | `close` | none | During `seneca.close()`, emitted by the builtin `sys:seneca,cmd:close` action before plugin close hooks run. |
 | `act-in` | `(msg, null, meta)` | A message has passed inward processing and its action is about to run. |

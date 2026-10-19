@@ -66,8 +66,10 @@ run.
 
 `seneca.listen()` and `seneca.client()` default to `type: 'web'`, and
 `options.transport` can hold per-type sections (`transport.web`,
-`transport.tcp`) as in Seneca 3. The `transport/utils` export can be
-replaced by a transport plugin (seneca-transport 8 provides its own).
+`transport.tcp`) as in Seneca 3. The Seneca 3 type names `http` and
+`direct` select the `web` transport, as in Seneca 3, and are
+deprecated. The `transport/utils` export can be replaced by a transport
+plugin (seneca-transport 8 provides its own).
 
 ## Results
 
@@ -126,6 +128,7 @@ The option `debug: { deprecation: false }` turns both off.
 | `SENECA_DEP_LEGACY_CLOSE_HOOK` | `close()` calls a plugin's close hook on `role:seneca,cmd:close` (once per plugin) | `this.destroy(fn)` or a prior on `sys:seneca,cmd:close` |
 | `SENECA_DEP_PLUGIN_INIT` | a plugin definition object names its function `init` (once per plugin) | `define` |
 | `SENECA_DEP_PROMISIFY` | the `promisify` plugin (seneca-promisify) is loaded | nothing; promises are built in |
+| `SENECA_DEP_TRANSPORT_TYPE` | `listen` or `client` is given the transport type `http` or `direct` (once per type) | `type: 'web'` |
 
 Actions can also be marked deprecated with the `deprecate$` pattern
 directive; calling one logs a `DEPRECATED` entry with its notice.

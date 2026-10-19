@@ -75,10 +75,20 @@ in the background.
 * Messages arriving over a transport cannot be fatal (`fatal$` is
   removed) but can be anything else: validate them with pattern rules
   and expose only the pins a service should serve.
+* Error text never contains message or option values, and the values of
+  secret-looking keys are redacted from log entries, the `log` event,
+  error details, printed options and fatal reports (see
+  [Options: redact](../reference/options.md#redact)). Add the names of
+  your own secret fields with `redact: { keys: ['pin', 'ssn'] }`, and
+  keep `redact.active` on in production.
+* Redaction works by key name: a secret under another name, or inside a
+  free text value, is not detected. Keep secrets out of free text such
+  as error messages written by your own actions.
 * `debug.print.env` is off by default so that a fatal error report does
   not print the environment.
-* Options printed with `--seneca.print.options` include plugin options;
-  avoid it where output is captured by shared logs.
+* Options printed with `--seneca.print.options` include plugin options,
+  with secret-looking values redacted; avoid it where output is captured
+  by shared logs.
 
 ## Dependencies
 

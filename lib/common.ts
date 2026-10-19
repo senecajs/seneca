@@ -283,6 +283,11 @@ function makedie(instance: any, ctxt: any) {
 
       err.fatal$ = true
 
+      // The report printed in test mode is redacted like log entries.
+      const redactor = instance.private$ && instance.private$.redact
+      const redact = redactor || ((val: any) => val)
+      const redact_argv = (redactor && redactor.argv) || ((val: any) => val)
+
       let logdesc = {
         kind: ctxt.txt || 'fatal',
         level: ctxt.level || 'fatal',
@@ -311,12 +316,13 @@ function makedie(instance: any, ctxt: any) {
         process.platform +
         (!full ? '' : ', path=' + process.execPath) +
         ', argv=' +
-        inspect(process.argv).replace(/\n/g, '') +
+        inspect(redact_argv(process.argv)).replace(/\n/g, '') +
         (!full
           ? ''
           : !print_env
             ? ''
-            : ', env=' + inspect(process.env).replace(/\n/g, ''))
+            : ', env=' +
+            inspect(redact(Object.assign({}, process.env))).replace(/\n/g, ''))
 
       let when = new Date()
 
@@ -333,11 +339,13 @@ function makedie(instance: any, ctxt: any) {
         instance.toString() +
         '\nDETAILS   :::  ' +
         inspect(
-          full
-            ? err.details
-            : ((clean_details = clean(err.details) || {}),
-              delete clean_details.instance,
-              clean_details),
+          redact(
+            full
+              ? err.details
+              : ((clean_details = clean(err.details) || {}),
+                delete clean_details.instance,
+                clean_details)
+          ),
           { depth: so.debug.print.depth }
         ).replace(/\n/g, '\n               ') +
         '\nSTACK     :::  ' +
@@ -347,7 +355,7 @@ function makedie(instance: any, ctxt: any) {
         ', ' +
         when.getTime() +
         '\nLOG       :::  ' +
-        jsonic_stringify(logdesc) +
+        jsonic_stringify(redact(logdesc)) +
         '\nNODE      :::  ' +
         process.version +
         ', ' +

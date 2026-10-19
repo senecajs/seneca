@@ -8,6 +8,8 @@ import {
   message_props_shape,
 } from './common'
 
+import { describe_args } from './redact'
+
 
 const Argu = MakeArgu('seneca')
 
@@ -32,7 +34,9 @@ const ActArgu: any = Argu('prior', {
 function api_prior(this: any) {
   if (null == this.private$.act) {
     // TODO: should be a top level api method: seneca.fail
-    throw this.util.error('no_prior_action', { args: arguments })
+    throw this.util.error('no_prior_action', {
+      args: describe_args(this, arguments),
+    })
   }
 
   // Get definition of prior action
@@ -70,7 +74,9 @@ function api_prior(this: any) {
 
 function api_direct_prior(this: any) {
   if (null == this.private$.act) {
-    throw this.util.error('no_prior_action', { args: arguments })
+    throw this.util.error('no_prior_action', {
+      args: describe_args(this, arguments),
+    })
   }
 
   // Get definition of prior action

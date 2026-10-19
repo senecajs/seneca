@@ -23,6 +23,7 @@ describe('timeout', function () {
         assert.partialDeepStrictEqual(err.details, {
           timeout: 100,
           message: { a: 1 },
+          desc: 'a:1',
           pattern: 'a:1',
         })
         assert.ok(

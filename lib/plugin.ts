@@ -13,6 +13,7 @@ import type { ErrDesc } from 'shape'
 import Common = require('./common')
 import { Deprecate } from './deprecate'
 import { Print } from './print'
+import { describe_shape_errors, redact_with } from './redact'
 
 // Shape.isShape exists at runtime, but shape 11.4 declares it only on built
 // shapes, not on the Shape function itself.
@@ -615,8 +616,8 @@ function make_tasks(): any {
         if (0 < shapeErrors.length) {
           err = delegate.error('invalid_plugin_option', {
             name: fullname,
-            err_msg: shapeErrors.map((se) => se.text).join('; '),
-            options: fullopts,
+            err_msg: describe_shape_errors(shapeErrors),
+            options: redact_with(delegate, fullopts),
           })
         }
       }
@@ -935,7 +936,7 @@ function make_intern() {
             ex.message +
             (null == where ? '' : (' (' + where[0]).replace(/\n.*\//g, ''))
           ).replace(/\n/g, ''),
-          options: options,
+          options: redact_with(delegate, options),
           repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',
         })
       }

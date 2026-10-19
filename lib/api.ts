@@ -19,6 +19,8 @@ import {
   message_props_shape,
 } from './common'
 
+import { make_redactor, redact_with } from './redact'
+
 
 const Argu = MakeArgu('seneca')
 
@@ -80,6 +82,14 @@ function options(this: any, options: any, chain: any) {
     return private$.optioner.get()
   }
 
+  let out_opts = (private$.exports.options = private$.optioner.set(options))
+
+  // Update redaction (shared by all delegates of the root instance)
+  // before logging the new options, so that new redact.keys apply.
+  if (options.redact) {
+    self.root.private$.redact = make_redactor(out_opts.redact)
+  }
+
   // self.log may not exist yet as .options() used during construction
   if (self.log) {
     self.log.debug({
@@ -88,8 +98,6 @@ function options(this: any, options: any, chain: any) {
       data: options,
     })
   }
-
-  let out_opts = (private$.exports.options = private$.optioner.set(options))
 
   if ('string' === typeof options.tag) {
     const oldtag = self.root.tag
@@ -680,14 +688,20 @@ function listen(this: any, callpoint: any) {
     })
 
     const opts = self.options().transport || {}
-    const config = intern.resolve_config(intern.parse_config(argsarr), opts)
+    const config = intern.resolve_config(
+      intern.parse_config(argsarr),
+      opts,
+      self
+    )
 
     self.act(
       'role:transport,cmd:listen',
       { config: config, gate$: true },
       function(err: any, result: any) {
         if (err) {
-          return self.die(private$.error(err, 'transport_listen', config))
+          return self.die(
+            private$.error(err, 'transport_listen', redact_with(self, config))
+          )
         }
 
         done(null, result)
@@ -722,7 +736,7 @@ function client(this: any, callpoint: any) {
     // pg: pin group
     raw_config.pg = pincanon(raw_config.pin || raw_config.pins)
 
-    const config = intern.resolve_config(raw_config, opts)
+    const config = intern.resolve_config(raw_config, opts, self)
 
     config.id = config.id || pattern(raw_config)
 
@@ -806,12 +820,17 @@ function client(this: any, callpoint: any) {
       { config: config, gate$: true },
       function(err: any, liveclient: any) {
         if (err) {
-          return sd.die(private$.error(err, 'transport_client', config))
+          return sd.die(
+            private$.error(err, 'transport_client', redact_with(sd, config))
+          )
         }
 
         if (null == liveclient) {
           return sd.die(
-            private$.error('transport_client_null', clean(config))
+            private$.error(
+              'transport_client_null',
+              redact_with(sd, clean(config))
+            )
           )
         }
 
@@ -934,7 +953,7 @@ intern.parse_config = function(args: any) {
 }
 
 
-intern.resolve_config = function(config: any, options: any) {
+intern.resolve_config = function(config: any, options: any, seneca?: any) {
   let out = Object.assign({}, config)
 
   Object.keys(options).forEach((key) => {
@@ -947,6 +966,19 @@ intern.resolve_config = function(config: any, options: any) {
 
   // Default transport is web
   out.type = out.type || 'web'
+
+  // Seneca 3 accepted 'http' and 'direct' as names of the web transport.
+  // They still work, so that Seneca 3 code does not fail, but are
+  // deprecated.
+  if ('http' === out.type || 'direct' === out.type) {
+    Deprecate.deprecate(
+      seneca,
+      'transport_type',
+      { type: out.type },
+      'transport_type:' + out.type,
+    )
+    out.type = 'web'
+  }
 
   const base = options[out.type] || {}
 

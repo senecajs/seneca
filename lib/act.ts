@@ -17,6 +17,8 @@ import {
   message_props_shape,
 } from './common'
 
+import { describe_msg, redact_with } from './redact'
+
 
 const { MakeArgu, Skip } = Shape
 
@@ -69,9 +71,11 @@ const intern = {
 
     // Capture caller code point if debugging.
     if (actspec.opts.debug.act_caller || actspec.opts.test) {
+      // msgstr prints two levels deep, so deeper data is not redacted.
+      const callmsg = redact_with(instance, actspec.msg, 3)
       actspec.msg.caller$ =
         '\n    Action call arguments and location: ' +
-        (new Error(msgstr(actspec.msg, actspec.opts.debug.datalen)).stack + '\n')
+        (new Error(msgstr(callmsg, actspec.opts.debug.datalen)).stack + '\n')
           .replace(/Error: /, '')
           .replace(/.*\/gate-executor\.[jt]s:.*\n/g, '')
           .replace(/.*\/seneca\.[jt]s:.*\n/g, '')
@@ -146,7 +150,8 @@ const intern = {
         timeout: timeout,
         start: start,
         end: end,
-        message: actmsg,
+        message: redact_with(instance, actmsg),
+        desc: describe_msg(instance, actmsg),
         pattern: execspec.ctxt.pattern,
         // legacy_string: actctxt.options.legacy.timeout_string
         //   ? '[TIMEOUT] '
@@ -294,7 +299,7 @@ const intern = {
       if ('sub_outward_action_failed' === outward.code) {
         const info = {
           pattern: actctxt.actdef.pattern,
-          msg: data.msg,
+          msg: describe_msg(act_instance, data.msg),
           ...(outward.info || {}),
         }
         data.err = error(outward.error, outward.code, info)
@@ -306,7 +311,7 @@ const intern = {
           outward.error ||
           error(
             outward.code || 'invalid-process-outward-code',
-            outward.info || {}
+            redact_with(act_instance, outward.info || {})
           )
       }
 
@@ -447,12 +452,12 @@ const intern = {
       if ('sub_inward_action_failed' === inward.code) {
         const info = {
           pattern: actdef.pattern,
-          msg: data.msg,
+          msg: describe_msg(act_instance, data.msg),
           ...(inward.info || {}),
         }
         err = error(err, inward.code, info)
       } else {
-        err = err || error(inward.code, inward.info)
+        err = err || error(inward.code, redact_with(act_instance, inward.info))
       }
 
       meta.error = true

@@ -28,6 +28,7 @@ const inward_1 = require("./lib/inward");
 const legacy_1 = require("./lib/legacy");
 const logging_1 = require("./lib/logging");
 const options_1 = require("./lib/options");
+const redact_1 = require("./lib/redact");
 const outward_1 = require("./lib/outward");
 const plugin_1 = require("./lib/plugin");
 const print_1 = require("./lib/print");
@@ -130,6 +131,21 @@ const option_defaults = {
         env: One({}, null),
         // Length of data description in logs
         datalen: 333,
+    },
+    // Keep secrets out of log entries (including the log event), error
+    // details, printed options and fatal error reports. A value is
+    // replaced by the mark when its key name looks secret, by the words of
+    // the name (see lib/redact: password, secret, token, apikey, auth and
+    // others), or matches one of `keys`. Passwords in URLs
+    // (scheme://user:pass@host) are replaced too. Error message text never
+    // contains message values.
+    redact: {
+        // Set false to switch redaction off (for local debugging only).
+        active: true,
+        // Additional names to redact, matched by words.
+        keys: [String],
+        // Replacement text.
+        mark: '[REDACTED]',
     },
     // Enforce strict behaviours. Relax when backwards compatibility needed.
     strict: {
@@ -471,6 +487,8 @@ function make_seneca(initial_opts) {
     // Resolve initial options.
     private$.optioner = (0, options_1.resolve_options)(module, option_defaults, initial_opts);
     var start_opts = private$.optioner.get();
+    // Redacts secrets from data leaving the instance (see lib/redact).
+    private$.redact = (0, redact_1.make_redactor)(start_opts.redact);
     // Console print utilities
     private$.print = {
         log: start_opts.internal.print.log || print_1.Print.internal_log,
@@ -793,6 +811,8 @@ function make_private() {
         },
         ignore_plugins: {},
         cleared: 0,
+        // Keys used in action patterns (see lib/redact describe_msg).
+        pattern_keys: new Set(),
     };
 }
 module.exports = Seneca;

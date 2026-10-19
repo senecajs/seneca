@@ -1,9 +1,8 @@
 /* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-import Util from 'util'
-
 import Common = require('./common')
+import Redact = require('./redact')
 
 // Internal implementations.
 var intern: any = {}
@@ -116,8 +115,8 @@ function outward_res_object(spec: any) {
   if (so.strict.result && not_legacy && not_object) {
     data.res = ctx.seneca.private$.error('result_not_objarr', {
       pattern: ctx.actdef.pattern,
-      args: Util.inspect(Common.clean(msg)).replace(/\n/g, ''),
-      result: res,
+      args: Redact.describe_msg(ctx.seneca, msg),
+      result: Redact.type_name(res),
     })
     data.meta.error = true
   }

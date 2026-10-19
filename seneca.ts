@@ -34,6 +34,7 @@ import { Inward } from './lib/inward'
 import { Legacy } from './lib/legacy'
 import { make_logging } from './lib/logging'
 import { resolve_options } from './lib/options'
+import { make_redactor } from './lib/redact'
 import { Outward } from './lib/outward'
 import { Plugin } from './lib/plugin'
 import { Print } from './lib/print'
@@ -179,6 +180,24 @@ const option_defaults = {
 
     // Length of data description in logs
     datalen: 333,
+  },
+
+  // Keep secrets out of log entries (including the log event), error
+  // details, printed options and fatal error reports. A value is
+  // replaced by the mark when its key name looks secret, by the words of
+  // the name (see lib/redact: password, secret, token, apikey, auth and
+  // others), or matches one of `keys`. Passwords in URLs
+  // (scheme://user:pass@host) are replaced too. Error message text never
+  // contains message values.
+  redact: {
+    // Set false to switch redaction off (for local debugging only).
+    active: true,
+
+    // Additional names to redact, matched by words.
+    keys: [String],
+
+    // Replacement text.
+    mark: '[REDACTED]',
   },
 
   // Enforce strict behaviours. Relax when backwards compatibility needed.
@@ -834,6 +853,12 @@ namespace Seneca {
       env?: Record<string, string> | null
       datalen?: number
     }
+    /** Keep secrets out of logs, error details and printed reports. See docs/reference/options.md#redact. */
+    redact?: {
+      active?: boolean
+      keys?: string[]
+      mark?: string
+    }
     strict?: {
       result?: boolean
       fixedargs?: boolean
@@ -1042,6 +1067,9 @@ function make_seneca(initial_opts?: any) {
   // Resolve initial options.
   private$.optioner = resolve_options(module, option_defaults, initial_opts)
   var start_opts = private$.optioner.get()
+
+  // Redacts secrets from data leaving the instance (see lib/redact).
+  private$.redact = make_redactor(start_opts.redact)
 
   // Console print utilities
   private$.print = {
@@ -1433,6 +1461,9 @@ function make_private() {
     },
     ignore_plugins: {},
     cleared: 0,
+
+    // Keys used in action patterns (see lib/redact describe_msg).
+    pattern_keys: new Set(),
   }
 }
 

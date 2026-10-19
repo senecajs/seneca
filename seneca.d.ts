@@ -229,6 +229,12 @@ declare namespace Seneca {
             env?: Record<string, string> | null;
             datalen?: number;
         };
+        /** Keep secrets out of logs, error details and printed reports. See docs/reference/options.md#redact. */
+        redact?: {
+            active?: boolean;
+            keys?: string[];
+            mark?: string;
+        };
         strict?: {
             result?: boolean;
             fixedargs?: boolean;
