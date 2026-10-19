@@ -29,7 +29,8 @@ The workflow has two jobs:
   creates the GitHub release from the `CHANGES.md` entry.
 
 Only one release runs at a time in the repository, so two tags cannot
-publish at once and move the `latest` dist-tag backward.
+publish at once and move the `latest` dist-tag backward. Later runs, dry
+runs included, wait in a queue; none replaces or cancels another.
 
 
 ## One-time setup

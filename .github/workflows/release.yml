@@ -24,7 +24,8 @@
 # validation script, and publishes the committed files.
 #
 # Only one release runs at a time in this repository, so two tags cannot
-# publish concurrently and move the latest dist-tag backward.
+# publish concurrently and move the latest dist-tag backward. Later runs,
+# dry runs included, wait in a queue instead of replacing a pending run.
 #
 # Actions are pinned to commits; Dependabot keeps the pins up to date.
 
@@ -49,10 +50,12 @@ on:
         type: string
         default: ''
 
-# One release at a time in the repository; never cancel a publish in progress.
+# One release at a time in the repository. Runs queue (up to 100) instead
+# of replacing the pending run, and a run in progress is never cancelled
+# (cancel-in-progress defaults to false and may not be combined with max).
 concurrency:
   group: release
-  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
