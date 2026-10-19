@@ -105,7 +105,7 @@ The export `seneca.export('transport/utils')` provides helpers
 | Function | Purpose |
 | -------- | ------- |
 | `externalize_msg(seneca, msg, meta)` | Prepare an outbound message: attaches `meta$`; errors become plain objects. |
-| `externalize_reply(seneca, err, out, meta)` | Prepare an outbound reply: attaches `meta$`, marks errors (`meta$.error`) and empty replies (`meta.empty`). |
+| `externalize_reply(seneca, err, out, meta)` | Prepare an outbound reply: attaches `meta$`, marks errors (`meta$.error`) and empty replies (`meta.empty`). An error reply is a plain object: secret-looking values in its `details` and `meta$.data` (the incoming message) are redacted, and passwords in URLs in its `message` and `stack` are replaced, using the redaction options of `seneca`, which must be the instance (see [Options: redact](options.md#redact)). Results are sent unchanged. |
 | `internalize_msg(seneca, msg)` | Prepare an inbound message: moves `meta$` into `id$`, `sync$`, `custom$`, `explain$` and `parents$`, removes `fatal$`, sets `remote$`, converts entities. |
 | `internalize_reply(seneca, data)` | Prepare an inbound reply: returns `{ err, out, meta }`, rebuilding `Error` objects. |
 | `stringifyJSON(obj)`, `parseJSON(text)` | Safe JSON encoding (circular references) and decoding (errors are returned, not thrown). |

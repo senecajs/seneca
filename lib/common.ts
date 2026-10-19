@@ -302,7 +302,10 @@ function makedie(instance: any, ctxt: any) {
 
       instance.log.fatal(logdesc)
 
-      let stack = err.stack || ''
+      // Credentials in URLs inside the message or stack are replaced too.
+      const report_err = redact(err)
+
+      let stack = report_err.stack || ''
       stack = stack
         .substring(stack.indexOf('\n') + 5)
         .replace(/\n\s+/g, '\n               ')
@@ -332,7 +335,7 @@ function makedie(instance: any, ctxt: any) {
         '\n\n' +
         '=== SENECA FATAL ERROR ===' +
         '\nMESSAGE   :::  ' +
-        err.message +
+        report_err.message +
         '\nCODE      :::  ' +
         err.code +
         '\nINSTANCE  :::  ' +

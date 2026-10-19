@@ -436,7 +436,7 @@ describe('redact', function () {
     })
 
     si.add('sys:user,cmd:login', function () {
-      const err = new Error('cannot reach the provider')
+      const err = new Error('cannot reach postgres://u:' + SECRET + '@db/x')
       err.details = { token: SECRET }
       throw err
     })
@@ -450,6 +450,7 @@ describe('redact', function () {
       try {
         assert.strictEqual(0 < exits, true)
         assert.ok(report.includes('SENECA FATAL ERROR'))
+        assert.ok(report.includes('postgres://u:[REDACTED]@db/x'))
         assert.ok(report.includes('[REDACTED]'))
         assert.ok(!report.includes(SECRET))
         fin()
@@ -619,6 +620,79 @@ describe('redact', function () {
         si.close(fin)
       }),
     )
+  })
+
+  it('transport-action-error-reply', function (t, fin) {
+    const stub = make_web_stub()
+    const server = capture({ tag: 'server' })
+    const client = capture({ tag: 'client' })
+
+    server.si
+      .use(stub.web_stub)
+      .add('sys:user,cmd:login', function (msg, reply) {
+        // The action still receives the real value.
+        const err = new Error('bad password')
+        err.details = { attempt: { pass: msg.pass, ok: SECRET === msg.pass } }
+        reply(err)
+      })
+      .listen({ pin: 'sys:user,cmd:*' })
+
+    server.si.ready(function () {
+      client.si.use(stub.web_stub).client({ pin: 'sys:user,cmd:*' })
+
+      client.si.ready(function () {
+        client.si.act(
+          'sys:user,cmd:login',
+          { pass: SECRET },
+          check(fin, function (err) {
+            assert.equal(err.message, 'bad password')
+            assert.equal(stub.wire.length, 1)
+            assert.ok(!stub.wire[0].includes(SECRET))
+            assert.deepStrictEqual(err.details.attempt, {
+              pass: '[REDACTED]',
+              ok: true,
+            })
+            assert.ok(!Stringify(err).includes(SECRET))
+            assert.deepStrictEqual(server.leaks(), [])
+            assert.deepStrictEqual(client.leaks(), [])
+            client.si.close(() => server.si.close(fin))
+          }),
+        )
+      })
+    })
+  })
+
+  it('transport-client-id', function (t, fin) {
+    const stub = make_web_stub()
+    const server = capture({ tag: 'server' })
+    const client = capture({ tag: 'client' })
+
+    server.si
+      .use(stub.web_stub)
+      .add('a:1', function (msg, reply) {
+        reply({ x: msg.x })
+      })
+      .listen({ pin: 'a:1' })
+
+    server.si.ready(function () {
+      // The client id is built from the configuration, password included.
+      client.si.use(stub.web_stub).client({ pin: 'a:1', password: SECRET })
+
+      client.si.ready(function () {
+        client.si.act(
+          'a:1,x:2',
+          check(fin, function (err, out) {
+            assert.ok(null == err)
+            assert.equal(out.x, 2)
+            assert.ok(
+              client.lines.some((line) => line.includes('password:[REDACTED]')),
+            )
+            assert.deepStrictEqual(client.leaks(), [])
+            client.si.close(() => server.si.close(fin))
+          }),
+        )
+      })
+    })
   })
 
   it('transport-error-reply', function (t, fin) {
@@ -882,6 +956,24 @@ describe('redact', function () {
     assert.ok(!ccfail.stack.includes(SECRET))
     assert.ok(cfail.message.includes(SECRET))
 
+    // An error's cause and an AggregateError's errors are walked too.
+    const caused = new Error('failed', { cause: { token: SECRET } })
+    const ccaused = redact({ e: caused }).e
+    assert.deepStrictEqual(ccaused.cause, { token: '[REDACTED]' })
+    assert.equal(
+      Object.prototype.propertyIsEnumerable.call(ccaused, 'cause'),
+      false,
+    )
+    assert.equal(caused.cause.token, SECRET)
+    const many = new AggregateError([{ token: SECRET }], 'many')
+    assert.deepStrictEqual(redact({ e: many }).e.errors, [
+      { token: '[REDACTED]' },
+    ])
+    const textcause = new Error('x', { cause: 'redis://u:' + SECRET + '@h' })
+    assert.equal(redact({ e: textcause }).e.cause, 'redis://u:[REDACTED]@h')
+    const plaincause = new Error('x', { cause: 7 })
+    assert.strictEqual(redact({ e: plaincause }).e, plaincause)
+
     // Class instances keep their prototype.
     class Entity {
       canon() {
@@ -1045,6 +1137,23 @@ describe('redact', function () {
     assert.deepStrictEqual(describe_msg(si, null), '(null)')
     assert.deepStrictEqual(describe_msg(si, [1]), '(array)')
     assert.deepStrictEqual(describe_msg(null, { a: 1 }), '{} (other keys: a)')
+
+    // A credential URL in a pattern value is scrubbed, even with
+    // redaction switched off.
+    si.add('role:db,endpoint:*', function (msg, reply) {
+      reply({})
+    })
+    const url = 'postgres://u:' + SECRET + '@h/db'
+    assert.equal(
+      describe_msg(si, { role: 'x', endpoint: url }),
+      'endpoint:postgres://u:[REDACTED]@h/db,role:x',
+    )
+    const off = Seneca({ log: 'silent', redact: { active: false } })
+    off.add('role:db,endpoint:*', function (msg, reply) {
+      reply({})
+    })
+    assert.ok(!describe_msg(off, { endpoint: url }).includes(SECRET))
+    off.close()
 
     // A property that cannot be read is named only.
     const odd = {

@@ -3,6 +3,7 @@
 
 import Util from 'util'
 import { make_trace_desc, stringify } from './common'
+import { redact_with } from './redact'
 
 
 // THIS IS NOT A PLUGIN
@@ -59,7 +60,7 @@ function externalize_msg(_seneca: any, msg: any, meta: any) {
 
 
 // TODO: handle arrays gracefully - e.g {arr$:[]} as msg
-function externalize_reply(_seneca: any, err: any, out: any, meta: any) {
+function externalize_reply(seneca: any, err: any, out: any, meta: any) {
   let rep = err || out
 
   if (!rep) {
@@ -73,6 +74,19 @@ function externalize_reply(_seneca: any, err: any, out: any, meta: any) {
     rep = Object.getOwnPropertyNames(rep)
       .reduce((a: any, pn: any) => (a[pn] = rep[pn], a), {})
     rep.meta$.error = true
+
+    // An error reply can carry the incoming message (meta$.data) and
+    // error details that include message values. The remote caller gets
+    // redacted copies; the local error is not changed. Results and
+    // custom meta data are not redacted, as callers depend on them.
+    rep.message = redact_with(seneca, rep.message)
+    rep.stack = redact_with(seneca, rep.stack)
+    if (null != rep.details) {
+      rep.details = redact_with(seneca, rep.details)
+    }
+    if (rep.meta$ && null != rep.meta$.data) {
+      rep.meta$ = { ...rep.meta$, data: redact_with(seneca, rep.meta$.data) }
+    }
   }
 
   return rep

@@ -5,7 +5,7 @@ Errors created by Seneca are `Error` objects with these properties:
 | Property | Meaning |
 | -------- | ------- |
 | `code` | The error code from the table below. |
-| `message` | `seneca: ` followed by the message template with its `<%=name%>` placeholders filled from `details`. It never contains message or plugin option values: a message is described by its pattern keys with their values and the names of its other keys, for example `cmd:logn,sys:user (other keys: email, pass)`, and a validation failure by the property and the expected type. |
+| `message` | `seneca: ` followed by the message template with its `<%=name%>` placeholders filled from `details`. It never contains message or plugin option values: a message is described by its pattern keys with their values and the names of its other keys, for example `cmd:logn,sys:user (other keys: email, pass)`, with passwords in URLs among the values replaced, and a validation failure by the property and the expected type. |
 | `details` | The values given when the error was created, plus `callpoint` in some cases. Values of secret-looking keys are redacted (see [Options: redact](options.md#redact)). |
 | `seneca` | `true`. |
 | `package` | `'seneca'`. |

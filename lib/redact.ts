@@ -246,13 +246,32 @@ function make_redactor(spec?: RedactSpec): Redactor {
         }
       }
 
-      // The message and stack of an error are not enumerable.
+      // The message, stack, cause and (for AggregateError) errors of an
+      // error are not enumerable.
       if (val instanceof Error) {
         for (const key of ['message', 'stack']) {
           const text = val[key as 'message' | 'stack']
           if ('string' === typeof text) {
             const out = scrub(text)
             if (out !== text) {
+              ; (changes = changes || []).push(key, out)
+            }
+          }
+        }
+
+        for (const key of ['cause', 'errors']) {
+          if (
+            Object.prototype.hasOwnProperty.call(val, key) &&
+            !Object.prototype.propertyIsEnumerable.call(val, key)
+          ) {
+            const child = (val as any)[key]
+            const out =
+              'string' === typeof child
+                ? scrub(child)
+                : null != child && 'object' === typeof child
+                  ? walk(child, depth + 1, limit, state)
+                  : child
+            if (out !== child) {
               ; (changes = changes || []).push(key, out)
             }
           }
@@ -463,6 +482,9 @@ function describe_msg(instance: any, msg: any): string {
     (private$ && private$.pattern_keys) || EMPTY_SET
   const redactor: Redactor = (private$ && private$.redact) || default_redactor
 
+  // Error text never shows secrets, even with redaction switched off.
+  const scrubber: Redactor = redactor.active ? redactor : default_redactor
+
   const shown: string[] = []
   const other: string[] = []
 
@@ -491,7 +513,8 @@ function describe_msg(instance: any, msg: any): string {
         'boolean' === typeof val) &&
       !redactor.matches_key(key)
     ) {
-      let valstr = String(val)
+      // A credential URL in a pattern value is scrubbed.
+      let valstr = scrubber(String(val))
       if (MAX_VALUE_LEN < valstr.length) {
         valstr = valstr.substring(0, MAX_VALUE_LEN) + '...'
       }

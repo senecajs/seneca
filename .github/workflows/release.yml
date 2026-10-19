@@ -18,9 +18,13 @@
 # with the "npm publish" action allowed. See docs/how-to/create-a-release.md.
 #
 # Layout: the `validate` job installs dependencies, builds and tests, and has
-# no OIDC permission. The `publish` job never installs dependencies or runs
-# third-party code: it checks out the tag, checks it again with the
-# dependency-free validation script, and publishes the committed files.
+# no OIDC permission. The `publish` job never installs anything or runs
+# third-party code: it checks out the commit that was validated, checks that
+# the tag still points to it, checks it again with the dependency-free
+# validation script, and publishes the committed files.
+#
+# Only one release runs at a time in this repository, so two tags cannot
+# publish concurrently and move the latest dist-tag backward.
 #
 # Actions are pinned to commits; Dependabot keeps the pins up to date.
 
@@ -45,9 +49,9 @@ on:
         type: string
         default: ''
 
-# One release at a time per ref; never cancel a publish in progress.
+# One release at a time in the repository; never cancel a publish in progress.
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 permissions:
@@ -63,6 +67,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       ref: ${{ steps.plan.outputs.ref }}
+      sha: ${{ steps.commit.outputs.sha }}
       tag: ${{ steps.plan.outputs.tag }}
       dry_run: ${{ steps.plan.outputs.dry_run }}
       version: ${{ steps.check.outputs.version }}
@@ -110,6 +115,11 @@ jobs:
           ref: ${{ steps.plan.outputs.ref }}
           persist-credentials: false
 
+      # The publish job checks out this exact commit, not the (movable) tag.
+      - name: Record the commit
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -135,7 +145,7 @@ jobs:
         run: npm publish --dry-run --ignore-scripts --tag "$DIST_TAG"
 
   publish:
-    name: publish ${{ needs.validate.outputs.tag }}
+    name: publish
     needs: validate
     if: needs.validate.outputs.dry_run != 'true'
     runs-on: ubuntu-latest
@@ -150,8 +160,24 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
-          ref: ${{ needs.validate.outputs.ref }}
+          ref: ${{ needs.validate.outputs.sha }}
           persist-credentials: false
+
+      - name: Check that the tag still points to the validated commit
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+          SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          # An annotated tag lists its commit as refs/tags/<tag>^{}.
+          current="$(git ls-remote origin "refs/tags/$TAG^{}" | cut -f1)"
+          if [ -z "$current" ]; then
+            current="$(git ls-remote origin "refs/tags/$TAG" | cut -f1)"
+          fi
+          if [ "$current" != "$SHA" ]; then
+            echo "::error::tag $TAG points to ${current:-nothing}, not the validated commit $SHA"
+            exit 1
+          fi
+          echo "tag $TAG is the validated commit $SHA"
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -160,7 +186,8 @@ jobs:
           package-manager-cache: false
 
       - name: Check the npm version
-        # Trusted publishing needs npm 11.5.1 or later; Node.js 24 bundles a newer npm.
+        # Trusted publishing needs npm 11.5.1 or later; Node.js 24 bundles a
+        # newer one. Nothing is installed in this job, so an older npm fails.
         run: |
           node -e '
             const [major, minor, patch] = require("node:child_process")
@@ -168,8 +195,7 @@ jobs:
             const ok = 11 < major || (11 === major && (5 < minor || (5 === minor && 1 <= patch)))
             console.log("npm " + [major, minor, patch].join(".") + (ok ? "" : ": too old for trusted publishing"))
             process.exit(ok ? 0 : 1)
-          ' || npm install -g npm@11
-          npm --version
+          '
 
       - name: Validate the tag again
         id: check

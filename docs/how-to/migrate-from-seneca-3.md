@@ -105,8 +105,9 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
   matched on error text should check `err.code` and `err.details`.
 * Values of secret-looking keys (names with words such as `password`,
   `secret`, `token`, `apikey` or `auth`) are redacted from log entries,
-  the `log` event, error details, printed options and fatal error
-  reports. Add your own names with the `redact.keys` option.
+  the `log` event, error details, error replies to remote callers,
+  printed options and fatal error reports. Add your own names with the
+  `redact.keys` option.
 * The transport type names `http` and `direct` still select the `web`
   transport, but are deprecated and log a warning: use `web`.
 
