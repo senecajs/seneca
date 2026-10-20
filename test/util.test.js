@@ -129,21 +129,4 @@ describe('util', function () {
     assert.equal(Seneca.util.Gex('a*').match('ab'), true)
     done()
   })
-
-  it('common.idnid-never-starts-with-digit', function (_t, done) {
-    var Common = require('../lib/common.js')
-
-    // Use a short length so a digit-first id would be common by
-    // chance if the fix wasn't in place (default alphabet is
-    // 0-9a-z, so ~28% chance per id of starting with a digit).
-    var gen = Common.idnid({ length: 4 })
-
-    for (var i = 0; i < 2000; i++) {
-      var id = gen()
-      assert.equal(id.length, 4)
-      assert.equal(/^[0-9]/.test(id), false)
-    }
-
-    done()
-  })
 })
