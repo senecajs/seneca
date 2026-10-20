@@ -738,7 +738,9 @@ function client(this: any, callpoint: any) {
 
     const config = intern.resolve_config(raw_config, opts, self)
 
-    config.id = config.id || pattern(raw_config)
+    // The id appears in logs and errors, so it is built from the
+    // redacted configuration (a password must not become part of it).
+    config.id = config.id || pattern(redact_with(self, raw_config))
 
     let pins =
       config.pins ||

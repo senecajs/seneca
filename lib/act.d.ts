@@ -6,6 +6,7 @@ declare const intern: {
     do_act: (instance: any, opts: any, origmsg: any, origreply: any) => any;
     make_actmsg: (origmsg: any) => any;
     handle_reply: (opts: any, meta: any, actctxt: any, actmsg: any, err: any, out?: any, reply_meta?: any) => void;
+    remote_error: (instance: any, meta: any, msg: any, err: any) => any;
     errlog: typeof make_standard_err_log_entry;
     actlog: typeof make_standard_act_log_entry;
     process_outward: (actctxt: any, data: any) => void;

@@ -271,13 +271,29 @@ const intern = {
     intern.process_outward(actctxt, data)
 
     if (data.has_callback) {
+      const reply_err = intern.remote_error(delegate, meta, actmsg, data.err)
+      const reply_res = data.res === data.err ? reply_err : data.res
+
       try {
-        reply.call(delegate, data.err, data.res, data.meta)
+        reply.call(delegate, reply_err, reply_res, data.meta)
       }
       catch (thrown_obj: any) {
         intern.callback_error(delegate, thrown_obj, actctxt, data)
       }
     }
+  },
+
+
+  // An error replied to a message from a remote caller is redacted
+  // before the transport plugin serializes it for that caller. Remote
+  // messages carry remote$ (core transport utilities, as meta.remote) or
+  // transport$ (seneca-transport); their child messages carry neither.
+  // Local callers receive the error unchanged.
+  remote_error: function(instance: any, meta: any, msg: any, err: any) {
+    return null != err &&
+      ((meta && meta.remote) || (msg && null != msg.transport$))
+      ? redact_with(instance, err)
+      : err
   },
 
 
@@ -468,7 +484,10 @@ const intern = {
         )
       }
 
-      reply.call(act_instance, err)
+      reply.call(
+        act_instance,
+        intern.remote_error(act_instance, meta, origmsg, err)
+      )
       return true
     } else if ('result' === inward.kind) {
       if (inward.log && inward.log.level) {

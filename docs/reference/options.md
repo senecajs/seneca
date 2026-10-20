@@ -77,7 +77,8 @@ describe the accepted type rather than a fixed default.
 ## `redact`
 
 Keeps secrets out of the data that leaves an instance: log entries
-(including those delivered to `log` event listeners), error `details`,
+(including those delivered to `log` event listeners), error `details`
+and causes, error replies sent to remote callers by transport plugins,
 printed options and the fatal error report. A value is replaced by the
 mark when its key name looks secret. The name is split into words at
 `-`, `_`, `.`, spaces, digits and camelCase boundaries (`apiKey`,
@@ -101,7 +102,9 @@ trivial actions lowers throughput by about 15-20%; with the default
 logging nothing is checked.
 
 Error message text does not depend on this option: it never contains
-message or option values (see [Error codes](error-codes.md)).
+option values, and of the message only the pattern keys with their
+values (passwords in URLs replaced) and the names of the other keys
+(see [Error codes](error-codes.md)).
 
 | Option | Default | Effect |
 | ------ | ------- | ------ |

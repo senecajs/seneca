@@ -141,9 +141,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   * Error messages never contain message or plugin option values. A
     message is described by its pattern keys with their values and the
     names of its other keys, for example `No matching action pattern
-    found for cmd:logn,sys:user (other keys: email, pass)`. Validation
-    failures name the property and the rule or expected type, without the
-    value that shape's own text includes; custom `Fault` messages are kept,
+    found for cmd:logn,sys:user (other keys: email, pass)`; passwords in
+    URLs among the pattern values are replaced. Validation failures name
+    the property and the rule or expected type, without the value that
+    shape's own text includes; custom `Fault` messages are kept,
     with `$VALUE` replaced by the type of the value. This changes the text of
     `act_not_found`, `act_default_bad`, `act_invalid_msg`,
     `action_timeout`, `result_not_objarr`, `closed`, `maxparents`,
@@ -154,9 +155,15 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
     `token`, `apikey`, `auth` or `cookie`, plus `redact.keys`; see
     docs/reference/options.md) and passwords in URLs, in log entries,
     entries delivered to `log` event listeners (which receive entries
-    of every level), error `details`, options printed by
-    `debug.print.options`, and the fatal error report, including its
-    command line arguments and, when printed, environment variables.
+    of every level), error `details` and causes (`cause`, and `errors`
+    of an `AggregateError`), errors replied to remote callers (an error
+    replied to a message that arrived through a transport plugin,
+    seneca-transport included, is redacted before the plugin serializes
+    it, and so is the copy of the message that `transport/utils`
+    returns in `meta$.data`), the transport client identifier, options
+    printed by `debug.print.options`, and the fatal error report,
+    including its error text, command line arguments and, when
+    printed, environment variables.
     Actions and callbacks still receive the real values. With a `log`
     listener or debug logging, a benchmark of trivial actions runs
     about 15-20% slower; with the default logging there is no

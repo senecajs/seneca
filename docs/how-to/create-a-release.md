@@ -20,11 +20,17 @@ The workflow has two jobs:
   published, and the dist-tag is consistent with the published versions.
   The job has no OIDC permission.
 * `publish` waits for the approval of the `npm` environment, checks out
-  the tag, runs the validation script again, and publishes the committed
-  files with `npm publish`. It does not run `npm install`, so no
-  third-party code runs in the job that holds the publish credential. It
-  then verifies the published version, its dist-tag and its provenance
-  attestation, and creates the GitHub release from the `CHANGES.md` entry.
+  the commit that `validate` tested, and stops if the tag no longer points
+  to it. It runs the validation script again and publishes the committed
+  files with `npm publish`. It installs nothing, so no third-party code
+  runs in the job that holds the publish credential; it needs the npm
+  bundled with Node.js 24 (11.5.1 or later). It then verifies the
+  published version, its dist-tag and its provenance attestation, and
+  creates the GitHub release from the `CHANGES.md` entry.
+
+Only one release runs at a time in the repository, so two tags cannot
+publish at once and move the `latest` dist-tag backward. Later runs, dry
+runs included, wait in a queue; none replaces or cancels another.
 
 
 ## One-time setup

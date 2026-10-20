@@ -105,7 +105,7 @@ The export `seneca.export('transport/utils')` provides helpers
 | Function | Purpose |
 | -------- | ------- |
 | `externalize_msg(seneca, msg, meta)` | Prepare an outbound message: attaches `meta$`; errors become plain objects. |
-| `externalize_reply(seneca, err, out, meta)` | Prepare an outbound reply: attaches `meta$`, marks errors (`meta$.error`) and empty replies (`meta.empty`). |
+| `externalize_reply(seneca, err, out, meta)` | Prepare an outbound reply: attaches `meta$`, marks errors (`meta$.error`) and empty replies (`meta.empty`). An error reply is a plain object of the error's own properties (`message`, `stack`, `details`, `cause` and any others), redacted with the options of `seneca`, which must be the instance, as is `meta$.data` (the incoming message); see [Options: redact](options.md#redact). Results are sent unchanged. |
 | `internalize_msg(seneca, msg)` | Prepare an inbound message: moves `meta$` into `id$`, `sync$`, `custom$`, `explain$` and `parents$`, removes `fatal$`, sets `remote$`, converts entities. |
 | `internalize_reply(seneca, data)` | Prepare an inbound reply: returns `{ err, out, meta }`, rebuilding `Error` objects. |
 | `stringifyJSON(obj)`, `parseJSON(text)` | Safe JSON encoding (circular references) and decoding (errors are returned, not thrown). |
@@ -113,3 +113,11 @@ The export `seneca.export('transport/utils')` provides helpers
 | `info()` | `{ local, remote }` maps of pattern to action id, telling local actions from client actions. |
 
 Inbound messages must not carry `fatal$`; `internalize_msg` removes it.
+
+When an inbound message is marked as remote, an error replied to it
+reaches the plugin's callback already redacted (see
+[Options: redact](options.md#redact)): `internalize_msg` sets `remote$`,
+and seneca-transport sets `transport$`. A plugin that submits inbound
+messages without either marker serializes errors unredacted. Local
+callers, and the child messages of a remote message, receive errors
+unchanged.

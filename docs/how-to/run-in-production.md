@@ -77,7 +77,8 @@ in the background.
   and expose only the pins a service should serve.
 * Error text never contains message or option values, and the values of
   secret-looking keys are redacted from log entries, the `log` event,
-  error details, printed options and fatal reports (see
+  error details, error replies to remote callers, printed options and
+  fatal reports (see
   [Options: redact](../reference/options.md#redact)). Add the names of
   your own secret fields with `redact: { keys: ['pin', 'ssn'] }`, and
   keep `redact.active` on in production.
