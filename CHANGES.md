@@ -65,18 +65,6 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Without a prior action, `seneca.prior` and `seneca.direct_prior` return
   a copy of an array `default$` as an array. Before, the copy was a plain
   object with numeric keys.
-* `seneca.on()` accepts only the events Seneca emits (`log`, `ready`,
-  `close`, `act-in`, `act-out`, `act-err`, `act-err-4`, `pin`,
-  `after-pin`) and the EventEmitter events `error`, `newListener` and
-  `removeListener`. Any other name throws `invalid_event_name`, so a
-  misspelt event no longer registers a listener that never fires (#929,
-  #949).
-* The `events` option registers the action events under their emitted
-  names `act-in`, `act-out` and `act-err`. The underscore keys it used
-  before never matched an emitted event (#949).
-* Generated ids (`seneca.idgen()`, action and instance ids) never start
-  with a digit, so an id embedded unquoted in a jsonic pattern string is
-  not parsed as a number (#935, #950).
 * Deprecation warnings. Each Seneca 3 name or behaviour that Seneca 4
   still supports, and that Seneca 5 removes, reports a deprecation the
   first time it is used in a process: a Node.js `DeprecationWarning` with
@@ -213,9 +201,6 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   are built in (previously provided by seneca-promisify).
 * `seneca.prepare`, `seneca.destroy` and `seneca.direct` are available
   for plugin preparation, shutdown, and synchronous action execution.
-* `seneca.on()` throws `invalid_event_name` for an event Seneca does not
-  emit. Listeners for custom events belong on a separate EventEmitter.
-* In the `events` option, use `act-in`, `act-out` and `act-err` as keys.
 * Deprecated Seneca 3 names still work in 4.x, and are removed in Seneca 5.
   Run your tests with `node --trace-deprecation` to find them: each one
   reports a `SENECA_DEP_*` deprecation warning with a stack trace.

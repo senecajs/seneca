@@ -461,42 +461,12 @@ function SenecaInstance(this: any) {
 }
 Util.inherits(SenecaInstance, Events.EventEmitter)
 
-// The known, valid Seneca event names. Anything else passed to `.on`
-// is almost certainly a typo... (e.g. 'act-err' vs 'act_err'), so it's
-// validated here rather than silently registering a listener that
-// will never fire. See lib/act.ts, lib/outward.ts, lib/logging.ts,
-// lib/ready.ts, lib/actions.ts (where these are emitted), and the
-// close cleanup in lib/api.ts (where they are removed) for the
-// canonical list.
-const valid_event_names = [
-  'act-in',
-  'act-out',
-  'act-err',
-  'act-err-4',
-  'pin',
-  'after-pin',
-  'ready',
-  'close',
-  'log',
-  'error', // Node.js EventEmitter special-cases this event.
-  'newListener', // Emitted by EventEmitter itself; used by events.once().
-  'removeListener',
-]
-
-const original_on = SenecaInstance.prototype.on
-SenecaInstance.prototype.on = function(this: any, event_name: any, ...rest: any[]) {
-  if ('string' === typeof event_name && -1 === valid_event_names.indexOf(event_name)) {
-    throw error('invalid_event_name', {
-      name: event_name,
-      valid: valid_event_names.join(', '),
-    })
-  }
-
-  if ('act-err-4' === event_name) {
+// Deprecated: report a listener added for act-err-4.
+SenecaInstance.prototype.on = function on(this: any, name: any, listener: any) {
+  if ('act-err-4' === name) {
     Deprecate.deprecate(this, 'act_err_4')
   }
-
-  return original_on.call(this, event_name, ...rest)
+  return Events.EventEmitter.prototype.on.call(this, name, listener)
 }
 
 // Mark the Seneca object
@@ -1093,7 +1063,7 @@ function make_seneca(initial_opts?: any) {
 
 
   // Setup event handlers, if defined
-  var event_names = ['log', 'act-in', 'act-out', 'act-err', 'ready', 'close']
+  var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close']
   event_names.forEach(function(event_name) {
     if ('function' === typeof start_opts.events[event_name]) {
       root$.on(event_name, start_opts.events[event_name])
@@ -1101,8 +1071,8 @@ function make_seneca(initial_opts?: any) {
   })
 
   // Create internal tools.
-  private$.actnid = Common.idnid({ length: start_opts.idlen })
-  private$.didnid = Common.idnid({ length: start_opts.didlen })
+  private$.actnid = Nid({ length: start_opts.idlen })
+  private$.didnid = Nid({ length: start_opts.didlen })
 
   // Instance specific incrementing counters to create unique function names
   private$.next_action_id = Common.autoincr()
@@ -1220,7 +1190,7 @@ function make_seneca(initial_opts?: any) {
   root$.pinact = Deprecate.deprecated('pinact', Legacy.findpins)
 
   // Identifier generator.
-  root$.idgen = Common.idnid({ length: start_opts.idlen })
+  root$.idgen = Nid({ length: start_opts.idlen })
 
   // Instance tag
   start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag
@@ -1243,7 +1213,7 @@ function make_seneca(initial_opts?: any) {
 
   if (start_opts.debug.short_logs || start_opts.log.short) {
     start_opts.idlen = 2
-    root$.idgen = Common.idnid({ length: start_opts.idlen })
+    root$.idgen = Nid({ length: start_opts.idlen })
     root$.id = root$.idgen() + '/' + start_opts.tag
   }
 
