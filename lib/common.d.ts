@@ -7,6 +7,7 @@ declare function stringify(...args: any): any;
 declare function wrap_error(err: any, code?: string, details?: Record<string, any>): never;
 declare function make_plugin_key(plugin: any, origtag?: any): string;
 declare const tagnid: any;
+declare function idnid(opts?: any): any;
 declare function parse_jsonic(str: any, code: any): any;
 declare function pattern(patobj: any): any;
 declare function pincanon(inpin: any): any;
@@ -55,4 +56,4 @@ declare class ActHistory {
 }
 declare function message_props_shape(): import("shape").Node<undefined>;
 declare function find_gubu_shape(value: any, path?: string, seen?: Set<unknown>): string | null;
-export { pins, find_gubu_shape, message_props_shape, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { pins, find_gubu_shape, message_props_shape, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, idnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };

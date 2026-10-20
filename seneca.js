@@ -355,12 +355,39 @@ function SenecaInstance() {
     this.setMaxListeners(0);
 }
 util_1.default.inherits(SenecaInstance, events_1.default.EventEmitter);
-// Deprecated: report a listener added for act-err-4.
-SenecaInstance.prototype.on = function on(name, listener) {
-    if ('act-err-4' === name) {
+// The known, valid Seneca event names. Anything else passed to `.on`
+// is almost certainly a typo... (e.g. 'act-err' vs 'act_err'), so it's
+// validated here rather than silently registering a listener that
+// will never fire. See lib/act.ts, lib/outward.ts, lib/logging.ts,
+// lib/ready.ts, lib/actions.ts (where these are emitted), and the
+// close cleanup in lib/api.ts (where they are removed) for the
+// canonical list.
+const valid_event_names = [
+    'act-in',
+    'act-out',
+    'act-err',
+    'act-err-4',
+    'pin',
+    'after-pin',
+    'ready',
+    'close',
+    'log',
+    'error', // Node.js EventEmitter special-cases this event.
+    'newListener', // Emitted by EventEmitter itself; used by events.once().
+    'removeListener',
+];
+const original_on = SenecaInstance.prototype.on;
+SenecaInstance.prototype.on = function (event_name, ...rest) {
+    if ('string' === typeof event_name && -1 === valid_event_names.indexOf(event_name)) {
+        throw error('invalid_event_name', {
+            name: event_name,
+            valid: valid_event_names.join(', '),
+        });
+    }
+    if ('act-err-4' === event_name) {
         deprecate_1.Deprecate.deprecate(this, 'act_err_4');
     }
-    return events_1.default.EventEmitter.prototype.on.call(this, name, listener);
+    return original_on.call(this, event_name, ...rest);
 };
 // Mark the Seneca object
 SenecaInstance.prototype.isSeneca = true;
@@ -478,15 +505,15 @@ function make_seneca(initial_opts) {
         outward: soi_subrouter.outward || (0, patrun_1.Patrun)({ gex: true }),
     };
     // Setup event handlers, if defined
-    var event_names = ['log', 'act_in', 'act_out', 'act_err', 'ready', 'close'];
+    var event_names = ['log', 'act-in', 'act-out', 'act-err', 'ready', 'close'];
     event_names.forEach(function (event_name) {
         if ('function' === typeof start_opts.events[event_name]) {
             root$.on(event_name, start_opts.events[event_name]);
         }
     });
     // Create internal tools.
-    private$.actnid = (0, nid_1.default)({ length: start_opts.idlen });
-    private$.didnid = (0, nid_1.default)({ length: start_opts.didlen });
+    private$.actnid = Common.idnid({ length: start_opts.idlen });
+    private$.didnid = Common.idnid({ length: start_opts.didlen });
     // Instance specific incrementing counters to create unique function names
     private$.next_action_id = Common.autoincr();
     var callpoint = (private$.callpoint = Common.make_callpoint(start_opts.debug.callpoint));
@@ -584,7 +611,7 @@ function make_seneca(initial_opts) {
     root$.findpins = deprecate_1.Deprecate.deprecated('findpins', legacy_1.Legacy.findpins);
     root$.pinact = deprecate_1.Deprecate.deprecated('pinact', legacy_1.Legacy.findpins);
     // Identifier generator.
-    root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
+    root$.idgen = Common.idnid({ length: start_opts.idlen });
     // Instance tag
     start_opts.tag = null != start_opts.tag ? start_opts.tag : option_defaults.tag;
     // Create a unique identifer for this instance.
@@ -603,7 +630,7 @@ function make_seneca(initial_opts) {
     root$.tag = start_opts.tag;
     if (start_opts.debug.short_logs || start_opts.log.short) {
         start_opts.idlen = 2;
-        root$.idgen = (0, nid_1.default)({ length: start_opts.idlen });
+        root$.idgen = Common.idnid({ length: start_opts.idlen });
         root$.id = root$.idgen() + '/' + start_opts.tag;
     }
     root$.fullname = 'Seneca/' + root$.id;
