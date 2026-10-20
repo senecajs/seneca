@@ -54,6 +54,7 @@ original message. A rejected `post` promise carries only the error.
 | `export_not_found` | `seneca.export(key)` found nothing and `strict.exports` is true. |
 | `fail_cond_must_be_bool` | `seneca.fail(cond, code, details)` was given a non boolean condition. |
 | `fail_wrong_number_of_args` | `seneca.fail` was called with more than three arguments. |
+| `invalid_event_name` | `seneca.on` was given an event name that Seneca does not emit. See [Events](events.md). |
 | `invalid_options` | The options failed validation. |
 | `invalid_plugin_option` | Plugin options failed validation against the plugin's `defaults`. The text names each failing option and what was expected; `details.options` holds the options with secret-looking values redacted. |
 | `inverted_file_name` | A file `options.seneca.js` exists; the supported name is `seneca.options.js`. |

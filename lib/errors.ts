@@ -183,6 +183,10 @@ const messages = {
   bad_logspec:
     'The log option must be a string, number, function, or object; was: <%=logspec%>.',
 
+  invalid_event_name:
+    'Invalid event name: "<%=name%>". The seneca.on method only accepts ' +
+    'known Seneca event names: <%=valid%>.',
+
   // Legacy error message codes
 
   act_invalid_args:

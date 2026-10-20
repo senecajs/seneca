@@ -50,6 +50,7 @@ declare const messages: {
     transport_client_null: string;
     bad_logspec_string: string;
     bad_logspec: string;
+    invalid_event_name: string;
     act_invalid_args: string;
 };
 declare const deprecation: Record<string, string>;
@@ -106,6 +107,7 @@ declare const _default: {
     transport_client_null: string;
     bad_logspec_string: string;
     bad_logspec: string;
+    invalid_event_name: string;
     act_invalid_args: string;
 };
 export default _default;

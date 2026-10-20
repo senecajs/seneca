@@ -19,6 +19,12 @@ can be called on any instance or delegate.
 `act-err`, `act-err-4`, `ready`, `pin` and `after-pin` once the close
 action has completed.
 
+`seneca.on()` accepts only the event names in the table above, `pin`
+and `after-pin`, and the EventEmitter events `newListener` and
+`removeListener`. Any other name throws `invalid_event_name`, so a
+misspelt event (`act_err` for `act-err`) fails at once instead of
+registering a listener that never fires.
+
 ## The `events` option
 
 Listeners can be registered before startup with the `events` option:
@@ -29,14 +35,13 @@ Seneca({
     log: (entry) => { ... },
     ready: () => { ... },
     close: () => { ... },
+    'act-in': (msg, out, meta) => { ... },
   },
 })
 ```
 
-The keys `act_in`, `act_out` and `act_err` are accepted by the option but
-register listeners for events of those names, which are never emitted
-(the action events use hyphens). Register them with
-`seneca.on('act-in', fn)` instead.
+The keys are `log`, `ready`, `close`, `act-in`, `act-out` and `act-err`.
+Other keys are ignored.
 
 ## Delegate hooks
 

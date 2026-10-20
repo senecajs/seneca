@@ -36,13 +36,8 @@ describe the accepted type rather than a fixed default.
 | `module` | none | Module object (with a `require` method) used to resolve `seneca.options.js` and plugin names; defaults to the module that required Seneca. |
 | `plugin` | `{}` | Options for plugins, keyed by plugin name (`plugin.foo`) or by name and tag (`plugin['foo$tag']`). See [Plugins](plugins.md#option-resolution). |
 | `plugins` | `{}` | Plugins to load at startup: an object (keys are names, values are plugin descriptions; `false` ignores the plugin) or an array of plugin descriptions, each passed to `seneca.use()`. |
-| `events` | `{}` | Event listeners registered before startup, keyed by event name: `log`, `ready`, `close` (and the act events, see note). See [Events](events.md). |
+| `events` | `{}` | Event listeners registered before startup, keyed by event name: `log`, `ready`, `close`, `act-in`, `act-out`, `act-err`. See [Events](events.md). |
 | `reload$` | none | Legacy: when passed to `seneca.options()`, options are recomputed from all sources instead of merged. |
-
-Note on `events`: the keys `act_in`, `act_out` and `act_err` register
-listeners for events with those underscore names, but the action events
-are emitted as `act-in`, `act-out` and `act-err`, so those three keys
-have no effect. Use `seneca.on('act-in', fn)` instead.
 
 ## `error`
 
