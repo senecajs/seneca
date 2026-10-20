@@ -20,7 +20,7 @@ describe the accepted type rather than a fixed default.
 | ------ | ------- | ------ |
 | `tag` | `'-'` | Instance tag. Appended to the instance identifier (`seneca.id`) and `seneca.tag`; used to tell instances apart in logs. `'-'` means untagged. |
 | `timeout` | `22222` | Default action timeout in milliseconds. An action that has not replied in time produces an `action_timeout` error. Overridden per message with `timeout$`. |
-| `idlen` | `12` | Length of the random identifiers generated for the instance and for messages. |
+| `idlen` | `12` | Length of the random identifiers generated for the instance and for messages. A message whose id repeats a recent one is answered from the action history without running its action, so a short length makes different messages collide. |
 | `didlen` | `4` | Length of delegate identifiers (`seneca.did`). |
 | `id$` | none | Fixed instance identifier instead of the generated one. |
 | `default_plugins` | `{}` | Reserved; not read by Seneca 4. |
@@ -67,7 +67,7 @@ describe the accepted type rather than a fixed default.
 | `debug.print.err` | `false` | The flat logger also prints errors to standard error. |
 | `debug.print.depth` | `2` | Object inspection depth for printed options, replies and log data. |
 | `debug.act_caller` | `false` | Record the calling code location of each `act` call in `msg.caller$` (always on in test mode). |
-| `debug.short_logs` | `false` | Shorten identifiers to 2 characters (the instance id becomes `xx/tag`). |
+| `debug.short_logs` | `false` | Shorten identifiers to 6 characters for readable logs (the instance id becomes `xxxxxx/tag`). Message and transaction ids use the same length. |
 | `debug.callpoint` | `false` | Record the calling code location when actions are added and called (`actdef.callpoint`, log entries). Enabled by test mode. |
 | `debug.deprecation` | `true` | Report deprecations: each deprecated Seneca 3 name or behaviour in use (once per process, as a warn-level `DEPRECATED` log entry and a Node.js `DeprecationWarning` with a `SENECA_DEP_*` code), and calls of actions marked with `deprecate$`. See [Legacy](legacy.md#deprecation-warnings). |
 | `debug.argv` | `null` | Array used instead of `process.argv` when parsing `--seneca.*` arguments (the first two entries are skipped). For tests. |

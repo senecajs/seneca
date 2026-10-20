@@ -1241,8 +1241,12 @@ function make_seneca(initial_opts?: any) {
   // The instance tag, useful for grouping instances.
   root$.tag = start_opts.tag
 
+  // Short identifiers for readable logs. Message and transaction ids come
+  // from the same generator, and a repeated id is answered from the action
+  // history as a repeated message, so they must not collide: with 2
+  // characters, different messages in a transaction often did.
   if (start_opts.debug.short_logs || start_opts.log.short) {
-    start_opts.idlen = 2
+    start_opts.idlen = 6
     root$.idgen = Common.idnid({ length: start_opts.idlen })
     root$.id = root$.idgen() + '/' + start_opts.tag
   }
