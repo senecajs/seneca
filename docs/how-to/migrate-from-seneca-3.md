@@ -89,6 +89,12 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
   but they are ignored and each one reports a deprecation.
 * `deathdelay` is `death_delay`. `deathdelay` still works, as a deprecated
   alias.
+* `debug.short_logs` (and `log.short`) no longer shorten identifiers. Seneca
+  3 made all identifiers 2 characters long, so different messages could
+  share an id, and a message with a repeated id is answered from the action
+  history without running its action. The options are accepted and
+  ignored, with a deprecation; the `flat` and `test` log formats print the
+  first 6 characters of identifiers.
 * `legacy.error` has no effect: errors always use the Seneca 4 format,
   where the caller receives the original error object and the error
   handler receives it with `meta$` attached.

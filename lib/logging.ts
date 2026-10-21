@@ -39,6 +39,11 @@ const internal_loggers: any = {
   json_logger,
 }
 
+// Number of characters of each identifier that the flat and test log
+// formats print. Identifiers themselves keep their full length.
+const PRINT_ID_LEN = 6
+
+
 function make_logging() {
   const logging = {
     default_logspec: Common.deep(default_logspec),
@@ -110,8 +115,8 @@ function flat_logger(this: any, entry: any) {
   var sb = [
     entry.isot,
     'string' === typeof entry.seneca_id
-      ? entry.seneca_id.substring(0, 5)
-      : '-----',
+      ? entry.seneca_id.substring(0, PRINT_ID_LEN)
+      : '-'.repeat(PRINT_ID_LEN),
     level_str,
     null == entry.kind ? 'log' : entry.kind,
     null == entry.case ? 'LOG' : entry.case,
@@ -368,7 +373,7 @@ function build_test_log(seneca: any, data: any) {
   var logb = [
     time +
     '/' +
-    seneca.id.substring(0, 2) +
+    seneca.id.substring(0, PRINT_ID_LEN) +
     '/' +
     seneca.tag +
     ' ' +
@@ -384,7 +389,7 @@ function build_test_log(seneca: any, data: any) {
         data.meta.id
           .split('/')
           .map(function(s: any) {
-            return s.substring(0, 2)
+            return s.substring(0, PRINT_ID_LEN)
           })
           .join('/')
       )
@@ -486,15 +491,17 @@ const intern = {
     entry.pattern = entry.pattern || act.meta.pattern
     entry.action = entry.action || act.def.id
 
-    entry.idpath = ('' + act.meta.tx).substring(0, 5)
+    entry.idpath = ('' + act.meta.tx).substring(0, PRINT_ID_LEN)
     if (act.meta.parents) {
       for (var i = 0; i < act.meta.parents.length; i++) {
-        entry.idpath += (
-          '.' + ((act.meta.parents[i] || [])[1] || '-').split('/')[0]
-        ).substring(0, 6)
+        entry.idpath +=
+          '.' +
+          ((act.meta.parents[i] || [])[1] || '-')
+            .split('/')[0]
+            .substring(0, PRINT_ID_LEN)
       }
     }
-    entry.idpath += ('.' + act.meta.mi).substring(0, 6)
+    entry.idpath += '.' + ('' + act.meta.mi).substring(0, PRINT_ID_LEN)
   },
 }
 

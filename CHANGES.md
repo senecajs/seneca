@@ -38,6 +38,16 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   string) produces a `plugin_define_failed` error instead of a TypeError.
 * `seneca.options({tag})` keeps a custom instance identifier (option `id$`)
   intact when the tag changes.
+* Identifiers are no longer shortened. `debug.short_logs` (and
+  `log.short`) made message and transaction ids 2 characters long, and a
+  message whose id repeats a recent one is answered from the action
+  history without running its action, so different messages in one
+  transaction often got another message's result (about one in six of 300
+  messages); the transport tests, which used short logs, failed
+  intermittently for this reason. The options are now ignored, with the
+  deprecation `SENECA_DEP_SHORT_LOGS`, and test mode no longer shortens the
+  instance id. The `flat` and `test` log formats print the first 6
+  characters of identifiers (they printed 5 and 2).
 * Error messages added for the `closed`, `unsupported_legacy_plugin`,
   `transport_client_null`, `bad_logspec`, `bad_logspec_string` and
   `no_options` error codes.

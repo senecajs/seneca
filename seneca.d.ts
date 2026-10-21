@@ -222,6 +222,7 @@ declare namespace Seneca {
             undead?: boolean;
             print?: Record<string, any>;
             act_caller?: boolean;
+            /** @deprecated Ignored: logs print the first 6 characters of identifiers. Removed in Seneca 5. */
             short_logs?: boolean;
             callpoint?: boolean;
             deprecation?: boolean;

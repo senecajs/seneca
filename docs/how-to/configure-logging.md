@@ -136,5 +136,4 @@ the test and flat formats.
 | Deeper object inspection | `debug: { print: { depth: 4 } }` |
 | Print errors to stderr as well (flat logger) | `debug: { print: { err: true } }` |
 | Periodic status line | `status: { running: true, interval: 60000 }` |
-| Shorter identifiers | `debug: { short_logs: true }` |
 | Silence deprecation warnings | `debug: { deprecation: false }` |

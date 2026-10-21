@@ -218,6 +218,9 @@ const deprecation: Record<string, string> = {
   legacy_error:
     'The legacy.error option has no effect: errors always use the Seneca 4 format. ' +
     'It will be removed in Seneca 5.',
+  short_logs:
+    'The <%=option%> option is ignored: identifiers keep their full length and ' +
+    'logs print their first 6 characters. It will not be accepted in Seneca 5.',
   plugin_init:
     'Plugin <%=name%>: the init property of a plugin definition is deprecated and will be removed in Seneca 5; ' +
     'name the definition function define.',

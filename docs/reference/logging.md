@@ -74,8 +74,8 @@ option is honoured, as the builtin loggers do.
 | Logger | Selected by | Output |
 | ------ | ----------- | ------ |
 | `json` (default) | default, `log: 'json'`, `logger: 'json'` | One JSON document per entry (circular references are made safe). Intended for log collection services. |
-| `flat` | `log: 'flat'`, `logger: 'flat'` | One tab separated line per entry: ISO time, first 5 characters of the instance id, level (5 characters), kind, case, plugin, pattern, action, id path, data (truncated to `debug.datalen`), callpoint. |
-| `test` | `seneca.test()`, `logger: 'test'` (not `log: 'test'`, which sets the level to `warn`) | Compact lines for reading test output: elapsed milliseconds, 2 characters of the instance id, tag, level, `kind/case`, then entry specific fields (action ids, patterns, results, stack traces for `ERR` entries). |
+| `flat` | `log: 'flat'`, `logger: 'flat'` | One tab separated line per entry: ISO time, first 6 characters of the instance id, level (5 characters), kind, case, plugin, pattern, action, id path, data (truncated to `debug.datalen`), callpoint. |
+| `test` | `seneca.test()`, `logger: 'test'` (not `log: 'test'`, which sets the level to `warn`) | Compact lines for reading test output: elapsed milliseconds, first 6 characters of the instance id, tag, level, `kind/case`, then entry specific fields (message ids, as the first 6 characters of each part; patterns, results, stack traces for `ERR` entries). |
 
 Custom loggers are given with the `logger` option (a function, a builtin
 name, or a logger plugin), with `internal.logger`, or as `log.logger`.
@@ -120,8 +120,8 @@ Fields added to every entry:
 | `plugin_name`, `plugin_tag` | Plugin that logged the entry, when logged from a plugin. |
 
 Fields added when logged inside an action: `kind: 'act'`, `actid`
-(message id), `pattern`, `action` (action id), `idpath` (shortened
-transaction and parent message ids).
+(message id), `pattern`, `action` (action id), `idpath` (the first 6
+characters of the transaction and parent message ids).
 
 Conventional fields used by Seneca's own entries:
 
@@ -166,6 +166,6 @@ error output (`debug.print.err`) use `console.error`, or
 ## Related options
 
 `log`, `logger`, `redact.*`, `test`, `quiet`, `debug.datalen`, `debug.print.depth`,
-`debug.print.err`, `debug.short_logs`, `status.*`, `trace.unknown`,
+`debug.print.err`, `status.*`, `trace.unknown`,
 `trace.invalid`, `internal.print.*`, `internal.logger`. See
 [Options](options.md).
