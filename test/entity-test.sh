@@ -1,5 +1,5 @@
 
-# Validates seneca master against seneca-entity
+# Validates seneca main against seneca-entity
 # Run from project root
 
 rm -rf seneca-entity-test

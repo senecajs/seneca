@@ -10,7 +10,7 @@ secrets, or on a maintainer's machine: the `release` workflow
 token for a publish credential, and npm attaches build provenance to the
 published package.
 
-A release is started by hand: run the `release` workflow on `master`
+A release is started by hand: run the `release` workflow on `main`
 (*Actions* → *release* → *Run workflow*, or `gh workflow run`). It
 releases the `package.json` version of that commit. With *dry-run* on,
 the default, it only validates.
@@ -25,7 +25,7 @@ The workflow has two jobs:
   with the published versions. It also checks that the tag `vX.Y.Z` does
   not exist yet, or points to the commit being released. The job has no
   OIDC permission.
-* `publish` runs when *dry-run* is off, and only from `master` or a
+* `publish` runs when *dry-run* is off, and only from `main` or a
   maintenance branch (`N.x`). It checks out the commit that `validate`
   tested, checks the tag again, runs the validation script again and
   publishes the committed files with `npm publish`. It installs nothing,
@@ -78,7 +78,7 @@ that branch and running it there with the *dist-tag* input `3x`.
 ## Releasing a version
 
 1. Review GitHub issues and pull requests; merge what belongs in the
-   release. Make sure the `build` workflow is green on `master`.
+   release. Make sure the `build` workflow is green on `main`.
 2. In a pull request, add an entry to `CHANGES.md` (`## X.Y.Z YYYY-MM-DD`
    followed by the release notes; the GitHub release notes are taken from
    this entry) and set `"version": "X.Y.Z"` in `package.json`
@@ -88,9 +88,9 @@ that branch and running it there with the *dist-tag* input `3x`.
    and merge the pull request. To check it locally first, run
    `node .github/scripts/validate-release.js --tag vX.Y.Z`.
 3. Rehearse with a dry run:
-   `gh workflow run release.yml --repo senecajs/seneca --ref master`.
+   `gh workflow run release.yml --repo senecajs/seneca --ref main`.
 4. Release:
-   `gh workflow run release.yml --repo senecajs/seneca --ref master -f dry-run=false`.
+   `gh workflow run release.yml --repo senecajs/seneca --ref main -f dry-run=false`.
 5. Check the [release](https://github.com/senecajs/seneca/actions/workflows/release.yml)
    run, the [npm package page](https://www.npmjs.com/package/seneca)
    (the version shows a *Provenance* section) and the
