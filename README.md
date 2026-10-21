@@ -90,7 +90,7 @@ const result = await client.post('role:math,cmd:sum,left:1,right:2')
 
 ## Documentation
 
-The documentation lives in [docs/](https://github.com/senecajs/seneca/blob/master/docs/README.md)
+The documentation lives in [docs/](https://github.com/senecajs/seneca/blob/main/docs/README.md)
 and is organized in four sections:
 
 - __[Tutorials](docs/README.md#tutorials)__: start with
@@ -179,12 +179,12 @@ Copyright (c) 2010-2026 Richard Rodger and other contributors;
 Licensed under [MIT][Lic].
 
 [BadgeNpmFigs]: https://img.shields.io/npm/dm/seneca.svg?maxAge=2592000
-[BadgeCoveralls]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=master&service=github
+[BadgeCoveralls]: https://coveralls.io/repos/senecajs/seneca/badge.svg?branch=main&service=github
 [BadgeDeepScan]: https://deepscan.io/api/teams/5016/projects/6816/branches/59148/badge/grade.svg
 [BadgeCodeClimate]: https://api.codeclimate.com/v1/badges/3a95be9ab6432c620bea/maintainability
 [CoC]: http://senecajs.org/code-of-conduct
 [Contrib]: http://senecajs.org/contribute
-[Coveralls]: https://coveralls.io/github/senecajs/seneca?branch=master
+[Coveralls]: https://coveralls.io/github/senecajs/seneca?branch=main
 [DeepScan]: https://deepscan.io/dashboard#view=project&tid=5016&pid=6816&bid=59148
 [CodeClimate]: https://codeclimate.com/github/senecajs/seneca/maintainability
 [Gitter]: https://gitter.im/senecajs/seneca

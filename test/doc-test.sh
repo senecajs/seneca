@@ -1,5 +1,5 @@
 
-# Validates seneca master against seneca-doc
+# Validates seneca main against seneca-doc
 # Run from project root
 
 rm -rf seneca-doc-test
