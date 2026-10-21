@@ -56,6 +56,24 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   define or initialize no longer leaves its gated define action in flight
   until the action timeout, so later plugins can load and the process is
   not held open.
+* A plugin that fails to load is reported once, with its name, and the
+  process exits promptly with code 1:
+  * An exception thrown by a plugin's `preload` function is the fatal
+    error `plugin_preload_failed` (new), with the location and the
+    plugin options in its details. It was reported with its message as
+    the error code and without the plugin name.
+  * An error from a plugin's initialization (`this.init` or
+    `this.prepare`) is reported once, as `plugin_init` with the plugin
+    name. It was reported first without a code and then again as a
+    `[DEATH LOOP]` error.
+  * The failed plugin's define message is completed, so the instance
+    closes as soon as the actions in progress have finished. Before, as
+    in Seneca 3, the close waited for that message, which never
+    completed, until `death_delay` (11 seconds by default) ran out, and
+    the process exited with code 2.
+  * Pending `seneca.ready` callbacks are not called after a fatal
+    error, and an error raised while the instance closes is logged at
+    debug level rather than reported as a further fatal error.
 * Node.js 24 or later is required (`engines.node`). TypeScript compiles
   for ES2024, `.nvmrc` selects Node.js 24, and continuous integration
   runs on Node.js 24.
@@ -211,9 +229,19 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   the renamed successor of Gubu. Message and option validation use Shape
   builders (`seneca.valid`). Joi schemas in plugin defaults or pattern rules
   are not recognized, and shapes built with Gubu are rejected
-  (`plugin_gubu_shape`, `add_gubu_shape`), so plugins that bundle Gubu,
-  such as seneca-entity 28 and seneca-mem-store 9, need releases built on
-  shape (or on `this.valid`).
+  (`plugin_gubu_shape`, `add_gubu_shape`), so plugins that bundle Gubu
+  need releases built on shape (or on `this.valid`). Use @seneca/entity
+  29, @seneca/mem-store 10, @seneca/env 0.6 and @seneca/repl 9.2 or
+  later. The entity plugin and its default store were published as
+  seneca-entity (up to 28) and seneca-mem-store (up to 9), which do not
+  load on Seneca 4.
+* Plugins that declare a peer dependency on `seneca-entity`, such as
+  seneca-transport 8.3, make npm install seneca-entity 28 and
+  seneca-mem-store 9 next to @seneca/entity and @seneca/mem-store, and a
+  short plugin name is looked up as `seneca-<name>` before
+  `@seneca/<name>`. Load them as `seneca.use('@seneca/entity')` and
+  `seneca.use('@seneca/mem-store')` rather than `'entity'` and
+  `'mem-store'`.
 * Plugin `defaults` functions are called with `{ valid }`; the `Joi`
   argument is gone. Action definitions carry the compiled shape as `shape`
   (was `gubu`).
