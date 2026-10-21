@@ -1,29 +1,30 @@
-# Publish a tagged release to npm with npm trusted publishing (GitHub OIDC).
+# Publish a release to npm with npm trusted publishing (GitHub OIDC).
 #
 # No npm token exists anywhere: the publish job exchanges a short-lived GitHub
 # OIDC token for a publish credential, and npm attaches build provenance.
 #
-# Triggers
-#   * push of a tag vX.Y.Z (or vX.Y.Z-rcN for a prerelease): validate, build
-#     and test, then publish once the `npm` environment is approved.
-#   * workflow_dispatch: a dry run by default (validate, build, test and pack;
-#     nothing is published). With dry-run off and an existing tag it publishes
-#     that tag; this is the manual path when a tag push run has failed.
+# Trigger: workflow_dispatch only (Actions > release > Run workflow, or
+# `gh workflow run release.yml -f dry-run=false`). A run releases the
+# package.json version of the selected branch:
+#   * dry-run (the default): validate, build, test and pack; nothing is
+#     published.
+#   * dry-run off: also publish to npm, then create the tag vX.Y.Z on the
+#     published commit and the GitHub release. Publishing is only allowed
+#     from the default branch and from maintenance branches named N.x.
 #
 # The npm trusted publisher of the `seneca` package must be configured as
 #   Organization or user: senecajs
 #   Repository:           seneca
 #   Workflow filename:    release.yml
-#   Environment name:     npm
+#   Environment name:     (none)
 # with the "npm publish" action allowed. See docs/how-to/create-a-release.md.
 #
 # Layout: the `validate` job installs dependencies, builds and tests, and has
-# no OIDC permission. The `publish` job never installs anything or runs
-# third-party code: it checks out the commit that was validated, checks that
-# the tag still points to it, checks it again with the dependency-free
-# validation script, and publishes the committed files.
+# no OIDC permission. The `publish` job never runs third-party code: it
+# checks out the commit that was validated, checks it again with the
+# dependency-free validation script, and publishes the committed files.
 #
-# Only one release runs at a time in this repository, so two tags cannot
+# Only one release runs at a time in this repository, so two runs cannot
 # publish concurrently and move the latest dist-tag backward. Later runs,
 # dry runs included, wait in a queue instead of replacing a pending run.
 #
@@ -32,19 +33,12 @@
 name: release
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       dry-run:
         description: 'Dry run: validate, build, test and pack, but do not publish'
         type: boolean
         default: true
-      tag:
-        description: 'Existing tag to release (vX.Y.Z). Empty: dry run of the selected branch'
-        type: string
-        default: ''
       dist-tag:
         description: 'npm dist-tag (empty: latest, or next for a prerelease; for example 3x for a maintenance release)'
         type: string
@@ -69,10 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
-      ref: ${{ steps.plan.outputs.ref }}
       sha: ${{ steps.commit.outputs.sha }}
-      tag: ${{ steps.plan.outputs.tag }}
       dry_run: ${{ steps.plan.outputs.dry_run }}
+      tag: ${{ steps.check.outputs.tag }}
       version: ${{ steps.check.outputs.version }}
       dist_tag: ${{ steps.check.outputs.dist_tag }}
       prerelease: ${{ steps.check.outputs.prerelease }}
@@ -81,44 +74,29 @@ jobs:
       - name: Plan the run
         id: plan
         env:
-          EVENT: ${{ github.event_name }}
           REF_NAME: ${{ github.ref_name }}
           REF_TYPE: ${{ github.ref_type }}
-          SHA: ${{ github.sha }}
-          INPUT_TAG: ${{ inputs.tag }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           INPUT_DRY_RUN: ${{ inputs.dry-run }}
         run: |
-          if [ "$EVENT" = push ]; then
-            tag="$REF_NAME"
-            dry_run=false
-          else
-            tag="$INPUT_TAG"
-            # Manual run started from a tag ("Use workflow from": the tag): release that tag.
-            if [ -z "$tag" ] && [ "$REF_TYPE" = tag ]; then tag="$REF_NAME"; fi
-            dry_run="$INPUT_DRY_RUN"
+          dry_run="$INPUT_DRY_RUN"
+          # Publish only from the default branch or a maintenance branch, so
+          # that a run started on a feature branch cannot release it.
+          if [ "$dry_run" != true ]; then
+            if [ "$REF_TYPE" != branch ] ||
+              { [ "$REF_NAME" != "$DEFAULT_BRANCH" ] && ! printf '%s' "$REF_NAME" | grep -Eq '^[0-9]+\.x$'; }; then
+              echo "::error::publish from $DEFAULT_BRANCH or a maintenance branch (N.x), not $REF_TYPE $REF_NAME; enable dry-run to validate it"
+              exit 1
+            fi
           fi
-          if [ -n "$tag" ] && ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
-            echo "::error::tag '$tag' is not of the form vX.Y.Z or vX.Y.Z-pre"
-            exit 1
-          fi
-          if [ "$dry_run" != true ] && [ -z "$tag" ]; then
-            echo "::error::a tag is required to publish; enable dry-run to validate a branch"
-            exit 1
-          fi
-          if [ -n "$tag" ]; then ref="refs/tags/$tag"; else ref="$SHA"; fi
-          {
-            echo "ref=$ref"
-            echo "tag=$tag"
-            echo "dry_run=$dry_run"
-          } >> "$GITHUB_OUTPUT"
-          echo "ref=$ref tag=$tag dry_run=$dry_run"
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "ref=$REF_TYPE $REF_NAME dry_run=$dry_run"
 
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
-          ref: ${{ steps.plan.outputs.ref }}
           persist-credentials: false
 
-      # The publish job checks out this exact commit, not the (movable) tag.
+      # The publish job checks out this exact commit, not the branch head.
       - name: Record the commit
         id: commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -135,12 +113,18 @@ jobs:
       - name: Validate the release
         id: check
         env:
-          TAG: ${{ steps.plan.outputs.tag }}
           DIST_TAG: ${{ inputs.dist-tag }}
         run: >-
           node .github/scripts/validate-release.js
-          --tag "$TAG" --dist-tag "$DIST_TAG"
+          --tag "v$(node -p 'require("./package.json").version')"
+          --dist-tag "$DIST_TAG"
           --notes-file "$RUNNER_TEMP/release-notes.md"
+
+      - name: Check the tag
+        env:
+          TAG: ${{ steps.check.outputs.tag }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: bash .github/scripts/check-release-tag.sh
 
       - name: Pack (dry run)
         env:
@@ -153,11 +137,8 @@ jobs:
     if: needs.validate.outputs.dry_run != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: npm
-      url: https://www.npmjs.com/package/seneca/v/${{ needs.validate.outputs.version }}
     permissions:
-      contents: write # create the GitHub release
+      contents: write # create the tag and the GitHub release
       id-token: write # mint the OIDC token for npm trusted publishing
 
     steps:
@@ -166,21 +147,11 @@ jobs:
           ref: ${{ needs.validate.outputs.sha }}
           persist-credentials: false
 
-      - name: Check that the tag still points to the validated commit
+      - name: Check the tag again
         env:
           TAG: ${{ needs.validate.outputs.tag }}
           SHA: ${{ needs.validate.outputs.sha }}
-        run: |
-          # An annotated tag lists its commit as refs/tags/<tag>^{}.
-          current="$(git ls-remote origin "refs/tags/$TAG^{}" | cut -f1)"
-          if [ -z "$current" ]; then
-            current="$(git ls-remote origin "refs/tags/$TAG" | cut -f1)"
-          fi
-          if [ "$current" != "$SHA" ]; then
-            echo "::error::tag $TAG points to ${current:-nothing}, not the validated commit $SHA"
-            exit 1
-          fi
-          echo "tag $TAG is the validated commit $SHA"
+        run: bash .github/scripts/check-release-tag.sh
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -200,7 +171,7 @@ jobs:
             process.exit(ok ? 0 : 1)
           '
 
-      - name: Validate the tag again
+      - name: Validate the release again
         id: check
         env:
           TAG: ${{ needs.validate.outputs.tag }}
@@ -230,6 +201,7 @@ jobs:
           attestations="$(npm view "seneca@$VERSION" dist.attestations.url)"
           test -n "$attestations"
           echo "provenance attestation: $attestations"
+          echo "Published [seneca@$VERSION](https://www.npmjs.com/package/seneca/v/$VERSION) as $DIST_TAG" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify the registry signature and provenance attestation
         # Informational: the version is already published when this runs.
@@ -242,11 +214,12 @@ jobs:
           npm install "seneca@$VERSION" --ignore-scripts --no-audit --no-fund
           npm audit signatures
 
-      - name: Create the GitHub release
+      - name: Create the tag and the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.validate.outputs.tag }}
+          SHA: ${{ needs.validate.outputs.sha }}
           PRERELEASE: ${{ steps.check.outputs.prerelease }}
           NOTES: ${{ runner.temp }}/release-notes.md
         run: |
@@ -255,6 +228,7 @@ jobs:
           if gh release view "$TAG" > /dev/null 2>&1; then
             gh release edit "$TAG" "${flags[@]}"
           else
-            gh release create "$TAG" --verify-tag "${flags[@]}"
+            # Creates the tag on the published commit when it does not exist.
+            gh release create "$TAG" --target "$SHA" "${flags[@]}"
           fi
           gh release view "$TAG" --json url --jq .url

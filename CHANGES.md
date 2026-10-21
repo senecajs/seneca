@@ -1,5 +1,5 @@
 
-## 4.0.0 2026-10-18
+## 4.0.0 2026-10-21
 
 First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
