@@ -41,6 +41,7 @@ Seneca 5. See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 | `legacy.actdef`, `action_signature`, `error_codes`, `fail`, `logging`, `meta_arg_remove`, `options`, `rules`, `timeout_string`, `top_plugins`, `transport` | Seneca 3 flags, removed. Accepted and ignored so that Seneca 3 configurations load. |
 | `legacy: false` | Sets all legacy flags to false. |
 | `deathdelay` | Replaced by `death_delay`; used as `death_delay` when that is not set. |
+| `debug.short_logs`, `log.short` | Seneca 3 shortened all identifiers to 2 characters. Accepted and ignored: identifiers keep their full length, and the `flat` and `test` log formats print their first 6 characters. |
 | `reload$: true` | With `seneca.options({ reload$: true, ... })`, options are recomputed from all sources. |
 
 ## Plugin definitions
@@ -124,6 +125,7 @@ The option `debug: { deprecation: false }` turns both off.
 | `SENECA_DEP_DEATHDELAY` | the `deathdelay` option is set | `death_delay` |
 | `SENECA_DEP_LEGACY_ERROR` | the `legacy.error` option is set | nothing; it has no effect |
 | `SENECA_DEP_LEGACY_FLAG` | a removed Seneca 3 `legacy.*` flag is set (once per flag) | nothing; it has no effect |
+| `SENECA_DEP_SHORT_LOGS` | the `debug.short_logs` or `log.short` option is set | nothing; logs print short identifiers |
 | `SENECA_DEP_ROLE_SENECA` | a `role:seneca` builtin action is called (`legacy.builtin_actions`; once per pattern) | the `sys:seneca` action |
 | `SENECA_DEP_LEGACY_CLOSE_HOOK` | `close()` calls a plugin's close hook on `role:seneca,cmd:close` (once per plugin) | `this.destroy(fn)` or a prior on `sys:seneca,cmd:close` |
 | `SENECA_DEP_PLUGIN_INIT` | a plugin definition object names its function `init` (once per plugin) | `define` |

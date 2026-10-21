@@ -67,7 +67,6 @@ describe the accepted type rather than a fixed default.
 | `debug.print.err` | `false` | The flat logger also prints errors to standard error. |
 | `debug.print.depth` | `2` | Object inspection depth for printed options, replies and log data. |
 | `debug.act_caller` | `false` | Record the calling code location of each `act` call in `msg.caller$` (always on in test mode). |
-| `debug.short_logs` | `false` | Shorten identifiers to 6 characters for readable logs (the instance id becomes `xxxxxx/tag`). Message and transaction ids use the same length. |
 | `debug.callpoint` | `false` | Record the calling code location when actions are added and called (`actdef.callpoint`, log entries). Enabled by test mode. |
 | `debug.deprecation` | `true` | Report deprecations: each deprecated Seneca 3 name or behaviour in use (once per process, as a warn-level `DEPRECATED` log entry and a Node.js `DeprecationWarning` with a `SENECA_DEP_*` code), and calls of actions marked with `deprecate$`. See [Legacy](legacy.md#deprecation-warnings). |
 | `debug.argv` | `null` | Array used instead of `process.argv` when parsing `--seneca.*` arguments (the first two entries are skipped). For tests. |

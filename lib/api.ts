@@ -415,15 +415,6 @@ function quiet(this: any, flags: any) {
 
 
 function test(this: any, errhandler: any, logspec: any) {
-  const opts = this.options()
-
-  if ('-' != opts.tag) {
-    this.root.id =
-      null == opts.id$
-        ? this.private$.actnid().substring(0, 4) + '/' + opts.tag
-        : '' + opts.id$
-  }
-
   if ('function' !== typeof errhandler && null !== errhandler) {
     logspec = errhandler
     errhandler = null

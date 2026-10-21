@@ -239,22 +239,23 @@ const seneca = Seneca().test('print')
 Running step 6 this way prints lines such as these (identifiers vary):
 
 ```
-34/zw/- DEBUG	add/ADD	cmd:sum,role:math
-37/zw/- DEBUG	add/ADD	cmd:sum,role:math
-40/zw/- DEBUG	act/IN/s	m3/ck	cmd:sum,role:math	{role:'math',cmd:'sum',left:0.1,right:0.2}	rounding/action/11	hhky
-41/zw/- DEBUG	act/IN/s	cl/ck	cmd:sum,role:math	{role:'math',cmd:'sum',left:0.1,right:0.2}	math/action/10	hhky/czh0
-41/zw/- DEBUG	act/OUT/s	cl/ck	cmd:sum,role:math	{answer:0.30000000000000004}	math/action/10	hhky/czh0
-41/zw/- DEBUG	act/OUT/s	m3/ck	cmd:sum,role:math	{answer:0.3}	rounding/action/11	hhky
+50/qujdrg/- DEBUG	add/ADD	cmd:sum,role:math
+57/qujdrg/- DEBUG	add/ADD	cmd:sum,role:math
+59/qujdrg/- DEBUG	act/IN/s	dzquxj/i08mo3	cmd:sum,role:math	{role:'math',cmd:'sum',left:0.1,right:0.2}	rounding/action/12	k2sj
+60/qujdrg/- DEBUG	act/IN/s	olz6zn/i08mo3	cmd:sum,role:math	{role:'math',cmd:'sum',left:0.1,right:0.2}	math/action/10	k2sj/ufqj
+61/qujdrg/- DEBUG	act/OUT/s	olz6zn/i08mo3	cmd:sum,role:math	{answer:0.30000000000000004}	math/action/10	k2sj/ufqj
+61/qujdrg/- DEBUG	act/OUT/s	dzquxj/i08mo3	cmd:sum,role:math	{answer:0.3}	rounding/action/12	k2sj
 { answer: 0.3 }
 ```
 
-Each line starts with the elapsed milliseconds, two characters of the
-instance id and the tag, then the level and the event (`add/ADD` for a
-pattern being added, `act/IN` and `act/OUT` for a message entering and
-leaving an action; the `/s` means a reply is expected). Action lines
-continue with the message id and transaction id (`m3/ck`: two messages
-in the same transaction `ck`), the pattern, the data, and the action
-that handled it (`plugin/function/number`). You can see the `rounding`
+Each line starts with the elapsed milliseconds, the first six characters
+of the instance id and the tag, then the level and the event (`add/ADD`
+for a pattern being added, `act/IN` and `act/OUT` for a message entering
+and leaving an action; the `/s` means a reply is expected). Action lines
+continue with the first six characters of the message id and transaction
+id (`dzquxj/i08mo3` and `olz6zn/i08mo3`: two messages in the same
+transaction), the pattern, the data, and the action that handled it
+(`plugin/function/number`). You can see the `rounding`
 action receive the message first, call its prior in `math`, and reply.
 
 ## Where next

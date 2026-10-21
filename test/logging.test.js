@@ -171,6 +171,59 @@ describe('logging', function () {
       })
   })
 
+  it('printed-ids', function (t, fin) {
+    // Identifiers keep their full length; the test and flat formats print
+    // the first 6 characters of each part.
+    const lines = { test: [], flat: [] }
+    const make = (logger) =>
+      Seneca({
+        tag: 'p0',
+        log: { level: 'debug', logger },
+        internal: {
+          print: { log: (line) => lines[logger].push(line), err: () => {} },
+        },
+      }).add('a:1', function (msg, reply, meta) {
+        reply({ mi: meta.mi, tx: meta.tx })
+      })
+
+    const run = (logger, next) => {
+      const si = make(logger)
+      si.act('a:1', function (err, out) {
+        if (err) return fin(err)
+        try {
+          assert.equal(out.mi.length, 12)
+          assert.equal(out.tx.length, 12)
+          const id6 = si.id.substring(0, 6)
+          const line = lines[logger].find(
+            (l) => l.includes('a:1') && l.includes(out.mi.substring(0, 6)),
+          )
+          assert.ok(line, 'no log line for a:1')
+          assert.ok(!line.includes(out.mi), 'full message id printed')
+          if ('test' === logger) {
+            assert.match(line, new RegExp('^\\d+/' + id6 + '/p0 '))
+            assert.ok(
+              line.includes(
+                out.mi.substring(0, 6) + '/' + out.tx.substring(0, 6),
+              ),
+            )
+          } else {
+            assert.ok(line.includes('\t' + id6 + '\t'))
+            assert.ok(
+              line.includes(
+                out.tx.substring(0, 6) + '.' + out.mi.substring(0, 6),
+              ),
+            )
+          }
+        } catch (e) {
+          return si.close(() => fin(e))
+        }
+        si.close(next)
+      })
+    }
+
+    run('test', () => run('flat', fin))
+  })
+
   it('logger-output', function (t, fin) {
     var log
 

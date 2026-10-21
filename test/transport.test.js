@@ -204,7 +204,7 @@ describe('transport', function () {
   it('transport-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent' })
       .use(st)
       .add('foo:1', testact)
       .add('foo:2', testact)
@@ -213,7 +213,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 5555,
           log: 'silent',
-          debug: { short_logs: true },
         })
 
         si.use(st)
@@ -239,7 +238,7 @@ describe('transport', function () {
   it('transport-star-pin-object', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent' })
       .use(st)
       .add('foo:1', testact)
       .add('foo:2', testact)
@@ -248,7 +247,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 9999,
           log: 'silent',
-          debug: { short_logs: true },
         })
           .use(st)
           .client({ type: 'simple', pin: { foo: '*' } })
@@ -312,7 +310,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 22222 * tmx,
           log: 'silent',
-          debug: { short_logs: true },
         })
           .use(st)
           .client({ type: 'simple', pins: ['foo:1', 'baz:2'] })
@@ -341,7 +338,7 @@ describe('transport', function () {
   it('transport-single-wrap-and-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent' })
       .use(st)
       .add('foo:1', testact)
       .add('qaz:1', testact)
@@ -351,7 +348,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 22222 * tmx,
           log: 'silent',
-          debug: { short_logs: true },
         })
         si.use(st)
           .add('foo:1', function (msg, reply) {
@@ -387,7 +383,7 @@ describe('transport', function () {
   it('transport-local-single-and-star', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 5555, log: 'silent' })
       .use(st)
       .add('foo:2,qaz:1', testact)
       .add('foo:2,qaz:2', testact)
@@ -396,7 +392,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 22222 * tmx,
           log: 'silent',
-          debug: { short_logs: true },
         })
           .use(st)
           .add('foo:1', function (msg, reply) {
@@ -431,7 +426,7 @@ describe('transport', function () {
   it('transport-local-over-wrap', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 5555, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 5555, log: 'silent' })
       .use(st)
       .add('foo:1', testact)
       .listen({ type: 'simple', pin: 'foo:1' })
@@ -439,7 +434,6 @@ describe('transport', function () {
         var si = Seneca({
           timeout: 22222 * tmx,
           log: 'silent',
-          debug: { short_logs: true },
         })
           .use(st)
           .client({ type: 'simple', pin: 'foo:1' })
@@ -538,7 +532,7 @@ describe('transport', function () {
   it('transport-no-plugin-init', test_opts, function (t, done) {
     const st = make_simple_transport()
 
-    Seneca({ timeout: 22222 * tmx, log: 'silent', debug: { short_logs: true } })
+    Seneca({ timeout: 22222 * tmx, log: 'silent' })
       .use(st)
       .client({ type: 'simple' })
       .add('foo:1', testact)
@@ -585,7 +579,6 @@ describe('transport', function () {
         tag: 'srv',
         timeout: 5555,
         log: 'silent',
-        debug: { short_logs: true },
       })
         .use(st)
         .error(done)
@@ -607,7 +600,6 @@ describe('transport', function () {
         tag: 'srv',
         timeout: 5555,
         log: 'silent',
-        debug: { short_logs: true },
       })
         .use(st)
         .error(done)
@@ -626,7 +618,6 @@ describe('transport', function () {
         tag: 'srv',
         timeout: 22222 * tmx,
         log: 'silent',
-        debug: { short_logs: true },
       })
         .use(st)
         .error(done)
@@ -642,7 +633,6 @@ describe('transport', function () {
         tag: 'cln',
         timeout: 22222 * tmx,
         log: 'silent',
-        debug: { short_logs: true },
       })
         .error(done)
         .use(st)

@@ -623,31 +623,4 @@ describe('message', function () {
         fin()
       })
   })
-
-  it('short-ids', test_opts, function (t, fin) {
-    // debug.short_logs shortens identifiers for readable logs. A repeated
-    // message id is answered from the action history as a repeated message,
-    // so distinct messages in one transaction must not share an id: with 2
-    // characters, about one in six of 300 messages did.
-    const si = Seneca({ log: 'silent', debug: { short_logs: true } })
-    si.add('a:1', function (msg, reply, meta) {
-      reply({ n: msg.n, mi: meta.mi, tx: meta.tx })
-    })
-
-    si.ready(async function () {
-      try {
-        assert.match(si.id, /^[a-z][a-z0-9]{5}\/-$/)
-        for (let n = 0; n < 300; n++) {
-          const out = await si.post('a:1', { n, tx$: 'tx0001' })
-          assert.equal(out.n, n)
-          assert.equal(out.mi.length, 6)
-          assert.equal(out.tx, 'tx0001')
-        }
-        assert.equal(si.private$.stats.act.cache, 0)
-        si.close(fin)
-      } catch (e) {
-        si.close(() => fin(e))
-      }
-    })
-  })
 })

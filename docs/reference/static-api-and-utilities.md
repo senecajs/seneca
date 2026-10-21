@@ -23,7 +23,7 @@ See [TypeScript](#typescript) for the types.
 
 | Property | Meaning |
 | -------- | ------- |
-| `id` | Instance identifier: `<random>/<start time>/<pid>/<version>/<tag>`, or the `id$` option, or `<6 chars>/<tag>` with `debug.short_logs` (and in test mode when a tag is set: `<4 chars>/<tag>`). |
+| `id` | Instance identifier: `<random>/<start time>/<pid>/<version>/<tag>`, or the `id$` option. |
 | `tag` | The instance tag (`'-'` when none). |
 | `fullname` | `Seneca/<id>`; also the result of `toString()`. |
 | `version` | Seneca version. |

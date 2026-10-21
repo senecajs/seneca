@@ -106,6 +106,28 @@ describe('deprecate', () => {
     await si.close()
   })
 
+  it('short-logs', async () => {
+    // Identifiers are no longer shortened: a repeated message id is answered
+    // from the action history, so short ids made different messages collide.
+    const c = collect()
+    const si = Seneca({ log: 'silent', debug: { short_logs: true } }).add(
+      'a:1',
+      function (msg, reply, meta) {
+        reply({ mi: meta.mi, tx: meta.tx })
+      },
+    )
+    const si2 = Seneca({ log: { level: 'none', short: true } })
+    const out = await si.post('a:1')
+    assert.equal(out.mi.length, 12)
+    assert.equal(out.tx.length, 12)
+    assert.equal(si.id.split('/')[0].length, 12)
+    assert.equal(si2.id.split('/')[0].length, 12)
+    await c.done()
+    assert.deepEqual(c.node, ['SENECA_DEP_SHORT_LOGS', 'SENECA_DEP_SHORT_LOGS'])
+    await si.close()
+    await si2.close()
+  })
+
   it('death_delay-wins-over-deathdelay', async () => {
     const si = Seneca({
       log: 'silent',

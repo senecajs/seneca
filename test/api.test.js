@@ -500,6 +500,13 @@ describe('api', function () {
     fin()
   })
 
+  it('test-mode-id', function (t, fin) {
+    // Test mode keeps the full instance id; logs print its first characters.
+    var si = Seneca({ tag: 'x1' }).test(fin)
+    assert.match(si.id, /^[a-z][a-z0-9]{11}\/\d+\/\d+\/[^/]+\/x1$/)
+    fin()
+  })
+
   it('reply', function (t, fin) {
     var si = Seneca().test(fin)
     assert.equal(si.reply(), false)

@@ -163,7 +163,8 @@ const option_defaults = {
     // Trace action caller and place in args.caller$.
     act_caller: false,
 
-    // Shorten all identifiers to 2 characters.
+    // Removed in Seneca 4: ignored, with a deprecation. Identifiers keep
+    // their full length; logs print the first 6 characters.
     short_logs: false,
 
     // Record and log callpoints (calling code locations).
@@ -555,6 +556,18 @@ function Seneca(
     }
   }
 
+  // Deprecated: short identifiers. Identifiers keep their full length, as
+  // a repeated message id is answered from the action history; logs print
+  // the first 6 characters instead.
+  const initial_debug = initial_opts.debug
+  if (initial_debug && undefined !== initial_debug.short_logs) {
+    Deprecate.deprecate(seneca, 'short_logs', { option: 'debug.short_logs' }, 'short_logs:debug')
+  }
+  const initial_log = initial_opts.log
+  if (initial_log && 'object' === typeof initial_log && undefined !== initial_log.short) {
+    Deprecate.deprecate(seneca, 'short_logs', { option: 'log.short' }, 'short_logs:log')
+  }
+
   // The 'internal' key of options is reserved for objects and functions
   // that provide functionality, and are thus not really printable
   seneca.log.debug({ kind: 'notice', options: { ...options, internal: null } })
@@ -846,6 +859,7 @@ namespace Seneca {
       undead?: boolean
       print?: Record<string, any>
       act_caller?: boolean
+      /** @deprecated Ignored: logs print the first 6 characters of identifiers. Removed in Seneca 5. */
       short_logs?: boolean
       callpoint?: boolean
       deprecation?: boolean
@@ -1240,16 +1254,6 @@ function make_seneca(initial_opts?: any) {
 
   // The instance tag, useful for grouping instances.
   root$.tag = start_opts.tag
-
-  // Short identifiers for readable logs. Message and transaction ids come
-  // from the same generator, and a repeated id is answered from the action
-  // history as a repeated message, so they must not collide: with 2
-  // characters, different messages in a transaction often did.
-  if (start_opts.debug.short_logs || start_opts.log.short) {
-    start_opts.idlen = 6
-    root$.idgen = Common.idnid({ length: start_opts.idlen })
-    root$.id = root$.idgen() + '/' + start_opts.tag
-  }
 
   root$.fullname = 'Seneca/' + root$.id
 
