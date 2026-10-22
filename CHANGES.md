@@ -65,7 +65,9 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   * An error from a plugin's initialization (`this.init` or
     `this.prepare`) is reported once, as `plugin_init` with the plugin
     name. It was reported first without a code and then again as a
-    `[DEATH LOOP]` error.
+    `[DEATH LOOP]` error. The error handler receives this `plugin_init`
+    error, with the plugin's error as `orig`, whatever it returns; it
+    received the plugin's error itself.
   * The failed plugin's define message is completed, so the instance
     closes as soon as the actions in progress have finished. Before, as
     in Seneca 3, the close waited for that message, which never

@@ -747,12 +747,28 @@ function make_tasks(): any {
       // The plugin delegate fixes fatal$, which would make an init error
       // call die from the act, without the plugin context, and then again
       // from the complete task. Act without it, so that the error is
-      // reported once, by the complete task, as plugin_init.
+      // reported once, by the complete task, as plugin_init. The reply
+      // handles the error itself (OWN_ERROR), so the error handler option
+      // can neither consume it nor see it twice: die calls the handler
+      // with the plugin_init error.
       let init_delegate: any = Object.create(delegate)
       init_delegate.fixedargs = Object.assign({}, delegate.fixedargs)
       delete init_delegate.fixedargs.fatal$
 
       return new Promise(resolve => {
+        const init_reply: any = function(err: Error, res: any) {
+          resolve({
+            op: 'merge',
+            out: {
+              prepare: {
+                err,
+                res
+              }
+            }
+          })
+        }
+        init_reply[Common.OWN_ERROR] = true
+
         init_delegate.act(
           {
             role: 'seneca',
@@ -763,17 +779,7 @@ function make_tasks(): any {
             default$: {},
             local$: true,
           },
-          function(err: Error, res: any) {
-            resolve({
-              op: 'merge',
-              out: {
-                prepare: {
-                  err,
-                  res
-                }
-              }
-            })
-          }
+          init_reply
         )
       })
     },

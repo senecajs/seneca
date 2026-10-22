@@ -1098,7 +1098,10 @@ describe('plugin', function () {
     var s0 = Seneca({ log: 'silent', debug: { undead: true } })
     s0.error(function (err) {
       try {
-        assert.equal(err.code, 'e0')
+        // Reported once, as plugin_init, with the plugin's error as orig.
+        assert.equal(err.code, 'plugin_init')
+        assert.equal(err.plugin, 'p0')
+        assert.equal(err.orig.code, 'e0')
         assert.ok(err.message.includes('a is 1'))
         fin()
       } catch (e) {
