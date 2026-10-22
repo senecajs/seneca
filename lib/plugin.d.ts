@@ -14,7 +14,8 @@ declare const Plugin: {
             seneca_options: (tr: any, ctx: any, data: any) => any;
             seneca_complete: (tr: any, _ctx: any, data: any) => any;
         };
-        release_define: (seneca: any, data: any, err: any) => void;
+        release_define: (_seneca: any, data: any, _err: any) => void;
+        fail_plugin: (e: any, code: string, plugin: any, seneca: any, options: any) => never;
         define_plugin: (delegate: any, plugin: any, options: any) => any;
     };
 };
