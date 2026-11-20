@@ -13,7 +13,7 @@ callback ◄── outward pipeline ◄── reply(err, result) ◄────
 ```
 
 1. **Submission.** `act` parses the message (Jsonic string plus object),
-   merges the instance's `fixedargs`, and builds a *Meta* object from
+   merges the instance's `fixedmsg`, and builds a *Meta* object from
    the message directives: identifiers, timeout, gate, fatal, local,
    custom data, parents. Directives are then removed from the message
    that the action will see.
@@ -26,7 +26,7 @@ callback ◄── outward pipeline ◄── reply(err, result) ◄────
    definition for the message (or the prior named by the meta data)
    and creates an *action delegate*: a delegate of the instance that
    knows the plugin, the message and the meta data, and whose
-   `fixedargs` carry the transaction id. The inward pipeline then
+   `fixedmsg` carry the transaction id. The inward pipeline then
    runs; it may stop the message early (not found, default result,
    closed instance, validation failure, cached result, too many
    parents).
@@ -106,7 +106,7 @@ actions, plugins and processes.
 
 A delegate is created with `Object.create(instance)`, so it has every
 method of the instance and shares its actions, plugins, options,
-executor and events, but has its own `fixedargs`, `fixedmeta`,
+executor and events, but has its own `fixedmsg`, `fixedmeta`,
 `context`, identifier (`did`) and log context. Seneca uses delegates
 for plugins (so that actions know their plugin) and for action
 executions (so that `this` inside an action knows the current message).

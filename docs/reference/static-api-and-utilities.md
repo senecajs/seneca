@@ -30,7 +30,7 @@ See [TypeScript](#typescript) for the types.
 | `start_time` | Creation time in milliseconds. |
 | `root` | The root instance (for delegates). |
 | `did` | Delegate identifier (delegates only). |
-| `fixedargs` | Properties merged into every message submitted through this instance or delegate. |
+| `fixedmsg` | Properties merged into every message submitted through this instance or delegate. `fixedargs` is a deprecated alias. |
 | `fixedmeta` | Meta data fixed for messages submitted through this delegate (`custom`, `gate`, `fatal`, `local`, `direct`). |
 | `context` | Free form object for contextual data; copied into delegates. |
 | `flags.closed` | True once `close()` has run. |
@@ -44,7 +44,7 @@ See [TypeScript](#typescript) for the types.
 | `plugin`, `shared` | Inside a plugin or its actions: the plugin record and the plugin's shared object. |
 
 Instances are event emitters (see [Events](events.md)) and serialize to
-`{ isSeneca, id, did, fixedargs, fixedmeta, start_time, version }` with
+`{ isSeneca, id, did, fixedmsg, fixedmeta, start_time, version }` with
 `JSON.stringify` and `util.inspect`.
 
 ## `Seneca.util`

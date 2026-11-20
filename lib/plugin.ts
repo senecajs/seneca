@@ -752,8 +752,8 @@ function make_tasks(): any {
       // can neither consume it nor see it twice: die calls the handler
       // with the plugin_init error.
       let init_delegate: any = Object.create(delegate)
-      init_delegate.fixedargs = Object.assign({}, delegate.fixedargs)
-      delete init_delegate.fixedargs.fatal$
+      init_delegate.fixedmsg = Object.assign({}, delegate.fixedmsg)
+      delete init_delegate.fixedmsg.fatal$
 
       return new Promise(resolve => {
         const init_reply: any = function(err: Error, res: any) {

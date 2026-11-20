@@ -42,6 +42,16 @@ async function run(): Promise<void> {
   const chained: Seneca.Instance = seneca.options({ timeout: 3333 }, true)
   void chained
 
+  const chained4: Seneca.Instance = seneca.options({ timeout: 3333 }).add('d:1', (_m, r) => r())
+  void chained4
+
+  // @ts-expect-error: options(opts) returns the instance, not the options
+  const t4: number = seneca.options({ timeout: 3333 }).timeout
+  void t4
+
+  const fm: Record<string, any> = seneca.delegate({ a: 1 }).fixedmsg
+  void fm
+
   const closed: boolean = seneca.flags.closed
   void closed
 

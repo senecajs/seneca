@@ -1,6 +1,6 @@
 declare function wrap(this: any, pin: any, actdef: any, wrapper: any): any;
 declare function fix(this: any, patargs: any, msgargs: any, custom: any): any;
-declare function options(this: any, options: any, chain: any): any;
+declare function options(this: any, options: any, _chain?: any): any;
 declare function close(callpoint: any): (this: any, done: any) => any;
 declare function toString(this: any): any;
 declare function seneca(this: any): any;
@@ -9,7 +9,7 @@ declare function error(this: any, first: any): any;
 declare function fail(this: any, ...args: any[]): any;
 declare function inward(this: any): any;
 declare function outward(this: any): any;
-declare function delegate(this: any, fixedargs: any, fixedmeta: any): any;
+declare function delegate(this: any, fixedmsg: any, fixedmeta: any): any;
 declare function depends(this: any): void;
 declare function export$(this: any, key: any): any;
 declare function quiet(this: any, flags: any): any;

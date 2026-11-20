@@ -214,6 +214,8 @@ const deprecation: Record<string, string> = {
   findplugin: 'seneca.findplugin is deprecated and will be removed in Seneca 5; use seneca.find_plugin.',
   hasplugin: 'seneca.hasplugin is deprecated and will be removed in Seneca 5; use seneca.has_plugin.',
   closed: 'seneca.closed is deprecated and will be removed in Seneca 5; use seneca.flags.closed.',
+  fixedargs: 'seneca.fixedargs is deprecated and will be removed in Seneca 5; use seneca.fixedmsg.',
+  strict_fixedargs: 'The strict.fixedargs option is deprecated and will be removed in Seneca 5; use strict.fixedmsg.',
   deathdelay: 'The deathdelay option is deprecated and will be removed in Seneca 5; use death_delay.',
   legacy_flag:
     'The legacy.<%=flag%> option was removed in Seneca 4 and is ignored; ' +

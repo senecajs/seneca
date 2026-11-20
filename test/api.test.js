@@ -544,3 +544,31 @@ describe('api', function () {
     si.act('a:1', fin)
   })
 })
+
+describe('api-options-chain', () => {
+  it('options-returns-instance', async () => {
+    const si = Seneca({ log: 'silent' })
+    assert.equal(si.options({ timeout: 3333 }), si)
+    assert.equal(si.options({ timeout: 3334 }, true), si)
+    assert.equal(si.options({ timeout: 3335 }, false), si)
+    assert.equal(si.options().timeout, 3335)
+    const d = si.delegate()
+    assert.equal(d.options({ timeout: 3336 }), d)
+    assert.equal(si.options().timeout, 3336)
+    assert.equal(si.options(null).timeout, 3336)
+    const file = __dirname + '/stubs/options/options.require.js'
+    assert.equal(si.options(file), si)
+    assert.equal(si.options().internal.b, 2)
+    await si.close()
+
+    // test() and quiet() read the options they set.
+    const st = Seneca({ log: 'silent' }).test()
+    assert.equal(st.options().test, true)
+    assert.equal(st.options().quiet, false)
+    await st.close()
+    const sq = Seneca({ log: 'silent' }).quiet()
+    assert.equal(sq.options().quiet, true)
+    assert.equal(sq.options().test, false)
+    await sq.close()
+  })
+})

@@ -679,7 +679,7 @@ describe('plugin', function () {
   it('plugin actions receive errors in callback function', function (t, fin) {
     var seneca = Seneca().test().quiet()
 
-    seneca.fixedargs['fatal$'] = false
+    seneca.fixedmsg['fatal$'] = false
 
     seneca.use(function service() {
       this.add({ role: 'plugin', cmd: 'throw' }, function (args, next) {

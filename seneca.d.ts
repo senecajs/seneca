@@ -238,6 +238,8 @@ declare namespace Seneca {
         };
         strict?: {
             result?: boolean;
+            fixedmsg?: boolean;
+            /** @deprecated Use strict.fixedmsg. Removed in Seneca 5. */
             fixedargs?: boolean;
             add?: boolean;
             find?: boolean;
@@ -302,6 +304,9 @@ declare namespace Seneca {
         readonly start_time: number;
         readonly root: Instance;
         readonly isSeneca: true;
+        /** Properties merged into every message submitted through this instance or delegate. */
+        fixedmsg: Msg;
+        /** @deprecated Use fixedmsg. Removed in Seneca 5. */
         fixedargs: Msg;
         fixedmeta: Msg;
         context: Record<string, any>;
@@ -345,14 +350,15 @@ declare namespace Seneca {
         sub(pattern: Pattern, moreProps: Msg, fn: SubFunc): this;
         gate(): Instance;
         ungate(): this;
-        delegate(fixedargs?: Msg, fixedmeta?: Msg): Instance;
+        delegate(fixedmsg?: Msg, fixedmeta?: Msg): Instance;
         ready(fn: (this: Instance) => void): this;
         ready(): Promise<Instance>;
         close(done: (err?: Error | null) => void): this;
         close(): Promise<void>;
         options(): Options & Record<string, any>;
-        options(opts: Options, chain?: false): Options & Record<string, any>;
-        options(opts: Options, chain: true): this;
+        options(opts: Options | string): this;
+        /** @deprecated The second argument is ignored: options(opts) returns the instance. */
+        options(opts: Options | string, chain: boolean): this;
         use(plugin: Plugin, options?: Record<string, any>): this;
         decorate(name: string, value: any): void;
         prepare(fn: (this: Instance) => Promise<void> | void): this;

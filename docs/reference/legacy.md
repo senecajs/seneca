@@ -20,6 +20,8 @@ Seneca 5. See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 | `seneca.hasplugin(name, tag)` | `seneca.has_plugin(name, tag)` | |
 | `seneca.next_act` | none | Removed. |
 | `seneca.closed` | `seneca.flags.closed` | Set to true by `close()`. |
+| `seneca.fixedargs` | `seneca.fixedmsg` | Reads and assigns `fixedmsg`. Code that also runs on Seneca 3 can read `seneca.fixedmsg ?? seneca.fixedargs`, which does not warn on Seneca 4. |
+| `seneca.options(opts, chain)` | `seneca.options(opts)` | The second argument is ignored: `options(opts)` returns the instance. In Seneca 3 it returned the resolved options unless `chain` was true; read them with `seneca.options()`. Not deprecated, and no warning: code that uses the result gets the instance. |
 | `seneca.export('util')` | `seneca.export('basic')` | `util` is mapped to `basic`. |
 
 ## Static properties
@@ -41,6 +43,7 @@ Seneca 5. See also [Migrate from Seneca 3](../how-to/migrate-from-seneca-3.md).
 | `legacy.actdef`, `action_signature`, `error_codes`, `fail`, `logging`, `meta_arg_remove`, `options`, `rules`, `timeout_string`, `top_plugins`, `transport` | Seneca 3 flags, removed. Accepted and ignored so that Seneca 3 configurations load. |
 | `legacy: false` | Sets all legacy flags to false. |
 | `deathdelay` | Replaced by `death_delay`; used as `death_delay` when that is not set. |
+| `strict.fixedargs` | Replaced by `strict.fixedmsg`; the rule is off when either option is false. |
 | `debug.short_logs`, `log.short` | Seneca 3 shortened all identifiers to 2 characters. Accepted and ignored: identifiers keep their full length, and the `flat` and `test` log formats print their first 6 characters. |
 | `reload$: true` | With `seneca.options({ reload$: true, ... })`, options are recomputed from all sources. |
 
@@ -116,6 +119,7 @@ The option `debug: { deprecation: false }` turns both off.
 | `SENECA_DEP_FINDPLUGIN` | `seneca.findplugin` is called | `seneca.find_plugin` |
 | `SENECA_DEP_HASPLUGIN` | `seneca.hasplugin` is called | `seneca.has_plugin` |
 | `SENECA_DEP_CLOSED` | `seneca.closed` is read | `seneca.flags.closed` |
+| `SENECA_DEP_FIXEDARGS` | `seneca.fixedargs` is read or assigned | `seneca.fixedmsg` |
 | `SENECA_DEP_EXPORT_UTIL` | `seneca.export('util')` | `seneca.export('basic')` |
 | `SENECA_DEP_UTIL_DEEPEXTEND` | `seneca.util.deepextend` is called | `seneca.util.deep` |
 | `SENECA_DEP_UTIL_FLATTEN` | `seneca.util.flatten` is called | none |
@@ -123,6 +127,7 @@ The option `debug: { deprecation: false }` turns both off.
 | `SENECA_DEP_ACTDEF_GUBU` | the `gubu` property of an action definition is read | `shape` |
 | `SENECA_DEP_ACT_ERR_4` | a listener is added for `act-err-4` | `act-err` |
 | `SENECA_DEP_DEATHDELAY` | the `deathdelay` option is set | `death_delay` |
+| `SENECA_DEP_STRICT_FIXEDARGS` | the `strict.fixedargs` option is passed to `Seneca()`, or is false (from any source) when a delegate is created | `strict.fixedmsg` |
 | `SENECA_DEP_LEGACY_ERROR` | the `legacy.error` option is set | nothing; it has no effect |
 | `SENECA_DEP_LEGACY_FLAG` | a removed Seneca 3 `legacy.*` flag is set (once per flag) | nothing; it has no effect |
 | `SENECA_DEP_SHORT_LOGS` | the `debug.short_logs` or `log.short` option is set | nothing; logs print short identifiers |

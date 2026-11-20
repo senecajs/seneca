@@ -303,9 +303,9 @@ function build_log(self: any) {
       entry.seneca_did = entry.seneca_did || instance.did
     }
 
-    if (instance.fixedargs.plugin$) {
-      entry.plugin_name = entry.plugin_name || instance.fixedargs.plugin$.name
-      entry.plugin_tag = entry.plugin_tag || instance.fixedargs.plugin$.tag
+    if (instance.fixedmsg.plugin$) {
+      entry.plugin_name = entry.plugin_name || instance.fixedmsg.plugin$.name
+      entry.plugin_tag = entry.plugin_tag || instance.fixedmsg.plugin$.tag
     }
 
     if (instance.private$.act) {

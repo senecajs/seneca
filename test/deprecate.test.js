@@ -47,10 +47,12 @@ describe('deprecate', () => {
     si.findact('a:1')
     si.findact('a:1')
     si.hasact('a:1')
+    void si.fixedargs
+    void si.delegate().fixedargs
 
     await c.done()
-    assert.deepEqual(c.node, ['SENECA_DEP_FINDACT', 'SENECA_DEP_HASACT'])
-    assert.deepEqual(c.log, ['SENECA_DEP_FINDACT', 'SENECA_DEP_HASACT'])
+    assert.deepEqual(c.node, ['SENECA_DEP_FINDACT', 'SENECA_DEP_HASACT', 'SENECA_DEP_FIXEDARGS'])
+    assert.deepEqual(c.log, ['SENECA_DEP_FINDACT', 'SENECA_DEP_HASACT', 'SENECA_DEP_FIXEDARGS'])
     await si.close()
   })
 
@@ -70,6 +72,12 @@ describe('deprecate', () => {
     assert.equal(si.util.Gubu, si.valid)
     assert.equal(si.find('a:1').gubu, si.find('a:1').shape)
     assert.equal(si.closed, false)
+    assert.equal(si.fixedargs, si.fixedmsg)
+    const d = si.delegate({ x: 1 })
+    assert.equal(d.fixedargs, d.fixedmsg)
+    d.fixedargs = { y: 2 }
+    assert.deepEqual(d.fixedmsg, { y: 2 })
+    assert.deepEqual(si.fixedmsg, {})
     await si.close()
     assert.equal(si.closed, true)
   })
@@ -126,6 +134,87 @@ describe('deprecate', () => {
     assert.deepEqual(c.node, ['SENECA_DEP_SHORT_LOGS', 'SENECA_DEP_SHORT_LOGS'])
     await si.close()
     await si2.close()
+  })
+
+  it('strict-fixedargs', async () => {
+    // strict.fixedmsg: the parent delegate's fixed properties win over
+    // those of a child delegate. strict.fixedargs is the deprecated alias.
+    const c = collect()
+    const si = Seneca({ log: 'silent', strict: { fixedargs: false } })
+    assert.deepEqual(si.delegate({ a: 1 }).delegate({ a: 3 }).fixedmsg, { a: 3 })
+    await c.done()
+    assert.deepEqual(c.node, ['SENECA_DEP_STRICT_FIXEDARGS'])
+    const si2 = Seneca({ log: 'silent' })
+    assert.deepEqual(si2.delegate({ a: 1 }).delegate({ a: 3 }).fixedmsg, { a: 1 })
+    await si.close()
+    await si2.close()
+  })
+
+  it('strict-fixedmsg-off-when-either-name-false', async () => {
+    // The fixed property a of a child delegate of delegate({ a: 1 }).
+    const child_a = (si) => si.delegate({ a: 1 }).delegate({ a: 3 }).fixedmsg.a
+    const all = []
+
+    // The new name never warns.
+    const c0 = collect()
+    const s0 = Seneca({ log: 'silent' })
+    all.push(s0)
+    assert.equal(child_a(s0), 1)
+    const s1 = Seneca({ log: 'silent', strict: { fixedmsg: false } })
+    all.push(s1)
+    assert.equal(child_a(s1), 3)
+    await c0.done()
+    assert.deepEqual(c0.node, [])
+
+    // The old name, set after construction, also turns the rule off,
+    // and warns.
+    const c1 = collect()
+    const s2 = Seneca({ log: 'silent' })
+    all.push(s2)
+    s2.options({ strict: { fixedargs: false } })
+    assert.equal(child_a(s2), 3)
+    await c1.done()
+    assert.deepEqual(c1.node, ['SENECA_DEP_STRICT_FIXEDARGS'])
+
+    // false wins whichever name has it.
+    const s3 = Seneca({
+      log: 'silent',
+      strict: { fixedmsg: true, fixedargs: false },
+    })
+    all.push(s3)
+    assert.equal(child_a(s3), 3)
+    const s4 = Seneca({
+      log: 'silent',
+      strict: { fixedmsg: false, fixedargs: true },
+    })
+    all.push(s4)
+    assert.equal(child_a(s4), 3)
+
+    // The old name from the environment and the command line.
+    const s5 = Seneca({
+      log: 'silent',
+      debug: { env: { SENECA_OPTIONS: '{strict:{fixedargs:false}}' } },
+    })
+    all.push(s5)
+    assert.equal(child_a(s5), 3)
+    const s6 = Seneca({
+      log: 'silent',
+      debug: {
+        argv: ['node', 'app', '--seneca.options.strict.fixedargs=false'],
+      },
+    })
+    all.push(s6)
+    assert.equal(child_a(s6), 3)
+
+    // Either way, fixed properties override message properties.
+    for (const si of [s0, s1, s3]) {
+      si.add('b:1', function (msg, reply) {
+        reply({ a: msg.a })
+      })
+      assert.equal((await si.delegate({ a: 1 }).post('b:1,a:2')).a, 1)
+    }
+
+    for (const si of all) await si.close()
   })
 
   it('death_delay-wins-over-deathdelay', async () => {

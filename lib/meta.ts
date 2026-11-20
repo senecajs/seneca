@@ -119,7 +119,7 @@ class Meta {
     id_tx[1] =
       id_tx[1] ||
       origmsg.tx$ ||
-      instance.fixedargs.tx$ ||
+      instance.fixedmsg.tx$ ||
       instance.idgen()
 
     id_tx[0] = id_tx[0] || instance.idgen()

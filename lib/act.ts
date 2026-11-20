@@ -63,7 +63,7 @@ const intern = {
       'string' === typeof actspec.props ?
         parse_jsonic(actspec.props, 'msg_jsonic_syntax') :
         actspec.props,
-      instance.fixedargs,
+      instance.fixedmsg,
     )
 
     // const msg = spec.msg
@@ -441,7 +441,7 @@ const intern = {
 
     // special overrides
     if (meta.tx) {
-      delegate.fixedargs.tx$ = meta.tx
+      delegate.fixedmsg.tx$ = meta.tx
     }
 
     return delegate
