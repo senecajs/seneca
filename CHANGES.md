@@ -125,8 +125,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   configurations load.
 * The `deathdelay` option is used as `death_delay` when that is not set.
   Before, it was overwritten and had no effect.
-* `seneca.next_act`, `Seneca.loghandler` and `seneca.util.parsepattern`,
-  which were undefined, are removed.
+* `seneca.next_act` and `Seneca.loghandler` are removed, and so are
+  `seneca.util.Joi`, `Optioner`, `argprops`, `copydata`, `nil` and
+  `recurse`. `seneca.util.parsepattern`, which was already undefined in
+  3.38, is gone as well.
 * `act-err` uses the Seneca 4 argument layout: the first argument is
   always `'callback'` (it was `'action'` for action failures). An action
   failure passes the original error; a callback that threw is wrapped as
@@ -249,6 +251,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
   need a transport plugin: `npm install seneca-transport` and
   `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.
+  Without a transport plugin, `listen()` stops the process at start with
+  the fatal error `transport_listen`, caused by `act_not_found` on
+  `role:transport,hook:listen`, and `client()` fails with
+  `action_timeout` after the `timeout` option (22 seconds by default),
+  which also ends the process.
 * Built-in actions use the `sys:seneca` prefix: `sys:seneca,cmd:ping`,
   `sys:seneca,cmd:stats`, `sys:seneca,cmd:close`, `sys:seneca,get:options`.
   Set the option `legacy: { builtin_actions: true }` to also register the
@@ -259,7 +266,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   are not recognized, and shapes built with Gubu are rejected
   (`plugin_gubu_shape`, `add_gubu_shape`), so plugins that bundle Gubu
   need releases built on shape (or on `this.valid`). Use @seneca/entity
-  29, @seneca/mem-store 10, @seneca/env 0.6 and @seneca/repl 9.2 or
+  29, @seneca/mem-store 10, @seneca/env 0.6 and @seneca/repl 10.0 or
   later. The entity plugin and its default store were published as
   seneca-entity (up to 28) and seneca-mem-store (up to 9), which do not
   load on Seneca 4.
@@ -277,8 +284,49 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 * Plugin `defaults` functions are called with `{ valid }`; the `Joi`
   argument is gone. Action definitions carry the compiled shape as `shape`
   (was `gubu`).
+* A Joi schema in plugin `defaults` is not rejected: the option takes the
+  Joi schema object itself as its value, not the schema's default.
+  `{ x: Joi.string().default('a') }` gives `options.x` a Joi object on
+  Seneca 4 and `'a'` on Seneca 3. Replace Joi schemas with plain values
+  or Shape builders.
+* Plugin `defaults` given as a plain object are closed: an option key
+  that the defaults do not name stops the process with
+  `invalid_plugin_option`. This also holds inside nested option objects,
+  so `{ db: { host: 'localhost' } }` rejects `db.port`. Seneca 3 accepted
+  unknown keys. A default that is a class, or a function whose name starts
+  with a capital letter, is an instance check that the option must pass,
+  so the plugin fails to load even when no options are given; an arrow
+  function takes the name of its key. Function defaults with a lower-case
+  name are default values as before. A `null` default accepts only
+  `null`. Declare what may vary with a defaults function:
+  `valid.Open({})` for an object that passes unknown keys through,
+  `valid.Skip(Function)` for an optional function and `valid.Skip(...)`
+  for any other optional value, for example
+  `plugin.defaults = ({ valid }) => ({ db: valid.Open({}), log: valid.Skip(Function), timeout: valid.Skip(Number) })`.
+* The resolved options of a plugin no longer contain `init$: true`.
+  Seneca 3 added it to every plugin's options; Seneca 4 keeps only the
+  directives (`init$`, `defined$`, `inited$`, `tag$`) that the caller
+  passed. Tests that compare a plugin's whole options object no longer
+  expect `init$`.
+* Seneca 4.x validates with shape 11 and exposes its builders, including
+  `One` and `Some`, as `seneca.valid`. shape 12 removed `One` and
+  `Some`. Use the `valid` that Seneca passes in (`this.valid`, or the
+  `{ valid }` argument of a `defaults` function) instead of depending on
+  the shape package; a plugin that imports shape should pin `shape ^11`. A
+  compiled shape 12 `Shape({...})` used as `defaults` is not recognized
+  and fails with a `shape` validation error.
+* Validator plugins: Seneca compiles the rules of a pattern (its object
+  and function valued properties) into its own message shape,
+  `actdef.shape`, and validates with it in preference to
+  `actdef.validate`. A plugin that validates messages itself, from an
+  `extend.action_modifier`, deletes `actdef.shape` when it sets
+  `actdef.validate`. See docs/how-to/validate-messages-and-options.md.
 * Most `legacy` option flags are removed; `legacy.meta` and
   `legacy.builtin_actions` remain.
+* `legacy.meta` is no longer switched on when a plugin named
+  `amqp-transport` loads. Applications that use seneca-amqp-transport set
+  `legacy: { meta: true }`. Transport plugins should read the meta data
+  from the third argument of their send function instead of `msg.meta$`.
 * `seneca.message(pattern, async (msg) => {...})` and `await seneca.post(msg)`
   are built in (previously provided by seneca-promisify).
 * `seneca.prepare`, `seneca.destroy` and `seneca.direct` are available
@@ -297,10 +345,22 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   Declare members that plugins add (such as `seneca.make$`) by augmenting
   the interface:
   `declare module 'seneca' { interface Instance { make$(name: string): any } }`.
+* Action errors reach the caller unwrapped. Seneca 3 wrapped an error
+  from an action in an `act_execute` error, with the original error as
+  `err.orig`. Seneca 4 passes the original error, with its own `code` and
+  `message` and with `callpoint` added; there is no `act_execute` wrapper
+  and no `err.orig`, and `legacy.error` has no effect. Test your own
+  `err.code`. Code that also runs on Seneca 3 can read
+  `(err.code === 'act_execute' && err.orig) ? err.orig.code : err.code`.
 * Error message text no longer includes message or option values; code
   that matched on error text should check `err.code` and `err.details`.
 * Use the transport type `web` instead of the deprecated `http` and
   `direct`.
+* `seneca.next_act`, `Seneca.loghandler` and the utilities
+  `seneca.util.Joi`, `Optioner`, `argprops`, `copydata`, `nil` and
+  `recurse` are removed. Use the `logger` option instead of
+  `loghandler`, and `seneca.util.deep` and `seneca.util.clean` instead of
+  `copydata`.
 * `seneca.options(opts)` returns the instance instead of the resolved
   options. Nothing warns about this: code that uses the result gets the
   instance without an error, and reads `undefined`, or a method for names

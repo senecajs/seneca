@@ -59,6 +59,46 @@ seneca.add('role:shop,cmd:price', function (msg, reply) {
 })
 ```
 
+## Write a validator plugin
+
+A plugin can validate messages with another library, as @seneca/joi does
+with Joi. It returns an `extend.action_modifier` function, which Seneca
+calls with the action definition of every action added after the plugin
+has loaded. Return it from the plugin's `preload` function instead to
+also cover actions added right after `seneca.use`, before the plugin's
+definition has run. The modifier sets `actdef.validate`, a
+function `(msg, done)` that calls `done(err)` with an error to reject the
+message, or `done()` to accept it. It must call `done` before it
+returns: Seneca does not wait for a later call.
+
+Seneca compiles the rules of a pattern (its object and function valued
+properties) into its own message shape, `actdef.shape`, and validates
+with that shape whenever it is present; `actdef.validate` is called only
+when there is no shape. So a modifier that takes over the validation of
+an action deletes `actdef.shape`:
+
+```js
+function myvalidator(options) {
+  return {
+    extend: {
+      action_modifier: function (actdef) {
+        const rules = actdef.rules
+        if (!uses_my_library(rules)) return // leave the action to Seneca
+
+        delete actdef.shape
+        actdef.validate = function (msg, done) {
+          const err = check_with_my_library(rules, msg)
+          done(err) // an error rejects the message with act_invalid_msg
+        }
+      },
+    },
+  }
+}
+```
+
+Modifiers run on the next tick after `add`, and must not throw: an
+exception there is not caught by Seneca and stops the process.
+
 ## Turn validation off
 
 ```js

@@ -22,6 +22,12 @@ npm install seneca-transport
 seneca.use('seneca-transport').listen(...)
 ```
 
+Without a transport plugin, `listen()` stops the process at start with
+the fatal error `transport_listen` (caused by `act_not_found` on
+`role:transport,hook:listen`), and `client()` fails with
+`action_timeout` after the `timeout` option, which also ends the
+process.
+
 ## Builtin action patterns
 
 The builtin actions use `sys:seneca`:
@@ -56,7 +62,9 @@ seneca.add({ role: 'shop', cmd: 'price', item: seneca.valid.Required(String) }, 
 
 Seneca 4 has no Joi support: Joi schemas in pattern rules or plugin
 `defaults` are not recognized. Convert them to plain default objects or
-Shape builders.
+Shape builders. A Joi schema in `defaults` is not rejected either: the
+option silently takes the schema object as its value, instead of the
+schema's default.
 
 Shapes built with Gubu are not accepted either. A plugin whose
 `defaults` were built with Gubu fails to load with
@@ -65,6 +73,16 @@ Shapes built with Gubu are not accepted either. A plugin whose
 or import the builders from the `shape` package. A `defaults` function
 of `{ valid }` builds the shape with the builders Seneca passes in, so
 the same plugin loads on Seneca 3.38 (Gubu) and Seneca 4 (Shape).
+
+Seneca 4.x uses shape 11, whose builders include `One` and `Some`.
+shape 12 removed them. Use the `valid` that Seneca passes in rather than
+depending on the shape package; a plugin that imports shape should pin
+`shape ^11`.
+
+A plugin that validates messages with another library, such as
+@seneca/joi, deletes the shape that Seneca compiles for an action when
+it supplies its own validator, see
+[Write a validator plugin](validate-messages-and-options.md#write-a-validator-plugin).
 
 ## Plugin versions
 
@@ -75,7 +93,7 @@ Plugins that built their options with Gubu have releases for Seneca 4:
 | Entities | `@seneca/entity` 29 | `seneca-entity` (up to 28) |
 | In-memory store | `@seneca/mem-store` 10 | `seneca-mem-store` (up to 9) |
 | Environment | `@seneca/env` 0.6 | |
-| REPL | `@seneca/repl` 9.2 | |
+| REPL | `@seneca/repl` 10.0 | |
 
 Install `@seneca/entity` and `@seneca/mem-store`, and load them by
 their full names, `seneca.use('@seneca/entity')` and
@@ -98,6 +116,33 @@ process on Seneca 4 with `plugin_gubu_shape`. A short name now finds
 * Plugin initialization: `this.init(fn)` still works; `this.prepare(asyncFn)`
   is the async form. Shutdown: `this.destroy(asyncFn)`.
 * `seneca.export('util')` is mapped to `seneca.export('basic')`.
+
+## Plugin options
+
+* `defaults` given as a plain object are closed: an option key that the
+  defaults do not name stops the process with `invalid_plugin_option`,
+  also inside nested option objects. Seneca 3 accepted unknown keys.
+* A default that is a class, or a function whose name starts with a
+  capital letter, is an instance check that the option must pass, so the
+  plugin fails to load even when no options are given. An arrow function
+  takes the name of its key. Function defaults with a lower-case name
+  are default values as before. A `null` default accepts only `null`.
+* Declare what may vary with a `defaults` function: `valid.Open({})` for
+  an object that passes unknown keys through, `valid.Skip(Function)` for
+  an optional function and `valid.Skip(...)` for any other optional
+  value:
+
+  ```js
+  plugin.defaults = ({ valid }) => ({
+    db: valid.Open({}),
+    log: valid.Skip(Function),
+    timeout: valid.Skip(Number),
+  })
+  ```
+
+* The resolved options no longer contain `init$: true`. Seneca 3 added
+  it to every plugin's options; Seneca 4 keeps only the directives
+  (`init$`, `defined$`, `inited$`, `tag$`) that the caller passed.
 
 ## Promises are built in
 
@@ -138,10 +183,17 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
   handler receives it with `meta$` attached.
 * The meta data object is passed as the third argument of actions and
   callbacks; it is attached to messages as `msg.meta$` only with
-  `legacy: { meta: true }`, which Seneca 3 transports need.
+  `legacy: { meta: true }`, which Seneca 3 transports need. Seneca 3
+  switched it on when a plugin named `amqp-transport` loaded; Seneca 4
+  does not, so applications that use seneca-amqp-transport set it.
 
 ## Error text and logs
 
+* Action errors reach the caller unwrapped: the caller receives the
+  error the action gave, with its own `code` and `message`, not an
+  `act_execute` error with the original as `err.orig`. Code that also
+  runs on Seneca 3 can read
+  `(err.code === 'act_execute' && err.orig) ? err.orig.code : err.code`.
 * Error messages no longer contain message or option values. A message
   is described by its pattern keys and the names of its other keys, for
   example `cmd:logn,sys:user (other keys: email, pass)`, and a
@@ -165,6 +217,7 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 | `Seneca.loghandler` | removed; use the `logger` option |
 | `seneca.findact`, `hasact`, `act_if`, `findpins`, `pinact`, `plugins`, `findplugin`, `hasplugin` | deprecated aliases; use `find`, `has`, `list`, `list_plugins`, `find_plugin`, `has_plugin` |
 | `seneca.util.parsepattern` | removed |
+| `seneca.util.Joi`, `Optioner`, `argprops`, `copydata`, `nil`, `recurse` | removed; use `seneca.util.deep` and `seneca.util.clean` instead of `copydata` |
 | `seneca.util.Gubu` | `seneca.util.Shape` or `seneca.valid` (`Gubu` is a deprecated alias) |
 | `act-err-4` event | `act-err`, which now has the same arguments (`act-err-4` is deprecated) |
 

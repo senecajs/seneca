@@ -1004,6 +1004,76 @@ describe('plugin', function () {
       })
   })
 
+  // A validator plugin (such as @seneca/joi) replaces the message shape
+  // that Seneca compiles from the pattern rules: Seneca validates with
+  // actdef.shape when there is one, and calls actdef.validate otherwise.
+  it('plugin-extend-action-modifier-replaces-shape', async () => {
+    const calls = { a: [], b: [] }
+
+    const si = Seneca({ legacy: false })
+      .test()
+      .quiet()
+      .use(function validator() {
+        return {
+          extend: {
+            action_modifier: function (actdef) {
+              const key = { 'a:1': 'a', 'b:1': 'b' }[actdef.pattern]
+              if (null == key) return
+
+              assert.equal('function', typeof actdef.shape)
+
+              // a:1 replaces the shape; b:1 keeps it, so its validate
+              // is not called.
+              if ('a' === key) {
+                delete actdef.shape
+              }
+
+              actdef.validate = function (msg, done) {
+                calls[key].push(msg.x)
+                done(
+                  'string' === typeof msg.x
+                    ? null
+                    : new Error('x must be a string'),
+                )
+              }
+            },
+          },
+        }
+      })
+      .use(function service() {
+        this.add({ a: 1, x: Number }, function (msg, reply) {
+          reply({ x: msg.x })
+        })
+        this.add({ b: 1, x: Number }, function (msg, reply) {
+          reply({ x: msg.x })
+        })
+      })
+
+    await si.ready()
+
+    // The rule x:Number would reject 'q'; the plugin's validator accepts it.
+    assert.deepEqual(await si.post('a:1', { x: 'q' }), { x: 'q' })
+
+    await assert.rejects(si.post('a:1', { x: 1 }), (err) => {
+      assert.equal(err.code, 'act_invalid_msg')
+      return true
+    })
+
+    assert.deepEqual(calls.a, ['q', 1])
+
+    // With actdef.shape in place, Seneca validates with the shape only.
+    assert.deepEqual(await si.post('b:1', { x: 2 }), { x: 2 })
+
+    await assert.rejects(si.post('b:1', { x: 'q' }), (err) => {
+      assert.equal(err.code, 'act_invalid_msg')
+      return true
+    })
+
+    assert.deepEqual(calls.b, [])
+
+    await si.close()
+  })
+
   it('plugin-extend-logger', function (t, fin) {
     var si = Seneca({ log: 'silent' })
       .use(function foo() {
