@@ -42,8 +42,9 @@ Seneca provides:
 npm install seneca
 ```
 
-Seneca 4 requires Node.js 24 or later, the version used for development,
-continuous integration and releases (see `.nvmrc`).
+Seneca 4 requires Node.js 24 or later, the version used for development
+and releases (see `.nvmrc`). Continuous integration runs on Node.js 24
+and 26.
 
 Network transports are plugins. For HTTP and TCP install
 [seneca-transport](https://github.com/senecajs/seneca-transport) as well.

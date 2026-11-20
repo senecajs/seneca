@@ -78,7 +78,7 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
     debug level rather than reported as a further fatal error.
 * Node.js 24 or later is required (`engines.node`). TypeScript compiles
   for ES2024, `.nvmrc` selects Node.js 24, and continuous integration
-  runs on Node.js 24.
+  runs on Node.js 24 and 26.
 * Unit tests run on the Node.js built-in test runner (`node:test`) with
   `node:assert` and built-in coverage reporting; `@hapi/lab` and
   `@hapi/code` are no longer used. Two `act_if` assertions and a
