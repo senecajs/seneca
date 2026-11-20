@@ -13,12 +13,16 @@ published package.
 A release is started by hand: run the `release` workflow on `main`
 (*Actions* → *release* → *Run workflow*, or `gh workflow run`). It
 releases the `package.json` version of that commit. With *dry-run* on,
-the default, it only validates.
+the default, it only validates. With *dry-run* off, the *sha* input must
+be the full 40-character commit at the head of the branch, so that the
+run publishes only the commit you checked; on a dry run *sha* is
+optional and checked when given.
 
-The workflow has two jobs:
+The workflow has three jobs:
 
-* `validate` installs the dependencies, builds, runs the tests, and checks
-  the release with `.github/scripts/validate-release.js`: `CHANGES.md` has
+* `validate` checks the commit against the *sha* input, installs the
+  dependencies, builds, runs the tests, and checks the release with
+  `.github/scripts/validate-release.js`: `CHANGES.md` has
   an entry for the version, the committed compiled output matches the
   sources, the package contents are complete and contain nothing else,
   the version is not already published, and the dist-tag is consistent
@@ -31,9 +35,14 @@ The workflow has two jobs:
   publishes the committed files with `npm publish`. It installs nothing,
   so no third-party code runs in the job that holds the publish
   credential; it needs the npm bundled with Node.js 24 (11.5.1 or later).
-  It then verifies the published version, its dist-tag and its provenance
+  It then waits up to 20 minutes for npm to make the version visible
+  (npm scans a new version first, typically for about five minutes),
+  verifies the published version, its dist-tag and its provenance
   attestation, and creates the tag `vX.Y.Z` on the published commit and
   the GitHub release from the `CHANGES.md` entry.
+* `load` then installs the published version in an empty directory and
+  loads it. It runs the package's code, so it runs in its own job,
+  without the publish credential.
 
 Only one release runs at a time in the repository, so two runs cannot
 publish at once and move the `latest` dist-tag backward. Later runs, dry
@@ -89,8 +98,10 @@ that branch and running it there with the *dist-tag* input `3x`.
    `node .github/scripts/validate-release.js --tag vX.Y.Z`.
 3. Rehearse with a dry run:
    `gh workflow run release.yml --repo senecajs/seneca --ref main`.
-4. Release:
-   `gh workflow run release.yml --repo senecajs/seneca --ref main -f dry-run=false`.
+4. Release, giving the commit that the dry run validated, with all 40
+   characters:
+   `gh workflow run release.yml --repo senecajs/seneca --ref main -f dry-run=false -f sha=<commit>`.
+   The run fails before it publishes if `main` is at another commit.
 5. Check the [release](https://github.com/senecajs/seneca/actions/workflows/release.yml)
    run, the [npm package page](https://www.npmjs.com/package/seneca)
    (the version shows a *Provenance* section) and the
