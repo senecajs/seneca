@@ -11,16 +11,19 @@ Node.js 24 or later.
 
 ## Install a transport
 
-Seneca 4 does not bundle seneca-transport. Add it where `listen` or
-`client` is used:
+Seneca 4 does not bundle seneca-transport. Add its Seneca 4 release,
+@seneca/transport 9, where `listen` or `client` is used:
 
 ```sh
-npm install seneca-transport
+npm install @seneca/transport
 ```
 
 ```js
-seneca.use('seneca-transport').listen(...)
+seneca.use('@seneca/transport').listen(...)
 ```
+
+seneca-transport 8.3 loads on Seneca 4, but it does not deliver the
+error of a remote action to the caller.
 
 Without a transport plugin, `listen()` stops the process at start with
 the fatal error `transport_listen` (caused by `act_not_found` on
@@ -272,7 +275,7 @@ Seneca 3 and remain.
 
 ## Check your application
 
-1. Update Node.js and dependencies; install seneca-transport if needed.
+1. Update Node.js and dependencies; install @seneca/transport if needed.
 2. Run your tests and look for deprecation warnings. Each deprecated
    Seneca 3 name or behaviour in use is reported once per process as a
    Node.js `DeprecationWarning` with a `SENECA_DEP_*` code (run with

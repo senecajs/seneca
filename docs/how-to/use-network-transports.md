@@ -1,7 +1,7 @@
 # Use network transports
 
 How to run actions in separate processes and connect them with
-seneca-transport. The core transport API is described in the
+@seneca/transport. The core transport API is described in the
 [Transport reference](../reference/transport.md); the tutorial
 [Microservices with transports](../tutorials/microservices-with-transports.md)
 walks through a first example.
@@ -9,11 +9,11 @@ walks through a first example.
 ## Install and load the transport plugin
 
 ```sh
-npm install seneca-transport
+npm install @seneca/transport
 ```
 
 ```js
-const seneca = Seneca().use('seneca-transport')
+const seneca = Seneca().use('@seneca/transport')
 ```
 
 Seneca 4 does not bundle transports; `listen` and `client` fail without
@@ -103,7 +103,7 @@ section named after the type (`web`, `tcp`) applies to that type.
 ## Set timeouts
 
 The instance `timeout` (default 22222 ms) applies to remote calls too;
-use `timeout$` on a message for a one-off limit. seneca-transport also
+use `timeout$` on a message for a one-off limit. @seneca/transport also
 accepts a `timeout` in the client configuration for the HTTP request.
 
 ## Use HTTPS
@@ -132,15 +132,19 @@ curl -s -X POST http://localhost:8260/act -H 'Content-Type: application/json' \
 ## Errors from remote actions
 
 How an error reply travels depends on the transport. With
-seneca-transport 8.3, an error replied by a remote action reaches an
-HTTP client as an `Error` with the generic message `Response Error: 500
-Internal Server Error` (the meta data's `err.code` is `act_execute`),
-and over TCP the error reply is not delivered at all, so the caller
-gets an `action_timeout`. The failing action's own error, with its code
-and details, is logged on the service side (`act/ERR`), so look there
-for the cause, and prefer replying with a result object that describes
-the failure (for example `{ ok: false, why: 'unknown_item' }`) when
-callers need the detail.
+@seneca/transport 9, an error replied by a remote action reaches the
+caller unwrapped, over HTTP and TCP: an `Error` with the action's own
+`message`, `code` and `details`. Values of secret-looking keys in it
+are redacted before it is sent (see
+[Options: redact](../reference/options.md#redact)).
+
+With seneca-transport 8.3, the same error reaches an HTTP client as an
+`Error` with the generic message `Response Error: 500 Internal Server
+Error` (the meta data's `err.code` is `act_execute`), and over TCP the
+error reply is not delivered at all, so the caller gets an
+`action_timeout`. The failing action's own error, with its code and
+details, is logged on the service side (`act/ERR`), so look there for
+the cause.
 
 ## Check connectivity
 

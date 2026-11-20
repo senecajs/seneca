@@ -3,18 +3,20 @@
 In this tutorial you will take a plugin that runs in one process and
 run it as a separate service that other processes call over HTTP,
 without changing the plugin. The finished programs are in
-[docs/examples/microservices](../examples/microservices/).
+[docs/examples/microservices](../examples/microservices/); they load
+`seneca-transport`, the development dependency of this repository, in
+place of `@seneca/transport`.
 
 You should have completed [Getting started](getting-started.md).
 
 ## 1. Install a transport
 
 Seneca core does not include network code. Transports are plugins; the
-standard one, [seneca-transport](https://github.com/senecajs/seneca-transport),
+standard one, [@seneca/transport](https://github.com/senecajs/seneca-transport),
 provides HTTP and TCP:
 
 ```sh
-npm install seneca seneca-transport
+npm install seneca @seneca/transport
 ```
 
 ## 2. The plugin, in one process
@@ -68,7 +70,7 @@ function shop(options) {
 
 Seneca({ tag: 'shop' })
   .use(shop, { prices: { plum: 1.0 } })
-  .use('seneca-transport')
+  .use('@seneca/transport')
   .listen({ type: 'web', port: 8260, pin: 'role:shop,cmd:*' })
   .ready(function () {
     console.log('shop service listening on port 8260 as ' + this.id)
@@ -98,7 +100,7 @@ const Seneca = require('seneca')
 
 async function main() {
   const seneca = Seneca({ tag: 'client', log: 'warn' })
-    .use('seneca-transport')
+    .use('@seneca/transport')
     .client({ type: 'web', port: 8260, pin: 'role:shop,cmd:*' })
 
   // Handle one case locally; everything else goes to the service through the prior
