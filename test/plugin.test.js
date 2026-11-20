@@ -1,10 +1,41 @@
 /* Copyright © 2013-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+const Fs = require('node:fs')
+const Os = require('node:os')
+const Path = require('node:path')
 const assert = require('node:assert/strict')
 const { describe, it } = require('node:test')
 
 var Seneca = require('..')
+
+// Writes a throw-away package tree that holds one package per name in
+// `pkgnames`, each defining the plugin `prefixcheck`, and returns a module
+// that resolves plugin names from that tree (option `internal.module`).
+function make_plugin_tree(t, pkgnames) {
+  const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'seneca-prefix-'))
+  t.after(() => Fs.rmSync(dir, { recursive: true, force: true }))
+  for (const pkgname of pkgnames) {
+    const pkgdir = Path.join(dir, 'node_modules', pkgname)
+    Fs.mkdirSync(pkgdir, { recursive: true })
+    Fs.writeFileSync(
+      Path.join(pkgdir, 'package.json'),
+      JSON.stringify({ name: pkgname, version: '1.0.0', main: 'index.js' }),
+    )
+    Fs.writeFileSync(
+      Path.join(pkgdir, 'index.js'),
+      'module.exports = function prefixcheck() {\n' +
+        "  this.add('role:prefixcheck,cmd:which', function (msg, reply) {\n" +
+        '    reply({ pkg: ' +
+        JSON.stringify(pkgname) +
+        ' })\n' +
+        '  })\n' +
+        '}\n',
+    )
+  }
+  Fs.writeFileSync(Path.join(dir, 'loader.js'), 'module.exports = module\n')
+  return require(Path.join(dir, 'loader.js'))
+}
 
 describe('plugin', function () {
   it('plugin-edges', (t, fin) => {
@@ -1141,6 +1172,73 @@ describe('plugin', function () {
       } catch (e) {
         fin(e)
       }
+    })
+  })
+
+  // A short name loads `@seneca/<name>` when `seneca-<name>` is installed
+  // too, as npm does for a legacy peer dependency such as `seneca-entity`.
+  it('short-name-prefers-scoped-package', function (t, fin) {
+    const module = make_plugin_tree(t, [
+      'seneca-prefixcheck',
+      '@seneca/prefixcheck',
+    ])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('prefixcheck')
+      .ready(function () {
+        assert.ok(this.has_plugin('prefixcheck'))
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, '@seneca/prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  it('short-name-falls-back-to-legacy-package', function (t, fin) {
+    const module = make_plugin_tree(t, ['seneca-prefixcheck'])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('prefixcheck')
+      .ready(function () {
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, 'seneca-prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  it('full-name-loads-that-package', function (t, fin) {
+    const module = make_plugin_tree(t, [
+      'seneca-prefixcheck',
+      '@seneca/prefixcheck',
+    ])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('seneca-prefixcheck')
+      .ready(function () {
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, 'seneca-prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  // use-plugin names an unnamed function plugin with the first lookup
+  // prefix, `@seneca/`; Seneca keeps the name `seneca-<nid>`.
+  it('unnamed-function-plugin-name', function (t, fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+    s0.use(function () {})
+    s0.use(() => {})
+    s0.ready(function () {
+      var names = Object.keys(this.list_plugins()).filter(
+        (name) => 'root$' !== name,
+      )
+      assert.equal(names.length, 2)
+      for (const name of names) {
+        assert.match(name, /^seneca-[0-9a-z]+$/)
+      }
+      assert.deepEqual(this.private$.plugin_order.byname, names)
+      fin()
     })
   })
 

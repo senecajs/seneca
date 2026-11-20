@@ -77,14 +77,16 @@ Plugins that built their options with Gubu have releases for Seneca 4:
 | Environment | `@seneca/env` 0.6 | |
 | REPL | `@seneca/repl` 9.2 | |
 
-Load the entity plugin and its store by their full names,
-`seneca.use('@seneca/entity')` and `seneca.use('@seneca/mem-store')`.
-Plugins that declare a peer dependency on `seneca-entity`, such as
-seneca-transport 8.3, make npm install seneca-entity 28 and
-seneca-mem-store 9 as well, and the short names `entity` and
-`mem-store` find those first (see
-[Manage plugins](manage-plugins.md#load-plugins)); they stop the
-process on Seneca 4 with `plugin_gubu_shape`.
+Install `@seneca/entity` and `@seneca/mem-store`, and load them by
+their full names, `seneca.use('@seneca/entity')` and
+`seneca.use('@seneca/mem-store')`. Plugins that declare a peer
+dependency on `seneca-entity`, such as seneca-transport 8.3, make npm
+install seneca-entity 28 and seneca-mem-store 9 as well; they stop the
+process on Seneca 4 with `plugin_gubu_shape`. A short name now finds
+`@seneca/<name>` before `seneca-<name>`, the reverse of Seneca 3 (see
+[Manage plugins](manage-plugins.md#load-plugins)), so the short names
+`entity` and `mem-store` load the old packages only when the
+`@seneca/` packages are not installed.
 
 ## Plugin definitions
 

@@ -233,6 +233,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   the option only decides whether a parent delegate's fixed properties
   win over those of a delegate created from it (the default) or the
   reverse.
+* A short plugin name is looked up as `@seneca/<name>` before
+  `seneca-<name>`, so `seneca.use('entity')` loads @seneca/entity when
+  seneca-entity is installed as well. 4.0.0-rc and Seneca 3 looked up
+  `seneca-<name>` first. Unnamed function plugins keep the name
+  `seneca-<nid>`. See "Upgrading from 3.x".
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -258,13 +263,17 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   later. The entity plugin and its default store were published as
   seneca-entity (up to 28) and seneca-mem-store (up to 9), which do not
   load on Seneca 4.
+* A short plugin name now resolves `@seneca/<name>` before
+  `seneca-<name>`; Seneca 3.38 used the opposite order. An application
+  that has both packages of a renamed plugin installed loads the
+  `@seneca/` one with the short name.
 * Plugins that declare a peer dependency on `seneca-entity`, such as
   seneca-transport 8.3, make npm install seneca-entity 28 and
-  seneca-mem-store 9 next to @seneca/entity and @seneca/mem-store, and a
-  short plugin name is looked up as `seneca-<name>` before
-  `@seneca/<name>`. Load them as `seneca.use('@seneca/entity')` and
-  `seneca.use('@seneca/mem-store')` rather than `'entity'` and
-  `'mem-store'`.
+  seneca-mem-store 9. If @seneca/entity and @seneca/mem-store are not
+  installed as well, the short names `'entity'` and `'mem-store'` load
+  those old packages, which stop the process with `plugin_gubu_shape`.
+  Install the `@seneca/` packages and load them by their full names,
+  `seneca.use('@seneca/entity')` and `seneca.use('@seneca/mem-store')`.
 * Plugin `defaults` functions are called with `{ valid }`; the `Joi`
   argument is gone. Action definitions carry the compiled shape as `shape`
   (was `gubu`).
