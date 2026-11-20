@@ -35,6 +35,7 @@ declare const TRACE_START = 5;
 declare const TRACE_END = 6;
 declare const TRACE_SYNC = 7;
 declare const TRACE_ACTION = 8;
+declare const OWN_ERROR: unique symbol;
 declare function history(opts: any): ActHistory;
 declare class ActHistory {
     _total: number;
@@ -56,4 +57,4 @@ declare class ActHistory {
 }
 declare function message_props_shape(): import("shape").Node<undefined>;
 declare function find_gubu_shape(value: any, path?: string, seen?: Set<unknown>): string | null;
-export { pins, find_gubu_shape, message_props_shape, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, idnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, };
+export { pins, find_gubu_shape, message_props_shape, promiser, stringify, wrap_error, make_plugin_key, parse_jsonic, pattern, pincanon, noop, clean, deep, each, makedie, make_standard_act_log_entry, make_standard_err_log_entry, resolve_option, autoincr, make_callpoint, make_trace_desc, history, print, tagnid, idnid, inspect, error, msgstr, jsonic_stringify, TRACE_PATTERN, TRACE_ID, TRACE_INSTANCE, TRACE_TAG, TRACE_VERSION, TRACE_START, TRACE_END, TRACE_SYNC, TRACE_ACTION, OWN_ERROR, };

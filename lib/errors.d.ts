@@ -31,6 +31,7 @@ declare const messages: {
     unknown_message_reply: string;
     maxparents: string;
     plugin_define_failed: string;
+    plugin_preload_failed: string;
     no_transport_client: string;
     invalid_plugin_option: string;
     plugin_gubu_shape: string;
@@ -88,6 +89,7 @@ declare const _default: {
     unknown_message_reply: string;
     maxparents: string;
     plugin_define_failed: string;
+    plugin_preload_failed: string;
     no_transport_client: string;
     invalid_plugin_option: string;
     plugin_gubu_shape: string;

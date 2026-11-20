@@ -1004,6 +1004,9 @@ intern.close = function(this: any, callpoint: any, done: any) {
     return safe_done()
   }
 
+  // Still called when a fatal error has dropped the other ready calls.
+  do_close.closing$ = true
+
   seneca.ready(do_close)
   const close_timeout = setTimeout(do_close, options.close_delay)
 

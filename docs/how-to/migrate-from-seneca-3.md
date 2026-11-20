@@ -62,7 +62,29 @@ Shapes built with Gubu are not accepted either. A plugin whose
 `defaults` were built with Gubu fails to load with
 `plugin_gubu_shape`, and pattern rules built with Gubu fail with
 `add_gubu_shape`. Build them with `seneca.valid` or `this.valid` (Shape),
-or import the builders from the `shape` package.
+or import the builders from the `shape` package. A `defaults` function
+of `{ valid }` builds the shape with the builders Seneca passes in, so
+the same plugin loads on Seneca 3.38 (Gubu) and Seneca 4 (Shape).
+
+## Plugin versions
+
+Plugins that built their options with Gubu have releases for Seneca 4:
+
+| Plugin | Version for Seneca 4 | Earlier name |
+| ------ | -------------------- | ------------ |
+| Entities | `@seneca/entity` 29 | `seneca-entity` (up to 28) |
+| In-memory store | `@seneca/mem-store` 10 | `seneca-mem-store` (up to 9) |
+| Environment | `@seneca/env` 0.6 | |
+| REPL | `@seneca/repl` 9.2 | |
+
+Load the entity plugin and its store by their full names,
+`seneca.use('@seneca/entity')` and `seneca.use('@seneca/mem-store')`.
+Plugins that declare a peer dependency on `seneca-entity`, such as
+seneca-transport 8.3, make npm install seneca-entity 28 and
+seneca-mem-store 9 as well, and the short names `entity` and
+`mem-store` find those first (see
+[Manage plugins](manage-plugins.md#load-plugins)); they stop the
+process on Seneca 4 with `plugin_gubu_shape`.
 
 ## Plugin definitions
 

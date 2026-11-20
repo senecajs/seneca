@@ -273,8 +273,12 @@ function make_tasks(): any {
       let meta: any = {}
 
       if ('function' === typeof plugin.define.preload) {
-        // TODO: need to capture errors
-        meta = plugin.define.preload.call(seneca, plugin) || {}
+        try {
+          meta = plugin.define.preload.call(seneca, plugin) || {}
+        } catch (e: any) {
+          intern.fail_plugin(
+            e, 'plugin_preload_failed', plugin, seneca, plugin.options || {})
+        }
       }
 
       let name = meta.name || plugin.name
@@ -740,8 +744,32 @@ function make_tasks(): any {
       })
 
 
+      // The plugin delegate fixes fatal$, which would make an init error
+      // call die from the act, without the plugin context, and then again
+      // from the complete task. Act without it, so that the error is
+      // reported once, by the complete task, as plugin_init. The reply
+      // handles the error itself (OWN_ERROR), so the error handler option
+      // can neither consume it nor see it twice: die calls the handler
+      // with the plugin_init error.
+      let init_delegate: any = Object.create(delegate)
+      init_delegate.fixedargs = Object.assign({}, delegate.fixedargs)
+      delete init_delegate.fixedargs.fatal$
+
       return new Promise(resolve => {
-        delegate.act(
+        const init_reply: any = function(err: Error, res: any) {
+          resolve({
+            op: 'merge',
+            out: {
+              prepare: {
+                err,
+                res
+              }
+            }
+          })
+        }
+        init_reply[Common.OWN_ERROR] = true
+
+        init_delegate.act(
           {
             role: 'seneca',
             plugin: 'init',
@@ -749,20 +777,9 @@ function make_tasks(): any {
             init: plugin.name,
             tag: plugin.tag,
             default$: {},
-            fatal$: true,
             local$: true,
           },
-          function(err: Error, res: any) {
-            resolve({
-              op: 'merge',
-              out: {
-                prepare: {
-                  err,
-                  res
-                }
-              }
-            })
-          }
+          init_reply
         )
       })
     },
@@ -782,7 +799,7 @@ function make_tasks(): any {
 
           plugin_out.plugin_error = prepare.err.message
 
-          if (prepare.err.code === 'action-timeout') {
+          if (prepare.err.code === 'action_timeout') {
             plugin_out.err_code = 'plugin_init_timeout'
             plugin_out.timeout = so.timeout
           }
@@ -872,6 +889,7 @@ function make_intern() {
 
         if (data.prepare.err) {
           let err = data.delegate.error(data.prepare.err, data.plugin.err_code, data.plugin)
+          err.plugin = err.plugin || data.plugin.fullname || data.plugin.name
           data.delegate.die(err)
 
           intern.release_define(data.delegate, data, err)
@@ -884,20 +902,43 @@ function make_intern() {
 
     // A plugin is defined inside a gated `role:seneca,plugin:define` action,
     // and that action is only completed when the plugin has loaded. When the
-    // plugin fails, `die` terminates the process - except in undead mode
-    // (testing only), where the instance lives on with the define action
-    // still in flight. Complete the action so that the executor is released
-    // immediately, rather than when the action times out: later plugins can
-    // then load, and the process is not held open by the executor interval.
-    release_define: function(seneca: any, data: any, err: any) {
-      let so = seneca.options()
-      let undead = (so.debug && so.debug.undead) || (err && err.undead)
-
-      if (undead && 'function' === typeof data.plugin_done) {
+    // plugin fails, complete the action so that the executor is released
+    // immediately. Otherwise `die`, which closes the instance before it
+    // exits, waits for the instance to be ready until `death_delay` runs
+    // out, and the process exits with code 2. In undead mode (testing
+    // only), where the instance lives on, later plugins can then load, and
+    // the process is not held open by the executor interval.
+    release_define: function(_seneca: any, data: any, _err: any) {
+      if ('function' === typeof data.plugin_done) {
         let plugin_done = data.plugin_done
         data.plugin_done = null
         plugin_done()
       }
+    },
+
+    // Throw the exception of a plugin's preload or definition function as
+    // the Seneca error `code`, with the plugin name, the location of the
+    // failure and the options (secret-looking values redacted).
+    fail_plugin: function(
+      e: any, code: string, plugin: any, seneca: any, options: any): never {
+      // The plugin may throw a non-Error value (such as a string),
+      // in which case there is no stack to locate the failure.
+      const is_error = e instanceof Error
+      const ex: any = is_error ? e :
+        new Error('string' === typeof e ? e : Common.inspect(e))
+      const where = is_error && 'string' === typeof ex.stack ?
+        ex.stack.match(/\n.*?\n/) : null
+
+      return Common.wrap_error(ex, code, {
+        fullname:
+          plugin.fullname || Common.make_plugin_key(plugin.name, plugin.tag),
+        message: (
+          ex.message +
+          (null == where ? '' : (' (' + where[0]).replace(/\n.*\//g, ''))
+        ).replace(/\n/g, ''),
+        options: redact_with(seneca, options),
+        repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',
+      })
     },
 
     define_plugin: function(delegate: any, plugin: any, options: any): any {
@@ -922,23 +963,7 @@ function make_intern() {
       try {
         meta = plugin.define.call(delegate, options) || {}
       } catch (e: any) {
-        // The plugin may throw a non-Error value (such as a string),
-        // in which case there is no stack to locate the failure.
-        const is_error = e instanceof Error
-        const ex: any = is_error ? e :
-          new Error('string' === typeof e ? e : Common.inspect(e))
-        const where = is_error && 'string' === typeof ex.stack ?
-          ex.stack.match(/\n.*?\n/) : null
-
-        Common.wrap_error(ex, 'plugin_define_failed', {
-          fullname: plugin.fullname,
-          message: (
-            ex.message +
-            (null == where ? '' : (' (' + where[0]).replace(/\n.*\//g, ''))
-          ).replace(/\n/g, ''),
-          options: redact_with(delegate, options),
-          repo: plugin.repo ? ' ' + plugin.repo + '/issues' : '',
-        })
+        intern.fail_plugin(e, 'plugin_define_failed', plugin, delegate, options)
       }
 
       if (meta instanceof Promise) {

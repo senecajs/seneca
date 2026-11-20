@@ -265,6 +265,23 @@ function makedie(instance: any, ctxt: any) {
       (so.debug && so.debug.print && 'full' === so.debug.print.fatal) || false
     let print_env = (so.debug && so.debug.print.env) || false
 
+    // A fatal error, reported by the die of this or another instance
+    // (such as a plugin delegate), is already closing the instance. An
+    // error raised while it closes, such as an action of a plugin still
+    // loading, is a consequence of it and is not reported again. This is
+    // checked first, as the second failure can come through this same die
+    // (two plugins used by one instance), which is not a death loop.
+    const dying_private = (instance.root || instance).private$
+    if (dying_private && dying_private.dying) {
+      instance.log.debug({
+        kind: 'fatal',
+        case: 'dying',
+        code: err && err.code,
+        notice: err && err.message,
+      })
+      return
+    }
+
     if (0 < diecount) {
       if (!undead) {
         throw error(err, '[DEATH LOOP] die count: ' + diecount)
@@ -385,6 +402,16 @@ function makedie(instance: any, ctxt: any) {
       }
 
       if (!undead) {
+        // The instance will not become ready: pending ready calls are
+        // dropped (close still waits for pending actions).
+        const root_private = (instance.root || instance).private$
+        if (root_private) {
+          root_private.dying = true
+          if (root_private.ready_list) {
+            root_private.ready_list.length = 0
+          }
+        }
+
         instance.act('sys:seneca,info:fatal,closing$:true', { err: err })
 
         instance.close(
@@ -697,6 +724,12 @@ const TRACE_SYNC = 7
 const TRACE_ACTION = 8
 
 
+// Marks a reply callback that handles the action error itself: the error
+// handler (option errhandler) is not called for it, so it cannot consume
+// the error. Internal, used by the plugin init action.
+const OWN_ERROR = Symbol('seneca.own_error')
+
+
 function history(opts: any) {
   return new ActHistory(opts)
 }
@@ -890,6 +923,7 @@ export {
   TRACE_END,
   TRACE_SYNC,
   TRACE_ACTION,
+  OWN_ERROR,
 }
 
 

@@ -359,8 +359,13 @@ intern.act_error = function(instance: any, ctx: any, data: any) {
   // Deprecated alias of act-err, with the same arguments. Remove in Seneca 5.
   instance.emit('act-err-4', 'callback', msg, meta, err)
 
-  // when fatal$ is set, prefer to die instead
-  if ('function' === typeof opts.errhandler && (!msg || !meta.fatal)) {
+  // when fatal$ is set, prefer to die instead; a reply that handles the
+  // error itself (Common.OWN_ERROR) always receives it
+  if (
+    'function' === typeof opts.errhandler &&
+    (!msg || !meta.fatal) &&
+    !(reply && reply[Common.OWN_ERROR])
+  ) {
     call_cb = !opts.errhandler.call(instance, err, err.meta$ || meta)
   }
 

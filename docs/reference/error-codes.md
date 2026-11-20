@@ -67,8 +67,9 @@ original message. A rejected `post` promise carries only the error.
 | `no_transport_client` | Reserved (transports log `no-transport-client` instead). |
 | `plugin_define_failed` | The plugin definition function threw. Fatal. `details.options` holds the plugin options with secret-looking values redacted. |
 | `plugin_gubu_shape` | The plugin's `defaults` were built with Gubu, which Seneca 4 does not accept; `details.path` names the option. Fatal. |
-| `plugin_init` | The plugin init action replied with an error. Fatal. |
-| `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but not produced: the completion code compares the code against `action-timeout` (hyphen) while the actual code is `action_timeout`, so a timed-out initialization is reported as a fatal `action_timeout` error. |
+| `plugin_init` | The plugin init action (`this.init` or `this.prepare`) replied with an error or threw. Fatal. |
+| `plugin_init_timeout` | Defined for a plugin init action that does not reply within the timeout, but in practice not produced: the plugin's `role:seneca,plugin:define` message has the same timeout and times out first, so a timed-out initialization is reported as a fatal `action_timeout` error for that message, which names the plugin. |
+| `plugin_preload_failed` | The plugin's `preload` function threw. Fatal. `details.options` holds the plugin options with secret-looking values redacted. |
 | `plugin_required` | `seneca.depends` found a missing plugin. Fatal. |
 | `ready_failed` | A function given to `seneca.ready` threw. Fatal unless an error handler is set. |
 | `require_default_options` | `seneca.options.js` exists but could not be loaded. |
