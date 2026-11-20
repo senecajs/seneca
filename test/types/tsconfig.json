@@ -11,5 +11,5 @@
       "seneca": ["../../seneca.d.ts"]
     }
   },
-  "files": ["esm.mts", "cjs.cts", "plugin.mts", "augment.d.mts"]
+  "files": ["esm.mts", "cjs.cts", "plugin.mts", "augment.d.mts", "handlers.mts"]
 }

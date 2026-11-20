@@ -162,6 +162,13 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   other public types are in the `Seneca` namespace, and deprecated names
   are marked `@deprecated`. Plugins declare the members they add by
   augmenting `Instance` (`declare module 'seneca'`).
+* An action passed to `seneca.message` or `seneca.add` can declare the
+  type of its message, for example `async function (msg: PriceMsg)`.
+  `Seneca.MessageFunc` and `Seneca.ActionFunc` take the message type as a
+  type parameter, which defaults to `Seneca.Msg`. `message` and `add`
+  infer it from the action, or take it explicitly, as in
+  `seneca.message<PriceMsg>(pattern, action)`. The type is not checked
+  against the pattern; Seneca validates messages at runtime.
 * The TypeScript sources import Seneca's own modules and typed
   dependencies with `import` instead of `require`, so the calls between
   them are type-checked, and `npm test` compiles example consumer code
@@ -342,9 +349,12 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `err.code === 'act_callback'`. Listeners on `act-err-4` can move to
   `act-err` unchanged.
 * TypeScript: instances are typed as `Seneca.Instance` instead of `any`.
-  Declare members that plugins add (such as `seneca.make$`) by augmenting
-  the interface:
-  `declare module 'seneca' { interface Instance { make$(name: string): any } }`.
+  @seneca/entity 29 declares the members it adds (`make$`, `make` and
+  `entity`); the declarations apply once a file of the tsc program loads
+  the package, with `import type {} from '@seneca/entity'` or with
+  `"@seneca/entity"` in `compilerOptions.types`. Declare members that
+  other plugins add by augmenting the interface:
+  `declare module 'seneca' { interface Instance { make_widget(): Widget } }`.
 * Action errors reach the caller unwrapped. Seneca 3 wrapped an error
   from an action in an `act_execute` error, with the original error as
   `err.orig`. Seneca 4 passes the original error, with its own `code` and

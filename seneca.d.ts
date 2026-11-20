@@ -76,10 +76,10 @@ declare namespace Seneca {
         (err: Error | null | undefined, result?: Result): void;
         (result?: Result | Error): void;
     }
-    /** An action: replies through reply, or returns its result for direct calls. */
-    type ActionFunc = (this: Instance, msg: Msg, reply: Reply, meta: Meta) => any;
-    /** An action written as an async function (seneca.message). */
-    type MessageFunc = (this: Instance, msg: Msg, meta: Meta) => Promise<Result | void>;
+    /** An action: replies through reply, or returns its result for direct calls. M is the message type the action declares. */
+    type ActionFunc<M extends Msg = Msg> = (this: Instance, msg: M, reply: Reply, meta: Meta) => any;
+    /** An action written as an async function (seneca.message). M is the message type the action declares. */
+    type MessageFunc<M extends Msg = Msg> = (this: Instance, msg: M, meta: Meta) => Promise<Result | void>;
     /** The callback of seneca.act. */
     type ActCallback = (this: Instance, err: Error | null, result?: any, meta?: Meta) => void;
     /** A subscription function (seneca.sub). */
@@ -324,10 +324,10 @@ declare namespace Seneca {
         shared?: Record<string, any>;
         /** Internal state. Not part of the public API. */
         private$: any;
-        add(pattern: Pattern, action?: ActionFunc, actdef?: Partial<ActDef>): this;
-        add(pattern: Pattern, moreProps: Msg, action?: ActionFunc, actdef?: Partial<ActDef>): this;
-        message(pattern: Pattern, action: MessageFunc): this;
-        message(pattern: Pattern, moreProps: Msg, action: MessageFunc): this;
+        add<M extends Msg = Msg>(pattern: Pattern, action?: ActionFunc<M>, actdef?: Partial<ActDef>): this;
+        add<M extends Msg = Msg>(pattern: Pattern, moreProps: Msg, action?: ActionFunc<M>, actdef?: Partial<ActDef>): this;
+        message<M extends Msg = Msg>(pattern: Pattern, action: MessageFunc<M>): this;
+        message<M extends Msg = Msg>(pattern: Pattern, moreProps: Msg, action: MessageFunc<M>): this;
         act(msg: Pattern, callback?: ActCallback): this;
         act(msg: Pattern, moreProps: Msg, callback?: ActCallback): this;
         post<T = any>(msg: Pattern, moreProps?: Msg): Promise<T>;
