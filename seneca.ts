@@ -708,16 +708,16 @@ namespace Seneca {
     (result?: Result | Error): void
   }
 
-  /** An action: replies through reply, or returns its result for direct calls. */
-  export type ActionFunc = (
+  /** An action: replies through reply, or returns its result for direct calls. M is the message type the action declares. */
+  export type ActionFunc<M extends Msg = Msg> = (
     this: Instance,
-    msg: Msg,
+    msg: M,
     reply: Reply,
     meta: Meta,
   ) => any
 
-  /** An action written as an async function (seneca.message). */
-  export type MessageFunc = (this: Instance, msg: Msg, meta: Meta) => Promise<Result | void>
+  /** An action written as an async function (seneca.message). M is the message type the action declares. */
+  export type MessageFunc<M extends Msg = Msg> = (this: Instance, msg: M, meta: Meta) => Promise<Result | void>
 
   /** The callback of seneca.act. */
   export type ActCallback = (
@@ -960,15 +960,15 @@ namespace Seneca {
 
     // Actions and messages
 
-    add(pattern: Pattern, action?: ActionFunc, actdef?: Partial<ActDef>): this
-    add(
+    add<M extends Msg = Msg>(pattern: Pattern, action?: ActionFunc<M>, actdef?: Partial<ActDef>): this
+    add<M extends Msg = Msg>(
       pattern: Pattern,
       moreProps: Msg,
-      action?: ActionFunc,
+      action?: ActionFunc<M>,
       actdef?: Partial<ActDef>,
     ): this
-    message(pattern: Pattern, action: MessageFunc): this
-    message(pattern: Pattern, moreProps: Msg, action: MessageFunc): this
+    message<M extends Msg = Msg>(pattern: Pattern, action: MessageFunc<M>): this
+    message<M extends Msg = Msg>(pattern: Pattern, moreProps: Msg, action: MessageFunc<M>): this
     act(msg: Pattern, callback?: ActCallback): this
     act(msg: Pattern, moreProps: Msg, callback?: ActCallback): this
     post<T = any>(msg: Pattern, moreProps?: Msg): Promise<T>

@@ -234,14 +234,25 @@ The declarations describe the API; before, instances were typed as
 * `Seneca()` returns `Seneca.Instance`, which is also `this` in actions
   and plugin definitions. Calls to methods that do not exist, or with
   arguments of the wrong type, no longer compile.
-* Members that plugins add to instances (such as `seneca.make$` from
-  seneca-entity) are not part of `Instance`. Declare them by augmenting
-  it:
+* Members that plugins add to instances are not part of `Instance`
+  until a declaration adds them. @seneca/entity 29 declares the members
+  it adds (`make$`, `make` and `entity`). Its declarations apply once
+  any file of the tsc program loads the package:
+
+  ```ts
+  import type {} from '@seneca/entity'
+  ```
+
+  or add `"@seneca/entity"` to `compilerOptions.types`. Each tsc program
+  needs it: when `src` and `test` are separate projects, add it to both,
+  because declaration output does not keep the import. seneca-entity 28
+  and earlier declare nothing for Seneca 4.
+* Declare members that other plugins add by augmenting `Instance`:
 
   ```ts
   declare module 'seneca' {
     interface Instance {
-      make$(name: string): any
+      make_widget(name: string): Widget
     }
   }
   ```

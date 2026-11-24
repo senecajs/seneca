@@ -88,13 +88,38 @@ can also be imported by name: `import type { Instance } from 'seneca'`.
 `this` is a `Seneca.Instance` inside actions, callbacks and plugin
 definitions. Deprecated methods and options are marked `@deprecated`.
 
+An action can declare the type of its message. `seneca.message` and
+`seneca.add` infer it from the action, or take it as a type parameter:
+
+```ts
+type PriceMsg = { item: string; qty: number }
+
+async function price(this: Seneca.Instance, msg: PriceMsg) {
+  return { total: msg.qty * 2 }
+}
+
+seneca.message('role:shop,cmd:price', price)
+seneca.message<PriceMsg>('role:shop,cmd:quote', async function (msg) {
+  return { qty: msg.qty }
+})
+```
+
+The message type is not checked against the pattern: Seneca validates
+messages at runtime, with the pattern and its rules. Without a declared
+type, `msg` is a `Seneca.Msg`.
+
 Plugins that add members to instances, for example with
 `seneca.decorate`, declare them by augmenting `Instance`:
 
 ```ts
 declare module 'seneca' {
   interface Instance {
-    make$(name: string): Entity
+    make_widget(name: string): Widget
   }
 }
 ```
+
+@seneca/entity 29 declares `make$`, `make` and `entity` this way. The
+declarations apply once any file of the tsc program loads the package,
+with `import type {} from '@seneca/entity'` or with `"@seneca/entity"`
+in `compilerOptions.types`.
