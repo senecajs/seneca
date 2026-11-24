@@ -1,10 +1,41 @@
 /* Copyright © 2013-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+const Fs = require('node:fs')
+const Os = require('node:os')
+const Path = require('node:path')
 const assert = require('node:assert/strict')
 const { describe, it } = require('node:test')
 
 var Seneca = require('..')
+
+// Writes a throw-away package tree that holds one package per name in
+// `pkgnames`, each defining the plugin `prefixcheck`, and returns a module
+// that resolves plugin names from that tree (option `internal.module`).
+function make_plugin_tree(t, pkgnames) {
+  const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'seneca-prefix-'))
+  t.after(() => Fs.rmSync(dir, { recursive: true, force: true }))
+  for (const pkgname of pkgnames) {
+    const pkgdir = Path.join(dir, 'node_modules', pkgname)
+    Fs.mkdirSync(pkgdir, { recursive: true })
+    Fs.writeFileSync(
+      Path.join(pkgdir, 'package.json'),
+      JSON.stringify({ name: pkgname, version: '1.0.0', main: 'index.js' }),
+    )
+    Fs.writeFileSync(
+      Path.join(pkgdir, 'index.js'),
+      'module.exports = function prefixcheck() {\n' +
+        "  this.add('role:prefixcheck,cmd:which', function (msg, reply) {\n" +
+        '    reply({ pkg: ' +
+        JSON.stringify(pkgname) +
+        ' })\n' +
+        '  })\n' +
+        '}\n',
+    )
+  }
+  Fs.writeFileSync(Path.join(dir, 'loader.js'), 'module.exports = module\n')
+  return require(Path.join(dir, 'loader.js'))
+}
 
 describe('plugin', function () {
   it('plugin-edges', (t, fin) => {
@@ -973,6 +1004,76 @@ describe('plugin', function () {
       })
   })
 
+  // A validator plugin (such as @seneca/joi) replaces the message shape
+  // that Seneca compiles from the pattern rules: Seneca validates with
+  // actdef.shape when there is one, and calls actdef.validate otherwise.
+  it('plugin-extend-action-modifier-replaces-shape', async () => {
+    const calls = { a: [], b: [] }
+
+    const si = Seneca({ legacy: false })
+      .test()
+      .quiet()
+      .use(function validator() {
+        return {
+          extend: {
+            action_modifier: function (actdef) {
+              const key = { 'a:1': 'a', 'b:1': 'b' }[actdef.pattern]
+              if (null == key) return
+
+              assert.equal('function', typeof actdef.shape)
+
+              // a:1 replaces the shape; b:1 keeps it, so its validate
+              // is not called.
+              if ('a' === key) {
+                delete actdef.shape
+              }
+
+              actdef.validate = function (msg, done) {
+                calls[key].push(msg.x)
+                done(
+                  'string' === typeof msg.x
+                    ? null
+                    : new Error('x must be a string'),
+                )
+              }
+            },
+          },
+        }
+      })
+      .use(function service() {
+        this.add({ a: 1, x: Number }, function (msg, reply) {
+          reply({ x: msg.x })
+        })
+        this.add({ b: 1, x: Number }, function (msg, reply) {
+          reply({ x: msg.x })
+        })
+      })
+
+    await si.ready()
+
+    // The rule x:Number would reject 'q'; the plugin's validator accepts it.
+    assert.deepEqual(await si.post('a:1', { x: 'q' }), { x: 'q' })
+
+    await assert.rejects(si.post('a:1', { x: 1 }), (err) => {
+      assert.equal(err.code, 'act_invalid_msg')
+      return true
+    })
+
+    assert.deepEqual(calls.a, ['q', 1])
+
+    // With actdef.shape in place, Seneca validates with the shape only.
+    assert.deepEqual(await si.post('b:1', { x: 2 }), { x: 2 })
+
+    await assert.rejects(si.post('b:1', { x: 'q' }), (err) => {
+      assert.equal(err.code, 'act_invalid_msg')
+      return true
+    })
+
+    assert.deepEqual(calls.b, [])
+
+    await si.close()
+  })
+
   it('plugin-extend-logger', function (t, fin) {
     var si = Seneca({ log: 'silent' })
       .use(function foo() {
@@ -1141,6 +1242,73 @@ describe('plugin', function () {
       } catch (e) {
         fin(e)
       }
+    })
+  })
+
+  // A short name loads `@seneca/<name>` when `seneca-<name>` is installed
+  // too, as npm does for a legacy peer dependency such as `seneca-entity`.
+  it('short-name-prefers-scoped-package', function (t, fin) {
+    const module = make_plugin_tree(t, [
+      'seneca-prefixcheck',
+      '@seneca/prefixcheck',
+    ])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('prefixcheck')
+      .ready(function () {
+        assert.ok(this.has_plugin('prefixcheck'))
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, '@seneca/prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  it('short-name-falls-back-to-legacy-package', function (t, fin) {
+    const module = make_plugin_tree(t, ['seneca-prefixcheck'])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('prefixcheck')
+      .ready(function () {
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, 'seneca-prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  it('full-name-loads-that-package', function (t, fin) {
+    const module = make_plugin_tree(t, [
+      'seneca-prefixcheck',
+      '@seneca/prefixcheck',
+    ])
+    Seneca({ legacy: false, internal: { module } })
+      .test(fin)
+      .use('seneca-prefixcheck')
+      .ready(function () {
+        this.act('role:prefixcheck,cmd:which', function (err, out) {
+          assert.equal(out.pkg, 'seneca-prefixcheck')
+          fin()
+        })
+      })
+  })
+
+  // use-plugin names an unnamed function plugin with the first lookup
+  // prefix, `@seneca/`; Seneca keeps the name `seneca-<nid>`.
+  it('unnamed-function-plugin-name', function (t, fin) {
+    var s0 = Seneca({ legacy: false }).test(fin)
+    s0.use(function () {})
+    s0.use(() => {})
+    s0.ready(function () {
+      var names = Object.keys(this.list_plugins()).filter(
+        (name) => 'root$' !== name,
+      )
+      assert.equal(names.length, 2)
+      for (const name of names) {
+        assert.match(name, /^seneca-[0-9a-z]+$/)
+      }
+      assert.deepEqual(this.private$.plugin_order.byname, names)
+      fin()
     })
   })
 

@@ -1,5 +1,6 @@
 # Continuous integration: clean install, build and test on Node.js 24, the
-# version Seneca 4 targets, across Linux, Windows and macOS.
+# version Seneca 4 targets, and on Node.js 26, across Linux, Windows and
+# macOS.
 # Publishing is handled separately by release.yml (npm trusted publishing).
 #
 # Actions are pinned to commits; Dependabot (.github/dependabot.yml) keeps
@@ -27,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [24.x]
+        node-version: [24.x, 26.x]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

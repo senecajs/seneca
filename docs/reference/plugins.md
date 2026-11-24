@@ -80,7 +80,7 @@ or a meta data object:
 | `tag` | Set the tag. |
 | `exports` (or `exportmap`) | Object of values made available as `seneca.export('<name>/<key>')` and `seneca.export('<name>$<tag>/<key>')`. |
 | `export` | Value returned by `seneca.export('<name>')` instead of the plugin record. |
-| `extend.action_modifier` | Function `(actdef) => void` called for every action added afterwards on the instance. |
+| `extend.action_modifier` | Function `(actdef) => void` called for every action added afterwards on the instance. A validator plugin sets `actdef.validate` here and deletes `actdef.shape`, see [Write a validator plugin](../how-to/validate-messages-and-options.md#write-a-validator-plugin). |
 | `extend.logger` | Logger function added to the current logger (or replacing it when `logger.replace` is true). |
 | `order.plugin` | Ordu task or array of tasks added to the plugin loading pipeline. |
 | `service` | Legacy: a function kept as `plugin.service`. |

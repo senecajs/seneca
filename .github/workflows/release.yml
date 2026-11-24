@@ -4,13 +4,14 @@
 # OIDC token for a publish credential, and npm attaches build provenance.
 #
 # Trigger: workflow_dispatch only (Actions > release > Run workflow, or
-# `gh workflow run release.yml -f dry-run=false`). A run releases the
-# package.json version of the selected branch:
+# `gh workflow run release.yml -f dry-run=false -f sha=<commit>`). A run
+# releases the package.json version of the selected branch:
 #   * dry-run (the default): validate, build, test and pack; nothing is
 #     published.
 #   * dry-run off: also publish to npm, then create the tag vX.Y.Z on the
 #     published commit and the GitHub release. Publishing is only allowed
-#     from the default branch and from maintenance branches named N.x.
+#     from the default branch and from maintenance branches named N.x, and
+#     only when the input sha is the commit at the head of the branch.
 #
 # The npm trusted publisher of the `seneca` package must be configured as
 #   Organization or user: senecajs
@@ -23,6 +24,8 @@
 # no OIDC permission. The `publish` job never runs third-party code: it
 # checks out the commit that was validated, checks it again with the
 # dependency-free validation script, and publishes the committed files.
+# The `load` job, which has no OIDC permission either, installs the
+# published version and loads it.
 #
 # Only one release runs at a time in this repository, so two runs cannot
 # publish concurrently and move the latest dist-tag backward. Later runs,
@@ -41,6 +44,10 @@ on:
         default: true
       dist-tag:
         description: 'npm dist-tag (empty: latest, or next for a prerelease; for example 3x for a maintenance release)'
+        type: string
+        default: ''
+      sha:
+        description: 'Expected commit, 40 characters (required to publish): fail unless the branch head is exactly this commit'
         type: string
         default: ''
 
@@ -99,7 +106,19 @@ jobs:
       # The publish job checks out this exact commit, not the branch head.
       - name: Record the commit
         id: commit
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        env:
+          DRY_RUN: ${{ inputs.dry-run }}
+          EXPECT_SHA: ${{ inputs.sha }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          # A publish releases only the commit that was validated.
+          if [ "$DRY_RUN" != true ] || [ -n "$EXPECT_SHA" ]; then
+            if [ "$EXPECT_SHA" != "$sha" ]; then
+              echo "::error::the branch head is $sha, the expected commit is '$EXPECT_SHA'; a publish needs -f sha=<validated commit>"
+              exit 1
+            fi
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -136,7 +155,9 @@ jobs:
     needs: validate
     if: needs.validate.outputs.dry_run != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Covers the wait for the registry below (up to 25 minutes) and the
+    # rest of the job.
+    timeout-minutes: 40
     permissions:
       contents: write # create the tag and the GitHub release
       id-token: write # mint the OIDC token for npm trusted publishing
@@ -186,18 +207,31 @@ jobs:
           DIST_TAG: ${{ steps.check.outputs.dist_tag }}
         run: npm publish --ignore-scripts --tag "$DIST_TAG"
 
+      # npm scans a new version before it becomes visible: typically about
+      # five minutes, sometimes more than 15. Wait up to 20 minutes for the
+      # version, then up to 5 minutes for the dist-tag, which a stale
+      # registry read can report late.
       - name: Verify the published package
         env:
           VERSION: ${{ steps.check.outputs.version }}
           DIST_TAG: ${{ steps.check.outputs.dist_tag }}
         run: |
-          for i in $(seq 1 30); do
-            if [ "$(npm view "seneca@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then break; fi
-            echo "waiting for the registry ($i)"
-            sleep 10
-          done
-          test "$(npm view "seneca@$VERSION" version)" = "$VERSION"
-          test "$(npm view seneca "dist-tags.$DIST_TAG")" = "$VERSION"
+          wait_for() {
+            local what="$1" tries="$2"; shift 2
+            local i
+            for i in $(seq 1 "$tries"); do
+              if [ "$("$@" 2>/dev/null)" = "$VERSION" ]; then
+                echo "$what: $VERSION"
+                return 0
+              fi
+              echo "waiting for the registry: $what ($i/$tries)"
+              sleep 10
+            done
+            echo "::error::$what is not $VERSION after $((tries * 10)) seconds"
+            return 1
+          }
+          wait_for "seneca@$VERSION" 120 npm view "seneca@$VERSION" version
+          wait_for "dist-tag $DIST_TAG" 30 npm view seneca "dist-tags.$DIST_TAG"
           attestations="$(npm view "seneca@$VERSION" dist.attestations.url)"
           test -n "$attestations"
           echo "provenance attestation: $attestations"
@@ -232,3 +266,38 @@ jobs:
             gh release create "$TAG" --target "$SHA" "${flags[@]}"
           fi
           gh release view "$TAG" --json url --jq .url
+
+  # Loading runs the code of the package and of its dependencies, so it
+  # runs here, without the OIDC permission of the publish job. It runs
+  # after the tag and the GitHub release, so a failure cannot leave the
+  # published version without them; it still fails the run.
+  load:
+    name: load the published package
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Install and load the published package
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/load" && cd "$RUNNER_TEMP/load"
+          npm init -y > /dev/null
+          npm install "seneca@$VERSION" --ignore-scripts --no-audit --no-fund
+          node -e '
+            const version = require("seneca/package.json").version
+            if (version !== process.env.VERSION) {
+              console.error("installed seneca@" + version + ", expected " + process.env.VERSION)
+              process.exit(1)
+            }
+            require("seneca")().ready(function () {
+              console.log("seneca@" + version + " loads")
+              this.close()
+            })
+          '

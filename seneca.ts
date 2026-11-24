@@ -1345,8 +1345,14 @@ function make_seneca(initial_opts?: any) {
 
   // private$.plugins = {}
   private$.plugin_order = { byname: [], byref: [] }
+  // A short plugin name is looked up as `@seneca/<name>` before
+  // `seneca-<name>`, so that an application with both generations of a
+  // renamed plugin installed (npm adds `seneca-entity` for legacy peer
+  // dependencies) loads the Seneca 4 package. Seneca 3 used the opposite
+  // order. Unnamed function plugins are still named `seneca-<nid>`, see
+  // the `load` task in lib/plugin.ts.
   private$.use = UsePlugin({
-    prefix: ['seneca-', '@seneca/'],
+    prefix: ['@seneca/', 'seneca-'],
     module: start_opts.internal.module || module,
     msgprefix: false,
     builtin: '',

@@ -3,6 +3,11 @@
 'use strict'
 
 // TODO: replace `seneca-` prefix with `plugin-` for unnamed plugins
+const UNNAMED_PREFIX = 'seneca-'
+
+// First prefix of the short-name lookup (seneca.ts), which use-plugin also
+// uses to name unnamed function plugins.
+const LOOKUP_PREFIX = '@seneca/'
 
 import Eraro from 'eraro'
 import Nua from 'nua'
@@ -195,6 +200,22 @@ function make_tasks(): any {
       // TODO: use-plugin needs better error message for malformed plugin desc
       let desc = private$.use.build_plugin_desc(...args)
       desc.callpoint = spec.ctx.callpoint
+
+      // use-plugin names an unnamed function plugin with the first lookup
+      // prefix, which is `@seneca/` (see seneca.ts). Keep the name
+      // `seneca-<nid>` that such plugins have always had in logs,
+      // `list_plugins()` and `plugin_order`, and that the short-name option
+      // lookup in the `options` task strips.
+      const def: any = args[0]
+      if (
+        'function' === typeof def &&
+        '' === def.name &&
+        'string' === typeof desc.name &&
+        desc.name.startsWith(LOOKUP_PREFIX)
+      ) {
+        desc.name = UNNAMED_PREFIX + desc.name.substring(LOOKUP_PREFIX.length)
+        desc.full = desc.name
+      }
 
       if (private$.ignore_plugins[desc.full]) {
         seneca.log.info({
