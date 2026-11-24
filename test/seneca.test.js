@@ -90,13 +90,13 @@ describe('seneca', function () {
     si.start_time = 123
     assert.equal(
       JSON.stringify(si),
-      '{"isSeneca":true,"id":"a","fixedargs":{},"fixedmeta":{},"start_time":123,"version":"' +
+      '{"isSeneca":true,"id":"a","fixedmsg":{},"fixedmeta":{},"start_time":123,"version":"' +
         Package.version +
         '"}',
     )
     assert.equal(
       Util.inspect(si).replace(/\n */g, ' '),
-      "{ isSeneca: true, id: 'a', did: undefined, fixedargs: {}, fixedmeta: {}, start_time: 123, version: '" +
+      "{ isSeneca: true, id: 'a', did: undefined, fixedmsg: {}, fixedmeta: {}, start_time: 123, version: '" +
         Package.version +
         "' }",
     )

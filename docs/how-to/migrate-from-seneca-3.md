@@ -109,8 +109,22 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
   `legacy.builtin_actions` remain, and `legacy: false` turns both off.
   The removed flags are still accepted, so Seneca 3 configurations load,
   but they are ignored and each one reports a deprecation.
+* `seneca.options(opts)` returns the instance or delegate it was called
+  on, so it chains like `add` and `use`. In Seneca 3 it returned the
+  resolved options. Nothing reports this change: code that uses the
+  result gets the instance without an error, and reads `undefined` (or a
+  method, for names such as `test` and `log`) where it expected an option
+  value. The Seneca 3 idiom `var options = seneca.options('config.js')`
+  breaks this way. Read the options with a separate call, which works on
+  Seneca 3 and 4: `seneca.options(x); const opts = seneca.options()`. The
+  second argument (`true` selected chaining in Seneca 3) is ignored.
+  TypeScript reports uses of the result as errors.
 * `deathdelay` is `death_delay`. `deathdelay` still works, as a deprecated
   alias.
+* `strict.fixedargs` is `strict.fixedmsg`. `strict.fixedargs` still works,
+  as a deprecated alias. The option decides only whether a parent
+  delegate's fixed message properties win over those of a delegate
+  created from it; fixed properties always override message properties.
 * `debug.short_logs` (and `log.short`) no longer shorten identifiers. Seneca
   3 made all identifiers 2 characters long, so different messages could
   share an id, and a message with a repeated id is answered from the action
@@ -144,6 +158,7 @@ seneca.close()` and `await this.prior(msg)` are part of the core.
 | Seneca 3 | Seneca 4 |
 | -------- | -------- |
 | `seneca.closed` | `seneca.flags.closed` (`closed` is a deprecated alias) |
+| `seneca.fixedargs` | `seneca.fixedmsg` (`fixedargs` is a deprecated alias; code that also runs on Seneca 3 can read `seneca.fixedmsg ?? seneca.fixedargs`) |
 | `seneca.next_act` | removed |
 | `Seneca.loghandler` | removed; use the `logger` option |
 | `seneca.findact`, `hasact`, `act_if`, `findpins`, `pinact`, `plugins`, `findplugin`, `hasplugin` | deprecated aliases; use `find`, `has`, `list`, `list_plugins`, `find_plugin`, `has_plugin` |
@@ -199,7 +214,9 @@ Seneca 3 and remain.
    `--throw-deprecation` to fail on it) and as a `DEPRECATED` log entry.
    Also look for `UNKNOWN` entries with `--seneca.test`. See
    [Deprecation warnings](../reference/legacy.md#deprecation-warnings).
-3. Grep for `role:seneca` patterns, `Joi`, `gubu`, `deathdelay`, `seneca.closed`
-   and the removed API names.
+3. Grep for `role:seneca` patterns, `Joi`, `gubu`, `deathdelay`, `seneca.closed`,
+   `fixedargs` and the removed API names, and for calls of
+   `seneca.options(...)` with an argument whose result is used, which no
+   warning reports.
 4. Run your test suite with `debug.undead` off: plugin failures that
    were tolerated before are fatal in Seneca 4.

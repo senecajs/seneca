@@ -20,7 +20,7 @@ Set on the message passed to `act`, `post`, `direct` or `prior`
 | `default$` | object or array | Result to use when no action matches the message (instead of an `act_not_found` error). Any other type is an `act_default_bad` error. Also the value returned by `seneca.prior()` when there is no prior action. |
 | `custom$` | object | Custom meta data, available as `meta.custom` in the action and in every child action, and merged back from replies. The same object reference is shared across the call tree. |
 | `id$` | string `'mi'` or `'mi/tx'` | Message identifier (and transaction identifier). A repeated identifier within the history window returns the recorded result instead of running the action again. `actid$` is an alias. |
-| `tx$` | string | Transaction identifier shared by all messages in a call tree (`meta.tx`). Delegates created for actions carry it in `fixedargs.tx$`. |
+| `tx$` | string | Transaction identifier shared by all messages in a call tree (`meta.tx`). Delegates created for actions carry it in `fixedmsg.tx$`. |
 | `sync$` | boolean | Whether a reply is expected (`meta.sync`). Defaults to true when a callback is given. |
 | `explain$` | array | Collect an explanation of the message's processing into the array. See [Debug and inspect](../how-to/debug-and-inspect.md). |
 | `closing$` | boolean | Allow the message while the instance is closing (used by the close action). |

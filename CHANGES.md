@@ -112,10 +112,10 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   first time it is used in a process: a Node.js `DeprecationWarning` with
   a `SENECA_DEP_*` code, and a warn-level `DEPRECATED` log entry. This
   covers the instance aliases (`findact`, `hasact`, `act_if`, `findpins`,
-  `pinact`, `plugins`, `findplugin`, `hasplugin`, `closed`),
+  `pinact`, `plugins`, `findplugin`, `hasplugin`, `closed`, `fixedargs`),
   `export('util')`, `util.deepextend`, `util.flatten`, `util.Gubu`,
-  `actdef.gubu`, the `act-err-4` event, the `deathdelay` and `legacy.*`
-  options, the `role:seneca` builtin actions and close hooks, the plugin
+  `actdef.gubu`, the `act-err-4` event, the `deathdelay`,
+  `strict.fixedargs` and `legacy.*` options, the `role:seneca` builtin actions and close hooks, the plugin
   `init` property and the promisify plugin.
   `debug: { deprecation: false }` turns them off. See
   docs/reference/legacy.md.
@@ -212,6 +212,27 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   `SENECA_DEP_TRANSPORT_TYPE`. In 4.0.0-rc they reached seneca-transport
   unchanged, where a client of type `http` crashed at start-up.
 * The `action_timeout` message closes its parenthesis.
+* `seneca.options(opts)` returns the instance or delegate it was called
+  on, so calls chain as they do for `add` and `use`; so does the string
+  form `seneca.options('file.js')`. `seneca.options()` and
+  `seneca.options(null)` still return the resolved options. The second
+  argument, which selected chaining in Seneca 3 (`true`), is accepted and
+  ignored. This change cannot report a deprecation; see "Upgrading from
+  3.x".
+* The delegate property `fixedargs`, the properties merged into every
+  message a delegate submits, is renamed `fixedmsg`, to match `fixedmeta`
+  and the message terminology of Seneca 4. `fixedargs` remains as a
+  deprecated alias (`SENECA_DEP_FIXEDARGS`) that reads and assigns
+  `fixedmsg`, so plugins that use it, such as seneca-transport 8.3, keep
+  working. `JSON.stringify(seneca)` and `util.inspect` print `fixedmsg`.
+* The option `strict.fixedargs` is renamed `strict.fixedmsg`, with
+  `strict.fixedargs` as a deprecated alias
+  (`SENECA_DEP_STRICT_FIXEDARGS`); the rule is off when either option is
+  false. The documentation described the option wrongly: fixed message
+  properties always override message properties of the same name, and
+  the option only decides whether a parent delegate's fixed properties
+  win over those of a delegate created from it (the default) or the
+  reverse.
 * Continuous integration restored (GitHub Actions `build` workflow).
 * Releases are published by GitHub Actions using npm trusted publishing
   (OpenID Connect) with provenance; no npm tokens are used. See
@@ -271,6 +292,19 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
   that matched on error text should check `err.code` and `err.details`.
 * Use the transport type `web` instead of the deprecated `http` and
   `direct`.
+* `seneca.options(opts)` returns the instance instead of the resolved
+  options. Nothing warns about this: code that uses the result gets the
+  instance without an error, and reads `undefined`, or a method for names
+  such as `test` and `log`, where it expected an option value (the Seneca
+  3 idiom `var options = seneca.options('config.js')` breaks this way).
+  Read the options with a separate call, which works on Seneca 3 and 4:
+  `seneca.options(x); const opts = seneca.options()`. TypeScript reports
+  uses of the result as errors.
+* `seneca.fixedargs` is renamed `seneca.fixedmsg`, and the option
+  `strict.fixedargs` is renamed `strict.fixedmsg`. The old names still
+  work, with a deprecation warning. Code that also runs on Seneca 3 can
+  read `seneca.fixedmsg ?? seneca.fixedargs`, which does not warn on
+  Seneca 4.
 
 
 ## 4.0.0-rc5 2025-02-07

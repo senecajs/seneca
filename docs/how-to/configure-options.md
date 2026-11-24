@@ -104,9 +104,13 @@ See [Plugin option resolution](../reference/plugins.md#option-resolution).
 const opts = seneca.options()          // the resolved options object
 console.log(opts.timeout)
 
-seneca.options({ timeout: 8000 })      // deep merge, returns the options
-seneca.options({ log: 'debug' }, true) // returns the instance for chaining
+seneca.options({ timeout: 8000 })      // deep merge, returns the instance
+console.log(seneca.options().timeout)  // 8000
 ```
+
+`seneca.options(opts)` returns the instance, so it chains like `add` and
+`use`. In Seneca 3 it returned the resolved options; read them with
+`seneca.options()` instead.
 
 Changing `log` rebuilds the logger; changing `tag` updates the instance
 identifier. Other changes take effect for later messages that read them

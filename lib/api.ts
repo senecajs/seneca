@@ -74,7 +74,7 @@ function fix(this: any, patargs: any, msgargs: any, custom: any) {
 }
 
 
-function options(this: any, options: any, chain: any) {
+function options(this: any, options: any, _chain?: any) {
   const self = this
   const private$ = self.private$
 
@@ -135,10 +135,10 @@ function options(this: any, options: any, chain: any) {
   //   }
   // }
 
-  // TODO: in 4.x, when given options, it should chain
-  // Allow chaining with seneca.options({...}, true)
-  // see https://github.com/rjrodger/seneca/issues/80
-  return chain ? self : out_opts
+  // Seneca 4: setting options returns the instance, so calls chain.
+  // The Seneca 3 second argument (chain) is accepted and ignored.
+  // Read the resolved options with seneca.options().
+  return self
 }
 
 
@@ -192,7 +192,7 @@ function error(this: any, first: any) {
     }
 
     const plugin_fullname =
-      this.fixedargs && this.fixedargs.plugin$ && this.fixedargs.plugin$.full
+      this.fixedmsg && this.fixedmsg.plugin$ && this.fixedmsg.plugin$.full
 
     const plugin =
       null != plugin_fullname
@@ -258,13 +258,12 @@ function outward(this: any) {
 }
 
 
-// TODO: rename fixedargs
-function delegate(this: any, fixedargs: any, fixedmeta: any) {
+function delegate(this: any, fixedmsg: any, fixedmeta: any) {
   const self = this
   const root = this.root
   const opts = this.options()
 
-  fixedargs = fixedargs || {}
+  fixedmsg = fixedmsg || {}
   fixedmeta = fixedmeta || {}
 
   const delegate = Object.create(self)
@@ -286,8 +285,8 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
   function delegate_toString() {
     if (strdesc) return strdesc
     const vfa: any = {}
-    Object.keys(fixedargs).forEach((k) => {
-      const v = fixedargs[k]
+    Object.keys(fixedmsg).forEach((k) => {
+      const v = fixedmsg[k]
       if (~k.indexOf('$')) return
       vfa[k] = v
     })
@@ -299,9 +298,19 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
     return strdesc
   }
 
-  const delegate_fixedargs = opts.strict.fixedargs
-    ? Object.assign({}, fixedargs, self.fixedargs)
-    : Object.assign({}, self.fixedargs, fixedargs)
+  // Option strict.fixedmsg: the fixed message properties of the parent
+  // win over those given here. Its deprecated Seneca 3 name is
+  // strict.fixedargs. The rule is off when either name is false, so the
+  // old name works from every option source.
+  const strict_fixedargs = opts.strict.fixedargs
+  if (!strict_fixedargs) {
+    Deprecate.deprecate(self, 'strict_fixedargs')
+  }
+
+  const delegate_fixedmsg =
+    opts.strict.fixedmsg && strict_fixedargs
+      ? Object.assign({}, fixedmsg, self.fixedmsg)
+      : Object.assign({}, self.fixedmsg, fixedmsg)
 
   const delegate_fixedmeta = opts.strict.fixedmeta
     ? Object.assign({}, fixedmeta, self.fixedmeta)
@@ -309,10 +318,10 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
 
   function delegate_delegate(
     this: any,
-    further_fixedargs: any,
+    further_fixedmsg: any,
     further_fixedmeta: any
   ) {
-    const args = Object.assign({}, delegate.fixedargs, further_fixedargs || {})
+    const args = Object.assign({}, delegate.fixedmsg, further_fixedmsg || {})
     const meta = Object.assign({}, delegate.fixedmeta, further_fixedmeta || {})
     return self.delegate.call(this, args, meta)
   }
@@ -325,7 +334,7 @@ function delegate(this: any, fixedargs: any, fixedmeta: any) {
   Object.defineProperties(delegate, {
     log: { value: delegate_log, writable: true },
     toString: { value: delegate_toString, writable: true },
-    fixedargs: { value: delegate_fixedargs, writable: true },
+    fixedmsg: { value: delegate_fixedmsg, writable: true },
     fixedmeta: { value: delegate_fixedmeta, writable: true },
     delegate: { value: delegate_delegate, writable: true },
     context: { value: delegate_context, writable: true },
@@ -400,7 +409,8 @@ function quiet(this: any, flags: any) {
     reload$: true, // TODO: obsolete?
   }
 
-  const opts = this.options(quiet_opts)
+  this.options(quiet_opts)
+  const opts = this.options()
 
   // An override from env or args is possible.
   // Only flip to test mode if called from test() method
@@ -431,7 +441,8 @@ function test(this: any, errhandler: any, logspec: any) {
     debug: { callpoint: true },
   }
 
-  const set_opts = this.options(test_opts)
+  this.options(test_opts)
+  const set_opts = this.options()
 
   // An override from env or args is possible.
   if (set_opts.quiet) {
@@ -548,7 +559,7 @@ function gate(this: any) {
 
 
 function ungate(this: any) {
-  this.fixedargs.gate$ = false
+  this.fixedmsg.gate$ = false
   return this
 }
 

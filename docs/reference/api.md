@@ -212,16 +212,23 @@ on the instance it is called on.
 ### `delegate`
 
 ```js
-const d = seneca.delegate([fixedargs], [fixedmeta])
+const d = seneca.delegate([fixedmsg], [fixedmeta])
 ```
 
 Create a delegate: an object inheriting from the instance, with its own
-`fixedargs` (properties merged into every message it submits; with
-`strict.fixedargs` they override message properties), `fixedmeta`
+`fixedmsg` (properties merged into every message it submits; they
+override message properties of the same name), `fixedmeta`
 (`custom`, `gate`, `fatal`, `local`, `direct`), `context` (a copy of the
 parent's), `did` identifier and `toString()`. Delegates share actions,
 plugins, options and events with the root instance. Seneca creates a
 delegate for every action execution and every plugin.
+
+A delegate of a delegate has the fixed properties of both. When both fix
+the same property, the parent's value wins; with the option
+`strict.fixedmsg: false`, the child's value wins.
+
+`fixedargs` is the Seneca 3 name of `fixedmsg`, kept as a deprecated
+alias (`SENECA_DEP_FIXEDARGS`) that reads and assigns `fixedmsg`.
 
 ## Lifecycle
 
@@ -254,15 +261,23 @@ timers. Closing twice is harmless.
 ### `options`
 
 ```js
-const opts = seneca.options()
-seneca.options({ timeout: 5000 })
-seneca.options({ timeout: 5000 }, true)   // returns the instance
+const opts = seneca.options()              // the resolved options
+seneca.options({ timeout: 5000 })          // returns the instance
+seneca.options({ timeout: 5000 }).add(...) // so calls chain
 ```
 
-Get the resolved options, or deep merge new values and return the
-result. Changing `log` rebuilds the logger; changing `tag` updates the
-instance id; `debug.callpoint` takes effect immediately. See
-[Options](options.md).
+With no argument (or `null`), return the resolved options. With an
+options object, or the path of an options file, deep merge the new
+values and return the instance or delegate that `options` was called
+on. A second argument is accepted and ignored. Changing `log` rebuilds
+the logger; changing `tag` updates the instance id; `debug.callpoint`
+takes effect immediately. See [Options](options.md).
+
+In Seneca 3, `seneca.options(opts)` returned the resolved options, and
+`seneca.options(opts, true)` the instance. Code that uses the result
+gets the instance now, without an error. Read the options with a
+separate call, which works on both versions:
+`seneca.options(opts); const resolved = seneca.options()`.
 
 ### `use`
 
@@ -417,7 +432,7 @@ Receive or send messages through a transport plugin. See
 
 | Method | Description |
 | ------ | ----------- |
-| `seneca.toString()` | `Seneca/<id>` (delegates append their fixed arguments). |
+| `seneca.toString()` | `Seneca/<id>` (delegates append their fixed message properties). |
 | `seneca.seneca()` | Returns the instance; a cheap way to check for a Seneca object (`isSeneca` is also true). |
 | `seneca.on(event, fn)`, `once`, `emit`, `removeListener` | Node.js `EventEmitter` methods; see [Events](events.md). |
 | `seneca.die(err)` | Trigger a fatal error: log, call the error handler, close and exit (unless `debug.undead`). |

@@ -25,7 +25,7 @@ Options are listed under their top level key in the
 | `death_delay`, fatal exit codes | [Options](options.md#top-level), [Error codes](error-codes.md) | [Handle errors](../how-to/handle-errors.md) |
 | `decorate` | [API: decorate](api.md#decorate) | |
 | `default$`, `strict.find` | [Message directives](message-directives.md), [Options: strict](options.md#strict) | [Handle errors](../how-to/handle-errors.md) |
-| `delegate`, `fixedargs`, `fixedmeta`, `did` | [API: delegate](api.md#delegate) | [Control message flow](../how-to/control-message-flow.md) |
+| `delegate`, `fixedmsg`, `fixedmeta`, `did` | [API: delegate](api.md#delegate) | [Control message flow](../how-to/control-message-flow.md) |
 | Delegate hooks (`on_act_in`, `on_act_out`, `on_act_err`) | [Events: delegate hooks](events.md#delegate-hooks) | |
 | `depends` | [Plugins](plugins.md#the-definition-function) | [Manage plugins](../how-to/manage-plugins.md) |
 | `deprecate$`, `debug.deprecation` | [Message directives](message-directives.md) | |

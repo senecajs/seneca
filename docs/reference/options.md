@@ -116,7 +116,8 @@ values (passwords in URLs replaced) and the names of the other keys
 | Option | Default | Effect |
 | ------ | ------- | ------ |
 | `strict.result` | `true` | An action result must be an object or array (or an `Error`, an entity, or an object with `force$`). Other values produce `result_not_objarr`. |
-| `strict.fixedargs` | `true` | A delegate's fixed arguments override message properties of the same name. When false, message properties win. |
+| `strict.fixedmsg` | `true` | For a delegate created from another delegate (`d.delegate(...)`), when both fix the same message property, the parent's value wins. When false, the child's value wins. Either way, fixed message properties override message properties of the same name; this option does not change that. |
+| `strict.fixedargs` | `true` | Deprecated Seneca 3 name of `strict.fixedmsg` (`SENECA_DEP_STRICT_FIXEDARGS`). The rule is off when either option is false. |
 | `strict.fixedmeta` | none | Read by `delegate()` as the same rule for fixed meta data, but not part of the validated option shape: passing it to `Seneca()` is rejected as an unknown key, so it can only take effect when `valid.option` is false. |
 | `strict.add` | `false` | When true, adding a pattern only overrides (becomes the prior of) an existing action with exactly the same pattern. When false, the most specific existing match becomes the prior. Overridden per pattern with `strict$: { add }`. |
 | `strict.find` | `true` | When false, a message with no matching action gets an empty object result instead of an `act_not_found` error. |
@@ -242,8 +243,9 @@ loading. Setting `debug: true` prints each task execution.
 
 * `seneca.options()` returns the resolved options object.
 * `seneca.options({ ... })` merges new values (deeply) and returns the
-  result; `seneca.options({ ... }, true)` returns the instance for
-  chaining. Changing `log` rebuilds the logger; changing `tag` updates
+  instance, so calls chain; a second argument is ignored. Read the
+  result with `seneca.options()`. (In Seneca 3 it returned the resolved
+  options.) Changing `log` rebuilds the logger; changing `tag` updates
   the instance identifier.
 * The builtin action `sys:seneca,get:options` returns options to callers
   (see [Builtin actions](builtin-actions.md)).

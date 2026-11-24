@@ -43,7 +43,7 @@ function api_prior(this: any) {
   const priordef = this.private$.act.def.priordef
 
 
-  // var spec = Common.build_message(this, arguments, 'reply:f?', this.fixedargs)
+  // var spec = Common.build_message(this, arguments, 'reply:f?', this.fixedmsg)
   const spec = ActArgu(arguments)
 
   // TODO: duplicated, should be utility

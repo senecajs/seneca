@@ -206,7 +206,12 @@ const option_defaults = {
     // Action result must be a plain object.
     result: true,
 
-    // Delegate fixedargs override action args.
+    // A parent delegate's fixed message properties win over those of a
+    // child delegate. Fixed properties always override message properties.
+    fixedmsg: true,
+
+    // Deprecated old name of strict.fixedmsg: false here also turns the
+    // rule off. Remove in Seneca 5.
     fixedargs: true,
 
     // Adding a pattern overrides existing pattern only if matches exactly.
@@ -510,7 +515,7 @@ SenecaInstance.prototype.toJSON = function toJSON() {
     isSeneca: true,
     id: this.id,
     did: this.did,
-    fixedargs: this.fixedargs,
+    fixedmsg: this.fixedmsg,
     fixedmeta: this.fixedmeta,
     start_time: this.start_time,
     version: this.version,
@@ -541,6 +546,14 @@ function Seneca(
 
   if (used_deathdelay) {
     Deprecate.deprecate(seneca, 'deathdelay')
+  }
+
+  // Deprecated: strict.fixedargs is the old name of strict.fixedmsg.
+  // delegate() honours both names, and also reports a false value of
+  // strict.fixedargs from any other option source.
+  const initial_strict = initial_opts.strict
+  if (null != initial_strict && undefined !== initial_strict.fixedargs) {
+    Deprecate.deprecate(seneca, 'strict_fixedargs')
   }
 
   // Deprecated: legacy flags that Seneca 4 ignores.
@@ -875,6 +888,8 @@ namespace Seneca {
     }
     strict?: {
       result?: boolean
+      fixedmsg?: boolean
+      /** @deprecated Use strict.fixedmsg. Removed in Seneca 5. */
       fixedargs?: boolean
       add?: boolean
       find?: boolean
@@ -921,6 +936,9 @@ namespace Seneca {
     readonly start_time: number
     readonly root: Instance
     readonly isSeneca: true
+    /** Properties merged into every message submitted through this instance or delegate. */
+    fixedmsg: Msg
+    /** @deprecated Use fixedmsg. Removed in Seneca 5. */
     fixedargs: Msg
     fixedmeta: Msg
     context: Record<string, any>
@@ -980,7 +998,7 @@ namespace Seneca {
     sub(pattern: Pattern, moreProps: Msg, fn: SubFunc): this
     gate(): Instance
     ungate(): this
-    delegate(fixedargs?: Msg, fixedmeta?: Msg): Instance
+    delegate(fixedmsg?: Msg, fixedmeta?: Msg): Instance
 
     // Lifecycle
 
@@ -989,8 +1007,9 @@ namespace Seneca {
     close(done: (err?: Error | null) => void): this
     close(): Promise<void>
     options(): Options & Record<string, any>
-    options(opts: Options, chain?: false): Options & Record<string, any>
-    options(opts: Options, chain: true): this
+    options(opts: Options | string): this
+    /** @deprecated The second argument is ignored: options(opts) returns the instance. */
+    options(opts: Options | string, chain: boolean): this
     use(plugin: Plugin, options?: Record<string, any>): this
     decorate(name: string, value: any): void
     prepare(fn: (this: Instance) => Promise<void> | void): this
@@ -1130,8 +1149,9 @@ function make_seneca(initial_opts?: any) {
   root$.context = {}
   root$.version = Pkg.version
 
-  // TODO: rename in 4.x as "args" terminology is legacy
-  root$.fixedargs = {}
+  // Fixed message properties and meta data, merged into every message
+  // submitted through this instance (delegates have their own).
+  root$.fixedmsg = {}
   root$.fixedmeta = {}
 
   root$.flags = {
@@ -1143,6 +1163,21 @@ function make_seneca(initial_opts?: any) {
     get() {
       Deprecate.deprecate(this, 'closed')
       return this.flags.closed
+    },
+    enumerable: false,
+    configurable: true,
+  })
+
+  // Deprecated alias of fixedmsg ("args" is Seneca 3 terminology).
+  // Remove in Seneca 5.
+  Object.defineProperty(root$, 'fixedargs', {
+    get() {
+      Deprecate.deprecate(this, 'fixedargs')
+      return this.fixedmsg
+    },
+    set(value: any) {
+      Deprecate.deprecate(this, 'fixedargs')
+      this.fixedmsg = value
     },
     enumerable: false,
     configurable: true,

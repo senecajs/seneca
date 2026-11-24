@@ -382,7 +382,7 @@ function inward_prepare_delegate(spec: any) {
     ctx.seneca.shared = plugin.shared
   }
 
-  ctx.seneca.fixedargs.tx$ = data.meta.tx
+  ctx.seneca.fixedmsg.tx$ = data.meta.tx
 
   data.reply = data.reply.bind(ctx.seneca)
   data.reply.seneca = ctx.seneca
