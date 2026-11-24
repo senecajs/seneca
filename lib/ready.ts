@@ -44,6 +44,12 @@ function api_ready(this: any, ready_func: any) {
   function run_ready() {
     const private$ = self.root.private$
 
+    // A fatal error is closing the instance, which will not be ready: only
+    // the close itself still waits for pending actions.
+    if (private$.dying && !ready_func.closing$) {
+      return
+    }
+
     const ready_call = function() {
       ready_func.call(self)
     }

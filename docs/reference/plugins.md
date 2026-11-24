@@ -124,19 +124,20 @@ For each `use` call, in order:
    name: false }`) stops here. With `system.plugin.load_once`, a plugin
    that is already loaded stops here.
 2. **preload**: `defaults`, `errors` and `preload` are read; `preload`
-   may rename the plugin.
+   may rename the plugin. An exception thrown by `preload` is fatal
+   (`plugin_preload_failed`).
 3. **define**: a gated `role:seneca,plugin:define` message is
    submitted, so that no other plugin defines itself at the same time;
    options are resolved and validated; the definition function runs;
    its meta data is applied (`DEFINE` log entry); `options.defined$` is
    called.
 4. **init**: unless `init$` is false, the init action
-   `role:seneca,plugin:init,init:<name>[,tag:<tag>]` is called with
-   `fatal$: true` (`INIT` log entry). It is defined by `this.init` and
-   `this.prepare`; without them the default action replies at once.
-   Errors are fatal (`plugin_init`); no reply within the timeout is a
-   fatal `action_timeout` (the dedicated `plugin_init_timeout` code is
-   not produced, see [Error codes](error-codes.md)).
+   `role:seneca,plugin:init,init:<name>[,tag:<tag>]` is called (`INIT`
+   log entry). It is defined by `this.init` and `this.prepare`; without
+   them the default action replies at once. Errors are fatal
+   (`plugin_init`); no reply within the timeout is a fatal
+   `action_timeout` (the dedicated `plugin_init_timeout` code is not
+   produced, see [Error codes](error-codes.md)).
 5. **complete**: `READY` log entry; `options.inited$` is called; the
    plugin options are printed, with secret-looking values redacted, when
    `debug.print.options` is set; the define message completes and the
@@ -144,6 +145,14 @@ For each `use` call, in order:
 
 `seneca.ready(fn)` callbacks run when the action queue is empty, which
 includes the completion of all plugins submitted so far.
+
+When a plugin fails to load (in any step above), the fatal error is
+reported once and names the plugin. The plugin's define message is
+completed, the instance closes as soon as the actions in progress have
+finished, and the process exits with code 1. Pending `seneca.ready`
+callbacks are not called after a fatal error. In undead mode
+(`debug.undead`, for testing only) the instance lives on: the error goes
+to the error handler, later plugins load, and `ready` callbacks run.
 
 ## Inspecting plugins
 

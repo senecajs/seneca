@@ -9,13 +9,22 @@ The plugin definition itself is covered in
 
 ```js
 seneca.use(shop)                  // a function
-seneca.use('seneca-entity')       // an npm module
-seneca.use('entity')              // seneca-entity or @seneca/entity
+seneca.use('@seneca/entity')      // an npm module
+seneca.use('entity')              // seneca-entity, else @seneca/entity
 seneca.use('./plugins/shop.js')   // a file
 seneca.use({ name: 'shop', define: shop })
 ```
 
 With options as the second argument: `seneca.use(shop, { currency: 'EUR' })`.
+
+A short name is looked up as `seneca-<name>`, then `@seneca/<name>`,
+then `<name>`, and the first package found is loaded. When both a
+`seneca-` and an `@seneca/` package of a plugin are installed, load the
+one you want by its full name. This matters for the entity plugin and
+its default store: npm installs seneca-entity 28 (and seneca-mem-store
+9) for plugins that declare a peer dependency on `seneca-entity`, such
+as seneca-transport 8.3, next to @seneca/entity 29 and
+@seneca/mem-store 10, and only the `@seneca/` versions load on Seneca 4.
 
 Plugins load in `use` order, one after another; `await seneca.ready()`
 (or `seneca.ready(fn)`) marks the point where all of them are loaded.
@@ -25,7 +34,7 @@ Plugins load in `use` order, one after another; `await seneca.ready()`
 ```js
 Seneca({
   plugins: {
-    entity: 'seneca-entity',
+    entity: '@seneca/entity',
     shop: { name: 'shop', define: shop, options: { currency: 'EUR' } },
     debug: false,            // never load this plugin
   },

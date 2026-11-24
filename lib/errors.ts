@@ -119,6 +119,9 @@ const messages = {
   plugin_define_failed:
     "The definition action for the plugin <%=fullname%> has failed: <%=message%>. This error is considered fatal as all plugins have to initialize correctly. You should test the plugin by itself to verify that it is working correctly. Also ensure that the configuration options passed to the plugin are correct. These are shown below under in the DETAILS section. There could also be a bug in the plugin. If you think that is the case, please create a github issue on the plugin's repository<%=repo%>, and include this error report.",
 
+  plugin_preload_failed:
+    "The preload function of the plugin <%=fullname%> has failed: <%=message%>. This error is considered fatal as all plugins have to initialize correctly. You should test the plugin by itself to verify that it is working correctly. Also ensure that the configuration options passed to the plugin are correct. These are shown below under in the DETAILS section. There could also be a bug in the plugin. If you think that is the case, please create a github issue on the plugin's repository<%=repo%>, and include this error report.",
+
   no_transport_client:
     'The transport client defined by <%=config%> does not exist for message: <%=msg%>',
 
