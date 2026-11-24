@@ -33,7 +33,7 @@ Task oriented recipes for people who already know the basics.
 | [Validate messages and options](how-to/validate-messages-and-options.md) | Shape rules in patterns, plugin defaults, instance options. |
 | [Control message flow](how-to/control-message-flow.md) | Gates, timeouts, locality, fatal, defaults, custom meta data, idempotency, subscriptions, translation, hooks. |
 | [Manage plugins](how-to/manage-plugins.md) | Loading, configuration, tags, dependencies, exports, ignoring, load order. |
-| [Use network transports](how-to/use-network-transports.md) | seneca-transport over HTTP and TCP, pins, several services, local overrides, HTTPS. |
+| [Use network transports](how-to/use-network-transports.md) | @seneca/transport over HTTP and TCP, pins, several services, local overrides, HTTPS. |
 | [Debug and inspect](how-to/debug-and-inspect.md) | Message logs, pattern listing, explanations, tracing, statistics, pipeline tracing. |
 | [Shut down gracefully](how-to/shut-down-gracefully.md) | `close`, plugin `destroy`, signals, fatal exits. |
 | [Run in production](how-to/run-in-production.md) | Configuration per environment, logging, lifecycle, health, timeouts, security notes. |

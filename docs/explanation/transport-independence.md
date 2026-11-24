@@ -48,7 +48,7 @@ Seneca core contains no network code. It defines two hook patterns,
 `role:transport,hook:listen,type:<type>` and
 `role:transport,hook:client,type:<type>`, and the message serialization
 helpers that transport plugins use (`transport/utils`). A transport
-plugin such as seneca-transport implements the hooks for HTTP and TCP;
+plugin such as @seneca/transport implements the hooks for HTTP and TCP;
 others implement message queues or pub/sub systems. The
 [message transport protocol](../reference/message-transport-protocol.md)
 specifies the meta data that accompanies messages so that identifiers,

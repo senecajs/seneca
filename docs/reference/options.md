@@ -187,7 +187,7 @@ logged or printed.
 Defaults shared by `seneca.listen()` and `seneca.client()`. Transport
 plugins add their own keys (for example `transport.web`, `transport.tcp`).
 `host`, `path` and `protocol` have no default in core: the transport
-plugin in use supplies them (seneca-transport listens on `0.0.0.0`, path
+plugin in use supplies them (@seneca/transport listens on `0.0.0.0`, path
 `/act`, protocol `http`, and connects to `127.0.0.1` when no host is
 given). Set them here to apply one value to every listen and client
 configuration.

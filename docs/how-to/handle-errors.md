@@ -154,14 +154,14 @@ argument), and given to the error handler. It does not reach the action.
 
 The transport plugin decides how an error reply travels. Seneca's
 transport helpers serialize the error object with its `message`, `code`
-and `details`, but seneca-transport 8.3 does not deliver that detail:
-over HTTP the client gets an error with the generic message `Response
-Error: 500 Internal Server Error`, and over TCP the error reply is not
-delivered and the caller times out. The service side logs the original
-error (`act/ERR`), so check its logs for the cause; when callers need
-the detail, reply with a result object that describes the failure
-instead of an error. Remote callers cannot make a message fatal:
-`fatal$` is removed from inbound messages.
+and `details`, and @seneca/transport 9 delivers it to the caller
+unwrapped, over HTTP and TCP, with secret-looking values redacted.
+seneca-transport 8.3 does not deliver that detail: over HTTP the client
+gets an error with the generic message `Response Error: 500 Internal
+Server Error`, and over TCP the error reply is not delivered and the
+caller times out. The service side logs the original error (`act/ERR`)
+in both cases. Remote callers cannot make a message fatal: `fatal$` is
+removed from inbound messages.
 
 ## See what went wrong
 

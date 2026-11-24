@@ -2,7 +2,7 @@
 
 Seneca core contains the plumbing for sending messages between
 instances; the actual network protocols are provided by transport
-plugins such as [seneca-transport](https://github.com/senecajs/seneca-transport)
+plugins such as [@seneca/transport](https://github.com/senecajs/seneca-transport)
 (HTTP and TCP). This page covers the core API; the wire format is in
 [Message transport protocol](message-transport-protocol.md).
 
@@ -36,7 +36,7 @@ The configuration object is completed in this order:
 1. Scalar values of `options.transport` fill in missing keys. By default
    only `port` (10101) is set; `host`, `path` and `protocol` are copied
    only when you set them. Everything else comes from the transport
-   plugin's own defaults (seneca-transport: host `0.0.0.0`, path `/act`,
+   plugin's own defaults (@seneca/transport: host `0.0.0.0`, path `/act`,
    protocol `http` for `web`; host `0.0.0.0`, port 10201 for `tcp`).
 2. `type` defaults to `'web'`. The Seneca 3 names `http` and `direct`
    are accepted as aliases of `web`; they are deprecated and report
@@ -100,7 +100,8 @@ seneca.add('role:transport,hook:client,type:mytype', function (msg, reply) {
 ```
 
 The export `seneca.export('transport/utils')` provides helpers
-(seneca-transport 8 replaces this export with its own):
+(seneca-transport 8 replaces this export with its own; @seneca/transport
+9 replaces it with one that keeps these helpers):
 
 | Function | Purpose |
 | -------- | ------- |
@@ -117,7 +118,7 @@ Inbound messages must not carry `fatal$`; `internalize_msg` removes it.
 When an inbound message is marked as remote, an error replied to it
 reaches the plugin's callback already redacted (see
 [Options: redact](options.md#redact)): `internalize_msg` sets `remote$`,
-and seneca-transport sets `transport$`. A plugin that submits inbound
+and @seneca/transport sets `transport$`. A plugin that submits inbound
 messages without either marker serializes errors unredacted. Local
 callers, and the child messages of a remote message, receive errors
 unchanged.

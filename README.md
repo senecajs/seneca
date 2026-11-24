@@ -47,7 +47,7 @@ and releases (see `.nvmrc`). Continuous integration runs on Node.js 24
 and 26.
 
 Network transports are plugins. For HTTP and TCP install
-[seneca-transport](https://github.com/senecajs/seneca-transport) as well.
+[@seneca/transport](https://github.com/senecajs/seneca-transport) as well.
 
 ## Example
 
@@ -82,10 +82,10 @@ plugin can be served over the network with a transport plugin:
 
 ```js
 // service process
-Seneca().use(math).use('seneca-transport').listen({ port: 8260, pin: 'role:math,cmd:*' })
+Seneca().use(math).use('@seneca/transport').listen({ port: 8260, pin: 'role:math,cmd:*' })
 
 // client process
-const client = Seneca().use('seneca-transport').client({ port: 8260, pin: 'role:math,cmd:*' })
+const client = Seneca().use('@seneca/transport').client({ port: 8260, pin: 'role:math,cmd:*' })
 const result = await client.post('role:math,cmd:sum,left:1,right:2')
 ```
 

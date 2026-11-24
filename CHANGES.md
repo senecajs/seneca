@@ -256,8 +256,11 @@ First stable release of Seneca 4. See "Upgrading from 3.x" below.
 
 * Node.js 24 or later is required.
 * Transports are no longer bundled. `seneca.listen()` and `seneca.client()`
-  need a transport plugin: `npm install seneca-transport` and
-  `seneca.use('seneca-transport')` provide the 3.x HTTP and TCP transports.
+  need a transport plugin: `npm install @seneca/transport` and
+  `seneca.use('@seneca/transport')` provide the 3.x HTTP and TCP
+  transports. @seneca/transport 9 is the Seneca 4 release of
+  seneca-transport; seneca-transport 8.3 loads on Seneca 4 but does not
+  deliver the error of a remote action to the caller.
   Without a transport plugin, `listen()` stops the process at start with
   the fatal error `transport_listen`, caused by `act_not_found` on
   `role:transport,hook:listen`, and `client()` fails with
